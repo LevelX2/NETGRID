@@ -209,6 +209,12 @@ describe("scored agenda activated abilities", () => {
     expect(actions.map((action) => action.payload?.agendaAbility)).toContain(
       "ai_chief_financial_officer",
     );
+    expect(
+      actions.find(
+        (action) =>
+          action.payload?.agendaAbility === "ai_chief_financial_officer",
+      )?.label,
+    ).toBe("HQ/Archives in R&D mischen, 5 ziehen");
     expect(actions.map((action) => action.payload?.agendaAbility)).toContain(
       "v1922_corporate_retreat",
     );

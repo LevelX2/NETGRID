@@ -1,5 +1,4 @@
 import type {
-  CardDefinition,
   CardInstance,
   CardInstanceId,
   GameState,
@@ -10,15 +9,16 @@ import type {
   SpecialZoneState,
   SpecialZoneVisibility,
 } from "@netgrid/shared";
+import {
+  definitionFor,
+  mustInstance,
+  runnerInstalledCardIds,
+} from "../state/card-server-lookup";
 
 type NonSpecialZone = Exclude<CardInstance["zone"], { side: "special" }>;
 
 export type BoardStateActionExecutionHost = {
   state: GameState;
-  cards: {
-    definitionFor: (cardId: CardInstanceId) => CardDefinition;
-    cardInstanceFor: (cardId: CardInstanceId) => CardInstance;
-  };
   zones: {
     removeFromAllZones: (cardId: CardInstanceId) => void;
     serverById: (
@@ -87,7 +87,7 @@ function executeAdvanceCardAction(
   host.payment.spendClick("corp");
   host.payment.spendCredits("corp", 1);
   const advancedCardId = String(legalAction.payload?.cardId) as CardInstanceId;
-  const instance = host.cards.cardInstanceFor(advancedCardId);
+  const instance = mustInstance(host.state.cardInstances, advancedCardId);
   instance.advancementCounters += 1;
   const zone = instance.zone;
   if (zone.side === "corp" && zone.zone === "serverRoot")
@@ -108,7 +108,7 @@ function trashResource(
     : host.runner.resolveHiddenRunnerResourceSlot(cardId);
   if (!resolvedCardId || !host.state.runner.rig.resources.includes(resolvedCardId))
     throw new Error("Diese Resource ist nicht installiert.");
-  const definition = host.cards.definitionFor(resolvedCardId);
+  const definition = definitionFor(host.state, resolvedCardId);
   if (definition.type !== "resource")
     throw new Error("Nur installierte Resources koennen getrasht werden.");
   const wasConcealedHiddenResource =
@@ -138,7 +138,7 @@ function moveToSpecialZone(
   zone: SpecialZoneKind,
 ): void {
   const cardId = stringLegalPayload(legalAction, "cardId") as CardInstanceId;
-  const instance = host.cards.cardInstanceFor(cardId);
+  const instance = mustInstance(host.state.cardInstances, cardId);
   const harness = host.state.specialZoneHarness;
   const harnessConfig =
     zone === "set_aside" ? harness?.setAside : harness?.removedFromGame;
@@ -204,7 +204,7 @@ function returnFromSetAside(
   legalAction: LegalAction,
 ): void {
   const cardId = stringLegalPayload(legalAction, "cardId") as CardInstanceId;
-  const instance = host.cards.cardInstanceFor(cardId);
+  const instance = mustInstance(host.state.cardInstances, cardId);
   const harness = host.state.specialZoneHarness;
   if (
     !harness?.setAside?.allowReturn ||
@@ -221,7 +221,7 @@ function returnFromSetAside(
   host.zones.removeFromAllZones(cardId);
   placeCardInZone(host, cardId, returnZone);
   host.state.cardInstances[cardId] = {
-    ...host.cards.cardInstanceFor(cardId),
+    ...mustInstance(host.state.cardInstances, cardId),
     zone: returnZone,
   };
   legalAction.payload = {
@@ -242,7 +242,7 @@ function changeCardControl(
   legalAction: LegalAction,
 ): void {
   const cardId = stringLegalPayload(legalAction, "cardId") as CardInstanceId;
-  const instance = host.cards.cardInstanceFor(cardId);
+  const instance = mustInstance(host.state.cardInstances, cardId);
   const newController = sideLegalPayload(legalAction, "newController");
   const harness = host.state.specialZoneHarness;
   if (
@@ -293,7 +293,7 @@ function placeCardInZone(
   else if (zone.side === "runner" && zone.zone === "scoreArea")
     host.state.runner.scoreArea.push(cardId);
   else if (zone.side === "runner" && zone.zone === "rig") {
-    const definition = host.cards.definitionFor(cardId);
+    const definition = definitionFor(host.state, cardId);
     if (definition.type === "program") host.state.runner.rig.programs.push(cardId);
     else if (definition.type === "hardware")
       host.state.runner.rig.hardware.push(cardId);
@@ -311,14 +311,6 @@ function ensureSpecialZones(state: GameState): SpecialZoneState {
   state.specialZones.setAside ??= [];
   state.specialZones.removedFromGame ??= [];
   return state.specialZones;
-}
-
-function runnerInstalledCardIds(state: GameState): CardInstanceId[] {
-  return [
-    ...state.runner.rig.programs,
-    ...state.runner.rig.hardware,
-    ...state.runner.rig.resources,
-  ];
 }
 
 function cardInstanceWithoutCounters(instance: CardInstance): CardInstance {

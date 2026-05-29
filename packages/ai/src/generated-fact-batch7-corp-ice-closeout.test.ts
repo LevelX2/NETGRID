@@ -76,11 +76,11 @@ describe("generated fact Batch-7 Corp ICE closeout", () => {
 
   it("keeps included cards ready read-only with no conflicts or gaps", () => {
     const report = readReport();
-    expect(report.confirmedGeneratedFactCount).toBe(154);
-    expect(report.previewAddedFactCount).toBe(119);
+    expect(report.confirmedGeneratedFactCount).toBe(158);
+    expect(report.previewAddedFactCount).toBe(123);
     expect(report.hardErrorCount).toBe(0);
     expect(report.realSemanticConflictCount).toBe(0);
-    expect(report.normalizedDifferenceCount).toBe(248);
+    expect(report.normalizedDifferenceCount).toBe(252);
     expect(report.remainingDifferenceCount).toBe(0);
     expect(report.descriptorFollowupCount).toBe(0);
     expect(report.readiness).toBe("ready_read_only_split_subbatches");

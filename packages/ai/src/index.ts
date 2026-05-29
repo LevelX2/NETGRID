@@ -29,8 +29,11 @@ import deckFormatProfiles130Data from "../../../data/decks/deck-format-profiles-
 import deckSnapshots08Data from "../../../data/decks/deck-snapshots-0.8.json";
 import exploitFixtures143Data from "../../../data/scenarios/ai-v143-exploit-regression-fixtures.json";
 import {
+  assessCorpFutureRunIcePlacement,
+  assessCorpScoreTerminalWindow,
   chooseCorpPlanAction,
   classifyCorpScoredAgendaAbility,
+  classifyCorpFutureRunIceDefinitionId,
   hasCorpPlanAction,
 } from "./corp-plans";
 import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
@@ -57,6 +60,7 @@ import {
   creditsToBreakEndTheRunSubroutinesWithBreaker,
   endTheRunSubroutineCount,
   iceHasEndTheRun,
+  type KnownRezzedIcePathAssessment,
 } from "./visible-run-analysis";
 import {
   getStructuredRemoteRoleForCard,
@@ -115,7 +119,10 @@ export {
 export {
   chooseCorpPlanAction,
   chooseCorpPlanDecision,
+  assessCorpFutureRunIcePlacement,
+  assessCorpScoreTerminalWindow,
   classifyCorpScoredAgendaAbility,
+  classifyCorpFutureRunIceDefinitionId,
   classifyScoredAgendaActionFromOntology,
   corpPlanUsesOnlyAiSupportedCards,
   evaluateAgendaRisk,
@@ -588,6 +595,92 @@ export type AiMatchProgressionMetrics = {
   corpNonEssentialActionBeforeScoreWindow: number;
   corpEconomyBeforeScoreWindow: number;
   corpEconomyBeforeScoreWindowNecessary: number;
+  corpEconomyBeforeScoreWindowWithInstalledAgenda: number;
+  corpEconomyBeforeScoreWindowWithAdvancedAgenda: number;
+  corpEconomyBeforeScoreWindowWithScoreLegalNext: number;
+  corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext: number;
+  corpEconomyBeforeScoreWindowWithReadyRemote: number;
+  corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote: number;
+  corpEconomyBeforeScoreWindowCreditsShort: number;
+  corpEconomyBeforeScoreWindowCreditsAlreadyEnough: number;
+  corpEconomyBeforeScoreWindowRemoteSafe: number;
+  corpEconomyBeforeScoreWindowRemoteContestHigh: number;
+  corpEconomyBeforeScoreTaken: number;
+  corpEconomyBeforeScoreTakenAsNecessaryCredits: number;
+  corpEconomyBeforeScoreTakenDespiteCreditsEnough: number;
+  corpEconomyBeforeScoreTakenOverScoreLegal: number;
+  corpEconomyBeforeScoreTakenOverAdvanceToScoreLegal: number;
+  corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote: number;
+  corpEconomyBeforeScoreTakenOverHqAgendaExit: number;
+  corpEconomyBeforeScoreTakenOverScoreAreaAbility: number;
+  corpEconomyBeforeScoreConvertedToScoreNextDecision: number;
+  corpEconomyBeforeScoreConvertedToAdvanceNextDecision: number;
+  corpEconomyBeforeScoreConvertedToAgendaInstallNextDecision: number;
+  corpEconomyBeforeScoreConvertedWithin2CorpActions: number;
+  corpEconomyBeforeScoreConvertedWithin3CorpActions: number;
+  corpEconomyBeforeScoreNotConvertedWithin3CorpActions: number;
+  corpEconomyBeforeScoreRepeatedEconomyNextDecision: number;
+  corpEconomyBeforeScoreRepeatedEconomyWithin3: number;
+  corpEconomyBeforeScoreThenDraw: number;
+  corpEconomyBeforeScoreThenProtect: number;
+  corpEconomyBeforeScoreThenNewRemote: number;
+  corpEconomyBeforeScoreThenRunnerSteal: number;
+  corpEconomyBeforeScoreThenActionLimit: number;
+  corpEconomyBeforeScorePlausibleCreditsNeeded: number;
+  corpEconomyBeforeScorePlausibleRezOrAdvanceReserve: number;
+  corpEconomyBeforeScorePlausibleHqOrRndSafety: number;
+  corpEconomyBeforeScorePlausibleRunnerContestTooHigh: number;
+  corpEconomyBeforeScorePlausibleNoAgendaExit: number;
+  corpEconomyBeforeScoreSuspiciousCreditsAlreadyEnough: number;
+  corpEconomyBeforeScoreSuspiciousRepeatedEconomy: number;
+  corpEconomyBeforeScoreSuspiciousDelayedTerminalAction: number;
+  corpEconomyBeforeScoreSuspiciousRemoteStillSafe: number;
+  corpEconomyBeforeScoreSuspiciousRunnerStealFollowup: number;
+  corpEconomyBeforeScoreUnclassified: number;
+  corpEconomyBeforeScoreFixGateEligible: number;
+  corpEconomyBeforeScoreFixGateBlockedByCredits: number;
+  corpEconomyBeforeScoreFixGateBlockedByCheapContest: number;
+  corpEconomyBeforeScoreFixGateBlockedByRunnerContest: number;
+  corpEconomyBeforeScoreFixGateBlockedBySafety: number;
+  corpEconomyBeforeScoreFixGateSuspicious: number;
+  corpEconomyBeforeScoreFixGateSuspiciousRepeatedEconomy: number;
+  corpEconomyBeforeScoreFixGateSuspiciousNoConversion: number;
+  corpEconomyBeforeScoreFixGateSuspiciousStealFollowup: number;
+  corpRepeatedEconomyBeforeScoreWindows: number;
+  corpRepeatedEconomyBeforeScoreCreditsStillShort: number;
+  corpRepeatedEconomyBeforeScoreCreditsAlreadyEnough: number;
+  corpRepeatedEconomyBeforeScoreScoreLegal: number;
+  corpRepeatedEconomyBeforeScoreAdvanceLegal: number;
+  corpRepeatedEconomyBeforeScoreAgendaInstallReadyRemoteLegal: number;
+  corpRepeatedEconomyBeforeScoreRemoteSafe: number;
+  corpRepeatedEconomyBeforeScoreRunnerContestHigh: number;
+  corpRepeatedEconomyBeforeScoreThenScore: number;
+  corpRepeatedEconomyBeforeScoreThenRunnerSteal: number;
+  corpRepeatedEconomyBeforeScoreThenActionLimit: number;
+  corpRepeatedEconomyBeforeScoreSuspicious: number;
+  corpRepeatedEconomyBeforeScorePlausible: number;
+  corpEconomyBeforeScoreNoConversionCreditsStillShort: number;
+  corpEconomyBeforeScoreNoConversionNoAgendaExit: number;
+  corpEconomyBeforeScoreNoConversionRemoteUnsafe: number;
+  corpEconomyBeforeScoreNoConversionRunnerContestHigh: number;
+  corpEconomyBeforeScoreNoConversionSafetyBlocked: number;
+  corpEconomyBeforeScoreNoConversionPlanDrift: number;
+  corpEconomyBeforeScoreNoConversionRepeatedEconomy: number;
+  corpEconomyBeforeScoreNoConversionDrawLoop: number;
+  corpEconomyBeforeScoreNoConversionProtectionLoop: number;
+  corpEconomyBeforeScoreNoConversionRemotePortfolioLoop: number;
+  corpEconomyBeforeScoreNoConversionRunnerSteal: number;
+  corpEconomyBeforeScoreNoConversionActionLimit: number;
+  corpEconomyBeforeScoreNoConversionSuspicious: number;
+  corpEconomyBeforeScoreNoConversionPlausible: number;
+  corpEconomyBeforeScoreCreditsEnoughWindows: number;
+  corpEconomyBeforeScoreCreditsEnoughTaken: number;
+  corpEconomyBeforeScoreCreditsEnoughScoreLegal: number;
+  corpEconomyBeforeScoreCreditsEnoughAdvanceLegal: number;
+  corpEconomyBeforeScoreCreditsEnoughAgendaInstallReadyRemoteLegal: number;
+  corpEconomyBeforeScoreCreditsEnoughSafetyBlocked: number;
+  corpEconomyBeforeScoreCreditsEnoughSuspicious: number;
+  corpEconomyBeforeScoreCreditsEnoughPlausible: number;
   corpProtectionBeforeScoreWindow: number;
   corpProtectionBeforeScoreWindowNoSafetyDelta: number;
   corpCentralProtectionBeforeScoreWindow: number;
@@ -598,6 +691,44 @@ export type AiMatchProgressionMetrics = {
   corpSameTurnScoreTaken: number;
   corpScoreWindowLostAfterNonEssentialAction: number;
   corpRunnerStealAfterDelayedScoreWindow: number;
+  corpScoreTerminalWindow: number;
+  corpScoreTerminalWindowScoreLegal: number;
+  corpScoreTerminalWindowAdvanceToScoreLegal: number;
+  corpScoreTerminalWindowAgendaInstallLegal: number;
+  corpScoreTerminalWindowProtectedRemoteReady: number;
+  corpScoreTerminalWindowRemoteContestLow: number;
+  corpScoreTerminalWindowCreditsSufficient: number;
+  corpScoreTerminalWindowRunnerAccessThreatHigh: number;
+  corpScoreTerminalScoreTaken: number;
+  corpScoreTerminalAdvanceTaken: number;
+  corpScoreTerminalAgendaInstalled: number;
+  corpScoreTerminalSkipped: number;
+  corpScoreTerminalSkippedForProtection: number;
+  corpScoreTerminalSkippedForEconomy: number;
+  corpScoreTerminalSkippedForDraw: number;
+  corpScoreTerminalSkippedForInstallIce: number;
+  corpScoreTerminalSkippedForInstallAssetOrUpgrade: number;
+  corpScoreTerminalSkippedForHqProtection: number;
+  corpScoreTerminalSkippedForRndProtection: number;
+  corpScoreTerminalSkippedForRemotePortfolio: number;
+  corpScoreTerminalSkippedForUnknownHigherPriority: number;
+  corpScoreTerminalSkippedThenAgendaStolen: number;
+  corpScoreTerminalSkippedThenNoScoreWindow: number;
+  corpScoreTerminalSkippedThenActionLimit: number;
+  corpScoreTerminalSkippedThenProtectionLoop: number;
+  corpScoreTerminalSkippedThenEconomyLoop: number;
+  corpScoreTerminalSkippedThenRemoteStillSafe: number;
+  corpScoreTerminalSkippedThenScoreNextDecision: number;
+  corpScoreConversionFixGateEligible: number;
+  corpScoreConversionFixGateBlockedByCheapContest: number;
+  corpScoreConversionFixGateBlockedByCredits: number;
+  corpScoreConversionFixGateBlockedByRunnerContest: number;
+  corpScoreConversionFixGateBlockedByHqThreat: number;
+  corpScoreConversionFixGateSuspiciousProtectionLoop: number;
+  corpScoreConversionFixGateSuspiciousEconomyLoop: number;
+  corpScoreConversionFixGateSuspiciousDraw: number;
+  corpScoreConversionFixGateSuspiciousRemotePortfolio: number;
+  corpScoreConversionFixGateSuspiciousUnknown: number;
   corpAdvanceToScoreLineCompressedWithin2: number;
   corpAdvanceToScoreLineCompressedWithin3: number;
   scoredAgendaActionOpportunities: number;
@@ -664,6 +795,66 @@ export type AiMatchProgressionMetrics = {
   corpVisibleTagPunishSkippedForInstall: number;
   corpVisibleTagPunishSkippedForEndTurn: number;
   corpVisibleTagPunishSkippedForUnknownHigherPriority: number;
+  corpVisibleTagPunishSkippedUnknownChosenScore: number;
+  corpVisibleTagPunishSkippedUnknownChosenAdvance: number;
+  corpVisibleTagPunishSkippedUnknownChosenInstallAgenda: number;
+  corpVisibleTagPunishSkippedUnknownChosenInstallIce: number;
+  corpVisibleTagPunishSkippedUnknownChosenInstallAssetOrUpgrade: number;
+  corpVisibleTagPunishSkippedUnknownChosenRez: number;
+  corpVisibleTagPunishSkippedUnknownChosenOperation: number;
+  corpVisibleTagPunishSkippedUnknownChosenAbility: number;
+  corpVisibleTagPunishSkippedUnknownChosenTraceTagSource: number;
+  corpVisibleTagPunishSkippedUnknownChosenDraw: number;
+  corpVisibleTagPunishSkippedUnknownChosenBasicCredit: number;
+  corpVisibleTagPunishSkippedUnknownChosenEndTurn: number;
+  corpVisibleTagPunishSkippedUnknownChosenUnknown: number;
+  corpVisibleTagPunishSkippedUnknownByReasonCode: number;
+  corpVisibleTagPunishSkippedUnknownByChosenActionType: number;
+  corpVisibleTagPunishSkippedUnknownByChosenCard: number;
+  corpVisibleTagPunishSkippedUnknownByPayoffCard: number;
+  corpVisibleTagPunishSkippedUnknownByPayoffKind: number;
+  corpVisibleTagPunishUnknownSkipPlausible: number;
+  corpVisibleTagPunishUnknownSkipSuspicious: number;
+  corpVisibleTagPunishUnknownSkipUnclassified: number;
+  corpVisibleTagPunishUnknownSkipByPlausibility: number;
+  corpVisibleTagPunishUnknownSkipPayoffDamage: number;
+  corpVisibleTagPunishUnknownSkipPayoffEconomic: number;
+  corpVisibleTagPunishUnknownSkipPayoffTrash: number;
+  corpVisibleTagPunishUnknownSkipPayoffRunLock: number;
+  corpVisibleTagPunishUnknownSkipPayoffAmbush: number;
+  corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal: number;
+  corpVisibleTagPunishUnknownSkipPayoffNonLethal: number;
+  corpVisibleTagPunishFixGateEligibleWindow: number;
+  corpVisibleTagPunishFixGateBlockedByScore: number;
+  corpVisibleTagPunishFixGateBlockedByAdvanceScore: number;
+  corpVisibleTagPunishFixGateBlockedBySafety: number;
+  corpVisibleTagPunishFixGateBlockedByAffordability: number;
+  corpVisibleTagPunishFixGateBlockedByLowImpact: number;
+  corpVisibleTagPunishFixGateSuspiciousSkip: number;
+  corpVisibleTagPunishDecisionWindows: number;
+  corpVisibleTagPunishDecisionWindowsTaken: number;
+  corpVisibleTagPunishDecisionWindowsSkipped: number;
+  corpVisibleTagPunishDecisionWindowsWithMultiplePayoffs: number;
+  corpVisibleTagPunishAlternativePayoffsNotChosen: number;
+  corpVisibleTagPunishChosenPayoffAmongAlternatives: number;
+  corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff: number;
+  corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization: number;
+  corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen: number;
+  corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization: number;
+  corpVisibleTagPunishOperationChoiceAmongPayoffs: number;
+  corpVisibleTagPunishChosenDamageOverEconomic: number;
+  corpVisibleTagPunishChosenEconomicOverDamage: number;
+  corpVisibleTagPunishChosenTrashOverDamage: number;
+  corpVisibleTagPunishChosenLethalOverNonLethal: number;
+  corpVisibleTagPunishChosenNonLethalOverLethal: number;
+  corpVisibleTagPunishChosenLowerImpactOverHigherImpact: number;
+  corpVisibleTagPunishChosenUnknownImpactOrdering: number;
+  corpVisibleTagPunishFixGateEligibleWindowNormalized: number;
+  corpVisibleTagPunishFixGateSuspiciousSkipNormalized: number;
+  corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken: number;
+  corpVisibleTagPunishPotentialPayoffOrderingIssue: number;
+  corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed: number;
+  corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage: number;
   corpFunnelSourcePayoffPairSeenInDeck: number;
   corpFunnelSourceActionTakenWithPayoffInDeck: number;
   corpFunnelSourceActionTakenWithVisiblePayoff: number;
@@ -768,6 +959,27 @@ export type AiMatchProgressionMetrics = {
   corpOneIceRemoteCheaplyContestable: number;
   corpRemoteIceConsolidationOpportunity: number;
   corpRemoteIceConsolidationTaken: number;
+  corpFutureRunIceInstallOpportunities: number;
+  corpFutureRunIceInstalled: number;
+  corpFutureRunIceInstalledAsInnermost: number;
+  corpFutureRunIceInstalledAsOutermost: number;
+  corpFutureRunIceInstalledWithLaterIce: number;
+  corpFutureRunIceInstalledWithoutLaterIce: number;
+  corpFutureRunIceInstalledOnEmptyServer: number;
+  corpFutureRunIceInstalledFirstOnEmptyServer: number;
+  corpFutureRunIceInstalledAfterInnerIceExists: number;
+  corpFutureRunIceInstalledAsDeadEffect: number;
+  corpFutureRunIceInstalledAsLiveEffect: number;
+  corpNextIceEffectInstalledLast: number;
+  corpIceOrderFutureEffectDead: number;
+  corpIceOrderFutureEffectLive: number;
+  corpMultiIceInstallOrderFutureEffectDead: number;
+  corpMultiIceInstallOrderOptimized: number;
+  corpBallAndChainInstalledInnermost: number;
+  corpBallAndChainInstalledWithoutLaterIce: number;
+  corpBallAndChainInstalledWithLaterIce: number;
+  corpCanisInstalledWithoutLaterIce: number;
+  corpBolterOrDataDartsInstalledWithoutNextIce: number;
   corpRemoteCreatedThenNoScorePath: number;
   corpRemoteCreatedThenAgendaInstalledWithin3: number;
   corpRemoteCreatedThenAssetInstalledWithin3: number;
@@ -1114,9 +1326,293 @@ export type AiMatchProgressionMetrics = {
   runnerLowValueDuplicateInstallActions: number;
   runnerJunkyardBbsDuplicateInstalls: number;
   runnerEconomyActionsTaken: number;
+  runnerEconomyDecisionWindows: number;
+  runnerLegalEconomyActions: number;
+  runnerLegalBurstEconomyActions: number;
+  runnerLegalActionEconomyActions: number;
+  runnerLegalFinitePoolEconomyActions: number;
+  runnerLegalLoanDebtEconomyActions: number;
+  runnerLegalRecurringEconomyActions: number;
+  runnerLegalResourceEconomyActions: number;
+  runnerLegalHardwareEconomyActions: number;
+  runnerEconomyTaken: number;
+  runnerEconomySkipped: number;
+  runnerEconomySkippedWhileLowCredits: number;
+  runnerEconomySkippedWhileKnownUnaffordablePath: number;
+  runnerEconomySkippedForPressure: number;
+  runnerEconomySkippedForRemoteContest: number;
+  runnerEconomySkippedForSetup: number;
+  runnerEconomySkippedForDraw: number;
+  runnerEconomySkippedForRun: number;
+  runnerEconomySkippedForInstallBreaker: number;
+  runnerEconomySkippedForTrash: number;
+  runnerEconomySkippedForEndTurn: number;
+  runnerEconomySkippedForUnknownHigherPriority: number;
+  runnerLowCreditDecisionWindows: number;
+  runnerCreditStarvedWithLegalEconomy: number;
+  runnerCreditStarvedEconomyTaken: number;
+  runnerCreditStarvedEconomySkipped: number;
+  runnerKnownUnaffordablePathWithLegalEconomy: number;
+  runnerEconomyTakenToReachRunReserve: number;
+  runnerEconomyTakenButStillBelowReserve: number;
+  runnerEconomySkippedThenUnaffordableRun: number;
+  runnerRunStartedBelowKnownPathCost: number;
+  runnerRunStartedAfterSkippingEconomy: number;
+  runnerEconomyChosenOverFreshCentralPressure: number;
+  runnerEconomyChosenOverRemoteContest: number;
+  runnerEconomyChosenOverBreakerInstall: number;
+  runnerEconomyChosenOverCriticalSetup: number;
+  runnerEconomyChosenOverRelevantTrash: number;
+  runnerEconomyChosenWhileRich: number;
+  runnerEconomyChosenWhilePressureReady: number;
+  runnerEconomyChosenAsReserveSetup: number;
+  runnerEconomyChoicePlausible: number;
+  runnerEconomyChoiceSuspicious: number;
+  runnerFinitePoolEconomySeen: number;
+  runnerFinitePoolEconomyTaken: number;
+  runnerFinitePoolEconomySkipped: number;
+  runnerFinitePoolEconomyTakenWhilePoolLikelyDepleted: number;
+  runnerDebtEconomySeen: number;
+  runnerDebtEconomyTaken: number;
+  runnerDebtEconomySkipped: number;
+  runnerDebtEconomyTakenWithoutNeed: number;
+  runnerEconomyWithDownsideSeen: number;
+  runnerEconomyWithDownsideTaken: number;
+  runnerDelayedPenaltyEconomyTaken: number;
+  runnerMemoryBottleneckDecisionWindows: number;
+  runnerHandSizeBottleneckDecisionWindows: number;
+  runnerLegalMemoryHardwareActions: number;
+  runnerLegalHandSizeActions: number;
+  runnerMemoryHardwareTaken: number;
+  runnerHandSizeSupportTaken: number;
+  runnerMemorySupportSkippedWhileGripHasPrograms: number;
+  runnerHandSizeSupportSkippedWhileDamageRiskVisible: number;
+  runnerHardwareSetupChosenOverEconomy: number;
+  runnerHardwareSetupChosenOverPressure: number;
+  runnerHandSizeFactUsedForDiagnosis: number;
+  runnerLegalSearchActions: number;
+  runnerLegalRecoveryActions: number;
+  runnerSearchTaken: number;
+  runnerRecoveryTaken: number;
+  runnerSearchSkippedWhileMissingBreakerCoverage: number;
+  runnerRecoverySkippedWhileMissingBreakerCoverage: number;
+  runnerSearchTakenForBreakerCoverage: number;
+  runnerRecoveryTakenForBreakerCoverage: number;
+  runnerSearchOrRecoveryWindowWithNoInstallFollowup: number;
+  runnerSearchRecoveryChosenOverEconomy: number;
+  runnerSearchRecoveryChosenOverPressure: number;
+  runnerEconomyFixGateEligibleStarvedSkip: number;
+  runnerEconomyFixGateSuspiciousRichEconomy: number;
+  runnerEconomyFixGateSuspiciousEconomyOverPressure: number;
+  runnerEconomyFixGateSuspiciousEconomyOverRemoteContest: number;
+  runnerEconomyFixGateSuspiciousDebtEconomyWithoutNeed: number;
+  runnerSetupFixGateEligibleMemorySkip: number;
+  runnerSetupFixGateEligibleSearchRecoverySkip: number;
+  runnerStarvedEconomySkipWindows: number;
+  runnerStarvedEconomySkipChosenRun: number;
+  runnerStarvedEconomySkipChosenDraw: number;
+  runnerStarvedEconomySkipChosenInstall: number;
+  runnerStarvedEconomySkipChosenSearchRecovery: number;
+  runnerStarvedEconomySkipChosenTrash: number;
+  runnerStarvedEconomySkipChosenEndTurn: number;
+  runnerStarvedEconomySkipChosenUnknown: number;
+  runnerStarvedEconomySkipThenUnaffordableRun: number;
+  runnerStarvedEconomySkipThenFailedRun: number;
+  runnerStarvedEconomySkipThenNoProgress: number;
+  runnerStarvedEconomySkipThenEconomyNextDecision: number;
+  runnerStarvedEconomySkipThenReserveRecovered: number;
+  runnerStarvedEconomySkipThenProgress: number;
+  runnerStarvedEconomySkipThenActionLimit: number;
+  runnerStarvedEconomySkipPlausiblePressure: number;
+  runnerStarvedEconomySkipPlausibleRemoteContest: number;
+  runnerStarvedEconomySkipPlausibleCriticalSetup: number;
+  runnerStarvedEconomySkipPlausibleTrash: number;
+  runnerStarvedEconomySkipSuspiciousLowValueRun: number;
+  runnerStarvedEconomySkipSuspiciousDraw: number;
+  runnerStarvedEconomySkipSuspiciousEndTurn: number;
+  runnerStarvedEconomySkipSuspiciousUnknown: number;
+  runnerEconomyFixGateAttributionEligible: number;
+  runnerEconomyFixGateAttributionBlocked: number;
+  runnerEconomyFixGateAttributionSuspicious: number;
+  runnerSearchRecoveryFixGateWindows: number;
+  runnerSearchRecoveryFixGateLegalSearch: number;
+  runnerSearchRecoveryFixGateLegalRecovery: number;
+  runnerSearchRecoveryFixGateMissingWall: number;
+  runnerSearchRecoveryFixGateMissingCodeGate: number;
+  runnerSearchRecoveryFixGateMissingSentry: number;
+  runnerSearchRecoveryFixGateMissingUniversal: number;
+  runnerSearchRecoveryFixGateMissingSpecial: number;
+  runnerSearchRecoveryAttributionWindows: number;
+  runnerSearchRecoveryAttributionLegalSearch: number;
+  runnerSearchRecoveryAttributionLegalRecovery: number;
+  runnerSearchRecoveryAttributionMissingWall: number;
+  runnerSearchRecoveryAttributionMissingCodeGate: number;
+  runnerSearchRecoveryAttributionMissingSentry: number;
+  runnerSearchRecoveryAttributionMissingUniversal: number;
+  runnerSearchRecoveryAttributionMissingSpecial: number;
+  runnerSearchRecoveryAttributionSearchTaken: number;
+  runnerSearchRecoveryAttributionRecoveryTaken: number;
+  runnerSearchRecoveryAttributionSkipped: number;
+  runnerSearchRecoverySkipChosenEconomy: number;
+  runnerSearchRecoverySkipChosenRun: number;
+  runnerSearchRecoverySkipChosenDraw: number;
+  runnerSearchRecoverySkipChosenInstall: number;
+  runnerSearchRecoverySkipChosenTrash: number;
+  runnerSearchRecoverySkipChosenEndTurn: number;
+  runnerSearchRecoverySkipChosenUnknown: number;
+  runnerSearchRecoverySkipThenInstallFollowup: number;
+  runnerSearchRecoverySkipThenCoverageResolved: number;
+  runnerSearchRecoverySkipThenCoverageStillMissing: number;
+  runnerSearchRecoverySkipThenKnownUnaffordableRun: number;
+  runnerSearchRecoverySkipThenNoProgress: number;
+  runnerSearchRecoverySkipThenActionLimit: number;
+  runnerSearchRecoveryWindowWithNoInstallFollowup: number;
+  runnerSearchRecoverySkipPlausibleEconomyReserve: number;
+  runnerSearchRecoverySkipPlausiblePressure: number;
+  runnerSearchRecoverySkipPlausibleRemoteContest: number;
+  runnerSearchRecoverySkipPlausibleCurrentRigEnough: number;
+  runnerSearchRecoverySkipSuspiciousCoverageStillMissing: number;
+  runnerSearchRecoverySkipSuspiciousNoProgress: number;
+  runnerSearchRecoverySkipSuspiciousKnownUnbreakableRun: number;
+  runnerSearchRecoverySkipUnclassified: number;
+  runnerSearchRecoveryFixGateAttributionEligible: number;
+  runnerSearchRecoveryFixGateAttributionBlocked: number;
+  runnerSearchRecoveryFixGateAttributionSuspicious: number;
+  runnerMemoryFixGateWindows: number;
+  runnerHandSizeFixGateWindows: number;
+  runnerMemoryFixGateLegalSupport: number;
+  runnerHandSizeFixGateLegalSupport: number;
+  runnerMemoryFixGateSkipped: number;
+  runnerHandSizeFixGateSkipped: number;
+  runnerMemoryAttributionWindows: number;
+  runnerHandSizeAttributionWindows: number;
+  runnerMemoryAttributionLegalSupport: number;
+  runnerHandSizeAttributionLegalSupport: number;
+  runnerMemoryAttributionSupportTaken: number;
+  runnerHandSizeAttributionSupportTaken: number;
+  runnerMemoryAttributionSkipped: number;
+  runnerHandSizeAttributionSkipped: number;
+  runnerMemorySkipChosenEconomy: number;
+  runnerMemorySkipChosenRun: number;
+  runnerMemorySkipChosenDraw: number;
+  runnerMemorySkipChosenInstallNonMemory: number;
+  runnerMemorySkipChosenSearchRecovery: number;
+  runnerMemorySkipChosenEndTurn: number;
+  runnerMemorySkipChosenUnknown: number;
+  runnerMemorySkipThenMemoryInstalled: number;
+  runnerMemorySkipThenProgramInstallBlocked: number;
+  runnerMemorySkipThenCoverageStillMissing: number;
+  runnerMemorySkipThenNoProgress: number;
+  runnerMemorySkipThenActionLimit: number;
+  runnerHandSizeSkipThenDamageRiskWindow: number;
+  runnerHandSizeSkipThenDiscardOrDamagePressure: number;
+  runnerMemorySkipPlausibleEconomyReserve: number;
+  runnerMemorySkipPlausiblePressure: number;
+  runnerMemorySkipPlausibleRemoteContest: number;
+  runnerMemorySkipPlausibleNoProgramPressure: number;
+  runnerMemorySkipSuspiciousRigBlocked: number;
+  runnerMemorySkipSuspiciousCoverageStillMissing: number;
+  runnerMemorySkipSuspiciousNoProgress: number;
+  runnerMemorySkipUnclassified: number;
+  runnerMemoryFixGateAttributionEligible: number;
+  runnerMemoryFixGateAttributionBlocked: number;
+  runnerMemoryFixGateAttributionSuspicious: number;
+  runnerHandSizeFixGateAttributionEligible: number;
+  runnerHandSizeFixGateAttributionBlocked: number;
+  runnerHandSizeFixGateAttributionSuspicious: number;
+  runnerSearchRecoveryNormalizedWindows: number;
+  runnerSearchRecoveryNormalizedTaken: number;
+  runnerSearchRecoveryNormalizedSkipped: number;
+  runnerSearchRecoveryNormalizedBlocked: number;
+  runnerSearchRecoveryNormalizedBlockedByPressureOrRemoteContest: number;
+  runnerSearchRecoveryNormalizedBlockedByEconomyOrReserve: number;
+  runnerSearchRecoveryNormalizedBlockedByCurrentRigEnough: number;
+  runnerSearchRecoveryNormalizedBlockedByNoInstallFollowup: number;
+  runnerSearchRecoveryNormalizedMetricArtifact: number;
+  runnerSearchRecoveryNormalizedUnclassified: number;
+  runnerSearchRecoveryNormalizedSuspicious: number;
+  runnerSearchRecoveryNormalizedTrueMissedCoverage: number;
+  runnerSearchRecoveryNormalizedFixGateEligible: number;
+  runnerMemoryNormalizedWindows: number;
+  runnerMemoryNormalizedTaken: number;
+  runnerMemoryNormalizedSkipped: number;
+  runnerMemoryNormalizedBlocked: number;
+  runnerMemoryNormalizedBlockedByPressureOrRemoteContest: number;
+  runnerMemoryNormalizedBlockedByEconomyOrReserve: number;
+  runnerMemoryNormalizedBlockedByNoProgramPressure: number;
+  runnerMemoryNormalizedMetricArtifact: number;
+  runnerMemoryNormalizedUnclassified: number;
+  runnerMemoryNormalizedSuspicious: number;
+  runnerMemoryNormalizedTrueRigBottleneck: number;
+  runnerMemoryNormalizedFixGateEligible: number;
+  runnerHandSizeNormalizedWindows: number;
+  runnerHandSizeNormalizedTaken: number;
+  runnerHandSizeNormalizedSkipped: number;
+  runnerHandSizeNormalizedBlocked: number;
+  runnerHandSizeNormalizedSuspicious: number;
+  runnerHandSizeNormalizedMetricArtifact: number;
+  runnerSetupNormalizedWindows: number;
+  runnerSetupNormalizedSuspicious: number;
+  runnerSetupNormalizedBlocked: number;
+  runnerSetupNormalizedMetricArtifact: number;
+  runnerSetupNormalizedUnclassified: number;
+  runnerSetupNormalizedFixGateEligible: number;
+  runnerSetupNormalizedRecommendedFixKindNone: number;
+  runnerSetupNormalizedRecommendedFixKindSearchRecovery: number;
+  runnerSetupNormalizedRecommendedFixKindMemory: number;
+  runnerSetupNormalizedRecommendedFixKindHandSize: number;
+  runnerSetupNormalizedRecommendedFixKindMixedNeedsMoreDiagnosis: number;
+  runnerSetupAttributionWindows: number;
+  runnerSetupAttributionSuspicious: number;
+  runnerSetupAttributionBlocked: number;
+  runnerSetupAttributionUnclassified: number;
+  runnerSetupAttributionByKindStarvedEconomy: number;
+  runnerSetupAttributionByKindSearchRecovery: number;
+  runnerSetupAttributionByKindMemory: number;
+  runnerSetupAttributionByKindHandSize: number;
+  runnerSetupRecommendedFixKindNone: number;
+  runnerSetupRecommendedFixKindEconomyStarvedSkip: number;
+  runnerSetupRecommendedFixKindSearchRecovery: number;
+  runnerSetupRecommendedFixKindMemorySetup: number;
+  runnerSetupRecommendedFixKindHandSizeSetup: number;
+  runnerSetupRecommendedFixKindMixedNeedsMoreDiagnosis: number;
   runnerRigInstallActions: number;
   runnerRemoteTrashOpportunities: number;
   runnerRemoteTrashTaken: number;
+  runnerRemoteTrashDecisionWindows: number;
+  runnerRemoteTrashLegalActions: number;
+  runnerRemoteTrashSkipped: number;
+  runnerRemoteTrashSkippedAffordableRelevant: number;
+  runnerRemoteTrashSkippedAssetEconomy: number;
+  runnerRemoteTrashSkippedFinitePoolEconomy: number;
+  runnerRemoteTrashSkippedWithCorpValueRemaining: number;
+  runnerRemoteTrashSkippedDueToReserve: number;
+  runnerRemoteTrashSkippedDueToLowCredits: number;
+  runnerRemoteTrashSkippedDueToUnknownHigherPriority: number;
+  runnerBbsWhisperingCampaignAccessed: number;
+  runnerBbsWhisperingCampaignTrashLegal: number;
+  runnerBbsWhisperingCampaignTrashTaken: number;
+  runnerBbsWhisperingCampaignTrashSkipped: number;
+  runnerBbsWhisperingCampaignTrashSkippedAffordable: number;
+  runnerBbsWhisperingCampaignTrashSkippedWithCreditsRemaining: number;
+  runnerFinitePoolAssetAccessed: number;
+  runnerFinitePoolAssetTrashLegal: number;
+  runnerFinitePoolAssetTrashTaken: number;
+  runnerFinitePoolAssetTrashSkippedAffordable: number;
+  runnerRepeatAccessKnownRemote: number;
+  runnerRepeatAccessKnownTrashableRemote: number;
+  runnerRepeatAccessKnownTrashableRemoteWithoutTrash: number;
+  runnerRepeatRunOnSameRemoteAfterDecliningTrash: number;
+  runnerRepeatRunOnSameRemoteNoNewInfo: number;
+  runnerRepeatRemoteAccessNoProgress: number;
+  runnerRepeatRemoteRunSuppressedAfterNoTrash: number;
+  runnerRepeatRemoteRunPenalizedAfterNoTrash: number;
+  runnerRemoteTrashFixGateEligible: number;
+  runnerRemoteTrashFixGateBlockedByReserve: number;
+  runnerRemoteTrashFixGateBlockedByLowCredits: number;
+  runnerRemoteTrashFixGateBlockedByHigherThreat: number;
+  runnerRemoteTrashFixGateSuspicious: number;
+  runnerRepeatRemoteNoTrashFixGateSuspicious: number;
   handUseRate: number;
   runnerAverageCredits: number;
   runnerMedianCredits: number;
@@ -1144,6 +1640,20 @@ export type AiMatchProgressionMetrics = {
   runsStartedAgainstKnownUnaffordablePath: number;
   remoteRunsStartedAgainstKnownUnaffordablePath: number;
   centralRunsStartedAgainstKnownUnaffordablePath: number;
+  runnerRunStartedAgainstKnownUnpayableFullPath: number;
+  runnerRunStartedAgainstKnownUnpayableRemotePath: number;
+  runnerRunStartedAgainstKnownUnpayableCentralPath: number;
+  runnerKnownPathCanReachAccessFalse: number;
+  runnerKnownPathCanBreakNextIceButNotFullPath: number;
+  runnerRunAbortedAfterKnownUnpayableLaterIce: number;
+  runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce: number;
+  runnerRunCostQuoteUnderestimatedFullPath: number;
+  runnerRepeatRunOnKnownUnpayablePath: number;
+  runnerRepeatRunOnKnownUnpayableRemotePath: number;
+  runnerRunCouldOnlyForceRezButNotAccess: number;
+  runnerRunAllowedAsFirstProbeUnknownIce: number;
+  runnerRunSuppressedAsKnownNoAccess: number;
+  runnerRunPenalizedAsKnownNoAccess: number;
   runsEndedAfterFirstIceDueToCredits: number;
   creditsMissingForKnownPath: number;
   knownPathCostAtRunStart: number;
@@ -1751,6 +2261,30 @@ export type AiSimulationSummary = {
     fallbackUsed: boolean;
     timeoutUsed: boolean;
     targetServerId?: string;
+    corpFutureRunIceInstallOpportunity?: boolean;
+    corpFutureRunIceInstalled?: boolean;
+    corpFutureRunIceClass?:
+      | "ball_and_chain"
+      | "canis"
+      | "bolter_or_data_darts"
+      | "future_run_ice";
+    corpFutureRunIceInstalledAsInnermost?: boolean;
+    corpFutureRunIceInstalledAsOutermost?: boolean;
+    corpFutureRunIceInstalledWithLaterIce?: boolean;
+    corpFutureRunIceInstalledWithoutLaterIce?: boolean;
+    corpFutureRunIceInstalledOnEmptyServer?: boolean;
+    corpFutureRunIceInstalledFirstOnEmptyServer?: boolean;
+    corpFutureRunIceInstalledAfterInnerIceExists?: boolean;
+    corpFutureRunIceInstalledAsDeadEffect?: boolean;
+    corpFutureRunIceInstalledAsLiveEffect?: boolean;
+    corpNextIceEffectInstalledLast?: boolean;
+    corpIceOrderFutureEffectDead?: boolean;
+    corpIceOrderFutureEffectLive?: boolean;
+    corpBallAndChainInstalledInnermost?: boolean;
+    corpBallAndChainInstalledWithoutLaterIce?: boolean;
+    corpBallAndChainInstalledWithLaterIce?: boolean;
+    corpCanisInstalledWithoutLaterIce?: boolean;
+    corpBolterOrDataDartsInstalledWithoutNextIce?: boolean;
     advancementCountersAdded?: number;
     scoreActionsAvailable?: number;
     targetCardType?: ProgressionCardTargetType;
@@ -1780,6 +2314,92 @@ export type AiSimulationSummary = {
     runnerLowValueDuplicateInstallAction?: boolean;
     runnerJunkyardBbsDuplicateInstall?: boolean;
     runnerEconomyActionTaken?: boolean;
+    runnerEconomyDecisionWindow?: boolean;
+    runnerLegalEconomyActions?: number;
+    runnerLegalBurstEconomyActions?: number;
+    runnerLegalActionEconomyActions?: number;
+    runnerLegalFinitePoolEconomyActions?: number;
+    runnerLegalLoanDebtEconomyActions?: number;
+    runnerLegalRecurringEconomyActions?: number;
+    runnerLegalResourceEconomyActions?: number;
+    runnerLegalHardwareEconomyActions?: number;
+    runnerEconomyTaken?: boolean;
+    runnerEconomySkipped?: boolean;
+    runnerEconomySkippedWhileLowCredits?: boolean;
+    runnerEconomySkippedWhileKnownUnaffordablePath?: boolean;
+    runnerEconomySkippedForPressure?: boolean;
+    runnerEconomySkippedForRemoteContest?: boolean;
+    runnerEconomySkippedForSetup?: boolean;
+    runnerEconomySkippedForDraw?: boolean;
+    runnerEconomySkippedForRun?: boolean;
+    runnerEconomySkippedForInstallBreaker?: boolean;
+    runnerEconomySkippedForTrash?: boolean;
+    runnerEconomySkippedForEndTurn?: boolean;
+    runnerEconomySkippedForUnknownHigherPriority?: boolean;
+    runnerLowCreditDecisionWindow?: boolean;
+    runnerCreditStarvedWithLegalEconomy?: boolean;
+    runnerCreditStarvedEconomyTaken?: boolean;
+    runnerCreditStarvedEconomySkipped?: boolean;
+    runnerKnownUnaffordablePathWithLegalEconomy?: boolean;
+    runnerEconomyTakenToReachRunReserve?: boolean;
+    runnerEconomyTakenButStillBelowReserve?: boolean;
+    runnerEconomySkippedThenUnaffordableRun?: boolean;
+    runnerRunStartedBelowKnownPathCost?: boolean;
+    runnerRunStartedAfterSkippingEconomy?: boolean;
+    runnerEconomyChosenOverFreshCentralPressure?: boolean;
+    runnerEconomyChosenOverRemoteContest?: boolean;
+    runnerEconomyChosenOverBreakerInstall?: boolean;
+    runnerEconomyChosenOverCriticalSetup?: boolean;
+    runnerEconomyChosenOverRelevantTrash?: boolean;
+    runnerEconomyChosenWhileRich?: boolean;
+    runnerEconomyChosenWhilePressureReady?: boolean;
+    runnerEconomyChosenAsReserveSetup?: boolean;
+    runnerEconomyChoicePlausible?: boolean;
+    runnerEconomyChoiceSuspicious?: boolean;
+    runnerFinitePoolEconomySeen?: boolean;
+    runnerFinitePoolEconomyTaken?: boolean;
+    runnerFinitePoolEconomySkipped?: boolean;
+    runnerFinitePoolEconomyTakenWhilePoolLikelyDepleted?: boolean;
+    runnerDebtEconomySeen?: boolean;
+    runnerDebtEconomyTaken?: boolean;
+    runnerDebtEconomySkipped?: boolean;
+    runnerDebtEconomyTakenWithoutNeed?: boolean;
+    runnerEconomyWithDownsideSeen?: boolean;
+    runnerEconomyWithDownsideTaken?: boolean;
+    runnerDelayedPenaltyEconomyTaken?: boolean;
+    runnerMemoryBottleneckDecisionWindow?: boolean;
+    runnerHandSizeBottleneckDecisionWindow?: boolean;
+    runnerLegalMemoryHardwareActions?: number;
+    runnerLegalHandSizeActions?: number;
+    runnerMemoryHardwareTaken?: boolean;
+    runnerHandSizeSupportTaken?: boolean;
+    runnerMemorySupportSkippedWhileGripHasPrograms?: boolean;
+    runnerHandSizeSupportSkippedWhileDamageRiskVisible?: boolean;
+    runnerHardwareSetupChosenOverEconomy?: boolean;
+    runnerHardwareSetupChosenOverPressure?: boolean;
+    runnerHandSizeFactUsedForDiagnosis?: boolean;
+    runnerLegalSearchActions?: number;
+    runnerLegalRecoveryActions?: number;
+    runnerSearchTaken?: boolean;
+    runnerRecoveryTaken?: boolean;
+    runnerSearchSkippedWhileMissingBreakerCoverage?: boolean;
+    runnerRecoverySkippedWhileMissingBreakerCoverage?: boolean;
+    runnerSearchTakenForBreakerCoverage?: boolean;
+    runnerRecoveryTakenForBreakerCoverage?: boolean;
+    runnerSearchOrRecoveryWindowWithNoInstallFollowup?: boolean;
+    runnerSearchRecoveryChosenOverEconomy?: boolean;
+    runnerSearchRecoveryChosenOverPressure?: boolean;
+    runnerEconomyFixGateEligibleStarvedSkip?: boolean;
+    runnerEconomyFixGateSuspiciousRichEconomy?: boolean;
+    runnerEconomyFixGateSuspiciousEconomyOverPressure?: boolean;
+    runnerEconomyFixGateSuspiciousEconomyOverRemoteContest?: boolean;
+    runnerEconomyFixGateSuspiciousDebtEconomyWithoutNeed?: boolean;
+    runnerSetupFixGateEligibleMemorySkip?: boolean;
+    runnerSetupFixGateEligibleSearchRecoverySkip?: boolean;
+    runnerSetupMissingCoverageTypes?: RunnerSetupMissingCoverageType[];
+    runnerSetupAttributionEvidence?: string[];
+    runnerEconomySetupClassifications?: string[];
+    runnerEconomySetupEvidence?: string[];
     runnerRigInstallAction?: boolean;
     runnerPressureActionTaken?: boolean;
     runnerRemoteTrashOpportunity?: boolean;
@@ -1807,6 +2427,24 @@ export type AiSimulationSummary = {
     runnerRemoteTrashProtectedScoreThreat?: boolean;
     runnerRemoteTrashWithoutImmediateThreat?: boolean;
     runnerRemoteTrashCostBucket?: "0_1" | "2_3" | "4_5" | "6_plus";
+    runnerRemoteTrashLegalActionCount?: number;
+    runnerRemoteTrashAssetEconomy?: boolean;
+    runnerRemoteTrashFinitePoolEconomy?: boolean;
+    runnerRemoteTrashCorpValueRemaining?: number;
+    runnerBbsWhisperingCampaignAccessed?: boolean;
+    runnerBbsWhisperingCampaignTrashLegal?: boolean;
+    runnerBbsWhisperingCampaignTrashTaken?: boolean;
+    runnerBbsWhisperingCampaignTrashSkipped?: boolean;
+    runnerBbsWhisperingCampaignTrashSkippedAffordable?: boolean;
+    runnerFinitePoolAssetAccessed?: boolean;
+    runnerFinitePoolAssetTrashLegal?: boolean;
+    runnerFinitePoolAssetTrashTaken?: boolean;
+    runnerFinitePoolAssetTrashSkippedAffordable?: boolean;
+    runnerRemoteTrashFixGateEligible?: boolean;
+    runnerRemoteTrashFixGateBlockedByReserve?: boolean;
+    runnerRemoteTrashFixGateBlockedByLowCredits?: boolean;
+    runnerRemoteTrashFixGateBlockedByHigherThreat?: boolean;
+    runnerRemoteTrashFixGateSuspicious?: boolean;
     dedicatedTrashCreditsUsed?: number;
     generalCreditsSpentOnTrash?: number;
     trashDecisionLeftRunnerUnableToContest?: boolean;
@@ -1823,6 +2461,73 @@ export type AiSimulationSummary = {
     runnerRepeatedLowValueCentralRun?: boolean;
     runnerCentralRunStreakWithoutValue?: number;
     runnerCentralRunStartedWithInsufficientPostRunReserve?: boolean;
+    corpScoreTerminalWindow?: boolean;
+    corpScoreTerminalWindowScoreLegal?: boolean;
+    corpScoreTerminalWindowAdvanceToScoreLegal?: boolean;
+    corpScoreTerminalWindowAgendaInstallLegal?: boolean;
+    corpScoreTerminalWindowProtectedRemoteReady?: boolean;
+    corpScoreTerminalWindowRemoteContestLow?: boolean;
+    corpScoreTerminalWindowCreditsSufficient?: boolean;
+    corpScoreTerminalWindowRunnerAccessThreatHigh?: boolean;
+    corpScoreTerminalScoreTaken?: boolean;
+    corpScoreTerminalAdvanceTaken?: boolean;
+    corpScoreTerminalAgendaInstalled?: boolean;
+    corpScoreTerminalSkipped?: boolean;
+    corpScoreTerminalSkippedForProtection?: boolean;
+    corpScoreTerminalSkippedForEconomy?: boolean;
+    corpScoreTerminalSkippedForDraw?: boolean;
+    corpScoreTerminalSkippedForInstallIce?: boolean;
+    corpScoreTerminalSkippedForInstallAssetOrUpgrade?: boolean;
+    corpScoreTerminalSkippedForHqProtection?: boolean;
+    corpScoreTerminalSkippedForRndProtection?: boolean;
+    corpScoreTerminalSkippedForRemotePortfolio?: boolean;
+    corpScoreTerminalSkippedForUnknownHigherPriority?: boolean;
+    corpScoreConversionFixGateEligible?: boolean;
+    corpScoreConversionFixGateBlockedByCheapContest?: boolean;
+    corpScoreConversionFixGateBlockedByCredits?: boolean;
+    corpScoreConversionFixGateBlockedByRunnerContest?: boolean;
+    corpScoreConversionFixGateBlockedByHqThreat?: boolean;
+    corpScoreConversionFixGateSuspiciousProtectionLoop?: boolean;
+    corpScoreConversionFixGateSuspiciousEconomyLoop?: boolean;
+    corpScoreConversionFixGateSuspiciousDraw?: boolean;
+    corpScoreConversionFixGateSuspiciousRemotePortfolio?: boolean;
+    corpScoreConversionFixGateSuspiciousUnknown?: boolean;
+    corpScoreTerminalEvidence?: string[];
+    corpEconomyBeforeScoreDiagnosticWindow?: boolean;
+    corpEconomyBeforeScoreWindowWithInstalledAgenda?: boolean;
+    corpEconomyBeforeScoreWindowWithAdvancedAgenda?: boolean;
+    corpEconomyBeforeScoreWindowWithScoreLegalNext?: boolean;
+    corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext?: boolean;
+    corpEconomyBeforeScoreWindowWithReadyRemote?: boolean;
+    corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote?: boolean;
+    corpEconomyBeforeScoreWindowCreditsShort?: boolean;
+    corpEconomyBeforeScoreWindowCreditsAlreadyEnough?: boolean;
+    corpEconomyBeforeScoreWindowRemoteSafe?: boolean;
+    corpEconomyBeforeScoreWindowRemoteContestHigh?: boolean;
+    corpEconomyBeforeScoreTaken?: boolean;
+    corpEconomyBeforeScoreTakenAsNecessaryCredits?: boolean;
+    corpEconomyBeforeScoreTakenDespiteCreditsEnough?: boolean;
+    corpEconomyBeforeScoreTakenOverScoreLegal?: boolean;
+    corpEconomyBeforeScoreTakenOverAdvanceToScoreLegal?: boolean;
+    corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote?: boolean;
+    corpEconomyBeforeScoreTakenOverHqAgendaExit?: boolean;
+    corpEconomyBeforeScoreTakenOverScoreAreaAbility?: boolean;
+    corpEconomyBeforeScorePlausibleCreditsNeeded?: boolean;
+    corpEconomyBeforeScorePlausibleRezOrAdvanceReserve?: boolean;
+    corpEconomyBeforeScorePlausibleHqOrRndSafety?: boolean;
+    corpEconomyBeforeScorePlausibleRunnerContestTooHigh?: boolean;
+    corpEconomyBeforeScorePlausibleNoAgendaExit?: boolean;
+    corpEconomyBeforeScoreSuspiciousCreditsAlreadyEnough?: boolean;
+    corpEconomyBeforeScoreSuspiciousDelayedTerminalAction?: boolean;
+    corpEconomyBeforeScoreSuspiciousRemoteStillSafe?: boolean;
+    corpEconomyBeforeScoreUnclassified?: boolean;
+    corpEconomyBeforeScoreFixGateEligible?: boolean;
+    corpEconomyBeforeScoreFixGateBlockedByCredits?: boolean;
+    corpEconomyBeforeScoreFixGateBlockedByCheapContest?: boolean;
+    corpEconomyBeforeScoreFixGateBlockedByRunnerContest?: boolean;
+    corpEconomyBeforeScoreFixGateBlockedBySafety?: boolean;
+    corpEconomyBeforeScoreFixGateSuspicious?: boolean;
+    corpEconomyBeforeScoreEvidence?: string[];
     hqKnownCards?: number;
     hqUnknownCards?: number;
     hqKnownFraction?: number;
@@ -1993,6 +2698,20 @@ export type AiSimulationSummary = {
     runStartedAgainstKnownUnaffordablePath?: boolean;
     remoteRunStartedAgainstKnownUnaffordablePath?: boolean;
     centralRunStartedAgainstKnownUnaffordablePath?: boolean;
+    runnerRunStartedAgainstKnownUnpayableFullPath?: boolean;
+    runnerRunStartedAgainstKnownUnpayableRemotePath?: boolean;
+    runnerRunStartedAgainstKnownUnpayableCentralPath?: boolean;
+    runnerKnownPathCanReachAccessFalse?: boolean;
+    runnerKnownPathCanBreakNextIceButNotFullPath?: boolean;
+    runnerRunAbortedAfterKnownUnpayableLaterIce?: boolean;
+    runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce?: boolean;
+    runnerRunCostQuoteUnderestimatedFullPath?: boolean;
+    runnerRepeatRunOnKnownUnpayablePath?: boolean;
+    runnerRepeatRunOnKnownUnpayableRemotePath?: boolean;
+    runnerRunCouldOnlyForceRezButNotAccess?: boolean;
+    runnerRunAllowedAsFirstProbeUnknownIce?: boolean;
+    runnerRunSuppressedAsKnownNoAccess?: boolean;
+    runnerRunPenalizedAsKnownNoAccess?: boolean;
     runEndedAfterFirstIceDueToCredits?: boolean;
     runStartedWithInsufficientStealOrTrashReserve?: boolean;
     probeRunWithPositiveInfoValue?: boolean;
@@ -2028,6 +2747,44 @@ export type AiSimulationSummary = {
     corpVisibleTagPunishTaken?: boolean;
     corpVisibleTagPunishSkipped?: boolean;
     corpVisibleTagPunishSkippedReason?: CorpTagPunishSkipReason;
+    corpVisibleTagPunishUnknownSkipAttribution?: CorpTagPunishUnknownSkipAttribution;
+    corpVisibleTagPunishUnknownSkipPlausibility?: CorpTagPunishUnknownSkipPlausibility;
+    corpVisibleTagPunishUnknownSkipChosenFamily?: CorpTagPunishUnknownChosenFamily;
+    corpVisibleTagPunishUnknownSkipChosenActionType?: string;
+    corpVisibleTagPunishUnknownSkipChosenCardId?: string;
+    corpVisibleTagPunishUnknownSkipChosenCardTitle?: string;
+    corpVisibleTagPunishUnknownSkipFixGateEligible?: boolean;
+    corpVisibleTagPunishUnknownSkipFixGateBlockedBy?:
+      | "score"
+      | "advance_score"
+      | "safety"
+      | "affordability"
+      | "low_impact";
+    corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal?: boolean;
+    corpVisibleTagPunishDecisionWindow?: boolean;
+    corpVisibleTagPunishDecisionWindowTaken?: boolean;
+    corpVisibleTagPunishDecisionWindowSkipped?: boolean;
+    corpVisibleTagPunishDecisionWindowWithMultiplePayoffs?: boolean;
+    corpVisibleTagPunishAlternativePayoffsNotChosen?: number;
+    corpVisibleTagPunishChosenPayoffAmongAlternatives?: boolean;
+    corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff?: boolean;
+    corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization?: boolean;
+    corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen?: boolean;
+    corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization?: boolean;
+    corpVisibleTagPunishOperationChoiceAmongPayoffs?: boolean;
+    corpVisibleTagPunishChosenDamageOverEconomic?: boolean;
+    corpVisibleTagPunishChosenEconomicOverDamage?: boolean;
+    corpVisibleTagPunishChosenTrashOverDamage?: boolean;
+    corpVisibleTagPunishChosenLethalOverNonLethal?: boolean;
+    corpVisibleTagPunishChosenNonLethalOverLethal?: boolean;
+    corpVisibleTagPunishChosenLowerImpactOverHigherImpact?: boolean;
+    corpVisibleTagPunishChosenUnknownImpactOrdering?: boolean;
+    corpVisibleTagPunishFixGateEligibleWindowNormalized?: boolean;
+    corpVisibleTagPunishFixGateSuspiciousSkipNormalized?: boolean;
+    corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken?: boolean;
+    corpVisibleTagPunishPotentialPayoffOrderingIssue?: boolean;
+    corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed?: boolean;
+    corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage?: boolean;
     corpFunnelSourcePayoffPairSeenInDeck?: boolean;
     corpFunnelSourceActionTakenWithPayoffInDeck?: boolean;
     corpFunnelSourceActionTakenWithVisiblePayoff?: boolean;
@@ -2092,6 +2849,9 @@ type RemoteTrashRole =
   | "ambush"
   | "low_value"
   | "unknown";
+
+const BBS_WHISPERING_CAMPAIGN_DEFINITION_ID =
+  "onr_v1_309_bbs-whispering-campaign";
 
 type CorpPunishKind =
   | "scorched_earth_like"
@@ -2549,6 +3309,12 @@ export function simulateAiGame(
       action,
       targetServerId,
     );
+    const runnerEconomySetup = runnerEconomySetupDiagnosticsForSimulationAction(
+      input,
+      action,
+      targetServerId,
+      result.state,
+    );
     const tagPunishDiagnostics = tagPunishWindowDiagnosticsForSimulationAction(
       input,
       action,
@@ -2556,6 +3322,16 @@ export function simulateAiGame(
       stateBeforeAction,
       result.state,
     );
+    const corpFutureRunIce = corpFutureRunIceDiagnosticsForSimulationAction(
+      input,
+      action,
+    );
+    const corpScoreTerminal = corpScoreTerminalDiagnosticsForSimulationAction(
+      input,
+      action,
+    );
+    const corpEconomyBeforeScore =
+      corpEconomyBeforeScoreDiagnosticsForSimulationAction(input, action);
     actionSequence.push({
       side,
       stateVersionBefore: result.event.stateVersionBefore,
@@ -2601,7 +3377,11 @@ export function simulateAiGame(
       ...runnerReserve,
       ...runnerCentralPressure,
       ...runnerCoverage,
+      ...runnerEconomySetup,
       ...tagPunishDiagnostics,
+      ...corpFutureRunIce,
+      ...corpScoreTerminal,
+      ...corpEconomyBeforeScore,
       ...(typeof action.payload?.placement === "string"
         ? { installPlacement: action.payload.placement }
         : {}),
@@ -4363,6 +5143,72 @@ export function formatMatchProgressionBenchmarkReport(
       benchmark.delta.corpScoreWindowCompressionRate,
     ],
     [
+      "corpScoreTerminalWindow",
+      benchmark.baseline.corpScoreTerminalWindow,
+      benchmark.candidate.corpScoreTerminalWindow,
+      benchmark.delta.corpScoreTerminalWindow,
+    ],
+    [
+      "corpScoreTerminalScoreTaken",
+      benchmark.baseline.corpScoreTerminalScoreTaken,
+      benchmark.candidate.corpScoreTerminalScoreTaken,
+      benchmark.delta.corpScoreTerminalScoreTaken,
+    ],
+    [
+      "corpScoreTerminalAdvanceTaken",
+      benchmark.baseline.corpScoreTerminalAdvanceTaken,
+      benchmark.candidate.corpScoreTerminalAdvanceTaken,
+      benchmark.delta.corpScoreTerminalAdvanceTaken,
+    ],
+    [
+      "corpScoreTerminalAgendaInstalled",
+      benchmark.baseline.corpScoreTerminalAgendaInstalled,
+      benchmark.candidate.corpScoreTerminalAgendaInstalled,
+      benchmark.delta.corpScoreTerminalAgendaInstalled,
+    ],
+    [
+      "corpScoreTerminalSkipped",
+      benchmark.baseline.corpScoreTerminalSkipped,
+      benchmark.candidate.corpScoreTerminalSkipped,
+      benchmark.delta.corpScoreTerminalSkipped,
+    ],
+    [
+      "corpScoreConversionFixGateEligible",
+      benchmark.baseline.corpScoreConversionFixGateEligible,
+      benchmark.candidate.corpScoreConversionFixGateEligible,
+      benchmark.delta.corpScoreConversionFixGateEligible,
+    ],
+    [
+      "corpScoreConversionFixGateSuspiciousProtectionLoop",
+      benchmark.baseline.corpScoreConversionFixGateSuspiciousProtectionLoop,
+      benchmark.candidate.corpScoreConversionFixGateSuspiciousProtectionLoop,
+      benchmark.delta.corpScoreConversionFixGateSuspiciousProtectionLoop,
+    ],
+    [
+      "corpScoreConversionFixGateSuspiciousEconomyLoop",
+      benchmark.baseline.corpScoreConversionFixGateSuspiciousEconomyLoop,
+      benchmark.candidate.corpScoreConversionFixGateSuspiciousEconomyLoop,
+      benchmark.delta.corpScoreConversionFixGateSuspiciousEconomyLoop,
+    ],
+    [
+      "corpScoreConversionFixGateSuspiciousDraw",
+      benchmark.baseline.corpScoreConversionFixGateSuspiciousDraw,
+      benchmark.candidate.corpScoreConversionFixGateSuspiciousDraw,
+      benchmark.delta.corpScoreConversionFixGateSuspiciousDraw,
+    ],
+    [
+      "corpScoreConversionFixGateSuspiciousRemotePortfolio",
+      benchmark.baseline.corpScoreConversionFixGateSuspiciousRemotePortfolio,
+      benchmark.candidate.corpScoreConversionFixGateSuspiciousRemotePortfolio,
+      benchmark.delta.corpScoreConversionFixGateSuspiciousRemotePortfolio,
+    ],
+    [
+      "corpScoreTerminalSkippedThenAgendaStolen",
+      benchmark.baseline.corpScoreTerminalSkippedThenAgendaStolen,
+      benchmark.candidate.corpScoreTerminalSkippedThenAgendaStolen,
+      benchmark.delta.corpScoreTerminalSkippedThenAgendaStolen,
+    ],
+    [
       "corpNonEssentialActionBeforeScoreWindow",
       benchmark.baseline.corpNonEssentialActionBeforeScoreWindow,
       benchmark.candidate.corpNonEssentialActionBeforeScoreWindow,
@@ -4379,6 +5225,54 @@ export function formatMatchProgressionBenchmarkReport(
       benchmark.baseline.corpEconomyBeforeScoreWindowNecessary,
       benchmark.candidate.corpEconomyBeforeScoreWindowNecessary,
       benchmark.delta.corpEconomyBeforeScoreWindowNecessary,
+    ],
+    [
+      "corpEconomyBeforeScoreTaken",
+      benchmark.baseline.corpEconomyBeforeScoreTaken,
+      benchmark.candidate.corpEconomyBeforeScoreTaken,
+      benchmark.delta.corpEconomyBeforeScoreTaken,
+    ],
+    [
+      "corpEconomyBeforeScoreTakenAsNecessaryCredits",
+      benchmark.baseline.corpEconomyBeforeScoreTakenAsNecessaryCredits,
+      benchmark.candidate.corpEconomyBeforeScoreTakenAsNecessaryCredits,
+      benchmark.delta.corpEconomyBeforeScoreTakenAsNecessaryCredits,
+    ],
+    [
+      "corpEconomyBeforeScoreTakenDespiteCreditsEnough",
+      benchmark.baseline.corpEconomyBeforeScoreTakenDespiteCreditsEnough,
+      benchmark.candidate.corpEconomyBeforeScoreTakenDespiteCreditsEnough,
+      benchmark.delta.corpEconomyBeforeScoreTakenDespiteCreditsEnough,
+    ],
+    [
+      "corpEconomyBeforeScoreConvertedWithin3CorpActions",
+      benchmark.baseline.corpEconomyBeforeScoreConvertedWithin3CorpActions,
+      benchmark.candidate.corpEconomyBeforeScoreConvertedWithin3CorpActions,
+      benchmark.delta.corpEconomyBeforeScoreConvertedWithin3CorpActions,
+    ],
+    [
+      "corpEconomyBeforeScoreRepeatedEconomyWithin3",
+      benchmark.baseline.corpEconomyBeforeScoreRepeatedEconomyWithin3,
+      benchmark.candidate.corpEconomyBeforeScoreRepeatedEconomyWithin3,
+      benchmark.delta.corpEconomyBeforeScoreRepeatedEconomyWithin3,
+    ],
+    [
+      "corpEconomyBeforeScoreNotConvertedWithin3CorpActions",
+      benchmark.baseline.corpEconomyBeforeScoreNotConvertedWithin3CorpActions,
+      benchmark.candidate.corpEconomyBeforeScoreNotConvertedWithin3CorpActions,
+      benchmark.delta.corpEconomyBeforeScoreNotConvertedWithin3CorpActions,
+    ],
+    [
+      "corpEconomyBeforeScoreThenRunnerSteal",
+      benchmark.baseline.corpEconomyBeforeScoreThenRunnerSteal,
+      benchmark.candidate.corpEconomyBeforeScoreThenRunnerSteal,
+      benchmark.delta.corpEconomyBeforeScoreThenRunnerSteal,
+    ],
+    [
+      "corpEconomyBeforeScoreFixGateSuspicious",
+      benchmark.baseline.corpEconomyBeforeScoreFixGateSuspicious,
+      benchmark.candidate.corpEconomyBeforeScoreFixGateSuspicious,
+      benchmark.delta.corpEconomyBeforeScoreFixGateSuspicious,
     ],
     [
       "corpProtectionBeforeScoreWindowNoSafetyDelta",
@@ -4481,6 +5375,42 @@ export function formatMatchProgressionBenchmarkReport(
       benchmark.baseline.corpRemoteIceConsolidationTaken,
       benchmark.candidate.corpRemoteIceConsolidationTaken,
       benchmark.delta.corpRemoteIceConsolidationTaken,
+    ],
+    [
+      "corpFutureRunIceInstallOpportunities",
+      benchmark.baseline.corpFutureRunIceInstallOpportunities,
+      benchmark.candidate.corpFutureRunIceInstallOpportunities,
+      benchmark.delta.corpFutureRunIceInstallOpportunities,
+    ],
+    [
+      "corpFutureRunIceInstalled",
+      benchmark.baseline.corpFutureRunIceInstalled,
+      benchmark.candidate.corpFutureRunIceInstalled,
+      benchmark.delta.corpFutureRunIceInstalled,
+    ],
+    [
+      "corpFutureRunIceInstalledAsDeadEffect",
+      benchmark.baseline.corpFutureRunIceInstalledAsDeadEffect,
+      benchmark.candidate.corpFutureRunIceInstalledAsDeadEffect,
+      benchmark.delta.corpFutureRunIceInstalledAsDeadEffect,
+    ],
+    [
+      "corpFutureRunIceInstalledAsLiveEffect",
+      benchmark.baseline.corpFutureRunIceInstalledAsLiveEffect,
+      benchmark.candidate.corpFutureRunIceInstalledAsLiveEffect,
+      benchmark.delta.corpFutureRunIceInstalledAsLiveEffect,
+    ],
+    [
+      "corpMultiIceInstallOrderOptimized",
+      benchmark.baseline.corpMultiIceInstallOrderOptimized,
+      benchmark.candidate.corpMultiIceInstallOrderOptimized,
+      benchmark.delta.corpMultiIceInstallOrderOptimized,
+    ],
+    [
+      "corpBallAndChainInstalledWithoutLaterIce",
+      benchmark.baseline.corpBallAndChainInstalledWithoutLaterIce,
+      benchmark.candidate.corpBallAndChainInstalledWithoutLaterIce,
+      benchmark.delta.corpBallAndChainInstalledWithoutLaterIce,
     ],
     [
       "corpRemotePortfolioOverExpanded",
@@ -7253,10 +8183,20 @@ function scoreRunnerAction(
               ? 940
               : trashContext.role === "run_tax"
                 ? 875
-                : 890
+                : trashContext.finitePoolEconomy
+                  ? trashContext.bbsWhisperingCampaign
+                    ? 1120
+                    : 1040
+                  : 890
             : trashContext.trashable && trashContext.role === "low_value"
               ? 430
               : 780;
+        if (
+          trashContext.finitePoolEconomy &&
+          trashContext.corpValueRemaining >=
+            Math.max(trashContext.trashCost + 4, 8)
+        )
+          score += 90;
         if (trashContext.dedicatedTrashCredits > 0) score += 80;
         evidence.push(...trashContext.evidence);
       }
@@ -7272,11 +8212,13 @@ function scoreRunnerAction(
         const trashContext = runnerRemoteTrashAccessContext(input, action);
         score = trashContext.deferredByBudget
           ? 900
-          : trashContext.affordableRelevant
-            ? 120
-            : trashContext.trashable && trashContext.role === "low_value"
-              ? 760
-              : 650;
+          : trashContext.affordableRelevant && trashContext.finitePoolEconomy
+            ? 35
+            : trashContext.affordableRelevant
+              ? 120
+              : trashContext.trashable && trashContext.role === "low_value"
+                ? 760
+                : 650;
         evidence.push(...trashContext.evidence);
       }
       reasonCode = "runner.access.decline_trash";
@@ -8127,6 +9069,40 @@ type CorpVisibleTagPayoffCategory =
   | "ambush"
   | "unknown";
 
+type CorpTagPunishUnknownChosenFamily =
+  | "score"
+  | "advance"
+  | "install_agenda"
+  | "install_ice"
+  | "install_asset_or_upgrade"
+  | "rez"
+  | "operation"
+  | "ability"
+  | "trace_tag_source"
+  | "draw"
+  | "basic_credit"
+  | "end_turn"
+  | "unknown";
+
+type CorpTagPunishUnknownSkipPlausibility =
+  | "plausible"
+  | "suspicious"
+  | "unclassified";
+
+type CorpTagPunishUnknownSkipAttribution =
+  | "unknown_skip_plausible_score_window"
+  | "unknown_skip_plausible_advance_to_score"
+  | "unknown_skip_plausible_remote_safety"
+  | "unknown_skip_plausible_hq_or_rnd_safety"
+  | "unknown_skip_plausible_payoff_unaffordable"
+  | "unknown_skip_plausible_payoff_low_impact"
+  | "unknown_skip_plausible_survival_countercontext"
+  | "unknown_skip_suspicious_economy_or_setup"
+  | "unknown_skip_suspicious_low_value_install"
+  | "unknown_skip_suspicious_basic_credit"
+  | "unknown_skip_suspicious_end_turn"
+  | "unknown_skip_unclassified_missing_evidence";
+
 function tagPunishWindowDiagnosticsForSimulationAction(
   input: AiDecisionInput,
   action: LegalAction,
@@ -8167,9 +9143,12 @@ function tagPunishWindowDiagnosticsForSimulationAction(
     if (visiblePunishOpportunities.length > 0) {
       diagnostics.corpVisibleTagPunishLegalActions =
         visiblePunishOpportunities.length;
+      diagnostics.corpVisibleTagPunishDecisionWindow = true;
       diagnostics.corpVisibleTagPayoffLegalActionKinds =
         visiblePayoffCategories;
       diagnostics.corpVisibleTagPayoffLegalActionCards = visiblePayoffCards;
+      if (visiblePunishOpportunities.length > 1)
+        diagnostics.corpVisibleTagPunishDecisionWindowWithMultiplePayoffs = true;
       if (visiblePayoffCategories.includes("damage"))
         diagnostics.corpVisibleTagDamagePunishLegalActions = true;
       if (visiblePayoffCategories.includes("economic"))
@@ -8188,7 +9167,11 @@ function tagPunishWindowDiagnosticsForSimulationAction(
           diagnostics.runnerFlatlinePreventionVisibleAtPayoffWindow = true;
       }
     }
-    const punishOpportunity = visiblePunishOpportunities[0];
+    const chosenPunishOpportunity = visiblePunishOpportunities.find(
+      (opportunity) => opportunity.action.actionId === action.actionId,
+    );
+    const punishOpportunity =
+      chosenPunishOpportunity ?? visiblePunishOpportunities[0];
     if (punishOpportunity) {
       const punishOntology = corpTagPunishOntologyAssessmentForAction(
         input,
@@ -8199,16 +9182,54 @@ function tagPunishWindowDiagnosticsForSimulationAction(
       diagnostics.corpPunishKind = punishOpportunity.kind;
       if (punishOntology?.isPunishPayoff)
         diagnostics.corpPunishOpportunityConfirmedByOntology = true;
-      if (action.actionId === punishOpportunity.action.actionId) {
+      if (chosenPunishOpportunity) {
         diagnostics.corpPunishTaken = true;
         diagnostics.corpVisibleTagPunishTaken = true;
+        diagnostics.corpVisibleTagPunishDecisionWindowTaken = true;
         if (punishOntology?.isPunishPayoff)
           diagnostics.corpOntologyPunishOpportunityConverted = true;
+        applyCorpVisibleTagPunishTakenWindowDiagnostics(
+          diagnostics,
+          input,
+          action,
+          decision,
+          chosenPunishOpportunity,
+          visiblePunishOpportunities,
+        );
       } else {
         const skippedReason = corpTagPunishSkipReason(action, decision);
         diagnostics.corpPunishSkippedReason = skippedReason;
         diagnostics.corpVisibleTagPunishSkipped = true;
         diagnostics.corpVisibleTagPunishSkippedReason = skippedReason;
+        diagnostics.corpVisibleTagPunishDecisionWindowSkipped = true;
+        diagnostics.corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen = true;
+        if (
+          skippedReason === "unknown_higher_priority" ||
+          skippedReason === "unknown"
+        )
+          applyCorpVisibleTagPunishUnknownSkipDiagnostics(
+            diagnostics,
+            input,
+            action,
+            decision,
+            visiblePunishOpportunities,
+            survivalContext,
+          );
+        if (
+          diagnostics.corpVisibleTagPunishUnknownSkipFixGateEligible === true
+        ) {
+          diagnostics.corpVisibleTagPunishFixGateEligibleWindowNormalized = true;
+          if (
+            diagnostics.corpVisibleTagPunishUnknownSkipPlausibility ===
+            "suspicious"
+          )
+            diagnostics.corpVisibleTagPunishFixGateSuspiciousSkipNormalized = true;
+        }
+        if (
+          skippedReason === "unknown_higher_priority" ||
+          skippedReason === "unknown"
+        )
+          diagnostics.corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization = true;
         if (survivalContext.any)
           diagnostics.runnerSurvivalCounterContextSuppressedPunishValue = true;
         if (punishOntology?.isPunishPayoff)
@@ -8417,6 +9438,341 @@ function corpVisibleTagPayoffCategoryFromOntology(
   }
 }
 
+function applyCorpVisibleTagPunishTakenWindowDiagnostics(
+  diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
+  input: AiDecisionInput,
+  action: LegalAction,
+  decision: AiDecision,
+  chosenOpportunity: {
+    action: LegalAction;
+    kind: CorpPunishKind;
+    category: CorpVisibleTagPayoffCategory;
+    cardId: string | undefined;
+  },
+  opportunities: Array<{
+    action: LegalAction;
+    kind: CorpPunishKind;
+    category: CorpVisibleTagPayoffCategory;
+    cardId: string | undefined;
+  }>,
+): void {
+  const alternatives = opportunities.filter(
+    (opportunity) => opportunity.action.actionId !== action.actionId,
+  );
+  if (alternatives.length <= 0) return;
+
+  diagnostics.corpVisibleTagPunishAlternativePayoffsNotChosen =
+    alternatives.length;
+  diagnostics.corpVisibleTagPunishChosenPayoffAmongAlternatives = true;
+  if (action.type === "play_operation")
+    diagnostics.corpVisibleTagPunishOperationChoiceAmongPayoffs = true;
+
+  const legacyReference = opportunities[0];
+  if (legacyReference?.action.actionId !== action.actionId) {
+    diagnostics.corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization = true;
+    const legacySkippedReason = corpTagPunishSkipReason(action, decision);
+    if (
+      legacySkippedReason === "unknown_higher_priority" ||
+      legacySkippedReason === "unknown"
+    ) {
+      diagnostics.corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff = true;
+      diagnostics.corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken = true;
+    }
+  }
+
+  const chosenLethal = corpPayoffOpportunityIsLethalOrNearLethal(
+    input,
+    chosenOpportunity,
+  );
+  const alternativeCategories = new Set(
+    alternatives.map((opportunity) => opportunity.category),
+  );
+  const alternativeLethal = alternatives.some((opportunity) =>
+    corpPayoffOpportunityIsLethalOrNearLethal(input, opportunity),
+  );
+  if (
+    chosenOpportunity.category === "damage" &&
+    alternativeCategories.has("economic")
+  )
+    diagnostics.corpVisibleTagPunishChosenDamageOverEconomic = true;
+  if (
+    chosenOpportunity.category === "economic" &&
+    alternativeCategories.has("damage")
+  ) {
+    diagnostics.corpVisibleTagPunishChosenEconomicOverDamage = true;
+    diagnostics.corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage = true;
+  }
+  if (
+    chosenOpportunity.category === "trash" &&
+    alternativeCategories.has("damage")
+  )
+    diagnostics.corpVisibleTagPunishChosenTrashOverDamage = true;
+  if (
+    chosenLethal &&
+    alternatives.some((opportunity) => opportunity.category !== "damage")
+  )
+    diagnostics.corpVisibleTagPunishChosenLethalOverNonLethal = true;
+  if (!chosenLethal && alternativeLethal) {
+    diagnostics.corpVisibleTagPunishChosenNonLethalOverLethal = true;
+    diagnostics.corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed = true;
+  }
+
+  const chosenImpact = corpVisibleTagPayoffImpact(chosenOpportunity);
+  const alternativeImpacts = alternatives.map(corpVisibleTagPayoffImpact);
+  if (
+    chosenImpact === undefined ||
+    alternativeImpacts.some((impact) => impact === undefined)
+  ) {
+    diagnostics.corpVisibleTagPunishChosenUnknownImpactOrdering = true;
+  } else if (Math.max(...(alternativeImpacts as number[])) > chosenImpact) {
+    diagnostics.corpVisibleTagPunishChosenLowerImpactOverHigherImpact = true;
+  }
+  if (
+    diagnostics.corpVisibleTagPunishChosenLowerImpactOverHigherImpact ===
+      true ||
+    diagnostics.corpVisibleTagPunishChosenNonLethalOverLethal === true ||
+    diagnostics.corpVisibleTagPunishChosenEconomicOverDamage === true ||
+    diagnostics.corpVisibleTagPunishChosenTrashOverDamage === true
+  )
+    diagnostics.corpVisibleTagPunishPotentialPayoffOrderingIssue = true;
+}
+
+function corpVisibleTagPayoffImpact(opportunity: {
+  category: CorpVisibleTagPayoffCategory;
+}): number | undefined {
+  switch (opportunity.category) {
+    case "damage":
+      return 50;
+    case "economic":
+      return 35;
+    case "trash":
+      return 30;
+    case "run_lock":
+      return 20;
+    case "ambush":
+      return 15;
+    case "unknown":
+      return undefined;
+  }
+}
+
+function corpPayoffOpportunityIsLethalOrNearLethal(
+  input: AiDecisionInput,
+  opportunity: { category: CorpVisibleTagPayoffCategory },
+): boolean {
+  return (
+    opportunity.category === "damage" &&
+    input.playerView.opponent.handCount <= 3
+  );
+}
+
+function applyCorpVisibleTagPunishUnknownSkipDiagnostics(
+  diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
+  input: AiDecisionInput,
+  action: LegalAction,
+  decision: AiDecision,
+  opportunities: Array<{
+    action: LegalAction;
+    kind: CorpPunishKind;
+    category: CorpVisibleTagPayoffCategory;
+    cardId: string | undefined;
+  }>,
+  survivalContext: ReturnType<typeof runnerSurvivalCounterContextForInput>,
+): void {
+  const chosenFamily = corpUnknownSkipChosenFamily(input, action);
+  const chosenCardId = sourceDefinitionIdForAction(input, action) || undefined;
+  const chosenCardTitle = titleForCardId(chosenCardId);
+  const attribution = corpUnknownSkipAttribution(
+    input,
+    action,
+    decision,
+    opportunities,
+    chosenFamily,
+    survivalContext,
+  );
+  const plausibility = corpUnknownSkipPlausibility(attribution);
+  const fixGate = corpUnknownSkipFixGate(attribution, opportunities);
+  diagnostics.corpVisibleTagPunishUnknownSkipChosenFamily = chosenFamily;
+  diagnostics.corpVisibleTagPunishUnknownSkipChosenActionType = action.type;
+  if (chosenCardId)
+    diagnostics.corpVisibleTagPunishUnknownSkipChosenCardId = chosenCardId;
+  if (chosenCardTitle)
+    diagnostics.corpVisibleTagPunishUnknownSkipChosenCardTitle =
+      chosenCardTitle;
+  diagnostics.corpVisibleTagPunishUnknownSkipAttribution = attribution;
+  diagnostics.corpVisibleTagPunishUnknownSkipPlausibility = plausibility;
+  if (corpUnknownSkipPayoffLethalOrNearLethal(input, opportunities))
+    diagnostics.corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal = true;
+  if (fixGate.eligible)
+    diagnostics.corpVisibleTagPunishUnknownSkipFixGateEligible = true;
+  if (fixGate.blockedBy)
+    diagnostics.corpVisibleTagPunishUnknownSkipFixGateBlockedBy =
+      fixGate.blockedBy;
+}
+
+function corpUnknownSkipChosenFamily(
+  input: AiDecisionInput,
+  action: LegalAction,
+): CorpTagPunishUnknownChosenFamily {
+  if (isCorpTraceTagSourceAction(input, action)) return "trace_tag_source";
+  if (action.type === "score_agenda") return "score";
+  if (action.type === "advance_card") return "advance";
+  if (action.type === "rez_ice") return "rez";
+  if (action.type === "play_operation") return "operation";
+  if (
+    action.type === "activated_card_ability" ||
+    action.type === "trigger_ability"
+  )
+    return "ability";
+  if (action.type === "draw_card") return "draw";
+  if (action.type === "gain_credit") return "basic_credit";
+  if (action.type === "end_turn") return "end_turn";
+  if (action.type === "install_card") {
+    const definitionId = sourceDefinitionIdForAction(input, action);
+    const type =
+      RUNTIME_CARDS[definitionId]?.type ?? DEMO_CARDS_BY_ID[definitionId]?.type;
+    if (type === "agenda") return "install_agenda";
+    if (type === "ice" || action.payload?.placement === "ice")
+      return "install_ice";
+    if (type === "asset" || type === "upgrade")
+      return "install_asset_or_upgrade";
+    return "unknown";
+  }
+  return "unknown";
+}
+
+function corpUnknownSkipAttribution(
+  input: AiDecisionInput,
+  action: LegalAction,
+  decision: AiDecision,
+  opportunities: Array<{
+    action: LegalAction;
+    kind: CorpPunishKind;
+    category: CorpVisibleTagPayoffCategory;
+    cardId: string | undefined;
+  }>,
+  chosenFamily: CorpTagPunishUnknownChosenFamily,
+  survivalContext: ReturnType<typeof runnerSurvivalCounterContextForInput>,
+): CorpTagPunishUnknownSkipAttribution {
+  const text = `${decision.reasonCode} ${(decision.evidence ?? []).join(" ")}`;
+  if (chosenFamily === "score" || text.includes("score_now"))
+    return "unknown_skip_plausible_score_window";
+  if (
+    chosenFamily === "advance" ||
+    text.includes("advance_to_score") ||
+    text.includes("score_window")
+  )
+    return "unknown_skip_plausible_advance_to_score";
+  if (
+    text.includes("remote_safety") ||
+    text.includes("unsafe_remote") ||
+    text.includes("scoring_remote")
+  )
+    return "unknown_skip_plausible_remote_safety";
+  if (
+    text.includes("central") ||
+    text.includes("protect_hq") ||
+    text.includes("protect_rd") ||
+    text.includes("hq_protection") ||
+    text.includes("rnd_protection")
+  )
+    return "unknown_skip_plausible_hq_or_rnd_safety";
+  if (
+    text.includes("unaffordable") ||
+    text.includes("cannot_afford") ||
+    text.includes("insufficient_credits")
+  )
+    return "unknown_skip_plausible_payoff_unaffordable";
+  if (survivalContext.damage || survivalContext.flatline)
+    return "unknown_skip_plausible_survival_countercontext";
+  if (
+    text.includes("low_impact") ||
+    opportunities.every((opportunity) =>
+      ["unknown", "run_lock", "ambush"].includes(opportunity.category),
+    )
+  )
+    return "unknown_skip_plausible_payoff_low_impact";
+  if (chosenFamily === "basic_credit")
+    return "unknown_skip_suspicious_basic_credit";
+  if (chosenFamily === "end_turn") return "unknown_skip_suspicious_end_turn";
+  if (
+    chosenFamily === "install_asset_or_upgrade" ||
+    chosenFamily === "install_ice" ||
+    chosenFamily === "install_agenda"
+  )
+    return "unknown_skip_suspicious_low_value_install";
+  if (
+    chosenFamily === "operation" &&
+    (text.includes("economy") || text.includes("setup"))
+  )
+    return "unknown_skip_suspicious_economy_or_setup";
+  return "unknown_skip_unclassified_missing_evidence";
+}
+
+function corpUnknownSkipPlausibility(
+  attribution: CorpTagPunishUnknownSkipAttribution,
+): CorpTagPunishUnknownSkipPlausibility {
+  if (attribution.startsWith("unknown_skip_plausible_")) return "plausible";
+  if (attribution.startsWith("unknown_skip_suspicious_")) return "suspicious";
+  return "unclassified";
+}
+
+function corpUnknownSkipFixGate(
+  attribution: CorpTagPunishUnknownSkipAttribution,
+  opportunities: Array<{
+    category: CorpVisibleTagPayoffCategory;
+  }>,
+): {
+  eligible: boolean;
+  blockedBy?:
+    | "score"
+    | "advance_score"
+    | "safety"
+    | "affordability"
+    | "low_impact";
+} {
+  switch (attribution) {
+    case "unknown_skip_plausible_score_window":
+      return { eligible: false, blockedBy: "score" };
+    case "unknown_skip_plausible_advance_to_score":
+      return { eligible: false, blockedBy: "advance_score" };
+    case "unknown_skip_plausible_remote_safety":
+    case "unknown_skip_plausible_hq_or_rnd_safety":
+    case "unknown_skip_plausible_survival_countercontext":
+      return { eligible: false, blockedBy: "safety" };
+    case "unknown_skip_plausible_payoff_unaffordable":
+      return { eligible: false, blockedBy: "affordability" };
+    case "unknown_skip_plausible_payoff_low_impact":
+      return { eligible: false, blockedBy: "low_impact" };
+    case "unknown_skip_suspicious_basic_credit":
+    case "unknown_skip_suspicious_end_turn":
+    case "unknown_skip_suspicious_low_value_install":
+    case "unknown_skip_suspicious_economy_or_setup":
+      return {
+        eligible: opportunities.some(
+          (opportunity) => opportunity.category !== "unknown",
+        ),
+      };
+    default:
+      return { eligible: false };
+  }
+}
+
+function corpUnknownSkipPayoffLethalOrNearLethal(
+  input: AiDecisionInput,
+  opportunities: Array<{ category: CorpVisibleTagPayoffCategory }>,
+): boolean {
+  return (
+    opportunities.some((opportunity) => opportunity.category === "damage") &&
+    input.playerView.opponent.handCount <= 3
+  );
+}
+
+function titleForCardId(cardId: string | undefined): string | undefined {
+  if (!cardId) return undefined;
+  return RUNTIME_CARDS[cardId]?.title ?? DEMO_CARDS_BY_ID[cardId]?.title;
+}
+
 function applyCorpTagSourceWindowDiagnostics(
   diagnostics: Partial<AiSimulationSummary["actionSequence"][number]>,
   input: AiDecisionInput,
@@ -8573,6 +9929,10 @@ function addKindsToCounter(kinds: string[], counter: Record<string, number>) {
 
 function addCardsToCounter(cardIds: string[], counter: Record<string, number>) {
   for (const cardId of cardIds) counter[cardId] = (counter[cardId] ?? 0) + 1;
+}
+
+function incrementStringCounter(counter: Record<string, number>, key: string) {
+  counter[key] = (counter[key] ?? 0) + 1;
 }
 
 function strongestCorpTagSourceOpportunity(
@@ -10249,6 +11609,92 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "corpNonEssentialActionBeforeScoreWindow",
   "corpEconomyBeforeScoreWindow",
   "corpEconomyBeforeScoreWindowNecessary",
+  "corpEconomyBeforeScoreWindowWithInstalledAgenda",
+  "corpEconomyBeforeScoreWindowWithAdvancedAgenda",
+  "corpEconomyBeforeScoreWindowWithScoreLegalNext",
+  "corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext",
+  "corpEconomyBeforeScoreWindowWithReadyRemote",
+  "corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote",
+  "corpEconomyBeforeScoreWindowCreditsShort",
+  "corpEconomyBeforeScoreWindowCreditsAlreadyEnough",
+  "corpEconomyBeforeScoreWindowRemoteSafe",
+  "corpEconomyBeforeScoreWindowRemoteContestHigh",
+  "corpEconomyBeforeScoreTaken",
+  "corpEconomyBeforeScoreTakenAsNecessaryCredits",
+  "corpEconomyBeforeScoreTakenDespiteCreditsEnough",
+  "corpEconomyBeforeScoreTakenOverScoreLegal",
+  "corpEconomyBeforeScoreTakenOverAdvanceToScoreLegal",
+  "corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote",
+  "corpEconomyBeforeScoreTakenOverHqAgendaExit",
+  "corpEconomyBeforeScoreTakenOverScoreAreaAbility",
+  "corpEconomyBeforeScoreConvertedToScoreNextDecision",
+  "corpEconomyBeforeScoreConvertedToAdvanceNextDecision",
+  "corpEconomyBeforeScoreConvertedToAgendaInstallNextDecision",
+  "corpEconomyBeforeScoreConvertedWithin2CorpActions",
+  "corpEconomyBeforeScoreConvertedWithin3CorpActions",
+  "corpEconomyBeforeScoreNotConvertedWithin3CorpActions",
+  "corpEconomyBeforeScoreRepeatedEconomyNextDecision",
+  "corpEconomyBeforeScoreRepeatedEconomyWithin3",
+  "corpEconomyBeforeScoreThenDraw",
+  "corpEconomyBeforeScoreThenProtect",
+  "corpEconomyBeforeScoreThenNewRemote",
+  "corpEconomyBeforeScoreThenRunnerSteal",
+  "corpEconomyBeforeScoreThenActionLimit",
+  "corpEconomyBeforeScorePlausibleCreditsNeeded",
+  "corpEconomyBeforeScorePlausibleRezOrAdvanceReserve",
+  "corpEconomyBeforeScorePlausibleHqOrRndSafety",
+  "corpEconomyBeforeScorePlausibleRunnerContestTooHigh",
+  "corpEconomyBeforeScorePlausibleNoAgendaExit",
+  "corpEconomyBeforeScoreSuspiciousCreditsAlreadyEnough",
+  "corpEconomyBeforeScoreSuspiciousRepeatedEconomy",
+  "corpEconomyBeforeScoreSuspiciousDelayedTerminalAction",
+  "corpEconomyBeforeScoreSuspiciousRemoteStillSafe",
+  "corpEconomyBeforeScoreSuspiciousRunnerStealFollowup",
+  "corpEconomyBeforeScoreUnclassified",
+  "corpEconomyBeforeScoreFixGateEligible",
+  "corpEconomyBeforeScoreFixGateBlockedByCredits",
+  "corpEconomyBeforeScoreFixGateBlockedByCheapContest",
+  "corpEconomyBeforeScoreFixGateBlockedByRunnerContest",
+  "corpEconomyBeforeScoreFixGateBlockedBySafety",
+  "corpEconomyBeforeScoreFixGateSuspicious",
+  "corpEconomyBeforeScoreFixGateSuspiciousRepeatedEconomy",
+  "corpEconomyBeforeScoreFixGateSuspiciousNoConversion",
+  "corpEconomyBeforeScoreFixGateSuspiciousStealFollowup",
+  "corpRepeatedEconomyBeforeScoreWindows",
+  "corpRepeatedEconomyBeforeScoreCreditsStillShort",
+  "corpRepeatedEconomyBeforeScoreCreditsAlreadyEnough",
+  "corpRepeatedEconomyBeforeScoreScoreLegal",
+  "corpRepeatedEconomyBeforeScoreAdvanceLegal",
+  "corpRepeatedEconomyBeforeScoreAgendaInstallReadyRemoteLegal",
+  "corpRepeatedEconomyBeforeScoreRemoteSafe",
+  "corpRepeatedEconomyBeforeScoreRunnerContestHigh",
+  "corpRepeatedEconomyBeforeScoreThenScore",
+  "corpRepeatedEconomyBeforeScoreThenRunnerSteal",
+  "corpRepeatedEconomyBeforeScoreThenActionLimit",
+  "corpRepeatedEconomyBeforeScoreSuspicious",
+  "corpRepeatedEconomyBeforeScorePlausible",
+  "corpEconomyBeforeScoreNoConversionCreditsStillShort",
+  "corpEconomyBeforeScoreNoConversionNoAgendaExit",
+  "corpEconomyBeforeScoreNoConversionRemoteUnsafe",
+  "corpEconomyBeforeScoreNoConversionRunnerContestHigh",
+  "corpEconomyBeforeScoreNoConversionSafetyBlocked",
+  "corpEconomyBeforeScoreNoConversionPlanDrift",
+  "corpEconomyBeforeScoreNoConversionRepeatedEconomy",
+  "corpEconomyBeforeScoreNoConversionDrawLoop",
+  "corpEconomyBeforeScoreNoConversionProtectionLoop",
+  "corpEconomyBeforeScoreNoConversionRemotePortfolioLoop",
+  "corpEconomyBeforeScoreNoConversionRunnerSteal",
+  "corpEconomyBeforeScoreNoConversionActionLimit",
+  "corpEconomyBeforeScoreNoConversionSuspicious",
+  "corpEconomyBeforeScoreNoConversionPlausible",
+  "corpEconomyBeforeScoreCreditsEnoughWindows",
+  "corpEconomyBeforeScoreCreditsEnoughTaken",
+  "corpEconomyBeforeScoreCreditsEnoughScoreLegal",
+  "corpEconomyBeforeScoreCreditsEnoughAdvanceLegal",
+  "corpEconomyBeforeScoreCreditsEnoughAgendaInstallReadyRemoteLegal",
+  "corpEconomyBeforeScoreCreditsEnoughSafetyBlocked",
+  "corpEconomyBeforeScoreCreditsEnoughSuspicious",
+  "corpEconomyBeforeScoreCreditsEnoughPlausible",
   "corpProtectionBeforeScoreWindow",
   "corpProtectionBeforeScoreWindowNoSafetyDelta",
   "corpCentralProtectionBeforeScoreWindow",
@@ -10259,6 +11705,44 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "corpSameTurnScoreTaken",
   "corpScoreWindowLostAfterNonEssentialAction",
   "corpRunnerStealAfterDelayedScoreWindow",
+  "corpScoreTerminalWindow",
+  "corpScoreTerminalWindowScoreLegal",
+  "corpScoreTerminalWindowAdvanceToScoreLegal",
+  "corpScoreTerminalWindowAgendaInstallLegal",
+  "corpScoreTerminalWindowProtectedRemoteReady",
+  "corpScoreTerminalWindowRemoteContestLow",
+  "corpScoreTerminalWindowCreditsSufficient",
+  "corpScoreTerminalWindowRunnerAccessThreatHigh",
+  "corpScoreTerminalScoreTaken",
+  "corpScoreTerminalAdvanceTaken",
+  "corpScoreTerminalAgendaInstalled",
+  "corpScoreTerminalSkipped",
+  "corpScoreTerminalSkippedForProtection",
+  "corpScoreTerminalSkippedForEconomy",
+  "corpScoreTerminalSkippedForDraw",
+  "corpScoreTerminalSkippedForInstallIce",
+  "corpScoreTerminalSkippedForInstallAssetOrUpgrade",
+  "corpScoreTerminalSkippedForHqProtection",
+  "corpScoreTerminalSkippedForRndProtection",
+  "corpScoreTerminalSkippedForRemotePortfolio",
+  "corpScoreTerminalSkippedForUnknownHigherPriority",
+  "corpScoreTerminalSkippedThenAgendaStolen",
+  "corpScoreTerminalSkippedThenNoScoreWindow",
+  "corpScoreTerminalSkippedThenActionLimit",
+  "corpScoreTerminalSkippedThenProtectionLoop",
+  "corpScoreTerminalSkippedThenEconomyLoop",
+  "corpScoreTerminalSkippedThenRemoteStillSafe",
+  "corpScoreTerminalSkippedThenScoreNextDecision",
+  "corpScoreConversionFixGateEligible",
+  "corpScoreConversionFixGateBlockedByCheapContest",
+  "corpScoreConversionFixGateBlockedByCredits",
+  "corpScoreConversionFixGateBlockedByRunnerContest",
+  "corpScoreConversionFixGateBlockedByHqThreat",
+  "corpScoreConversionFixGateSuspiciousProtectionLoop",
+  "corpScoreConversionFixGateSuspiciousEconomyLoop",
+  "corpScoreConversionFixGateSuspiciousDraw",
+  "corpScoreConversionFixGateSuspiciousRemotePortfolio",
+  "corpScoreConversionFixGateSuspiciousUnknown",
   "corpAdvanceToScoreLineCompressedWithin2",
   "corpAdvanceToScoreLineCompressedWithin3",
   "scoredAgendaActionOpportunities",
@@ -10325,6 +11809,66 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "corpVisibleTagPunishSkippedForInstall",
   "corpVisibleTagPunishSkippedForEndTurn",
   "corpVisibleTagPunishSkippedForUnknownHigherPriority",
+  "corpVisibleTagPunishSkippedUnknownChosenScore",
+  "corpVisibleTagPunishSkippedUnknownChosenAdvance",
+  "corpVisibleTagPunishSkippedUnknownChosenInstallAgenda",
+  "corpVisibleTagPunishSkippedUnknownChosenInstallIce",
+  "corpVisibleTagPunishSkippedUnknownChosenInstallAssetOrUpgrade",
+  "corpVisibleTagPunishSkippedUnknownChosenRez",
+  "corpVisibleTagPunishSkippedUnknownChosenOperation",
+  "corpVisibleTagPunishSkippedUnknownChosenAbility",
+  "corpVisibleTagPunishSkippedUnknownChosenTraceTagSource",
+  "corpVisibleTagPunishSkippedUnknownChosenDraw",
+  "corpVisibleTagPunishSkippedUnknownChosenBasicCredit",
+  "corpVisibleTagPunishSkippedUnknownChosenEndTurn",
+  "corpVisibleTagPunishSkippedUnknownChosenUnknown",
+  "corpVisibleTagPunishSkippedUnknownByReasonCode",
+  "corpVisibleTagPunishSkippedUnknownByChosenActionType",
+  "corpVisibleTagPunishSkippedUnknownByChosenCard",
+  "corpVisibleTagPunishSkippedUnknownByPayoffCard",
+  "corpVisibleTagPunishSkippedUnknownByPayoffKind",
+  "corpVisibleTagPunishUnknownSkipPlausible",
+  "corpVisibleTagPunishUnknownSkipSuspicious",
+  "corpVisibleTagPunishUnknownSkipUnclassified",
+  "corpVisibleTagPunishUnknownSkipByPlausibility",
+  "corpVisibleTagPunishUnknownSkipPayoffDamage",
+  "corpVisibleTagPunishUnknownSkipPayoffEconomic",
+  "corpVisibleTagPunishUnknownSkipPayoffTrash",
+  "corpVisibleTagPunishUnknownSkipPayoffRunLock",
+  "corpVisibleTagPunishUnknownSkipPayoffAmbush",
+  "corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal",
+  "corpVisibleTagPunishUnknownSkipPayoffNonLethal",
+  "corpVisibleTagPunishFixGateEligibleWindow",
+  "corpVisibleTagPunishFixGateBlockedByScore",
+  "corpVisibleTagPunishFixGateBlockedByAdvanceScore",
+  "corpVisibleTagPunishFixGateBlockedBySafety",
+  "corpVisibleTagPunishFixGateBlockedByAffordability",
+  "corpVisibleTagPunishFixGateBlockedByLowImpact",
+  "corpVisibleTagPunishFixGateSuspiciousSkip",
+  "corpVisibleTagPunishDecisionWindows",
+  "corpVisibleTagPunishDecisionWindowsTaken",
+  "corpVisibleTagPunishDecisionWindowsSkipped",
+  "corpVisibleTagPunishDecisionWindowsWithMultiplePayoffs",
+  "corpVisibleTagPunishAlternativePayoffsNotChosen",
+  "corpVisibleTagPunishChosenPayoffAmongAlternatives",
+  "corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff",
+  "corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization",
+  "corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen",
+  "corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization",
+  "corpVisibleTagPunishOperationChoiceAmongPayoffs",
+  "corpVisibleTagPunishChosenDamageOverEconomic",
+  "corpVisibleTagPunishChosenEconomicOverDamage",
+  "corpVisibleTagPunishChosenTrashOverDamage",
+  "corpVisibleTagPunishChosenLethalOverNonLethal",
+  "corpVisibleTagPunishChosenNonLethalOverLethal",
+  "corpVisibleTagPunishChosenLowerImpactOverHigherImpact",
+  "corpVisibleTagPunishChosenUnknownImpactOrdering",
+  "corpVisibleTagPunishFixGateEligibleWindowNormalized",
+  "corpVisibleTagPunishFixGateSuspiciousSkipNormalized",
+  "corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken",
+  "corpVisibleTagPunishPotentialPayoffOrderingIssue",
+  "corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed",
+  "corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage",
   "corpFunnelSourcePayoffPairSeenInDeck",
   "corpFunnelSourceActionTakenWithPayoffInDeck",
   "corpFunnelSourceActionTakenWithVisiblePayoff",
@@ -10429,6 +11973,27 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "corpOneIceRemoteCheaplyContestable",
   "corpRemoteIceConsolidationOpportunity",
   "corpRemoteIceConsolidationTaken",
+  "corpFutureRunIceInstallOpportunities",
+  "corpFutureRunIceInstalled",
+  "corpFutureRunIceInstalledAsInnermost",
+  "corpFutureRunIceInstalledAsOutermost",
+  "corpFutureRunIceInstalledWithLaterIce",
+  "corpFutureRunIceInstalledWithoutLaterIce",
+  "corpFutureRunIceInstalledOnEmptyServer",
+  "corpFutureRunIceInstalledFirstOnEmptyServer",
+  "corpFutureRunIceInstalledAfterInnerIceExists",
+  "corpFutureRunIceInstalledAsDeadEffect",
+  "corpFutureRunIceInstalledAsLiveEffect",
+  "corpNextIceEffectInstalledLast",
+  "corpIceOrderFutureEffectDead",
+  "corpIceOrderFutureEffectLive",
+  "corpMultiIceInstallOrderFutureEffectDead",
+  "corpMultiIceInstallOrderOptimized",
+  "corpBallAndChainInstalledInnermost",
+  "corpBallAndChainInstalledWithoutLaterIce",
+  "corpBallAndChainInstalledWithLaterIce",
+  "corpCanisInstalledWithoutLaterIce",
+  "corpBolterOrDataDartsInstalledWithoutNextIce",
   "corpRemoteCreatedThenNoScorePath",
   "corpRemoteCreatedThenAgendaInstalledWithin3",
   "corpRemoteCreatedThenAssetInstalledWithin3",
@@ -10775,9 +12340,223 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "runnerLowValueDuplicateInstallActions",
   "runnerJunkyardBbsDuplicateInstalls",
   "runnerEconomyActionsTaken",
+  "runnerEconomyDecisionWindows",
+  "runnerLegalEconomyActions",
+  "runnerLegalBurstEconomyActions",
+  "runnerLegalActionEconomyActions",
+  "runnerLegalFinitePoolEconomyActions",
+  "runnerLegalLoanDebtEconomyActions",
+  "runnerLegalRecurringEconomyActions",
+  "runnerLegalResourceEconomyActions",
+  "runnerLegalHardwareEconomyActions",
+  "runnerEconomyTaken",
+  "runnerEconomySkipped",
+  "runnerEconomySkippedWhileLowCredits",
+  "runnerEconomySkippedWhileKnownUnaffordablePath",
+  "runnerEconomySkippedForPressure",
+  "runnerEconomySkippedForRemoteContest",
+  "runnerEconomySkippedForSetup",
+  "runnerEconomySkippedForDraw",
+  "runnerEconomySkippedForRun",
+  "runnerEconomySkippedForInstallBreaker",
+  "runnerEconomySkippedForTrash",
+  "runnerEconomySkippedForEndTurn",
+  "runnerEconomySkippedForUnknownHigherPriority",
+  "runnerLowCreditDecisionWindows",
+  "runnerCreditStarvedWithLegalEconomy",
+  "runnerCreditStarvedEconomyTaken",
+  "runnerCreditStarvedEconomySkipped",
+  "runnerKnownUnaffordablePathWithLegalEconomy",
+  "runnerEconomyTakenToReachRunReserve",
+  "runnerEconomyTakenButStillBelowReserve",
+  "runnerEconomySkippedThenUnaffordableRun",
+  "runnerRunStartedBelowKnownPathCost",
+  "runnerRunStartedAfterSkippingEconomy",
+  "runnerEconomyChosenOverFreshCentralPressure",
+  "runnerEconomyChosenOverRemoteContest",
+  "runnerEconomyChosenOverBreakerInstall",
+  "runnerEconomyChosenOverCriticalSetup",
+  "runnerEconomyChosenOverRelevantTrash",
+  "runnerEconomyChosenWhileRich",
+  "runnerEconomyChosenWhilePressureReady",
+  "runnerEconomyChosenAsReserveSetup",
+  "runnerEconomyChoicePlausible",
+  "runnerEconomyChoiceSuspicious",
+  "runnerFinitePoolEconomySeen",
+  "runnerFinitePoolEconomyTaken",
+  "runnerFinitePoolEconomySkipped",
+  "runnerFinitePoolEconomyTakenWhilePoolLikelyDepleted",
+  "runnerDebtEconomySeen",
+  "runnerDebtEconomyTaken",
+  "runnerDebtEconomySkipped",
+  "runnerDebtEconomyTakenWithoutNeed",
+  "runnerEconomyWithDownsideSeen",
+  "runnerEconomyWithDownsideTaken",
+  "runnerDelayedPenaltyEconomyTaken",
+  "runnerMemoryBottleneckDecisionWindows",
+  "runnerHandSizeBottleneckDecisionWindows",
+  "runnerLegalMemoryHardwareActions",
+  "runnerLegalHandSizeActions",
+  "runnerMemoryHardwareTaken",
+  "runnerHandSizeSupportTaken",
+  "runnerMemorySupportSkippedWhileGripHasPrograms",
+  "runnerHandSizeSupportSkippedWhileDamageRiskVisible",
+  "runnerHardwareSetupChosenOverEconomy",
+  "runnerHardwareSetupChosenOverPressure",
+  "runnerHandSizeFactUsedForDiagnosis",
+  "runnerLegalSearchActions",
+  "runnerLegalRecoveryActions",
+  "runnerSearchTaken",
+  "runnerRecoveryTaken",
+  "runnerSearchSkippedWhileMissingBreakerCoverage",
+  "runnerRecoverySkippedWhileMissingBreakerCoverage",
+  "runnerSearchTakenForBreakerCoverage",
+  "runnerRecoveryTakenForBreakerCoverage",
+  "runnerSearchOrRecoveryWindowWithNoInstallFollowup",
+  "runnerSearchRecoveryChosenOverEconomy",
+  "runnerSearchRecoveryChosenOverPressure",
+  "runnerEconomyFixGateEligibleStarvedSkip",
+  "runnerEconomyFixGateSuspiciousRichEconomy",
+  "runnerEconomyFixGateSuspiciousEconomyOverPressure",
+  "runnerEconomyFixGateSuspiciousEconomyOverRemoteContest",
+  "runnerEconomyFixGateSuspiciousDebtEconomyWithoutNeed",
+  "runnerSetupFixGateEligibleMemorySkip",
+  "runnerSetupFixGateEligibleSearchRecoverySkip",
+  "runnerStarvedEconomySkipWindows",
+  "runnerStarvedEconomySkipChosenRun",
+  "runnerStarvedEconomySkipChosenDraw",
+  "runnerStarvedEconomySkipChosenInstall",
+  "runnerStarvedEconomySkipChosenSearchRecovery",
+  "runnerStarvedEconomySkipChosenTrash",
+  "runnerStarvedEconomySkipChosenEndTurn",
+  "runnerStarvedEconomySkipChosenUnknown",
+  "runnerStarvedEconomySkipThenUnaffordableRun",
+  "runnerStarvedEconomySkipThenFailedRun",
+  "runnerStarvedEconomySkipThenNoProgress",
+  "runnerStarvedEconomySkipThenEconomyNextDecision",
+  "runnerStarvedEconomySkipThenReserveRecovered",
+  "runnerStarvedEconomySkipThenProgress",
+  "runnerStarvedEconomySkipThenActionLimit",
+  "runnerStarvedEconomySkipPlausiblePressure",
+  "runnerStarvedEconomySkipPlausibleRemoteContest",
+  "runnerStarvedEconomySkipPlausibleCriticalSetup",
+  "runnerStarvedEconomySkipPlausibleTrash",
+  "runnerStarvedEconomySkipSuspiciousLowValueRun",
+  "runnerStarvedEconomySkipSuspiciousDraw",
+  "runnerStarvedEconomySkipSuspiciousEndTurn",
+  "runnerStarvedEconomySkipSuspiciousUnknown",
+  "runnerEconomyFixGateAttributionEligible",
+  "runnerEconomyFixGateAttributionBlocked",
+  "runnerEconomyFixGateAttributionSuspicious",
+  "runnerSearchRecoveryFixGateWindows",
+  "runnerSearchRecoveryFixGateLegalSearch",
+  "runnerSearchRecoveryFixGateLegalRecovery",
+  "runnerSearchRecoveryFixGateMissingWall",
+  "runnerSearchRecoveryFixGateMissingCodeGate",
+  "runnerSearchRecoveryFixGateMissingSentry",
+  "runnerSearchRecoveryFixGateMissingUniversal",
+  "runnerSearchRecoveryFixGateMissingSpecial",
+  "runnerSearchRecoverySkipChosenEconomy",
+  "runnerSearchRecoverySkipChosenRun",
+  "runnerSearchRecoverySkipChosenDraw",
+  "runnerSearchRecoverySkipChosenInstall",
+  "runnerSearchRecoverySkipChosenTrash",
+  "runnerSearchRecoverySkipChosenEndTurn",
+  "runnerSearchRecoverySkipChosenUnknown",
+  "runnerSearchRecoverySkipThenInstallFollowup",
+  "runnerSearchRecoverySkipThenCoverageResolved",
+  "runnerSearchRecoverySkipThenCoverageStillMissing",
+  "runnerSearchRecoverySkipThenKnownUnaffordableRun",
+  "runnerSearchRecoverySkipThenNoProgress",
+  "runnerSearchRecoveryWindowWithNoInstallFollowup",
+  "runnerSearchRecoverySkipPlausibleEconomyReserve",
+  "runnerSearchRecoverySkipPlausiblePressure",
+  "runnerSearchRecoverySkipPlausibleRemoteContest",
+  "runnerSearchRecoverySkipSuspiciousCoverageStillMissing",
+  "runnerSearchRecoverySkipSuspiciousNoProgress",
+  "runnerSearchRecoverySkipUnclassified",
+  "runnerSearchRecoveryFixGateAttributionEligible",
+  "runnerSearchRecoveryFixGateAttributionBlocked",
+  "runnerSearchRecoveryFixGateAttributionSuspicious",
+  "runnerMemoryFixGateWindows",
+  "runnerHandSizeFixGateWindows",
+  "runnerMemoryFixGateLegalSupport",
+  "runnerHandSizeFixGateLegalSupport",
+  "runnerMemoryFixGateSkipped",
+  "runnerHandSizeFixGateSkipped",
+  "runnerMemorySkipChosenEconomy",
+  "runnerMemorySkipChosenRun",
+  "runnerMemorySkipChosenDraw",
+  "runnerMemorySkipChosenInstallNonMemory",
+  "runnerMemorySkipChosenSearchRecovery",
+  "runnerMemorySkipChosenEndTurn",
+  "runnerMemorySkipChosenUnknown",
+  "runnerMemorySkipThenMemoryInstalled",
+  "runnerMemorySkipThenProgramInstallBlocked",
+  "runnerMemorySkipThenCoverageStillMissing",
+  "runnerMemorySkipThenNoProgress",
+  "runnerHandSizeSkipThenDamageRiskWindow",
+  "runnerHandSizeSkipThenDiscardOrDamagePressure",
+  "runnerMemorySkipPlausibleEconomyReserve",
+  "runnerMemorySkipPlausiblePressure",
+  "runnerMemorySkipPlausibleRemoteContest",
+  "runnerMemorySkipSuspiciousRigBlocked",
+  "runnerMemorySkipSuspiciousNoProgress",
+  "runnerMemorySkipUnclassified",
+  "runnerMemoryFixGateAttributionEligible",
+  "runnerMemoryFixGateAttributionBlocked",
+  "runnerMemoryFixGateAttributionSuspicious",
+  "runnerSetupAttributionWindows",
+  "runnerSetupAttributionSuspicious",
+  "runnerSetupAttributionBlocked",
+  "runnerSetupAttributionUnclassified",
+  "runnerSetupAttributionByKindStarvedEconomy",
+  "runnerSetupAttributionByKindSearchRecovery",
+  "runnerSetupAttributionByKindMemory",
+  "runnerSetupAttributionByKindHandSize",
+  "runnerSetupRecommendedFixKindNone",
+  "runnerSetupRecommendedFixKindEconomyStarvedSkip",
+  "runnerSetupRecommendedFixKindSearchRecovery",
+  "runnerSetupRecommendedFixKindMemorySetup",
+  "runnerSetupRecommendedFixKindHandSizeSetup",
+  "runnerSetupRecommendedFixKindMixedNeedsMoreDiagnosis",
   "runnerRigInstallActions",
   "runnerRemoteTrashOpportunities",
   "runnerRemoteTrashTaken",
+  "runnerRemoteTrashDecisionWindows",
+  "runnerRemoteTrashLegalActions",
+  "runnerRemoteTrashSkipped",
+  "runnerRemoteTrashSkippedAffordableRelevant",
+  "runnerRemoteTrashSkippedAssetEconomy",
+  "runnerRemoteTrashSkippedFinitePoolEconomy",
+  "runnerRemoteTrashSkippedWithCorpValueRemaining",
+  "runnerRemoteTrashSkippedDueToReserve",
+  "runnerRemoteTrashSkippedDueToLowCredits",
+  "runnerRemoteTrashSkippedDueToUnknownHigherPriority",
+  "runnerBbsWhisperingCampaignAccessed",
+  "runnerBbsWhisperingCampaignTrashLegal",
+  "runnerBbsWhisperingCampaignTrashTaken",
+  "runnerBbsWhisperingCampaignTrashSkipped",
+  "runnerBbsWhisperingCampaignTrashSkippedAffordable",
+  "runnerBbsWhisperingCampaignTrashSkippedWithCreditsRemaining",
+  "runnerFinitePoolAssetAccessed",
+  "runnerFinitePoolAssetTrashLegal",
+  "runnerFinitePoolAssetTrashTaken",
+  "runnerFinitePoolAssetTrashSkippedAffordable",
+  "runnerRepeatAccessKnownRemote",
+  "runnerRepeatAccessKnownTrashableRemote",
+  "runnerRepeatAccessKnownTrashableRemoteWithoutTrash",
+  "runnerRepeatRunOnSameRemoteAfterDecliningTrash",
+  "runnerRepeatRunOnSameRemoteNoNewInfo",
+  "runnerRepeatRemoteAccessNoProgress",
+  "runnerRepeatRemoteRunSuppressedAfterNoTrash",
+  "runnerRepeatRemoteRunPenalizedAfterNoTrash",
+  "runnerRemoteTrashFixGateEligible",
+  "runnerRemoteTrashFixGateBlockedByReserve",
+  "runnerRemoteTrashFixGateBlockedByLowCredits",
+  "runnerRemoteTrashFixGateBlockedByHigherThreat",
+  "runnerRemoteTrashFixGateSuspicious",
+  "runnerRepeatRemoteNoTrashFixGateSuspicious",
   "handUseRate",
   "runnerAverageCredits",
   "runnerMedianCredits",
@@ -10805,6 +12584,20 @@ const MATCH_PROGRESSION_METRIC_KEYS: Array<keyof AiMatchProgressionMetrics> = [
   "runsStartedAgainstKnownUnaffordablePath",
   "remoteRunsStartedAgainstKnownUnaffordablePath",
   "centralRunsStartedAgainstKnownUnaffordablePath",
+  "runnerRunStartedAgainstKnownUnpayableFullPath",
+  "runnerRunStartedAgainstKnownUnpayableRemotePath",
+  "runnerRunStartedAgainstKnownUnpayableCentralPath",
+  "runnerKnownPathCanReachAccessFalse",
+  "runnerKnownPathCanBreakNextIceButNotFullPath",
+  "runnerRunAbortedAfterKnownUnpayableLaterIce",
+  "runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce",
+  "runnerRunCostQuoteUnderestimatedFullPath",
+  "runnerRepeatRunOnKnownUnpayablePath",
+  "runnerRepeatRunOnKnownUnpayableRemotePath",
+  "runnerRunCouldOnlyForceRezButNotAccess",
+  "runnerRunAllowedAsFirstProbeUnknownIce",
+  "runnerRunSuppressedAsKnownNoAccess",
+  "runnerRunPenalizedAsKnownNoAccess",
   "runsEndedAfterFirstIceDueToCredits",
   "creditsMissingForKnownPath",
   "knownPathCostAtRunStart",
@@ -11009,6 +12802,52 @@ export function summarizeMatchProgressionMetrics(
   const skippedAffordableRelevantRemoteTrash = actionSequence.filter(
     (entry) => entry.runnerSkippedAffordableRelevantRemoteTrash === true,
   ).length;
+  const repeatRemoteNoTrashMetrics =
+    summarizeRunnerRepeatRemoteNoTrashMetrics(summaries);
+  const runnerRemoteTrashDecisionWindows = actionSequence.filter(
+    (entry) => entry.runnerRemoteAccessWithTrashableCard === true,
+  ).length;
+  const runnerRemoteTrashLegalActions = actionSequence.reduce(
+    (sum, entry) => sum + (entry.runnerRemoteTrashLegalActionCount ?? 0),
+    0,
+  );
+  const runnerRemoteTrashSkipped = actionSequence.filter(
+    (entry) =>
+      entry.runnerRemoteAccessWithTrashableCard === true &&
+      entry.runnerRemoteTrashTaken !== true,
+  ).length;
+  const runnerRemoteTrashSkippedAffordableRelevant =
+    skippedAffordableRelevantRemoteTrash;
+  const runnerRemoteTrashSkippedAssetEconomy = actionSequence.filter(
+    (entry) =>
+      entry.runnerRemoteTrashAssetEconomy === true &&
+      entry.runnerRemoteTrashTaken !== true,
+  ).length;
+  const runnerRemoteTrashSkippedFinitePoolEconomy = actionSequence.filter(
+    (entry) =>
+      entry.runnerRemoteTrashFinitePoolEconomy === true &&
+      entry.runnerRemoteTrashTaken !== true,
+  ).length;
+  const runnerRemoteTrashSkippedWithCorpValueRemaining = actionSequence.filter(
+    (entry) =>
+      (entry.runnerRemoteTrashCorpValueRemaining ?? 0) > 0 &&
+      entry.runnerRemoteTrashTaken !== true,
+  ).length;
+  const runnerRemoteTrashSkippedDueToReserve = actionSequence.filter(
+    (entry) => entry.runnerRemoteTrashFixGateBlockedByReserve === true,
+  ).length;
+  const runnerRemoteTrashSkippedDueToLowCredits = actionSequence.filter(
+    (entry) => entry.runnerRemoteTrashFixGateBlockedByLowCredits === true,
+  ).length;
+  const runnerRemoteTrashSkippedDueToUnknownHigherPriority =
+    actionSequence.filter(
+      (entry) =>
+        entry.runnerRemoteTrashFixGateEligible === true &&
+        entry.runnerRemoteTrashFixGateBlockedByReserve !== true &&
+        entry.runnerRemoteTrashFixGateBlockedByLowCredits !== true &&
+        entry.runnerRemoteTrashFixGateBlockedByHigherThreat !== true &&
+        entry.runnerRemoteTrashTaken !== true,
+    ).length;
   const remoteRunOpportunitiesAgainstAdvancedRemote = actionSequence.filter(
     (entry) => entry.runnerRemoteRunOpportunityAgainstAdvancedRemote === true,
   ).length;
@@ -11042,6 +12881,8 @@ export function summarizeMatchProgressionMetrics(
   const breakerOntologyMetrics = summarizeBreakerOntologyMetrics(summaries);
   const remoteRoleOntologyMetrics =
     summarizeRemoteRoleOntologyMetrics(summaries);
+  const runnerSetupAttributionMetrics =
+    summarizeRunnerSetupAttributionMetrics(summaries);
   const runnerHandUseOpportunityWindows = actionSequence.filter(
     (entry) => entry.runnerHandUseOpportunity === true,
   ).length;
@@ -11067,6 +12908,14 @@ export function summarizeMatchProgressionMetrics(
   const runnerKnownPathRunEntries = runnerRuns.filter(
     (entry) => typeof entry.runKnownPathCostAtStart === "number",
   );
+  const corpFutureRunIceEntries = actionSequence.filter(
+    (entry) => entry.corpFutureRunIceInstalled === true,
+  );
+  const corpScoreTerminalEntries = actionSequence.filter(
+    (entry) => entry.corpScoreTerminalWindow === true,
+  );
+  const corpEconomyBeforeScoreMetrics =
+    summarizeCorpEconomyBeforeScoreMetrics(summaries);
   const hqMemoryEntries = actionSequence.filter(
     (entry) =>
       entry.side === "runner" && typeof entry.hqKnownCards === "number",
@@ -11112,6 +12961,179 @@ export function summarizeMatchProgressionMetrics(
     ...tagPunishWindowMetrics,
     ...breakerOntologyMetrics,
     ...remoteRoleOntologyMetrics,
+    ...runnerSetupAttributionMetrics,
+    ...corpEconomyBeforeScoreMetrics,
+    corpScoreTerminalWindow: corpScoreTerminalEntries.length,
+    corpScoreTerminalWindowScoreLegal: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreTerminalWindowScoreLegal === true,
+    ).length,
+    corpScoreTerminalWindowAdvanceToScoreLegal: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreTerminalWindowAdvanceToScoreLegal === true,
+    ).length,
+    corpScoreTerminalWindowAgendaInstallLegal: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreTerminalWindowAgendaInstallLegal === true,
+    ).length,
+    corpScoreTerminalWindowProtectedRemoteReady:
+      corpScoreTerminalEntries.filter(
+        (entry) => entry.corpScoreTerminalWindowProtectedRemoteReady === true,
+      ).length,
+    corpScoreTerminalWindowRemoteContestLow: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreTerminalWindowRemoteContestLow === true,
+    ).length,
+    corpScoreTerminalWindowCreditsSufficient: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreTerminalWindowCreditsSufficient === true,
+    ).length,
+    corpScoreTerminalWindowRunnerAccessThreatHigh:
+      corpScoreTerminalEntries.filter(
+        (entry) => entry.corpScoreTerminalWindowRunnerAccessThreatHigh === true,
+      ).length,
+    corpScoreTerminalScoreTaken: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreTerminalScoreTaken === true,
+    ).length,
+    corpScoreTerminalAdvanceTaken: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreTerminalAdvanceTaken === true,
+    ).length,
+    corpScoreTerminalAgendaInstalled: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreTerminalAgendaInstalled === true,
+    ).length,
+    corpScoreTerminalSkipped: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreTerminalSkipped === true,
+    ).length,
+    corpScoreTerminalSkippedForProtection: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreTerminalSkippedForProtection === true,
+    ).length,
+    corpScoreTerminalSkippedForEconomy: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreTerminalSkippedForEconomy === true,
+    ).length,
+    corpScoreTerminalSkippedForDraw: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreTerminalSkippedForDraw === true,
+    ).length,
+    corpScoreTerminalSkippedForInstallIce: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreTerminalSkippedForInstallIce === true,
+    ).length,
+    corpScoreTerminalSkippedForInstallAssetOrUpgrade:
+      corpScoreTerminalEntries.filter(
+        (entry) =>
+          entry.corpScoreTerminalSkippedForInstallAssetOrUpgrade === true,
+      ).length,
+    corpScoreTerminalSkippedForHqProtection: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreTerminalSkippedForHqProtection === true,
+    ).length,
+    corpScoreTerminalSkippedForRndProtection: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreTerminalSkippedForRndProtection === true,
+    ).length,
+    corpScoreTerminalSkippedForRemotePortfolio: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreTerminalSkippedForRemotePortfolio === true,
+    ).length,
+    corpScoreTerminalSkippedForUnknownHigherPriority:
+      corpScoreTerminalEntries.filter(
+        (entry) =>
+          entry.corpScoreTerminalSkippedForUnknownHigherPriority === true,
+      ).length,
+    ...corpScoreTerminalFollowupMetrics(actionSequence),
+    corpScoreConversionFixGateEligible: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreConversionFixGateEligible === true,
+    ).length,
+    corpScoreConversionFixGateBlockedByCheapContest:
+      corpScoreTerminalEntries.filter(
+        (entry) =>
+          entry.corpScoreConversionFixGateBlockedByCheapContest === true,
+      ).length,
+    corpScoreConversionFixGateBlockedByCredits: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreConversionFixGateBlockedByCredits === true,
+    ).length,
+    corpScoreConversionFixGateBlockedByRunnerContest:
+      corpScoreTerminalEntries.filter(
+        (entry) =>
+          entry.corpScoreConversionFixGateBlockedByRunnerContest === true,
+      ).length,
+    corpScoreConversionFixGateBlockedByHqThreat:
+      corpScoreTerminalEntries.filter(
+        (entry) => entry.corpScoreConversionFixGateBlockedByHqThreat === true,
+      ).length,
+    corpScoreConversionFixGateSuspiciousProtectionLoop:
+      corpScoreTerminalEntries.filter(
+        (entry) =>
+          entry.corpScoreConversionFixGateSuspiciousProtectionLoop === true,
+      ).length,
+    corpScoreConversionFixGateSuspiciousEconomyLoop:
+      corpScoreTerminalEntries.filter(
+        (entry) =>
+          entry.corpScoreConversionFixGateSuspiciousEconomyLoop === true,
+      ).length,
+    corpScoreConversionFixGateSuspiciousDraw: corpScoreTerminalEntries.filter(
+      (entry) => entry.corpScoreConversionFixGateSuspiciousDraw === true,
+    ).length,
+    corpScoreConversionFixGateSuspiciousRemotePortfolio:
+      corpScoreTerminalEntries.filter(
+        (entry) =>
+          entry.corpScoreConversionFixGateSuspiciousRemotePortfolio === true,
+      ).length,
+    corpScoreConversionFixGateSuspiciousUnknown:
+      corpScoreTerminalEntries.filter(
+        (entry) => entry.corpScoreConversionFixGateSuspiciousUnknown === true,
+      ).length,
+    corpFutureRunIceInstallOpportunities: actionSequence.filter(
+      (entry) => entry.corpFutureRunIceInstallOpportunity === true,
+    ).length,
+    corpFutureRunIceInstalled: corpFutureRunIceEntries.length,
+    corpFutureRunIceInstalledAsInnermost: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpFutureRunIceInstalledAsInnermost === true,
+    ).length,
+    corpFutureRunIceInstalledAsOutermost: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpFutureRunIceInstalledAsOutermost === true,
+    ).length,
+    corpFutureRunIceInstalledWithLaterIce: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpFutureRunIceInstalledWithLaterIce === true,
+    ).length,
+    corpFutureRunIceInstalledWithoutLaterIce: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpFutureRunIceInstalledWithoutLaterIce === true,
+    ).length,
+    corpFutureRunIceInstalledOnEmptyServer: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpFutureRunIceInstalledOnEmptyServer === true,
+    ).length,
+    corpFutureRunIceInstalledFirstOnEmptyServer: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpFutureRunIceInstalledFirstOnEmptyServer === true,
+    ).length,
+    corpFutureRunIceInstalledAfterInnerIceExists:
+      corpFutureRunIceEntries.filter(
+        (entry) => entry.corpFutureRunIceInstalledAfterInnerIceExists === true,
+      ).length,
+    corpFutureRunIceInstalledAsDeadEffect: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpFutureRunIceInstalledAsDeadEffect === true,
+    ).length,
+    corpFutureRunIceInstalledAsLiveEffect: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpFutureRunIceInstalledAsLiveEffect === true,
+    ).length,
+    corpNextIceEffectInstalledLast: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpNextIceEffectInstalledLast === true,
+    ).length,
+    corpIceOrderFutureEffectDead: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpIceOrderFutureEffectDead === true,
+    ).length,
+    corpIceOrderFutureEffectLive: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpIceOrderFutureEffectLive === true,
+    ).length,
+    corpMultiIceInstallOrderFutureEffectDead:
+      countCorpMultiIceInstallOrderFutureEffectDead(actionSequence),
+    corpMultiIceInstallOrderOptimized:
+      countCorpMultiIceInstallOrderOptimized(actionSequence),
+    corpBallAndChainInstalledInnermost: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpBallAndChainInstalledInnermost === true,
+    ).length,
+    corpBallAndChainInstalledWithoutLaterIce: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpBallAndChainInstalledWithoutLaterIce === true,
+    ).length,
+    corpBallAndChainInstalledWithLaterIce: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpBallAndChainInstalledWithLaterIce === true,
+    ).length,
+    corpCanisInstalledWithoutLaterIce: corpFutureRunIceEntries.filter(
+      (entry) => entry.corpCanisInstalledWithoutLaterIce === true,
+    ).length,
+    corpBolterOrDataDartsInstalledWithoutNextIce:
+      corpFutureRunIceEntries.filter(
+        (entry) => entry.corpBolterOrDataDartsInstalledWithoutNextIce === true,
+      ).length,
     advancedAgendaSteals,
     advancedAgendaStealsFromRemote,
     advancedAgendaStealsFromCentral,
@@ -11799,11 +13821,407 @@ export function summarizeMatchProgressionMetrics(
     runnerEconomyActionsTaken: actionSequence.filter(
       (entry) => entry.runnerEconomyActionTaken === true,
     ).length,
+    runnerEconomyDecisionWindows: actionSequence.filter(
+      (entry) => entry.runnerEconomyDecisionWindow === true,
+    ).length,
+    runnerLegalEconomyActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalEconomyActions ?? 0),
+      0,
+    ),
+    runnerLegalBurstEconomyActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalBurstEconomyActions ?? 0),
+      0,
+    ),
+    runnerLegalActionEconomyActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalActionEconomyActions ?? 0),
+      0,
+    ),
+    runnerLegalFinitePoolEconomyActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalFinitePoolEconomyActions ?? 0),
+      0,
+    ),
+    runnerLegalLoanDebtEconomyActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalLoanDebtEconomyActions ?? 0),
+      0,
+    ),
+    runnerLegalRecurringEconomyActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalRecurringEconomyActions ?? 0),
+      0,
+    ),
+    runnerLegalResourceEconomyActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalResourceEconomyActions ?? 0),
+      0,
+    ),
+    runnerLegalHardwareEconomyActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalHardwareEconomyActions ?? 0),
+      0,
+    ),
+    runnerEconomyTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyTaken",
+    ),
+    runnerEconomySkipped: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkipped",
+    ),
+    runnerEconomySkippedWhileLowCredits: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedWhileLowCredits",
+    ),
+    runnerEconomySkippedWhileKnownUnaffordablePath:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerEconomySkippedWhileKnownUnaffordablePath",
+      ),
+    runnerEconomySkippedForPressure: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForPressure",
+    ),
+    runnerEconomySkippedForRemoteContest: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForRemoteContest",
+    ),
+    runnerEconomySkippedForSetup: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForSetup",
+    ),
+    runnerEconomySkippedForDraw: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForDraw",
+    ),
+    runnerEconomySkippedForRun: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForRun",
+    ),
+    runnerEconomySkippedForInstallBreaker: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForInstallBreaker",
+    ),
+    runnerEconomySkippedForTrash: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForTrash",
+    ),
+    runnerEconomySkippedForEndTurn: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForEndTurn",
+    ),
+    runnerEconomySkippedForUnknownHigherPriority: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedForUnknownHigherPriority",
+    ),
+    runnerLowCreditDecisionWindows: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerLowCreditDecisionWindow",
+    ),
+    runnerCreditStarvedWithLegalEconomy: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerCreditStarvedWithLegalEconomy",
+    ),
+    runnerCreditStarvedEconomyTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerCreditStarvedEconomyTaken",
+    ),
+    runnerCreditStarvedEconomySkipped: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerCreditStarvedEconomySkipped",
+    ),
+    runnerKnownUnaffordablePathWithLegalEconomy: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerKnownUnaffordablePathWithLegalEconomy",
+    ),
+    runnerEconomyTakenToReachRunReserve: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyTakenToReachRunReserve",
+    ),
+    runnerEconomyTakenButStillBelowReserve: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyTakenButStillBelowReserve",
+    ),
+    runnerEconomySkippedThenUnaffordableRun: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomySkippedThenUnaffordableRun",
+    ),
+    runnerRunStartedBelowKnownPathCost: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerRunStartedBelowKnownPathCost",
+    ),
+    runnerRunStartedAfterSkippingEconomy: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerRunStartedAfterSkippingEconomy",
+    ),
+    runnerEconomyChosenOverFreshCentralPressure: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChosenOverFreshCentralPressure",
+    ),
+    runnerEconomyChosenOverRemoteContest: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChosenOverRemoteContest",
+    ),
+    runnerEconomyChosenOverBreakerInstall: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChosenOverBreakerInstall",
+    ),
+    runnerEconomyChosenOverCriticalSetup: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChosenOverCriticalSetup",
+    ),
+    runnerEconomyChosenOverRelevantTrash: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChosenOverRelevantTrash",
+    ),
+    runnerEconomyChosenWhileRich: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChosenWhileRich",
+    ),
+    runnerEconomyChosenWhilePressureReady: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChosenWhilePressureReady",
+    ),
+    runnerEconomyChosenAsReserveSetup: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChosenAsReserveSetup",
+    ),
+    runnerEconomyChoicePlausible: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChoicePlausible",
+    ),
+    runnerEconomyChoiceSuspicious: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyChoiceSuspicious",
+    ),
+    runnerFinitePoolEconomySeen: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerFinitePoolEconomySeen",
+    ),
+    runnerFinitePoolEconomyTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerFinitePoolEconomyTaken",
+    ),
+    runnerFinitePoolEconomySkipped: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerFinitePoolEconomySkipped",
+    ),
+    runnerFinitePoolEconomyTakenWhilePoolLikelyDepleted:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerFinitePoolEconomyTakenWhilePoolLikelyDepleted",
+      ),
+    runnerDebtEconomySeen: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerDebtEconomySeen",
+    ),
+    runnerDebtEconomyTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerDebtEconomyTaken",
+    ),
+    runnerDebtEconomySkipped: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerDebtEconomySkipped",
+    ),
+    runnerDebtEconomyTakenWithoutNeed: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerDebtEconomyTakenWithoutNeed",
+    ),
+    runnerEconomyWithDownsideSeen: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyWithDownsideSeen",
+    ),
+    runnerEconomyWithDownsideTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyWithDownsideTaken",
+    ),
+    runnerDelayedPenaltyEconomyTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerDelayedPenaltyEconomyTaken",
+    ),
+    runnerMemoryBottleneckDecisionWindows: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerMemoryBottleneckDecisionWindow",
+    ),
+    runnerHandSizeBottleneckDecisionWindows: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerHandSizeBottleneckDecisionWindow",
+    ),
+    runnerLegalMemoryHardwareActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalMemoryHardwareActions ?? 0),
+      0,
+    ),
+    runnerLegalHandSizeActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalHandSizeActions ?? 0),
+      0,
+    ),
+    runnerMemoryHardwareTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerMemoryHardwareTaken",
+    ),
+    runnerHandSizeSupportTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerHandSizeSupportTaken",
+    ),
+    runnerMemorySupportSkippedWhileGripHasPrograms:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerMemorySupportSkippedWhileGripHasPrograms",
+      ),
+    runnerHandSizeSupportSkippedWhileDamageRiskVisible:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerHandSizeSupportSkippedWhileDamageRiskVisible",
+      ),
+    runnerHardwareSetupChosenOverEconomy: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerHardwareSetupChosenOverEconomy",
+    ),
+    runnerHardwareSetupChosenOverPressure: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerHardwareSetupChosenOverPressure",
+    ),
+    runnerHandSizeFactUsedForDiagnosis: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerHandSizeFactUsedForDiagnosis",
+    ),
+    runnerLegalSearchActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalSearchActions ?? 0),
+      0,
+    ),
+    runnerLegalRecoveryActions: actionSequence.reduce(
+      (sum, entry) => sum + (entry.runnerLegalRecoveryActions ?? 0),
+      0,
+    ),
+    runnerSearchTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerSearchTaken",
+    ),
+    runnerRecoveryTaken: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerRecoveryTaken",
+    ),
+    runnerSearchSkippedWhileMissingBreakerCoverage:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerSearchSkippedWhileMissingBreakerCoverage",
+      ),
+    runnerRecoverySkippedWhileMissingBreakerCoverage:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerRecoverySkippedWhileMissingBreakerCoverage",
+      ),
+    runnerSearchTakenForBreakerCoverage: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerSearchTakenForBreakerCoverage",
+    ),
+    runnerRecoveryTakenForBreakerCoverage: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerRecoveryTakenForBreakerCoverage",
+    ),
+    runnerSearchOrRecoveryWindowWithNoInstallFollowup:
+      countRunnerSearchRecoveryNoInstallFollowup(actionSequence),
+    runnerSearchRecoveryChosenOverEconomy: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerSearchRecoveryChosenOverEconomy",
+    ),
+    runnerSearchRecoveryChosenOverPressure: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerSearchRecoveryChosenOverPressure",
+    ),
+    runnerEconomyFixGateEligibleStarvedSkip: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyFixGateEligibleStarvedSkip",
+    ),
+    runnerEconomyFixGateSuspiciousRichEconomy: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerEconomyFixGateSuspiciousRichEconomy",
+    ),
+    runnerEconomyFixGateSuspiciousEconomyOverPressure:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerEconomyFixGateSuspiciousEconomyOverPressure",
+      ),
+    runnerEconomyFixGateSuspiciousEconomyOverRemoteContest:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerEconomyFixGateSuspiciousEconomyOverRemoteContest",
+      ),
+    runnerEconomyFixGateSuspiciousDebtEconomyWithoutNeed:
+      countRunnerEconomySetupMetric(
+        actionSequence,
+        "runnerEconomyFixGateSuspiciousDebtEconomyWithoutNeed",
+      ),
+    runnerSetupFixGateEligibleMemorySkip: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerSetupFixGateEligibleMemorySkip",
+    ),
+    runnerSetupFixGateEligibleSearchRecoverySkip: countRunnerEconomySetupMetric(
+      actionSequence,
+      "runnerSetupFixGateEligibleSearchRecoverySkip",
+    ),
     runnerRigInstallActions: actionSequence.filter(
       (entry) => entry.runnerRigInstallAction === true,
     ).length,
     runnerRemoteTrashOpportunities,
     runnerRemoteTrashTaken,
+    runnerRemoteTrashDecisionWindows,
+    runnerRemoteTrashLegalActions,
+    runnerRemoteTrashSkipped,
+    runnerRemoteTrashSkippedAffordableRelevant,
+    runnerRemoteTrashSkippedAssetEconomy,
+    runnerRemoteTrashSkippedFinitePoolEconomy,
+    runnerRemoteTrashSkippedWithCorpValueRemaining,
+    runnerRemoteTrashSkippedDueToReserve,
+    runnerRemoteTrashSkippedDueToLowCredits,
+    runnerRemoteTrashSkippedDueToUnknownHigherPriority,
+    runnerBbsWhisperingCampaignAccessed: actionSequence.filter(
+      (entry) => entry.runnerBbsWhisperingCampaignAccessed === true,
+    ).length,
+    runnerBbsWhisperingCampaignTrashLegal: actionSequence.filter(
+      (entry) => entry.runnerBbsWhisperingCampaignTrashLegal === true,
+    ).length,
+    runnerBbsWhisperingCampaignTrashTaken: actionSequence.filter(
+      (entry) => entry.runnerBbsWhisperingCampaignTrashTaken === true,
+    ).length,
+    runnerBbsWhisperingCampaignTrashSkipped: actionSequence.filter(
+      (entry) => entry.runnerBbsWhisperingCampaignTrashSkipped === true,
+    ).length,
+    runnerBbsWhisperingCampaignTrashSkippedAffordable: actionSequence.filter(
+      (entry) =>
+        entry.runnerBbsWhisperingCampaignTrashSkippedAffordable === true,
+    ).length,
+    runnerBbsWhisperingCampaignTrashSkippedWithCreditsRemaining:
+      actionSequence.filter(
+        (entry) =>
+          entry.runnerBbsWhisperingCampaignTrashSkipped === true &&
+          (entry.runnerRemoteTrashCorpValueRemaining ?? 0) > 0,
+      ).length,
+    runnerFinitePoolAssetAccessed: actionSequence.filter(
+      (entry) => entry.runnerFinitePoolAssetAccessed === true,
+    ).length,
+    runnerFinitePoolAssetTrashLegal: actionSequence.filter(
+      (entry) => entry.runnerFinitePoolAssetTrashLegal === true,
+    ).length,
+    runnerFinitePoolAssetTrashTaken: actionSequence.filter(
+      (entry) => entry.runnerFinitePoolAssetTrashTaken === true,
+    ).length,
+    runnerFinitePoolAssetTrashSkippedAffordable: actionSequence.filter(
+      (entry) => entry.runnerFinitePoolAssetTrashSkippedAffordable === true,
+    ).length,
+    ...repeatRemoteNoTrashMetrics,
+    runnerRemoteTrashFixGateEligible: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashFixGateEligible === true,
+    ).length,
+    runnerRemoteTrashFixGateBlockedByReserve: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashFixGateBlockedByReserve === true,
+    ).length,
+    runnerRemoteTrashFixGateBlockedByLowCredits: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashFixGateBlockedByLowCredits === true,
+    ).length,
+    runnerRemoteTrashFixGateBlockedByHigherThreat: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashFixGateBlockedByHigherThreat === true,
+    ).length,
+    runnerRemoteTrashFixGateSuspicious: actionSequence.filter(
+      (entry) => entry.runnerRemoteTrashFixGateSuspicious === true,
+    ).length,
+    runnerRepeatRemoteNoTrashFixGateSuspicious:
+      repeatRemoteNoTrashMetrics.runnerRepeatRemoteNoTrashFixGateSuspicious,
     handUseRate:
       runnerHandUseOpportunityWindows > 0
         ? round(runnerHandUseActionsTaken / runnerHandUseOpportunityWindows)
@@ -11897,6 +14315,50 @@ export function summarizeMatchProgressionMetrics(
     ).length,
     centralRunsStartedAgainstKnownUnaffordablePath: runnerRuns.filter(
       (entry) => entry.centralRunStartedAgainstKnownUnaffordablePath === true,
+    ).length,
+    runnerRunStartedAgainstKnownUnpayableFullPath: runnerRuns.filter(
+      (entry) => entry.runnerRunStartedAgainstKnownUnpayableFullPath === true,
+    ).length,
+    runnerRunStartedAgainstKnownUnpayableRemotePath: runnerRuns.filter(
+      (entry) => entry.runnerRunStartedAgainstKnownUnpayableRemotePath === true,
+    ).length,
+    runnerRunStartedAgainstKnownUnpayableCentralPath: runnerRuns.filter(
+      (entry) =>
+        entry.runnerRunStartedAgainstKnownUnpayableCentralPath === true,
+    ).length,
+    runnerKnownPathCanReachAccessFalse: actionSequence.filter(
+      (entry) => entry.runnerKnownPathCanReachAccessFalse === true,
+    ).length,
+    runnerKnownPathCanBreakNextIceButNotFullPath: actionSequence.filter(
+      (entry) => entry.runnerKnownPathCanBreakNextIceButNotFullPath === true,
+    ).length,
+    runnerRunAbortedAfterKnownUnpayableLaterIce: actionSequence.filter(
+      (entry) => entry.runnerRunAbortedAfterKnownUnpayableLaterIce === true,
+    ).length,
+    runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce: runnerRuns.filter(
+      (entry) =>
+        entry.runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce === true,
+    ).length,
+    runnerRunCostQuoteUnderestimatedFullPath: runnerRuns.filter(
+      (entry) => entry.runnerRunCostQuoteUnderestimatedFullPath === true,
+    ).length,
+    runnerRepeatRunOnKnownUnpayablePath: runnerRuns.filter(
+      (entry) => entry.runnerRepeatRunOnKnownUnpayablePath === true,
+    ).length,
+    runnerRepeatRunOnKnownUnpayableRemotePath: runnerRuns.filter(
+      (entry) => entry.runnerRepeatRunOnKnownUnpayableRemotePath === true,
+    ).length,
+    runnerRunCouldOnlyForceRezButNotAccess: runnerRuns.filter(
+      (entry) => entry.runnerRunCouldOnlyForceRezButNotAccess === true,
+    ).length,
+    runnerRunAllowedAsFirstProbeUnknownIce: actionSequence.filter(
+      (entry) => entry.runnerRunAllowedAsFirstProbeUnknownIce === true,
+    ).length,
+    runnerRunSuppressedAsKnownNoAccess: actionSequence.filter(
+      (entry) => entry.runnerRunSuppressedAsKnownNoAccess === true,
+    ).length,
+    runnerRunPenalizedAsKnownNoAccess: runnerRuns.filter(
+      (entry) => entry.runnerRunPenalizedAsKnownNoAccess === true,
     ).length,
     runsEndedAfterFirstIceDueToCredits: actionSequence.filter(
       (entry) => entry.runEndedAfterFirstIceDueToCredits === true,
@@ -12115,6 +14577,84 @@ function averageRunnerContestRisk(
 }
 
 type PlanConversionActionEntry = AiSimulationSummary["actionSequence"][number];
+
+function summarizeRunnerRepeatRemoteNoTrashMetrics(
+  summaries: AiSimulationSummary[],
+): Pick<
+  AiMatchProgressionMetrics,
+  | "runnerRepeatAccessKnownRemote"
+  | "runnerRepeatAccessKnownTrashableRemote"
+  | "runnerRepeatAccessKnownTrashableRemoteWithoutTrash"
+  | "runnerRepeatRunOnSameRemoteAfterDecliningTrash"
+  | "runnerRepeatRunOnSameRemoteNoNewInfo"
+  | "runnerRepeatRemoteAccessNoProgress"
+  | "runnerRepeatRemoteRunSuppressedAfterNoTrash"
+  | "runnerRepeatRemoteRunPenalizedAfterNoTrash"
+  | "runnerRepeatRemoteNoTrashFixGateSuspicious"
+> {
+  const metrics = {
+    runnerRepeatAccessKnownRemote: 0,
+    runnerRepeatAccessKnownTrashableRemote: 0,
+    runnerRepeatAccessKnownTrashableRemoteWithoutTrash: 0,
+    runnerRepeatRunOnSameRemoteAfterDecliningTrash: 0,
+    runnerRepeatRunOnSameRemoteNoNewInfo: 0,
+    runnerRepeatRemoteAccessNoProgress: 0,
+    runnerRepeatRemoteRunSuppressedAfterNoTrash: 0,
+    runnerRepeatRemoteRunPenalizedAfterNoTrash: 0,
+    runnerRepeatRemoteNoTrashFixGateSuspicious: 0,
+  };
+  for (const summary of summaries) {
+    let declinedTrashRemote: string | undefined;
+    for (const entry of progressionEntriesWithRunTargets(
+      summary.actionSequence,
+    )) {
+      if (entry.side !== "runner") continue;
+      if (
+        entry.runnerRemoteAccessWithRelevantTrashableCard === true &&
+        isRemoteServerTarget(entry.targetServerId)
+      ) {
+        metrics.runnerRepeatAccessKnownRemote += 1;
+        if (entry.runnerRemoteAccessWithTrashableCard === true) {
+          metrics.runnerRepeatAccessKnownTrashableRemote += 1;
+        }
+        if (entry.runnerRemoteTrashTaken === true) {
+          declinedTrashRemote = undefined;
+        } else if (entry.runnerRemoteAccessWithTrashableCard === true) {
+          metrics.runnerRepeatAccessKnownTrashableRemoteWithoutTrash += 1;
+          declinedTrashRemote = entry.targetServerId;
+        }
+      }
+      if (
+        entry.actionType === "start_run" &&
+        entry.targetServerId &&
+        entry.targetServerId === declinedTrashRemote
+      ) {
+        metrics.runnerRepeatRunOnSameRemoteAfterDecliningTrash += 1;
+        metrics.runnerRepeatRunOnSameRemoteNoNewInfo += 1;
+        metrics.runnerRepeatRemoteAccessNoProgress += 1;
+        metrics.runnerRepeatRemoteNoTrashFixGateSuspicious += 1;
+      }
+      if (
+        hasEvidenceFlag(
+          entry,
+          "runner_repeat_remote_after_declined_trash_penalized:true",
+        )
+      ) {
+        metrics.runnerRepeatRemoteRunPenalizedAfterNoTrash += 1;
+      }
+      if (
+        declinedTrashRemote &&
+        entry.actionType !== "start_run" &&
+        entry.actionType !== "decline_trash" &&
+        entry.runnerRemoteTrashTaken !== true
+      ) {
+        metrics.runnerRepeatRemoteRunSuppressedAfterNoTrash += 1;
+        declinedTrashRemote = undefined;
+      }
+    }
+  }
+  return metrics;
+}
 
 function summarizePlanConversionMetrics(
   summaries: AiSimulationSummary[],
@@ -13724,6 +16264,1086 @@ function countRunnerPressureWithinOwnActions(
   }).length;
 }
 
+function countRunnerEconomySetupMetric(
+  sequence: PlanConversionActionEntry[],
+  metric: keyof PlanConversionActionEntry,
+): number {
+  return sequence.filter((entry) => entry[metric] === true).length;
+}
+
+function countRunnerSearchRecoveryNoInstallFollowup(
+  sequence: PlanConversionActionEntry[],
+): number {
+  return sequence.filter((entry, index) => {
+    if (
+      entry.side !== "runner" ||
+      (entry.runnerSearchTaken !== true && entry.runnerRecoveryTaken !== true)
+    )
+      return false;
+    let ownActions = 0;
+    for (
+      let candidateIndex = index + 1;
+      candidateIndex < sequence.length;
+      candidateIndex += 1
+    ) {
+      const candidate = sequence[candidateIndex]!;
+      if (candidate.side !== "runner") continue;
+      ownActions += 1;
+      if (candidate.actionType === "install_card") return false;
+      if (candidate.actionType === "start_run") return false;
+      if (ownActions >= 3) return true;
+    }
+    return ownActions > 0;
+  }).length;
+}
+
+type RunnerSetupAttributionMetricKey =
+  | "runnerStarvedEconomySkipWindows"
+  | "runnerStarvedEconomySkipChosenRun"
+  | "runnerStarvedEconomySkipChosenDraw"
+  | "runnerStarvedEconomySkipChosenInstall"
+  | "runnerStarvedEconomySkipChosenSearchRecovery"
+  | "runnerStarvedEconomySkipChosenTrash"
+  | "runnerStarvedEconomySkipChosenEndTurn"
+  | "runnerStarvedEconomySkipChosenUnknown"
+  | "runnerStarvedEconomySkipThenUnaffordableRun"
+  | "runnerStarvedEconomySkipThenFailedRun"
+  | "runnerStarvedEconomySkipThenNoProgress"
+  | "runnerStarvedEconomySkipThenEconomyNextDecision"
+  | "runnerStarvedEconomySkipThenReserveRecovered"
+  | "runnerStarvedEconomySkipThenProgress"
+  | "runnerStarvedEconomySkipThenActionLimit"
+  | "runnerStarvedEconomySkipPlausiblePressure"
+  | "runnerStarvedEconomySkipPlausibleRemoteContest"
+  | "runnerStarvedEconomySkipPlausibleCriticalSetup"
+  | "runnerStarvedEconomySkipPlausibleTrash"
+  | "runnerStarvedEconomySkipSuspiciousLowValueRun"
+  | "runnerStarvedEconomySkipSuspiciousDraw"
+  | "runnerStarvedEconomySkipSuspiciousEndTurn"
+  | "runnerStarvedEconomySkipSuspiciousUnknown"
+  | "runnerEconomyFixGateAttributionEligible"
+  | "runnerEconomyFixGateAttributionBlocked"
+  | "runnerEconomyFixGateAttributionSuspicious"
+  | "runnerSearchRecoveryFixGateWindows"
+  | "runnerSearchRecoveryFixGateLegalSearch"
+  | "runnerSearchRecoveryFixGateLegalRecovery"
+  | "runnerSearchRecoveryFixGateMissingWall"
+  | "runnerSearchRecoveryFixGateMissingCodeGate"
+  | "runnerSearchRecoveryFixGateMissingSentry"
+  | "runnerSearchRecoveryFixGateMissingUniversal"
+  | "runnerSearchRecoveryFixGateMissingSpecial"
+  | "runnerSearchRecoveryAttributionWindows"
+  | "runnerSearchRecoveryAttributionLegalSearch"
+  | "runnerSearchRecoveryAttributionLegalRecovery"
+  | "runnerSearchRecoveryAttributionMissingWall"
+  | "runnerSearchRecoveryAttributionMissingCodeGate"
+  | "runnerSearchRecoveryAttributionMissingSentry"
+  | "runnerSearchRecoveryAttributionMissingUniversal"
+  | "runnerSearchRecoveryAttributionMissingSpecial"
+  | "runnerSearchRecoveryAttributionSearchTaken"
+  | "runnerSearchRecoveryAttributionRecoveryTaken"
+  | "runnerSearchRecoveryAttributionSkipped"
+  | "runnerSearchRecoverySkipChosenEconomy"
+  | "runnerSearchRecoverySkipChosenRun"
+  | "runnerSearchRecoverySkipChosenDraw"
+  | "runnerSearchRecoverySkipChosenInstall"
+  | "runnerSearchRecoverySkipChosenTrash"
+  | "runnerSearchRecoverySkipChosenEndTurn"
+  | "runnerSearchRecoverySkipChosenUnknown"
+  | "runnerSearchRecoverySkipThenInstallFollowup"
+  | "runnerSearchRecoverySkipThenCoverageResolved"
+  | "runnerSearchRecoverySkipThenCoverageStillMissing"
+  | "runnerSearchRecoverySkipThenKnownUnaffordableRun"
+  | "runnerSearchRecoverySkipThenNoProgress"
+  | "runnerSearchRecoverySkipThenActionLimit"
+  | "runnerSearchRecoveryWindowWithNoInstallFollowup"
+  | "runnerSearchRecoverySkipPlausibleEconomyReserve"
+  | "runnerSearchRecoverySkipPlausiblePressure"
+  | "runnerSearchRecoverySkipPlausibleRemoteContest"
+  | "runnerSearchRecoverySkipPlausibleCurrentRigEnough"
+  | "runnerSearchRecoverySkipSuspiciousCoverageStillMissing"
+  | "runnerSearchRecoverySkipSuspiciousNoProgress"
+  | "runnerSearchRecoverySkipSuspiciousKnownUnbreakableRun"
+  | "runnerSearchRecoverySkipUnclassified"
+  | "runnerSearchRecoveryFixGateAttributionEligible"
+  | "runnerSearchRecoveryFixGateAttributionBlocked"
+  | "runnerSearchRecoveryFixGateAttributionSuspicious"
+  | "runnerMemoryFixGateWindows"
+  | "runnerHandSizeFixGateWindows"
+  | "runnerMemoryFixGateLegalSupport"
+  | "runnerHandSizeFixGateLegalSupport"
+  | "runnerMemoryFixGateSkipped"
+  | "runnerHandSizeFixGateSkipped"
+  | "runnerMemoryAttributionWindows"
+  | "runnerHandSizeAttributionWindows"
+  | "runnerMemoryAttributionLegalSupport"
+  | "runnerHandSizeAttributionLegalSupport"
+  | "runnerMemoryAttributionSupportTaken"
+  | "runnerHandSizeAttributionSupportTaken"
+  | "runnerMemoryAttributionSkipped"
+  | "runnerHandSizeAttributionSkipped"
+  | "runnerMemorySkipChosenEconomy"
+  | "runnerMemorySkipChosenRun"
+  | "runnerMemorySkipChosenDraw"
+  | "runnerMemorySkipChosenInstallNonMemory"
+  | "runnerMemorySkipChosenSearchRecovery"
+  | "runnerMemorySkipChosenEndTurn"
+  | "runnerMemorySkipChosenUnknown"
+  | "runnerMemorySkipThenMemoryInstalled"
+  | "runnerMemorySkipThenProgramInstallBlocked"
+  | "runnerMemorySkipThenCoverageStillMissing"
+  | "runnerMemorySkipThenNoProgress"
+  | "runnerMemorySkipThenActionLimit"
+  | "runnerHandSizeSkipThenDamageRiskWindow"
+  | "runnerHandSizeSkipThenDiscardOrDamagePressure"
+  | "runnerMemorySkipPlausibleEconomyReserve"
+  | "runnerMemorySkipPlausiblePressure"
+  | "runnerMemorySkipPlausibleRemoteContest"
+  | "runnerMemorySkipPlausibleNoProgramPressure"
+  | "runnerMemorySkipSuspiciousRigBlocked"
+  | "runnerMemorySkipSuspiciousCoverageStillMissing"
+  | "runnerMemorySkipSuspiciousNoProgress"
+  | "runnerMemorySkipUnclassified"
+  | "runnerMemoryFixGateAttributionEligible"
+  | "runnerMemoryFixGateAttributionBlocked"
+  | "runnerMemoryFixGateAttributionSuspicious"
+  | "runnerHandSizeFixGateAttributionEligible"
+  | "runnerHandSizeFixGateAttributionBlocked"
+  | "runnerHandSizeFixGateAttributionSuspicious"
+  | "runnerSearchRecoveryNormalizedWindows"
+  | "runnerSearchRecoveryNormalizedTaken"
+  | "runnerSearchRecoveryNormalizedSkipped"
+  | "runnerSearchRecoveryNormalizedBlocked"
+  | "runnerSearchRecoveryNormalizedBlockedByPressureOrRemoteContest"
+  | "runnerSearchRecoveryNormalizedBlockedByEconomyOrReserve"
+  | "runnerSearchRecoveryNormalizedBlockedByCurrentRigEnough"
+  | "runnerSearchRecoveryNormalizedBlockedByNoInstallFollowup"
+  | "runnerSearchRecoveryNormalizedMetricArtifact"
+  | "runnerSearchRecoveryNormalizedUnclassified"
+  | "runnerSearchRecoveryNormalizedSuspicious"
+  | "runnerSearchRecoveryNormalizedTrueMissedCoverage"
+  | "runnerSearchRecoveryNormalizedFixGateEligible"
+  | "runnerMemoryNormalizedWindows"
+  | "runnerMemoryNormalizedTaken"
+  | "runnerMemoryNormalizedSkipped"
+  | "runnerMemoryNormalizedBlocked"
+  | "runnerMemoryNormalizedBlockedByPressureOrRemoteContest"
+  | "runnerMemoryNormalizedBlockedByEconomyOrReserve"
+  | "runnerMemoryNormalizedBlockedByNoProgramPressure"
+  | "runnerMemoryNormalizedMetricArtifact"
+  | "runnerMemoryNormalizedUnclassified"
+  | "runnerMemoryNormalizedSuspicious"
+  | "runnerMemoryNormalizedTrueRigBottleneck"
+  | "runnerMemoryNormalizedFixGateEligible"
+  | "runnerHandSizeNormalizedWindows"
+  | "runnerHandSizeNormalizedTaken"
+  | "runnerHandSizeNormalizedSkipped"
+  | "runnerHandSizeNormalizedBlocked"
+  | "runnerHandSizeNormalizedSuspicious"
+  | "runnerHandSizeNormalizedMetricArtifact"
+  | "runnerSetupNormalizedWindows"
+  | "runnerSetupNormalizedSuspicious"
+  | "runnerSetupNormalizedBlocked"
+  | "runnerSetupNormalizedMetricArtifact"
+  | "runnerSetupNormalizedUnclassified"
+  | "runnerSetupNormalizedFixGateEligible"
+  | "runnerSetupNormalizedRecommendedFixKindNone"
+  | "runnerSetupNormalizedRecommendedFixKindSearchRecovery"
+  | "runnerSetupNormalizedRecommendedFixKindMemory"
+  | "runnerSetupNormalizedRecommendedFixKindHandSize"
+  | "runnerSetupNormalizedRecommendedFixKindMixedNeedsMoreDiagnosis"
+  | "runnerSetupAttributionWindows"
+  | "runnerSetupAttributionSuspicious"
+  | "runnerSetupAttributionBlocked"
+  | "runnerSetupAttributionUnclassified"
+  | "runnerSetupAttributionByKindStarvedEconomy"
+  | "runnerSetupAttributionByKindSearchRecovery"
+  | "runnerSetupAttributionByKindMemory"
+  | "runnerSetupAttributionByKindHandSize"
+  | "runnerSetupRecommendedFixKindNone"
+  | "runnerSetupRecommendedFixKindEconomyStarvedSkip"
+  | "runnerSetupRecommendedFixKindSearchRecovery"
+  | "runnerSetupRecommendedFixKindMemorySetup"
+  | "runnerSetupRecommendedFixKindHandSizeSetup"
+  | "runnerSetupRecommendedFixKindMixedNeedsMoreDiagnosis";
+
+const RUNNER_SETUP_ATTRIBUTION_METRIC_KEYS: RunnerSetupAttributionMetricKey[] =
+  [
+    "runnerStarvedEconomySkipWindows",
+    "runnerStarvedEconomySkipChosenRun",
+    "runnerStarvedEconomySkipChosenDraw",
+    "runnerStarvedEconomySkipChosenInstall",
+    "runnerStarvedEconomySkipChosenSearchRecovery",
+    "runnerStarvedEconomySkipChosenTrash",
+    "runnerStarvedEconomySkipChosenEndTurn",
+    "runnerStarvedEconomySkipChosenUnknown",
+    "runnerStarvedEconomySkipThenUnaffordableRun",
+    "runnerStarvedEconomySkipThenFailedRun",
+    "runnerStarvedEconomySkipThenNoProgress",
+    "runnerStarvedEconomySkipThenEconomyNextDecision",
+    "runnerStarvedEconomySkipThenReserveRecovered",
+    "runnerStarvedEconomySkipThenProgress",
+    "runnerStarvedEconomySkipThenActionLimit",
+    "runnerStarvedEconomySkipPlausiblePressure",
+    "runnerStarvedEconomySkipPlausibleRemoteContest",
+    "runnerStarvedEconomySkipPlausibleCriticalSetup",
+    "runnerStarvedEconomySkipPlausibleTrash",
+    "runnerStarvedEconomySkipSuspiciousLowValueRun",
+    "runnerStarvedEconomySkipSuspiciousDraw",
+    "runnerStarvedEconomySkipSuspiciousEndTurn",
+    "runnerStarvedEconomySkipSuspiciousUnknown",
+    "runnerEconomyFixGateAttributionEligible",
+    "runnerEconomyFixGateAttributionBlocked",
+    "runnerEconomyFixGateAttributionSuspicious",
+    "runnerSearchRecoveryFixGateWindows",
+    "runnerSearchRecoveryFixGateLegalSearch",
+    "runnerSearchRecoveryFixGateLegalRecovery",
+    "runnerSearchRecoveryFixGateMissingWall",
+    "runnerSearchRecoveryFixGateMissingCodeGate",
+    "runnerSearchRecoveryFixGateMissingSentry",
+    "runnerSearchRecoveryFixGateMissingUniversal",
+    "runnerSearchRecoveryFixGateMissingSpecial",
+    "runnerSearchRecoveryAttributionWindows",
+    "runnerSearchRecoveryAttributionLegalSearch",
+    "runnerSearchRecoveryAttributionLegalRecovery",
+    "runnerSearchRecoveryAttributionMissingWall",
+    "runnerSearchRecoveryAttributionMissingCodeGate",
+    "runnerSearchRecoveryAttributionMissingSentry",
+    "runnerSearchRecoveryAttributionMissingUniversal",
+    "runnerSearchRecoveryAttributionMissingSpecial",
+    "runnerSearchRecoveryAttributionSearchTaken",
+    "runnerSearchRecoveryAttributionRecoveryTaken",
+    "runnerSearchRecoveryAttributionSkipped",
+    "runnerSearchRecoverySkipChosenEconomy",
+    "runnerSearchRecoverySkipChosenRun",
+    "runnerSearchRecoverySkipChosenDraw",
+    "runnerSearchRecoverySkipChosenInstall",
+    "runnerSearchRecoverySkipChosenTrash",
+    "runnerSearchRecoverySkipChosenEndTurn",
+    "runnerSearchRecoverySkipChosenUnknown",
+    "runnerSearchRecoverySkipThenInstallFollowup",
+    "runnerSearchRecoverySkipThenCoverageResolved",
+    "runnerSearchRecoverySkipThenCoverageStillMissing",
+    "runnerSearchRecoverySkipThenKnownUnaffordableRun",
+    "runnerSearchRecoverySkipThenNoProgress",
+    "runnerSearchRecoverySkipThenActionLimit",
+    "runnerSearchRecoveryWindowWithNoInstallFollowup",
+    "runnerSearchRecoverySkipPlausibleEconomyReserve",
+    "runnerSearchRecoverySkipPlausiblePressure",
+    "runnerSearchRecoverySkipPlausibleRemoteContest",
+    "runnerSearchRecoverySkipPlausibleCurrentRigEnough",
+    "runnerSearchRecoverySkipSuspiciousCoverageStillMissing",
+    "runnerSearchRecoverySkipSuspiciousNoProgress",
+    "runnerSearchRecoverySkipSuspiciousKnownUnbreakableRun",
+    "runnerSearchRecoverySkipUnclassified",
+    "runnerSearchRecoveryFixGateAttributionEligible",
+    "runnerSearchRecoveryFixGateAttributionBlocked",
+    "runnerSearchRecoveryFixGateAttributionSuspicious",
+    "runnerMemoryFixGateWindows",
+    "runnerHandSizeFixGateWindows",
+    "runnerMemoryFixGateLegalSupport",
+    "runnerHandSizeFixGateLegalSupport",
+    "runnerMemoryFixGateSkipped",
+    "runnerHandSizeFixGateSkipped",
+    "runnerMemoryAttributionWindows",
+    "runnerHandSizeAttributionWindows",
+    "runnerMemoryAttributionLegalSupport",
+    "runnerHandSizeAttributionLegalSupport",
+    "runnerMemoryAttributionSupportTaken",
+    "runnerHandSizeAttributionSupportTaken",
+    "runnerMemoryAttributionSkipped",
+    "runnerHandSizeAttributionSkipped",
+    "runnerMemorySkipChosenEconomy",
+    "runnerMemorySkipChosenRun",
+    "runnerMemorySkipChosenDraw",
+    "runnerMemorySkipChosenInstallNonMemory",
+    "runnerMemorySkipChosenSearchRecovery",
+    "runnerMemorySkipChosenEndTurn",
+    "runnerMemorySkipChosenUnknown",
+    "runnerMemorySkipThenMemoryInstalled",
+    "runnerMemorySkipThenProgramInstallBlocked",
+    "runnerMemorySkipThenCoverageStillMissing",
+    "runnerMemorySkipThenNoProgress",
+    "runnerMemorySkipThenActionLimit",
+    "runnerHandSizeSkipThenDamageRiskWindow",
+    "runnerHandSizeSkipThenDiscardOrDamagePressure",
+    "runnerMemorySkipPlausibleEconomyReserve",
+    "runnerMemorySkipPlausiblePressure",
+    "runnerMemorySkipPlausibleRemoteContest",
+    "runnerMemorySkipPlausibleNoProgramPressure",
+    "runnerMemorySkipSuspiciousRigBlocked",
+    "runnerMemorySkipSuspiciousCoverageStillMissing",
+    "runnerMemorySkipSuspiciousNoProgress",
+    "runnerMemorySkipUnclassified",
+    "runnerMemoryFixGateAttributionEligible",
+    "runnerMemoryFixGateAttributionBlocked",
+    "runnerMemoryFixGateAttributionSuspicious",
+    "runnerHandSizeFixGateAttributionEligible",
+    "runnerHandSizeFixGateAttributionBlocked",
+    "runnerHandSizeFixGateAttributionSuspicious",
+    "runnerSearchRecoveryNormalizedWindows",
+    "runnerSearchRecoveryNormalizedTaken",
+    "runnerSearchRecoveryNormalizedSkipped",
+    "runnerSearchRecoveryNormalizedBlocked",
+    "runnerSearchRecoveryNormalizedBlockedByPressureOrRemoteContest",
+    "runnerSearchRecoveryNormalizedBlockedByEconomyOrReserve",
+    "runnerSearchRecoveryNormalizedBlockedByCurrentRigEnough",
+    "runnerSearchRecoveryNormalizedBlockedByNoInstallFollowup",
+    "runnerSearchRecoveryNormalizedMetricArtifact",
+    "runnerSearchRecoveryNormalizedUnclassified",
+    "runnerSearchRecoveryNormalizedSuspicious",
+    "runnerSearchRecoveryNormalizedTrueMissedCoverage",
+    "runnerSearchRecoveryNormalizedFixGateEligible",
+    "runnerMemoryNormalizedWindows",
+    "runnerMemoryNormalizedTaken",
+    "runnerMemoryNormalizedSkipped",
+    "runnerMemoryNormalizedBlocked",
+    "runnerMemoryNormalizedBlockedByPressureOrRemoteContest",
+    "runnerMemoryNormalizedBlockedByEconomyOrReserve",
+    "runnerMemoryNormalizedBlockedByNoProgramPressure",
+    "runnerMemoryNormalizedMetricArtifact",
+    "runnerMemoryNormalizedUnclassified",
+    "runnerMemoryNormalizedSuspicious",
+    "runnerMemoryNormalizedTrueRigBottleneck",
+    "runnerMemoryNormalizedFixGateEligible",
+    "runnerHandSizeNormalizedWindows",
+    "runnerHandSizeNormalizedTaken",
+    "runnerHandSizeNormalizedSkipped",
+    "runnerHandSizeNormalizedBlocked",
+    "runnerHandSizeNormalizedSuspicious",
+    "runnerHandSizeNormalizedMetricArtifact",
+    "runnerSetupNormalizedWindows",
+    "runnerSetupNormalizedSuspicious",
+    "runnerSetupNormalizedBlocked",
+    "runnerSetupNormalizedMetricArtifact",
+    "runnerSetupNormalizedUnclassified",
+    "runnerSetupNormalizedFixGateEligible",
+    "runnerSetupNormalizedRecommendedFixKindNone",
+    "runnerSetupNormalizedRecommendedFixKindSearchRecovery",
+    "runnerSetupNormalizedRecommendedFixKindMemory",
+    "runnerSetupNormalizedRecommendedFixKindHandSize",
+    "runnerSetupNormalizedRecommendedFixKindMixedNeedsMoreDiagnosis",
+    "runnerSetupAttributionWindows",
+    "runnerSetupAttributionSuspicious",
+    "runnerSetupAttributionBlocked",
+    "runnerSetupAttributionUnclassified",
+    "runnerSetupAttributionByKindStarvedEconomy",
+    "runnerSetupAttributionByKindSearchRecovery",
+    "runnerSetupAttributionByKindMemory",
+    "runnerSetupAttributionByKindHandSize",
+    "runnerSetupRecommendedFixKindNone",
+    "runnerSetupRecommendedFixKindEconomyStarvedSkip",
+    "runnerSetupRecommendedFixKindSearchRecovery",
+    "runnerSetupRecommendedFixKindMemorySetup",
+    "runnerSetupRecommendedFixKindHandSizeSetup",
+    "runnerSetupRecommendedFixKindMixedNeedsMoreDiagnosis",
+  ];
+
+function summarizeRunnerSetupAttributionMetrics(
+  summaries: AiSimulationSummary[],
+): Record<RunnerSetupAttributionMetricKey, number> {
+  const metrics = Object.fromEntries(
+    RUNNER_SETUP_ATTRIBUTION_METRIC_KEYS.map((key) => [key, 0]),
+  ) as Record<RunnerSetupAttributionMetricKey, number>;
+  for (const summary of summaries) {
+    const sequence = progressionEntriesWithRunTargets(summary.actionSequence);
+    for (let index = 0; index < sequence.length; index += 1) {
+      const entry = sequence[index]!;
+      attributeRunnerSetupSupportWindows(metrics, entry);
+      if (entry.runnerEconomyFixGateEligibleStarvedSkip === true)
+        attributeStarvedEconomySkip(metrics, sequence, index, summary);
+      if (entry.runnerSetupFixGateEligibleSearchRecoverySkip === true)
+        attributeSearchRecoverySkip(metrics, sequence, index, summary);
+      if (entry.runnerSetupFixGateEligibleMemorySkip === true)
+        attributeMemorySkip(metrics, sequence, index, summary);
+      if (entry.runnerHandSizeSupportSkippedWhileDamageRiskVisible === true)
+        attributeHandSizeSkip(metrics, sequence, index);
+    }
+  }
+  metrics.runnerSetupAttributionWindows =
+    metrics.runnerSetupAttributionByKindStarvedEconomy +
+    metrics.runnerSetupAttributionByKindSearchRecovery +
+    metrics.runnerSetupAttributionByKindMemory +
+    metrics.runnerSetupAttributionByKindHandSize;
+  metrics.runnerSetupAttributionSuspicious =
+    metrics.runnerEconomyFixGateAttributionSuspicious +
+    metrics.runnerSearchRecoveryFixGateAttributionSuspicious +
+    metrics.runnerMemoryFixGateAttributionSuspicious +
+    metrics.runnerHandSizeFixGateAttributionSuspicious;
+  metrics.runnerSetupAttributionBlocked =
+    metrics.runnerEconomyFixGateAttributionBlocked +
+    metrics.runnerSearchRecoveryFixGateAttributionBlocked +
+    metrics.runnerMemoryFixGateAttributionBlocked +
+    metrics.runnerHandSizeFixGateAttributionBlocked;
+  metrics.runnerSetupAttributionUnclassified = Math.max(
+    0,
+    metrics.runnerSetupAttributionWindows -
+      metrics.runnerSetupAttributionSuspicious -
+      metrics.runnerSetupAttributionBlocked,
+  );
+  metrics.runnerSetupNormalizedWindows =
+    metrics.runnerSearchRecoveryNormalizedWindows +
+    metrics.runnerMemoryNormalizedWindows +
+    metrics.runnerHandSizeNormalizedWindows;
+  metrics.runnerSetupNormalizedSuspicious =
+    metrics.runnerSearchRecoveryNormalizedSuspicious +
+    metrics.runnerMemoryNormalizedSuspicious +
+    metrics.runnerHandSizeNormalizedSuspicious;
+  metrics.runnerSetupNormalizedBlocked =
+    metrics.runnerSearchRecoveryNormalizedBlocked +
+    metrics.runnerMemoryNormalizedBlocked +
+    metrics.runnerHandSizeNormalizedBlocked;
+  metrics.runnerSetupNormalizedMetricArtifact =
+    metrics.runnerSearchRecoveryNormalizedMetricArtifact +
+    metrics.runnerMemoryNormalizedMetricArtifact +
+    metrics.runnerHandSizeNormalizedMetricArtifact;
+  metrics.runnerSetupNormalizedUnclassified =
+    metrics.runnerSearchRecoveryNormalizedUnclassified +
+    metrics.runnerMemoryNormalizedUnclassified;
+  metrics.runnerSetupNormalizedFixGateEligible =
+    metrics.runnerSearchRecoveryNormalizedFixGateEligible +
+    metrics.runnerMemoryNormalizedFixGateEligible +
+    metrics.runnerHandSizeNormalizedSuspicious;
+  const normalizedStrongest = [
+    {
+      key: "runnerSetupNormalizedRecommendedFixKindSearchRecovery" as const,
+      value: metrics.runnerSearchRecoveryNormalizedSuspicious,
+    },
+    {
+      key: "runnerSetupNormalizedRecommendedFixKindMemory" as const,
+      value: metrics.runnerMemoryNormalizedSuspicious,
+    },
+    {
+      key: "runnerSetupNormalizedRecommendedFixKindHandSize" as const,
+      value: metrics.runnerHandSizeNormalizedSuspicious,
+    },
+  ].sort((left, right) => right.value - left.value);
+  if (metrics.runnerSetupNormalizedSuspicious === 0)
+    metrics.runnerSetupNormalizedRecommendedFixKindNone = 1;
+  else if (normalizedStrongest[0]!.value === normalizedStrongest[1]!.value)
+    metrics.runnerSetupNormalizedRecommendedFixKindMixedNeedsMoreDiagnosis = 1;
+  else metrics[normalizedStrongest[0]!.key] = 1;
+  const strongest = [
+    {
+      key: "runnerSetupRecommendedFixKindEconomyStarvedSkip" as const,
+      value: metrics.runnerEconomyFixGateAttributionSuspicious,
+    },
+    {
+      key: "runnerSetupRecommendedFixKindSearchRecovery" as const,
+      value: metrics.runnerSearchRecoveryFixGateAttributionSuspicious,
+    },
+    {
+      key: "runnerSetupRecommendedFixKindMemorySetup" as const,
+      value: metrics.runnerMemoryFixGateAttributionSuspicious,
+    },
+    {
+      key: "runnerSetupRecommendedFixKindHandSizeSetup" as const,
+      value: metrics.runnerHandSizeFixGateAttributionSuspicious,
+    },
+  ].sort((left, right) => right.value - left.value);
+  if (metrics.runnerSetupAttributionSuspicious === 0)
+    metrics.runnerSetupRecommendedFixKindNone = 1;
+  else if (strongest[0]!.value === strongest[1]!.value)
+    metrics.runnerSetupRecommendedFixKindMixedNeedsMoreDiagnosis = 1;
+  else metrics[strongest[0]!.key] = 1;
+  return metrics;
+}
+
+function attributeRunnerSetupSupportWindows(
+  metrics: Record<RunnerSetupAttributionMetricKey, number>,
+  entry: PlanConversionActionEntry,
+): void {
+  if (entry.runnerMemoryBottleneckDecisionWindow === true) {
+    metrics.runnerMemoryAttributionWindows += 1;
+    metrics.runnerMemoryNormalizedWindows += 1;
+    if ((entry.runnerLegalMemoryHardwareActions ?? 0) > 0)
+      metrics.runnerMemoryAttributionLegalSupport += 1;
+  }
+  if (entry.runnerHandSizeBottleneckDecisionWindow === true) {
+    metrics.runnerHandSizeAttributionWindows += 1;
+    metrics.runnerHandSizeNormalizedWindows += 1;
+    if ((entry.runnerLegalHandSizeActions ?? 0) > 0)
+      metrics.runnerHandSizeAttributionLegalSupport += 1;
+  }
+  if (entry.runnerMemoryHardwareTaken === true)
+    metrics.runnerMemoryAttributionSupportTaken += 1;
+  if (entry.runnerMemoryHardwareTaken === true)
+    metrics.runnerMemoryNormalizedTaken += 1;
+  if (entry.runnerHandSizeSupportTaken === true)
+    metrics.runnerHandSizeAttributionSupportTaken += 1;
+  if (entry.runnerHandSizeSupportTaken === true)
+    metrics.runnerHandSizeNormalizedTaken += 1;
+  if (entry.runnerSearchTaken === true || entry.runnerRecoveryTaken === true) {
+    metrics.runnerSearchRecoveryNormalizedWindows += 1;
+    metrics.runnerSearchRecoveryNormalizedTaken += 1;
+  }
+}
+
+function attributeStarvedEconomySkip(
+  metrics: Record<RunnerSetupAttributionMetricKey, number>,
+  sequence: PlanConversionActionEntry[],
+  index: number,
+  summary: AiSimulationSummary,
+): void {
+  const entry = sequence[index]!;
+  metrics.runnerStarvedEconomySkipWindows += 1;
+  metrics.runnerSetupAttributionByKindStarvedEconomy += 1;
+  incrementChosenFamily(metrics, "runnerStarvedEconomySkip", entry);
+  const next = nextRunnerEntries(sequence, index, 5);
+  if (
+    entry.runStartedAgainstKnownUnaffordablePath === true ||
+    next.some((candidate) => candidate.runStartedAgainstKnownUnaffordablePath)
+  )
+    metrics.runnerStarvedEconomySkipThenUnaffordableRun += 1;
+  if (
+    entry.lowValueUnaffordableRun === true ||
+    entry.runEndedAfterFirstIceDueToCredits === true ||
+    next.some(
+      (candidate) =>
+        candidate.lowValueUnaffordableRun === true ||
+        candidate.runEndedAfterFirstIceDueToCredits === true,
+    )
+  )
+    metrics.runnerStarvedEconomySkipThenFailedRun += 1;
+  if (!hasMeaningfulProgressWithin(sequence, index, 5))
+    metrics.runnerStarvedEconomySkipThenNoProgress += 1;
+  const economyNextDecision = next[0]?.runnerEconomyTaken === true;
+  if (economyNextDecision)
+    metrics.runnerStarvedEconomySkipThenEconomyNextDecision += 1;
+  const reserveRecovered = next.some(
+    (candidate) =>
+      typeof candidate.runnerCreditsAfter === "number" &&
+      typeof candidate.runnerReserveTarget === "number" &&
+      candidate.runnerCreditsAfter >= candidate.runnerReserveTarget,
+  );
+  if (reserveRecovered)
+    metrics.runnerStarvedEconomySkipThenReserveRecovered += 1;
+  if (hasMeaningfulProgressWithin(sequence, index, 5))
+    metrics.runnerStarvedEconomySkipThenProgress += 1;
+  if (summary.winner === "action_limit_reached")
+    metrics.runnerStarvedEconomySkipThenActionLimit += 1;
+
+  const blocked =
+    entry.runnerEconomySkippedForPressure === true ||
+    entry.runnerEconomySkippedForRemoteContest === true ||
+    entry.runnerEconomySkippedForInstallBreaker === true ||
+    entry.runnerEconomySkippedForSetup === true ||
+    entry.runnerEconomySkippedForTrash === true;
+  if (entry.runnerEconomySkippedForPressure === true)
+    metrics.runnerStarvedEconomySkipPlausiblePressure += 1;
+  if (entry.runnerEconomySkippedForRemoteContest === true)
+    metrics.runnerStarvedEconomySkipPlausibleRemoteContest += 1;
+  if (
+    entry.runnerEconomySkippedForInstallBreaker === true ||
+    entry.runnerEconomySkippedForSetup === true
+  )
+    metrics.runnerStarvedEconomySkipPlausibleCriticalSetup += 1;
+  if (entry.runnerEconomySkippedForTrash === true)
+    metrics.runnerStarvedEconomySkipPlausibleTrash += 1;
+  const suspiciousLowValue =
+    entry.lowValueUnaffordableRun === true ||
+    entry.runStartedAgainstKnownUnaffordablePath === true;
+  if (suspiciousLowValue)
+    metrics.runnerStarvedEconomySkipSuspiciousLowValueRun += 1;
+  const suspiciousDraw =
+    entry.runnerEconomySkippedForDraw === true &&
+    !economyNextDecision &&
+    !reserveRecovered;
+  const suspiciousEndTurn =
+    entry.runnerEconomySkippedForEndTurn === true &&
+    !economyNextDecision &&
+    !reserveRecovered;
+  const suspiciousUnknown =
+    entry.runnerEconomySkippedForUnknownHigherPriority === true &&
+    !economyNextDecision &&
+    !reserveRecovered;
+  if (suspiciousDraw) metrics.runnerStarvedEconomySkipSuspiciousDraw += 1;
+  if (suspiciousEndTurn) metrics.runnerStarvedEconomySkipSuspiciousEndTurn += 1;
+  if (suspiciousUnknown) metrics.runnerStarvedEconomySkipSuspiciousUnknown += 1;
+  const suspicious =
+    suspiciousLowValue ||
+    suspiciousDraw ||
+    suspiciousEndTurn ||
+    suspiciousUnknown ||
+    (!blocked && !hasMeaningfulProgressWithin(sequence, index, 5));
+  metrics.runnerEconomyFixGateAttributionEligible += 1;
+  if (blocked) metrics.runnerEconomyFixGateAttributionBlocked += 1;
+  if (suspicious) metrics.runnerEconomyFixGateAttributionSuspicious += 1;
+}
+
+function attributeSearchRecoverySkip(
+  metrics: Record<RunnerSetupAttributionMetricKey, number>,
+  sequence: PlanConversionActionEntry[],
+  index: number,
+  summary: AiSimulationSummary,
+): void {
+  const entry = sequence[index]!;
+  metrics.runnerSearchRecoveryFixGateWindows += 1;
+  metrics.runnerSearchRecoveryAttributionWindows += 1;
+  metrics.runnerSearchRecoveryAttributionSkipped += 1;
+  metrics.runnerSetupAttributionByKindSearchRecovery += 1;
+  if ((entry.runnerLegalSearchActions ?? 0) > 0) {
+    metrics.runnerSearchRecoveryFixGateLegalSearch += 1;
+    metrics.runnerSearchRecoveryAttributionLegalSearch += 1;
+  }
+  if ((entry.runnerLegalRecoveryActions ?? 0) > 0) {
+    metrics.runnerSearchRecoveryFixGateLegalRecovery += 1;
+    metrics.runnerSearchRecoveryAttributionLegalRecovery += 1;
+  }
+  if (entry.runnerSearchTaken === true)
+    metrics.runnerSearchRecoveryAttributionSearchTaken += 1;
+  if (entry.runnerRecoveryTaken === true)
+    metrics.runnerSearchRecoveryAttributionRecoveryTaken += 1;
+  incrementCoverageTypes(metrics, entry);
+  incrementChosenFamily(metrics, "runnerSearchRecoverySkip", entry);
+  const next = nextRunnerEntries(sequence, index, 5);
+  const installFollowup = next.some(
+    (candidate) => candidate.actionType === "install_card",
+  );
+  const coverageResolved = next.some(
+    (candidate) => candidate.runnerCoverageImproved === true,
+  );
+  const knownUnaffordableRun = next.some(
+    (candidate) => candidate.runStartedAgainstKnownUnaffordablePath === true,
+  );
+  const noProgress = !hasMeaningfulProgressWithin(sequence, index, 5);
+  const actionLimit = summary.winner === "action_limit_reached" && noProgress;
+  if (installFollowup) metrics.runnerSearchRecoverySkipThenInstallFollowup += 1;
+  if (coverageResolved)
+    metrics.runnerSearchRecoverySkipThenCoverageResolved += 1;
+  if (!coverageResolved)
+    metrics.runnerSearchRecoverySkipThenCoverageStillMissing += 1;
+  if (knownUnaffordableRun)
+    metrics.runnerSearchRecoverySkipThenKnownUnaffordableRun += 1;
+  if (noProgress) metrics.runnerSearchRecoverySkipThenNoProgress += 1;
+  if (actionLimit) metrics.runnerSearchRecoverySkipThenActionLimit += 1;
+  if (!installFollowup)
+    metrics.runnerSearchRecoveryWindowWithNoInstallFollowup += 1;
+
+  const blocked =
+    entry.runnerEconomyTaken === true ||
+    entry.runnerPressureActionTaken === true ||
+    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
+    entry.runnerCentralRunWhileRemoteScoreThreatVisible === true;
+  if (entry.runnerEconomyTaken === true)
+    metrics.runnerSearchRecoverySkipPlausibleEconomyReserve += 1;
+  if (entry.runnerPressureActionTaken === true)
+    metrics.runnerSearchRecoverySkipPlausiblePressure += 1;
+  if (
+    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
+    entry.runnerCentralRunWhileRemoteScoreThreatVisible === true
+  )
+    metrics.runnerSearchRecoverySkipPlausibleRemoteContest += 1;
+  if (
+    entry.runnerPressureReadyTrue === true &&
+    entry.runnerPathBlockedByMissingCoverage !== true
+  )
+    metrics.runnerSearchRecoverySkipPlausibleCurrentRigEnough += 1;
+  const suspiciousCoverage = !coverageResolved && !installFollowup;
+  if (suspiciousCoverage)
+    metrics.runnerSearchRecoverySkipSuspiciousCoverageStillMissing += 1;
+  if (noProgress) metrics.runnerSearchRecoverySkipSuspiciousNoProgress += 1;
+  if (knownUnaffordableRun)
+    metrics.runnerSearchRecoverySkipSuspiciousKnownUnbreakableRun += 1;
+  const suspicious = suspiciousCoverage || noProgress || knownUnaffordableRun;
+  if (!blocked && !suspicious)
+    metrics.runnerSearchRecoverySkipUnclassified += 1;
+  metrics.runnerSearchRecoveryFixGateAttributionEligible += 1;
+  if (blocked) metrics.runnerSearchRecoveryFixGateAttributionBlocked += 1;
+  if (suspicious) metrics.runnerSearchRecoveryFixGateAttributionSuspicious += 1;
+  attributeNormalizedSearchRecoverySkip(metrics, entry, {
+    installFollowup,
+    coverageResolved,
+    knownUnaffordableRun,
+    noProgress,
+    actionLimit,
+  });
+}
+
+function attributeNormalizedSearchRecoverySkip(
+  metrics: Record<RunnerSetupAttributionMetricKey, number>,
+  entry: PlanConversionActionEntry,
+  followup: {
+    installFollowup: boolean;
+    coverageResolved: boolean;
+    knownUnaffordableRun: boolean;
+    noProgress: boolean;
+    actionLimit: boolean;
+  },
+): void {
+  metrics.runnerSearchRecoveryNormalizedWindows += 1;
+  if (entry.runnerSearchTaken === true || entry.runnerRecoveryTaken === true)
+    metrics.runnerSearchRecoveryNormalizedTaken += 1;
+  else metrics.runnerSearchRecoveryNormalizedSkipped += 1;
+
+  const blockedPressure =
+    entry.runnerPressureActionTaken === true ||
+    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
+    entry.runnerCentralRunWhileRemoteScoreThreatVisible === true ||
+    entry.runnerRemoteTrashTaken === true;
+  if (blockedPressure) {
+    metrics.runnerSearchRecoveryNormalizedBlocked += 1;
+    metrics.runnerSearchRecoveryNormalizedBlockedByPressureOrRemoteContest += 1;
+    return;
+  }
+
+  if (
+    entry.runnerEconomyTaken === true ||
+    entry.runnerEconomyActionTaken === true
+  ) {
+    metrics.runnerSearchRecoveryNormalizedBlocked += 1;
+    metrics.runnerSearchRecoveryNormalizedBlockedByEconomyOrReserve += 1;
+    return;
+  }
+
+  if (
+    entry.runnerPressureReadyTrue === true &&
+    entry.runnerPathBlockedByMissingCoverage !== true
+  ) {
+    metrics.runnerSearchRecoveryNormalizedMetricArtifact += 1;
+    metrics.runnerSearchRecoveryNormalizedBlockedByCurrentRigEnough += 1;
+    return;
+  }
+
+  const missingCoverage =
+    (entry.runnerSetupMissingCoverageTypes ?? []).length > 0;
+  const legalSearchRecovery =
+    (entry.runnerLegalSearchActions ?? 0) +
+      (entry.runnerLegalRecoveryActions ?? 0) >
+    0;
+  if (!missingCoverage || !legalSearchRecovery) {
+    metrics.runnerSearchRecoveryNormalizedMetricArtifact += 1;
+    return;
+  }
+
+  const followupProblem =
+    !followup.coverageResolved &&
+    (followup.knownUnaffordableRun ||
+      followup.noProgress ||
+      followup.actionLimit);
+  if (followupProblem) {
+    metrics.runnerSearchRecoveryNormalizedSuspicious += 1;
+    metrics.runnerSearchRecoveryNormalizedTrueMissedCoverage += 1;
+    metrics.runnerSearchRecoveryNormalizedFixGateEligible += 1;
+    return;
+  }
+
+  if (!followup.installFollowup && !followup.coverageResolved) {
+    metrics.runnerSearchRecoveryNormalizedMetricArtifact += 1;
+    metrics.runnerSearchRecoveryNormalizedBlockedByNoInstallFollowup += 1;
+    return;
+  }
+
+  metrics.runnerSearchRecoveryNormalizedUnclassified += 1;
+}
+
+function attributeMemorySkip(
+  metrics: Record<RunnerSetupAttributionMetricKey, number>,
+  sequence: PlanConversionActionEntry[],
+  index: number,
+  summary: AiSimulationSummary,
+): void {
+  const entry = sequence[index]!;
+  metrics.runnerMemoryFixGateWindows += 1;
+  metrics.runnerSetupAttributionByKindMemory += 1;
+  if ((entry.runnerLegalMemoryHardwareActions ?? 0) > 0)
+    metrics.runnerMemoryFixGateLegalSupport += 1;
+  metrics.runnerMemoryFixGateSkipped += 1;
+  metrics.runnerMemoryAttributionSkipped += 1;
+  incrementChosenFamily(metrics, "runnerMemorySkip", entry);
+  const next = nextRunnerEntries(sequence, index, 5);
+  const memoryInstalled = next.some(
+    (candidate) => candidate.runnerMemoryHardwareTaken === true,
+  );
+  const programBlocked =
+    entry.runnerMemorySupportSkippedWhileGripHasPrograms === true &&
+    !memoryInstalled;
+  const coverageStillMissing =
+    !next.some((candidate) => candidate.runnerCoverageImproved === true) &&
+    next.some(
+      (candidate) =>
+        candidate.runnerPathBlockedByMissingCoverage === true ||
+        candidate.runnerSetupFixGateEligibleSearchRecoverySkip === true,
+    );
+  const noProgress = !hasMeaningfulProgressWithin(sequence, index, 5);
+  const actionLimit = summary.winner === "action_limit_reached" && noProgress;
+  if (memoryInstalled) metrics.runnerMemorySkipThenMemoryInstalled += 1;
+  if (programBlocked) metrics.runnerMemorySkipThenProgramInstallBlocked += 1;
+  if (coverageStillMissing)
+    metrics.runnerMemorySkipThenCoverageStillMissing += 1;
+  if (noProgress) metrics.runnerMemorySkipThenNoProgress += 1;
+  if (actionLimit) metrics.runnerMemorySkipThenActionLimit += 1;
+
+  const blocked =
+    entry.runnerEconomyTaken === true ||
+    entry.runnerPressureActionTaken === true ||
+    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
+    entry.runnerCentralRunWhileRemoteScoreThreatVisible === true;
+  if (entry.runnerEconomyTaken === true)
+    metrics.runnerMemorySkipPlausibleEconomyReserve += 1;
+  if (entry.runnerPressureActionTaken === true)
+    metrics.runnerMemorySkipPlausiblePressure += 1;
+  if (
+    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
+    entry.runnerCentralRunWhileRemoteScoreThreatVisible === true
+  )
+    metrics.runnerMemorySkipPlausibleRemoteContest += 1;
+  if (entry.runnerMemorySupportSkippedWhileGripHasPrograms !== true)
+    metrics.runnerMemorySkipPlausibleNoProgramPressure += 1;
+  const suspiciousRig = programBlocked || coverageStillMissing;
+  if (suspiciousRig) metrics.runnerMemorySkipSuspiciousRigBlocked += 1;
+  if (coverageStillMissing)
+    metrics.runnerMemorySkipSuspiciousCoverageStillMissing += 1;
+  if (noProgress) metrics.runnerMemorySkipSuspiciousNoProgress += 1;
+  const suspicious = suspiciousRig || noProgress;
+  if (!blocked && !suspicious) metrics.runnerMemorySkipUnclassified += 1;
+  metrics.runnerMemoryFixGateAttributionEligible += 1;
+  if (blocked) metrics.runnerMemoryFixGateAttributionBlocked += 1;
+  if (suspicious) metrics.runnerMemoryFixGateAttributionSuspicious += 1;
+  attributeNormalizedMemorySkip(metrics, entry, {
+    memoryInstalled,
+    programBlocked,
+    coverageStillMissing,
+    noProgress,
+    actionLimit,
+  });
+}
+
+function attributeNormalizedMemorySkip(
+  metrics: Record<RunnerSetupAttributionMetricKey, number>,
+  entry: PlanConversionActionEntry,
+  followup: {
+    memoryInstalled: boolean;
+    programBlocked: boolean;
+    coverageStillMissing: boolean;
+    noProgress: boolean;
+    actionLimit: boolean;
+  },
+): void {
+  if (entry.runnerMemoryBottleneckDecisionWindow !== true)
+    metrics.runnerMemoryNormalizedWindows += 1;
+  if (entry.runnerMemoryHardwareTaken === true)
+    metrics.runnerMemoryNormalizedTaken += 1;
+  else metrics.runnerMemoryNormalizedSkipped += 1;
+
+  const legalMemorySupport = (entry.runnerLegalMemoryHardwareActions ?? 0) > 0;
+  if (!legalMemorySupport) {
+    metrics.runnerMemoryNormalizedMetricArtifact += 1;
+    return;
+  }
+
+  const blockedPressure =
+    entry.runnerPressureActionTaken === true ||
+    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
+    entry.runnerCentralRunWhileRemoteScoreThreatVisible === true ||
+    entry.runnerRemoteTrashTaken === true;
+  if (blockedPressure) {
+    metrics.runnerMemoryNormalizedBlocked += 1;
+    metrics.runnerMemoryNormalizedBlockedByPressureOrRemoteContest += 1;
+    return;
+  }
+
+  if (
+    entry.runnerEconomyTaken === true ||
+    entry.runnerEconomyActionTaken === true
+  ) {
+    metrics.runnerMemoryNormalizedBlocked += 1;
+    metrics.runnerMemoryNormalizedBlockedByEconomyOrReserve += 1;
+    return;
+  }
+
+  if (entry.runnerMemorySupportSkippedWhileGripHasPrograms !== true) {
+    metrics.runnerMemoryNormalizedBlocked += 1;
+    metrics.runnerMemoryNormalizedBlockedByNoProgramPressure += 1;
+    return;
+  }
+
+  const followupProblem =
+    !followup.memoryInstalled &&
+    (followup.programBlocked ||
+      followup.coverageStillMissing ||
+      followup.noProgress ||
+      followup.actionLimit);
+  if (followupProblem) {
+    metrics.runnerMemoryNormalizedSuspicious += 1;
+    metrics.runnerMemoryNormalizedTrueRigBottleneck += 1;
+    metrics.runnerMemoryNormalizedFixGateEligible += 1;
+    return;
+  }
+
+  metrics.runnerMemoryNormalizedUnclassified += 1;
+}
+
+function attributeHandSizeSkip(
+  metrics: Record<RunnerSetupAttributionMetricKey, number>,
+  sequence: PlanConversionActionEntry[],
+  index: number,
+): void {
+  const entry = sequence[index]!;
+  const next = nextRunnerEntries(sequence, index, 5);
+  metrics.runnerHandSizeFixGateWindows += 1;
+  metrics.runnerSetupAttributionByKindHandSize += 1;
+  metrics.runnerHandSizeFixGateLegalSupport += 1;
+  metrics.runnerHandSizeFixGateSkipped += 1;
+  metrics.runnerHandSizeAttributionSkipped += 1;
+  metrics.runnerHandSizeSkipThenDamageRiskWindow += 1;
+  metrics.runnerHandSizeFixGateAttributionEligible += 1;
+  const blocked =
+    entry.runnerEconomyTaken === true ||
+    entry.runnerPressureActionTaken === true ||
+    entry.runnerRemoteRunAgainstAdvancedRemote === true ||
+    entry.runnerCentralRunWhileRemoteScoreThreatVisible === true;
+  if (blocked) metrics.runnerHandSizeFixGateAttributionBlocked += 1;
+  const suspicious = next.some(
+    (candidate) =>
+      candidate.runnerDiscardChoice === true ||
+      candidate.runnerHandSizeSupportSkippedWhileDamageRiskVisible === true,
+  );
+  if (suspicious) metrics.runnerHandSizeSkipThenDiscardOrDamagePressure += 1;
+  if (suspicious) metrics.runnerHandSizeFixGateAttributionSuspicious += 1;
+  attributeNormalizedHandSizeSkip(metrics, entry, { blocked, suspicious });
+}
+
+function attributeNormalizedHandSizeSkip(
+  metrics: Record<RunnerSetupAttributionMetricKey, number>,
+  entry: PlanConversionActionEntry,
+  context: { blocked: boolean; suspicious: boolean },
+): void {
+  if (entry.runnerHandSizeBottleneckDecisionWindow !== true)
+    metrics.runnerHandSizeNormalizedWindows += 1;
+  if (entry.runnerHandSizeSupportTaken === true)
+    metrics.runnerHandSizeNormalizedTaken += 1;
+  else metrics.runnerHandSizeNormalizedSkipped += 1;
+
+  const legalHandSizeSupport = (entry.runnerLegalHandSizeActions ?? 0) > 0;
+  if (!legalHandSizeSupport) {
+    metrics.runnerHandSizeNormalizedMetricArtifact += 1;
+    return;
+  }
+
+  if (context.blocked) {
+    metrics.runnerHandSizeNormalizedBlocked += 1;
+    return;
+  }
+
+  if (context.suspicious) {
+    metrics.runnerHandSizeNormalizedSuspicious += 1;
+    return;
+  }
+
+  metrics.runnerHandSizeNormalizedMetricArtifact += 1;
+}
+
+function incrementChosenFamily(
+  metrics: Record<RunnerSetupAttributionMetricKey, number>,
+  prefix:
+    | "runnerStarvedEconomySkip"
+    | "runnerSearchRecoverySkip"
+    | "runnerMemorySkip",
+  entry: PlanConversionActionEntry,
+): void {
+  const family = runnerSetupChosenFamilyForEntry(entry);
+  if (prefix === "runnerMemorySkip" && family === "install") {
+    metrics.runnerMemorySkipChosenInstallNonMemory += 1;
+    return;
+  }
+  const key = `${prefix}Chosen${capitalizeRunnerSetupFamily(family)}` as
+    | RunnerSetupAttributionMetricKey
+    | undefined;
+  if (key && key in metrics) metrics[key] += 1;
+}
+
+function runnerSetupChosenFamilyForEntry(entry: {
+  actionType: string;
+  runnerEconomyTaken?: boolean;
+  runnerDrawAction?: boolean;
+  runnerRigInstallAction?: boolean;
+  runnerSearchTaken?: boolean;
+  runnerRecoveryTaken?: boolean;
+  runnerRemoteTrashTaken?: boolean;
+}):
+  | "economy"
+  | "run"
+  | "draw"
+  | "install"
+  | "searchRecovery"
+  | "trash"
+  | "endTurn"
+  | "unknown" {
+  if (entry.runnerEconomyTaken === true) return "economy";
+  if (entry.actionType === "start_run") return "run";
+  if (entry.runnerDrawAction === true || entry.actionType === "draw_card")
+    return "draw";
+  if (entry.runnerSearchTaken === true || entry.runnerRecoveryTaken === true)
+    return "searchRecovery";
+  if (
+    entry.runnerRemoteTrashTaken === true ||
+    entry.actionType === "trash_accessed_card"
+  )
+    return "trash";
+  if (
+    entry.actionType === "install_card" ||
+    entry.runnerRigInstallAction === true
+  )
+    return "install";
+  if (entry.actionType === "end_turn") return "endTurn";
+  return "unknown";
+}
+
+function capitalizeRunnerSetupFamily(
+  family: ReturnType<typeof runnerSetupChosenFamilyForEntry>,
+): string {
+  if (family === "searchRecovery") return "SearchRecovery";
+  if (family === "endTurn") return "EndTurn";
+  return family.charAt(0).toUpperCase() + family.slice(1);
+}
+
+function incrementCoverageTypes(
+  metrics: Record<RunnerSetupAttributionMetricKey, number>,
+  entry: PlanConversionActionEntry,
+): void {
+  const types = entry.runnerSetupMissingCoverageTypes ?? [];
+  if (types.includes("wall")) {
+    metrics.runnerSearchRecoveryFixGateMissingWall += 1;
+    metrics.runnerSearchRecoveryAttributionMissingWall += 1;
+  }
+  if (types.includes("code_gate")) {
+    metrics.runnerSearchRecoveryFixGateMissingCodeGate += 1;
+    metrics.runnerSearchRecoveryAttributionMissingCodeGate += 1;
+  }
+  if (types.includes("sentry")) {
+    metrics.runnerSearchRecoveryFixGateMissingSentry += 1;
+    metrics.runnerSearchRecoveryAttributionMissingSentry += 1;
+  }
+  if (types.includes("universal")) {
+    metrics.runnerSearchRecoveryFixGateMissingUniversal += 1;
+    metrics.runnerSearchRecoveryAttributionMissingUniversal += 1;
+  }
+  if (types.includes("special")) {
+    metrics.runnerSearchRecoveryFixGateMissingSpecial += 1;
+    metrics.runnerSearchRecoveryAttributionMissingSpecial += 1;
+  }
+}
+
+function nextRunnerEntries(
+  sequence: PlanConversionActionEntry[],
+  index: number,
+  ownActionWindow: number,
+): PlanConversionActionEntry[] {
+  const entries: PlanConversionActionEntry[] = [];
+  for (
+    let candidateIndex = index + 1;
+    candidateIndex < sequence.length;
+    candidateIndex += 1
+  ) {
+    const candidate = sequence[candidateIndex]!;
+    if (candidate.side !== "runner") continue;
+    entries.push(candidate);
+    if (entries.length >= ownActionWindow) break;
+  }
+  return entries;
+}
+
 function hasMeaningfulProgressWithin(
   sequence: PlanConversionActionEntry[],
   index: number,
@@ -14593,6 +18213,611 @@ function summarizeStrategicLineMetrics(
   };
 }
 
+function summarizeCorpEconomyBeforeScoreMetrics(
+  summaries: AiSimulationSummary[],
+): Pick<
+  AiMatchProgressionMetrics,
+  | "corpEconomyBeforeScoreWindow"
+  | "corpEconomyBeforeScoreWindowNecessary"
+  | "corpEconomyBeforeScoreWindowWithInstalledAgenda"
+  | "corpEconomyBeforeScoreWindowWithAdvancedAgenda"
+  | "corpEconomyBeforeScoreWindowWithScoreLegalNext"
+  | "corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext"
+  | "corpEconomyBeforeScoreWindowWithReadyRemote"
+  | "corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote"
+  | "corpEconomyBeforeScoreWindowCreditsShort"
+  | "corpEconomyBeforeScoreWindowCreditsAlreadyEnough"
+  | "corpEconomyBeforeScoreWindowRemoteSafe"
+  | "corpEconomyBeforeScoreWindowRemoteContestHigh"
+  | "corpEconomyBeforeScoreTaken"
+  | "corpEconomyBeforeScoreTakenAsNecessaryCredits"
+  | "corpEconomyBeforeScoreTakenDespiteCreditsEnough"
+  | "corpEconomyBeforeScoreTakenOverScoreLegal"
+  | "corpEconomyBeforeScoreTakenOverAdvanceToScoreLegal"
+  | "corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote"
+  | "corpEconomyBeforeScoreTakenOverHqAgendaExit"
+  | "corpEconomyBeforeScoreTakenOverScoreAreaAbility"
+  | "corpEconomyBeforeScoreConvertedToScoreNextDecision"
+  | "corpEconomyBeforeScoreConvertedToAdvanceNextDecision"
+  | "corpEconomyBeforeScoreConvertedToAgendaInstallNextDecision"
+  | "corpEconomyBeforeScoreConvertedWithin2CorpActions"
+  | "corpEconomyBeforeScoreConvertedWithin3CorpActions"
+  | "corpEconomyBeforeScoreNotConvertedWithin3CorpActions"
+  | "corpEconomyBeforeScoreRepeatedEconomyNextDecision"
+  | "corpEconomyBeforeScoreRepeatedEconomyWithin3"
+  | "corpEconomyBeforeScoreThenDraw"
+  | "corpEconomyBeforeScoreThenProtect"
+  | "corpEconomyBeforeScoreThenNewRemote"
+  | "corpEconomyBeforeScoreThenRunnerSteal"
+  | "corpEconomyBeforeScoreThenActionLimit"
+  | "corpEconomyBeforeScorePlausibleCreditsNeeded"
+  | "corpEconomyBeforeScorePlausibleRezOrAdvanceReserve"
+  | "corpEconomyBeforeScorePlausibleHqOrRndSafety"
+  | "corpEconomyBeforeScorePlausibleRunnerContestTooHigh"
+  | "corpEconomyBeforeScorePlausibleNoAgendaExit"
+  | "corpEconomyBeforeScoreSuspiciousCreditsAlreadyEnough"
+  | "corpEconomyBeforeScoreSuspiciousRepeatedEconomy"
+  | "corpEconomyBeforeScoreSuspiciousDelayedTerminalAction"
+  | "corpEconomyBeforeScoreSuspiciousRemoteStillSafe"
+  | "corpEconomyBeforeScoreSuspiciousRunnerStealFollowup"
+  | "corpEconomyBeforeScoreUnclassified"
+  | "corpEconomyBeforeScoreFixGateEligible"
+  | "corpEconomyBeforeScoreFixGateBlockedByCredits"
+  | "corpEconomyBeforeScoreFixGateBlockedByCheapContest"
+  | "corpEconomyBeforeScoreFixGateBlockedByRunnerContest"
+  | "corpEconomyBeforeScoreFixGateBlockedBySafety"
+  | "corpEconomyBeforeScoreFixGateSuspicious"
+  | "corpEconomyBeforeScoreFixGateSuspiciousRepeatedEconomy"
+  | "corpEconomyBeforeScoreFixGateSuspiciousNoConversion"
+  | "corpEconomyBeforeScoreFixGateSuspiciousStealFollowup"
+  | "corpRepeatedEconomyBeforeScoreWindows"
+  | "corpRepeatedEconomyBeforeScoreCreditsStillShort"
+  | "corpRepeatedEconomyBeforeScoreCreditsAlreadyEnough"
+  | "corpRepeatedEconomyBeforeScoreScoreLegal"
+  | "corpRepeatedEconomyBeforeScoreAdvanceLegal"
+  | "corpRepeatedEconomyBeforeScoreAgendaInstallReadyRemoteLegal"
+  | "corpRepeatedEconomyBeforeScoreRemoteSafe"
+  | "corpRepeatedEconomyBeforeScoreRunnerContestHigh"
+  | "corpRepeatedEconomyBeforeScoreThenScore"
+  | "corpRepeatedEconomyBeforeScoreThenRunnerSteal"
+  | "corpRepeatedEconomyBeforeScoreThenActionLimit"
+  | "corpRepeatedEconomyBeforeScoreSuspicious"
+  | "corpRepeatedEconomyBeforeScorePlausible"
+  | "corpEconomyBeforeScoreNoConversionCreditsStillShort"
+  | "corpEconomyBeforeScoreNoConversionNoAgendaExit"
+  | "corpEconomyBeforeScoreNoConversionRemoteUnsafe"
+  | "corpEconomyBeforeScoreNoConversionRunnerContestHigh"
+  | "corpEconomyBeforeScoreNoConversionSafetyBlocked"
+  | "corpEconomyBeforeScoreNoConversionPlanDrift"
+  | "corpEconomyBeforeScoreNoConversionRepeatedEconomy"
+  | "corpEconomyBeforeScoreNoConversionDrawLoop"
+  | "corpEconomyBeforeScoreNoConversionProtectionLoop"
+  | "corpEconomyBeforeScoreNoConversionRemotePortfolioLoop"
+  | "corpEconomyBeforeScoreNoConversionRunnerSteal"
+  | "corpEconomyBeforeScoreNoConversionActionLimit"
+  | "corpEconomyBeforeScoreNoConversionSuspicious"
+  | "corpEconomyBeforeScoreNoConversionPlausible"
+  | "corpEconomyBeforeScoreCreditsEnoughWindows"
+  | "corpEconomyBeforeScoreCreditsEnoughTaken"
+  | "corpEconomyBeforeScoreCreditsEnoughScoreLegal"
+  | "corpEconomyBeforeScoreCreditsEnoughAdvanceLegal"
+  | "corpEconomyBeforeScoreCreditsEnoughAgendaInstallReadyRemoteLegal"
+  | "corpEconomyBeforeScoreCreditsEnoughSafetyBlocked"
+  | "corpEconomyBeforeScoreCreditsEnoughSuspicious"
+  | "corpEconomyBeforeScoreCreditsEnoughPlausible"
+> {
+  const actionSequence = summaries.flatMap((summary) => summary.actionSequence);
+  const entries = actionSequence.filter(
+    (entry) =>
+      entry.corpEconomyBeforeScoreDiagnosticWindow === true ||
+      hasEvidenceFlag(entry, "corp_economy_before_score_window:true"),
+  );
+  const takenEntries = summaries.flatMap((summary) =>
+    summary.actionSequence
+      .map((entry, index) => ({
+        entry,
+        index,
+        sequence: summary.actionSequence,
+      }))
+      .filter(({ entry }) => entry.corpEconomyBeforeScoreTaken === true),
+  );
+  let convertedToScoreNext = 0;
+  let convertedToAdvanceNext = 0;
+  let convertedToAgendaInstallNext = 0;
+  let convertedWithin2 = 0;
+  let convertedWithin3 = 0;
+  let notConvertedWithin3 = 0;
+  let repeatedEconomyNext = 0;
+  let repeatedEconomyWithin3 = 0;
+  let thenDraw = 0;
+  let thenProtect = 0;
+  let thenNewRemote = 0;
+  let thenRunnerSteal = 0;
+  let thenActionLimit = 0;
+  let suspiciousRepeated = 0;
+  let suspiciousNoConversion = 0;
+  let suspiciousStealFollowup = 0;
+  let repeatedCreditsStillShort = 0;
+  let repeatedCreditsAlreadyEnough = 0;
+  let repeatedScoreLegal = 0;
+  let repeatedAdvanceLegal = 0;
+  let repeatedAgendaInstallReadyRemoteLegal = 0;
+  let repeatedRemoteSafe = 0;
+  let repeatedRunnerContestHigh = 0;
+  let repeatedThenScore = 0;
+  let repeatedThenRunnerSteal = 0;
+  let repeatedThenActionLimit = 0;
+  let repeatedSuspicious = 0;
+  let repeatedPlausible = 0;
+  let noConversionCreditsStillShort = 0;
+  let noConversionNoAgendaExit = 0;
+  let noConversionRemoteUnsafe = 0;
+  let noConversionRunnerContestHigh = 0;
+  let noConversionSafetyBlocked = 0;
+  let noConversionPlanDrift = 0;
+  let noConversionRepeatedEconomy = 0;
+  let noConversionDrawLoop = 0;
+  let noConversionProtectionLoop = 0;
+  let noConversionRemotePortfolioLoop = 0;
+  let noConversionRunnerSteal = 0;
+  let noConversionActionLimit = 0;
+  let noConversionSuspicious = 0;
+  let noConversionPlausible = 0;
+
+  const converted = (entry: PlanConversionActionEntry) =>
+    entry.corpScoreTerminalScoreTaken === true ||
+    entry.corpScoreTerminalAdvanceTaken === true ||
+    entry.corpScoreTerminalAgendaInstalled === true ||
+    entry.actionType === "score_agenda" ||
+    (entry.actionType === "advance_card" &&
+      entry.corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext === true) ||
+    (entry.actionType === "install_card" &&
+      entry.installPlacement !== "ice" &&
+      entry.targetCardType === "agenda");
+  const economy = (entry: PlanConversionActionEntry) =>
+    entry.corpEconomyBeforeScoreTaken === true ||
+    entry.corpScoreTerminalSkippedForEconomy === true ||
+    entry.actionType === "gain_credit" ||
+    hasEvidenceFlag(entry, "corp_economy_before_score_window:true");
+  const scoreLegal = (entry: PlanConversionActionEntry) =>
+    entry.corpEconomyBeforeScoreWindowWithScoreLegalNext === true ||
+    entry.corpScoreTerminalWindowScoreLegal === true;
+  const advanceLegal = (entry: PlanConversionActionEntry) =>
+    entry.corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext === true ||
+    entry.corpScoreTerminalWindowAdvanceToScoreLegal === true;
+  const agendaReadyLegal = (entry: PlanConversionActionEntry) =>
+    entry.corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote === true ||
+    entry.corpScoreTerminalWindowAgendaInstallLegal === true;
+  const blockedForPlausibleReason = (entry: PlanConversionActionEntry) =>
+    entry.corpEconomyBeforeScoreFixGateBlockedByCredits === true ||
+    entry.corpEconomyBeforeScoreFixGateBlockedByCheapContest === true ||
+    entry.corpEconomyBeforeScoreFixGateBlockedByRunnerContest === true ||
+    entry.corpEconomyBeforeScoreFixGateBlockedBySafety === true ||
+    entry.corpEconomyBeforeScorePlausibleNoAgendaExit === true ||
+    entry.corpEconomyBeforeScoreWindowRemoteContestHigh === true;
+  const fixGateSuspiciousEntry = (entry: PlanConversionActionEntry) =>
+    entry.corpEconomyBeforeScoreFixGateEligible === true &&
+    entry.corpEconomyBeforeScoreWindowCreditsAlreadyEnough === true &&
+    !blockedForPlausibleReason(entry) &&
+    (scoreLegal(entry) || advanceLegal(entry) || agendaReadyLegal(entry));
+
+  for (const { entry, index, sequence } of takenEntries) {
+    const future = sequence.slice(index + 1, index + 13);
+    const futureCorp = future.filter((candidate) => candidate.side === "corp");
+    const nextCorp = futureCorp[0];
+    const next3 = futureCorp.slice(0, 3);
+    if (nextCorp?.corpScoreTerminalScoreTaken === true)
+      convertedToScoreNext += 1;
+    if (nextCorp?.corpScoreTerminalAdvanceTaken === true)
+      convertedToAdvanceNext += 1;
+    if (nextCorp?.corpScoreTerminalAgendaInstalled === true)
+      convertedToAgendaInstallNext += 1;
+    if (futureCorp.slice(0, 2).some(converted)) convertedWithin2 += 1;
+    const convertedInNext3 = next3.some(converted);
+    const repeatedInNext3 = next3.some(economy);
+    const runnerStealAfterEntry = future.some(
+      (candidate) =>
+        candidate.side === "runner" && candidate.actionType === "steal_agenda",
+    );
+    const actionLimitAfterEntry =
+      index >= sequence.length - 6 && !futureCorp.some(converted);
+    const next3HasDraw = next3.some(
+      (candidate) => candidate.actionType === "draw_card",
+    );
+    const next3HasProtection = next3.some(
+      (candidate) =>
+        candidate.corpScoreTerminalSkippedForProtection === true ||
+        candidate.corpScoreTerminalSkippedForHqProtection === true ||
+        candidate.corpScoreTerminalSkippedForRndProtection === true,
+    );
+    const next3HasNewRemote = next3.some(
+      (candidate) =>
+        candidate.actionType === "install_card" &&
+        candidate.targetServerId === "new_remote",
+    );
+    const entryPlausible = blockedForPlausibleReason(entry);
+    const entrySuspicious = fixGateSuspiciousEntry(entry);
+
+    if (convertedInNext3) convertedWithin3 += 1;
+    else {
+      notConvertedWithin3 += 1;
+      if (entry.corpEconomyBeforeScoreFixGateEligible === true)
+        suspiciousNoConversion += 1;
+      if (entry.corpEconomyBeforeScoreWindowCreditsShort === true)
+        noConversionCreditsStillShort += 1;
+      if (entry.corpEconomyBeforeScorePlausibleNoAgendaExit === true)
+        noConversionNoAgendaExit += 1;
+      if (entry.corpEconomyBeforeScoreWindowWithReadyRemote !== true)
+        noConversionRemoteUnsafe += 1;
+      if (entry.corpEconomyBeforeScoreWindowRemoteContestHigh === true)
+        noConversionRunnerContestHigh += 1;
+      if (entry.corpEconomyBeforeScoreFixGateBlockedBySafety === true)
+        noConversionSafetyBlocked += 1;
+      if (next3HasDraw || next3HasProtection || next3HasNewRemote)
+        noConversionPlanDrift += 1;
+      if (repeatedInNext3) noConversionRepeatedEconomy += 1;
+      if (next3HasDraw) noConversionDrawLoop += 1;
+      if (next3HasProtection) noConversionProtectionLoop += 1;
+      if (next3HasNewRemote) noConversionRemotePortfolioLoop += 1;
+      if (runnerStealAfterEntry) noConversionRunnerSteal += 1;
+      if (actionLimitAfterEntry) noConversionActionLimit += 1;
+      if (entrySuspicious) noConversionSuspicious += 1;
+      if (entryPlausible) noConversionPlausible += 1;
+    }
+    if (nextCorp && economy(nextCorp)) {
+      repeatedEconomyNext += 1;
+      if (entry.corpEconomyBeforeScoreFixGateEligible === true)
+        suspiciousRepeated += 1;
+    }
+    if (repeatedInNext3) {
+      repeatedEconomyWithin3 += 1;
+      if (entry.corpEconomyBeforeScoreWindowCreditsShort === true)
+        repeatedCreditsStillShort += 1;
+      if (entry.corpEconomyBeforeScoreWindowCreditsAlreadyEnough === true)
+        repeatedCreditsAlreadyEnough += 1;
+      if (scoreLegal(entry)) repeatedScoreLegal += 1;
+      if (advanceLegal(entry)) repeatedAdvanceLegal += 1;
+      if (agendaReadyLegal(entry)) repeatedAgendaInstallReadyRemoteLegal += 1;
+      if (entry.corpEconomyBeforeScoreWindowWithReadyRemote === true)
+        repeatedRemoteSafe += 1;
+      if (entry.corpEconomyBeforeScoreWindowRemoteContestHigh === true)
+        repeatedRunnerContestHigh += 1;
+      if (next3.some((candidate) => candidate.corpScoreTerminalScoreTaken))
+        repeatedThenScore += 1;
+      if (runnerStealAfterEntry) repeatedThenRunnerSteal += 1;
+      if (actionLimitAfterEntry) repeatedThenActionLimit += 1;
+      if (entrySuspicious) repeatedSuspicious += 1;
+      if (entryPlausible) repeatedPlausible += 1;
+    }
+    if (nextCorp?.actionType === "draw_card") thenDraw += 1;
+    if (
+      nextCorp?.corpScoreTerminalSkippedForProtection === true ||
+      nextCorp?.corpScoreTerminalSkippedForHqProtection === true ||
+      nextCorp?.corpScoreTerminalSkippedForRndProtection === true
+    )
+      thenProtect += 1;
+    if (
+      nextCorp?.actionType === "install_card" &&
+      nextCorp.targetServerId === "new_remote"
+    )
+      thenNewRemote += 1;
+    if (runnerStealAfterEntry) {
+      thenRunnerSteal += 1;
+      if (entry.corpEconomyBeforeScoreFixGateEligible === true)
+        suspiciousStealFollowup += 1;
+    }
+    if (actionLimitAfterEntry) thenActionLimit += 1;
+  }
+
+  const count = (flag: keyof AiSimulationSummary["actionSequence"][number]) =>
+    entries.filter((entry) => entry[flag] === true).length;
+
+  return {
+    corpEconomyBeforeScoreWindow: entries.length,
+    corpEconomyBeforeScoreWindowNecessary: entries.filter(
+      (entry) =>
+        entry.corpEconomyBeforeScoreTakenAsNecessaryCredits === true ||
+        hasEvidenceFlag(
+          entry,
+          "corp_economy_before_score_window_necessary:true",
+        ),
+    ).length,
+    corpEconomyBeforeScoreWindowWithInstalledAgenda: count(
+      "corpEconomyBeforeScoreWindowWithInstalledAgenda",
+    ),
+    corpEconomyBeforeScoreWindowWithAdvancedAgenda: count(
+      "corpEconomyBeforeScoreWindowWithAdvancedAgenda",
+    ),
+    corpEconomyBeforeScoreWindowWithScoreLegalNext: count(
+      "corpEconomyBeforeScoreWindowWithScoreLegalNext",
+    ),
+    corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext: count(
+      "corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext",
+    ),
+    corpEconomyBeforeScoreWindowWithReadyRemote: count(
+      "corpEconomyBeforeScoreWindowWithReadyRemote",
+    ),
+    corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote: count(
+      "corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote",
+    ),
+    corpEconomyBeforeScoreWindowCreditsShort: count(
+      "corpEconomyBeforeScoreWindowCreditsShort",
+    ),
+    corpEconomyBeforeScoreWindowCreditsAlreadyEnough: count(
+      "corpEconomyBeforeScoreWindowCreditsAlreadyEnough",
+    ),
+    corpEconomyBeforeScoreWindowRemoteSafe: count(
+      "corpEconomyBeforeScoreWindowRemoteSafe",
+    ),
+    corpEconomyBeforeScoreWindowRemoteContestHigh: count(
+      "corpEconomyBeforeScoreWindowRemoteContestHigh",
+    ),
+    corpEconomyBeforeScoreTaken: count("corpEconomyBeforeScoreTaken"),
+    corpEconomyBeforeScoreTakenAsNecessaryCredits: count(
+      "corpEconomyBeforeScoreTakenAsNecessaryCredits",
+    ),
+    corpEconomyBeforeScoreTakenDespiteCreditsEnough: count(
+      "corpEconomyBeforeScoreTakenDespiteCreditsEnough",
+    ),
+    corpEconomyBeforeScoreTakenOverScoreLegal: count(
+      "corpEconomyBeforeScoreTakenOverScoreLegal",
+    ),
+    corpEconomyBeforeScoreTakenOverAdvanceToScoreLegal: count(
+      "corpEconomyBeforeScoreTakenOverAdvanceToScoreLegal",
+    ),
+    corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote: count(
+      "corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote",
+    ),
+    corpEconomyBeforeScoreTakenOverHqAgendaExit: count(
+      "corpEconomyBeforeScoreTakenOverHqAgendaExit",
+    ),
+    corpEconomyBeforeScoreTakenOverScoreAreaAbility: count(
+      "corpEconomyBeforeScoreTakenOverScoreAreaAbility",
+    ),
+    corpEconomyBeforeScoreConvertedToScoreNextDecision: convertedToScoreNext,
+    corpEconomyBeforeScoreConvertedToAdvanceNextDecision:
+      convertedToAdvanceNext,
+    corpEconomyBeforeScoreConvertedToAgendaInstallNextDecision:
+      convertedToAgendaInstallNext,
+    corpEconomyBeforeScoreConvertedWithin2CorpActions: convertedWithin2,
+    corpEconomyBeforeScoreConvertedWithin3CorpActions: convertedWithin3,
+    corpEconomyBeforeScoreNotConvertedWithin3CorpActions: notConvertedWithin3,
+    corpEconomyBeforeScoreRepeatedEconomyNextDecision: repeatedEconomyNext,
+    corpEconomyBeforeScoreRepeatedEconomyWithin3: repeatedEconomyWithin3,
+    corpEconomyBeforeScoreThenDraw: thenDraw,
+    corpEconomyBeforeScoreThenProtect: thenProtect,
+    corpEconomyBeforeScoreThenNewRemote: thenNewRemote,
+    corpEconomyBeforeScoreThenRunnerSteal: thenRunnerSteal,
+    corpEconomyBeforeScoreThenActionLimit: thenActionLimit,
+    corpEconomyBeforeScorePlausibleCreditsNeeded: count(
+      "corpEconomyBeforeScorePlausibleCreditsNeeded",
+    ),
+    corpEconomyBeforeScorePlausibleRezOrAdvanceReserve: count(
+      "corpEconomyBeforeScorePlausibleRezOrAdvanceReserve",
+    ),
+    corpEconomyBeforeScorePlausibleHqOrRndSafety: count(
+      "corpEconomyBeforeScorePlausibleHqOrRndSafety",
+    ),
+    corpEconomyBeforeScorePlausibleRunnerContestTooHigh: count(
+      "corpEconomyBeforeScorePlausibleRunnerContestTooHigh",
+    ),
+    corpEconomyBeforeScorePlausibleNoAgendaExit: count(
+      "corpEconomyBeforeScorePlausibleNoAgendaExit",
+    ),
+    corpEconomyBeforeScoreSuspiciousCreditsAlreadyEnough: count(
+      "corpEconomyBeforeScoreSuspiciousCreditsAlreadyEnough",
+    ),
+    corpEconomyBeforeScoreSuspiciousRepeatedEconomy: suspiciousRepeated,
+    corpEconomyBeforeScoreSuspiciousDelayedTerminalAction: count(
+      "corpEconomyBeforeScoreSuspiciousDelayedTerminalAction",
+    ),
+    corpEconomyBeforeScoreSuspiciousRemoteStillSafe: count(
+      "corpEconomyBeforeScoreSuspiciousRemoteStillSafe",
+    ),
+    corpEconomyBeforeScoreSuspiciousRunnerStealFollowup:
+      suspiciousStealFollowup,
+    corpEconomyBeforeScoreUnclassified: count(
+      "corpEconomyBeforeScoreUnclassified",
+    ),
+    corpEconomyBeforeScoreFixGateEligible: count(
+      "corpEconomyBeforeScoreFixGateEligible",
+    ),
+    corpEconomyBeforeScoreFixGateBlockedByCredits: count(
+      "corpEconomyBeforeScoreFixGateBlockedByCredits",
+    ),
+    corpEconomyBeforeScoreFixGateBlockedByCheapContest: count(
+      "corpEconomyBeforeScoreFixGateBlockedByCheapContest",
+    ),
+    corpEconomyBeforeScoreFixGateBlockedByRunnerContest: count(
+      "corpEconomyBeforeScoreFixGateBlockedByRunnerContest",
+    ),
+    corpEconomyBeforeScoreFixGateBlockedBySafety: count(
+      "corpEconomyBeforeScoreFixGateBlockedBySafety",
+    ),
+    corpEconomyBeforeScoreFixGateSuspicious: count(
+      "corpEconomyBeforeScoreFixGateSuspicious",
+    ),
+    corpEconomyBeforeScoreFixGateSuspiciousRepeatedEconomy: suspiciousRepeated,
+    corpEconomyBeforeScoreFixGateSuspiciousNoConversion: suspiciousNoConversion,
+    corpEconomyBeforeScoreFixGateSuspiciousStealFollowup:
+      suspiciousStealFollowup,
+    corpRepeatedEconomyBeforeScoreWindows: repeatedEconomyWithin3,
+    corpRepeatedEconomyBeforeScoreCreditsStillShort: repeatedCreditsStillShort,
+    corpRepeatedEconomyBeforeScoreCreditsAlreadyEnough:
+      repeatedCreditsAlreadyEnough,
+    corpRepeatedEconomyBeforeScoreScoreLegal: repeatedScoreLegal,
+    corpRepeatedEconomyBeforeScoreAdvanceLegal: repeatedAdvanceLegal,
+    corpRepeatedEconomyBeforeScoreAgendaInstallReadyRemoteLegal:
+      repeatedAgendaInstallReadyRemoteLegal,
+    corpRepeatedEconomyBeforeScoreRemoteSafe: repeatedRemoteSafe,
+    corpRepeatedEconomyBeforeScoreRunnerContestHigh: repeatedRunnerContestHigh,
+    corpRepeatedEconomyBeforeScoreThenScore: repeatedThenScore,
+    corpRepeatedEconomyBeforeScoreThenRunnerSteal: repeatedThenRunnerSteal,
+    corpRepeatedEconomyBeforeScoreThenActionLimit: repeatedThenActionLimit,
+    corpRepeatedEconomyBeforeScoreSuspicious: repeatedSuspicious,
+    corpRepeatedEconomyBeforeScorePlausible: repeatedPlausible,
+    corpEconomyBeforeScoreNoConversionCreditsStillShort:
+      noConversionCreditsStillShort,
+    corpEconomyBeforeScoreNoConversionNoAgendaExit: noConversionNoAgendaExit,
+    corpEconomyBeforeScoreNoConversionRemoteUnsafe: noConversionRemoteUnsafe,
+    corpEconomyBeforeScoreNoConversionRunnerContestHigh:
+      noConversionRunnerContestHigh,
+    corpEconomyBeforeScoreNoConversionSafetyBlocked: noConversionSafetyBlocked,
+    corpEconomyBeforeScoreNoConversionPlanDrift: noConversionPlanDrift,
+    corpEconomyBeforeScoreNoConversionRepeatedEconomy:
+      noConversionRepeatedEconomy,
+    corpEconomyBeforeScoreNoConversionDrawLoop: noConversionDrawLoop,
+    corpEconomyBeforeScoreNoConversionProtectionLoop:
+      noConversionProtectionLoop,
+    corpEconomyBeforeScoreNoConversionRemotePortfolioLoop:
+      noConversionRemotePortfolioLoop,
+    corpEconomyBeforeScoreNoConversionRunnerSteal: noConversionRunnerSteal,
+    corpEconomyBeforeScoreNoConversionActionLimit: noConversionActionLimit,
+    corpEconomyBeforeScoreNoConversionSuspicious: noConversionSuspicious,
+    corpEconomyBeforeScoreNoConversionPlausible: noConversionPlausible,
+    corpEconomyBeforeScoreCreditsEnoughWindows: entries.filter(
+      (entry) =>
+        entry.corpEconomyBeforeScoreWindowCreditsAlreadyEnough === true,
+    ).length,
+    corpEconomyBeforeScoreCreditsEnoughTaken: entries.filter(
+      (entry) =>
+        entry.corpEconomyBeforeScoreWindowCreditsAlreadyEnough === true &&
+        entry.corpEconomyBeforeScoreTaken === true,
+    ).length,
+    corpEconomyBeforeScoreCreditsEnoughScoreLegal: entries.filter(
+      (entry) =>
+        entry.corpEconomyBeforeScoreWindowCreditsAlreadyEnough === true &&
+        scoreLegal(entry),
+    ).length,
+    corpEconomyBeforeScoreCreditsEnoughAdvanceLegal: entries.filter(
+      (entry) =>
+        entry.corpEconomyBeforeScoreWindowCreditsAlreadyEnough === true &&
+        advanceLegal(entry),
+    ).length,
+    corpEconomyBeforeScoreCreditsEnoughAgendaInstallReadyRemoteLegal:
+      entries.filter(
+        (entry) =>
+          entry.corpEconomyBeforeScoreWindowCreditsAlreadyEnough === true &&
+          agendaReadyLegal(entry),
+      ).length,
+    corpEconomyBeforeScoreCreditsEnoughSafetyBlocked: entries.filter(
+      (entry) =>
+        entry.corpEconomyBeforeScoreWindowCreditsAlreadyEnough === true &&
+        entry.corpEconomyBeforeScoreFixGateBlockedBySafety === true,
+    ).length,
+    corpEconomyBeforeScoreCreditsEnoughSuspicious: entries.filter(
+      (entry) =>
+        entry.corpEconomyBeforeScoreWindowCreditsAlreadyEnough === true &&
+        entry.corpEconomyBeforeScoreTaken === true &&
+        fixGateSuspiciousEntry(entry),
+    ).length,
+    corpEconomyBeforeScoreCreditsEnoughPlausible: entries.filter(
+      (entry) =>
+        entry.corpEconomyBeforeScoreWindowCreditsAlreadyEnough === true &&
+        blockedForPlausibleReason(entry),
+    ).length,
+  };
+}
+
+function corpScoreTerminalFollowupMetrics(
+  actionSequence: AiSimulationSummary["actionSequence"],
+): Pick<
+  AiMatchProgressionMetrics,
+  | "corpScoreTerminalSkippedThenAgendaStolen"
+  | "corpScoreTerminalSkippedThenNoScoreWindow"
+  | "corpScoreTerminalSkippedThenActionLimit"
+  | "corpScoreTerminalSkippedThenProtectionLoop"
+  | "corpScoreTerminalSkippedThenEconomyLoop"
+  | "corpScoreTerminalSkippedThenRemoteStillSafe"
+  | "corpScoreTerminalSkippedThenScoreNextDecision"
+> {
+  let corpScoreTerminalSkippedThenAgendaStolen = 0;
+  let corpScoreTerminalSkippedThenNoScoreWindow = 0;
+  let corpScoreTerminalSkippedThenActionLimit = 0;
+  let corpScoreTerminalSkippedThenProtectionLoop = 0;
+  let corpScoreTerminalSkippedThenEconomyLoop = 0;
+  let corpScoreTerminalSkippedThenRemoteStillSafe = 0;
+  let corpScoreTerminalSkippedThenScoreNextDecision = 0;
+  const skippedEntries = actionSequence
+    .map((entry, index) => ({ entry, index }))
+    .filter(({ entry }) => entry.corpScoreTerminalSkipped === true);
+
+  for (const { entry, index } of skippedEntries) {
+    const future = actionSequence.slice(index + 1, index + 13);
+    const futureCorp = future.filter((candidate) => candidate.side === "corp");
+    const nextCorp = futureCorp[0];
+    const scoreLike = (candidate: PlanConversionActionEntry) =>
+      candidate.corpScoreTerminalScoreTaken === true ||
+      candidate.corpScoreTerminalAdvanceTaken === true ||
+      candidate.corpScoreTerminalAgendaInstalled === true ||
+      candidate.actionType === "score_agenda";
+
+    if (
+      future.some(
+        (candidate) =>
+          candidate.side === "runner" &&
+          candidate.actionType === "steal_agenda",
+      )
+    )
+      corpScoreTerminalSkippedThenAgendaStolen += 1;
+
+    if (nextCorp && scoreLike(nextCorp))
+      corpScoreTerminalSkippedThenScoreNextDecision += 1;
+
+    if (!futureCorp.slice(0, 3).some(scoreLike))
+      corpScoreTerminalSkippedThenNoScoreWindow += 1;
+
+    if (index >= actionSequence.length - 6 && !futureCorp.some(scoreLike))
+      corpScoreTerminalSkippedThenActionLimit += 1;
+
+    if (
+      futureCorp
+        .slice(0, 3)
+        .some(
+          (candidate) =>
+            candidate.corpScoreTerminalSkippedForProtection === true ||
+            hasEvidenceFlag(
+              candidate,
+              "corp_protection_loop_after_remote_safe:true",
+            ),
+        )
+    )
+      corpScoreTerminalSkippedThenProtectionLoop += 1;
+
+    if (
+      futureCorp
+        .slice(0, 3)
+        .some(
+          (candidate) =>
+            candidate.corpScoreTerminalSkippedForEconomy === true ||
+            hasEvidenceFlag(candidate, "corp_economy_before_score_window:true"),
+        )
+    )
+      corpScoreTerminalSkippedThenEconomyLoop += 1;
+
+    if (
+      entry.corpScoreTerminalWindowProtectedRemoteReady === true ||
+      futureCorp
+        .slice(0, 3)
+        .some(
+          (candidate) =>
+            candidate.corpScoreTerminalWindowProtectedRemoteReady === true,
+        )
+    )
+      corpScoreTerminalSkippedThenRemoteStillSafe += 1;
+  }
+
+  return {
+    corpScoreTerminalSkippedThenAgendaStolen,
+    corpScoreTerminalSkippedThenNoScoreWindow,
+    corpScoreTerminalSkippedThenActionLimit,
+    corpScoreTerminalSkippedThenProtectionLoop,
+    corpScoreTerminalSkippedThenEconomyLoop,
+    corpScoreTerminalSkippedThenRemoteStillSafe,
+    corpScoreTerminalSkippedThenScoreNextDecision,
+  };
+}
+
 function summarizeCorpEffectiveRemoteSafetyMetrics(
   summaries: AiSimulationSummary[],
 ): Pick<
@@ -14796,6 +19021,66 @@ function summarizeTagPunishWindowMetrics(
   | "corpVisibleTagPunishSkippedForInstall"
   | "corpVisibleTagPunishSkippedForEndTurn"
   | "corpVisibleTagPunishSkippedForUnknownHigherPriority"
+  | "corpVisibleTagPunishSkippedUnknownChosenScore"
+  | "corpVisibleTagPunishSkippedUnknownChosenAdvance"
+  | "corpVisibleTagPunishSkippedUnknownChosenInstallAgenda"
+  | "corpVisibleTagPunishSkippedUnknownChosenInstallIce"
+  | "corpVisibleTagPunishSkippedUnknownChosenInstallAssetOrUpgrade"
+  | "corpVisibleTagPunishSkippedUnknownChosenRez"
+  | "corpVisibleTagPunishSkippedUnknownChosenOperation"
+  | "corpVisibleTagPunishSkippedUnknownChosenAbility"
+  | "corpVisibleTagPunishSkippedUnknownChosenTraceTagSource"
+  | "corpVisibleTagPunishSkippedUnknownChosenDraw"
+  | "corpVisibleTagPunishSkippedUnknownChosenBasicCredit"
+  | "corpVisibleTagPunishSkippedUnknownChosenEndTurn"
+  | "corpVisibleTagPunishSkippedUnknownChosenUnknown"
+  | "corpVisibleTagPunishSkippedUnknownByReasonCode"
+  | "corpVisibleTagPunishSkippedUnknownByChosenActionType"
+  | "corpVisibleTagPunishSkippedUnknownByChosenCard"
+  | "corpVisibleTagPunishSkippedUnknownByPayoffCard"
+  | "corpVisibleTagPunishSkippedUnknownByPayoffKind"
+  | "corpVisibleTagPunishUnknownSkipPlausible"
+  | "corpVisibleTagPunishUnknownSkipSuspicious"
+  | "corpVisibleTagPunishUnknownSkipUnclassified"
+  | "corpVisibleTagPunishUnknownSkipByPlausibility"
+  | "corpVisibleTagPunishUnknownSkipPayoffDamage"
+  | "corpVisibleTagPunishUnknownSkipPayoffEconomic"
+  | "corpVisibleTagPunishUnknownSkipPayoffTrash"
+  | "corpVisibleTagPunishUnknownSkipPayoffRunLock"
+  | "corpVisibleTagPunishUnknownSkipPayoffAmbush"
+  | "corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal"
+  | "corpVisibleTagPunishUnknownSkipPayoffNonLethal"
+  | "corpVisibleTagPunishFixGateEligibleWindow"
+  | "corpVisibleTagPunishFixGateBlockedByScore"
+  | "corpVisibleTagPunishFixGateBlockedByAdvanceScore"
+  | "corpVisibleTagPunishFixGateBlockedBySafety"
+  | "corpVisibleTagPunishFixGateBlockedByAffordability"
+  | "corpVisibleTagPunishFixGateBlockedByLowImpact"
+  | "corpVisibleTagPunishFixGateSuspiciousSkip"
+  | "corpVisibleTagPunishDecisionWindows"
+  | "corpVisibleTagPunishDecisionWindowsTaken"
+  | "corpVisibleTagPunishDecisionWindowsSkipped"
+  | "corpVisibleTagPunishDecisionWindowsWithMultiplePayoffs"
+  | "corpVisibleTagPunishAlternativePayoffsNotChosen"
+  | "corpVisibleTagPunishChosenPayoffAmongAlternatives"
+  | "corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff"
+  | "corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization"
+  | "corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen"
+  | "corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization"
+  | "corpVisibleTagPunishOperationChoiceAmongPayoffs"
+  | "corpVisibleTagPunishChosenDamageOverEconomic"
+  | "corpVisibleTagPunishChosenEconomicOverDamage"
+  | "corpVisibleTagPunishChosenTrashOverDamage"
+  | "corpVisibleTagPunishChosenLethalOverNonLethal"
+  | "corpVisibleTagPunishChosenNonLethalOverLethal"
+  | "corpVisibleTagPunishChosenLowerImpactOverHigherImpact"
+  | "corpVisibleTagPunishChosenUnknownImpactOrdering"
+  | "corpVisibleTagPunishFixGateEligibleWindowNormalized"
+  | "corpVisibleTagPunishFixGateSuspiciousSkipNormalized"
+  | "corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken"
+  | "corpVisibleTagPunishPotentialPayoffOrderingIssue"
+  | "corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed"
+  | "corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage"
   | "corpFunnelSourcePayoffPairSeenInDeck"
   | "corpFunnelSourceActionTakenWithPayoffInDeck"
   | "corpFunnelSourceActionTakenWithVisiblePayoff"
@@ -14922,6 +19207,75 @@ function summarizeTagPunishWindowMetrics(
     {};
   let corpVisibleTagPunishTaken = 0;
   let corpVisibleTagPunishSkipped = 0;
+  const unknownSkipChosenFamilyCounts: Record<
+    CorpTagPunishUnknownChosenFamily,
+    number
+  > = {
+    score: 0,
+    advance: 0,
+    install_agenda: 0,
+    install_ice: 0,
+    install_asset_or_upgrade: 0,
+    rez: 0,
+    operation: 0,
+    ability: 0,
+    trace_tag_source: 0,
+    draw: 0,
+    basic_credit: 0,
+    end_turn: 0,
+    unknown: 0,
+  };
+  const unknownSkipReasonCodeCounts: Record<string, number> = {};
+  const unknownSkipChosenActionTypeCounts: Record<string, number> = {};
+  const unknownSkipChosenCardCounts: Record<string, number> = {};
+  const unknownSkipPayoffCardCounts: Record<string, number> = {};
+  const unknownSkipPayoffKindCounts: Record<string, number> = {};
+  const unknownSkipPlausibilityCounts: Record<
+    CorpTagPunishUnknownSkipPlausibility,
+    number
+  > = {
+    plausible: 0,
+    suspicious: 0,
+    unclassified: 0,
+  };
+  let corpVisibleTagPunishUnknownSkipPayoffDamage = 0;
+  let corpVisibleTagPunishUnknownSkipPayoffEconomic = 0;
+  let corpVisibleTagPunishUnknownSkipPayoffTrash = 0;
+  let corpVisibleTagPunishUnknownSkipPayoffRunLock = 0;
+  let corpVisibleTagPunishUnknownSkipPayoffAmbush = 0;
+  let corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal = 0;
+  let corpVisibleTagPunishUnknownSkipPayoffNonLethal = 0;
+  let corpVisibleTagPunishFixGateEligibleWindow = 0;
+  let corpVisibleTagPunishFixGateBlockedByScore = 0;
+  let corpVisibleTagPunishFixGateBlockedByAdvanceScore = 0;
+  let corpVisibleTagPunishFixGateBlockedBySafety = 0;
+  let corpVisibleTagPunishFixGateBlockedByAffordability = 0;
+  let corpVisibleTagPunishFixGateBlockedByLowImpact = 0;
+  let corpVisibleTagPunishFixGateSuspiciousSkip = 0;
+  let corpVisibleTagPunishDecisionWindows = 0;
+  let corpVisibleTagPunishDecisionWindowsTaken = 0;
+  let corpVisibleTagPunishDecisionWindowsSkipped = 0;
+  let corpVisibleTagPunishDecisionWindowsWithMultiplePayoffs = 0;
+  let corpVisibleTagPunishAlternativePayoffsNotChosen = 0;
+  let corpVisibleTagPunishChosenPayoffAmongAlternatives = 0;
+  let corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff = 0;
+  let corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization = 0;
+  let corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen = 0;
+  let corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization = 0;
+  let corpVisibleTagPunishOperationChoiceAmongPayoffs = 0;
+  let corpVisibleTagPunishChosenDamageOverEconomic = 0;
+  let corpVisibleTagPunishChosenEconomicOverDamage = 0;
+  let corpVisibleTagPunishChosenTrashOverDamage = 0;
+  let corpVisibleTagPunishChosenLethalOverNonLethal = 0;
+  let corpVisibleTagPunishChosenNonLethalOverLethal = 0;
+  let corpVisibleTagPunishChosenLowerImpactOverHigherImpact = 0;
+  let corpVisibleTagPunishChosenUnknownImpactOrdering = 0;
+  let corpVisibleTagPunishFixGateEligibleWindowNormalized = 0;
+  let corpVisibleTagPunishFixGateSuspiciousSkipNormalized = 0;
+  let corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken = 0;
+  let corpVisibleTagPunishPotentialPayoffOrderingIssue = 0;
+  let corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed = 0;
+  let corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage = 0;
   const visiblePunishSkippedByReason: Record<CorpTagPunishSkipReason, number> =
     {
       economy: 0,
@@ -15140,7 +19494,159 @@ function summarizeTagPunishWindowMetrics(
           visiblePunishSkippedByReason,
           entry.corpVisibleTagPunishSkippedReason,
         );
+        if (
+          entry.corpVisibleTagPunishSkippedReason ===
+            "unknown_higher_priority" ||
+          entry.corpVisibleTagPunishSkippedReason === "unknown"
+        ) {
+          unknownSkipChosenFamilyCounts[
+            entry.corpVisibleTagPunishUnknownSkipChosenFamily ?? "unknown"
+          ] += 1;
+          incrementStringCounter(unknownSkipReasonCodeCounts, entry.reasonCode);
+          incrementStringCounter(
+            unknownSkipChosenActionTypeCounts,
+            entry.corpVisibleTagPunishUnknownSkipChosenActionType ??
+              entry.actionType,
+          );
+          if (entry.corpVisibleTagPunishUnknownSkipChosenCardId)
+            incrementStringCounter(
+              unknownSkipChosenCardCounts,
+              entry.corpVisibleTagPunishUnknownSkipChosenCardId,
+            );
+          addCardsToCounter(
+            entry.corpVisibleTagPayoffLegalActionCards ?? [],
+            unknownSkipPayoffCardCounts,
+          );
+          addKindsToCounter(
+            entry.corpVisibleTagPayoffLegalActionKinds ?? [],
+            unknownSkipPayoffKindCounts,
+          );
+          unknownSkipPlausibilityCounts[
+            entry.corpVisibleTagPunishUnknownSkipPlausibility ?? "unclassified"
+          ] += 1;
+          if (
+            entry.corpVisibleTagPayoffLegalActionKinds?.includes("damage") ===
+            true
+          )
+            corpVisibleTagPunishUnknownSkipPayoffDamage += 1;
+          if (
+            entry.corpVisibleTagPayoffLegalActionKinds?.includes("economic") ===
+            true
+          )
+            corpVisibleTagPunishUnknownSkipPayoffEconomic += 1;
+          if (
+            entry.corpVisibleTagPayoffLegalActionKinds?.includes("trash") ===
+            true
+          )
+            corpVisibleTagPunishUnknownSkipPayoffTrash += 1;
+          if (
+            entry.corpVisibleTagPayoffLegalActionKinds?.includes("run_lock") ===
+            true
+          )
+            corpVisibleTagPunishUnknownSkipPayoffRunLock += 1;
+          if (
+            entry.corpVisibleTagPayoffLegalActionKinds?.includes("ambush") ===
+            true
+          )
+            corpVisibleTagPunishUnknownSkipPayoffAmbush += 1;
+          if (
+            entry.corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal ===
+            true
+          )
+            corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal += 1;
+          else corpVisibleTagPunishUnknownSkipPayoffNonLethal += 1;
+          if (entry.corpVisibleTagPunishUnknownSkipFixGateEligible === true) {
+            corpVisibleTagPunishFixGateEligibleWindow += 1;
+            if (
+              entry.corpVisibleTagPunishUnknownSkipPlausibility === "suspicious"
+            )
+              corpVisibleTagPunishFixGateSuspiciousSkip += 1;
+          }
+          switch (entry.corpVisibleTagPunishUnknownSkipFixGateBlockedBy) {
+            case "score":
+              corpVisibleTagPunishFixGateBlockedByScore += 1;
+              break;
+            case "advance_score":
+              corpVisibleTagPunishFixGateBlockedByAdvanceScore += 1;
+              break;
+            case "safety":
+              corpVisibleTagPunishFixGateBlockedBySafety += 1;
+              break;
+            case "affordability":
+              corpVisibleTagPunishFixGateBlockedByAffordability += 1;
+              break;
+            case "low_impact":
+              corpVisibleTagPunishFixGateBlockedByLowImpact += 1;
+              break;
+          }
+        }
       }
+      if (entry.corpVisibleTagPunishDecisionWindow === true)
+        corpVisibleTagPunishDecisionWindows += 1;
+      if (entry.corpVisibleTagPunishDecisionWindowTaken === true)
+        corpVisibleTagPunishDecisionWindowsTaken += 1;
+      if (entry.corpVisibleTagPunishDecisionWindowSkipped === true)
+        corpVisibleTagPunishDecisionWindowsSkipped += 1;
+      if (entry.corpVisibleTagPunishDecisionWindowWithMultiplePayoffs === true)
+        corpVisibleTagPunishDecisionWindowsWithMultiplePayoffs += 1;
+      corpVisibleTagPunishAlternativePayoffsNotChosen +=
+        entry.corpVisibleTagPunishAlternativePayoffsNotChosen ?? 0;
+      if (entry.corpVisibleTagPunishChosenPayoffAmongAlternatives === true)
+        corpVisibleTagPunishChosenPayoffAmongAlternatives += 1;
+      if (
+        entry.corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff ===
+        true
+      )
+        corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff += 1;
+      if (
+        entry.corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization ===
+        true
+      )
+        corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization += 1;
+      if (entry.corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen === true)
+        corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen += 1;
+      if (
+        entry.corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization ===
+        true
+      )
+        corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization += 1;
+      if (entry.corpVisibleTagPunishOperationChoiceAmongPayoffs === true)
+        corpVisibleTagPunishOperationChoiceAmongPayoffs += 1;
+      if (entry.corpVisibleTagPunishChosenDamageOverEconomic === true)
+        corpVisibleTagPunishChosenDamageOverEconomic += 1;
+      if (entry.corpVisibleTagPunishChosenEconomicOverDamage === true)
+        corpVisibleTagPunishChosenEconomicOverDamage += 1;
+      if (entry.corpVisibleTagPunishChosenTrashOverDamage === true)
+        corpVisibleTagPunishChosenTrashOverDamage += 1;
+      if (entry.corpVisibleTagPunishChosenLethalOverNonLethal === true)
+        corpVisibleTagPunishChosenLethalOverNonLethal += 1;
+      if (entry.corpVisibleTagPunishChosenNonLethalOverLethal === true)
+        corpVisibleTagPunishChosenNonLethalOverLethal += 1;
+      if (entry.corpVisibleTagPunishChosenLowerImpactOverHigherImpact === true)
+        corpVisibleTagPunishChosenLowerImpactOverHigherImpact += 1;
+      if (entry.corpVisibleTagPunishChosenUnknownImpactOrdering === true)
+        corpVisibleTagPunishChosenUnknownImpactOrdering += 1;
+      if (entry.corpVisibleTagPunishFixGateEligibleWindowNormalized === true)
+        corpVisibleTagPunishFixGateEligibleWindowNormalized += 1;
+      if (entry.corpVisibleTagPunishFixGateSuspiciousSkipNormalized === true)
+        corpVisibleTagPunishFixGateSuspiciousSkipNormalized += 1;
+      if (
+        entry.corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken ===
+        true
+      )
+        corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken += 1;
+      if (entry.corpVisibleTagPunishPotentialPayoffOrderingIssue === true)
+        corpVisibleTagPunishPotentialPayoffOrderingIssue += 1;
+      if (
+        entry.corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed ===
+        true
+      )
+        corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed += 1;
+      if (
+        entry.corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage ===
+        true
+      )
+        corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage += 1;
       if (entry.corpFunnelSourcePayoffPairSeenInDeck === true)
         corpFunnelSourcePayoffPairSeenInDeck += 1;
       if (entry.corpFunnelSourceActionTakenWithPayoffInDeck === true) {
@@ -15325,6 +19831,95 @@ function summarizeTagPunishWindowMetrics(
     corpVisibleTagPunishSkippedForUnknownHigherPriority:
       visiblePunishSkippedByReason.unknown_higher_priority +
       visiblePunishSkippedByReason.unknown,
+    corpVisibleTagPunishSkippedUnknownChosenScore:
+      unknownSkipChosenFamilyCounts.score,
+    corpVisibleTagPunishSkippedUnknownChosenAdvance:
+      unknownSkipChosenFamilyCounts.advance,
+    corpVisibleTagPunishSkippedUnknownChosenInstallAgenda:
+      unknownSkipChosenFamilyCounts.install_agenda,
+    corpVisibleTagPunishSkippedUnknownChosenInstallIce:
+      unknownSkipChosenFamilyCounts.install_ice,
+    corpVisibleTagPunishSkippedUnknownChosenInstallAssetOrUpgrade:
+      unknownSkipChosenFamilyCounts.install_asset_or_upgrade,
+    corpVisibleTagPunishSkippedUnknownChosenRez:
+      unknownSkipChosenFamilyCounts.rez,
+    corpVisibleTagPunishSkippedUnknownChosenOperation:
+      unknownSkipChosenFamilyCounts.operation,
+    corpVisibleTagPunishSkippedUnknownChosenAbility:
+      unknownSkipChosenFamilyCounts.ability,
+    corpVisibleTagPunishSkippedUnknownChosenTraceTagSource:
+      unknownSkipChosenFamilyCounts.trace_tag_source,
+    corpVisibleTagPunishSkippedUnknownChosenDraw:
+      unknownSkipChosenFamilyCounts.draw,
+    corpVisibleTagPunishSkippedUnknownChosenBasicCredit:
+      unknownSkipChosenFamilyCounts.basic_credit,
+    corpVisibleTagPunishSkippedUnknownChosenEndTurn:
+      unknownSkipChosenFamilyCounts.end_turn,
+    corpVisibleTagPunishSkippedUnknownChosenUnknown:
+      unknownSkipChosenFamilyCounts.unknown,
+    corpVisibleTagPunishSkippedUnknownByReasonCode: Object.values(
+      unknownSkipReasonCodeCounts,
+    ).reduce((sum, value) => sum + value, 0),
+    corpVisibleTagPunishSkippedUnknownByChosenActionType: Object.values(
+      unknownSkipChosenActionTypeCounts,
+    ).reduce((sum, value) => sum + value, 0),
+    corpVisibleTagPunishSkippedUnknownByChosenCard: Object.values(
+      unknownSkipChosenCardCounts,
+    ).reduce((sum, value) => sum + value, 0),
+    corpVisibleTagPunishSkippedUnknownByPayoffCard: Object.values(
+      unknownSkipPayoffCardCounts,
+    ).reduce((sum, value) => sum + value, 0),
+    corpVisibleTagPunishSkippedUnknownByPayoffKind: Object.values(
+      unknownSkipPayoffKindCounts,
+    ).reduce((sum, value) => sum + value, 0),
+    corpVisibleTagPunishUnknownSkipPlausible:
+      unknownSkipPlausibilityCounts.plausible,
+    corpVisibleTagPunishUnknownSkipSuspicious:
+      unknownSkipPlausibilityCounts.suspicious,
+    corpVisibleTagPunishUnknownSkipUnclassified:
+      unknownSkipPlausibilityCounts.unclassified,
+    corpVisibleTagPunishUnknownSkipByPlausibility:
+      unknownSkipPlausibilityCounts.plausible +
+      unknownSkipPlausibilityCounts.suspicious +
+      unknownSkipPlausibilityCounts.unclassified,
+    corpVisibleTagPunishUnknownSkipPayoffDamage,
+    corpVisibleTagPunishUnknownSkipPayoffEconomic,
+    corpVisibleTagPunishUnknownSkipPayoffTrash,
+    corpVisibleTagPunishUnknownSkipPayoffRunLock,
+    corpVisibleTagPunishUnknownSkipPayoffAmbush,
+    corpVisibleTagPunishUnknownSkipPayoffLethalOrNearLethal,
+    corpVisibleTagPunishUnknownSkipPayoffNonLethal,
+    corpVisibleTagPunishFixGateEligibleWindow,
+    corpVisibleTagPunishFixGateBlockedByScore,
+    corpVisibleTagPunishFixGateBlockedByAdvanceScore,
+    corpVisibleTagPunishFixGateBlockedBySafety,
+    corpVisibleTagPunishFixGateBlockedByAffordability,
+    corpVisibleTagPunishFixGateBlockedByLowImpact,
+    corpVisibleTagPunishFixGateSuspiciousSkip,
+    corpVisibleTagPunishDecisionWindows,
+    corpVisibleTagPunishDecisionWindowsTaken,
+    corpVisibleTagPunishDecisionWindowsSkipped,
+    corpVisibleTagPunishDecisionWindowsWithMultiplePayoffs,
+    corpVisibleTagPunishAlternativePayoffsNotChosen,
+    corpVisibleTagPunishChosenPayoffAmongAlternatives,
+    corpVisibleTagPunishUnknownSkipResolvedAsAlternativePayoff,
+    corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization,
+    corpVisibleTagPunishSkippedOnlyWhenNoPayoffChosen,
+    corpVisibleTagPunishWindowHadTakenAndSkippedBeforeNormalization,
+    corpVisibleTagPunishOperationChoiceAmongPayoffs,
+    corpVisibleTagPunishChosenDamageOverEconomic,
+    corpVisibleTagPunishChosenEconomicOverDamage,
+    corpVisibleTagPunishChosenTrashOverDamage,
+    corpVisibleTagPunishChosenLethalOverNonLethal,
+    corpVisibleTagPunishChosenNonLethalOverLethal,
+    corpVisibleTagPunishChosenLowerImpactOverHigherImpact,
+    corpVisibleTagPunishChosenUnknownImpactOrdering,
+    corpVisibleTagPunishFixGateEligibleWindowNormalized,
+    corpVisibleTagPunishFixGateSuspiciousSkipNormalized,
+    corpVisibleTagPunishFixGateResolvedByAlternativePayoffTaken,
+    corpVisibleTagPunishPotentialPayoffOrderingIssue,
+    corpVisibleTagPunishPotentialPayoffOrderingIssueLethalMissed,
+    corpVisibleTagPunishPotentialPayoffOrderingIssueEconomicVsDamage,
     corpFunnelSourcePayoffPairSeenInDeck,
     corpFunnelSourceActionTakenWithPayoffInDeck,
     corpFunnelSourceActionTakenWithVisiblePayoff,
@@ -17403,6 +21998,59 @@ function isRemoteServerTarget(serverId: string | undefined): boolean {
   return serverId === "new_remote" || serverId?.startsWith("remote_") === true;
 }
 
+function countCorpMultiIceInstallOrderFutureEffectDead(
+  sequence: AiSimulationSummary["actionSequence"],
+): number {
+  return sequence.filter((entry, index) => {
+    if (
+      entry.side !== "corp" ||
+      entry.actionType !== "install_card" ||
+      entry.installPlacement !== "ice" ||
+      entry.corpFutureRunIceInstalledAsDeadEffect !== true ||
+      !entry.targetServerId ||
+      !entry.turnNumber
+    )
+      return false;
+    return sequence
+      .slice(index + 1)
+      .some(
+        (later) =>
+          later.side === "corp" &&
+          later.turnNumber === entry.turnNumber &&
+          later.actionType === "install_card" &&
+          later.installPlacement === "ice" &&
+          later.targetServerId === entry.targetServerId,
+      );
+  }).length;
+}
+
+function countCorpMultiIceInstallOrderOptimized(
+  sequence: AiSimulationSummary["actionSequence"],
+): number {
+  return sequence.filter((entry, index) => {
+    if (
+      entry.side !== "corp" ||
+      entry.actionType !== "install_card" ||
+      entry.installPlacement !== "ice" ||
+      entry.corpFutureRunIceInstalledAsLiveEffect !== true ||
+      !entry.targetServerId ||
+      !entry.turnNumber
+    )
+      return false;
+    return sequence
+      .slice(0, index)
+      .some(
+        (previous) =>
+          previous.side === "corp" &&
+          previous.turnNumber === entry.turnNumber &&
+          previous.actionType === "install_card" &&
+          previous.installPlacement === "ice" &&
+          previous.targetServerId === entry.targetServerId &&
+          previous.corpFutureRunIceInstalled !== true,
+      );
+  }).length;
+}
+
 function isCorpRemoteAdvancementProgress(
   entry: AiSimulationSummary["actionSequence"][number],
 ): boolean {
@@ -17518,6 +22166,417 @@ type RunnerPressureReadyForMetrics = {
     | "no_valuable_target"
   >;
 };
+
+function corpFutureRunIceDiagnosticsForSimulationAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): Partial<AiSimulationSummary["actionSequence"][number]> {
+  if (input.side !== "corp" || action.side !== "corp") return {};
+  const opportunity = input.legalActions.some(
+    (candidate) =>
+      candidate.side === "corp" &&
+      candidate.type === "install_card" &&
+      candidate.payload?.placement === "ice" &&
+      Boolean(
+        classifyCorpFutureRunIceDefinitionId(
+          sourceDefinitionIdForSimulationAction(input, candidate),
+        ),
+      ),
+  );
+  const assessment = assessCorpFutureRunIcePlacement(input, action);
+  if (!assessment) {
+    return opportunity ? { corpFutureRunIceInstallOpportunity: true } : {};
+  }
+  return {
+    ...(opportunity ? { corpFutureRunIceInstallOpportunity: true } : {}),
+    corpFutureRunIceInstalled: true,
+    corpFutureRunIceClass: assessment.futureRunIceClass,
+    ...(assessment.installedOnEmptyServer
+      ? {
+          corpFutureRunIceInstalledOnEmptyServer: true,
+          corpFutureRunIceInstalledFirstOnEmptyServer: true,
+          corpFutureRunIceInstalledAsInnermost: true,
+          corpFutureRunIceInstalledWithoutLaterIce: true,
+          corpFutureRunIceInstalledAsDeadEffect: true,
+          corpIceOrderFutureEffectDead: true,
+        }
+      : {
+          corpFutureRunIceInstalledAfterInnerIceExists: true,
+          corpFutureRunIceInstalledWithLaterIce: true,
+          corpFutureRunIceInstalledAsLiveEffect: true,
+          corpIceOrderFutureEffectLive: true,
+        }),
+    corpFutureRunIceInstalledAsOutermost: true,
+    ...(assessment.deadEffect &&
+    (assessment.futureRunIceClass === "bolter_or_data_darts" ||
+      assessment.futureRunIceClass === "future_run_ice")
+      ? { corpNextIceEffectInstalledLast: true }
+      : {}),
+    ...(assessment.futureRunIceClass === "ball_and_chain" &&
+    assessment.deadEffect
+      ? {
+          corpBallAndChainInstalledInnermost: true,
+          corpBallAndChainInstalledWithoutLaterIce: true,
+        }
+      : {}),
+    ...(assessment.futureRunIceClass === "ball_and_chain" &&
+    assessment.liveEffect
+      ? { corpBallAndChainInstalledWithLaterIce: true }
+      : {}),
+    ...(assessment.futureRunIceClass === "canis" && assessment.deadEffect
+      ? { corpCanisInstalledWithoutLaterIce: true }
+      : {}),
+    ...(assessment.futureRunIceClass === "bolter_or_data_darts" &&
+    assessment.deadEffect
+      ? { corpBolterOrDataDartsInstalledWithoutNextIce: true }
+      : {}),
+  };
+}
+
+function corpScoreTerminalDiagnosticsForSimulationAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): Partial<AiSimulationSummary["actionSequence"][number]> {
+  if (input.side !== "corp" || action.side !== "corp") return {};
+  const terminal = assessCorpScoreTerminalWindow(input);
+  if (!terminal.terminalWindow) return {};
+  const scoreTaken = terminal.scoreActionIds.includes(action.actionId);
+  const advanceTaken = terminal.advanceToScoreActionIds.includes(
+    action.actionId,
+  );
+  const agendaInstalled = terminal.agendaInstallActionIds.includes(
+    action.actionId,
+  );
+  const taken = scoreTaken || advanceTaken || agendaInstalled;
+  const skipped = !taken;
+  const family = corpScoreTerminalChosenFamily(input, action);
+  const fixGateBlocked =
+    terminal.blockedByCheapContest ||
+    terminal.blockedByCredits ||
+    terminal.blockedByRunnerContest ||
+    terminal.blockedByHqThreat;
+  const suspiciousProtection =
+    skipped && !fixGateBlocked && family === "protection";
+  const suspiciousEconomy = skipped && !fixGateBlocked && family === "economy";
+  const suspiciousDraw = skipped && !fixGateBlocked && family === "draw";
+  const suspiciousRemotePortfolio =
+    skipped && !fixGateBlocked && family === "remote_portfolio";
+  const suspiciousUnknown =
+    skipped &&
+    !fixGateBlocked &&
+    !suspiciousProtection &&
+    !suspiciousEconomy &&
+    !suspiciousDraw &&
+    !suspiciousRemotePortfolio;
+  return {
+    corpScoreTerminalWindow: true,
+    ...(terminal.scoreActionIds.length > 0
+      ? { corpScoreTerminalWindowScoreLegal: true }
+      : {}),
+    ...(terminal.advanceToScoreActionIds.length > 0
+      ? { corpScoreTerminalWindowAdvanceToScoreLegal: true }
+      : {}),
+    ...(terminal.agendaInstallActionIds.length > 0
+      ? { corpScoreTerminalWindowAgendaInstallLegal: true }
+      : {}),
+    ...(terminal.protectedRemoteIds.length > 0
+      ? { corpScoreTerminalWindowProtectedRemoteReady: true }
+      : {}),
+    ...(terminal.remoteContestLow
+      ? { corpScoreTerminalWindowRemoteContestLow: true }
+      : {}),
+    ...(terminal.creditsSufficient
+      ? { corpScoreTerminalWindowCreditsSufficient: true }
+      : {}),
+    ...(terminal.runnerAccessThreatHigh
+      ? { corpScoreTerminalWindowRunnerAccessThreatHigh: true }
+      : {}),
+    ...(scoreTaken ? { corpScoreTerminalScoreTaken: true } : {}),
+    ...(advanceTaken ? { corpScoreTerminalAdvanceTaken: true } : {}),
+    ...(agendaInstalled ? { corpScoreTerminalAgendaInstalled: true } : {}),
+    ...(skipped ? { corpScoreTerminalSkipped: true } : {}),
+    ...(skipped && family === "protection"
+      ? { corpScoreTerminalSkippedForProtection: true }
+      : {}),
+    ...(skipped && family === "economy"
+      ? { corpScoreTerminalSkippedForEconomy: true }
+      : {}),
+    ...(skipped && family === "draw"
+      ? { corpScoreTerminalSkippedForDraw: true }
+      : {}),
+    ...(skipped && family === "install_ice"
+      ? { corpScoreTerminalSkippedForInstallIce: true }
+      : {}),
+    ...(skipped && family === "install_asset_or_upgrade"
+      ? { corpScoreTerminalSkippedForInstallAssetOrUpgrade: true }
+      : {}),
+    ...(skipped && family === "hq_protection"
+      ? { corpScoreTerminalSkippedForHqProtection: true }
+      : {}),
+    ...(skipped && family === "rnd_protection"
+      ? { corpScoreTerminalSkippedForRndProtection: true }
+      : {}),
+    ...(skipped && family === "remote_portfolio"
+      ? { corpScoreTerminalSkippedForRemotePortfolio: true }
+      : {}),
+    ...(skipped && family === "unknown"
+      ? { corpScoreTerminalSkippedForUnknownHigherPriority: true }
+      : {}),
+    ...(terminal.blockedByCheapContest
+      ? { corpScoreConversionFixGateBlockedByCheapContest: true }
+      : {}),
+    ...(terminal.blockedByCredits
+      ? { corpScoreConversionFixGateBlockedByCredits: true }
+      : {}),
+    ...(terminal.blockedByRunnerContest
+      ? { corpScoreConversionFixGateBlockedByRunnerContest: true }
+      : {}),
+    ...(terminal.blockedByHqThreat
+      ? { corpScoreConversionFixGateBlockedByHqThreat: true }
+      : {}),
+    ...(suspiciousProtection
+      ? {
+          corpScoreConversionFixGateEligible: true,
+          corpScoreConversionFixGateSuspiciousProtectionLoop: true,
+        }
+      : {}),
+    ...(suspiciousEconomy
+      ? {
+          corpScoreConversionFixGateEligible: true,
+          corpScoreConversionFixGateSuspiciousEconomyLoop: true,
+        }
+      : {}),
+    ...(suspiciousDraw
+      ? {
+          corpScoreConversionFixGateEligible: true,
+          corpScoreConversionFixGateSuspiciousDraw: true,
+        }
+      : {}),
+    ...(suspiciousRemotePortfolio
+      ? {
+          corpScoreConversionFixGateEligible: true,
+          corpScoreConversionFixGateSuspiciousRemotePortfolio: true,
+        }
+      : {}),
+    ...(suspiciousUnknown
+      ? {
+          corpScoreConversionFixGateEligible: true,
+          corpScoreConversionFixGateSuspiciousUnknown: true,
+        }
+      : {}),
+    corpScoreTerminalEvidence: terminal.evidence,
+  };
+}
+
+function corpEconomyBeforeScoreDiagnosticsForSimulationAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): Partial<AiSimulationSummary["actionSequence"][number]> {
+  if (input.side !== "corp" || action.side !== "corp") return {};
+  const terminal = assessCorpScoreTerminalWindow(input);
+  if (!terminal.terminalWindow) return {};
+  const family = corpScoreTerminalChosenFamily(input, action);
+  const economyTaken = family === "economy";
+  const hasInstalledAgenda =
+    terminal.scoreActionIds.length > 0 ||
+    terminal.advanceToScoreActionIds.length > 0;
+  const hasAdvancedAgenda = hasInstalledAgenda;
+  const scoreLegal = terminal.scoreActionIds.length > 0;
+  const advanceToScoreLegal = terminal.advanceToScoreActionIds.length > 0;
+  const agendaInstallReadyRemoteLegal =
+    terminal.agendaInstallActionIds.length > 0 &&
+    terminal.protectedRemoteIds.length > 0;
+  const fixGateBlockedBySafety = terminal.blockedByHqThreat;
+  const fixGateBlocked =
+    terminal.blockedByCredits ||
+    terminal.blockedByCheapContest ||
+    terminal.blockedByRunnerContest ||
+    fixGateBlockedBySafety;
+  const creditsNeeded = economyTaken && terminal.blockedByCredits;
+  const creditsAlreadyEnough = !terminal.blockedByCredits;
+  const suspiciousCreditsAlreadyEnough =
+    economyTaken && creditsAlreadyEnough && !fixGateBlocked;
+  const suspiciousDelayedTerminalAction =
+    economyTaken &&
+    !fixGateBlocked &&
+    (scoreLegal || advanceToScoreLegal || agendaInstallReadyRemoteLegal);
+  const suspiciousRemoteStillSafe =
+    economyTaken && !fixGateBlocked && terminal.protectedRemoteIds.length > 0;
+  const unclassified =
+    economyTaken &&
+    !creditsNeeded &&
+    !suspiciousCreditsAlreadyEnough &&
+    !suspiciousDelayedTerminalAction &&
+    !suspiciousRemoteStillSafe &&
+    !fixGateBlocked;
+  const evidence = [
+    "corp_economy_before_score_diagnostic_window:true",
+    `corp_economy_before_score_score_legal:${scoreLegal}`,
+    `corp_economy_before_score_advance_to_score_legal:${advanceToScoreLegal}`,
+    `corp_economy_before_score_agenda_install_ready_remote_legal:${agendaInstallReadyRemoteLegal}`,
+    `corp_economy_before_score_credits_short:${terminal.blockedByCredits}`,
+    `corp_economy_before_score_credits_already_enough:${creditsAlreadyEnough}`,
+    `corp_economy_before_score_remote_safe:${terminal.protectedRemoteIds.length > 0}`,
+    `corp_economy_before_score_runner_contest_high:${terminal.blockedByRunnerContest}`,
+  ];
+
+  return {
+    corpEconomyBeforeScoreDiagnosticWindow: true,
+    ...(hasInstalledAgenda
+      ? { corpEconomyBeforeScoreWindowWithInstalledAgenda: true }
+      : {}),
+    ...(hasAdvancedAgenda
+      ? { corpEconomyBeforeScoreWindowWithAdvancedAgenda: true }
+      : {}),
+    ...(scoreLegal
+      ? { corpEconomyBeforeScoreWindowWithScoreLegalNext: true }
+      : {}),
+    ...(advanceToScoreLegal
+      ? { corpEconomyBeforeScoreWindowWithAdvanceToScoreLegalNext: true }
+      : {}),
+    ...(terminal.protectedRemoteIds.length > 0
+      ? {
+          corpEconomyBeforeScoreWindowWithReadyRemote: true,
+          corpEconomyBeforeScoreWindowRemoteSafe: true,
+        }
+      : {}),
+    ...(agendaInstallReadyRemoteLegal
+      ? { corpEconomyBeforeScoreWindowWithAgendaInHqAndReadyRemote: true }
+      : {}),
+    ...(terminal.blockedByCredits
+      ? { corpEconomyBeforeScoreWindowCreditsShort: true }
+      : { corpEconomyBeforeScoreWindowCreditsAlreadyEnough: true }),
+    ...(terminal.blockedByRunnerContest
+      ? { corpEconomyBeforeScoreWindowRemoteContestHigh: true }
+      : {}),
+    ...(economyTaken ? { corpEconomyBeforeScoreTaken: true } : {}),
+    ...(creditsNeeded
+      ? {
+          corpEconomyBeforeScoreTakenAsNecessaryCredits: true,
+          corpEconomyBeforeScorePlausibleCreditsNeeded: true,
+          corpEconomyBeforeScorePlausibleRezOrAdvanceReserve: true,
+        }
+      : {}),
+    ...(economyTaken && creditsAlreadyEnough
+      ? { corpEconomyBeforeScoreTakenDespiteCreditsEnough: true }
+      : {}),
+    ...(economyTaken && scoreLegal
+      ? { corpEconomyBeforeScoreTakenOverScoreLegal: true }
+      : {}),
+    ...(economyTaken && advanceToScoreLegal
+      ? { corpEconomyBeforeScoreTakenOverAdvanceToScoreLegal: true }
+      : {}),
+    ...(economyTaken && agendaInstallReadyRemoteLegal
+      ? { corpEconomyBeforeScoreTakenOverAgendaInstallReadyRemote: true }
+      : {}),
+    ...(economyTaken && agendaInstallReadyRemoteLegal
+      ? { corpEconomyBeforeScoreTakenOverHqAgendaExit: true }
+      : {}),
+    ...(terminal.blockedByHqThreat
+      ? { corpEconomyBeforeScorePlausibleHqOrRndSafety: true }
+      : {}),
+    ...(terminal.blockedByRunnerContest
+      ? { corpEconomyBeforeScorePlausibleRunnerContestTooHigh: true }
+      : {}),
+    ...(economyTaken &&
+    !scoreLegal &&
+    !advanceToScoreLegal &&
+    !agendaInstallReadyRemoteLegal
+      ? { corpEconomyBeforeScorePlausibleNoAgendaExit: true }
+      : {}),
+    ...(suspiciousCreditsAlreadyEnough
+      ? { corpEconomyBeforeScoreSuspiciousCreditsAlreadyEnough: true }
+      : {}),
+    ...(suspiciousDelayedTerminalAction
+      ? { corpEconomyBeforeScoreSuspiciousDelayedTerminalAction: true }
+      : {}),
+    ...(suspiciousRemoteStillSafe
+      ? { corpEconomyBeforeScoreSuspiciousRemoteStillSafe: true }
+      : {}),
+    ...(unclassified ? { corpEconomyBeforeScoreUnclassified: true } : {}),
+    ...(terminal.blockedByCredits
+      ? { corpEconomyBeforeScoreFixGateBlockedByCredits: true }
+      : {}),
+    ...(terminal.blockedByCheapContest
+      ? { corpEconomyBeforeScoreFixGateBlockedByCheapContest: true }
+      : {}),
+    ...(terminal.blockedByRunnerContest
+      ? { corpEconomyBeforeScoreFixGateBlockedByRunnerContest: true }
+      : {}),
+    ...(fixGateBlockedBySafety
+      ? { corpEconomyBeforeScoreFixGateBlockedBySafety: true }
+      : {}),
+    ...(economyTaken && !fixGateBlocked
+      ? {
+          corpEconomyBeforeScoreFixGateEligible: true,
+          corpEconomyBeforeScoreFixGateSuspicious:
+            suspiciousCreditsAlreadyEnough ||
+            suspiciousDelayedTerminalAction ||
+            suspiciousRemoteStillSafe,
+        }
+      : {}),
+    corpEconomyBeforeScoreEvidence: evidence,
+  };
+}
+
+function corpScoreTerminalChosenFamily(
+  input: AiDecisionInput,
+  action: LegalAction,
+):
+  | "protection"
+  | "economy"
+  | "draw"
+  | "install_ice"
+  | "install_asset_or_upgrade"
+  | "hq_protection"
+  | "rnd_protection"
+  | "remote_portfolio"
+  | "unknown" {
+  if (action.type === "draw_card") return "draw";
+  if (action.type === "gain_credit") return "economy";
+  const roles = rolesForAction(input, action);
+  if (roles.some((role) => role.includes("economy"))) return "economy";
+  if (
+    action.type === "install_card" &&
+    action.payload?.placement === "ice" &&
+    action.payload?.serverId === "hq"
+  )
+    return "hq_protection";
+  if (
+    action.type === "install_card" &&
+    action.payload?.placement === "ice" &&
+    action.payload?.serverId === "rd"
+  )
+    return "rnd_protection";
+  if (action.type === "install_card" && action.payload?.placement === "ice") {
+    if (action.payload?.serverId === "new_remote") return "remote_portfolio";
+    return "install_ice";
+  }
+  if (action.type === "install_card" && action.payload?.placement !== "ice") {
+    if (action.payload?.serverId === "new_remote") return "remote_portfolio";
+    if (
+      roles.some(
+        (role) =>
+          role === "remote_support" ||
+          role === "remote_protection" ||
+          role === "upgrade" ||
+          role === "run_tax" ||
+          role === "steal_tax",
+      )
+    )
+      return "protection";
+    return "install_asset_or_upgrade";
+  }
+  if (
+    action.type === "play_operation" ||
+    action.type === "trigger_ability" ||
+    action.type === "activated_card_ability"
+  )
+    return roles.some((role) => role.includes("economy"))
+      ? "economy"
+      : "unknown";
+  return "unknown";
+}
 
 function runnerBreakerCoverageDiagnosticsForSimulationAction(
   input: AiDecisionInput,
@@ -18156,7 +23215,65 @@ function runnerHandUseDiagnosticsForSimulationAction(
           runnerRemoteTrashCostBucket: remoteTrashCostBucket(
             remoteTrash.trashCost,
           ),
+          runnerRemoteTrashLegalActionCount: remoteTrash.legalTrashActionCount,
         }
+      : {}),
+    ...(remoteTrash.role === "economy"
+      ? { runnerRemoteTrashAssetEconomy: true }
+      : {}),
+    ...(remoteTrash.finitePoolEconomy
+      ? { runnerRemoteTrashFinitePoolEconomy: true }
+      : {}),
+    ...(remoteTrash.corpValueRemaining > 0
+      ? { runnerRemoteTrashCorpValueRemaining: remoteTrash.corpValueRemaining }
+      : {}),
+    ...(remoteTrash.bbsWhisperingCampaign
+      ? { runnerBbsWhisperingCampaignAccessed: true }
+      : {}),
+    ...(remoteTrash.bbsWhisperingCampaign &&
+    remoteTrash.legalTrashActionCount > 0
+      ? { runnerBbsWhisperingCampaignTrashLegal: true }
+      : {}),
+    ...(remoteTrash.bbsWhisperingCampaign && remoteTrashTaken
+      ? { runnerBbsWhisperingCampaignTrashTaken: true }
+      : {}),
+    ...(remoteTrash.bbsWhisperingCampaign && action.type === "decline_trash"
+      ? { runnerBbsWhisperingCampaignTrashSkipped: true }
+      : {}),
+    ...(remoteTrash.bbsWhisperingCampaign &&
+    remoteTrash.skippedAffordableRelevant
+      ? { runnerBbsWhisperingCampaignTrashSkippedAffordable: true }
+      : {}),
+    ...(remoteTrash.finitePoolEconomy
+      ? { runnerFinitePoolAssetAccessed: true }
+      : {}),
+    ...(remoteTrash.finitePoolEconomy && remoteTrash.legalTrashActionCount > 0
+      ? { runnerFinitePoolAssetTrashLegal: true }
+      : {}),
+    ...(remoteTrash.finitePoolEconomy && remoteTrashTaken
+      ? { runnerFinitePoolAssetTrashTaken: true }
+      : {}),
+    ...(remoteTrash.finitePoolEconomy && remoteTrash.skippedAffordableRelevant
+      ? { runnerFinitePoolAssetTrashSkippedAffordable: true }
+      : {}),
+    ...(remoteTrash.skippedAffordableRelevant
+      ? { runnerRemoteTrashFixGateEligible: true }
+      : {}),
+    ...(remoteTrash.deferredByBudget
+      ? { runnerRemoteTrashFixGateBlockedByReserve: true }
+      : {}),
+    ...(remoteTrash.trashable &&
+    remoteTrash.legalTrashActionCount === 0 &&
+    input.playerView.own.credits < remoteTrash.trashCost
+      ? { runnerRemoteTrashFixGateBlockedByLowCredits: true }
+      : {}),
+    ...(remoteTrash.skippedAffordableRelevant && action.type === "steal_agenda"
+      ? { runnerRemoteTrashFixGateBlockedByHigherThreat: true }
+      : {}),
+    ...(remoteTrash.skippedAffordableRelevant &&
+    action.type !== "steal_agenda" &&
+    !remoteTrash.deferredByBudget
+      ? { runnerRemoteTrashFixGateSuspicious: true }
       : {}),
     ...(remoteTrash.expensive
       ? { runnerExpensiveRemoteTrashOpportunity: true }
@@ -18232,6 +23349,695 @@ function runnerHandUseDiagnosticsForSimulationAction(
     ...(handUseOpportunity ? { runnerHandUseOpportunity: true } : {}),
     ...(handUseActionTaken ? { runnerHandUseActionTaken: true } : {}),
   };
+}
+
+type RunnerEconomySetupActionClass = {
+  economy: boolean;
+  burstEconomy: boolean;
+  actionEconomy: boolean;
+  finitePoolEconomy: boolean;
+  loanDebtEconomy: boolean;
+  recurringEconomy: boolean;
+  resourceEconomy: boolean;
+  hardwareEconomy: boolean;
+  memoryHardware: boolean;
+  handSizeSupport: boolean;
+  search: boolean;
+  recovery: boolean;
+  downsideEconomy: boolean;
+  delayedPenaltyEconomy: boolean;
+};
+
+type RunnerSetupMissingCoverageType =
+  | "wall"
+  | "code_gate"
+  | "sentry"
+  | "universal"
+  | "special";
+
+function runnerEconomySetupDiagnosticsForSimulationAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  targetServerId: string | undefined,
+  stateAfterAction: GameState,
+): Partial<AiSimulationSummary["actionSequence"][number]> {
+  if (input.side !== "runner" || action.side !== "runner") return {};
+  const legalRunnerActions = input.legalActions.filter(
+    (candidate) => candidate.side === "runner",
+  );
+  const classified = legalRunnerActions.map((candidate) => ({
+    action: candidate,
+    classification: runnerEconomySetupActionClass(input, candidate),
+  }));
+  const legalEconomy = classified.filter(
+    ({ classification }) => classification.economy,
+  );
+  const legalMemory = classified.filter(
+    ({ classification }) => classification.memoryHardware,
+  );
+  const legalHandSize = classified.filter(
+    ({ classification }) => classification.handSizeSupport,
+  );
+  const legalSearch = classified.filter(
+    ({ classification }) => classification.search,
+  );
+  const legalRecovery = classified.filter(
+    ({ classification }) => classification.recovery,
+  );
+  const chosen = runnerEconomySetupActionClass(input, action);
+  const economyWindow = legalEconomy.length > 0;
+  const economyTaken = economyWindow && chosen.economy;
+  const economySkipped = economyWindow && !economyTaken;
+  const reserveTarget = runnerCreditReserveTargetForInput(input);
+  const creditsBefore = input.playerView.own.credits;
+  const creditsAfter = stateAfterAction.runner.credits;
+  const lowCredits = creditsBefore < reserveTarget;
+  const knownUnaffordablePath = runnerHasKnownUnaffordableLegalRun(input);
+  const advancedRemoteContest = runnerAdvancedRemoteContestContext(
+    input,
+    action,
+    targetServerId,
+  );
+  const freshPressureAvailable = hasRunnerRunnablePressureAction(
+    input,
+    action.actionId,
+  );
+  const installableBreaker = hasRunnerInstallableBreakerAction(
+    input,
+    action.actionId,
+  );
+  const remoteTrashAvailable = hasRunnerRemoteTrashAction(input);
+  const draw = runnerDrawKindForSimulationAction(input, action).draw;
+  const runAction = action.type === "start_run";
+  const setupAction =
+    action.type === "install_card" &&
+    (isRunnerRigInstallAction(input, action) || installableBreaker);
+  const relevantSkippedReason = economySkipped
+    ? runnerEconomySkipReasonForDiagnostics({
+        action,
+        draw,
+        runAction,
+        setupAction,
+        installableBreaker,
+        remoteTrashAvailable,
+        advancedRemoteContestSkipped: advancedRemoteContest.skipped,
+        freshPressureAvailable,
+      })
+    : undefined;
+  const rich = creditsBefore >= Math.max(8, reserveTarget + 3);
+  const economyNeeded = lowCredits || knownUnaffordablePath;
+  const economyReserveSetup =
+    economyTaken &&
+    creditsBefore < reserveTarget &&
+    creditsAfter >= reserveTarget;
+  const economyStillBelowReserve = economyTaken && creditsAfter < reserveTarget;
+  const finiteSeen = legalEconomy.some(
+    ({ classification }) => classification.finitePoolEconomy,
+  );
+  const finiteTaken = economyTaken && chosen.finitePoolEconomy;
+  const debtSeen = legalEconomy.some(
+    ({ classification }) => classification.loanDebtEconomy,
+  );
+  const debtTaken = economyTaken && chosen.loanDebtEconomy;
+  const downsideSeen = legalEconomy.some(
+    ({ classification }) => classification.downsideEconomy,
+  );
+  const downsideTaken = economyTaken && chosen.downsideEconomy;
+  const memoryWindow = legalMemory.length > 0;
+  const handSizeWindow = legalHandSize.length > 0;
+  const missingBreakerCoverage =
+    runnerVisibleMissingBreakerCoverage(input) ||
+    runnerHasKnownBlockedPathByCoverage(input);
+  const missingCoverageTypes = runnerMissingCoverageTypesForInput(input);
+  const legalProgramInstalls = legalRunnerActions.filter((candidate) => {
+    if (candidate.type !== "install_card") return false;
+    const definition = definitionForSimulationAction(input, candidate);
+    return definition?.type === "program";
+  }).length;
+  const handSizeNeedVisible =
+    (input.playerView.own.tags ?? 0) > 0 ||
+    (input.playerView.own.gripOrHq?.length ?? 0) >
+      Math.max(0, input.playerView.own.maxHandSize ?? 5);
+  const memorySkipped = memoryWindow && !chosen.memoryHardware;
+  const handSizeSkipped = handSizeWindow && !chosen.handSizeSupport;
+  const searchTaken = chosen.search;
+  const recoveryTaken = chosen.recovery;
+  const searchSkippedWithCoverage =
+    legalSearch.length > 0 && !searchTaken && missingBreakerCoverage;
+  const recoverySkippedWithCoverage =
+    legalRecovery.length > 0 && !recoveryTaken && missingBreakerCoverage;
+  const economyOverPressure = economyTaken && freshPressureAvailable;
+  const economyOverRemoteContest =
+    economyTaken && advancedRemoteContest.skipped;
+  const economyOverSetup = economyTaken && installableBreaker;
+  const economyOverTrash = economyTaken && remoteTrashAvailable;
+  const economyPlausible =
+    economyTaken &&
+    (economyNeeded || economyReserveSetup || creditsAfter < reserveTarget + 2);
+  const economySuspicious =
+    economyTaken &&
+    !economyPlausible &&
+    ((rich && (freshPressureAvailable || advancedRemoteContest.opportunity)) ||
+      economyOverRemoteContest ||
+      economyOverTrash ||
+      (debtTaken && !economyNeeded));
+  const suspiciousEconomyOverPressure =
+    economyOverPressure && !economyPlausible && (rich || !economyNeeded);
+  const suspiciousEconomyOverRemoteContest =
+    economyOverRemoteContest && !economyPlausible && (rich || !economyNeeded);
+  const classifications = sortedUnique([
+    ...(economyWindow ? ["runner_economy_window"] : []),
+    ...(economyTaken ? ["runner_economy_taken"] : []),
+    ...(economySkipped ? ["runner_economy_skipped"] : []),
+    ...(finiteSeen ? ["finite_pool_economy_seen"] : []),
+    ...(debtSeen ? ["debt_economy_seen"] : []),
+    ...(memoryWindow ? ["memory_hardware_window"] : []),
+    ...(handSizeWindow ? ["hand_size_window"] : []),
+    ...(legalSearch.length > 0 ? ["search_window"] : []),
+    ...(legalRecovery.length > 0 ? ["recovery_window"] : []),
+    ...(economySuspicious ? ["economy_choice_suspicious"] : []),
+    ...(economyPlausible ? ["economy_choice_plausible"] : []),
+  ]);
+  const evidence = sortedUnique([
+    `runner_credits:${creditsBefore}`,
+    `runner_reserve_target:${reserveTarget}`,
+    `legal_economy_actions:${legalEconomy.length}`,
+    `legal_memory_hardware_actions:${legalMemory.length}`,
+    `legal_hand_size_actions:${legalHandSize.length}`,
+    `legal_search_actions:${legalSearch.length}`,
+    `legal_recovery_actions:${legalRecovery.length}`,
+    `known_unaffordable_path:${knownUnaffordablePath}`,
+    `missing_breaker_coverage:${missingBreakerCoverage}`,
+    ...(chosen.handSizeSupport
+      ? ["mram_militech_classified_as_hand_size:true"]
+      : []),
+  ]);
+
+  return {
+    ...(economyWindow ? { runnerEconomyDecisionWindow: true } : {}),
+    ...(legalEconomy.length > 0
+      ? { runnerLegalEconomyActions: legalEconomy.length }
+      : {}),
+    ...runnerEconomySubcounts(
+      legalEconomy.map((entry) => entry.classification),
+    ),
+    ...(economyTaken ? { runnerEconomyTaken: true } : {}),
+    ...(economySkipped ? { runnerEconomySkipped: true } : {}),
+    ...(economySkipped && lowCredits
+      ? { runnerEconomySkippedWhileLowCredits: true }
+      : {}),
+    ...(economySkipped && knownUnaffordablePath
+      ? { runnerEconomySkippedWhileKnownUnaffordablePath: true }
+      : {}),
+    ...(relevantSkippedReason === "pressure"
+      ? { runnerEconomySkippedForPressure: true }
+      : {}),
+    ...(relevantSkippedReason === "remote_contest"
+      ? { runnerEconomySkippedForRemoteContest: true }
+      : {}),
+    ...(relevantSkippedReason === "setup"
+      ? { runnerEconomySkippedForSetup: true }
+      : {}),
+    ...(relevantSkippedReason === "draw"
+      ? { runnerEconomySkippedForDraw: true }
+      : {}),
+    ...(relevantSkippedReason === "run"
+      ? { runnerEconomySkippedForRun: true }
+      : {}),
+    ...(relevantSkippedReason === "install_breaker"
+      ? { runnerEconomySkippedForInstallBreaker: true }
+      : {}),
+    ...(relevantSkippedReason === "trash"
+      ? { runnerEconomySkippedForTrash: true }
+      : {}),
+    ...(relevantSkippedReason === "end_turn"
+      ? { runnerEconomySkippedForEndTurn: true }
+      : {}),
+    ...(relevantSkippedReason === "unknown_higher_priority"
+      ? { runnerEconomySkippedForUnknownHigherPriority: true }
+      : {}),
+    ...(lowCredits ? { runnerLowCreditDecisionWindow: true } : {}),
+    ...(economyWindow && lowCredits
+      ? { runnerCreditStarvedWithLegalEconomy: true }
+      : {}),
+    ...(economyTaken && lowCredits
+      ? { runnerCreditStarvedEconomyTaken: true }
+      : {}),
+    ...(economySkipped && lowCredits
+      ? { runnerCreditStarvedEconomySkipped: true }
+      : {}),
+    ...(economyWindow && knownUnaffordablePath
+      ? { runnerKnownUnaffordablePathWithLegalEconomy: true }
+      : {}),
+    ...(economyReserveSetup
+      ? { runnerEconomyTakenToReachRunReserve: true }
+      : {}),
+    ...(economyStillBelowReserve
+      ? { runnerEconomyTakenButStillBelowReserve: true }
+      : {}),
+    ...(economySkipped && knownUnaffordablePath
+      ? {
+          runnerEconomySkippedThenUnaffordableRun: true,
+          runnerRunStartedAfterSkippingEconomy: runAction,
+        }
+      : {}),
+    ...(runAction &&
+    runnerRunKnownPathCost(input, targetServerId) > creditsBefore
+      ? { runnerRunStartedBelowKnownPathCost: true }
+      : {}),
+    ...(economyOverPressure
+      ? { runnerEconomyChosenOverFreshCentralPressure: true }
+      : {}),
+    ...(economyOverRemoteContest
+      ? { runnerEconomyChosenOverRemoteContest: true }
+      : {}),
+    ...(economyOverSetup
+      ? { runnerEconomyChosenOverBreakerInstall: true }
+      : {}),
+    ...(economyOverSetup ? { runnerEconomyChosenOverCriticalSetup: true } : {}),
+    ...(economyOverTrash ? { runnerEconomyChosenOverRelevantTrash: true } : {}),
+    ...(economyTaken && rich ? { runnerEconomyChosenWhileRich: true } : {}),
+    ...(economyTaken && freshPressureAvailable
+      ? { runnerEconomyChosenWhilePressureReady: true }
+      : {}),
+    ...(economyReserveSetup ? { runnerEconomyChosenAsReserveSetup: true } : {}),
+    ...(economyPlausible ? { runnerEconomyChoicePlausible: true } : {}),
+    ...(economySuspicious ? { runnerEconomyChoiceSuspicious: true } : {}),
+    ...(finiteSeen ? { runnerFinitePoolEconomySeen: true } : {}),
+    ...(finiteTaken ? { runnerFinitePoolEconomyTaken: true } : {}),
+    ...(finiteSeen && economySkipped
+      ? { runnerFinitePoolEconomySkipped: true }
+      : {}),
+    ...(debtSeen ? { runnerDebtEconomySeen: true } : {}),
+    ...(debtTaken ? { runnerDebtEconomyTaken: true } : {}),
+    ...(debtSeen && economySkipped ? { runnerDebtEconomySkipped: true } : {}),
+    ...(debtTaken && !economyNeeded
+      ? { runnerDebtEconomyTakenWithoutNeed: true }
+      : {}),
+    ...(downsideSeen ? { runnerEconomyWithDownsideSeen: true } : {}),
+    ...(downsideTaken ? { runnerEconomyWithDownsideTaken: true } : {}),
+    ...(chosen.delayedPenaltyEconomy
+      ? { runnerDelayedPenaltyEconomyTaken: true }
+      : {}),
+    ...(memoryWindow ? { runnerMemoryBottleneckDecisionWindow: true } : {}),
+    ...(handSizeWindow ? { runnerHandSizeBottleneckDecisionWindow: true } : {}),
+    ...(legalMemory.length > 0
+      ? { runnerLegalMemoryHardwareActions: legalMemory.length }
+      : {}),
+    ...(legalHandSize.length > 0
+      ? { runnerLegalHandSizeActions: legalHandSize.length }
+      : {}),
+    ...(chosen.memoryHardware ? { runnerMemoryHardwareTaken: true } : {}),
+    ...(chosen.handSizeSupport
+      ? {
+          runnerHandSizeSupportTaken: true,
+          runnerHandSizeFactUsedForDiagnosis: true,
+        }
+      : {}),
+    ...(memorySkipped && legalProgramInstalls > 0
+      ? { runnerMemorySupportSkippedWhileGripHasPrograms: true }
+      : {}),
+    ...(handSizeSkipped && handSizeNeedVisible
+      ? { runnerHandSizeSupportSkippedWhileDamageRiskVisible: true }
+      : {}),
+    ...(chosen.memoryHardware || chosen.handSizeSupport
+      ? {
+          ...(economyWindow && !economyTaken
+            ? { runnerHardwareSetupChosenOverEconomy: true }
+            : {}),
+          ...(freshPressureAvailable
+            ? { runnerHardwareSetupChosenOverPressure: true }
+            : {}),
+        }
+      : {}),
+    ...(legalSearch.length > 0
+      ? { runnerLegalSearchActions: legalSearch.length }
+      : {}),
+    ...(legalRecovery.length > 0
+      ? { runnerLegalRecoveryActions: legalRecovery.length }
+      : {}),
+    ...(searchTaken ? { runnerSearchTaken: true } : {}),
+    ...(recoveryTaken ? { runnerRecoveryTaken: true } : {}),
+    ...(searchSkippedWithCoverage
+      ? { runnerSearchSkippedWhileMissingBreakerCoverage: true }
+      : {}),
+    ...(recoverySkippedWithCoverage
+      ? { runnerRecoverySkippedWhileMissingBreakerCoverage: true }
+      : {}),
+    ...(searchTaken && missingBreakerCoverage
+      ? { runnerSearchTakenForBreakerCoverage: true }
+      : {}),
+    ...(recoveryTaken && missingBreakerCoverage
+      ? { runnerRecoveryTakenForBreakerCoverage: true }
+      : {}),
+    ...((searchTaken || recoveryTaken) && economyWindow && !economyTaken
+      ? { runnerSearchRecoveryChosenOverEconomy: true }
+      : {}),
+    ...((searchTaken || recoveryTaken) && freshPressureAvailable
+      ? { runnerSearchRecoveryChosenOverPressure: true }
+      : {}),
+    ...(economySkipped && lowCredits && knownUnaffordablePath
+      ? { runnerEconomyFixGateEligibleStarvedSkip: true }
+      : {}),
+    ...(economyTaken && rich
+      ? { runnerEconomyFixGateSuspiciousRichEconomy: true }
+      : {}),
+    ...(suspiciousEconomyOverPressure
+      ? { runnerEconomyFixGateSuspiciousEconomyOverPressure: true }
+      : {}),
+    ...(suspiciousEconomyOverRemoteContest
+      ? { runnerEconomyFixGateSuspiciousEconomyOverRemoteContest: true }
+      : {}),
+    ...(debtTaken && !economyNeeded
+      ? { runnerEconomyFixGateSuspiciousDebtEconomyWithoutNeed: true }
+      : {}),
+    ...(memorySkipped && legalProgramInstalls > 0
+      ? { runnerSetupFixGateEligibleMemorySkip: true }
+      : {}),
+    ...(searchSkippedWithCoverage || recoverySkippedWithCoverage
+      ? { runnerSetupFixGateEligibleSearchRecoverySkip: true }
+      : {}),
+    ...(missingCoverageTypes.length > 0
+      ? { runnerSetupMissingCoverageTypes: missingCoverageTypes }
+      : {}),
+    ...(economySkipped || searchSkippedWithCoverage || memorySkipped
+      ? {
+          runnerSetupAttributionEvidence: sortedUnique([
+            `chosen_action_type:${action.type}`,
+            `chosen_reason_family:${runnerSetupChosenFamilyForEntry({
+              actionType: action.type,
+              runnerEconomyTaken: chosen.economy,
+              runnerDrawAction: draw,
+              runnerRigInstallAction: setupAction,
+              runnerSearchTaken: searchTaken,
+              runnerRecoveryTaken: recoveryTaken,
+              runnerRemoteTrashTaken: action.type === "trash_accessed_card",
+            })}`,
+            `runner_credits:${creditsBefore}`,
+            `reserve_target:${reserveTarget}`,
+            `known_path_affordable:${!knownUnaffordablePath}`,
+            `missing_coverage_types:${missingCoverageTypes.join(",") || "none"}`,
+          ]),
+        }
+      : {}),
+    ...(classifications.length > 0
+      ? { runnerEconomySetupClassifications: classifications }
+      : {}),
+    ...(classifications.length > 0
+      ? { runnerEconomySetupEvidence: evidence }
+      : {}),
+  };
+}
+
+function runnerEconomySubcounts(
+  classifications: RunnerEconomySetupActionClass[],
+): Partial<AiSimulationSummary["actionSequence"][number]> {
+  const count = (
+    selector: (classification: RunnerEconomySetupActionClass) => boolean,
+  ) => classifications.filter(selector).length;
+  return {
+    ...(count((classification) => classification.burstEconomy) > 0
+      ? {
+          runnerLegalBurstEconomyActions: count(
+            (classification) => classification.burstEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.actionEconomy) > 0
+      ? {
+          runnerLegalActionEconomyActions: count(
+            (classification) => classification.actionEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.finitePoolEconomy) > 0
+      ? {
+          runnerLegalFinitePoolEconomyActions: count(
+            (classification) => classification.finitePoolEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.loanDebtEconomy) > 0
+      ? {
+          runnerLegalLoanDebtEconomyActions: count(
+            (classification) => classification.loanDebtEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.recurringEconomy) > 0
+      ? {
+          runnerLegalRecurringEconomyActions: count(
+            (classification) => classification.recurringEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.resourceEconomy) > 0
+      ? {
+          runnerLegalResourceEconomyActions: count(
+            (classification) => classification.resourceEconomy,
+          ),
+        }
+      : {}),
+    ...(count((classification) => classification.hardwareEconomy) > 0
+      ? {
+          runnerLegalHardwareEconomyActions: count(
+            (classification) => classification.hardwareEconomy,
+          ),
+        }
+      : {}),
+  };
+}
+
+function runnerEconomySetupActionClass(
+  input: AiDecisionInput,
+  action: LegalAction,
+): RunnerEconomySetupActionClass {
+  const definitionId = sourceDefinitionIdForSimulationAction(input, action);
+  const definition = definitionForSimulationAction(input, action);
+  const roles = rolesForAction(input, action);
+  const mechanics =
+    definition &&
+    "mechanics" in definition &&
+    Array.isArray(definition.mechanics)
+      ? definition.mechanics
+      : [];
+  const isShortTermContract = definitionId === "onr_v1_178_short-term-contract";
+  const isLoanFromChiba = definitionId === "onr_v1_168_loan-from-chiba";
+  const isMramHandSize =
+    definitionId === "onr_v1_133_militech-mram-chip" ||
+    definitionId === "onr_v1_134_mram-chip";
+  const economy = isRunnerEconomyAction(input, action);
+  const search = runnerCoverageSearchActionForMetrics(input, action);
+  const recovery = runnerCoverageRecoveryActionForMetrics(input, action);
+  const handSizeSupport =
+    isMramHandSize ||
+    roles.some(
+      (role) =>
+        role.includes("hand_size") ||
+        role.includes("damage_resilience") ||
+        role.includes("damage_prevention"),
+    ) ||
+    mechanics.some(
+      (mechanic: string) =>
+        mechanic.includes("hand") || mechanic.includes("damage_prevention"),
+    );
+  const memoryHardware =
+    !handSizeSupport &&
+    action.type === "install_card" &&
+    (roles.includes("memory") ||
+      roles.includes("memory_support") ||
+      mechanics.some((mechanic: string) => mechanic.includes("memory")));
+  return {
+    economy,
+    burstEconomy: economy && action.type === "play_event",
+    actionEconomy:
+      economy &&
+      (action.type === "gain_credit" ||
+        action.type === "trigger_ability" ||
+        action.type === "activated_card_ability"),
+    finitePoolEconomy:
+      economy &&
+      (isShortTermContract ||
+        roles.some(
+          (role) => role.includes("finite") || role.includes("pool"),
+        ) ||
+        mechanics.some(
+          (mechanic: string) =>
+            mechanic.includes("counter") ||
+            mechanic.includes("resource_action"),
+        )),
+    loanDebtEconomy:
+      economy &&
+      (isLoanFromChiba ||
+        roles.some((role) => role.includes("loan") || role.includes("debt"))),
+    recurringEconomy:
+      economy &&
+      roles.some((role) => role.includes("recurring") || role.includes("drip")),
+    resourceEconomy: economy && definition?.type === "resource",
+    hardwareEconomy: economy && definition?.type === "hardware",
+    memoryHardware,
+    handSizeSupport,
+    search,
+    recovery,
+    downsideEconomy:
+      economy &&
+      (isLoanFromChiba ||
+        roles.some(
+          (role) =>
+            role.includes("risk") ||
+            role.includes("downside") ||
+            role.includes("penalty") ||
+            role.includes("tag"),
+        )),
+    delayedPenaltyEconomy:
+      economy &&
+      (isLoanFromChiba ||
+        roles.some(
+          (role) => role.includes("delayed") || role.includes("penalty"),
+        )),
+  };
+}
+
+function definitionForSimulationAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+) {
+  const definitionId = sourceDefinitionIdForSimulationAction(input, action);
+  return definitionId
+    ? (RUNTIME_CARDS[definitionId] ?? DEMO_CARDS_BY_ID[definitionId])
+    : undefined;
+}
+
+function runnerEconomySkipReasonForDiagnostics(context: {
+  action: LegalAction;
+  draw: boolean;
+  runAction: boolean;
+  setupAction: boolean;
+  installableBreaker: boolean;
+  remoteTrashAvailable: boolean;
+  advancedRemoteContestSkipped: boolean;
+  freshPressureAvailable: boolean;
+}):
+  | "pressure"
+  | "remote_contest"
+  | "setup"
+  | "draw"
+  | "run"
+  | "install_breaker"
+  | "trash"
+  | "end_turn"
+  | "unknown_higher_priority" {
+  if (context.advancedRemoteContestSkipped) return "remote_contest";
+  if (
+    context.action.type === "trash_accessed_card" ||
+    context.remoteTrashAvailable
+  )
+    return "trash";
+  if (context.installableBreaker && context.action.type === "install_card")
+    return "install_breaker";
+  if (context.setupAction) return "setup";
+  if (context.draw) return "draw";
+  if (context.runAction && context.freshPressureAvailable) return "pressure";
+  if (context.runAction) return "run";
+  if (context.action.type === "end_turn") return "end_turn";
+  return "unknown_higher_priority";
+}
+
+function runnerHasKnownUnaffordableLegalRun(input: AiDecisionInput): boolean {
+  return input.legalActions.some((action) => {
+    if (
+      action.side !== "runner" ||
+      action.type !== "start_run" ||
+      typeof action.payload?.serverId !== "string"
+    )
+      return false;
+    return (
+      runnerRunKnownPathCost(input, action.payload.serverId) >
+      input.playerView.own.credits
+    );
+  });
+}
+
+function runnerRunKnownPathCost(
+  input: AiDecisionInput,
+  targetServerId: string | undefined,
+): number {
+  if (!targetServerId) return 0;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === targetServerId,
+  );
+  if (!server) return 0;
+  return (
+    assessKnownRezzedIcePath(
+      server.ice,
+      input.playerView.own.rig ?? [],
+      input.playerView.own.credits,
+      server.root,
+    ).visibleBreakCost ?? 0
+  );
+}
+
+function runnerVisibleMissingBreakerCoverage(input: AiDecisionInput): boolean {
+  const rigRoles = new Set(
+    (input.playerView.own.rig ?? []).flatMap((card) =>
+      rolesForCardId(card.definitionId),
+    ),
+  );
+  return input.playerView.servers.some((server) =>
+    server.ice
+      .filter(
+        (ice): ice is typeof ice & { definitionId: string } =>
+          ice.known && typeof ice.definitionId === "string",
+      )
+      .flatMap((ice) => runnerMissingBreakerRolesForMetrics(ice.definitionId))
+      .some((role) => !rigRoles.has(role)),
+  );
+}
+
+function runnerMissingCoverageTypesForInput(
+  input: AiDecisionInput,
+): RunnerSetupMissingCoverageType[] {
+  const rigRoles = new Set(
+    (input.playerView.own.rig ?? []).flatMap((card) =>
+      rolesForCardId(card.definitionId),
+    ),
+  );
+  const missing = new Set<RunnerSetupMissingCoverageType>();
+  for (const server of input.playerView.servers) {
+    for (const ice of server.ice) {
+      if (!ice.known || typeof ice.definitionId !== "string") continue;
+      for (const role of runnerMissingBreakerRolesForMetrics(
+        ice.definitionId,
+      )) {
+        if (rigRoles.has(role)) continue;
+        if (role === "breaker_fracter") missing.add("wall");
+        else if (role === "breaker_decoder") missing.add("code_gate");
+        else if (role === "breaker_killer") missing.add("sentry");
+        else missing.add("universal");
+      }
+      if (
+        ice.effectiveRunQuote?.subroutines.some(
+          (subroutine) =>
+            String(subroutine.type).includes("trace") ||
+            String(subroutine.type).includes("damage"),
+        ) === true
+      )
+        missing.add("special");
+    }
+  }
+  return [...missing].sort();
+}
+
+function runnerHasKnownBlockedPathByCoverage(input: AiDecisionInput): boolean {
+  return input.playerView.servers.some(
+    (server) =>
+      assessKnownRezzedIcePath(
+        server.ice,
+        input.playerView.own.rig ?? [],
+        input.playerView.own.credits,
+        server.root,
+      ).blocked,
+  );
 }
 
 function runnerCentralPressureDiagnosticsForSimulationAction(
@@ -19814,6 +25620,19 @@ function runnerKnownPathDiagnosticsForAction(
   targetServerId: string | undefined,
   reserveTarget: number,
 ): Partial<AiSimulationSummary["actionSequence"][number]> {
+  const legalKnownNoAccessTargets = runnerKnownNoAccessLegalRunTargets(input);
+  const selectedKnownNoAccess =
+    targetServerId !== undefined &&
+    legalKnownNoAccessTargets.some(
+      (target) => target.serverId === targetServerId,
+    );
+  const suppressedKnownNoAccess =
+    action.type !== "start_run" && legalKnownNoAccessTargets.length > 0;
+  const firstProbeUnknownAllowed =
+    action.type === "start_run" &&
+    targetServerId !== undefined &&
+    runnerRunTargetHasOnlyUnknownOrUnrezzedIce(input, targetServerId) &&
+    legalKnownNoAccessTargets.length === 0;
   if (action.type === "jack_out") {
     const run = input.playerView.run;
     const server = input.playerView.servers.find(
@@ -19833,15 +25652,42 @@ function runnerKnownPathDiagnosticsForAction(
         input.playerView.own.credits,
         server?.root ?? [],
       ).blocked
-    )
-      return { runEndedAfterFirstIceDueToCredits: true };
+    ) {
+      const fullPath =
+        server !== undefined
+          ? assessKnownRezzedIcePath(
+              server.ice,
+              input.playerView.own.rig ?? [],
+              input.playerView.own.credits,
+              server.root,
+            )
+          : undefined;
+      return {
+        runEndedAfterFirstIceDueToCredits: true,
+        ...(fullPath?.canReachAccess === false &&
+        fullPath.unpayableReason ===
+          "later_ice_unaffordable_after_prior_ice_cost"
+          ? { runnerRunAbortedAfterKnownUnpayableLaterIce: true }
+          : {}),
+      };
+    }
     return {};
   }
-  if (action.type !== "start_run" || !targetServerId) return {};
+  if (action.type !== "start_run" || !targetServerId)
+    return {
+      ...(suppressedKnownNoAccess
+        ? { runnerRunSuppressedAsKnownNoAccess: true }
+        : {}),
+    };
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === targetServerId,
   );
-  if (!server) return {};
+  if (!server)
+    return {
+      ...(firstProbeUnknownAllowed
+        ? { runnerRunAllowedAsFirstProbeUnknownIce: true }
+        : {}),
+    };
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     input.playerView.own.rig ?? [],
@@ -19871,6 +25717,12 @@ function runnerKnownPathDiagnosticsForAction(
           role.includes("inside_job"),
       ));
   const insufficientPath = assessment.blocked || creditsMissing > 0;
+  const knownNoAccess =
+    assessment.canReachAccess === false &&
+    assessment.assessedKnownIceCount > 0 &&
+    runnerKnownPathAssessmentIsCostNoAccess(assessment);
+  const canBreakNextButNotFull =
+    assessment.canBreakNextIceButNotFullPath === true;
   const insufficientReserve =
     !insufficientPath &&
     creditsAfterPath < reserveTarget &&
@@ -19904,6 +25756,45 @@ function runnerKnownPathDiagnosticsForAction(
     ...(insufficientPath && central
       ? { centralRunStartedAgainstKnownUnaffordablePath: true }
       : {}),
+    ...(knownNoAccess
+      ? {
+          runnerRunStartedAgainstKnownUnpayableFullPath: true,
+          runnerKnownPathCanReachAccessFalse: true,
+        }
+      : {}),
+    ...(knownNoAccess && remote
+      ? { runnerRunStartedAgainstKnownUnpayableRemotePath: true }
+      : {}),
+    ...(knownNoAccess && central
+      ? { runnerRunStartedAgainstKnownUnpayableCentralPath: true }
+      : {}),
+    ...(canBreakNextButNotFull
+      ? { runnerKnownPathCanBreakNextIceButNotFullPath: true }
+      : {}),
+    ...(assessment.creditsSpentBeforeUnpayableIce > 0
+      ? { runnerRunSpentCreditsBeforeKnownUnbreakableLaterIce: true }
+      : {}),
+    ...(knownNoAccess &&
+    (assessment.visibleBreakCost ?? 0) > input.playerView.own.credits
+      ? { runnerRunCostQuoteUnderestimatedFullPath: true }
+      : {}),
+    ...(knownNoAccess && runnerHasRecentRunOnServer(input, targetServerId)
+      ? { runnerRepeatRunOnKnownUnpayablePath: true }
+      : {}),
+    ...(knownNoAccess &&
+    remote &&
+    runnerHasRecentRunOnServer(input, targetServerId)
+      ? { runnerRepeatRunOnKnownUnpayableRemotePath: true }
+      : {}),
+    ...(knownNoAccess && positiveProbe
+      ? { runnerRunCouldOnlyForceRezButNotAccess: true }
+      : {}),
+    ...(firstProbeUnknownAllowed
+      ? { runnerRunAllowedAsFirstProbeUnknownIce: true }
+      : {}),
+    ...(selectedKnownNoAccess
+      ? { runnerRunPenalizedAsKnownNoAccess: true }
+      : {}),
     ...(insufficientReserve
       ? { runStartedWithInsufficientStealOrTrashReserve: true }
       : {}),
@@ -19912,6 +25803,84 @@ function runnerKnownPathDiagnosticsForAction(
       ? { lowValueUnaffordableRun: true }
       : {}),
   };
+}
+
+function runnerKnownNoAccessLegalRunTargets(
+  input: AiDecisionInput,
+): Array<{ serverId: string; assessment: KnownRezzedIcePathAssessment }> {
+  if (input.side !== "runner") return [];
+  return input.legalActions
+    .filter(
+      (action) =>
+        action.side === "runner" &&
+        action.type === "start_run" &&
+        typeof action.payload?.serverId === "string",
+    )
+    .map((action) => {
+      const serverId = String(action.payload?.serverId);
+      const server = input.playerView.servers.find(
+        (candidate) => candidate.id === serverId,
+      );
+      if (!server) return undefined;
+      const assessment = assessKnownRezzedIcePath(
+        server.ice,
+        input.playerView.own.rig ?? [],
+        input.playerView.own.credits,
+        server.root,
+      );
+      if (
+        assessment.canReachAccess ||
+        assessment.assessedKnownIceCount <= 0 ||
+        !runnerKnownPathAssessmentIsCostNoAccess(assessment) ||
+        runnerRunTargetHasOnlyUnknownOrUnrezzedIce(input, serverId)
+      )
+        return undefined;
+      return { serverId, assessment };
+    })
+    .filter(
+      (
+        target,
+      ): target is {
+        serverId: string;
+        assessment: KnownRezzedIcePathAssessment;
+      } => target !== undefined,
+    );
+}
+
+function runnerKnownPathAssessmentIsCostNoAccess(
+  assessment: KnownRezzedIcePathAssessment,
+): boolean {
+  return (
+    assessment.unpayableReason === "ice_unaffordable" ||
+    assessment.unpayableReason === "later_ice_unaffordable_after_prior_ice_cost"
+  );
+}
+
+function runnerRunTargetHasOnlyUnknownOrUnrezzedIce(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
+  return (
+    server !== undefined &&
+    server.ice.length > 0 &&
+    server.ice.every((ice) => !ice.known || ice.rezzed !== true)
+  );
+}
+
+function runnerHasRecentRunOnServer(
+  input: AiDecisionInput,
+  serverId: string,
+): boolean {
+  return input.playerView.publicEvents
+    .slice(-24)
+    .some(
+      (event) =>
+        event.publicPayload.actionType === "start_run" &&
+        aiServerIdFromEvent(event) === serverId,
+    );
 }
 
 function runnerContestBlockedByCredits(
@@ -20016,6 +25985,10 @@ function runnerRemoteTrashAccessContext(
   reserveTarget: number;
   dropsBelowReserve: boolean;
   deferredByBudget: boolean;
+  finitePoolEconomy: boolean;
+  bbsWhisperingCampaign: boolean;
+  corpValueRemaining: number;
+  legalTrashActionCount: number;
   evidence: string[];
   targetType?: RemoteTrashTargetType;
   role?: RemoteTrashRole;
@@ -20039,6 +26012,10 @@ function runnerRemoteTrashAccessContext(
       reserveTarget: runnerCreditReserveTargetForInput(input),
       dropsBelowReserve: false,
       deferredByBudget: false,
+      finitePoolEconomy: false,
+      bbsWhisperingCampaign: false,
+      corpValueRemaining: 0,
+      legalTrashActionCount: 0,
       evidence: ["remote_trash_access:none"],
     };
   }
@@ -20050,13 +26027,26 @@ function runnerRemoteTrashAccessContext(
   const trashAction = input.legalActions.find(
     (candidate) => candidate.type === "trash_accessed_card",
   );
+  const legalTrashActionCount = input.legalActions.filter(
+    (candidate) => candidate.type === "trash_accessed_card",
+  ).length;
   const trashCost = trashAction
     ? remoteTrashActionTotalCostForMetrics(trashAction)
     : (remoteTrashCostForVisibleCard(accessed) ?? 0);
   const trashable =
     targetType !== "unknown" &&
     remoteTrashCostForVisibleCard(accessed) !== undefined;
-  const relevant = trashable && role !== "low_value" && role !== "unknown";
+  const bbsWhisperingCampaign =
+    accessed.definitionId === BBS_WHISPERING_CAMPAIGN_DEFINITION_ID;
+  const corpValueRemaining = remoteTrashVisibleCorpValueRemaining(accessed);
+  const finitePoolEconomy =
+    bbsWhisperingCampaign ||
+    (role === "economy" &&
+      (corpValueRemaining > 0 ||
+        remoteTrashCardLooksLikeFinitePoolForMetrics(accessed)));
+  const relevant =
+    trashable &&
+    ((role !== "low_value" && role !== "unknown") || finitePoolEconomy);
   const dedicatedTrashCredits =
     trashAction !== undefined
       ? remoteTrashDedicatedCreditsForMetrics(input, trashAction, accessed)
@@ -20074,18 +26064,24 @@ function runnerRemoteTrashAccessContext(
       role === "run_tax" ||
       role === "remote_capacity" ||
       role === "economy" ||
-      role === "tag_punish");
+      role === "tag_punish" ||
+      finitePoolEconomy);
   const acuteThreat = remoteTrashAccessProtectsAcuteThreatForMetrics(
     input,
     run.attackedServerId,
   );
+  const highRemainingFinitePool =
+    finitePoolEconomy &&
+    corpValueRemaining >= Math.max(trashCost + 2, 8) &&
+    trashCost > 0;
   const deferredByBudget =
     trashable &&
     highImpact &&
     expensive &&
     dropsBelowReserve &&
     dedicatedTrashCredits <= 0 &&
-    !acuteThreat;
+    !acuteThreat &&
+    !highRemainingFinitePool;
   const affordableRelevant =
     relevant && trashAction !== undefined && !deferredByBudget;
   const relevantTaken =
@@ -20107,6 +26103,10 @@ function runnerRemoteTrashAccessContext(
     reserveTarget,
     dropsBelowReserve,
     deferredByBudget,
+    finitePoolEconomy,
+    bbsWhisperingCampaign,
+    corpValueRemaining,
+    legalTrashActionCount,
     evidence: [
       `remote_trash_role:${role}`,
       ...(structuredRemoteRole
@@ -20134,10 +26134,59 @@ function runnerRemoteTrashAccessContext(
       `remote_trash_drops_below_reserve:${dropsBelowReserve}`,
       `remote_trash_acute_threat:${acuteThreat}`,
       `remote_trash_deferred_by_budget:${deferredByBudget}`,
+      `remote_trash_finite_pool_economy:${finitePoolEconomy}`,
+      `remote_trash_bbs_whispering_campaign:${bbsWhisperingCampaign}`,
+      `remote_trash_corp_value_remaining:${corpValueRemaining}`,
     ],
     ...(trashable ? { targetType } : {}),
     ...(trashable ? { role } : {}),
   };
+}
+
+function remoteTrashVisibleCorpValueRemaining(card: VisibleCard): number {
+  return Math.max(
+    0,
+    card.counters?.bit ?? 0,
+    card.counters?.recurring_credit ?? 0,
+  );
+}
+
+function remoteTrashCardLooksLikeFinitePoolForMetrics(
+  card: VisibleCard,
+): boolean {
+  if (card.definitionId === BBS_WHISPERING_CAMPAIGN_DEFINITION_ID) return true;
+  const runtimeDefinition = card.definitionId
+    ? RUNTIME_CARDS[card.definitionId]
+    : undefined;
+  const demoDefinition = card.definitionId
+    ? DEMO_CARDS_BY_ID[card.definitionId]
+    : undefined;
+  const mechanics = [
+    ...("mechanics" in (runtimeDefinition ?? {})
+      ? ((runtimeDefinition as { mechanics?: string[] } | undefined)
+          ?.mechanics ?? [])
+      : []),
+    ...(demoDefinition?.mechanics ?? []),
+  ];
+  const runtimeText =
+    (runtimeDefinition as { text?: string } | undefined)?.text ?? "";
+  const demoText =
+    (demoDefinition as { text?: string } | undefined)?.text ?? "";
+  const rulesText = `${runtimeText} ${demoText} ${
+    card.rulesText ?? ""
+  }`.toLowerCase();
+  return (
+    mechanics.some(
+      (mechanic: string) =>
+        mechanic.includes("finite_economy_pool") ||
+        mechanic.includes("hosted_credits") ||
+        mechanic.includes("bit_counter"),
+    ) ||
+    (rulesText.includes("put") &&
+      rulesText.includes("from the bank") &&
+      rulesText.includes("take") &&
+      rulesText.includes("bits"))
+  );
 }
 
 function runnerAdvancedRemoteContestContext(

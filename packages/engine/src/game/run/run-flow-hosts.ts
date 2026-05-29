@@ -220,7 +220,7 @@ export type RunFlowHost = {
       legalAction?: LegalAction,
     ) => void;
     applyAiBoonRunStart: (state: GameState, legalAction?: LegalAction) => void;
-    openCorpStartOfRunRedirectWindow: (
+    openStartOfRunFortUtilityWindow: (
       state: GameState,
       legalAction?: LegalAction,
     ) => boolean;
@@ -506,8 +506,8 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         applyRunnerTraceCounterRunStartEffects:
           host.run.applyRunnerTraceCounterRunStartEffects,
         applyAiBoonRunStart: host.run.applyAiBoonRunStart,
-        openCorpStartOfRunRedirectWindow:
-          host.run.openCorpStartOfRunRedirectWindow,
+        openStartOfRunFortUtilityWindow:
+          host.run.openStartOfRunFortUtilityWindow,
       },
     };
   }

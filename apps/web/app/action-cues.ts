@@ -14,6 +14,8 @@ export type OpponentActionCue = {
   actionType: string;
   title: string;
   description?: string;
+  cardDefinitionId?: string;
+  cardTitle?: string;
   visibility: ChronicleVisibility;
   importance: ChronicleImportance;
   highlight?: BoardHighlight;
@@ -22,6 +24,21 @@ export type OpponentActionCue = {
   soundCount?: number;
   requiresLocalAttention: boolean;
   aiExplanation?: string;
+};
+
+export type DamageImpactCue = {
+  cueId: string;
+  eventId: string;
+  viewerSide: Side;
+  damageType: "net" | "meat" | "core";
+  amount: number;
+  cardsTrashed?: number;
+  runnerGripBefore?: number;
+  runnerGripAfter?: number;
+  flatline: boolean;
+  coreDamageAfter?: number;
+  runnerMaxHandSizeAfter?: number;
+  sourceLabel: string;
 };
 
 export type CueActionUse = {
@@ -120,6 +137,8 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
       actionType,
       title: item.title,
       ...(item.description ? { description: item.description } : {}),
+      ...(item.cardDefinitionId ? { cardDefinitionId: item.cardDefinitionId } : {}),
+      ...(item.cardTitle ? { cardTitle: item.cardTitle } : {}),
       visibility,
       importance: item.importance,
       ...(highlight ? { highlight } : {}),
@@ -144,6 +163,8 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
         actionType,
         title: effectItem.title,
         ...(effectItem.description ? { description: effectItem.description } : {}),
+        ...(effectItem.cardDefinitionId ? { cardDefinitionId: effectItem.cardDefinitionId } : {}),
+        ...(effectItem.cardTitle ? { cardTitle: effectItem.cardTitle } : {}),
         visibility: effectItem.visibility,
         importance: effectItem.importance,
         ...(relatedCard ? { relatedCard } : {}),
@@ -155,6 +176,40 @@ export function deriveOpponentActionCues(input: CueDerivationInput): OpponentAct
   });
 
   return cues;
+}
+
+export function deriveDamageImpactCues(input: Pick<CueDerivationInput, "viewerSide" | "playerView" | "events" | "lastPresentedEventId">): DamageImpactCue[] {
+  const visibleCards = visibleCardsByDefinition(input.playerView);
+  return eventsAfter(input.events, input.lastPresentedEventId)
+    .map((event): DamageImpactCue | null => {
+      const payload = event.publicPayload ?? {};
+      if (payload.damageResolved !== true) return null;
+      const damageType = damageTypeValue(payload.damageType);
+      if (!damageType) return null;
+      const amount = nonNegativeIntegerValue(payload.damageAmount) ?? positiveIntegerValue(payload.cardsTrashed) ?? 0;
+      const cardsTrashed = nonNegativeIntegerValue(payload.cardsTrashed);
+      const runnerGripBefore = nonNegativeIntegerValue(payload.runnerGripBefore);
+      const runnerGripAfter = nonNegativeIntegerValue(payload.runnerGripAfter);
+      const coreDamageAfter = nonNegativeIntegerValue(payload.coreDamageAfter);
+      const runnerMaxHandSizeAfter = nonNegativeIntegerValue(payload.runnerMaxHandSizeAfter);
+      const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+      const visibleSource = sourceDefinitionId ? visibleCards.get(sourceDefinitionId) : undefined;
+      return {
+        cueId: `${input.viewerSide}:${event.eventId}:damage-impact`,
+        eventId: event.eventId,
+        viewerSide: input.viewerSide,
+        damageType,
+        amount,
+        ...(cardsTrashed !== undefined ? { cardsTrashed } : {}),
+        ...(runnerGripBefore !== undefined ? { runnerGripBefore } : {}),
+        ...(runnerGripAfter !== undefined ? { runnerGripAfter } : {}),
+        flatline: payload.flatline === true,
+        ...(coreDamageAfter !== undefined ? { coreDamageAfter } : {}),
+        ...(runnerMaxHandSizeAfter !== undefined ? { runnerMaxHandSizeAfter } : {}),
+        sourceLabel: visibleSource?.title ?? "Korp-Effekt"
+      };
+    })
+    .filter((cue): cue is DamageImpactCue => Boolean(cue));
 }
 
 export function cueHasHiddenLeak(cue: OpponentActionCue): boolean {
@@ -371,4 +426,12 @@ function sideValue(value: unknown): Side | undefined {
 
 function positiveIntegerValue(value: unknown): number | undefined {
   return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : undefined;
+}
+
+function nonNegativeIntegerValue(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isInteger(value) && value >= 0 ? value : undefined;
+}
+
+function damageTypeValue(value: unknown): DamageImpactCue["damageType"] | undefined {
+  return value === "net" || value === "meat" || value === "core" ? value : undefined;
 }

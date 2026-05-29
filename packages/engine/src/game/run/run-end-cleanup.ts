@@ -868,7 +868,7 @@ function applyV181SuccessfulRunCounterTriggers(
           ),
           sourceCardDefinitionId: definition.id,
         };
-        appendProteusRunnerVirusCounterEffect(legalAction, {
+        appendRunnerVirusCounterEffect(legalAction, {
           run,
           sourceCardId: cardId,
           sourceDefinitionId: definition.id,
@@ -917,7 +917,7 @@ function applyV181SuccessfulRunCounterTriggers(
               }
             : {}),
         };
-        const socketEffectInput: Parameters<typeof appendProteusRunnerVirusCounterEffect>[1] = {
+        const socketEffectInput: Parameters<typeof appendRunnerVirusCounterEffect>[1] = {
           run,
           sourceCardId: cardId,
           sourceDefinitionId: definition.id,
@@ -933,9 +933,9 @@ function applyV181SuccessfulRunCounterTriggers(
         };
         const socketServerLabel = host.servers.publicServerLabel(run.attackedServerId);
         if (socketServerLabel) socketEffectInput.serverLabel = socketServerLabel;
-        appendProteusRunnerVirusCounterEffect(legalAction, socketEffectInput);
+        appendRunnerVirusCounterEffect(legalAction, socketEffectInput);
         if (pipeCounterAdded > 0) {
-          appendProteusRunnerVirusCounterEffect(legalAction, {
+          appendRunnerVirusCounterEffect(legalAction, {
             run,
             sourceCardId: cardId,
             sourceDefinitionId: definition.id,
@@ -1023,7 +1023,7 @@ function applyV181SuccessfulRunCounterTriggers(
   }
 }
 
-function appendProteusRunnerVirusCounterEffect(
+function appendRunnerVirusCounterEffect(
   legalAction: LegalAction,
   input: {
     run: ActiveRun;

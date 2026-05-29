@@ -125,7 +125,7 @@ export type RunnerTracePaymentDependencies = {
   ) => void;
   runnerCreditsAvailable: (state: GameState) => number;
   spendRunnerCredits: (state: GameState, amount: number) => void;
-  recordWilsonRunCapSpend: (state: GameState, amount: number) => void;
+  recordRunnerRunCreditSpend: (state: GameState, amount: number) => void;
   definitionIdForCard: (
     state: GameState,
     cardId: CardInstanceId,
@@ -490,7 +490,7 @@ function payRunnerTracePaymentQuote(
   state: GameState,
   quote: RunnerTracePaymentQuote,
 ): RunnerTracePaymentReceipt {
-  deps.recordWilsonRunCapSpend(state, quote.amount);
+  deps.recordRunnerRunCreditSpend(state, quote.amount);
   for (const entry of quote.breakdown) {
     if (
       entry.kind !== "restricted_trace_link_credit" &&

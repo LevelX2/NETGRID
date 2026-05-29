@@ -198,14 +198,14 @@ export type CardEffectExecutionContext = {
   passCurrentEncounteredIce?: (
     subtypeRequired?: "ap",
   ) => CardEffectHiddenInfoResult;
-  freeRezInstalledIceWithCounters?: (input: {
+  rezInstalledIceWithLifecycleCounters?: (input: {
     counterType: Extract<CounterType, "kludge" | "term">;
     amount: number;
     lifecycle:
       | "remove_one_counter_start_corp_turn_trash_on_last"
       | "rent_to_own_start_corp_turn";
   }) => CardEffectHiddenInfoResult;
-  replaceSourceFortCardsFromHq?: () => CardEffectHiddenInfoResult;
+  replaceFortCardsFromHq?: () => CardEffectHiddenInfoResult;
 };
 
 export type CardEffectExecutionResult = {
@@ -838,7 +838,7 @@ export function executeCardImplementationEffects(
         assertPublicVisibility("free_rez_installed_ice_with_counters", effect.visibility);
         if (effect.target !== "chosen_installed_ice")
           throw new Error("free_rez_installed_ice_with_counters target is invalid.");
-        if (!context.freeRezInstalledIceWithCounters)
+        if (!context.rezInstalledIceWithLifecycleCounters)
           throw new Error(
             "free_rez_installed_ice_with_counters requires a target context.",
           );
@@ -848,7 +848,7 @@ export function executeCardImplementationEffects(
             : Math.max(0, Math.floor(Number(context.targetRezCost ?? 0)));
         mergePublicPayload(
           publicPayload,
-          context.freeRezInstalledIceWithCounters({
+          context.rezInstalledIceWithLifecycleCounters({
             counterType: effect.counterType,
             amount,
             lifecycle: effect.lifecycle,
@@ -861,13 +861,13 @@ export function executeCardImplementationEffects(
           throw new Error("replace_source_fort_cards_from_hq visibility is invalid.");
         if (effect.include !== "root_and_ice" || effect.installCost !== "free")
           throw new Error("replace_source_fort_cards_from_hq profile is invalid.");
-        if (!context.replaceSourceFortCardsFromHq)
+        if (!context.replaceFortCardsFromHq)
           throw new Error(
             "replace_source_fort_cards_from_hq requires a source-fort context.",
           );
         mergePublicPayload(
           publicPayload,
-          context.replaceSourceFortCardsFromHq().publicPayload,
+          context.replaceFortCardsFromHq().publicPayload,
         );
         return;
       }

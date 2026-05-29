@@ -47,6 +47,8 @@ export type DamageSummary = {
   amount: number;
   cardsTrashed: number;
   flatline: boolean;
+  runnerGripBefore?: number;
+  runnerGripAfter?: number;
   coreDamageAfter?: number;
   runnerMaxHandSizeAfter?: number;
 };
@@ -296,7 +298,8 @@ export function doDamage(
   },
 ): DamageSummary {
   assertPositiveIntegerAmount(request.amount);
-  if (request.amount > state.runner.grip.length) {
+  const runnerGripBefore = state.runner.grip.length;
+  if (request.amount > runnerGripBefore) {
     state.winner = "corp";
     state.gameEndReason = "flatline";
     state.phase = "game_over";
@@ -308,6 +311,8 @@ export function doDamage(
       amount: request.amount,
       cardsTrashed: 0,
       flatline: true,
+      runnerGripBefore,
+      runnerGripAfter: 0,
     };
   }
 
@@ -347,6 +352,8 @@ export function doDamage(
     amount: request.amount,
     cardsTrashed: selected.length,
     flatline: false,
+    runnerGripBefore,
+    runnerGripAfter: state.runner.grip.length,
     ...(request.damageType === "core"
       ? {
           coreDamageAfter: state.runner.coreDamage,
@@ -543,6 +550,12 @@ export function aggregateDamageSummaries(summaries: DamageSummary[]): DamageSumm
       0,
     ),
     flatline: summaries.some((summary) => summary.flatline),
+    ...(first.runnerGripBefore !== undefined
+      ? { runnerGripBefore: first.runnerGripBefore }
+      : {}),
+    ...(summaries.at(-1)?.runnerGripAfter !== undefined
+      ? { runnerGripAfter: summaries.at(-1)!.runnerGripAfter }
+      : {}),
     ...(lastCoreSummary?.coreDamageAfter !== undefined
       ? { coreDamageAfter: lastCoreSummary.coreDamageAfter }
       : {}),
@@ -563,6 +576,12 @@ export function setDamagePayload(
     damageAmount: summary.amount,
     cardsTrashed: summary.cardsTrashed,
     flatline: summary.flatline,
+    ...(summary.runnerGripBefore !== undefined
+      ? { runnerGripBefore: summary.runnerGripBefore }
+      : {}),
+    ...(summary.runnerGripAfter !== undefined
+      ? { runnerGripAfter: summary.runnerGripAfter }
+      : {}),
     ...(summary.coreDamageAfter !== undefined
       ? { coreDamageAfter: summary.coreDamageAfter }
       : {}),

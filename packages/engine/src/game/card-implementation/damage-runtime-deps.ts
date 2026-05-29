@@ -92,6 +92,13 @@ const defaultDamageRuntimeDepsHost: DamageRuntimeDepsHost = {
 export function createDamageCardImplementationRuntimeDeps(
   host: DamageRuntimeDepsHost = defaultDamageRuntimeDepsHost,
 ): DamageCardImplementationRuntimeDeps {
+  host = {
+    damage: {
+      ...defaultDamageRuntimeDepsHost.damage,
+      ...(host.damage ?? {}),
+    },
+  };
+
   function damageRunner(
     state: RuntimeState,
     legalAction: RuntimeLegalAction,

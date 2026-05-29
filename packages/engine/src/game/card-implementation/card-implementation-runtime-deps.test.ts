@@ -245,10 +245,10 @@ function host(calls: string[] = []): GameCardImplementationRuntimeDepsHost {
       startMoveAdvancementCounters: () => ({
         publicPayload: { advancementCounterMoveChoiceOpened: true },
       }),
-      freeRezInstalledIceWithCounters: () => ({
+      rezInstalledIceWithLifecycleCounters: () => ({
         publicPayload: { freeRez: true },
       }),
-      replaceSourceFortCardsFromHq: () => ({
+      replaceFortCardsFromHq: () => ({
         publicPayload: { replacedFortCards: true },
       }),
       trashTopCorpRdCards: () => ({
@@ -279,8 +279,8 @@ describe("game card implementation runtime deps root", () => {
         "runnerInstalledCardIds",
         "runnerRunAttemptsLastTurn",
         "runnerRunAttemptsThisGame",
-        "runnerTrashedNodeLastTurn",
         "runnerTrashedAdvertisementThisTurn",
+        "runnerTrashedNodeLastTurn",
         "runnerTrashedTransactionsThisTurn",
         "runnerInstalledResourceLastTurn",
         "runnerWasDamagedDuringLastThreeActions",
@@ -351,8 +351,8 @@ describe("game card implementation runtime deps root", () => {
         "trashSource",
         "startDistributeAdvancementCounters",
         "startMoveAdvancementCounters",
-        "freeRezInstalledIceWithCounters",
-        "replaceSourceFortCardsFromHq",
+        "rezInstalledIceWithLifecycleCounters",
+        "replaceFortCardsFromHq",
         "trashTopCorpRdCards",
         "rezCostForCard",
         "startCorpChoiceDerezLastRezzedBlackIceOrBadPublicityChoice",

@@ -183,7 +183,7 @@ export function buildScoredAgendaAbilityActionsForCard(
       host.actions.createLegalAction(
         "corp",
         "gain_credit",
-        `${definition.title}: HQ/Archives in R&D mischen, 5 ziehen`,
+        "HQ/Archives in R&D mischen, 5 ziehen",
         agendaId,
         [{ clicks: 1 }],
         {

@@ -11,21 +11,21 @@
     ],
     "mode": "read-only comparison index; does not replace ai-card-hints-active.json"
   },
-  "compiledCardCount": 177,
+  "compiledCardCount": 193,
   "overlayCardCount": 6,
-  "cardsWithoutOverlay": 171,
+  "cardsWithoutOverlay": 187,
   "hardErrorCount": 0,
-  "warningCount": 597,
+  "warningCount": 649,
   "warningCountsByKind": {
-    "active_monolith_mechanical_duplication": 170,
-    "generated_fact_missing_from_active_monolith": 306,
+    "active_monolith_mechanical_duplication": 181,
+    "generated_fact_missing_from_active_monolith": 334,
     "manual_overlay_strategy_field_missing_from_active": 6,
-    "overlay_missing_for_manual_gap": 115
+    "overlay_missing_for_manual_gap": 128
   },
   "warningClassificationCounts": {
-    "generated_fact_absent_from_monolith": 306,
-    "manual_review_candidate": 115,
-    "monolith_mechanical_duplication_candidate": 170,
+    "generated_fact_absent_from_monolith": 334,
+    "manual_review_candidate": 128,
+    "monolith_mechanical_duplication_candidate": 181,
     "overlay_strategy_field_not_in_monolith": 6
   },
   "warningClassificationByCard": [
@@ -273,6 +273,18 @@
         "overlay_strategy_field_not_in_monolith": 1
       },
       "info": ["overlay_present"]
+    },
+    {
+      "cardId": "onr_v1_045_newsgroup-filter",
+      "title": "Newsgroup Filter",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "warningClassificationCounts": {
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
+      },
+      "info": []
     },
     {
       "cardId": "onr_v1_047_pile-driver",
@@ -540,8 +552,123 @@
       "info": ["info_no_overlay_needed"]
     },
     {
+      "cardId": "onr_v1_087_forgotten-backup-chip",
+      "title": "Forgotten Backup Chip",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "warningClassificationCounts": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
+      },
+      "info": []
+    },
+    {
+      "cardId": "onr_v1_089_gideons-pawnshop",
+      "title": "Gideon's Pawnshop",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "warningClassificationCounts": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
+      },
+      "info": []
+    },
+    {
+      "cardId": "onr_v1_093_if-you-want-it-done-right",
+      "title": "If You Want It Done Right . . .",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "warningClassificationCounts": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
+      },
+      "info": []
+    },
+    {
+      "cardId": "onr_v1_095_jack-n-joe",
+      "title": "Jack 'n' Joe",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "warningClassificationCounts": {
+        "generated_fact_absent_from_monolith": 1,
+        "monolith_mechanical_duplication_candidate": 1
+      },
+      "info": ["info_no_overlay_needed"]
+    },
+    {
+      "cardId": "onr_v1_097_livewires-contacts",
+      "title": "Livewire's Contacts",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "warningClassificationCounts": {
+        "generated_fact_absent_from_monolith": 1,
+        "monolith_mechanical_duplication_candidate": 1
+      },
+      "info": ["info_no_overlay_needed"]
+    },
+    {
+      "cardId": "onr_v1_099_mantis-fixer-at-large",
+      "title": "Mantis, Fixer-at-Large",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "warningClassificationCounts": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
+      },
+      "info": []
+    },
+    {
+      "cardId": "onr_v1_103_organ-donor",
+      "title": "Organ Donor",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "warningClassificationCounts": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "info": []
+    },
+    {
+      "cardId": "onr_v1_108_score",
+      "title": "Score!",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "warningClassificationCounts": {
+        "generated_fact_absent_from_monolith": 1,
+        "monolith_mechanical_duplication_candidate": 1
+      },
+      "info": ["info_no_overlay_needed"]
+    },
+    {
+      "cardId": "onr_v1_114_temple-microcode-outlet",
+      "title": "Temple Microcode Outlet",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "warningClassificationCounts": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
+      },
+      "info": []
+    },
+    {
       "cardId": "onr_v1_116_total-genetic-retrofit",
       "title": "Total Genetic Retrofit",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "warningClassificationCounts": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "info": []
+    },
+    {
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "title": "Microtech Backup Drive",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
@@ -584,6 +711,17 @@
       "info": []
     },
     {
+      "cardId": "onr_v1_154_broker",
+      "title": "Broker",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "warningClassificationCounts": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "info": []
+    },
+    {
       "cardId": "onr_v1_157_crash-everett-inventive-fixer",
       "title": "Crash Everett, Inventive Fixer",
       "recommendedNextAction": "manual_review_candidate",
@@ -602,6 +740,52 @@
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
+      },
+      "info": []
+    },
+    {
+      "cardId": "onr_v1_168_loan-from-chiba",
+      "title": "Loan from Chiba",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "warningClassificationCounts": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
+      },
+      "info": []
+    },
+    {
+      "cardId": "onr_v1_176_the-shell-traders",
+      "title": "The Shell Traders",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "warningClassificationCounts": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "info": []
+    },
+    {
+      "cardId": "onr_v1_177_the-short-circuit",
+      "title": "The Short Circuit",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "warningClassificationCounts": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "info": []
+    },
+    {
+      "cardId": "onr_v1_178_short-term-contract",
+      "title": "Short-Term Contract",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "warningClassificationCounts": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
       "info": []
     },
@@ -2205,6 +2389,15 @@
       "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
+      "cardId": "onr_v1_045_newsgroup-filter",
+      "title": "Newsgroup Filter",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "generatedFields": ["effects"],
+      "generatedOnlyFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"]
+    },
+    {
       "cardId": "onr_v1_047_pile-driver",
       "title": "Pile Driver",
       "recommendedNextAction": "ready_for_generated_mechanical_fields",
@@ -2421,8 +2614,98 @@
       "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
+      "cardId": "onr_v1_087_forgotten-backup-chip",
+      "title": "Forgotten Backup Chip",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "generatedFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["effects"]
+    },
+    {
+      "cardId": "onr_v1_089_gideons-pawnshop",
+      "title": "Gideon's Pawnshop",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "generatedFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["effects"]
+    },
+    {
+      "cardId": "onr_v1_093_if-you-want-it-done-right",
+      "title": "If You Want It Done Right . . .",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "generatedFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["effects"]
+    },
+    {
+      "cardId": "onr_v1_095_jack-n-joe",
+      "title": "Jack 'n' Joe",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "generatedFields": ["effects"],
+      "generatedOnlyFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"]
+    },
+    {
+      "cardId": "onr_v1_097_livewires-contacts",
+      "title": "Livewire's Contacts",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "generatedFields": ["effects"],
+      "generatedOnlyFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"]
+    },
+    {
+      "cardId": "onr_v1_099_mantis-fixer-at-large",
+      "title": "Mantis, Fixer-at-Large",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "generatedFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["effects"]
+    },
+    {
+      "cardId": "onr_v1_103_organ-donor",
+      "title": "Organ Donor",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "generatedFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": []
+    },
+    {
+      "cardId": "onr_v1_108_score",
+      "title": "Score!",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "generatedFields": ["effects"],
+      "generatedOnlyFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"]
+    },
+    {
+      "cardId": "onr_v1_114_temple-microcode-outlet",
+      "title": "Temple Microcode Outlet",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "generatedFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["effects"]
+    },
+    {
       "cardId": "onr_v1_116_total-genetic-retrofit",
       "title": "Total Genetic Retrofit",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "generatedFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": []
+    },
+    {
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "title": "Microtech Backup Drive",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
@@ -2457,6 +2740,15 @@
       "duplicatedActiveMechanicalFields": []
     },
     {
+      "cardId": "onr_v1_154_broker",
+      "title": "Broker",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "generatedFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": []
+    },
+    {
       "cardId": "onr_v1_157_crash-everett-inventive-fixer",
       "title": "Crash Everett, Inventive Fixer",
       "recommendedNextAction": "manual_review_candidate",
@@ -2473,6 +2765,42 @@
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects", "conditions"],
       "duplicatedActiveMechanicalFields": []
+    },
+    {
+      "cardId": "onr_v1_168_loan-from-chiba",
+      "title": "Loan from Chiba",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "generatedFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["effects"]
+    },
+    {
+      "cardId": "onr_v1_176_the-shell-traders",
+      "title": "The Shell Traders",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "generatedFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": []
+    },
+    {
+      "cardId": "onr_v1_177_the-short-circuit",
+      "title": "The Short Circuit",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "generatedFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": []
+    },
+    {
+      "cardId": "onr_v1_178_short-term-contract",
+      "title": "Short-Term Contract",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "generatedFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_188_ai-chief-financial-officer",
@@ -3763,6 +4091,13 @@
       "missingManualOverlay": ["effect:expose_info"]
     },
     {
+      "cardId": "onr_v1_045_newsgroup-filter",
+      "title": "Newsgroup Filter",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["effect:action_economy"]
+    },
+    {
       "cardId": "onr_v1_051_rabbit",
       "title": "Rabbit",
       "recommendedNextAction": "manual_review_candidate",
@@ -3825,6 +4160,55 @@
       ]
     },
     {
+      "cardId": "onr_v1_087_forgotten-backup-chip",
+      "title": "Forgotten Backup Chip",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_heap_card",
+        "effect:card_recovery",
+        "effect:zone_shuffle"
+      ]
+    },
+    {
+      "cardId": "onr_v1_089_gideons-pawnshop",
+      "title": "Gideon's Pawnshop",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_heap_card",
+        "effect:card_recovery"
+      ]
+    },
+    {
+      "cardId": "onr_v1_093_if-you-want-it-done-right",
+      "title": "If You Want It Done Right . . .",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["condition:requires_stack_search"]
+    },
+    {
+      "cardId": "onr_v1_099_mantis-fixer-at-large",
+      "title": "Mantis, Fixer-at-Large",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["condition:requires_stack_search", "effect:draw"]
+    },
+    {
+      "cardId": "onr_v1_103_organ-donor",
+      "title": "Organ Donor",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["condition:requires_grip_card", "effect:economy"]
+    },
+    {
+      "cardId": "onr_v1_114_temple-microcode-outlet",
+      "title": "Temple Microcode Outlet",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["condition:requires_stack_search", "effect:draw"]
+    },
+    {
       "cardId": "onr_v1_116_total-genetic-retrofit",
       "title": "Total Genetic Retrofit",
       "recommendedNextAction": "manual_review_candidate",
@@ -3834,6 +4218,18 @@
         "condition:requires_runner_tagged",
         "effect:survival_payoff",
         "effect:tag_prevention"
+      ]
+    },
+    {
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "title": "Microtech Backup Drive",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_installed_hardware",
+        "condition:requires_program_trash",
+        "effect:card_recovery",
+        "effect:program_trash_prevention"
       ]
     },
     {
@@ -3867,6 +4263,18 @@
       ]
     },
     {
+      "cardId": "onr_v1_154_broker",
+      "title": "Broker",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:counter_economy",
+        "effect:finite_economy_pool"
+      ]
+    },
+    {
       "cardId": "onr_v1_157_crash-everett-inventive-fixer",
       "title": "Crash Everett, Inventive Fixer",
       "recommendedNextAction": "manual_review_candidate",
@@ -3881,6 +4289,50 @@
       "missingManualOverlay": [
         "condition:requires_prevention_window",
         "effect:tag_prevention"
+      ]
+    },
+    {
+      "cardId": "onr_v1_168_loan-from-chiba",
+      "title": "Loan from Chiba",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_start_of_turn",
+        "effect:counter_economy",
+        "effect:delayed_penalty"
+      ]
+    },
+    {
+      "cardId": "onr_v1_176_the-shell-traders",
+      "title": "The Shell Traders",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_grip_card",
+        "condition:requires_installed_resource",
+        "effect:install_discount"
+      ]
+    },
+    {
+      "cardId": "onr_v1_177_the-short-circuit",
+      "title": "The Short Circuit",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_runner_action",
+        "condition:requires_stack_search",
+        "effect:search"
+      ]
+    },
+    {
+      "cardId": "onr_v1_178_short-term-contract",
+      "title": "Short-Term Contract",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:finite_economy_pool"
       ]
     },
     {
@@ -4138,7 +4590,9 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine"
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect"
       ]
     },
     {
@@ -4172,7 +4626,9 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine"
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect"
       ]
     },
     {
@@ -5186,6 +5642,16 @@
       ]
     },
     {
+      "cardId": "onr_v1_045_newsgroup-filter",
+      "title": "Newsgroup Filter",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "mechanicalFactsFromGenerated": [
+        "effect:action_economy",
+        "effect:economy"
+      ]
+    },
+    {
       "cardId": "onr_v1_047_pile-driver",
       "title": "Pile Driver",
       "recommendedNextAction": "ready_for_generated_mechanical_fields",
@@ -5393,6 +5859,89 @@
       ]
     },
     {
+      "cardId": "onr_v1_087_forgotten-backup-chip",
+      "title": "Forgotten Backup Chip",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_heap_card",
+        "effect:card_recovery",
+        "effect:search"
+      ]
+    },
+    {
+      "cardId": "onr_v1_089_gideons-pawnshop",
+      "title": "Gideon's Pawnshop",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_heap_card",
+        "effect:card_recovery",
+        "effect:search"
+      ]
+    },
+    {
+      "cardId": "onr_v1_093_if-you-want-it-done-right",
+      "title": "If You Want It Done Right . . .",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_stack_search",
+        "effect:search"
+      ]
+    },
+    {
+      "cardId": "onr_v1_095_jack-n-joe",
+      "title": "Jack 'n' Joe",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "mechanicalFactsFromGenerated": ["effect:draw"]
+    },
+    {
+      "cardId": "onr_v1_097_livewires-contacts",
+      "title": "Livewire's Contacts",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "mechanicalFactsFromGenerated": ["effect:economy"]
+    },
+    {
+      "cardId": "onr_v1_099_mantis-fixer-at-large",
+      "title": "Mantis, Fixer-at-Large",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_stack_search",
+        "effect:search"
+      ]
+    },
+    {
+      "cardId": "onr_v1_103_organ-donor",
+      "title": "Organ Donor",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_grip_card",
+        "effect:economy"
+      ]
+    },
+    {
+      "cardId": "onr_v1_108_score",
+      "title": "Score!",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "mechanicalFactsFromGenerated": ["effect:economy"]
+    },
+    {
+      "cardId": "onr_v1_114_temple-microcode-outlet",
+      "title": "Temple Microcode Outlet",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_stack_search",
+        "effect:search"
+      ]
+    },
+    {
       "cardId": "onr_v1_116_total-genetic-retrofit",
       "title": "Total Genetic Retrofit",
       "recommendedNextAction": "manual_review_candidate",
@@ -5402,6 +5951,18 @@
         "condition:requires_runner_tagged",
         "effect:survival_payoff",
         "effect:tag_prevention"
+      ]
+    },
+    {
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "title": "Microtech Backup Drive",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_installed_hardware",
+        "condition:requires_program_trash",
+        "effect:card_recovery",
+        "effect:program_trash_prevention"
       ]
     },
     {
@@ -5435,6 +5996,18 @@
       ]
     },
     {
+      "cardId": "onr_v1_154_broker",
+      "title": "Broker",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:counter_economy",
+        "effect:finite_economy_pool"
+      ]
+    },
+    {
       "cardId": "onr_v1_157_crash-everett-inventive-fixer",
       "title": "Crash Everett, Inventive Fixer",
       "recommendedNextAction": "manual_review_candidate",
@@ -5449,6 +6022,52 @@
       "mechanicalFactsFromGenerated": [
         "condition:requires_prevention_window",
         "effect:tag_prevention"
+      ]
+    },
+    {
+      "cardId": "onr_v1_168_loan-from-chiba",
+      "title": "Loan from Chiba",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_start_of_turn",
+        "effect:counter_economy",
+        "effect:delayed_penalty",
+        "effect:economy"
+      ]
+    },
+    {
+      "cardId": "onr_v1_176_the-shell-traders",
+      "title": "The Shell Traders",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_grip_card",
+        "condition:requires_installed_resource",
+        "effect:install_discount"
+      ]
+    },
+    {
+      "cardId": "onr_v1_177_the-short-circuit",
+      "title": "The Short Circuit",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_runner_action",
+        "condition:requires_stack_search",
+        "effect:search"
+      ]
+    },
+    {
+      "cardId": "onr_v1_178_short-term-contract",
+      "title": "Short-Term Contract",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:counter_economy",
+        "effect:finite_economy_pool"
       ]
     },
     {
@@ -5828,7 +6447,9 @@
       "mechanicalFactsFromGenerated": [
         "condition:requires_during_run",
         "condition:requires_encounter",
+        "condition:requires_remaining_ice",
         "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect",
         "effect:future_run_effect",
         "effect:run_tax"
       ]
@@ -5868,7 +6489,9 @@
       "mechanicalFactsFromGenerated": [
         "condition:requires_during_run",
         "condition:requires_encounter",
+        "condition:requires_remaining_ice",
         "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect",
         "effect:future_run_effect",
         "effect:run_tax"
       ]
@@ -7078,6 +7701,13 @@
       "missingManualOverlay": ["effect:expose_info"]
     },
     {
+      "cardId": "onr_v1_045_newsgroup-filter",
+      "title": "Newsgroup Filter",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["effect:action_economy"]
+    },
+    {
       "cardId": "onr_v1_051_rabbit",
       "title": "Rabbit",
       "recommendedNextAction": "manual_review_candidate",
@@ -7140,6 +7770,55 @@
       ]
     },
     {
+      "cardId": "onr_v1_087_forgotten-backup-chip",
+      "title": "Forgotten Backup Chip",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_heap_card",
+        "effect:card_recovery",
+        "effect:zone_shuffle"
+      ]
+    },
+    {
+      "cardId": "onr_v1_089_gideons-pawnshop",
+      "title": "Gideon's Pawnshop",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_heap_card",
+        "effect:card_recovery"
+      ]
+    },
+    {
+      "cardId": "onr_v1_093_if-you-want-it-done-right",
+      "title": "If You Want It Done Right . . .",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["condition:requires_stack_search"]
+    },
+    {
+      "cardId": "onr_v1_099_mantis-fixer-at-large",
+      "title": "Mantis, Fixer-at-Large",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["condition:requires_stack_search", "effect:draw"]
+    },
+    {
+      "cardId": "onr_v1_103_organ-donor",
+      "title": "Organ Donor",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["condition:requires_grip_card", "effect:economy"]
+    },
+    {
+      "cardId": "onr_v1_114_temple-microcode-outlet",
+      "title": "Temple Microcode Outlet",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["condition:requires_stack_search", "effect:draw"]
+    },
+    {
       "cardId": "onr_v1_116_total-genetic-retrofit",
       "title": "Total Genetic Retrofit",
       "recommendedNextAction": "manual_review_candidate",
@@ -7149,6 +7828,18 @@
         "condition:requires_runner_tagged",
         "effect:survival_payoff",
         "effect:tag_prevention"
+      ]
+    },
+    {
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "title": "Microtech Backup Drive",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_installed_hardware",
+        "condition:requires_program_trash",
+        "effect:card_recovery",
+        "effect:program_trash_prevention"
       ]
     },
     {
@@ -7182,6 +7873,18 @@
       ]
     },
     {
+      "cardId": "onr_v1_154_broker",
+      "title": "Broker",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:counter_economy",
+        "effect:finite_economy_pool"
+      ]
+    },
+    {
       "cardId": "onr_v1_157_crash-everett-inventive-fixer",
       "title": "Crash Everett, Inventive Fixer",
       "recommendedNextAction": "manual_review_candidate",
@@ -7196,6 +7899,50 @@
       "missingManualOverlay": [
         "condition:requires_prevention_window",
         "effect:tag_prevention"
+      ]
+    },
+    {
+      "cardId": "onr_v1_168_loan-from-chiba",
+      "title": "Loan from Chiba",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_start_of_turn",
+        "effect:counter_economy",
+        "effect:delayed_penalty"
+      ]
+    },
+    {
+      "cardId": "onr_v1_176_the-shell-traders",
+      "title": "The Shell Traders",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_grip_card",
+        "condition:requires_installed_resource",
+        "effect:install_discount"
+      ]
+    },
+    {
+      "cardId": "onr_v1_177_the-short-circuit",
+      "title": "The Short Circuit",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_runner_action",
+        "condition:requires_stack_search",
+        "effect:search"
+      ]
+    },
+    {
+      "cardId": "onr_v1_178_short-term-contract",
+      "title": "Short-Term Contract",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:finite_economy_pool"
       ]
     },
     {
@@ -7453,7 +8200,9 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine"
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect"
       ]
     },
     {
@@ -7487,7 +8236,9 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine"
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect"
       ]
     },
     {
@@ -8287,7 +9038,7 @@
     }
   ],
   "infoCounts": {
-    "info_no_overlay_needed": 56,
+    "info_no_overlay_needed": 59,
     "info_overlay_present": 6
   },
   "cards": [
@@ -10440,6 +11191,92 @@
       "migrationReadiness": "ready"
     },
     {
+      "cardId": "onr_v1_045_newsgroup-filter",
+      "title": "Newsgroup Filter",
+      "side": "runner",
+      "cardType": "program",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "needsManualReview": true,
+      "missingManualOverlay": ["effect:action_economy"],
+      "compiledPreview": {
+        "cardId": "onr_v1_045_newsgroup-filter",
+        "side": "runner",
+        "cardType": "program",
+        "roles": ["per_card_longtail", "program", "runner"],
+        "planRoles": ["runner_install_program", "runner_program_ability"],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 2,
+            "confidence": "high",
+            "kind": "action_economy",
+            "resource": "credits",
+            "scope": "runner",
+            "source": "implementation.effect.gain_credits",
+            "timing": "action"
+          },
+          {
+            "amount": 2,
+            "confidence": "high",
+            "kind": "economy",
+            "resource": "credits",
+            "scope": "runner",
+            "source": "implementation.effect.gain_credits",
+            "timing": "action"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "effect:action_economy",
+        "effect:economy"
+      ],
+      "generatedFields": ["effects"],
+      "strategyFieldsFromOverlay": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": ["effects"],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_045_newsgroup-filter",
+          "field": "effects"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_045_newsgroup-filter",
+          "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_045_newsgroup-filter"
+        }
+      ],
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
+    },
+    {
       "cardId": "onr_v1_047_pile-driver",
       "title": "Pile Driver",
       "side": "runner",
@@ -12499,6 +13336,774 @@
       "migrationReadiness": "ready"
     },
     {
+      "cardId": "onr_v1_087_forgotten-backup-chip",
+      "title": "Forgotten Backup Chip",
+      "side": "runner",
+      "cardType": "event",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "needsManualReview": true,
+      "missingManualOverlay": [
+        "condition:requires_heap_card",
+        "effect:card_recovery",
+        "effect:zone_shuffle"
+      ],
+      "compiledPreview": {
+        "cardId": "onr_v1_087_forgotten-backup-chip",
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["event", "hidden_zone_tool", "stack_search"],
+        "planRoles": ["build_rig", "recover_rig"],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "card_recovery",
+            "resource": "cards",
+            "scope": "heap",
+            "source": "implementation.effect.search_trash_to_grip",
+            "timing": "action"
+          },
+          {
+            "confidence": "high",
+            "kind": "search",
+            "resource": "cards",
+            "scope": "heap",
+            "source": "implementation.effect.search_trash_to_grip",
+            "timing": "action"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_heap_card",
+            "source": "implementation.effect.search_trash_to_grip"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_heap_card",
+        "effect:card_recovery",
+        "effect:search"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "strategyFieldsFromOverlay": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_087_forgotten-backup-chip",
+          "field": "effects"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_087_forgotten-backup-chip",
+          "field": "conditions"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_087_forgotten-backup-chip",
+          "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_087_forgotten-backup-chip"
+        }
+      ],
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
+    },
+    {
+      "cardId": "onr_v1_089_gideons-pawnshop",
+      "title": "Gideon's Pawnshop",
+      "side": "runner",
+      "cardType": "event",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "needsManualReview": true,
+      "missingManualOverlay": [
+        "condition:requires_heap_card",
+        "effect:card_recovery"
+      ],
+      "compiledPreview": {
+        "cardId": "onr_v1_089_gideons-pawnshop",
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["event", "trash_recovery"],
+        "planRoles": ["build_rig", "recover_rig"],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "card_recovery",
+            "resource": "cards",
+            "scope": "heap",
+            "source": "implementation.effect.search_trash_to_grip",
+            "timing": "action"
+          },
+          {
+            "confidence": "high",
+            "kind": "search",
+            "resource": "cards",
+            "scope": "heap",
+            "source": "implementation.effect.search_trash_to_grip",
+            "timing": "action"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_heap_card",
+            "source": "implementation.effect.search_trash_to_grip"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_heap_card",
+        "effect:card_recovery",
+        "effect:search"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "strategyFieldsFromOverlay": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "activeMonolithOnlyFields": [
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_089_gideons-pawnshop",
+          "field": "effects"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_089_gideons-pawnshop",
+          "field": "conditions"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_089_gideons-pawnshop",
+          "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_089_gideons-pawnshop"
+        }
+      ],
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
+    },
+    {
+      "cardId": "onr_v1_093_if-you-want-it-done-right",
+      "title": "If You Want It Done Right . . .",
+      "side": "runner",
+      "cardType": "event",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "needsManualReview": true,
+      "missingManualOverlay": ["condition:requires_stack_search"],
+      "compiledPreview": {
+        "cardId": "onr_v1_093_if-you-want-it-done-right",
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["event", "per_card_longtail", "runner"],
+        "planRoles": ["runner_event_choice", "runner_play_event"],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 5,
+            "confidence": "high",
+            "kind": "search",
+            "resource": "cards",
+            "scope": "stack",
+            "source": "implementation.effect.look_top_stack_take_one_arrange_rest",
+            "timing": "action"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_stack_search",
+            "source": "implementation.effect.search_stack_or_top_stack"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_stack_search",
+        "effect:search"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "strategyFieldsFromOverlay": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "activeMonolithOnlyFields": [
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_093_if-you-want-it-done-right",
+          "field": "effects"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_093_if-you-want-it-done-right",
+          "field": "conditions"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_093_if-you-want-it-done-right",
+          "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_093_if-you-want-it-done-right"
+        }
+      ],
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
+    },
+    {
+      "cardId": "onr_v1_095_jack-n-joe",
+      "title": "Jack 'n' Joe",
+      "side": "runner",
+      "cardType": "event",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "needsManualReview": false,
+      "missingManualOverlay": [],
+      "compiledPreview": {
+        "cardId": "onr_v1_095_jack-n-joe",
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["draw", "setup"],
+        "planRoles": ["draw_for_answers"],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 3,
+            "confidence": "high",
+            "kind": "draw",
+            "resource": "cards",
+            "scope": "runner",
+            "source": "implementation.effect.draw_cards",
+            "timing": "action"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": ["effect:draw"],
+      "generatedFields": ["effects"],
+      "strategyFieldsFromOverlay": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "activeMonolithOnlyFields": [
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": ["effects"],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_095_jack-n-joe",
+          "field": "effects"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_095_jack-n-joe",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
+    },
+    {
+      "cardId": "onr_v1_097_livewires-contacts",
+      "title": "Livewire's Contacts",
+      "side": "runner",
+      "cardType": "event",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "needsManualReview": false,
+      "missingManualOverlay": [],
+      "compiledPreview": {
+        "cardId": "onr_v1_097_livewires-contacts",
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["economy", "tempo"],
+        "planRoles": ["recover_economy"],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 3,
+            "confidence": "high",
+            "kind": "economy",
+            "resource": "credits",
+            "scope": "runner",
+            "source": "implementation.effect.gain_credits",
+            "timing": "action"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": ["effect:economy"],
+      "generatedFields": ["effects"],
+      "strategyFieldsFromOverlay": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "activeMonolithOnlyFields": [
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": ["effects"],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_097_livewires-contacts",
+          "field": "effects"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_097_livewires-contacts",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
+    },
+    {
+      "cardId": "onr_v1_099_mantis-fixer-at-large",
+      "title": "Mantis, Fixer-at-Large",
+      "side": "runner",
+      "cardType": "event",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "needsManualReview": true,
+      "missingManualOverlay": [
+        "condition:requires_stack_search",
+        "effect:draw"
+      ],
+      "compiledPreview": {
+        "cardId": "onr_v1_099_mantis-fixer-at-large",
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["connection", "event", "hidden_zone_tool", "stack_search"],
+        "planRoles": ["build_rig", "recover_rig"],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "search",
+            "resource": "cards",
+            "scope": "stack",
+            "source": "implementation.effect.search_stack_to_grip",
+            "timing": "action"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_stack_search",
+            "source": "implementation.effect.search_stack_or_top_stack"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_stack_search",
+        "effect:search"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "strategyFieldsFromOverlay": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_099_mantis-fixer-at-large",
+          "field": "effects"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_099_mantis-fixer-at-large",
+          "field": "conditions"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_099_mantis-fixer-at-large",
+          "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_099_mantis-fixer-at-large"
+        }
+      ],
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
+    },
+    {
+      "cardId": "onr_v1_103_organ-donor",
+      "title": "Organ Donor",
+      "side": "runner",
+      "cardType": "event",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "needsManualReview": true,
+      "missingManualOverlay": [
+        "condition:requires_grip_card",
+        "effect:economy"
+      ],
+      "compiledPreview": {
+        "cardId": "onr_v1_103_organ-donor",
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["event", "per_card_longtail", "runner"],
+        "planRoles": ["runner_event_choice", "runner_play_event"],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 2,
+            "confidence": "high",
+            "kind": "economy",
+            "resource": "credits",
+            "scope": "runner",
+            "source": "implementation.effect.trash_cards_from_grip_for_credits",
+            "timing": "action"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_grip_card",
+            "source": "implementation.effect.trash_cards_from_grip_for_credits"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_grip_card",
+        "effect:economy"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "strategyFieldsFromOverlay": [],
+      "duplicatedActiveMechanicalFields": [],
+      "activeMonolithOnlyFields": [
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_103_organ-donor",
+          "field": "conditions"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_103_organ-donor",
+          "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_103_organ-donor"
+        }
+      ],
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
+    },
+    {
+      "cardId": "onr_v1_108_score",
+      "title": "Score!",
+      "side": "runner",
+      "cardType": "event",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "needsManualReview": false,
+      "missingManualOverlay": [],
+      "compiledPreview": {
+        "cardId": "onr_v1_108_score",
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["economy", "run_pressure"],
+        "planRoles": ["pressure_rnd", "recover_economy"],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 9,
+            "confidence": "high",
+            "kind": "economy",
+            "resource": "credits",
+            "scope": "runner",
+            "source": "implementation.effect.gain_credits",
+            "timing": "action"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": ["effect:economy"],
+      "generatedFields": ["effects"],
+      "strategyFieldsFromOverlay": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": ["effects"],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_108_score",
+          "field": "effects"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_108_score",
+          "field": "effects"
+        }
+      ],
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
+    },
+    {
+      "cardId": "onr_v1_114_temple-microcode-outlet",
+      "title": "Temple Microcode Outlet",
+      "side": "runner",
+      "cardType": "event",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "needsManualReview": true,
+      "missingManualOverlay": [
+        "condition:requires_stack_search",
+        "effect:draw"
+      ],
+      "compiledPreview": {
+        "cardId": "onr_v1_114_temple-microcode-outlet",
+        "side": "runner",
+        "cardType": "event",
+        "roles": ["event", "hidden_zone_tool", "program_search"],
+        "planRoles": ["build_rig", "draw_for_answers"],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "search",
+            "resource": "cards",
+            "scope": "stack",
+            "source": "implementation.effect.search_stack_to_grip",
+            "timing": "action"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_stack_search",
+            "source": "implementation.effect.search_stack_or_top_stack"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_stack_search",
+        "effect:search"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "strategyFieldsFromOverlay": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "field": "effects"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "field": "conditions"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_114_temple-microcode-outlet",
+          "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_114_temple-microcode-outlet"
+        }
+      ],
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
+    },
+    {
       "cardId": "onr_v1_116_total-genetic-retrofit",
       "title": "Total Genetic Retrofit",
       "side": "runner",
@@ -12594,6 +14199,107 @@
           "kind": "overlay_missing_for_manual_gap",
           "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
           "cardId": "onr_v1_116_total-genetic-retrofit"
+        }
+      ],
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
+    },
+    {
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "title": "Microtech Backup Drive",
+      "side": "runner",
+      "cardType": "hardware",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "needsManualReview": true,
+      "missingManualOverlay": [
+        "condition:requires_installed_hardware",
+        "condition:requires_program_trash",
+        "effect:card_recovery",
+        "effect:program_trash_prevention"
+      ],
+      "compiledPreview": {
+        "cardId": "onr_v1_131_microtech-backup-drive",
+        "side": "runner",
+        "cardType": "hardware",
+        "roles": ["hardware", "per_card_longtail", "runner"],
+        "planRoles": ["runner_install_hardware"],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "card_recovery",
+            "resource": "cards",
+            "scope": "runner",
+            "source": "implementation.runnerUtilityLongtail.microtech_backup_drive_program_trash_replacement",
+            "timing": "persistent"
+          },
+          {
+            "confidence": "high",
+            "kind": "program_trash_prevention",
+            "resource": "cards",
+            "scope": "installed_program",
+            "source": "implementation.runnerUtilityLongtail.microtech_backup_drive_program_trash_replacement",
+            "timing": "prevention_window"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_installed_hardware",
+            "source": "implementation.runnerUtilityLongtail.microtech_backup_drive_program_trash_replacement"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_program_trash",
+            "source": "implementation.runnerUtilityLongtail.microtech_backup_drive_program_trash_replacement"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_installed_hardware",
+        "condition:requires_program_trash",
+        "effect:card_recovery",
+        "effect:program_trash_prevention"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "strategyFieldsFromOverlay": [],
+      "duplicatedActiveMechanicalFields": [],
+      "activeMonolithOnlyFields": [
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_131_microtech-backup-drive",
+          "field": "conditions"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_131_microtech-backup-drive",
+          "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_131_microtech-backup-drive"
         }
       ],
       "recommendedNextAction": "manual_review_candidate",
@@ -12854,6 +14560,111 @@
       "migrationReadiness": "needs_review"
     },
     {
+      "cardId": "onr_v1_154_broker",
+      "title": "Broker",
+      "side": "runner",
+      "cardType": "resource",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "needsManualReview": true,
+      "missingManualOverlay": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:counter_economy",
+        "effect:finite_economy_pool"
+      ],
+      "compiledPreview": {
+        "cardId": "onr_v1_154_broker",
+        "side": "runner",
+        "cardType": "resource",
+        "roles": ["recursion", "resource", "tag_risk", "trash_recovery"],
+        "planRoles": ["build_rig", "recover_key_card", "resource_value_engine"],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 3,
+            "confidence": "high",
+            "kind": "finite_economy_pool",
+            "resource": "credits",
+            "scope": "runner",
+            "source": "implementation.effect.add_hosted_credits",
+            "timing": "action"
+          },
+          {
+            "confidence": "high",
+            "kind": "action_economy",
+            "resource": "credits",
+            "scope": "corp",
+            "source": "implementation.effect.take_hosted_credits",
+            "timing": "action"
+          },
+          {
+            "confidence": "high",
+            "kind": "counter_economy",
+            "resource": "credits",
+            "scope": "corp",
+            "source": "implementation.effect.take_hosted_credits",
+            "timing": "action"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_installed_resource",
+            "source": "implementation.effect.add_hosted_credits"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:counter_economy",
+        "effect:finite_economy_pool"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "strategyFieldsFromOverlay": [],
+      "duplicatedActiveMechanicalFields": [],
+      "activeMonolithOnlyFields": [
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_154_broker",
+          "field": "conditions"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_154_broker",
+          "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_154_broker"
+        }
+      ],
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
+    },
+    {
       "cardId": "onr_v1_157_crash-everett-inventive-fixer",
       "title": "Crash Everett, Inventive Fixer",
       "side": "runner",
@@ -13005,6 +14816,449 @@
           "kind": "overlay_missing_for_manual_gap",
           "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
           "cardId": "onr_v1_161_fall-guy"
+        }
+      ],
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
+    },
+    {
+      "cardId": "onr_v1_168_loan-from-chiba",
+      "title": "Loan from Chiba",
+      "side": "runner",
+      "cardType": "resource",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "needsManualReview": true,
+      "missingManualOverlay": [
+        "condition:requires_start_of_turn",
+        "effect:counter_economy",
+        "effect:delayed_penalty"
+      ],
+      "compiledPreview": {
+        "cardId": "onr_v1_168_loan-from-chiba",
+        "side": "runner",
+        "cardType": "resource",
+        "roles": ["economy", "persistent", "resource", "runner"],
+        "planRoles": ["credit_swing"],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 1,
+            "confidence": "high",
+            "kind": "delayed_penalty",
+            "resource": "credits",
+            "scope": "runner",
+            "source": "implementation.lifecycle.start_of_runner_turn.lose_credits",
+            "timing": "start_of_turn"
+          },
+          {
+            "amount": 10,
+            "confidence": "high",
+            "kind": "delayed_penalty",
+            "resource": "credits",
+            "scope": "runner",
+            "source": "implementation.lifecycle.on_leave_play.pay_credits_or_lose_game",
+            "timing": "on_leave_play"
+          },
+          {
+            "amount": 12,
+            "confidence": "high",
+            "kind": "economy",
+            "resource": "credits",
+            "scope": "runner",
+            "source": "implementation.effect.gain_credits",
+            "timing": "action"
+          },
+          {
+            "confidence": "high",
+            "kind": "counter_economy",
+            "resource": "credits",
+            "scope": "runner",
+            "source": "implementation.effect.lose_credits",
+            "timing": "action"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_start_of_turn",
+            "source": "implementation.lifecycle.start_of_runner_turn"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_start_of_turn",
+        "effect:counter_economy",
+        "effect:delayed_penalty",
+        "effect:economy"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "strategyFieldsFromOverlay": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_168_loan-from-chiba",
+          "field": "effects"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_168_loan-from-chiba",
+          "field": "conditions"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_168_loan-from-chiba",
+          "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_168_loan-from-chiba"
+        }
+      ],
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
+    },
+    {
+      "cardId": "onr_v1_176_the-shell-traders",
+      "title": "The Shell Traders",
+      "side": "runner",
+      "cardType": "resource",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "needsManualReview": true,
+      "missingManualOverlay": [
+        "condition:requires_grip_card",
+        "condition:requires_installed_resource",
+        "effect:install_discount"
+      ],
+      "compiledPreview": {
+        "cardId": "onr_v1_176_the-shell-traders",
+        "side": "runner",
+        "cardType": "resource",
+        "roles": [
+          "counter",
+          "delayed_install",
+          "resource",
+          "set_aside_install",
+          "shell_counter"
+        ],
+        "planRoles": ["build_rig", "delayed_install"],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "install_discount",
+            "resource": "credits",
+            "scope": "runner",
+            "source": "implementation.hiddenReplacementLongtail.shell_traders_delayed_install",
+            "timing": "persistent"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_grip_card",
+            "source": "implementation.hiddenReplacementLongtail.shell_traders_delayed_install"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_installed_resource",
+            "source": "implementation.hiddenReplacementLongtail.shell_traders_delayed_install"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_grip_card",
+        "condition:requires_installed_resource",
+        "effect:install_discount"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "strategyFieldsFromOverlay": [],
+      "duplicatedActiveMechanicalFields": [],
+      "activeMonolithOnlyFields": [
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_176_the-shell-traders",
+          "field": "conditions"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_176_the-shell-traders",
+          "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_176_the-shell-traders"
+        }
+      ],
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
+    },
+    {
+      "cardId": "onr_v1_177_the-short-circuit",
+      "title": "The Short Circuit",
+      "side": "runner",
+      "cardType": "resource",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "needsManualReview": true,
+      "missingManualOverlay": [
+        "condition:requires_runner_action",
+        "condition:requires_stack_search",
+        "effect:search"
+      ],
+      "compiledPreview": {
+        "cardId": "onr_v1_177_the-short-circuit",
+        "side": "runner",
+        "cardType": "resource",
+        "roles": [
+          "hidden_zone_tool",
+          "repeatable_resource_ability",
+          "resource",
+          "stack_search"
+        ],
+        "planRoles": ["build_rig", "recover_rig"],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "search",
+            "resource": "cards",
+            "scope": "stack",
+            "source": "implementation.effect.search_stack_to_grip",
+            "timing": "action"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_runner_action",
+            "source": "implementation.ability.cost.action"
+          },
+          {
+            "confidence": "high",
+            "kind": "requires_stack_search",
+            "source": "implementation.effect.search_stack_or_top_stack"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_runner_action",
+        "condition:requires_stack_search",
+        "effect:search"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "strategyFieldsFromOverlay": [],
+      "duplicatedActiveMechanicalFields": [],
+      "activeMonolithOnlyFields": [
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_177_the-short-circuit",
+          "field": "conditions"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_177_the-short-circuit",
+          "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_177_the-short-circuit"
+        }
+      ],
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
+    },
+    {
+      "cardId": "onr_v1_178_short-term-contract",
+      "title": "Short-Term Contract",
+      "side": "runner",
+      "cardType": "resource",
+      "activeHintFound": true,
+      "derivedFactsFound": true,
+      "manualOverlayFound": false,
+      "expectedManualOverlayNeeded": false,
+      "needsManualReview": true,
+      "missingManualOverlay": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:finite_economy_pool"
+      ],
+      "compiledPreview": {
+        "cardId": "onr_v1_178_short-term-contract",
+        "side": "runner",
+        "cardType": "resource",
+        "roles": [
+          "bit_depot",
+          "click_economy",
+          "drip_economy",
+          "economy",
+          "resource"
+        ],
+        "planRoles": [
+          "build_rig",
+          "click_for_credits_when_safe",
+          "recover_economy"
+        ],
+        "aiSupportStatus": "ai_supported",
+        "effects": [
+          {
+            "amount": 12,
+            "confidence": "high",
+            "kind": "finite_economy_pool",
+            "resource": "credits",
+            "scope": "runner",
+            "source": "implementation.effect.add_hosted_credits",
+            "timing": "action"
+          },
+          {
+            "amount": 2,
+            "confidence": "high",
+            "kind": "action_economy",
+            "resource": "credits",
+            "scope": "corp",
+            "source": "implementation.effect.take_hosted_credits",
+            "timing": "action"
+          },
+          {
+            "amount": 2,
+            "confidence": "high",
+            "kind": "counter_economy",
+            "resource": "credits",
+            "scope": "corp",
+            "source": "implementation.effect.take_hosted_credits",
+            "timing": "action"
+          }
+        ],
+        "conditions": [
+          {
+            "confidence": "high",
+            "kind": "requires_installed_resource",
+            "source": "implementation.effect.add_hosted_credits"
+          }
+        ]
+      },
+      "mechanicalFactsFromGenerated": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:counter_economy",
+        "effect:finite_economy_pool"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "strategyFieldsFromOverlay": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "activeMonolithOnlyFields": [
+        "costProfile",
+        "lineSupport",
+        "quality",
+        "requiredMechanics",
+        "riskTags",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "generatedOnlyFields": ["effects", "conditions"],
+      "overlayOnlyFields": [],
+      "conflicts": [],
+      "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_178_short-term-contract",
+          "field": "effects"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_178_short-term-contract",
+          "field": "conditions"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_178_short-term-contract",
+          "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_178_short-term-contract"
         }
       ],
       "recommendedNextAction": "manual_review_candidate",
@@ -16200,7 +18454,9 @@
       "needsManualReview": true,
       "missingManualOverlay": [
         "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine"
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_222_ball-and-chain",
@@ -16217,6 +18473,13 @@
             "resource": "credits",
             "scope": "run_path",
             "source": "implementation.printedSubroutines.run_duration_encounter_cost_or_end_run",
+            "timing": "encounter"
+          },
+          {
+            "confidence": "medium",
+            "kind": "future_encounter_effect",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration.future_ice",
             "timing": "encounter"
           },
           {
@@ -16240,6 +18503,11 @@
           },
           {
             "confidence": "high",
+            "kind": "requires_remaining_ice",
+            "source": "implementation.printedSubroutines.run_duration.future_ice"
+          },
+          {
+            "confidence": "high",
             "kind": "requires_unbroken_subroutine",
             "source": "implementation.printedSubroutines"
           }
@@ -16248,7 +18516,9 @@
       "mechanicalFactsFromGenerated": [
         "condition:requires_during_run",
         "condition:requires_encounter",
+        "condition:requires_remaining_ice",
         "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect",
         "effect:future_run_effect",
         "effect:run_tax"
       ],
@@ -16567,7 +18837,9 @@
       "needsManualReview": true,
       "missingManualOverlay": [
         "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine"
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_225_canis-major",
@@ -16584,6 +18856,13 @@
             "resource": "strength",
             "scope": "run_path",
             "source": "implementation.printedSubroutines.run_duration_ice_strength",
+            "timing": "encounter"
+          },
+          {
+            "confidence": "medium",
+            "kind": "future_encounter_effect",
+            "scope": "run_path",
+            "source": "implementation.printedSubroutines.run_duration.future_ice",
             "timing": "encounter"
           },
           {
@@ -16607,6 +18886,11 @@
           },
           {
             "confidence": "high",
+            "kind": "requires_remaining_ice",
+            "source": "implementation.printedSubroutines.run_duration.future_ice"
+          },
+          {
+            "confidence": "high",
             "kind": "requires_unbroken_subroutine",
             "source": "implementation.printedSubroutines"
           }
@@ -16615,7 +18899,9 @@
       "mechanicalFactsFromGenerated": [
         "condition:requires_during_run",
         "condition:requires_encounter",
+        "condition:requires_remaining_ice",
         "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect",
         "effect:future_run_effect",
         "effect:run_tax"
       ],
@@ -27108,6 +29394,29 @@
       "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
       "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_045_newsgroup-filter",
+      "field": "effects"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_045_newsgroup-filter",
+      "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_045_newsgroup-filter"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
       "message": "Active monolith already carries mechanical field breakerProfile; long-term source should be generated facts.",
       "cardId": "onr_v1_047_pile-driver",
       "field": "breakerProfile"
@@ -27659,6 +29968,232 @@
       "field": "effects"
     },
     {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_087_forgotten-backup-chip",
+      "field": "effects"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_087_forgotten-backup-chip",
+      "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_087_forgotten-backup-chip",
+      "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_087_forgotten-backup-chip"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_089_gideons-pawnshop",
+      "field": "effects"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_089_gideons-pawnshop",
+      "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_089_gideons-pawnshop",
+      "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_089_gideons-pawnshop"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_093_if-you-want-it-done-right",
+      "field": "effects"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_093_if-you-want-it-done-right",
+      "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_093_if-you-want-it-done-right",
+      "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_093_if-you-want-it-done-right"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_095_jack-n-joe",
+      "field": "effects"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_095_jack-n-joe",
+      "field": "effects"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_097_livewires-contacts",
+      "field": "effects"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_097_livewires-contacts",
+      "field": "effects"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_099_mantis-fixer-at-large",
+      "field": "effects"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_099_mantis-fixer-at-large",
+      "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_099_mantis-fixer-at-large",
+      "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_099_mantis-fixer-at-large"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_103_organ-donor",
+      "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_103_organ-donor",
+      "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_103_organ-donor"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_108_score",
+      "field": "effects"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_108_score",
+      "field": "effects"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_114_temple-microcode-outlet",
+      "field": "effects"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_114_temple-microcode-outlet",
+      "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_114_temple-microcode-outlet",
+      "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_114_temple-microcode-outlet"
+    },
+    {
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
@@ -27680,6 +30215,29 @@
       "kind": "overlay_missing_for_manual_gap",
       "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
       "cardId": "onr_v1_116_total-genetic-retrofit"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_131_microtech-backup-drive"
     },
     {
       "classification": "generated_fact_absent_from_monolith",
@@ -27754,6 +30312,29 @@
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_154_broker",
+      "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_154_broker",
+      "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_154_broker"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_157_crash-everett-inventive-fixer",
       "field": "effects"
@@ -27787,6 +30368,114 @@
       "kind": "overlay_missing_for_manual_gap",
       "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
       "cardId": "onr_v1_161_fall-guy"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_168_loan-from-chiba",
+      "field": "effects"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_168_loan-from-chiba",
+      "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_168_loan-from-chiba",
+      "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_168_loan-from-chiba"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_176_the-shell-traders",
+      "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_176_the-shell-traders",
+      "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_176_the-shell-traders"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_177_the-short-circuit",
+      "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_177_the-short-circuit",
+      "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_177_the-short-circuit"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_178_short-term-contract",
+      "field": "effects"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_178_short-term-contract",
+      "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_178_short-term-contract",
+      "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_178_short-term-contract"
     },
     {
       "classification": "monolith_mechanical_duplication_candidate",

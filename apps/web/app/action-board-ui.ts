@@ -1373,14 +1373,14 @@ export function runAwareActionButtonLabel(view: PlayerView, action: LegalAction)
   if (!view.run) return base;
   const iceLabel = runCurrentIceLabel(view);
   if (action.type === "jack_out") {
-    return iceLabel ? `Run abbrechen an ${iceLabel}` : "Run abbrechen vor Zugriff";
+    return iceLabel ? `Jack-out: an ${iceLabel} abbrechen` : "Jack-out: vor Zugriff abbrechen";
   }
   if (action.type === "continue_run") {
     if (action.payload?.encounterContinue === true) {
       if (base === "ICE passieren" && iceLabel) return `${iceLabel} passieren`;
       return iceLabel ? `${base} an ${iceLabel}` : base;
     }
-    if (view.run.phase === "movement") return iceLabel ? `Run fortsetzen zu ${iceLabel}` : "Run fortsetzen zum Zugriff";
+    if (view.run.phase === "movement") return iceLabel ? `Weiterlaufen: zu ${iceLabel}` : "Weiterlaufen: zum Zugriff";
     if (view.run.phase === "approach_ice" && iceLabel) return `Annäherung an ${iceLabel} fortsetzen`;
   }
   if ((action.type === "pump_breaker" || action.type === "break_subroutine") && iceLabel && action.payload?.iceId === activeRunIceInstanceId(view)) {

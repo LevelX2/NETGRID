@@ -1,0 +1,193 @@
+{
+  "schemaVersion": "aufgabe-041-compiled-hint-runtime-pilot-report-v1",
+  "taskId": "Aufgabe 041",
+  "generatedAt": "2026-05-25",
+  "activeHintCount": 410,
+  "compiledHintCount": 410,
+  "runtimePilotCardCount": 10,
+  "generatedFactsCardCount": 193,
+  "legacyFallbackOnlyCount": 217,
+  "manualOverlayCardCount": 6,
+  "hardErrorCount": 0,
+  "warningCount": 0,
+  "runtimePilotCards": [
+    {
+      "cardId": "onr_v1_039_krash",
+      "side": "runner",
+      "cardType": "program",
+      "generatedFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "manualOverlayFields": [
+        "lineSupport",
+        "quality"
+      ]
+    },
+    {
+      "cardId": "onr_v1_040_loony-goon",
+      "side": "runner",
+      "cardType": "program",
+      "generatedFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile"
+      ],
+      "manualOverlayFields": [
+        "lineSupport",
+        "quality"
+      ]
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "side": "runner",
+      "cardType": "program",
+      "generatedFields": [
+        "effects",
+        "conditions",
+        "costProfile",
+        "targetProfiles"
+      ],
+      "manualOverlayFields": [
+        "lineSupport",
+        "quality",
+        "manualNotes"
+      ]
+    },
+    {
+      "cardId": "onr_v1_057_scatter-shot",
+      "side": "runner",
+      "cardType": "program",
+      "generatedFields": [
+        "effects",
+        "costProfile"
+      ],
+      "manualOverlayFields": [
+        "lineSupport",
+        "quality"
+      ]
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "side": "runner",
+      "cardType": "program",
+      "generatedFields": [
+        "effects",
+        "conditions",
+        "costProfile",
+        "targetProfiles"
+      ],
+      "manualOverlayFields": [
+        "lineSupport",
+        "quality",
+        "manualNotes"
+      ]
+    },
+    {
+      "cardId": "onr_v1_222_ball-and-chain",
+      "side": "corp",
+      "cardType": "ice",
+      "generatedFields": [
+        "effects",
+        "conditions"
+      ],
+      "manualOverlayFields": [
+        "lineSupport",
+        "quality"
+      ]
+    },
+    {
+      "cardId": "onr_v1_225_canis-major",
+      "side": "corp",
+      "cardType": "ice",
+      "generatedFields": [
+        "effects",
+        "conditions"
+      ],
+      "manualOverlayFields": [
+        "lineSupport",
+        "quality"
+      ]
+    },
+    {
+      "cardId": "onr_v1_302_scorched-earth",
+      "side": "corp",
+      "cardType": "operation",
+      "generatedFields": [
+        "effects",
+        "conditions",
+        "costProfile"
+      ],
+      "manualOverlayFields": [
+        "lineSupport",
+        "quality"
+      ]
+    },
+    {
+      "cardId": "onr_v1_309_bbs-whispering-campaign",
+      "side": "corp",
+      "cardType": "asset",
+      "generatedFields": [
+        "effects",
+        "costProfile",
+        "remoteRole"
+      ],
+      "manualOverlayFields": [
+        "lineSupport",
+        "quality"
+      ]
+    },
+    {
+      "cardId": "onr_v1_366_red-herrings",
+      "side": "corp",
+      "cardType": "upgrade",
+      "generatedFields": [
+        "effects",
+        "conditions",
+        "remoteRole"
+      ],
+      "manualOverlayFields": [
+        "lineSupport",
+        "quality",
+        "strategicNotes"
+      ]
+    }
+  ],
+  "legacyCompatibility": {
+    "legacyFieldsChecked": [
+      "cardId",
+      "side",
+      "cardType",
+      "roles",
+      "planRoles",
+      "aiSupportStatus"
+    ],
+    "allActiveHintsPresent": true,
+    "activeLegacyFieldsStable": true,
+    "aiSupportStatusStable": true
+  },
+  "consumerImpact": {
+    "runnerBreaker": [
+      "breakerProfile"
+    ],
+    "runnerSearch": [
+      "effects.search",
+      "targetProfiles"
+    ],
+    "runnerRemoteTrash": [
+      "remoteRole.asset_economy",
+      "effects.trash_credit"
+    ],
+    "corpIceOrdering": [
+      "effects.future_encounter_effect"
+    ],
+    "corpTagPunish": [
+      "effects.tag_punish_payoff"
+    ],
+    "runnerRemoteAccess": [
+      "remoteRole.agenda_steal_tax"
+    ]
+  },
+  "errors": []
+}

@@ -154,7 +154,7 @@
     }
   ],
   "hardErrorCount": 0,
-  "warningCount": 24,
+  "warningCount": 25,
   "errors": [],
   "warnings": [
     {
@@ -216,6 +216,12 @@
       "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
       "cardId": "onr_v1_042_mouse",
       "title": "Mouse"
+    },
+    {
+      "kind": "missing_manual_overlay_pilot_card",
+      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
+      "cardId": "onr_v1_045_newsgroup-filter",
+      "title": "Newsgroup Filter"
     },
     {
       "kind": "missing_manual_overlay_pilot_card",

@@ -200,8 +200,8 @@ function pendingChoiceHost(
         "resolveCodeViralCachePurgeChoice",
       ),
       resolveChimeraDaemonTrashChoice: unexpected("resolveChimeraDaemonTrashChoice"),
-      resolveProteusRunnerProgramReturnChoice: unexpected(
-        "resolveProteusRunnerProgramReturnChoice",
+      resolveRunnerProgramReturnChoice: unexpected(
+        "resolveRunnerProgramReturnChoice",
       ),
       resolveRunnerPrivateLookChoice: unexpected("resolveRunnerPrivateLookChoice"),
       resolveExposePreventionChoice: unexpected("resolveExposePreventionChoice"),
@@ -255,8 +255,8 @@ function pendingChoiceHost(
       resolvePostMeatDamageHiddenResourceChoice: unexpected(
         "resolvePostMeatDamageHiddenResourceChoice",
       ),
-      resolveSirenStartRunRedirectChoice: unexpected(
-        "resolveSirenStartRunRedirectChoice",
+      resolveStartOfRunFortUtilityChoice: unexpected(
+        "resolveStartOfRunFortUtilityChoice",
       ),
     },
     access: {

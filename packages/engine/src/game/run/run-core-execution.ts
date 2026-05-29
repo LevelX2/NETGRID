@@ -79,7 +79,7 @@ export type RunCoreExecutionHost = {
       state: GameState,
       legalAction?: LegalAction,
     ) => void;
-    openCorpStartOfRunRedirectWindow: (
+    openStartOfRunFortUtilityWindow: (
       state: GameState,
       legalAction?: LegalAction,
     ) => boolean;
@@ -261,7 +261,7 @@ export function startRun(
     };
   }
   host.callbacks.applyAiBoonRunStart(state, legalAction);
-  if (host.callbacks.openCorpStartOfRunRedirectWindow(state, legalAction))
+  if (host.callbacks.openStartOfRunFortUtilityWindow(state, legalAction))
     return;
   if (server.ice.length > 0) {
     const iceIndex = outermostIceIndex(server);

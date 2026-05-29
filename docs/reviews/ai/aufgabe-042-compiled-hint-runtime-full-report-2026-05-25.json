@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "aufgabe-042-compiled-hint-runtime-full-report-v1",
+  "taskId": "Aufgabe 042",
+  "generatedAt": "2026-05-25",
+  "activeHintCount": 410,
+  "compiledHintCount": 410,
+  "generatedFactsCardCount": 305,
+  "legacyFallbackOnlyCount": 68,
+  "manualOverlayCardCount": 6,
+  "descriptorOrSchemaGapCount": 239,
+  "manualOverlayRequiredCount": 0,
+  "blockedMissingImplementationCount": 37,
+  "coverageClassCounts": {
+    "blocked_missing_implementation": 37,
+    "descriptor_or_schema_gap": 239,
+    "generated_mechanical_clean": 60,
+    "generated_plus_overlay": 6,
+    "legacy_fallback_only": 68
+  },
+  "coverageBySideCardType": {
+    "corp:agenda": 36,
+    "corp:asset": 43,
+    "corp:ice": 68,
+    "corp:identity": 1,
+    "corp:operation": 32,
+    "corp:upgrade": 27,
+    "runner:event": 49,
+    "runner:hardware": 32,
+    "runner:identity": 1,
+    "runner:program": 81,
+    "runner:resource": 40
+  },
+  "warningCount": 1454,
+  "hardErrorCount": 0,
+  "legacyCompatibility": {
+    "legacyFieldsChecked": [
+      "cardId",
+      "side",
+      "cardType",
+      "roles",
+      "planRoles",
+      "aiSupportStatus"
+    ],
+    "allActiveHintsPresent": true,
+    "activeLegacyFieldsStable": true,
+    "aiSupportStatusStable": true
+  },
+  "consumerImpact": {
+    "runnerBreaker": [
+      "breakerProfile"
+    ],
+    "runnerSearch": [
+      "effects.search",
+      "targetProfiles"
+    ],
+    "runnerRemoteTrash": [
+      "remoteRole.asset_economy",
+      "effects.trash_credit"
+    ],
+    "corpIceOrdering": [
+      "effects.future_encounter_effect"
+    ],
+    "corpTagPunish": [
+      "effects.tag_punish_payoff"
+    ],
+    "runnerRemoteAccess": [
+      "remoteRole.agenda_steal_tax"
+    ]
+  },
+  "errors": []
+}

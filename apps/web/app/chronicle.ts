@@ -595,6 +595,24 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Stack", searchReveal === "public" ? "Vorgezeigt" : "Verdeckt", installPendingMemoryTrash ? "MU freimachen" : installFailed ? "Nicht installiert" : destinationLabel, ...(temporaryInstall ? ["Temporär"] : []), ...(payload.searchShuffleAfter === true || payload.shuffled === true ? ["Shuffle"] : []));
         break;
       }
+      if (hiddenZoneAction === "p3_37_search_stack_to_grip") {
+        const revealedTitle =
+          titleForDefinitionId(stringValue(payload.publicRevealDefinitionId)) ??
+          titleForDefinitionId(cardDefinitionId) ??
+          cardTitle;
+        const isPublicReveal =
+          stringValue(payload.publicRevealKind) === "reveal" ||
+          Boolean(stringValue(payload.publicRevealDefinitionId)) ||
+          Boolean(cardDefinitionId);
+        category = isPublicReveal ? "card" : "hidden";
+        importance = "important";
+        visibility = isPublicReveal ? "public" : "redacted";
+        title = isPublicReveal
+          ? phrase(subject, `${revealedTitle ?? "eine Karte"} aus dem Stack vorgezeigt und auf die Hand genommen`)
+          : phrase(subject, `${cardCountText(numberValue(payload.selectedCount) ?? 1)} verdeckt aus dem Stack auf die Hand genommen`);
+        chips.push("Stack", isPublicReveal ? "Vorgezeigt" : "Verdeckt", "Hand", ...(payload.shufflePerformed === true || payload.shuffled === true ? ["Shuffle"] : []));
+        break;
+      }
       if (hiddenZoneAction === "v1911_aujourdoui_top5") {
         const revealedTitles = titlesForDefinitionIds(stringValue(payload.publicRevealDefinitionIds));
         const selectedCount = numberValue(payload.selectedCount) ?? revealedTitles.length;
@@ -1135,12 +1153,14 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       if (abilityId === "rio_de_janeiro_passed_ice") {
         const dieRoll = payloadRandomRoll(payload);
         const runEnded = payload.rioRunEnded === true;
-        const passedIce = stringValue(payload.passedIceDefinitionId) ?? "ein gerezztes ICE";
+        const passedIceDefinitionId = stringValue(payload.passedIceDefinitionId);
+        const passedIce = titleForDefinitionId(passedIceDefinitionId) ?? passedIceDefinitionId ?? "ein gerezztes ICE";
         category = "run";
         importance = runEnded ? "critical" : "important";
         title = phrase(subject, `${passedIce} passiert und Rio de Janeiro City Grid würfelt${dieRoll !== undefined ? ` eine ${dieRoll}` : ""}`);
         description = runEnded ? "Der Run endet durch Rio de Janeiro City Grid." : "Der Run läuft weiter.";
-        cardDefinitionId = cardDefinitionId ?? stringValue(payload.sourceDefinitionId);
+        cardDefinitionId = passedIceDefinitionId ?? cardDefinitionId ?? stringValue(payload.sourceDefinitionId);
+        cardTitle = passedIceDefinitionId ? passedIce : cardTitle;
         chips.push("Rio", ...(serverLabel ? [serverLabel] : []), ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []), runEnded ? "Run endet" : "Weiter");
         break;
       }

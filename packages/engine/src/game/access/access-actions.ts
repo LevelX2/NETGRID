@@ -18,7 +18,7 @@ import { cardImplementationForDefinitionId } from "../../card-implementations/re
 type ActiveRun = NonNullable<GameState["run"]>;
 type ActiveBreach = NonNullable<ActiveRun["breach"]>;
 type AccessQueueZone = ActiveBreach["queue"][number]["zone"];
-type ProteusAccessTrashCounterType = "crumble" | "garbage";
+type AccessTrashCounterType = "crumble" | "garbage";
 
 export type RunnerAccessActionHost = {
   state: GameState;
@@ -368,7 +368,7 @@ export function freeTrashAccessSourceForCurrentAccessCard(
   host: RunnerAccessActionHost,
   run: ActiveRun,
   definition: CardDefinition,
-): { enabled: boolean; counterType?: ProteusAccessTrashCounterType } {
+): { enabled: boolean; counterType?: AccessTrashCounterType } {
   if (definition.type === "agenda") return { enabled: false };
   const currentZone =
     run.breach?.queue[run.breach.currentIndex]?.zone ??
@@ -382,12 +382,12 @@ export function freeTrashAccessSourceForCurrentAccessCard(
   )
     return { enabled: true };
   const corpCounters = host.state.purgeableRunnerVirusCounters?.corp;
-  const zoneMatchesProteusCounter =
+  const zoneMatchesAccessTrashCounter =
     currentZone === accessServerId ||
     (currentZone === "remote_root" &&
       definition.type === "upgrade" &&
       (accessServerId === "hq" || accessServerId === "rd"));
-  if (!zoneMatchesProteusCounter) return { enabled: false };
+  if (!zoneMatchesAccessTrashCounter) return { enabled: false };
   if (
     accessServerId === "hq" &&
     Math.max(0, Math.floor(corpCounters?.crumble ?? 0)) >= 2

@@ -762,7 +762,7 @@ function trashAccessedCard(
   if (host.cards.cardHasSubtype(definition, "transactions")) {
     host.runner.ensureTurnFlags().trashedTransactionsThisTurn = true;
   }
-  consumeProteusAccessTrashCounters(host, definition, legalAction);
+  consumeAccessTrashCounters(host, definition, legalAction);
   if (host.state.run?.breach) {
     return {
       ...completeCurrentBreachAccess(host, "trashed", legalAction),
@@ -781,7 +781,7 @@ function trashAccessedCard(
   };
 }
 
-function consumeProteusAccessTrashCounters(
+function consumeAccessTrashCounters(
   host: AccessFlowHost,
   definition: CardDefinition,
   legalAction?: LegalAction,

@@ -9,8 +9,8 @@ Ergebnis:
 - 44 Kandidaten geprüft.
 - 24 primäre Corp-ICE-Karten eingeschlossen.
 - 20 optionale ICE-Karten begründet zurückgestellt.
-- 154 Generated Facts bestätigt oder neu abgeleitet.
-- 119 Preview-Adds im read-only Vergleichspfad.
+- Nach Aufgabe 041: 158 Generated Facts bestätigt oder neu abgeleitet.
+- Nach Aufgabe 041: 123 Preview-Adds im read-only Vergleichspfad.
 - 248 Differenzen/Kontext-Hinweise normalisiert.
 - 0 verbleibende Differenzen.
 - 0 Hard Errors.

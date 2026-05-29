@@ -1,10 +1,10 @@
 import type {
   CardDefinition,
-  CardInstance,
   CardInstanceId,
   GameState,
   LegalAction,
 } from "@netgrid/shared";
+import { definitionFor, mustInstance } from "../state/card-server-lookup";
 
 type PlayCardResolver = {
   resolve: (state: GameState, legalAction: LegalAction) => void;
@@ -12,10 +12,6 @@ type PlayCardResolver = {
 
 export type PlayCardExecutionHost = {
   state: GameState;
-  cards: {
-    definitionFor: (cardId: CardInstanceId) => CardDefinition;
-    cardInstanceFor: (cardId: CardInstanceId) => CardInstance;
-  };
   zones: {
     removeFromAllZones: (cardId: CardInstanceId) => void;
   };
@@ -84,11 +80,11 @@ function executePlayEventAction(
   host.payment.spendClick("runner");
   host.payment.spendCredits("runner", legalAction.costs[0]?.credits ?? 0);
   const cardId = String(legalAction.payload?.cardId) as CardInstanceId;
-  const definition = host.cards.definitionFor(cardId);
+  const definition = definitionFor(host.state, cardId);
   host.zones.removeFromAllZones(cardId);
   host.state.runner.heap.push(cardId);
   host.state.cardInstances[cardId] = {
-    ...host.cards.cardInstanceFor(cardId),
+    ...mustInstance(host.state.cardInstances, cardId),
     faceup: true,
     zone: { side: "runner", zone: "heap" },
   };
@@ -123,7 +119,7 @@ function executePlayOperationAction(
     throw new Error("Die Operation hat keine gueltige Karte.");
   {
     const cardId = String(legalAction.payload.cardId) as CardInstanceId;
-    const definition = host.cards.definitionFor(cardId);
+    const definition = definitionFor(host.state, cardId);
     if (!host.operations.canPlayCorpOperation(definition))
       throw new Error("Diese Operation ist im aktuellen Zustand nicht spielbar.");
     if (host.cardImplementation.hasPrintedCostOnPlay(definition)) {
@@ -145,11 +141,11 @@ function executePlayOperationAction(
   host.payment.spendCredits("corp", legalAction.costs[0]?.credits ?? 0);
   if (legalAction.payload?.cardId) {
     const cardId = String(legalAction.payload.cardId) as CardInstanceId;
-    const definition = host.cards.definitionFor(cardId);
+    const definition = definitionFor(host.state, cardId);
     host.zones.removeFromAllZones(cardId);
     host.state.corp.archives.push(cardId);
     host.state.cardInstances[cardId] = {
-      ...host.cards.cardInstanceFor(cardId),
+      ...mustInstance(host.state.cardInstances, cardId),
       faceup: true,
       rezzed: true,
       zone: { side: "corp", zone: "archives" },

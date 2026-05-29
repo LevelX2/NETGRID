@@ -70,6 +70,7 @@ export const KNOWN_HINT_EFFECT_KINDS = [
   "persistent_survival_modifier",
   "prevention_replacement",
   "survival_payoff",
+  "delayed_penalty",
 ] as const;
 
 export const KNOWN_HINT_EFFECT_TIMINGS = [
@@ -90,6 +91,8 @@ export const KNOWN_HINT_EFFECT_TIMINGS = [
   "damage_window",
   "flatline_replacement",
   "trace_window",
+  "install",
+  "on_leave_play",
 ] as const;
 
 export const KNOWN_HINT_EFFECT_SCOPES = [
@@ -109,6 +112,10 @@ export const KNOWN_HINT_EFFECT_SCOPES = [
   "installed_program",
   "trace",
   "damage",
+  "hardware",
+  "resource",
+  "heap",
+  "stack",
 ] as const;
 
 export const KNOWN_HINT_EFFECT_RESOURCES = [
@@ -173,6 +180,13 @@ export const KNOWN_HINT_CONDITION_KINDS = [
   "requires_trace_attempt",
   "requires_prevention_window",
   "requires_turn_limit_available",
+  "requires_runner_action",
+  "requires_installed_resource",
+  "requires_installed_hardware",
+  "requires_grip_card",
+  "requires_stack_search",
+  "requires_heap_card",
+  "requires_credit_pool",
 ] as const;
 
 export const KNOWN_HINT_COST_RISKS = ["low", "medium", "high"] as const;

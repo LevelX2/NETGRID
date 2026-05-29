@@ -1,0 +1,345 @@
+{
+  "schemaVersion": "ai-post-reclassification-observation-v1",
+  "generatedAt": "2026-05-25",
+  "taskId": "Aufgabe 039",
+  "baselineProfile": "belief_ai_v1_4_2",
+  "candidateProfile": "current_candidate",
+  "suite": {
+    "kind": "runMatchProgressionBenchmarkSuite",
+    "includeHoldout": true,
+    "maxActions": 160,
+    "seedCount": 9,
+    "runnableSlotCount": 8,
+    "note": "Ein einzelner deterministischer 8-Slot-Beobachtungspunkt; keine statistische Default-Freigabe."
+  },
+  "global": {
+    "safety": {
+      "illegalActions": 0,
+      "replayFailures": 0,
+      "timeoutRate": 0,
+      "fallbackRate": 0.032
+    },
+    "progression": {
+      "baseline": {
+        "games": 72,
+        "actionLimitRate": 0.347,
+        "corpScores": 52,
+        "runnerSteals": 132,
+        "scoreOrStealActions": 184,
+        "scoreOrStealActionsPerMatch": 2.556
+      },
+      "candidate": {
+        "games": 72,
+        "actionLimitRate": 0.347,
+        "corpScores": 61,
+        "runnerSteals": 118,
+        "scoreOrStealActions": 179,
+        "scoreOrStealActionsPerMatch": 2.486
+      },
+      "delta": {
+        "actionLimitRate": 0,
+        "corpScores": 9,
+        "runnerSteals": -14,
+        "scoreOrStealActions": -5
+      }
+    },
+    "guardrails": {
+      "candidate": {
+        "corpAgendaInstalledInCheaplyContestableRemote": 0,
+        "corpAdvanceInCheaplyContestableRemote": 0,
+        "runnerRunStartedAgainstKnownUnpayableFullPath": 0,
+        "runnerRunSuppressedAsKnownNoAccess": 379,
+        "runnerRunAllowedAsFirstProbeUnknownIce": 339,
+        "corpFutureRunIceInstalledAsDeadEffect": 1,
+        "corpMultiIceInstallOrderFutureEffectDead": 0,
+        "corpRemotePortfolioOverExpanded": 0,
+        "corpNewRemoteCreatedWithoutPayloadPlan": 10
+      },
+      "delta": {
+        "corpAgendaInstalledInCheaplyContestableRemote": 0,
+        "corpAdvanceInCheaplyContestableRemote": 0,
+        "runnerRunStartedAgainstKnownUnpayableFullPath": 0,
+        "corpMultiIceInstallOrderFutureEffectDead": -1
+      }
+    },
+    "tagPunish": {
+      "corpVisibleTagPunishDecisionWindows": 36,
+      "corpVisibleTagPunishDecisionWindowsTaken": 35,
+      "corpVisibleTagPunishDecisionWindowsSkipped": 1,
+      "corpVisibleTagPunishUnknownSkipRemainingAfterWindowNormalization": 0,
+      "corpVisibleTagPunishFixGateSuspiciousSkipNormalized": 0
+    },
+    "runnerKnownPath": {
+      "runnerRunStartedAgainstKnownUnpayableFullPath": 0,
+      "runnerKnownPathCanBreakNextIceButNotFullPath": 0,
+      "runnerRunPenalizedAsKnownNoAccess": 0,
+      "runnerRunSuppressedAsKnownNoAccess": 379,
+      "runnerRunAllowedAsFirstProbeUnknownIce": 339
+    },
+    "iceOrdering": {
+      "corpFutureRunIceInstalledAsLiveEffect": 6,
+      "corpFutureRunIceInstalledAsDeadEffect": 1,
+      "corpMultiIceInstallOrderFutureEffectDead": 0,
+      "corpBallAndChainInstalledWithoutLaterIce": 1
+    },
+    "scoreTerminal": {
+      "corpScoreTerminalWindow": 505,
+      "corpScoreTerminalScoreTaken": 61,
+      "corpScoreTerminalAdvanceTaken": 52,
+      "corpScoreTerminalSkipped": 261,
+      "corpScoreConversionFixGateSuspiciousEconomyLoop": 26,
+      "corpScoreConversionFixGateSuspiciousProtectionLoop": 0
+    },
+    "economyBeforeScore": {
+      "raw": {
+        "corpEconomyBeforeScoreTaken": 86,
+        "corpEconomyBeforeScoreRepeatedEconomyWithin3": 44,
+        "corpEconomyBeforeScoreNotConvertedWithin3CorpActions": 71,
+        "corpEconomyBeforeScoreThenRunnerSteal": 10
+      },
+      "interpretation": "previous suspicious samples were metric_artifacts"
+    },
+    "runnerSetup": {
+      "old": {
+        "runnerSearchRecoveryFixGateAttributionSuspicious": 104,
+        "runnerMemoryFixGateAttributionSuspicious": 104,
+        "runnerHandSizeFixGateAttributionSuspicious": 2
+      },
+      "normalized": {
+        "runnerSearchRecoveryNormalizedSuspicious": 1,
+        "runnerSearchRecoveryNormalizedBlocked": 109,
+        "runnerSearchRecoveryNormalizedMetricArtifact": 17,
+        "runnerSearchRecoveryNormalizedUnclassified": 7,
+        "runnerMemoryNormalizedSuspicious": 23,
+        "runnerMemoryNormalizedBlocked": 81,
+        "runnerMemoryNormalizedMetricArtifact": 0,
+        "runnerMemoryNormalizedUnclassified": 1,
+        "runnerHandSizeNormalizedSuspicious": 0,
+        "runnerSetupNormalizedSuspicious": 24,
+        "runnerSetupNormalizedBlocked": 192,
+        "runnerSetupNormalizedMetricArtifact": 19,
+        "runnerSetupNormalizedUnclassified": 8,
+        "runnerSetupNormalizedFixGateEligible": 24,
+        "runnerSetupNormalizedRecommendedFixKind": "memory_observe"
+      }
+    }
+  },
+  "slots": [
+    {
+      "slotId": "safety_smoke_demo_008",
+      "label": "Safety-Smoke demo_008",
+      "baseline": {
+        "corpScores": 7,
+        "runnerSteals": 14,
+        "actionLimitRate": 0.667,
+        "runnerSearchRecoveryOldSuspicious": 0,
+        "runnerSearchRecoveryNormalizedSuspicious": 0,
+        "runnerMemoryOldSuspicious": 27,
+        "runnerMemoryNormalizedSuspicious": 9
+      },
+      "candidate": {
+        "corpScores": 10,
+        "runnerSteals": 15,
+        "actionLimitRate": 0.667,
+        "runnerSearchRecoveryOldSuspicious": 0,
+        "runnerSearchRecoveryNormalizedSuspicious": 0,
+        "runnerMemoryOldSuspicious": 37,
+        "runnerMemoryNormalizedSuspicious": 9,
+        "runnerSetupNormalizedSuspicious": 9,
+        "runnerSetupNormalizedBlocked": 28,
+        "runnerSetupNormalizedMetricArtifact": 0
+      }
+    },
+    {
+      "slotId": "progression_tuning_origin_rig_vs_tax",
+      "label": "Progression-Tuning A",
+      "baseline": {
+        "corpScores": 10,
+        "runnerSteals": 22,
+        "actionLimitRate": 0.222,
+        "runnerSearchRecoveryOldSuspicious": 0,
+        "runnerSearchRecoveryNormalizedSuspicious": 0,
+        "runnerMemoryOldSuspicious": 2,
+        "runnerMemoryNormalizedSuspicious": 1
+      },
+      "candidate": {
+        "corpScores": 11,
+        "runnerSteals": 17,
+        "actionLimitRate": 0.111,
+        "runnerSearchRecoveryOldSuspicious": 0,
+        "runnerSearchRecoveryNormalizedSuspicious": 0,
+        "runnerMemoryOldSuspicious": 2,
+        "runnerMemoryNormalizedSuspicious": 1,
+        "runnerSetupNormalizedSuspicious": 1,
+        "runnerSetupNormalizedBlocked": 1,
+        "runnerSetupNormalizedMetricArtifact": 0
+      }
+    },
+    {
+      "slotId": "progression_tuning_origin_pressure_vs_tax",
+      "label": "Progression-Tuning B",
+      "baseline": {
+        "corpScores": 10,
+        "runnerSteals": 27,
+        "actionLimitRate": 0.222,
+        "runnerSearchRecoveryOldSuspicious": 0,
+        "runnerSearchRecoveryNormalizedSuspicious": 0,
+        "runnerMemoryOldSuspicious": 9,
+        "runnerMemoryNormalizedSuspicious": 2
+      },
+      "candidate": {
+        "corpScores": 13,
+        "runnerSteals": 22,
+        "actionLimitRate": 0.333,
+        "runnerSearchRecoveryOldSuspicious": 0,
+        "runnerSearchRecoveryNormalizedSuspicious": 0,
+        "runnerMemoryOldSuspicious": 19,
+        "runnerMemoryNormalizedSuspicious": 2,
+        "runnerSetupNormalizedSuspicious": 2,
+        "runnerSetupNormalizedBlocked": 17,
+        "runnerSetupNormalizedMetricArtifact": 0
+      }
+    },
+    {
+      "slotId": "snapshot_holdout_origin_pressure_vs_tag_ops",
+      "label": "Snapshot-Holdout",
+      "baseline": {
+        "corpScores": 9,
+        "runnerSteals": 19,
+        "actionLimitRate": 0.556,
+        "runnerSearchRecoveryOldSuspicious": 0,
+        "runnerSearchRecoveryNormalizedSuspicious": 0,
+        "runnerMemoryOldSuspicious": 9,
+        "runnerMemoryNormalizedSuspicious": 3
+      },
+      "candidate": {
+        "corpScores": 6,
+        "runnerSteals": 21,
+        "actionLimitRate": 0.556,
+        "runnerSearchRecoveryOldSuspicious": 0,
+        "runnerSearchRecoveryNormalizedSuspicious": 0,
+        "runnerMemoryOldSuspicious": 8,
+        "runnerMemoryNormalizedSuspicious": 3,
+        "runnerSetupNormalizedSuspicious": 3,
+        "runnerSetupNormalizedBlocked": 6,
+        "runnerSetupNormalizedMetricArtifact": 0
+      }
+    },
+    {
+      "slotId": "local_realistic_pair_1",
+      "label": "Local Realistic Holdout 1",
+      "baseline": {
+        "corpScores": 2,
+        "runnerSteals": 10,
+        "actionLimitRate": 0,
+        "runnerSearchRecoveryOldSuspicious": 34,
+        "runnerSearchRecoveryNormalizedSuspicious": 0,
+        "runnerMemoryOldSuspicious": 7,
+        "runnerMemoryNormalizedSuspicious": 2
+      },
+      "candidate": {
+        "corpScores": 2,
+        "runnerSteals": 8,
+        "actionLimitRate": 0,
+        "runnerSearchRecoveryOldSuspicious": 30,
+        "runnerSearchRecoveryNormalizedSuspicious": 1,
+        "runnerMemoryOldSuspicious": 6,
+        "runnerMemoryNormalizedSuspicious": 2,
+        "runnerSetupNormalizedSuspicious": 3,
+        "runnerSetupNormalizedBlocked": 35,
+        "runnerSetupNormalizedMetricArtifact": 5
+      }
+    },
+    {
+      "slotId": "local_realistic_pair_2",
+      "label": "Local Realistic Holdout 2",
+      "baseline": {
+        "corpScores": 0,
+        "runnerSteals": 19,
+        "actionLimitRate": 0,
+        "runnerSearchRecoveryOldSuspicious": 0,
+        "runnerSearchRecoveryNormalizedSuspicious": 0,
+        "runnerMemoryOldSuspicious": 0,
+        "runnerMemoryNormalizedSuspicious": 0
+      },
+      "candidate": {
+        "corpScores": 3,
+        "runnerSteals": 15,
+        "actionLimitRate": 0.222,
+        "runnerSearchRecoveryOldSuspicious": 2,
+        "runnerSearchRecoveryNormalizedSuspicious": 0,
+        "runnerMemoryOldSuspicious": 0,
+        "runnerMemoryNormalizedSuspicious": 0,
+        "runnerSetupNormalizedSuspicious": 0,
+        "runnerSetupNormalizedBlocked": 2,
+        "runnerSetupNormalizedMetricArtifact": 0
+      }
+    },
+    {
+      "slotId": "real_scene_pair_1",
+      "label": "Real Scene Holdout 1",
+      "baseline": {
+        "corpScores": 8,
+        "runnerSteals": 15,
+        "actionLimitRate": 0.556,
+        "runnerSearchRecoveryOldSuspicious": 54,
+        "runnerSearchRecoveryNormalizedSuspicious": 3,
+        "runnerMemoryOldSuspicious": 27,
+        "runnerMemoryNormalizedSuspicious": 3
+      },
+      "candidate": {
+        "corpScores": 10,
+        "runnerSteals": 14,
+        "actionLimitRate": 0.556,
+        "runnerSearchRecoveryOldSuspicious": 49,
+        "runnerSearchRecoveryNormalizedSuspicious": 0,
+        "runnerMemoryOldSuspicious": 25,
+        "runnerMemoryNormalizedSuspicious": 3,
+        "runnerSetupNormalizedSuspicious": 3,
+        "runnerSetupNormalizedBlocked": 74,
+        "runnerSetupNormalizedMetricArtifact": 9
+      }
+    },
+    {
+      "slotId": "real_scene_pair_2",
+      "label": "Real Scene Holdout 2",
+      "baseline": {
+        "corpScores": 6,
+        "runnerSteals": 6,
+        "actionLimitRate": 0.556,
+        "runnerSearchRecoveryOldSuspicious": 13,
+        "runnerSearchRecoveryNormalizedSuspicious": 0,
+        "runnerMemoryOldSuspicious": 9,
+        "runnerMemoryNormalizedSuspicious": 4
+      },
+      "candidate": {
+        "corpScores": 6,
+        "runnerSteals": 6,
+        "actionLimitRate": 0.333,
+        "runnerSearchRecoveryOldSuspicious": 23,
+        "runnerSearchRecoveryNormalizedSuspicious": 0,
+        "runnerMemoryOldSuspicious": 7,
+        "runnerMemoryNormalizedSuspicious": 3,
+        "runnerSetupNormalizedSuspicious": 3,
+        "runnerSetupNormalizedBlocked": 29,
+        "runnerSetupNormalizedMetricArtifact": 5
+      }
+    }
+  ],
+  "gateResults": {
+    "safety": "pass",
+    "cheapRemote": "pass",
+    "knownNoAccessRuns": "pass",
+    "iceOrdering": "pass",
+    "tagPunish": "pass",
+    "progression": "warn",
+    "economyBeforeScore": "observe",
+    "runnerSetupNormalized": "warn"
+  },
+  "technicalReadiness": {
+    "merge": "merge_ready_with_documented_risk",
+    "profileGated": "profile_gated_ready_with_risks",
+    "default": "default_not_ready_observe_more"
+  },
+  "recommendedNextStep": "profile_gated_observation_or_user_decision_on_merge"
+}

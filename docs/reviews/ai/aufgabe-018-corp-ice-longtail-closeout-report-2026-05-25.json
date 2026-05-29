@@ -13,11 +13,11 @@
   "candidateCardCount": 44,
   "includedCardCount": 24,
   "excludedCardCount": 20,
-  "confirmedGeneratedFactCount": 154,
-  "previewAddedFactCount": 119,
+  "confirmedGeneratedFactCount": 158,
+  "previewAddedFactCount": 123,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 248,
+  "normalizedDifferenceCount": 252,
   "remainingDifferenceCount": 0,
   "encounterContextInfoCount": 24,
   "traceSuccessContextInfoCount": 13,
@@ -44,14 +44,14 @@
     "ice_program_trash_normalization": 3,
     "ice_hardware_trash_normalization": 2,
     "ice_etr_normalization": 11,
-    "future_encounter_lock_normalization": 10,
+    "future_encounter_lock_normalization": 12,
     "run_lock_or_no_jack_out_normalization": 6,
     "persistent_counter_effect_normalization": 3,
     "trace_credit_source_normalization": 1,
     "simple_ice_baseline_normalization": 109,
     "encounter_context_required_classification": 72,
     "trace_success_context_required_classification": 26,
-    "runpath_context_required_classification": 25,
+    "runpath_context_required_classification": 27,
     "prevention_context_required_classification": 9,
     "target_selection_context_required_classification": 5,
     "effective_run_quote_priority_annotation": 20
@@ -217,13 +217,17 @@
       "generatedFactsConfirmed": [
         "condition:requires_during_run",
         "condition:requires_encounter",
+        "condition:requires_remaining_ice",
         "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect",
         "effect:future_run_effect",
         "effect:run_tax"
       ],
       "previewAdds": [
         "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine"
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect"
       ],
       "normalizedDifferences": [
         {
@@ -239,6 +243,13 @@
           "classification": "encounter_context_classified",
           "rule": "encounter_context_required_classification",
           "rationale": "Encounter and unbroken-subroutine requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "condition:requires_remaining_ice",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "runpath_context_classified",
+          "rule": "runpath_context_required_classification",
+          "rationale": "Runpath and later-ICE facts remain effectiveRunQuote and board-context guarded."
         },
         {
           "field": "condition:requires_unbroken_subroutine",
@@ -260,6 +271,13 @@
           "classification": "simple_ice_baseline_normalized",
           "rule": "simple_ice_baseline_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-7 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:future_encounter_effect",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "future_encounter_runpath_context_normalized",
+          "rule": "future_encounter_lock_normalization",
+          "rationale": "Future encounter effects require later-encounter/remaining-ICE runpath context and are not current self-ETR."
         },
         {
           "field": "effect:future_run_effect",
@@ -619,13 +637,17 @@
       "generatedFactsConfirmed": [
         "condition:requires_during_run",
         "condition:requires_encounter",
+        "condition:requires_remaining_ice",
         "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect",
         "effect:future_run_effect",
         "effect:run_tax"
       ],
       "previewAdds": [
         "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine"
+        "condition:requires_remaining_ice",
+        "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect"
       ],
       "normalizedDifferences": [
         {
@@ -641,6 +663,13 @@
           "classification": "encounter_context_classified",
           "rule": "encounter_context_required_classification",
           "rationale": "Encounter and unbroken-subroutine requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "condition:requires_remaining_ice",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "runpath_context_classified",
+          "rule": "runpath_context_required_classification",
+          "rationale": "Runpath and later-ICE facts remain effectiveRunQuote and board-context guarded."
         },
         {
           "field": "condition:requires_unbroken_subroutine",
@@ -662,6 +691,13 @@
           "classification": "simple_ice_baseline_normalized",
           "rule": "simple_ice_baseline_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-7 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "effect:future_encounter_effect",
+          "sourceWarningKind": "generated_fact_shape_or_context",
+          "classification": "future_encounter_runpath_context_normalized",
+          "rule": "future_encounter_lock_normalization",
+          "rationale": "Future encounter effects require later-encounter/remaining-ICE runpath context and are not current self-ETR."
         },
         {
           "field": "effect:future_run_effect",

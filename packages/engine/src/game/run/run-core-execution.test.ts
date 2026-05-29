@@ -219,7 +219,7 @@ function hostFor(state: GameState): {
         applyRunnerTraceCounterRunStartEffects: () =>
           calls.push("traceCounterRunStart"),
         applyAiBoonRunStart: () => calls.push("aiBoonRunStart"),
-        openCorpStartOfRunRedirectWindow: () => false,
+        openStartOfRunFortUtilityWindow: () => false,
       },
     },
   };

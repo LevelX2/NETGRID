@@ -437,7 +437,7 @@ export type CardImplementationRuntimeDependencies = {
     legalAction: LegalAction,
     subtypeRequired?: "ap",
   ) => CardEffectHiddenInfoResult;
-  freeRezInstalledIceWithCounters: (
+  rezInstalledIceWithLifecycleCounters: (
     state: GameState,
     legalAction: LegalAction,
     sourceCardId: CardInstanceId,
@@ -450,7 +450,7 @@ export type CardImplementationRuntimeDependencies = {
         | "rent_to_own_start_corp_turn";
     },
   ) => CardEffectHiddenInfoResult;
-  replaceSourceFortCardsFromHq: (
+  replaceFortCardsFromHq: (
     state: GameState,
     legalAction: LegalAction,
     sourceCardId: CardInstanceId,
@@ -920,10 +920,10 @@ export function executeCardImplementationLifecycleEffects(
           sourceCardId,
           definition.id,
         ),
-      replaceSourceFortCardsFromHq: () => {
+      replaceFortCardsFromHq: () => {
         if (!legalAction)
           throw new Error("Source-fort replacement braucht eine LegalAction.");
-        return deps.replaceSourceFortCardsFromHq(
+        return deps.replaceFortCardsFromHq(
           state,
           legalAction,
           cardId,
@@ -2546,16 +2546,16 @@ export function resolveActivatedCardImplementationAbility(
         deps.addCurrentRunAccessCount(state, server, amount),
       passCurrentEncounteredIce: (subtypeRequired) =>
         deps.passCurrentEncounteredIce(state, legalAction, subtypeRequired),
-      freeRezInstalledIceWithCounters: (input) =>
-        deps.freeRezInstalledIceWithCounters(
+      rezInstalledIceWithLifecycleCounters: (input) =>
+        deps.rezInstalledIceWithLifecycleCounters(
           state,
           legalAction,
           match.cardId,
           match.definition.id,
           input,
         ),
-      replaceSourceFortCardsFromHq: () =>
-        deps.replaceSourceFortCardsFromHq(
+      replaceFortCardsFromHq: () =>
+        deps.replaceFortCardsFromHq(
           state,
           legalAction,
           match.cardId,
@@ -2870,16 +2870,16 @@ export function executeOnPlayCardImplementationAbility(
           source,
           maxAmount,
         ),
-      freeRezInstalledIceWithCounters: (input) =>
-        deps.freeRezInstalledIceWithCounters(
+      rezInstalledIceWithLifecycleCounters: (input) =>
+        deps.rezInstalledIceWithLifecycleCounters(
           state,
           legalAction,
           cardId,
           definition.id,
           input,
         ),
-      replaceSourceFortCardsFromHq: () =>
-        deps.replaceSourceFortCardsFromHq(
+      replaceFortCardsFromHq: () =>
+        deps.replaceFortCardsFromHq(
           state,
           legalAction,
           cardId,

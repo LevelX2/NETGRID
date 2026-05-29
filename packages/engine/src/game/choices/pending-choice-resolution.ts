@@ -47,11 +47,11 @@ export type PendingChoiceResolutionHost = {
     resolveIncubatorTransformChoice: HostFn<void>;
     resolveCodeViralCachePurgeChoice: HostFn<void>;
     resolveChimeraDaemonTrashChoice: HostFn<void>;
-    resolveProteusRunnerProgramReturnChoice: HostFn<void>;
+    resolveRunnerProgramReturnChoice: HostFn<void>;
     resolveRunnerPrivateLookChoice: HostFn<void>;
     resolveExposePreventionChoice: HostFn<void>;
     resolveSenatorialFieldTripChoice: HostFn<void>;
-    resolvePavitBharatReplacementChoice?: HostFn<void>;
+    resolveFortHqReplacementChoice?: HostFn<void>;
   };
   corp: {
     handleCorpInstallRezSequenceChoice: HostFn<{ handled: boolean }>;
@@ -80,7 +80,7 @@ export type PendingChoiceResolutionHost = {
     resolveSuccessfulRunInterventionChoiceInRunModule: HostFn<void>;
     successfulRunInterventionHost: HostFn<unknown>;
     resolvePostMeatDamageHiddenResourceChoice: HostFn<void>;
-    resolveSirenStartRunRedirectChoice: HostFn<void>;
+    resolveStartOfRunFortUtilityChoice: HostFn<void>;
   };
   access: {
     resolvePriorityWreckSpendChoice: HostFn<void>;
@@ -168,16 +168,16 @@ export function resolvePendingChoice(
     host.hiddenZone.resolveCodeViralCachePurgeChoice;
   const resolveChimeraDaemonTrashChoice =
     host.hiddenZone.resolveChimeraDaemonTrashChoice;
-  const resolveProteusRunnerProgramReturnChoice =
-    host.hiddenZone.resolveProteusRunnerProgramReturnChoice;
+  const resolveRunnerProgramReturnChoice =
+    host.hiddenZone.resolveRunnerProgramReturnChoice;
   const resolveRunnerPrivateLookChoice =
     host.hiddenZone.resolveRunnerPrivateLookChoice;
   const resolveExposePreventionChoice =
     host.hiddenZone.resolveExposePreventionChoice;
   const resolveSenatorialFieldTripChoice =
     host.hiddenZone.resolveSenatorialFieldTripChoice;
-  const resolvePavitBharatReplacementChoice =
-    host.hiddenZone.resolvePavitBharatReplacementChoice;
+  const resolveFortHqReplacementChoice =
+    host.hiddenZone.resolveFortHqReplacementChoice;
   const handleCorpInstallRezSequenceChoice =
     host.corp.handleCorpInstallRezSequenceChoice;
   const corpInstallRezSequenceHandlerHost =
@@ -216,8 +216,8 @@ export function resolvePendingChoice(
   const successfulRunInterventionHost = host.run.successfulRunInterventionHost;
   const resolvePostMeatDamageHiddenResourceChoice =
     host.run.resolvePostMeatDamageHiddenResourceChoice;
-  const resolveSirenStartRunRedirectChoice =
-    host.run.resolveSirenStartRunRedirectChoice;
+  const resolveStartOfRunFortUtilityChoice =
+    host.run.resolveStartOfRunFortUtilityChoice;
   const resolvePriorityWreckSpendChoice =
     host.access.resolvePriorityWreckSpendChoice;
   const runAccessTransitionHost = host.access.runAccessTransitionHost;
@@ -264,7 +264,7 @@ export function resolvePendingChoice(
     return;
   }
   if (state.pendingChoice.source.startsWith("corp.start_of_run_redirect")) {
-    resolveSirenStartRunRedirectChoice(state, legalAction, playerAction);
+    resolveStartOfRunFortUtilityChoice(state, legalAction, playerAction);
     return;
   }
   const hiddenZoneArrangeChoice = handleHiddenZoneArrangeChoice(
@@ -332,10 +332,13 @@ export function resolvePendingChoice(
     resolveExposeInstalledCorpCardsChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("proteus.pavit_bharat_replacement")) {
-    if (!resolvePavitBharatReplacementChoice)
+  if (
+    state.pendingChoice.source.startsWith("proteus.pavit_bharat_replacement") ||
+    state.pendingChoice.source.startsWith("card_implementation.fort_hq_replacement")
+  ) {
+    if (!resolveFortHqReplacementChoice)
       throw new Error("Pavit-Bharat-Choice-Resolver fehlt.");
-    resolvePavitBharatReplacementChoice(state, legalAction, playerAction);
+    resolveFortHqReplacementChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("v1917.investment_firm_credit")) {
@@ -535,7 +538,7 @@ export function resolvePendingChoice(
     return;
   }
   if (state.pendingChoice.source.startsWith("proteus.return_runner_programs")) {
-    resolveProteusRunnerProgramReturnChoice(state, legalAction, playerAction);
+    resolveRunnerProgramReturnChoice(state, legalAction, playerAction);
     return;
   }
   if (state.pendingChoice.source.startsWith("p3_35.access_payment")) {

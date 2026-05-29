@@ -14,23 +14,23 @@
     "activeHints": "data/ai/ai-card-hints-active.json"
   },
   "mode": "read-only prioritization; no active hint migration, no runtime compile, no planner or consumer binding",
-  "candidateCount": 177,
+  "candidateCount": 193,
   "priorityCounts": {
     "P0": 13,
-    "P1": 160,
+    "P1": 176,
     "P2": 4,
     "P3": 0
   },
   "fieldCategoryCounts": {
-    "generated_with_board_context": 172,
-    "generated_with_descriptor_limitations": 134,
-    "legacy_keep_for_compat": 177,
+    "generated_with_board_context": 188,
+    "generated_with_descriptor_limitations": 150,
+    "legacy_keep_for_compat": 193,
     "overlay_only": 6,
-    "safe_generated_now": 170
+    "safe_generated_now": 186
   },
   "riskCounts": {
     "low": 29,
-    "medium": 148,
+    "medium": 164,
     "high": 0
   },
   "batchPlan": [
@@ -275,6 +275,28 @@
       "cardIds": [
         "onr_v1_213_private-cybernet-police",
         "onr_v1_301_punitive-counterstrike"
+      ]
+    },
+    {
+      "batch": 12,
+      "title": "Runner economy, resource, hardware and setup longtail",
+      "cardIds": [
+        "onr_v1_045_newsgroup-filter",
+        "onr_v1_087_forgotten-backup-chip",
+        "onr_v1_089_gideons-pawnshop",
+        "onr_v1_093_if-you-want-it-done-right",
+        "onr_v1_095_jack-n-joe",
+        "onr_v1_097_livewires-contacts",
+        "onr_v1_099_mantis-fixer-at-large",
+        "onr_v1_103_organ-donor",
+        "onr_v1_108_score",
+        "onr_v1_114_temple-microcode-outlet",
+        "onr_v1_131_microtech-backup-drive",
+        "onr_v1_154_broker",
+        "onr_v1_168_loan-from-chiba",
+        "onr_v1_176_the-shell-traders",
+        "onr_v1_177_the-short-circuit",
+        "onr_v1_178_short-term-contract"
       ]
     }
   ],
@@ -1173,6 +1195,45 @@
         "valueHints"
       ],
       "derivedRationale": "Top-of-stack search, show-to-Corp target profile, free program install and once-per-run usage limit are derivable in the read-only target profile."
+    },
+    {
+      "cardId": "onr_v1_045_newsgroup-filter",
+      "title": "Newsgroup Filter",
+      "side": "runner",
+      "cardType": "program",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["effects"],
+      "generatedMechanicalFacts": ["effect:action_economy", "effect:economy"],
+      "monolithFields": ["effects", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 12,
+      "rationale": "Activated Runner credit gain is derivable action economy, but click availability and action choice remain LegalAction/consumer context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Installed A:-credit ability is mechanical runner action economy; action availability remains LegalAction/runtime context."
     },
     {
       "cardId": "onr_v1_047_pile-driver",
@@ -2108,6 +2169,373 @@
       "derivedRationale": "HQ run event and additional HQ access count are mechanically derivable; strategic HQ pressure remains overlay/consumer context."
     },
     {
+      "cardId": "onr_v1_087_forgotten-backup-chip",
+      "title": "Forgotten Backup Chip",
+      "side": "runner",
+      "cardType": "event",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_heap_card",
+        "effect:card_recovery",
+        "effect:search"
+      ],
+      "monolithFields": ["effects", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 12,
+      "rationale": "Trash-to-grip program recovery is derivable by zone/target class, but generated facts must not expose hidden heap or grip identity.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trash-to-grip program recovery is mechanical heap context; generated facts do not expose hidden heap/grip card identity."
+    },
+    {
+      "cardId": "onr_v1_089_gideons-pawnshop",
+      "title": "Gideon's Pawnshop",
+      "side": "runner",
+      "cardType": "event",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_heap_card",
+        "effect:card_recovery",
+        "effect:search"
+      ],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 12,
+      "rationale": "Trash-to-grip recovery is derivable by zone/target class, but generated facts must not expose hidden heap or grip identity.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Trash-to-grip card recovery is mechanical heap context; generated facts do not expose hidden heap/grip card identity."
+    },
+    {
+      "cardId": "onr_v1_093_if-you-want-it-done-right",
+      "title": "If You Want It Done Right . . .",
+      "side": "runner",
+      "cardType": "event",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_stack_search",
+        "effect:search"
+      ],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 12,
+      "rationale": "Top-stack selection is derivable as search/topdeck context, but hidden stack order and card identity remain hidden-zone context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Top-stack selection is mechanical search/topdeck context; generated facts do not expose hidden stack order or card identity."
+    },
+    {
+      "cardId": "onr_v1_095_jack-n-joe",
+      "title": "Jack 'n' Joe",
+      "side": "runner",
+      "cardType": "event",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["effects"],
+      "generatedMechanicalFacts": ["effect:draw"],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 12,
+      "rationale": "Burst draw is mechanically derivable, while actual hand value remains hidden state and setup valuation remains strategy/consumer context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Burst draw is a mechanical hand-refill/setup fact without hidden stack identity."
+    },
+    {
+      "cardId": "onr_v1_097_livewires-contacts",
+      "title": "Livewire's Contacts",
+      "side": "runner",
+      "cardType": "event",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["effects"],
+      "generatedMechanicalFacts": ["effect:economy"],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 12,
+      "rationale": "Burst Runner credit gain is mechanically derivable, while tempo valuation remains strategy/consumer context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Burst credit gain is mechanical runner economy; tempo valuation remains consumer/strategy context."
+    },
+    {
+      "cardId": "onr_v1_099_mantis-fixer-at-large",
+      "title": "Mantis, Fixer-at-Large",
+      "side": "runner",
+      "cardType": "event",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_stack_search",
+        "effect:search"
+      ],
+      "monolithFields": ["effects", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 12,
+      "rationale": "Stack-to-grip search is derivable by zone/target class, but generated facts must not expose hidden stack order or card identity.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Stack-to-grip search is mechanical hidden-zone context; generated facts do not expose stack order or chosen card identity."
+    },
+    {
+      "cardId": "onr_v1_103_organ-donor",
+      "title": "Organ Donor",
+      "side": "runner",
+      "cardType": "event",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_grip_card",
+        "effect:economy"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 12,
+      "rationale": "Grip-trash economy is derivable as gain-per-trashed-card, but downside, hand quality and hidden grip identity remain context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Grip-trash-for-credits is mechanical economy with downside/hidden-zone context; generated facts record gain-per-card, not current hand value."
+    },
+    {
+      "cardId": "onr_v1_108_score",
+      "title": "Score!",
+      "side": "runner",
+      "cardType": "event",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["effects"],
+      "generatedMechanicalFacts": ["effect:economy"],
+      "monolithFields": ["effects", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 1
+      },
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
+      "recommendedMigrationBatch": 12,
+      "rationale": "Burst Runner credit gain is mechanically derivable, while action timing and tempo valuation remain strategy/consumer context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Burst credit gain is mechanical runner economy; when to spend the click remains strategy context."
+    },
+    {
+      "cardId": "onr_v1_114_temple-microcode-outlet",
+      "title": "Temple Microcode Outlet",
+      "side": "runner",
+      "cardType": "event",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_stack_search",
+        "effect:search"
+      ],
+      "monolithFields": ["effects", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 12,
+      "rationale": "Program search-to-grip is derivable by zone/target class, but generated facts must not expose hidden stack order or card identity.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Program search-to-grip is mechanical stack context; generated facts do not expose hidden stack order or card identity."
+    },
+    {
       "cardId": "onr_v1_116_total-genetic-retrofit",
       "title": "Total Genetic Retrofit",
       "side": "runner",
@@ -2149,6 +2577,49 @@
         "valueHints"
       ],
       "derivedRationale": "Tag removal and next-tag avoidance are represented without asserting the Runner is currently untagged."
+    },
+    {
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "title": "Microtech Backup Drive",
+      "side": "runner",
+      "cardType": "hardware",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_installed_hardware",
+        "condition:requires_program_trash",
+        "effect:card_recovery",
+        "effect:program_trash_prevention"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 12,
+      "rationale": "Program-trash replacement and recovery are derivable as installed-hardware context, but hosted-card identity remains hidden/runtime context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Program-trash replacement and top-card recovery are mechanical installed-hardware context without hosted-card identity."
     },
     {
       "cardId": "onr_v1_133_militech-mram-chip",
@@ -2274,6 +2745,49 @@
       "derivedRationale": "Paid tag avoidance is mechanical prevention-window context, not a current untagged state."
     },
     {
+      "cardId": "onr_v1_154_broker",
+      "title": "Broker",
+      "side": "runner",
+      "cardType": "resource",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:counter_economy",
+        "effect:finite_economy_pool"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 12,
+      "rationale": "Hosted-credit put/take abilities are derivable finite action economy, but current hosted pool and once-per-turn choice remain board/LegalAction context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Put/take hosted credits is finite resource economy with action and hosted-pool context, not a free repeatable economy fact."
+    },
+    {
       "cardId": "onr_v1_157_crash-everett-inventive-fixer",
       "title": "Crash Everett, Inventive Fixer",
       "side": "runner",
@@ -2351,6 +2865,178 @@
         "valueHints"
       ],
       "derivedRationale": "Trash-to-avoid-tag is mechanical prevention-window context, not a current untagged state."
+    },
+    {
+      "cardId": "onr_v1_168_loan-from-chiba",
+      "title": "Loan from Chiba",
+      "side": "runner",
+      "cardType": "resource",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_start_of_turn",
+        "effect:counter_economy",
+        "effect:delayed_penalty",
+        "effect:economy"
+      ],
+      "monolithFields": ["effects", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 12,
+      "rationale": "Install burst credits are derivable only with debt/downside and delayed-penalty context; migration must not collapse the card into pure economy.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Install burst credits are paired with start-turn loss and leave-play pay-or-lose debt context; generated facts must not treat this as pure economy."
+    },
+    {
+      "cardId": "onr_v1_176_the-shell-traders",
+      "title": "The Shell Traders",
+      "side": "runner",
+      "cardType": "resource",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_grip_card",
+        "condition:requires_installed_resource",
+        "effect:install_discount"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 12,
+      "rationale": "Delayed no-cost install support is derivable as install-discount context, but hidden hand choice and install legality remain runtime context.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Delayed no-cost install support is mechanical resource/setup context; actual hand choice and install legality remain engine/hidden-zone context."
+    },
+    {
+      "cardId": "onr_v1_177_the-short-circuit",
+      "title": "The Short Circuit",
+      "side": "runner",
+      "cardType": "resource",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_runner_action",
+        "condition:requires_stack_search",
+        "effect:search"
+      ],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 12,
+      "rationale": "Activated program search is derivable by action and stack context, but generated facts must not expose hidden stack identity.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Activated program search is mechanical action/stack context; generated facts do not expose hidden stack identity."
+    },
+    {
+      "cardId": "onr_v1_178_short-term-contract",
+      "title": "Short-Term Contract",
+      "side": "runner",
+      "cardType": "resource",
+      "migrationPriority": "P1",
+      "migrationRisk": "medium",
+      "fieldCategories": [
+        "generated_with_board_context",
+        "generated_with_descriptor_limitations",
+        "legacy_keep_for_compat",
+        "safe_generated_now"
+      ],
+      "generatedFields": ["conditions", "effects"],
+      "generatedMechanicalFacts": [
+        "condition:requires_installed_resource",
+        "effect:action_economy",
+        "effect:counter_economy",
+        "effect:finite_economy_pool"
+      ],
+      "monolithFields": ["effects", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
+      "overlayFields": [],
+      "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
+      },
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "recommendedMigrationBatch": 12,
+      "rationale": "Hosted-credit depot and A: take credits are derivable finite action economy; remaining pool stays board state and must not become infinite economy.",
+      "doNotMigrateFields": [
+        "aiSupportStatus",
+        "planRoles",
+        "requiredMechanics",
+        "riskTags",
+        "roles",
+        "scenarioRefs",
+        "valueHints"
+      ],
+      "derivedRationale": "Hosted 12-credit depot and A: take up to 2 credits are finite action economy; remaining pool is board state, not a repeatable generated fact."
     },
     {
       "cardId": "onr_v1_188_ai-chief-financial-officer",
@@ -3699,7 +4385,9 @@
       "generatedMechanicalFacts": [
         "condition:requires_during_run",
         "condition:requires_encounter",
+        "condition:requires_remaining_ice",
         "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect",
         "effect:future_run_effect",
         "effect:run_tax"
       ],
@@ -3835,7 +4523,9 @@
       "generatedMechanicalFacts": [
         "condition:requires_during_run",
         "condition:requires_encounter",
+        "condition:requires_remaining_ice",
         "condition:requires_unbroken_subroutine",
+        "effect:future_encounter_effect",
         "effect:future_run_effect",
         "effect:run_tax"
       ],
