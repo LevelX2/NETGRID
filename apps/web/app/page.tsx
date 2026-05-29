@@ -71,6 +71,8 @@ import type {
   ApiMatchStatus,
   ApiPlayerClockSnapshot,
   ApiRecentGameResult,
+  ApiRecentResultEntry,
+  ApiRecentSeriesResult,
   ApiSeriesResultSummary,
   ApiServerMessage,
   ApiSidePayload,
@@ -104,14 +106,17 @@ import { deckAgendaStatusForEditor, type DeckAgendaStatus } from "./deck-editor-
 import {
   actionSoundCountForAction,
   actionSoundForActionType,
+  deriveDamageImpactCues,
   deriveOpponentActionCues,
   turnStartAudioCue,
   type ActionSoundKind,
   type BoardHighlight,
+  type DamageImpactCue,
   type OpponentActionCue,
   type TurnStartAudioState
 } from "./action-cues";
 import { localizedDeCardTitle } from "./card-image-manifest";
+import { recentResultsEmptyText, recentSeriesWinnerLabel, seriesStatusLabel, singleRecentMatchPoints } from "./recent-results-ui";
 import {
   ACTION_CUE_POSITION_STORAGE_KEY,
   DEFAULT_CUE_POSITION,
@@ -467,7 +472,7 @@ type OpenMatchesResponse = {
 };
 
 type RecentGameResultsResponse = {
-  results?: ApiRecentGameResult[];
+  results?: ApiRecentResultEntry[];
   error?: { message: string };
 };
 
@@ -2140,7 +2145,7 @@ export default function Page() {
   const [openLanLoading, setOpenLanLoading] = useState(false);
   const [openLanError, setOpenLanError] = useState("");
   const [openLanUpdatedAt, setOpenLanUpdatedAt] = useState<string | null>(null);
-  const [recentGameResults, setRecentGameResults] = useState<ApiRecentGameResult[]>([]);
+  const [recentGameResults, setRecentGameResults] = useState<ApiRecentResultEntry[]>([]);
   const [recentGameResultsLoading, setRecentGameResultsLoading] = useState(false);
   const [recentGameResultsError, setRecentGameResultsError] = useState("");
   const [recentGameResultsUpdatedAt, setRecentGameResultsUpdatedAt] = useState<string | null>(null);
@@ -2228,6 +2233,8 @@ export default function Page() {
   };
   const [actionCueQueue, setActionCueQueue] = useState<OpponentActionCue[]>([]);
   const [currentActionCue, setCurrentActionCue] = useState<OpponentActionCue | null>(null);
+  const [damageImpactQueue, setDamageImpactQueue] = useState<DamageImpactCue[]>([]);
+  const [currentDamageImpact, setCurrentDamageImpact] = useState<DamageImpactCue | null>(null);
   const [aiPacingFallbackVisible, setAiPacingFallbackVisible] = useState(false);
   const [dismissedResultKey, setDismissedResultKey] = useState<string | null>(null);
   const [seriesTransitioning, setSeriesTransitioning] = useState(false);
@@ -3068,6 +3075,7 @@ export default function Page() {
   const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
   const showResultModal = Boolean(resultSummary && resultKey && dismissedResultKey !== resultKey);
   const canReturnToStart = Boolean(payload && (resultSummary || payload.winner || payload.matchStatus === "finished" || payload.matchStatus === "forfeited"));
+  const canStartNextSeriesGame = Boolean(resultSummary?.series?.nextAvailable);
   const opponentDisplayName = payload?.opponentStatus.displayName ?? lobby?.opponentStatus.displayName ?? null;
   const canForfeit = Boolean(payload && payload.matchStatus === "active" && !payload.winner);
   const matchClockDisplay =
@@ -3341,6 +3349,8 @@ export default function Page() {
     lastTurnStartAudioCueKeyRef.current = null;
     setActionCueQueue([]);
     setCurrentActionCue(null);
+    setDamageImpactQueue([]);
+    setCurrentDamageImpact(null);
     pendingAiAdvanceKeyRef.current = null;
     setFocusedCard(null);
   }, [session?.matchId, session?.sessionToken]);
@@ -3398,8 +3408,15 @@ export default function Page() {
           contextByEventId
         })
       : [];
+    const damageImpacts = deriveDamageImpactCues({
+      viewerSide: payload.side,
+      playerView: payload.playerView,
+      events: payload.eventTail,
+      lastPresentedEventId: lastSeen
+    });
     lastSeenCueEventIdRef.current = latestId;
     if (cues.length > 0) setActionCueQueue((current) => [...current, ...cues]);
+    if (damageImpacts.length > 0) setDamageImpactQueue((current) => [...current, ...damageImpacts]);
     if (!audioEnabled || newEvents.length === 0) return;
     const overlayEventIds = new Set(cues.map((cue) => cue.eventId));
     for (const event of newEvents) {
@@ -3420,6 +3437,20 @@ export default function Page() {
     setCurrentActionCue(nextCue);
     setActionCueQueue(rest);
   }, [actionCueQueue, currentActionCue]);
+
+  useEffect(() => {
+    if (currentDamageImpact || damageImpactQueue.length === 0) return;
+    const [nextCue, ...rest] = damageImpactQueue;
+    if (!nextCue) return;
+    setCurrentDamageImpact(nextCue);
+    setDamageImpactQueue(rest);
+  }, [damageImpactQueue, currentDamageImpact]);
+
+  useEffect(() => {
+    if (!currentDamageImpact || currentDamageImpact.flatline) return;
+    const timeout = window.setTimeout(() => setCurrentDamageImpact(null), 5200);
+    return () => window.clearTimeout(timeout);
+  }, [currentDamageImpact]);
 
   useEffect(() => {
     if (!currentActionCue) return;
@@ -5459,8 +5490,14 @@ export default function Page() {
           >
             {matchDetailsOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
           </button>
+          {canStartNextSeriesGame ? (
+            <button className="button primary" onClick={startNextSeriesGame} disabled={seriesTransitioning} title="Nächstes Serienspiel mit Seitenwechsel erstellen" type="button">
+              <Play size={16} />
+              {seriesTransitioning ? "Erstelle..." : "Matchserie fortsetzen"}
+            </button>
+          ) : null}
           {canReturnToStart ? (
-            <button className="button primary" onClick={leaveMatch} title="Zurück zum Startbildschirm" type="button">
+            <button className={canStartNextSeriesGame ? "button" : "button primary"} onClick={leaveMatch} title="Zurück zum Startbildschirm" type="button">
               <Play size={16} />
               Startbildschirm
             </button>
@@ -5508,6 +5545,13 @@ export default function Page() {
         onRequest={requestUndo}
         onResolve={resolveUndo}
       />
+      {activeMatchIsGame ? (
+      <DamageImpactOverlay
+        cue={currentDamageImpact}
+        queued={damageImpactQueue.length}
+        onDismiss={() => setCurrentDamageImpact(null)}
+      />
+      ) : null}
       {activeMatchIsGame ? (
       <OpponentActionOverlay
         cue={currentActionCue}
@@ -6323,7 +6367,7 @@ export default function Page() {
           retentionProtected={payload?.retentionProtected === true}
           onRetentionProtection={setRetentionProtection}
           {...(opponentDisplayName ? { opponentName: opponentDisplayName } : {})}
-          {...(resultSummary.series?.nextAvailable ? { onNextSeriesGame: startNextSeriesGame } : {})}
+          {...(canStartNextSeriesGame ? { onNextSeriesGame: startNextSeriesGame } : {})}
         />
       ) : null}
       {activeMatchIsGame && showAccessReveal && accessReveal ? (
@@ -7084,7 +7128,7 @@ function RecentGamesPanel({
   updatedAt,
   onRefresh
 }: {
-  results: ApiRecentGameResult[];
+  results: ApiRecentResultEntry[];
   loading: boolean;
   error: string;
   updatedAt: string | null;
@@ -7108,12 +7152,12 @@ function RecentGamesPanel({
         </p>
       ) : null}
       {results.length === 0 ? (
-        <p className="recentGamesEmpty">{loading ? "Lade letzte Spiele ..." : "Noch keine vollständig beendeten Spiele gefunden."}</p>
+        <p className="recentGamesEmpty">{recentResultsEmptyText(loading)}</p>
       ) : (
         <ol className="recentGamesList">
           {results.map((result) => (
-            <li key={result.matchId}>
-              <RecentGameResultCard result={result} />
+            <li key={result.resultId ?? (result.entryType === "series" ? result.seriesId : result.matchId)}>
+              {result.entryType === "series" ? <RecentSeriesResultCard result={result} /> : <RecentGameResultCard result={result} />}
             </li>
           ))}
         </ol>
@@ -7126,6 +7170,8 @@ function RecentGamesPanel({
 function RecentGameResultCard({ result }: { result: ApiRecentGameResult }) {
   const winnerName = result.winner === "draw" ? "Unentschieden" : result.winner === "runner" ? result.runner.displayName : result.corp.displayName;
   const scoreText = `${result.runner.agendaPoints} : ${result.corp.agendaPoints}`;
+  const runnerMatchPoints = result.runner.matchPoints ?? singleRecentMatchPoints(result.winner, "runner", result.runner.agendaPoints);
+  const corpMatchPoints = result.corp.matchPoints ?? singleRecentMatchPoints(result.winner, "corp", result.corp.agendaPoints);
   return (
     <article className="recentGameCard">
       <div className="recentGamePrimary">
@@ -7145,6 +7191,10 @@ function RecentGameResultCard({ result }: { result: ApiRecentGameResult }) {
         <div className="recentGameScore" aria-label={`Endstand Runner ${result.runner.agendaPoints} zu Korp ${result.corp.agendaPoints}`}>
           <span>{scoreText}</span>
           <small>Agenda-Punkte</small>
+        </div>
+        <div className="recentGameScore matchPoints" aria-label={`Matchpunkte Runner ${runnerMatchPoints} zu Korp ${corpMatchPoints}`}>
+          <span>{runnerMatchPoints} : {corpMatchPoints}</span>
+          <small>Matchpunkte</small>
         </div>
       </div>
       <div className="recentGameDetails">
@@ -7841,6 +7891,124 @@ function AudioSettings({
       </label>
     </div>
   );
+}
+
+function DamageImpactOverlay({
+  cue,
+  queued,
+  onDismiss
+}: {
+  cue: DamageImpactCue | null;
+  queued: number;
+  onDismiss(): void;
+}) {
+  if (!cue) return null;
+  const maxSegments = Math.max(1, cue.runnerGripBefore ?? cue.runnerGripAfter ?? cue.amount);
+  const segmentCount = Math.min(12, maxSegments);
+  const hitSegments = Math.min(segmentCount, Math.max(1, Math.ceil((cue.amount / maxSegments) * segmentCount)));
+  const filledAfter = cue.runnerGripAfter === undefined ? null : Math.max(0, Math.min(segmentCount, Math.round((cue.runnerGripAfter / maxSegments) * segmentCount)));
+  const title = cue.flatline ? "Flatline" : `${damageTypeLabel(cue.damageType)} Impact`;
+  const gripLabel = cue.runnerGripBefore !== undefined && cue.runnerGripAfter !== undefined
+    ? `Grip ${cue.runnerGripBefore} -> ${cue.runnerGripAfter}`
+    : cue.runnerGripAfter !== undefined
+      ? `Grip jetzt ${cue.runnerGripAfter}`
+      : "Grip-Pool";
+  const summary = cue.flatline && cue.runnerGripBefore !== undefined
+    ? `Runner hatte nicht genug Grip für ${cue.amount} ${damageTypeLabel(cue.damageType)}.`
+    : `${cue.amount} ${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel}.`;
+  const coreDetail = cue.damageType === "core"
+    ? [
+        cue.coreDamageAfter !== undefined ? `Core Damage: ${cue.coreDamageAfter}` : "Core Damage",
+        cue.runnerMaxHandSizeAfter !== undefined ? `Handlimit: ${cue.runnerMaxHandSizeAfter}` : null
+      ].filter(Boolean).join(" · ")
+    : null;
+
+  return (
+    <aside className={`damageImpactOverlay damage-${cue.damageType} ${cue.flatline ? "is-flatline" : ""}`} aria-live="assertive" data-testid="damage-impact">
+      <div className="damageImpactHeader">
+        <span className="damageImpactIcon" aria-hidden="true">
+          {cue.flatline ? <AlertTriangle size={22} /> : cue.damageType === "core" ? <Brain size={22} /> : <Zap size={22} />}
+        </span>
+        <div>
+          <strong>{title}</strong>
+          <span>{summary}</span>
+        </div>
+      </div>
+      <div className="damageImpactMeter" aria-label={gripLabel}>
+        {Array.from({ length: segmentCount }, (_, index) => {
+          const isHit = index >= segmentCount - hitSegments;
+          const isFilled = filledAfter === null || index < filledAfter;
+          return <span key={index} className={`${isFilled ? "is-filled" : "is-empty"} ${isHit ? "is-hit" : ""}`} />;
+        })}
+      </div>
+      <div className="damageImpactStats">
+        <span>{gripLabel}</span>
+        <span>-{cue.amount}</span>
+        {coreDetail ? <span>{coreDetail}</span> : null}
+      </div>
+      <div className="damageImpactFooter">
+        {queued > 0 ? <small>{queued} weitere Damage-Meldung{queued === 1 ? "" : "en"}</small> : <span aria-hidden="true" />}
+        <button className="button damageImpactDismiss" onClick={onDismiss} aria-label="Damage-Fenster schließen" title="Damage-Fenster schließen" type="button">
+          <Check size={14} />
+          Schließen
+        </button>
+      </div>
+    </aside>
+  );
+}
+
+function RecentSeriesResultCard({ result }: { result: ApiRecentSeriesResult }) {
+  const winnerLabel = recentSeriesWinnerLabel(result);
+  return (
+    <article className="recentGameCard recentSeriesCard">
+      <div className="recentGamePrimary">
+        <div>
+          <p className="recentGameMatchup">
+            <strong>{result.players.player_a.displayName}</strong>
+            <span>Spieler A</span>
+            <em>gegen</em>
+            <strong>{result.players.player_b.displayName}</strong>
+            <span>Spieler B</span>
+          </p>
+          <p className="recentGameMeta">
+            {formatRecentGameDate(result.finishedAt)} · Matchserie · {result.gamesPlayed}/{result.gamesPlanned} Spiele · {seriesStatusLabel(result.status)}
+          </p>
+        </div>
+        <div className="recentGameScore matchPoints" aria-label={`Serien-Matchpunkte Spieler A ${result.players.player_a.matchPoints} zu Spieler B ${result.players.player_b.matchPoints}`}>
+          <span>{result.players.player_a.matchPoints} : {result.players.player_b.matchPoints}</span>
+          <small>Matchpunkte</small>
+        </div>
+        <div className="recentGameScore" aria-label={`Serien-Agenda-Punkte Spieler A ${result.players.player_a.agendaPoints} zu Spieler B ${result.players.player_b.agendaPoints}`}>
+          <span>{result.players.player_a.agendaPoints} : {result.players.player_b.agendaPoints}</span>
+          <small>Agenda-Punkte</small>
+        </div>
+      </div>
+      <div className="recentGameDetails">
+        <span>
+          <Award size={14} />
+          {winnerLabel}
+        </span>
+        <span>{result.players.player_a.wins} : {result.players.player_b.wins} Siege</span>
+        <span title={result.seriesId}>Serie {result.seriesId.slice(0, 8)}</span>
+      </div>
+      <ol className="recentSeriesGames">
+        {result.games.map((game) => (
+          <li key={game.matchId}>
+            <span>Spiel {game.gameNumber}</span>
+            <span>{game.runnerDisplayName} als Runner {game.runnerAgendaPoints} AP / {game.runnerMatchPoints} MP</span>
+            <span>{game.corpDisplayName} als Korp {game.corpAgendaPoints} AP / {game.corpMatchPoints} MP</span>
+            <span>{shortResultReasonLabel(game.reason)}</span>
+          </li>
+        ))}
+      </ol>
+    </article>
+  );
+}
+
+function damageTypeLabel(type: DamageImpactCue["damageType"]): string {
+  if (type === "meat") return "Meat Damage";
+  if (type === "core") return "Core Damage";
+  return "Net Damage";
 }
 
 function OpponentActionOverlay({

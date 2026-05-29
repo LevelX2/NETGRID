@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PlayerView, PublicGameEvent, Side } from "@netgrid/shared";
-import { actionSoundCountForAction, actionSoundForActionType, cueHasHiddenLeak, deriveOpponentActionCues, eventsAfter, turnStartAudioCue } from "./action-cues";
+import { actionSoundCountForAction, actionSoundForActionType, cueHasHiddenLeak, deriveDamageImpactCues, deriveOpponentActionCues, eventsAfter, turnStartAudioCue } from "./action-cues";
 
 describe("deriveOpponentActionCues", () => {
   it("maps opponent AI events to stable cues without exposing raw reason codes", () => {
@@ -142,6 +142,87 @@ describe("deriveOpponentActionCues", () => {
     expect(corpCues.some((cue) => cue.title === "Der Runner hat 1 Net Damage durch Bel-Digmo Antibody erlitten.")).toBe(true);
     expect(runnerCues.at(-1)?.source).toBe("system");
     expect(runnerCues.at(-1)?.sound).toBe("tag_or_damage");
+  });
+
+  it("derives damage impact cues from public counts without leaking hidden source ids", () => {
+    const cues = deriveDamageImpactCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [
+        event("evt_damage", "resolve_choice", {
+          damageResolved: true,
+          damageType: "net",
+          damageAmount: 2,
+          cardsTrashed: 2,
+          runnerGripBefore: 4,
+          runnerGripAfter: 2,
+          flatline: false,
+          sourceDefinitionId: "hidden_asset_1",
+          sourceTitle: "Hidden Trap"
+        })
+      ]
+    });
+
+    expect(cues).toEqual([
+      {
+        cueId: "runner:evt_damage:damage-impact",
+        eventId: "evt_damage",
+        viewerSide: "runner",
+        damageType: "net",
+        amount: 2,
+        cardsTrashed: 2,
+        runnerGripBefore: 4,
+        runnerGripAfter: 2,
+        flatline: false,
+        sourceLabel: "Korp-Effekt"
+      }
+    ]);
+    expect(JSON.stringify(cues)).not.toContain("hidden_asset_1");
+    expect(JSON.stringify(cues)).not.toContain("Hidden Trap");
+  });
+
+  it("marks flatline damage impact from side-safe public counts", () => {
+    const cues = deriveDamageImpactCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [
+        event("evt_flatline", "play_operation", {
+          actor: "corp",
+          damageResolved: true,
+          damageType: "meat",
+          damageAmount: 4,
+          cardsTrashed: 0,
+          runnerGripBefore: 3,
+          runnerGripAfter: 0,
+          flatline: true
+        })
+      ]
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]).toMatchObject({
+      damageType: "meat",
+      amount: 4,
+      runnerGripBefore: 3,
+      runnerGripAfter: 0,
+      flatline: true,
+      sourceLabel: "Korp-Effekt"
+    });
+  });
+
+  it("keeps reconnect damage impact cues behind the last presented event id", () => {
+    const cues = deriveDamageImpactCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      lastPresentedEventId: "evt_old",
+      events: [
+        event("evt_old", "resolve_choice", { damageResolved: true, damageType: "net", damageAmount: 1, flatline: false }),
+        event("evt_new", "resolve_choice", { damageResolved: true, damageType: "core", damageAmount: 1, runnerGripBefore: 5, runnerGripAfter: 4, coreDamageAfter: 1, runnerMaxHandSizeAfter: 4, flatline: false })
+      ]
+    });
+
+    expect(cues.map((cue) => cue.eventId)).toEqual(["evt_new"]);
+    expect(cues[0]).toMatchObject({ damageType: "core", coreDamageAfter: 1, runnerMaxHandSizeAfter: 4 });
   });
 
   it("adds related cards only when the card is visible to the viewer", () => {

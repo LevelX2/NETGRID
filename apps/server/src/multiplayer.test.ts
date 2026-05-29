@@ -44,17 +44,91 @@ describe("recent match results", () => {
 
     expect(results).toHaveLength(1);
     expect(results[0]).toMatchObject({
+      entryType: "single_game",
       matchId: finished.match.matchId,
       matchStatus: "finished",
       matchMode: "human_runner_vs_corp_ai",
       winner: "runner",
-      runner: { displayName: "Ludwig" },
-      corp: { displayName: "Korp-KI" }
+      runner: { displayName: "Ludwig", matchPoints: 10 },
+      corp: { displayName: "Korp-KI", matchPoints: 0 }
     });
     const serialized = JSON.stringify(results[0]);
     expect(serialized).not.toContain("sessionToken");
     expect(serialized).not.toContain("reconnectToken");
     expect(serialized).not.toContain("tokenHash");
+  });
+
+  it("aggregates finished side-swap series into one recent result with match points", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "recent-series-test", now: () => "2026-05-28T12:00:00.000Z" });
+    await service.createMatch({ hostSide: "runner", playMode: "human_vs_ai", humanSide: "runner", displayName: "Ludwig", seed: "recent-series-game-1", settings: { matchFormat: "two_game_side_swap" } });
+    await service.createMatch({ hostSide: "corp", playMode: "human_vs_ai", humanSide: "corp", displayName: "Ludwig", seed: "recent-series-game-2", settings: { matchFormat: "two_game_side_swap" } });
+
+    const [first, second] = await storage.list();
+    if (!first?.gameState || !second?.gameState) throw new Error("Missing series test records");
+    const seriesId = "series_recent_results";
+    const gameOne = {
+      matchId: first.match.matchId,
+      gameNumber: 1,
+      winner: "runner" as const,
+      reason: "agenda_points" as const,
+      runnerPlayer: "player_a" as const,
+      corpPlayer: "player_b" as const,
+      runnerAgendaPoints: 7,
+      corpAgendaPoints: 2,
+      finishedAt: "2026-05-28T12:10:00.000Z",
+      finalStateHash: "hash:game-one"
+    };
+    const gameTwo = {
+      matchId: second.match.matchId,
+      gameNumber: 2,
+      winner: "corp" as const,
+      reason: "forfeit" as const,
+      runnerPlayer: "player_b" as const,
+      corpPlayer: "player_a" as const,
+      runnerAgendaPoints: 3,
+      corpAgendaPoints: 1,
+      finishedAt: "2026-05-28T12:30:00.000Z",
+      finalStateHash: "hash:game-two"
+    };
+
+    first.gameState.winner = "runner";
+    first.match.status = "finished";
+    first.match.winner = "runner";
+    first.match.updatedAt = gameOne.finishedAt;
+    first.match.series = { seriesId, mode: "two_game_side_swap", status: "between_games", gameNumber: 1, gamesPlanned: 2, runnerPlayer: "player_a", corpPlayer: "player_b", results: [gameOne] };
+    second.gameState.winner = "corp";
+    second.match.status = "finished";
+    second.match.winner = "corp";
+    second.match.updatedAt = gameTwo.finishedAt;
+    second.match.series = { seriesId, mode: "two_game_side_swap", status: "finished", gameNumber: 2, gamesPlanned: 2, runnerPlayer: "player_b", corpPlayer: "player_a", results: [gameOne, gameTwo] };
+    await storage.save(first);
+    await storage.save(second);
+
+    const results = await service.listRecentGameResults(20);
+
+    expect(results).toHaveLength(1);
+    expect(results[0]).toMatchObject({
+      entryType: "series",
+      seriesId,
+      status: "finished",
+      gamesPlayed: 2,
+      gamesPlanned: 2,
+      outcome: "player_a",
+      players: {
+        player_a: { displayName: "Ludwig", matchPoints: 20, agendaPoints: 8, wins: 2 },
+        player_b: { displayName: "Runner-KI", matchPoints: 5, agendaPoints: 5, wins: 0 }
+      },
+      games: [
+        { gameNumber: 1, runnerMatchPoints: 10, corpMatchPoints: 2 },
+        { gameNumber: 2, runnerMatchPoints: 3, corpMatchPoints: 10, reason: "forfeit" }
+      ]
+    });
+    const serialized = JSON.stringify(results[0]);
+    expect(serialized).not.toContain("sessionToken");
+    expect(serialized).not.toContain("reconnectToken");
+    expect(serialized).not.toContain("tokenHash");
+    expect(serialized).not.toContain("cardInstances");
   });
 });
 
