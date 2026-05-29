@@ -26,9 +26,24 @@ export type KnownRezzedIcePathAssessment = {
   blocked: boolean;
   visibleBreakCost?: number;
   canReachAccess: boolean;
+  knownPathBlockedByUnbreakableIce: boolean;
+  knownPathBlockedByMissingCoverage: boolean;
+  knownPathBlockedByEtr: boolean;
   creditsAfterPath: number;
   canBreakNextIceButNotFullPath: boolean;
   unpayableIceIndex?: number;
+  unbreakableIceIndex?: number;
+  unbreakableIceTitle?: string;
+  missingCoverage?: Array<
+    "wall" | "code_gate" | "sentry" | "ap" | "trace" | "unknown_special"
+  >;
+  hasBypassOrSpecialAccessPlan: boolean;
+  reachableAccessReason?: string;
+  noAccessReason?:
+    | "known_path_unpayable"
+    | "known_path_unbreakable"
+    | "missing_breaker_coverage"
+    | "known_etr_without_breaker";
   creditsSpentBeforeUnpayableIce: number;
   unpayableReason?:
     | "ice_unbreakable"
@@ -103,6 +118,8 @@ export function assessKnownRezzedIcePath(
           visibleBreakCost,
           remainingCredits,
           iceIndex,
+          ice.definitionId,
+          ice.subtypes,
           visibleBreakCost,
           firstKnownIceBreakable,
           assessedKnownIceCount,
@@ -114,6 +131,8 @@ export function assessKnownRezzedIcePath(
           visibleBreakCost + breakAssessment.cost,
           remainingCredits - breakAssessment.cost,
           iceIndex,
+          ice.definitionId,
+          ice.subtypes,
           visibleBreakCost,
           firstKnownIceBreakable,
           assessedKnownIceCount,
@@ -151,6 +170,8 @@ export function assessKnownRezzedIcePath(
           visibleBreakCost + handlingCost,
           remainingCredits - handlingCost,
           iceIndex,
+          ice.definitionId,
+          ice.subtypes,
           pathCostBeforeIce,
           firstKnownIceBreakable,
           assessedKnownIceCount,
@@ -178,8 +199,13 @@ export function assessKnownRezzedIcePath(
     blocked: false,
     ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),
     canReachAccess: true,
+    knownPathBlockedByUnbreakableIce: false,
+    knownPathBlockedByMissingCoverage: false,
+    knownPathBlockedByEtr: false,
     creditsAfterPath: remainingCredits,
     canBreakNextIceButNotFullPath: false,
+    hasBypassOrSpecialAccessPlan: false,
+    reachableAccessReason: "known_path_reachable",
     creditsSpentBeforeUnpayableIce: 0,
     assessedKnownIceCount,
   };
@@ -189,25 +215,72 @@ function blockedPathAssessment(
   visibleBreakCost: number,
   creditsAfterPath: number,
   unpayableIceIndex: number,
+  unpayableIceDefinitionId: string | undefined,
+  unpayableIceSubtypes: string[] | undefined,
   creditsSpentBeforeUnpayableIce: number,
   firstKnownIceBreakable: boolean,
   assessedKnownIceCount: number,
   unpayableReason: NonNullable<KnownRezzedIcePathAssessment["unpayableReason"]>,
 ): KnownRezzedIcePathAssessment {
+  const missingCoverage =
+    unpayableReason === "ice_unbreakable"
+      ? missingCoverageForIceSubtypes(unpayableIceSubtypes ?? [])
+      : undefined;
+  const unbreakable = unpayableReason === "ice_unbreakable";
   return {
     blocked: true,
     ...(visibleBreakCost > 0 ? { visibleBreakCost } : {}),
     canReachAccess: false,
+    knownPathBlockedByUnbreakableIce: unbreakable,
+    knownPathBlockedByMissingCoverage: unbreakable,
+    knownPathBlockedByEtr: true,
     creditsAfterPath,
     canBreakNextIceButNotFullPath:
       firstKnownIceBreakable &&
       creditsSpentBeforeUnpayableIce > 0 &&
       unpayableReason === "later_ice_unaffordable_after_prior_ice_cost",
     unpayableIceIndex,
+    ...(unbreakable ? { unbreakableIceIndex: unpayableIceIndex } : {}),
+    ...(unbreakable && unpayableIceDefinitionId
+      ? {
+          unbreakableIceTitle:
+            visibleRunCardDefinition(unpayableIceDefinitionId)?.title ??
+            unpayableIceDefinitionId,
+        }
+      : {}),
+    ...(missingCoverage && missingCoverage.length > 0
+      ? { missingCoverage }
+      : {}),
+    hasBypassOrSpecialAccessPlan: false,
+    noAccessReason: unbreakable
+      ? missingCoverage && missingCoverage.length > 0
+        ? "missing_breaker_coverage"
+        : "known_etr_without_breaker"
+      : "known_path_unpayable",
     creditsSpentBeforeUnpayableIce,
     assessedKnownIceCount,
     unpayableReason,
   };
+}
+
+function missingCoverageForIceSubtypes(
+  subtypes: string[],
+): NonNullable<KnownRezzedIcePathAssessment["missingCoverage"]> {
+  const normalized = new Set(subtypes.map(subtypeKey));
+  const coverage: NonNullable<KnownRezzedIcePathAssessment["missingCoverage"]> =
+    [];
+  if (normalized.has("wall")) coverage.push("wall");
+  if (normalized.has("code_gate")) coverage.push("code_gate");
+  if (normalized.has("sentry")) coverage.push("sentry");
+  if (
+    normalized.has("ap") ||
+    normalized.has("black_ice") ||
+    normalized.has("killer")
+  )
+    coverage.push("ap");
+  if (normalized.has("trace")) coverage.push("trace");
+  if (coverage.length === 0) coverage.push("unknown_special");
+  return [...new Set(coverage)].sort();
 }
 
 function effectiveRunQuoteForIce(
