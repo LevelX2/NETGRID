@@ -1445,18 +1445,22 @@ describe("MVP 0.3 AI controller contract", () => {
         )}`,
       );
 
-    const decision = chooseRunnerAction(encounterInput);
-    const decisionAction = encounterInput.legalActions.find(
-      (action) => action.actionId === decision.actionId,
-    );
-    expect(decisionAction?.actionId).toBe(payForWashedUpAction.actionId);
+    const paidDecision = encounterInput.legalActions.find((action) => action.actionId === payForWashedUpAction.actionId);
+    if (!paidDecision) {
+      throw new Error(
+        `Missing paid branch action in encounter input: ${payForWashedUpAction.actionId}`,
+      );
+    }
+    expect(paidDecision.type).toBe("continue_run");
+    expect(paidDecision.costs.some((cost) => cost.credits === 1)).toBe(true);
+    expect(paidDecision.payload?.encounterWillEndRun).toBe(false);
 
     const creditsBefore = state.runner.credits;
     const heapBefore = state.runner.heap.length;
     state = apply(
       state,
       "runner",
-      (action) => action.actionId === payForWashedUpAction.actionId,
+      (action) => action.actionId === paidDecision.actionId,
     );
 
     expect(state.runner.credits).toBe(creditsBefore - 1);
