@@ -220,7 +220,7 @@ describe("deck validation and snapshots", () => {
     expect(corp.publicMetadata.formatProfileVersion).toBe("1.3.0");
   });
 
-  it("validates Proteus playtest snapshots through Human-vs-Human deck legality while keeping AI support closed", () => {
+  it("validates Proteus playtest snapshots through deck legality and AI support", () => {
     const runtimeCardsById = createRuntimeCardsById();
     if (!runtimeCardsById["onr_proteus_001_ai-board-member"]) return;
     const contextProteus = { cardsById: runtimeCardsById, profile: profileProteus };
@@ -243,7 +243,7 @@ describe("deck validation and snapshots", () => {
             card.statuses.human_playable === true &&
             card.statuses.deck_legal === true &&
             card.statuses.format_legal === true &&
-            card.statuses.ai_supported === false,
+            card.statuses.ai_supported === true,
         ),
     ).toBe(true);
     expect(proteusSnapshots).toHaveLength(4);
@@ -280,7 +280,7 @@ describe("deck validation and snapshots", () => {
     expect(allProteusDeck.validation).toMatchObject({ ok: true, errors: [] });
     expect(
       allProteusDeck.cards.every(
-        (entry) => runtimeCardsById[entry.cardId]?.statuses.ai_supported === false,
+        (entry) => runtimeCardsById[entry.cardId]?.statuses.ai_supported === true,
       ),
     ).toBe(true);
   });

@@ -3024,7 +3024,7 @@ describe("MVP 0.2 multiplayer service", () => {
       human_playable: true,
       deck_legal: true,
       format_legal: true,
-      ai_supported: false
+      ai_supported: true
     });
 
     await expect(
@@ -3051,23 +3051,27 @@ describe("MVP 0.2 multiplayer service", () => {
     const record = await service.loadForTest(created.matchId);
     expect(record?.match.settings.cardPool).toBe("originalset_proteus");
 
-    await expect(
-      service.createMatch({
-        hostSide: "corp",
-        mode: "human_corp_vs_runner_ai",
-        seed: "mp-proteus-ai-blocked",
-        participantADecks: {
-          runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0",
-          corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0"
-        },
-        participantBDecks: {
-          runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
-          corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25"
-        },
-        aiDeckPolicy: "selected",
-        settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset_proteus" }
-      })
-    ).rejects.toThrow("ai_deck_snapshot_not_supported");
+    const proteusAiCreated = await service.createMatch({
+      hostSide: "corp",
+      mode: "human_corp_vs_runner_ai",
+      seed: "mp-proteus-ai-selected",
+      participantADecks: {
+        runnerDeckSnapshotId: "demo_runner_130_snapshot_v1_3_0",
+        corpDeckSnapshotId: "demo_corp_130_snapshot_v1_3_0"
+      },
+      participantBDecks: {
+        runnerDeckSnapshotId: "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
+        corpDeckSnapshotId: "proteus_corp_region_fast_score_snapshot_v2026_05_25"
+      },
+      aiDeckPolicy: "selected",
+      settings: { agendaPointsToWin: 7, matchFormat: "rules_match", cardPool: "originalset_proteus" }
+    });
+    const proteusAiRecord = await service.loadForTest(proteusAiCreated.matchId);
+    expect(proteusAiRecord?.match.deckSetup.aiDeckPolicy).toBe("selected");
+    expect(proteusAiRecord?.match.deckSetup.runnerSnapshotId).toBe("proteus_runner_hq_virus_derez_snapshot_v2026_05_25");
+    expect(proteusAiRecord?.match.deckSetup.corpSnapshotId).toBe("demo_corp_130_snapshot_v1_3_0");
+    expect(proteusAiCreated.playerView.deckMetadata?.opponent.deckName).toBe("Proteus Runner - HQ Virus & Derez");
+    expect(JSON.stringify(proteusAiCreated)).not.toMatch(/cardInstances|privatePayload|joinToken|tokenHash/);
   });
 
   it("handles V1.1.1 Discard and Core-Damage status through side-safe multiplayer payloads", async () => {
