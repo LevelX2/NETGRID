@@ -1712,6 +1712,128 @@ describe("MVP 0.3 AI controller contract", () => {
     ).toBe(true);
   });
 
+  it("continues toward a remote payoff after paying Washed-Up before unrezzed ICE", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-washed-up-continues-to-remote-payoff",
+        runnerDeck: {
+          id: "ai-washed-up-payoff-runner",
+          name: "AI Washed-Up Payoff Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "simple_decoder", quantity: 2 },
+            { id: "simple_economy_event", quantity: 6 },
+          ],
+        },
+        corpDeck: {
+          id: "ai-washed-up-payoff-corp",
+          name: "AI Washed-Up Payoff Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_agenda", quantity: 4 },
+            {
+              id: "onr_proteus_045_washed-up-solo-construct",
+              quantity: 1,
+            },
+            { id: "simple_barrier_ice", quantity: 1 },
+            { id: "simple_economy_operation", quantity: 4 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    const decoderId = moveRunnerCardToGrip(state, "simple_decoder");
+    state = installRunnerCard(state, "simple_decoder");
+    state.runner.credits = 5;
+    state.corp.credits = 12;
+    putCorpRootInServer(state, "remote_1", "simple_agenda", 2);
+    const secondIceId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "simple_barrier_ice",
+    );
+    const washedUpId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_proteus_045_washed-up-solo-construct",
+    );
+
+    const preRunInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const startDecision = chooseRunnerAction(preRunInput);
+    const startAction = preRunInput.legalActions.find(
+      (action) => action.actionId === startDecision.actionId,
+    );
+    expect(startAction?.type).toBe("start_run");
+    expect(startAction?.payload?.serverId).toBe("remote_1");
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === startDecision.actionId,
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" && action.source === washedUpId,
+    );
+
+    const encounterInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const encounterDecision = chooseRunnerAction(encounterInput);
+    const paidWashedUpAction = encounterInput.legalActions.find(
+      (action) => action.actionId === encounterDecision.actionId,
+    );
+    expect(paidWashedUpAction?.type).toBe("continue_run");
+    expect(paidWashedUpAction?.costs.some((cost) => cost.credits === 1)).toBe(
+      true,
+    );
+
+    const creditsBeforePayment = state.runner.credits;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === encounterDecision.actionId,
+    );
+    expect(state.runner.credits).toBe(creditsBeforePayment - 1);
+    expect(state.runner.rig.programs).toContain(decoderId);
+    expect(state.runner.heap).not.toContain(decoderId);
+
+    for (let index = 0; index < 4; index += 1) {
+      if (
+        !state.run ||
+        state.run.phase !== "encounter_ice" ||
+        state.run.encounteredIceId !== washedUpId
+      )
+        break;
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+    }
+    expect(state.timingPoint).toBe("run.jack_out_window");
+    expect(state.run?.approachedIceId).toBe(secondIceId);
+
+    const continuationInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const continuationDecision = chooseRunnerAction(continuationInput);
+    const continuationAction = continuationInput.legalActions.find(
+      (action) => action.actionId === continuationDecision.actionId,
+    );
+
+    expect(continuationAction?.type).toBe("continue_run");
+    expect(continuationDecision.reasonCode).toBe("runner.plan.safe_probe_run");
+    expect(continuationDecision.evidence).toContain(
+      "remote_score_threat_visible:true",
+    );
+  });
+
   it("keeps visible run analysis invariant across hidden-info variants", () => {
     const cardsById = createRuntimeCardsById();
     const ice = runtimeVisibleIce(cardsById["onr_v1_261_quandary"]);
@@ -12599,6 +12721,65 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(repeatScore.evidence).toContain(
       "runner_repeat_remote_after_declined_trash_penalized:true",
     );
+  });
+
+  it("does not repeat the same BBS remote after declining affordable trash", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-bbs-no-repeat-after-decline",
+        corpDeck: {
+          id: "ai_runner_bbs_no_repeat_after_decline_corp",
+          name: "AI Runner BBS No Repeat After Decline Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_309_bbs-whispering-campaign", quantity: 1 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 4;
+    putInstalledCorpBbsInRemote(state, "remote_1", 12);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const accessInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const accessDecision = chooseRunnerAction(accessInput);
+    expect(
+      accessInput.legalActions.find(
+        (action) => action.actionId === accessDecision.actionId,
+      )?.type,
+    ).toBe("trash_accessed_card");
+
+    state = apply(state, "runner", (action) => action.type === "decline_trash");
+    const repeatInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const repeatDecision = chooseRunnerAction(repeatInput);
+    const repeatAction = repeatInput.legalActions.find(
+      (action) => action.actionId === repeatDecision.actionId,
+    );
+
+    expect(
+      repeatInput.legalActions.some(
+        (action) =>
+          action.type === "start_run" && action.payload?.serverId === "remote_1",
+      ),
+    ).toBe(true);
+    expect(
+      repeatAction?.type === "start_run" &&
+        repeatAction.payload?.serverId === "remote_1",
+    ).toBe(false);
   });
 
   it("defers an early expensive run-tax region trash when no acute remote threat exists", () => {

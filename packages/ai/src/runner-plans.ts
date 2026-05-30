@@ -6018,9 +6018,17 @@ function actionPriority(
     return 90;
   }
   if (kind === "safe_probe_run" && action.type === "continue_run")
-    return reachedAccessMovement || affordableMovement ? 92 : 70;
+    return reachedAccessMovement ||
+      affordableMovement ||
+      runnerShouldContinueCurrentRemoteRun(input)
+      ? 92
+      : 70;
   if (kind === "safe_probe_run" && action.type === "jack_out")
-    return reachedAccessMovement || affordableMovement ? 30 : 88;
+    return reachedAccessMovement ||
+      affordableMovement ||
+      runnerShouldContinueCurrentRemoteRun(input)
+      ? 30
+      : 88;
   if (kind === "safe_probe_run" && action.type === "play_event") {
     const eventTarget = centralPressureTargetForAction(input, action);
     const goodTarget = eventTarget
@@ -6099,6 +6107,32 @@ function runnerCanAffordCurrentMovementIce(input: AiDecisionInput): boolean {
     input.playerView.own.credits,
     server?.root ?? [],
   ).blocked;
+}
+
+function runnerShouldContinueCurrentRemoteRun(input: AiDecisionInput): boolean {
+  const run = input.playerView.run;
+  if (
+    input.playerView.timingPoint !== "run.jack_out_window" ||
+    run?.phase !== "movement" ||
+    run.position?.kind !== "ice" ||
+    !run.attackedServerId.startsWith("remote_")
+  )
+    return false;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === run.attackedServerId,
+  );
+  if (!server || server.root.length === 0) return false;
+  const currentIce = server.ice[run.position.iceIndex];
+  if (currentIce?.known && currentIce.rezzed === true) {
+    return runnerCanAffordCurrentMovementIce(input);
+  }
+  const profile = runnerRemoteContestProfile(input, run.attackedServerId);
+  return (
+    (profile.contestable || profile.relevantTrash) &&
+    !profile.blockedByBreakerCoverage &&
+    !profile.blockedByKnownIceCost &&
+    !profile.blockedByPostRunReserve
+  );
 }
 
 function extractRunnerFeatures(input: AiDecisionInput): RunnerFeatures {
