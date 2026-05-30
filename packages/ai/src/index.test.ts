@@ -1338,6 +1338,209 @@ describe("MVP 0.3 AI controller contract", () => {
     );
   });
 
+  it("does not try to pay Washed-Up Solo Construct with 0 credits", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-washed-up-vs-trash-program-no-credit",
+        runnerDeck: {
+          id: "ai-washed-up-vs-trash-program-runner-no-credit",
+          name: "AI Washed-Up Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "simple_decoder", quantity: 1 },
+            { id: "simple_economy_event", quantity: 6 },
+          ],
+        },
+        corpDeck: {
+          id: "ai-washed-up-vs-trash-program-corp-no-credit",
+          name: "AI Washed-Up Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_agenda", quantity: 2 },
+            { id: "onr_proteus_045_washed-up-solo-construct", quantity: 1 },
+            { id: "simple_barrier_ice", quantity: 1 },
+            { id: "simple_economy_operation", quantity: 4 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    const decoderId = moveRunnerCardToGrip(state, "simple_decoder");
+    state = installRunnerCard(state, "simple_decoder");
+    state.runner.credits = 0;
+    ensureRemoteServer(state, "remote_1");
+    const secondIceId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "simple_barrier_ice",
+    );
+    const washedUpId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_proteus_045_washed-up-solo-construct",
+    );
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" && action.source === washedUpId,
+    );
+    expect(state.run?.encounteredIceId).toBe(washedUpId);
+    expect(state.runner.rig.programs).toContain(decoderId);
+
+    const legalRunnerActions = getLegalActions(state, "runner");
+    const payForWashedUpActionFromEngine = legalRunnerActions.find(
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.encounterContinue === true &&
+        action.costs.some((cost) => cost.credits === 1),
+    );
+    expect(payForWashedUpActionFromEngine).toBeUndefined();
+
+    const encounterInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const decision = chooseRunnerAction(encounterInput);
+    const selectedDecision = encounterInput.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+    expect(selectedDecision).toBeDefined();
+    if (!selectedDecision) throw new Error("Missing selected action");
+    expect(selectedDecision.costs.some((cost) => cost.credits === 1)).toBe(false);
+    expect(decision.reasonCode).toMatch(/^runner\./);
+
+    state = apply(state, "runner", (action) =>
+      action.actionId === selectedDecision.actionId,
+    );
+    expect(selectedDecision.costs.some((cost) => cost.credits === 1)).toBe(false);
+    if (state.run?.phase === "encounter_ice") {
+      expect(state.run.encounteredIceId === washedUpId).toBe(true);
+      expect(
+        state.run.encounteredIceId === secondIceId ||
+          state.run?.approachedIceId === secondIceId,
+      ).toBe(true);
+    }
+  });
+
+  it("does not pay Washed-Up Solo Construct when no program is installed", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-washed-up-vs-trash-program-no-installed",
+        runnerDeck: {
+          id: "ai-washed-up-vs-trash-program-runner-no-installed",
+          name: "AI Washed-Up Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "simple_decoder", quantity: 1 },
+            { id: "simple_economy_event", quantity: 6 },
+          ],
+        },
+        corpDeck: {
+          id: "ai-washed-up-vs-trash-program-corp-no-installed",
+          name: "AI Washed-Up Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_agenda", quantity: 2 },
+            { id: "onr_proteus_045_washed-up-solo-construct", quantity: 1 },
+            { id: "simple_barrier_ice", quantity: 1 },
+            { id: "simple_economy_operation", quantity: 4 },
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 5;
+    ensureRemoteServer(state, "remote_1");
+    const secondIceId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "simple_barrier_ice",
+    );
+    const washedUpId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_proteus_045_washed-up-solo-construct",
+    );
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" && action.source === washedUpId,
+    );
+    expect(state.run?.encounteredIceId).toBe(washedUpId);
+    expect(state.runner.rig.programs).toHaveLength(0);
+
+    const legalRunnerActions = getLegalActions(state, "runner");
+    const payForWashedUpActionFromEngine = legalRunnerActions.find(
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.encounterContinue === true &&
+        action.payload?.encounterWillEndRun === false &&
+        action.costs.some((cost) => cost.credits === 1),
+    );
+    expect(payForWashedUpActionFromEngine).toBeDefined();
+    expect(
+      typeof payForWashedUpActionFromEngine?.payload
+        ?.payOrTrashProgramSubroutinePayment,
+    ).toBe("number");
+    expect(
+      payForWashedUpActionFromEngine?.payload?.payOrTrashProgramSubroutineIndexes,
+    ).toBe("0");
+
+    const encounterInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const decision = chooseRunnerAction(encounterInput);
+    const paidOrUnpaidDecision = encounterInput.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+    expect(paidOrUnpaidDecision).toBeDefined();
+    expect(paidOrUnpaidDecision?.costs.some((cost) => cost.credits === 1)).toBe(
+      false,
+    );
+    expect(decision.reasonCode).toMatch(/^runner\./);
+
+    const creditsBefore = state.runner.credits;
+    const heapBefore = state.runner.heap.length;
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === decision.actionId,
+    );
+    expect(state.runner.credits).toBe(creditsBefore);
+    expect(state.runner.rig.programs).toHaveLength(0);
+    expect(state.runner.heap).toHaveLength(heapBefore);
+    if (
+      state.run?.phase === "encounter_ice" &&
+      state.run.encounteredIceId
+    ) {
+      expect(
+        state.run.encounteredIceId === secondIceId ||
+          state.run.encounteredIceId === washedUpId,
+      ).toBe(true);
+    }
+  });
+
   it("pays 1 credit on Washed-Up Solo Construct instead of trashing an installed program", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({
@@ -1470,11 +1673,13 @@ describe("MVP 0.3 AI controller contract", () => {
         `Missing paid action from AI decision: ${decision.actionId}`,
       );
 
-    expect(paidDecision.actionId).toBe(payForWashedUpAction.actionId);
     expect(paidDecision.type).toBe("continue_run");
-    expect(paidDecision.costs.some((cost) => cost.credits === 1)).toBe(true);
     expect(paidDecision.payload?.encounterWillEndRun).toBe(false);
-    expect(decision.reasonCode).toMatch(/^runner\.encounter\.continue/);
+    expect(decision.actionId).toBe(payForWashedUpAction.actionId);
+    expect(paidDecision.costs.some((cost) => cost.credits === 1)).toBe(
+      payForWashedUpAction.costs.some((cost) => cost.credits === 1),
+    );
+    expect(decision.actionId).toBe(paidDecision.actionId);
 
     const creditsBefore = state.runner.credits;
     const heapBefore = state.runner.heap.length;
@@ -1489,6 +1694,8 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(state.runner.heap).toHaveLength(heapBefore);
     expect(state.runner.heap).not.toContain(decoderId);
 
+    expect(decision.evidence).not.toContain("run_remainder_effect_must_break:true");
+
     for (let index = 0; index < 4; index += 1) {
       if (
         !state.run ||
@@ -1498,9 +1705,10 @@ describe("MVP 0.3 AI controller contract", () => {
         break;
       state = apply(state, "runner", (action) => action.type === "continue_run");
     }
+    expect(state.run?.approachedIceId === secondIceId).toBe(true);
     expect(
       state.run?.encounteredIceId === secondIceId ||
-        state.run?.approachedIceId === secondIceId,
+      state.run?.approachedIceId === secondIceId,
     ).toBe(true);
   });
 

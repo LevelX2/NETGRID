@@ -3205,9 +3205,15 @@ export function chooseCorpBaselineAction(input: AiDecisionInput): AiDecision {
 
 export function chooseRunnerAction(input: AiDecisionInput): AiDecision {
   const baselineDecision = chooseRunnerBaselineAction(input);
-  return hasRunnerPlanAction(input) &&
+  const baselineAction = input.legalActions.find(
+    (candidate) => candidate.actionId === baselineDecision.actionId,
+  );
+  const shouldUsePlanAction =
+    hasRunnerPlanAction(input) &&
     (!isRunnerReactiveBaselineDecision(baselineDecision) ||
-      baselineShellTradersPlanIsVisible(input, baselineDecision))
+      baselineShellTradersPlanIsVisible(input, baselineDecision)) &&
+    !runnerHasConditionalPaymentContinueDecision(input, baselineAction);
+  return shouldUsePlanAction
     ? chooseRunnerPlanAction(input, baselineDecision)
     : baselineDecision;
 }
@@ -3250,6 +3256,30 @@ function isRunnerReactiveBaselineDecision(decision: AiDecision): boolean {
     decision.reasonCode === "runner.shell_traders.prepare_install" ||
     decision.reasonCode === "runner.shell_traders.remove_counter"
   );
+}
+
+function runnerHasConditionalPaymentContinueDecision(
+  input: AiDecisionInput,
+  action: LegalAction | undefined,
+): boolean {
+  if (!action || action.type !== "continue_run") return false;
+  if (action.payload?.encounterContinue !== true) return false;
+  const payOrTrashProgramPayment = Number(
+    action.payload?.payOrTrashProgramSubroutinePayment ?? 0,
+  );
+  const payOrEndRunPayment = Number(
+    action.payload?.payOrEndRunSubroutinePayment ?? 0,
+  );
+  const hasConditionalTrashPay =
+    Number.isFinite(payOrTrashProgramPayment) &&
+    payOrTrashProgramPayment > 0 &&
+    typeof action.payload?.payOrTrashProgramSubroutineIndexes === "string";
+  const hasConditionalEndRunPay =
+    Number.isFinite(payOrEndRunPayment) &&
+    payOrEndRunPayment > 0 &&
+    typeof action.payload?.payOrEndRunSubroutineIndexes === "string";
+  if (!hasConditionalTrashPay && !hasConditionalEndRunPay) return false;
+  return runnerHasInstalledPrograms(input);
 }
 
 function baselineShellTradersPlanIsVisible(
@@ -8493,15 +8523,9 @@ function scoreRunnerAction(
         }
       }
       break;
-    case "continue_run":
-      {
-        const runEffect = encounterRunRemainderEffectAssessment(input);
-        const payOrTrashProgramPayment = Number(
-          action.payload?.payOrTrashProgramSubroutinePayment ?? 0,
-        );
-        const payOrEndRunPayment = Number(
-          action.payload?.payOrEndRunSubroutinePayment ?? 0,
-        );
+      case "continue_run":
+        {
+          const runEffect = encounterRunRemainderEffectAssessment(input, action);
         score = runEffect.mustBreak
           ? 180
           : runEffect.hasRunRemainderEffect
@@ -8511,13 +8535,12 @@ function scoreRunnerAction(
             : input.difficulty === "easy"
               ? 360
               : 520;
-        if (
-          Number.isFinite(payOrTrashProgramPayment) &&
-          payOrTrashProgramPayment > 0
-        )
-          score += 160;
-        if (Number.isFinite(payOrEndRunPayment) && payOrEndRunPayment > 0)
-          score += 60;
+        if (runEffect.paidConditionalPaymentRemediatesEffect) {
+          score += 220;
+        }
+        if (runEffect.paidConditionalPaymentWithoutBeneficialEffect) {
+          score -= 120;
+        }
         reasonCode = runEffect.mustBreak
           ? "runner.encounter.continue_visible_future_path_risk"
           : "runner.encounter.continue";
@@ -11166,6 +11189,8 @@ function encounterRunRemainderEffectAssessment(
   ignoredBecauseNoRemainingIce: boolean;
   remainingIceCount: number;
   remainingVisibleIceCount: number;
+  paidConditionalPaymentRemediatesEffect: boolean;
+  paidConditionalPaymentWithoutBeneficialEffect: boolean;
   evidence: string[];
 } {
   const quote = currentEncounteredIceCard(input)?.effectiveRunQuote;
@@ -11180,7 +11205,8 @@ function encounterRunRemainderEffectAssessment(
           .filter((index): index is number => index !== undefined) ?? []);
   const effects = targetIndexes.flatMap((index) => {
     const effect = quote?.subroutines[index]?.unbrokenRunEffect;
-    return effect ? [{ index, effect }] : [];
+    const subroutineType = quote?.subroutines[index]?.type;
+    return effect ? [{ index, effect, subroutineType }] : [];
   });
   if (!quote || effects.length === 0) {
     return {
@@ -11191,30 +11217,83 @@ function encounterRunRemainderEffectAssessment(
       ignoredBecauseNoRemainingIce: false,
       remainingIceCount: 0,
       remainingVisibleIceCount: 0,
+      paidConditionalPaymentRemediatesEffect: false,
+      paidConditionalPaymentWithoutBeneficialEffect: false,
       evidence: [],
     };
   }
+
+  const payOrTrashProgramIndexes = parseSubroutineIndexes(
+    action?.payload?.payOrTrashProgramSubroutineIndexes,
+  );
+  const payOrEndRunIndexes = parseSubroutineIndexes(
+    action?.payload?.payOrEndRunSubroutineIndexes,
+  );
+  const payOrTrashProgramPayment = Number(
+    action?.payload?.payOrTrashProgramSubroutinePayment ?? 0,
+  );
+  const payOrEndRunPayment = Number(
+    action?.payload?.payOrEndRunSubroutinePayment ?? 0,
+  );
+  const hasInstalledPrograms = runnerHasInstalledPrograms(input);
+  const actionableEffects = effects.filter(
+    (entry) =>
+      !(
+        isTrashUnlessRunnerPaysSubroutine(entry.subroutineType) &&
+        !hasInstalledPrograms
+      ),
+  );
+  const remainingEffects = actionableEffects.filter((entry) => {
+    if (
+      isTrashUnlessRunnerPaysSubroutine(entry.subroutineType) &&
+      Number.isFinite(payOrTrashProgramPayment) &&
+      payOrTrashProgramPayment > 0 &&
+      hasInstalledPrograms &&
+      payOrTrashProgramIndexes.has(entry.index)
+    )
+      return false;
+    if (
+      entry.subroutineType === "end_the_run_unless_runner_pays" &&
+      Number.isFinite(payOrEndRunPayment) &&
+      payOrEndRunPayment > 0 &&
+      payOrEndRunIndexes.has(entry.index)
+    )
+      return false;
+    return true;
+  });
+  const paidConditionalPaymentRequested =
+    (Number.isFinite(payOrTrashProgramPayment) &&
+      payOrTrashProgramPayment > 0 &&
+      payOrTrashProgramIndexes.size > 0) ||
+    (Number.isFinite(payOrEndRunPayment) &&
+      payOrEndRunPayment > 0 &&
+      payOrEndRunIndexes.size > 0);
+  const paidConditionalPaymentRemediatesEffect =
+    paidConditionalPaymentRequested &&
+    remainingEffects.length < actionableEffects.length;
+  const paidConditionalPaymentWithoutBeneficialEffect =
+    paidConditionalPaymentRequested && !paidConditionalPaymentRemediatesEffect;
 
   const remainingIce = currentRunRemainingIce(input);
   const remainingIceCount = remainingIce.length;
   const remainingVisibleIceCount = remainingIce.filter(
     (ice) => ice.known && ice.rezzed === true,
   ).length;
-  const seriousNonCostRisk = effects.some(
+  const seriousNonCostRiskAfterAction = remainingEffects.some(
     ({ effect }) =>
       effect.causesDamageOrProgramTrash === true ||
       effect.preventsJackOut === true ||
       (effect.createsRunLockOrActionTax ?? 0) > 0,
   );
   const ignoredBecauseNoRemainingIce =
-    remainingIceCount === 0 && !seriousNonCostRisk;
+    remainingIceCount === 0 && !seriousNonCostRiskAfterAction;
   const basePath = currentRunFuturePathAssessment(input);
-  const projectedPath = currentRunFuturePathAssessment(input, effects);
+  const projectedPath = currentRunFuturePathAssessment(input, remainingEffects);
   const futureCostDelta = Math.max(
     0,
     (projectedPath.visibleBreakCost ?? 0) - (basePath.visibleBreakCost ?? 0),
   );
-  const createsHardLock = effects.some(
+  const createsHardLock = remainingEffects.some(
     ({ effect }) => effect.preventsFutureBreaking === true,
   );
   const mustBreak =
@@ -11222,7 +11301,7 @@ function encounterRunRemainderEffectAssessment(
     (!ignoredBecauseNoRemainingIce &&
       createsHardLock &&
       currentRunHasFutureVisibleIce(input)) ||
-    (seriousNonCostRisk && !basePath.blocked);
+    (seriousNonCostRiskAfterAction && !basePath.blocked);
   const evidence = [
     "run_remainder_subroutine_effect:true",
     `run_remainder_effect_subroutines:${effects.map(({ index }) => index).join(",")}`,
@@ -11236,17 +11315,17 @@ function encounterRunRemainderEffectAssessment(
     ...(!ignoredBecauseNoRemainingIce && remainingIceCount > 0
       ? ["unbroken_run_effect_applied_to_remaining_path:true"]
       : []),
-    ...(effects.some(
+    ...(remainingEffects.some(
       ({ effect }) => (effect.addsFutureEndTheRunSubroutines ?? 0) > 0,
     )
       ? ["adds_future_end_the_run_subroutines:true"]
       : []),
-    ...(effects.some(
+    ...(remainingEffects.some(
       ({ effect }) => (effect.increasesFutureBreakCostPerSubroutine ?? 0) > 0,
     )
       ? ["increases_future_break_cost:true"]
       : []),
-    ...(effects.some(
+    ...(remainingEffects.some(
       ({ effect }) => (effect.increasesFutureIceStrength ?? 0) > 0,
     )
       ? ["increases_future_ice_strength:true"]
@@ -11254,7 +11333,10 @@ function encounterRunRemainderEffectAssessment(
     ...(mustBreak ? ["run_remainder_effect_must_break:true"] : []),
   ];
   return {
-    hasRunRemainderEffect: !ignoredBecauseNoRemainingIce,
+    hasRunRemainderEffect:
+      remainingEffects.length > 0 && !ignoredBecauseNoRemainingIce,
+    paidConditionalPaymentRemediatesEffect,
+    paidConditionalPaymentWithoutBeneficialEffect,
     mustBreak,
     futurePathBlocked: projectedPath.blocked,
     futureCostDelta,
@@ -11263,6 +11345,34 @@ function encounterRunRemainderEffectAssessment(
     remainingVisibleIceCount,
     evidence,
   };
+}
+
+function parseSubroutineIndexes(value: unknown): Set<number> {
+  if (typeof value !== "string") return new Set();
+  const indexes = new Set<number>();
+  for (const rawIndex of value.split(",")) {
+    if (!rawIndex) continue;
+    const index = Number(rawIndex);
+    if (!Number.isFinite(index) || !Number.isInteger(index) || index < 0) continue;
+    indexes.add(index);
+  }
+  return indexes;
+}
+
+function isTrashUnlessRunnerPaysSubroutine(
+  type: string | undefined,
+): boolean {
+  return (
+    type === "trash_program_unless_runner_pays" ||
+    type === "trash_installed_program_unless_runner_pays"
+  );
+}
+
+function runnerHasInstalledPrograms(input: AiDecisionInput): boolean {
+  const rig = input.playerView.own.rig;
+  if (!rig) return false;
+  if (!Array.isArray(rig)) return false;
+  return rig.some((card) => card.type === "program");
 }
 
 function currentEncounteredIceCard(
