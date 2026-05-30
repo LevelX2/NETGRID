@@ -1158,64 +1158,132 @@
       "immutable": true,
       "cards": [
         {
+          "cardId": "onr_proteus_078_armageddon",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_079_big-frackin-gun",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_080_black-widow",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_081_boring-bit",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_083_corrosion",
+          "quantity": 1
+        },
+        {
           "cardId": "onr_proteus_084_crumble",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_proteus_085_disintegrator",
           "quantity": 2
         },
         {
+          "cardId": "onr_proteus_086_enterprise-inc-shields",
+          "quantity": 1
+        },
+        {
           "cardId": "onr_proteus_089_garbage-in",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_090_highlighter",
-          "quantity": 2
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_091_lockjaw",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_095_skeleton-passkeys",
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_097_taxman",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_proteus_098_vienna-22",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_proteus_099_viral-pipeline",
-          "quantity": 2
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_100_wrecking-ball",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_103_cruising-for-netwatch",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_110_hijack",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_114_on-the-fast-track",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_120_reconnaissance",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_126_test-spin",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_133_chiba-bank-account",
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_134_cortical-cybermodem",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_135_cortical-stimulators",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_142_hq-mole",
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_138_deck-the",
+          "cardId": "onr_proteus_143_liberated-savings-account",
           "quantity": 1
         },
         {
           "cardId": "onr_proteus_146_precision-bribery",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_150_streetware-distributor",
-          "quantity": 3
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_151_sunburst-cranial-interface",
           "quantity": 1
         },
         {
+          "cardId": "onr_proteus_152_swiss-bank-account",
+          "quantity": 1
+        },
+        {
           "cardId": "onr_v1_014_codecracker",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_021_dwarf",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_039_krash",
@@ -1223,23 +1291,19 @@
         },
         {
           "cardId": "onr_v1_040_loony-goon",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_075_zetatech-software-installer",
           "quantity": 1
         },
         {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+          "cardId": "onr_v1_097_livewires-contacts",
           "quantity": 2
         },
         {
-          "cardId": "onr_v1_097_livewires-contacts",
-          "quantity": 3
-        },
-        {
           "cardId": "onr_v1_108_score",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_145_wutech-mem-chip",
@@ -1262,9 +1326,9 @@
         "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
         "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
         "formatProfileVersion": "1.0.0",
-        "deckHash": "fnv1a:cafdb5e2"
+        "deckHash": "fnv1a:e657e692"
       },
-      "deckHash": "fnv1a:cafdb5e2"
+      "deckHash": "fnv1a:e657e692"
     },
     {
       "deckSnapshotId": "proteus_runner_rd_bad_publicity_snapshot_v2026_05_25",
@@ -1281,72 +1345,128 @@
       "immutable": true,
       "cards": [
         {
+          "cardId": "onr_proteus_079_big-frackin-gun",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_082_bulldozer",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_083_corrosion",
+          "quantity": 1
+        },
+        {
           "cardId": "onr_proteus_084_crumble",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_085_disintegrator",
           "quantity": 1
         },
         {
+          "cardId": "onr_proteus_088_fubar",
+          "quantity": 1
+        },
+        {
           "cardId": "onr_proteus_089_garbage-in",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_proteus_090_highlighter",
-          "quantity": 3
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_proteus_092_morphing-tool",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_094_scaldan",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_095_skeleton-passkeys",
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_097_taxman",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_098_vienna-22",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_099_viral-pipeline",
-          "quantity": 3
+          "quantity": 2
+        },
+        {
+          "cardId": "onr_proteus_105_demolition-run",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_106_disgruntled-ice-technician",
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_108_faked-hit",
           "quantity": 2
         },
         {
+          "cardId": "onr_proteus_109_frame-up",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_113_live-news-feed",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_116_pirate-broadcast",
+          "quantity": 1
+        },
+        {
           "cardId": "onr_proteus_117_poisoned-water-supply",
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_134_cortical-cybermodem",
+          "cardId": "onr_proteus_119_promises-promises",
           "quantity": 1
         },
         {
-          "cardId": "onr_proteus_135_cortical-stimulators",
-          "quantity": 2
-        },
-        {
-          "cardId": "onr_proteus_138_deck-the",
-          "quantity": 2
-        },
-        {
-          "cardId": "onr_proteus_146_precision-bribery",
+          "cardId": "onr_proteus_121_remote-detonator",
           "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_122_rush-hour",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_123_senatorial-field-trip",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_125_subliminal-corruption",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_129_back-door-to-netwatch",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_147_r-and-d-mole",
+          "quantity": 2
         },
         {
           "cardId": "onr_proteus_150_streetware-distributor",
-          "quantity": 2
-        },
-        {
-          "cardId": "onr_proteus_151_sunburst-cranial-interface",
           "quantity": 1
         },
         {
           "cardId": "onr_v1_014_codecracker",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_021_dwarf",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_040_loony-goon",
@@ -1354,27 +1474,27 @@
         },
         {
           "cardId": "onr_v1_108_score",
-          "quantity": 1
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_151_aujourdoui",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_154_broker",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_157_crash-everett-inventive-fixer",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_177_the-short-circuit",
-          "quantity": 2
+          "quantity": 1
         }
       ],
       "validation": {
@@ -1393,9 +1513,9 @@
         "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
         "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
         "formatProfileVersion": "1.0.0",
-        "deckHash": "fnv1a:b8c5fcf3"
+        "deckHash": "fnv1a:27180acf"
       },
-      "deckHash": "fnv1a:b8c5fcf3"
+      "deckHash": "fnv1a:27180acf"
     },
     {
       "deckSnapshotId": "proteus_corp_region_fast_score_snapshot_v2026_05_25",
@@ -1440,36 +1560,92 @@
           "quantity": 1
         },
         {
+          "cardId": "onr_proteus_018_datacomb",
+          "quantity": 1
+        },
+        {
           "cardId": "onr_proteus_023_galatea",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_024_gatekeeper",
           "quantity": 2
         },
         {
+          "cardId": "onr_proteus_027_iceberg",
+          "quantity": 1
+        },
+        {
           "cardId": "onr_proteus_031_minotaur",
           "quantity": 1
         },
         {
+          "cardId": "onr_proteus_032_misleading-access-menus",
+          "quantity": 1
+        },
+        {
           "cardId": "onr_proteus_033_mobile-barricade",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_034_riddler",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_036_sandstorm",
-          "quantity": 2
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_037_scaffolding",
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_041_toughoniumtm-wall",
           "quantity": 1
         },
         {
+          "cardId": "onr_proteus_042_tumblers",
+          "quantity": 1
+        },
+        {
           "cardId": "onr_proteus_044_walking-wall",
-          "quantity": 2
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_046_corporate-guard-r-temps",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_047_credit-consolidation",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_048_data-sifters",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_049_emergency-rig",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_051_rent-to-own-contract",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_055_cybertech-think-tank",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_058_executive-boot-camp",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_059_government-contract",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_060_herman-revista",
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_062_lesley-major",
@@ -1477,15 +1653,11 @@
         },
         {
           "cardId": "onr_proteus_065_networked-center",
-          "quantity": 2
-        },
-        {
-          "cardId": "onr_proteus_070_rasmin-bridger",
           "quantity": 1
         },
         {
           "cardId": "onr_proteus_072_research-bunker",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_077_weapons-depot",
@@ -1493,27 +1665,27 @@
         },
         {
           "cardId": "onr_v1_281_accounts-receivable",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_282_annual-reviews",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_288_day-shift",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_290_efficiency-experts",
-          "quantity": 3
+          "quantity": 2
         },
         {
           "cardId": "onr_v1_297_overtime-incentives",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_309_bbs-whispering-campaign",
-          "quantity": 2
+          "quantity": 1
         }
       ],
       "validation": {
@@ -1532,9 +1704,9 @@
         "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
         "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
         "formatProfileVersion": "1.0.0",
-        "deckHash": "fnv1a:5ab12794"
+        "deckHash": "fnv1a:a8f30c68"
       },
-      "deckHash": "fnv1a:5ab12794"
+      "deckHash": "fnv1a:a8f30c68"
     },
     {
       "deckSnapshotId": "proteus_corp_antibody_tax_snapshot_v2026_05_25",
@@ -1571,11 +1743,23 @@
           "quantity": 1
         },
         {
+          "cardId": "onr_proteus_011_brain-wash",
+          "quantity": 1
+        },
+        {
           "cardId": "onr_proteus_012_bug-zapper",
           "quantity": 2
         },
         {
-          "cardId": "onr_proteus_017_credit-blocks",
+          "cardId": "onr_proteus_014_chihuahua",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_015_colonel-failure",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_016_coyote",
           "quantity": 1
         },
         {
@@ -1584,7 +1768,7 @@
         },
         {
           "cardId": "onr_proteus_021_dog-pile",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_022_food-fight",
@@ -1592,18 +1776,26 @@
         },
         {
           "cardId": "onr_proteus_025_homing-missile",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_026_hunting-pack",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_028_lesser-arcana",
           "quantity": 1
         },
         {
+          "cardId": "onr_proteus_029_marionette",
+          "quantity": 1
+        },
+        {
           "cardId": "onr_proteus_030_mastermind",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_035_roadblock",
           "quantity": 1
         },
         {
@@ -1615,16 +1807,48 @@
           "quantity": 1
         },
         {
+          "cardId": "onr_proteus_045_washed-up-solo-construct",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_046_corporate-guard-r-temps",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_050_manhunt",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_052_schlaghund-pointers",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_053_underworld-mole",
+          "quantity": 1
+        },
+        {
           "cardId": "onr_proteus_054_bel-digmo-antibody",
-          "quantity": 3
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_056_department-of-misinformation",
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_057_doppelganger-antibody",
-          "quantity": 2
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_061_ldl-traffic-analyzers",
+          "quantity": 1
+        },
+        {
+          "cardId": "onr_proteus_067_panic-button",
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_068_pattel-antibody",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_proteus_070_rasmin-bridger",
@@ -1632,15 +1856,15 @@
         },
         {
           "cardId": "onr_proteus_075_stereogram-antibody",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_281_accounts-receivable",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_282_annual-reviews",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_287_datapool-by-zetatech",
@@ -1648,15 +1872,15 @@
         },
         {
           "cardId": "onr_v1_290_efficiency-experts",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_293_netwatch-credit-voucher",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_295_night-shift",
-          "quantity": 2
+          "quantity": 1
         },
         {
           "cardId": "onr_v1_309_bbs-whispering-campaign",
@@ -1679,9 +1903,9 @@
         "cardPoolVersion": "private-local-onr-v1-plus-proteus-playtest",
         "formatProfileId": "netgrid_private_local_proteus_playtest_v1",
         "formatProfileVersion": "1.0.0",
-        "deckHash": "fnv1a:9606d777"
+        "deckHash": "fnv1a:6c4a87d4"
       },
-      "deckHash": "fnv1a:9606d777"
+      "deckHash": "fnv1a:6c4a87d4"
     }
   ]
 }
