@@ -92,6 +92,10 @@ const LEGAL_ACTION_PAYLOAD_KEYS = new Set<string>([
   "citySurveillanceDrawDecision",
   "citySurveillanceProjectedCreditsPaid",
   "citySurveillanceProjectedTagsAdded",
+  "payOrTrashProgramSubroutineIndexes",
+  "payOrTrashProgramSubroutinePayment",
+  "payOrEndRunSubroutineIndexes",
+  "payOrEndRunSubroutinePayment",
   ...LEGACY_ABILITY_PAYLOAD_FIELDS,
 ]);
 
@@ -679,8 +683,13 @@ function sanitizePublicPayload(payload: Record<string, unknown>): Record<string,
   return result;
 }
 
-function sanitizeLegalActionPayload(payload: Record<string, unknown>): Record<string, string | number | boolean> {
-  return sanitizeAllowedPrimitiveRecord(payload, LEGAL_ACTION_PAYLOAD_KEYS);
+function sanitizeLegalActionPayload(
+  payload: Record<string, unknown>,
+): Record<string, string | number | boolean> {
+  const result: Record<string, string | number | boolean> = {
+    ...sanitizeAllowedPrimitiveRecord(payload, LEGAL_ACTION_PAYLOAD_KEYS),
+  };
+  return result;
 }
 
 function sanitizeAllowedPrimitiveRecord(value: unknown, allowedKeys: ReadonlySet<string>): Record<string, string | number | boolean> {
@@ -705,6 +714,7 @@ function sanitizeStringArray(value: unknown): string[] | undefined {
   const entries = value.filter((entry): entry is string => typeof entry === "string");
   return entries.length > 0 ? entries : undefined;
 }
+
 
 function sanitizeNumberRecord(value: unknown, allowedKeys: ReadonlySet<string>): Record<string, number> | undefined {
   if (!value || typeof value !== "object" || Array.isArray(value)) return undefined;

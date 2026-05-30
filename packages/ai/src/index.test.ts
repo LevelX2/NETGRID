@@ -1445,15 +1445,36 @@ describe("MVP 0.3 AI controller contract", () => {
         )}`,
       );
 
-    const paidDecision = encounterInput.legalActions.find((action) => action.actionId === payForWashedUpAction.actionId);
-    if (!paidDecision) {
+    expect(typeof payForWashedUpAction.payload?.payOrTrashProgramSubroutineIndexes).toBe(
+      "string",
+    );
+    expect(
+      payForWashedUpAction.payload?.payOrTrashProgramSubroutinePayment,
+    ).toBe(1);
+
+    const noPayForWashedUpAction = encounterInput.legalActions.find(
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.encounterContinue === true &&
+        action.payload?.encounterWillEndRun === false &&
+        action.costs.length === 0,
+    );
+    expect(noPayForWashedUpAction).toBeDefined();
+
+    const decision = chooseRunnerAction(encounterInput);
+    const paidDecision = encounterInput.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+    if (!paidDecision)
       throw new Error(
-        `Missing paid branch action in encounter input: ${payForWashedUpAction.actionId}`,
+        `Missing paid action from AI decision: ${decision.actionId}`,
       );
-    }
+
+    expect(paidDecision.actionId).toBe(payForWashedUpAction.actionId);
     expect(paidDecision.type).toBe("continue_run");
     expect(paidDecision.costs.some((cost) => cost.credits === 1)).toBe(true);
     expect(paidDecision.payload?.encounterWillEndRun).toBe(false);
+    expect(decision.reasonCode).toMatch(/^runner\.encounter\.continue/);
 
     const creditsBefore = state.runner.credits;
     const heapBefore = state.runner.heap.length;

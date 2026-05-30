@@ -8496,6 +8496,12 @@ function scoreRunnerAction(
     case "continue_run":
       {
         const runEffect = encounterRunRemainderEffectAssessment(input);
+        const payOrTrashProgramPayment = Number(
+          action.payload?.payOrTrashProgramSubroutinePayment ?? 0,
+        );
+        const payOrEndRunPayment = Number(
+          action.payload?.payOrEndRunSubroutinePayment ?? 0,
+        );
         score = runEffect.mustBreak
           ? 180
           : runEffect.hasRunRemainderEffect
@@ -8505,6 +8511,13 @@ function scoreRunnerAction(
             : input.difficulty === "easy"
               ? 360
               : 520;
+        if (
+          Number.isFinite(payOrTrashProgramPayment) &&
+          payOrTrashProgramPayment > 0
+        )
+          score += 160;
+        if (Number.isFinite(payOrEndRunPayment) && payOrEndRunPayment > 0)
+          score += 60;
         reasonCode = runEffect.mustBreak
           ? "runner.encounter.continue_visible_future_path_risk"
           : "runner.encounter.continue";
