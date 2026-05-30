@@ -753,6 +753,15 @@ export function createCardLifecycleRuntimeHosts(
     variableRezForDefinition,
   } = deps;
 
+  function spendCorpInstallRezCredits(state: GameState, amount: number): void {
+    spendCredits(state, "corp", amount);
+    if (amount <= 0 || !state.corpTemporaryInstallRezCredits) return;
+    state.corpTemporaryInstallRezCredits.remaining = Math.max(
+      0,
+      Math.floor(state.corpTemporaryInstallRezCredits.remaining ?? 0) - amount,
+    );
+  }
+
   function installCardHost(state: GameState): InstallCardHost {
     return {
       state,
@@ -871,7 +880,10 @@ export function createCardLifecycleRuntimeHosts(
             legalAction,
             amount,
           ),
-        spendCredits: (side, amount) => spendCredits(state, side, amount),
+        spendCredits: (side, amount) =>
+          side === "corp"
+            ? spendCorpInstallRezCredits(state, amount)
+            : spendCredits(state, side, amount),
         rezCostForCard: (cardId) => rezCostForCard(state, cardId),
       },
       counters: {
@@ -929,7 +941,10 @@ export function createCardLifecycleRuntimeHosts(
         assertCorpRezCostQuoteValid: (cardId, legalAction) =>
           assertCorpRezCostQuoteValid(state, cardId, legalAction),
         creditCostForAction,
-        spendCredits: (side, amount) => spendCredits(state, side, amount),
+        spendCredits: (side, amount) =>
+          side === "corp"
+            ? spendCorpInstallRezCredits(state, amount)
+            : spendCredits(state, side, amount),
       },
       corp: {
         isAcmeSavingsAndLoanDefinition,

@@ -726,6 +726,8 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
     activeCrashEverettSourceId,
     availableRunnerProgramInstallCredits,
     citySurveillanceSourceIds,
+    hasInstalledUniqueCardDefinition,
+    isUniqueCard,
     runnerProgramUsesMemory,
     scoredAgendaKindForDefinition,
   } = deps;

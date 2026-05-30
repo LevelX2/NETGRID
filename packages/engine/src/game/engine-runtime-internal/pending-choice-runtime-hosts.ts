@@ -156,7 +156,8 @@ export function createPendingChoiceRuntimeHosts(
 
   const {
     RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_ACTION,
-    RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE,
+    RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE:
+      runnerInstalledConnectionTrashBadPublicityChoiceSource,
     addCounterToAllInstalledRunnerIcebreakers,
     canInstallRunnerProgramFromZone,
     canPlayTrashInstalledRunnerConnectionsThenAddBadPublicity,
@@ -201,8 +202,10 @@ export function createPendingChoiceRuntimeHosts(
     resolveCoreCommandJettisonIceChoice,
     resolveDealWithMilitech,
     resolveExposeInstalledCorpCardsChoice,
+    resolveExposePreventionChoice,
     resolveForgedActivationOrdersCorpChoice,
     resolveForgedActivationOrdersTargetChoice,
+    resolveGripInstallTemporaryCreditChoice,
     resolveHuntClubBbsExposeChoice,
     resolveIncubatorTransformChoice,
     resolveOpenEndedMileageProgramReturnChoice,
@@ -212,6 +215,7 @@ export function createPendingChoiceRuntimeHosts(
     resolveRunnerHostingChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,
     resolveSecurityCodeWormChipTrashIceChoice,
+    resolveStackInstallRunCleanupChoice,
     resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,
     resolveV1911CorporateDownsizing,
     resolveV1911RunnerHiddenZoneAbility,
@@ -237,6 +241,10 @@ export function createPendingChoiceRuntimeHosts(
     {},
     { get: (_target, property) => runtimeBinding(runtime, property) },
   ) as any;
+
+  const RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE =
+    runnerInstalledConnectionTrashBadPublicityChoiceSource ??
+    "card_implementation.runner_installed_connection_trash_bad_publicity";
 
   function continueRunAfterStartOfRunFortUtility(
     state: GameState,
@@ -565,6 +573,7 @@ export function createPendingChoiceRuntimeHosts(
         hiddenZoneSearchChoiceHandlerHost,
         resolveHuntClubBbsExposeChoice,
         resolveExposeInstalledCorpCardsChoice,
+        resolveExposePreventionChoice,
         resolveInvestmentFirmCreditChoice,
         resolveCrashEverettDrawChoice,
         resolvePowerGridOverloadChoice,
@@ -576,6 +585,8 @@ export function createPendingChoiceRuntimeHosts(
         resolveSecurityCodeWormChipTrashIceChoice,
         resolveV1921PlayfulAiChoice,
         resolveRunnerInstalledConnectionTrashBadPublicityChoice,
+        resolveGripInstallTemporaryCreditChoice,
+        resolveStackInstallRunCleanupChoice,
         resolveOpenEndedMileageProgramReturnChoice,
         resolveRunnerHostingChoice,
         resolveIncubatorTransformChoice,

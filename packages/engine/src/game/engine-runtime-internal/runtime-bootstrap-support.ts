@@ -1024,8 +1024,10 @@ export const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
   spendHostedPaymentCredits,
   runnerCreditsAvailable: (state) => state.runner.credits,
   spendRunnerCredits: (state, amount) => spendCredits(state, "runner", amount),
-  recordRunnerRunCreditSpend: (state, amount) =>
-    recordRunnerRunCreditSpend(runDurationPaymentHost(state), amount),
+  recordRunnerRunCreditSpend: (state, amount) => {
+    if (!state.run) return;
+    recordRunnerRunCreditSpend(runDurationPaymentHost(state), amount);
+  },
   definitionIdForCard: (state, cardId) => definitionFor(state, cardId).id,
   hellsRunDefinitionId: HELLS_RUN_ID,
 };

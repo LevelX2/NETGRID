@@ -45,6 +45,7 @@ export function createCorpZoneRuntimeHosts(
     completeDiscardPhase,
     corpInstallRezSequenceHandlerHost,
     corpInstalledCardIds,
+    corpUtilityImplementationForCard,
     corpScoredAgendaForfeitTargets,
     creditCostForAction,
     definitionFor,
@@ -380,6 +381,46 @@ export function createCorpZoneRuntimeHosts(
       throw new Error(
         "Diese installierte Korp-Karte kann nicht exposed werden.",
       );
+    const preventionOptions = corpInstalledCardIds(state)
+      .filter((cardId) => {
+        const utility = corpUtilityImplementationForCard(state, cardId);
+        if (utility?.kind !== "expose_prevention") return false;
+        const cost = utility.cost.kind === "credit" ? utility.cost.amount : 0;
+        return state.corp.credits >= cost;
+      })
+      .sort();
+    if (preventionOptions.length > 0) {
+      state.pendingChoice = {
+        choiceId: `corp_expose_prevention_${state.stateVersion + 1}`,
+        side: "corp",
+        source: `corp.expose_prevention:${targetCardId}:${sourceCardId}:${sourceDefinitionId}`,
+        prompt: "Expose verhindern",
+        kind: "select_option",
+        options: [
+          { id: "pass", label: "Expose nicht verhindern" },
+          ...preventionOptions.map((cardId) => ({
+            id: `department_${cardId}`,
+            label: `${definitionFor(state, cardId).title}: Expose verhindern`,
+            publicLabel: "Expose Prevention",
+            value: cardId,
+          })),
+        ],
+        minSelections: 1,
+        maxSelections: 1,
+        stateVersion: state.stateVersion + 1,
+        visibility: "public",
+      };
+      state.activeSide = "corp";
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "expose_prevention_choice",
+        cardImplementationExposeTargetId: targetCardId,
+        sourceCardId,
+        sourceDefinitionId,
+      };
+      return { publicPayload: legalAction.payload ?? {} };
+    }
     const targetDefinition = definitionFor(state, targetCardId);
     const sourceDefinition = DEMO_CARDS_BY_ID[sourceDefinitionId];
     const context = installedCorpCardServerContext(state, targetCardId);
@@ -882,6 +923,58 @@ export function createCorpZoneRuntimeHosts(
     };
   }
 
+  function resolveExposePreventionChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ): void {
+    const choice = state.pendingChoice;
+    if (!choice || !choice.source.startsWith("corp.expose_prevention"))
+      throw new Error("Es ist keine Expose-Prevention-Choice offen.");
+    const [targetCardId = ""] = choice.source
+      .slice("corp.expose_prevention:".length)
+      .split(":");
+    const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
+    if (selected === "pass") {
+      delete state.pendingChoice;
+      legalAction.payload = {
+        ...(legalAction.payload ?? {}),
+        exposePreventionDecision: "pass",
+        cardImplementationExposeTargetId: targetCardId,
+      };
+      return;
+    }
+    const option = choice.options.find((candidate) => candidate.id === selected);
+    const sourceCardId =
+      typeof option?.value === "string"
+        ? (option.value as CardInstanceId)
+        : undefined;
+    if (!sourceCardId) throw new Error("Die Expose-Prevention-Auswahl ist ungueltig.");
+    const source = state.cardInstances[sourceCardId];
+    const utility = corpUtilityImplementationForCard(state, sourceCardId);
+    if (!source || utility?.kind !== "expose_prevention")
+      throw new Error("Die Expose-Prevention-Quelle ist nicht mehr legal.");
+    const cost = utility.cost.kind === "credit" ? utility.cost.amount : 0;
+    if (state.corp.credits < cost)
+      throw new Error("Die Korp kann Expose Prevention nicht bezahlen.");
+    spendCredits(state, "corp", cost);
+    state.cardInstances[sourceCardId] = {
+      ...source,
+      faceup: true,
+      rezzed: true,
+    };
+    delete state.pendingChoice;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      exposePreventionDecision: "use",
+      cardImplementationExposeTargetId: targetCardId,
+      sourceCardId,
+      sourceDefinitionId: source.definitionId,
+      paidCredits: cost,
+      corpCreditsAfter: state.corp.credits,
+    };
+  }
+
   function outermostIceExposures(
     state: GameState,
   ): Array<{ server: CorpServer; cardId: CardInstanceId }> {
@@ -948,6 +1041,7 @@ export function createCorpZoneRuntimeHosts(
     installedRunnerIcebreakerIds,
     outermostIceExposures,
     resolveDealWithMilitech,
+    resolveExposePreventionChoice,
     resolveExposeInstalledCorpCardsChoice,
     resolveHuntClubBbsExposeChoice,
     resolveV1911CorporateDownsizing,

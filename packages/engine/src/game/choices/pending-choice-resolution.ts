@@ -418,6 +418,9 @@ export function resolvePendingChoice(
   if (
     state.pendingChoice.source.startsWith(
       `${RUNNER_INSTALLED_CONNECTION_TRASH_BAD_PUBLICITY_CHOICE_SOURCE}:`,
+    ) ||
+    state.pendingChoice.source.startsWith(
+      "card_implementation.runner_installed_connection_trash_bad_publicity:",
     )
   ) {
     resolveRunnerInstalledConnectionTrashBadPublicityChoice(

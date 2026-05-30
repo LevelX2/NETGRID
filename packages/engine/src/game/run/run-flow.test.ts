@@ -209,7 +209,7 @@ describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
     expect(runnerView.run?.breach?.remainingCount).toBe(2);
   });
 
-  it("adds HQ root upgrades after the random HQ hand access without leaking unaccessed HQ cards", () => {
+  it("includes HQ root upgrades with the random HQ hand access without leaking unaccessed HQ cards", () => {
     let state = toRunnerTurn(v097RunGame("v097-hq-root-upgrade-access"));
     state.runner.credits = 10;
     const operationId = moveCorpCardToHq(state, "simple_economy_operation");
@@ -238,9 +238,9 @@ describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
 
     const queue = state.run?.breach?.queue ?? [];
     expect(queue).toHaveLength(2);
-    expect(queue[1]?.cardInstanceId).toBe(upgradeId);
-    expect(queue.map((entry) => entry.zone)).toEqual(["hq", "remote_root"]);
-    const accessedHqId = queue[0]?.cardInstanceId;
+    expect(queue[0]?.cardInstanceId).toBe(upgradeId);
+    expect(queue.map((entry) => entry.zone)).toEqual(["remote_root", "hq"]);
+    const accessedHqId = queue.find((entry) => entry.zone === "hq")?.cardInstanceId;
     const unaccessedHqId = [operationId, agendaId].find(
       (cardId) => cardId !== accessedHqId,
     );
@@ -260,22 +260,6 @@ describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
 
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "access_card",
-      cardDefinitionId: accessedHqDefinition,
-      serverLabel: "HQ",
-    });
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
-      unaccessedHqTitle,
-    );
-    if (accessedHqDefinition === "simple_agenda") {
-      state = apply(state, "runner", (action) => action.type === "steal_agenda");
-    }
-    expect(state.run?.breach?.currentIndex).toBe(1);
-    expect(state.run?.accessedCardId).toBeUndefined();
-
-    state = apply(state, "runner", (action) => action.type === "access_card");
-
-    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
-      actionType: "access_card",
       cardDefinitionId: "simple_upgrade",
       serverLabel: "HQ",
     });
@@ -289,13 +273,29 @@ describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
     );
 
     expect(state.corp.archives).toContain(upgradeId);
+    expect(state.run?.breach?.currentIndex).toBe(1);
+    expect(state.run?.accessedCardId).toBeUndefined();
+
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      cardDefinitionId: accessedHqDefinition,
+      serverLabel: "HQ",
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toContain(
+      unaccessedHqTitle,
+    );
+    if (accessedHqDefinition === "simple_agenda") {
+      state = apply(state, "runner", (action) => action.type === "steal_agenda");
+    }
     expect(state.run).toBeUndefined();
     const accessEvents = state.eventLog
       .slice(replayStart)
       .filter((event) => event.publicPayload.actionType === "access_card");
     expect(
       accessEvents.map((event) => event.publicPayload.cardDefinitionId),
-    ).toEqual([accessedHqDefinition, "simple_upgrade"]);
+    ).toEqual(["simple_upgrade", accessedHqDefinition]);
     const replay = replayEvents(initial, state.eventLog.slice(replayStart));
     expect(replay.ok).toBe(true);
     expect(replay.actualFinalStateHash).toBe(hashState(state));

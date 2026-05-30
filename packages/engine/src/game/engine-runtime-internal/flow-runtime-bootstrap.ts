@@ -1073,7 +1073,7 @@ export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps })
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           hiddenZoneBarrier: true,
-          hiddenZoneAction: "test_spin_return_to_stack",
+          hiddenZoneAction: "pro018_test_spin_return_to_stack",
           sourceDefinitionId: pending.sourceDefinitionId,
           sourceTitle: sourceDefinition?.title ?? "Test Spin",
           returnedProgramDefinitionId: definition.id,
@@ -1102,7 +1102,7 @@ export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps })
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         hiddenZoneBarrier: true,
-        hiddenZoneAction: "test_spin_penalty",
+        hiddenZoneAction: "pro018_test_spin_penalty",
         sourceDefinitionId: pending.sourceDefinitionId,
         sourceTitle: sourceDefinition?.title ?? "Test Spin",
         returnedToStack: false,
@@ -1305,6 +1305,7 @@ export function configureFlowRuntimeBootstrap({ cardImplementationRuntimeDeps })
       },
       misc: {
         drawCorpCards,
+        awardRunnerEventAgendaPoint,
         acmeSavingsAndLoanObligationCount,
         addAcmeSavingsAndLoanObligation,
         applyRunnerForgoNextAction,

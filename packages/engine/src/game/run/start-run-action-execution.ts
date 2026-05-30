@@ -1,4 +1,5 @@
 import type { CardInstanceId, GameState, LegalAction, ServerId } from "@netgrid/shared";
+import type { StartRunOptions } from "./run-core-execution";
 
 export type StartRunActionExecutionHost = {
   state: GameState;
@@ -16,6 +17,7 @@ export type StartRunActionExecutionHost = {
     startRun: (
       serverId: Exclude<ServerId, "new_remote">,
       legalAction: LegalAction,
+      options?: StartRunOptions,
     ) => void;
     activeWilsonSourceIds: () => CardInstanceId[];
   };
@@ -80,7 +82,13 @@ export function executeStartRunAction(
       throw new Error("Es ist keine Wilson-Run-Aktion verfuegbar.");
     flags.wilsonRunOnlyActionsRemaining = remaining - 1;
   }
-  host.run.startRun(serverId, legalAction);
+  host.run.startRun(
+    serverId,
+    legalAction,
+    legalAction.payload?.pirateBroadcastRun === true
+      ? { pirateBroadcast: flags.pirateBroadcastPending }
+      : undefined,
+  );
   if (legalAction.payload?.wilsonRunOnlyAction === true && host.state.run) {
     const sourceCardId = host.run.activeWilsonSourceIds()[0];
     host.state.run.wilsonRunSpendingCap = {

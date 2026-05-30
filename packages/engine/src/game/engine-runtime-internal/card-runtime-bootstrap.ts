@@ -1399,6 +1399,15 @@ export function configureCardRuntimeBootstrap() {
   }
 
   function gameCardImplementationRuntimeDepsHost(): GameCardImplementationRuntimeDepsHost {
+    const spendCardImplementationCredits = (state: GameState, side: Side, amount: number): void => {
+      spendCredits(state, side, amount);
+      const temporaryCredits = state.run?.corpRunTemporaryCredits;
+      if (side !== "corp" || amount <= 0 || !temporaryCredits) return;
+      state.run.corpRunTemporaryCredits.remaining = Math.max(
+        0,
+        Math.floor(temporaryCredits.remaining ?? 0) - amount,
+      );
+    };
     return {
       cards: {
         definitionFor,
@@ -1408,7 +1417,7 @@ export function configureCardRuntimeBootstrap() {
       },
       credits: {
         spendClick,
-        spendCredits,
+        spendCredits: spendCardImplementationCredits,
       },
       actions: {
         createAction: action,

@@ -329,7 +329,7 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       "runner",
       (action) => action.type === "start_run" && action.payload?.serverId === "hq",
     );
-    redirected = applyChoice(redirected, "corp", "siren_siren_2");
+    redirected = applyChoice(redirected, "corp", "redirect_siren_2");
     expect(redirected.run?.attackedServerId).toBe("remote_1");
     expect(redirected.corp.credits).toBe(19);
     expectReplayStable(redirectedBefore, redirected);

@@ -1360,6 +1360,125 @@ function runnerEventLongtailKindForDefinition(
   return runnerEventLongtailForDefinition(definition)?.kind;
 }
 
+function pro018GripInstallCandidates(
+  state: GameState,
+  sourceCardId: CardInstanceId,
+  longtail: CardRunnerEventLongtailImplementation,
+): CardInstanceId[] {
+  const temporaryCredits = Math.max(0, Math.floor(longtail.temporaryCredits ?? 0));
+  return state.runner.grip.filter((cardId) => {
+    if (cardId === sourceCardId) return false;
+    const definition = definitionFor(state, cardId);
+    if (!(longtail.allowedTypes ?? []).includes(definition.type)) return false;
+    if (
+      isUniqueCard(definition) &&
+      hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+    )
+      return false;
+    if (
+      definition.type === "program" &&
+      state.runner.memoryUsed + (definition.memoryCost ?? 0) >
+        runnerMemoryLimit(state)
+    )
+      return false;
+    return state.runner.credits + temporaryCredits >= (definition.installCost ?? 0);
+  });
+}
+
+function startPro018GripInstallChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  definition: CardDefinition,
+  longtail: CardRunnerEventLongtailImplementation,
+): void {
+  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  const candidates = pro018GripInstallCandidates(state, sourceCardId, longtail);
+  if (candidates.length === 0)
+    throw new Error("Im Grip liegt keine legal installierbare Programm- oder Hardware-Karte.");
+  state.pendingChoice = {
+    choiceId: `pro018_grip_install_temporary_credits_${state.stateVersion + 1}`,
+    stateVersion: state.stateVersion + 1,
+    side: "runner",
+    source: `card_implementation.pro018_grip_install_temporary_credits:${sourceCardId}:${definition.id}:${longtail.temporaryCredits}:${state.stateVersion + 1}`,
+    prompt: "Programm oder Hardware installieren",
+    minSelections: 1,
+    maxSelections: 1,
+    options: state.runner.grip
+      .filter((cardId) => cardId !== sourceCardId)
+      .map((cardId) => {
+        const candidateDefinition = definitionFor(state, cardId);
+        return {
+          id: `card_${cardId}`,
+          label: candidateDefinition.title,
+          value: cardId,
+          ...(!candidates.includes(cardId) ? { selectable: false } : {}),
+        };
+      }),
+    visibility: "runner_private",
+    cardSearchPresentation: {
+      sourceZone: "grip",
+      selectableFilter: "program_or_hardware",
+      destination: "install",
+      showNonMatchingCards: true,
+    },
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "pro018_grip_install_temporary_credits",
+    sourceDefinitionId: definition.id,
+    choiceVisibility: "runner_private",
+  };
+}
+
+function startPro018StackInstallRunCleanupChoice(
+  state: GameState,
+  legalAction: LegalAction,
+  definition: CardDefinition,
+): void {
+  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  const candidates = searchStackInstallTargets(
+    hiddenZoneSearchActivationTargetHost(state),
+    "program",
+    "free",
+  );
+  if (candidates.length === 0)
+    throw new Error("Im Stack liegt kein legal installierbares Programm.");
+  state.pendingChoice = {
+    choiceId: `pro018_stack_install_run_cleanup_${state.stateVersion + 1}`,
+    stateVersion: state.stateVersion + 1,
+    side: "runner",
+    source: `card_implementation.pro018_stack_install_run_cleanup:${sourceCardId}:${definition.id}:${String(legalAction.payload?.serverId ?? "hq")}:${state.stateVersion + 1}`,
+    prompt: "Programm aus dem Stack installieren",
+    minSelections: 1,
+    maxSelections: 1,
+    options: state.runner.stack.map((cardId) => {
+      const candidateDefinition = definitionFor(state, cardId);
+      return {
+        id: `card_${cardId}`,
+        label: candidateDefinition.title,
+        value: cardId,
+        ...(!candidates.includes(cardId) ? { selectable: false } : {}),
+      };
+    }),
+    visibility: "runner_private",
+    cardSearchPresentation: {
+      sourceZone: "stack",
+      selectableFilter: "program",
+      destination: "install_program",
+      shuffleAfter: true,
+      showNonMatchingCards: true,
+    },
+  };
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    hiddenZoneBarrier: true,
+    hiddenZoneAction: "pro018_stack_install_run_cleanup",
+    sourceDefinitionId: definition.id,
+    choiceVisibility: "runner_private",
+  };
+}
+
 function hiddenReplacementLongtailForDefinition(
   definition: CardDefinition,
 ): CardHiddenReplacementLongtailImplementation | undefined {
@@ -1398,6 +1517,36 @@ function cardImplementationRunnerEventResolver(
               legalAction,
               definition.id,
               longtail,
+            ),
+        };
+      case "grip_install_program_or_hardware_with_temporary_credits":
+        return {
+          name: "card_implementation_runner_event_grip_install_program_or_hardware_with_temporary_credits",
+          canPlay: (state) =>
+            pro018GripInstallCandidates(
+              state,
+              "" as CardInstanceId,
+              longtail,
+            ).length > 0,
+          resolve: (state, legalAction) =>
+            startPro018GripInstallChoice(state, legalAction, definition, longtail),
+        };
+      case "search_stack_install_program_free_then_run_return_or_penalty":
+        return {
+          name: "card_implementation_runner_event_search_stack_install_program_free_then_run_return_or_penalty",
+          requiresServer: true,
+          canPlay: (state) =>
+            searchStackInstallTargets(
+              hiddenZoneSearchActivationTargetHost(state),
+              "program",
+              "free",
+            ).length > 0,
+          canPlayForServer: () => true,
+          resolve: (state, legalAction) =>
+            startPro018StackInstallRunCleanupChoice(
+              state,
+              legalAction,
+              definition,
             ),
         };
       default: {

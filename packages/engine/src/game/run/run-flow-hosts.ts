@@ -982,7 +982,9 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
       openDamageResolutionWindow: (event, action) =>
         host.damage.openDamageResolutionWindow(state, event, action),
       parisCityGridTracePoolSource: () =>
-        parisCityGridTracePoolSource(fortRunSideFamiliesHostForState(state)),
+        state.run
+          ? parisCityGridTracePoolSource(fortRunSideFamiliesHostForState(state))
+          : undefined,
       rabbitTraceLimitReductionForIceTrace: () =>
         host.trace.rabbitTraceLimitReductionForIceTrace(state),
       resolveDamageImminentEvent: (event) =>

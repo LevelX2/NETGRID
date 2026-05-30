@@ -114,7 +114,7 @@ describe("trace orchestration", () => {
     });
   });
 
-  it("resolves the Runner bid and delegates trace success followups", () => {
+  it("resolves the Runner bid and completes operation trace success without a run", () => {
     const sourceId = "source_1" as CardInstanceId;
     const sourceDefinition = definition("trace_source", "operation");
     const state = minimalState({
@@ -138,7 +138,14 @@ describe("trace orchestration", () => {
     );
 
     expect(state.runner.credits).toBe(3);
-    expect(calls.followups).toEqual(["runner_bid:trace_1"]);
+    expect(calls.followups).toEqual([]);
+    expect(state.runner.tags).toBe(1);
+    expect(action.payload).toMatchObject({
+      traceId: "trace_1",
+      traceStep: "runner_bid",
+      traceSuccessful: true,
+      tagsAdded: 1,
+    });
     expect(state.trace).toBeUndefined();
     expect(state.pendingChoice).toBeUndefined();
   });
@@ -647,6 +654,8 @@ function testHost(
     },
     callbacks: {
       sanitizeId: (value) => value.replace(/[^a-z0-9_]+/gi, "_"),
+      addHackerTrackerTraceCounters: () => 0,
+      resolveTraceTrashRunnerResourceSuccess: () => ({}),
     },
     constants: {
       PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID:

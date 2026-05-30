@@ -723,6 +723,7 @@ import type { RuntimeDeps } from "./runtime-shared";
 
 export function createInstallRezRuntimeHosts(deps: RuntimeDeps) {
   const {
+    cardInstallCapabilitiesForDefinition,
     cardHasSubtype,
     expireCorporateRetreatInstallCreditAbilities,
     fortCapacityModifiersForCard,
@@ -735,6 +736,20 @@ export function createInstallRezRuntimeHosts(deps: RuntimeDeps) {
     definition: CardDefinition,
     server: CorpServer,
   ): boolean {
+    const installCapabilities = cardInstallCapabilitiesForDefinition(definition.id);
+    if (
+      installCapabilities.some((capability) => capability.kind === "install_only_in_hq") &&
+      server.id !== "hq"
+    )
+      return false;
+    if (
+      installCapabilities.some(
+        (capability) => capability.kind === "install_only_in_hq_or_rd",
+      ) &&
+      server.id !== "hq" &&
+      server.id !== "rd"
+    )
+      return false;
     if (mustInstallInsideSubsidiaryDataFort(definition) && server.kind !== "remote")
       return false;
     if (definition.type === "upgrade") return server.kind !== "archives";

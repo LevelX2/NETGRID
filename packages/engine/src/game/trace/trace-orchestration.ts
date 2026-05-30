@@ -127,6 +127,13 @@ export type TraceOrchestrationHost = {
   };
   callbacks: {
     sanitizeId: (value: string) => string;
+    addHackerTrackerTraceCounters: () => number;
+    resolveTraceTrashRunnerResourceSuccess: (
+      sourceDefinitionId: CardDefinitionId,
+      sourceCardInstanceId: CardInstanceId,
+      traceId: string,
+      targetCardId: CardInstanceId | undefined,
+    ) => Record<string, unknown>;
   };
   constants: {
     PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID: CardDefinitionId;
@@ -477,10 +484,11 @@ function resolveTraceBaseLinkChoice(
   if (!cardId) throw new Error("Diese Base-Link-Quelle ist nicht legal.");
   const candidate = assertTraceBaseLinkChoiceValid(state, cardId);
   host.payment.spendRunnerCredits(candidate.creditCost);
-  host.run.markSubmarineUplinkJackOutAfterEncounter(
-    candidate.sourceCardInstanceId,
-    legalAction,
-  );
+  if (state.run)
+    host.run.markSubmarineUplinkJackOutAfterEncounter(
+      candidate.sourceCardInstanceId,
+      legalAction,
+    );
   const runnerLink =
     calculateRunnerLinkCore(host) + candidate.baseLinkValue;
   const nextTrace = {
@@ -592,6 +600,14 @@ function resolveTraceRunnerBid(
       postBidTraceLinkChoiceOpened: false,
       traceSuccessCancelChoiceOpened: true,
     };
+    return;
+  }
+  if (!state.run) {
+    completeTraceWithoutRun(host, postBidTrace, "runner_bid", legalAction, {
+      runnerLinkFallback: runnerLink,
+      extraPayload: tracePaymentPayload,
+      deletePendingChoice: true,
+    });
     return;
   }
   host.run.applyPrintedTraceSuccessFollowups({
@@ -720,10 +736,11 @@ function resolveTracePostBidLinkChoice(
     const tapPayload = candidate.tapSource
       ? tapTraceSource(host, candidate.cardId)
       : {};
-    host.run.markSubmarineUplinkJackOutAfterEncounter(
-      candidate.cardId,
-      legalAction,
-    );
+    if (state.run)
+      host.run.markSubmarineUplinkJackOutAfterEncounter(
+        candidate.cardId,
+        legalAction,
+      );
     const nextTrace = {
       ...trace,
       runnerLink: (trace.runnerLink ?? 0) + candidate.linkDelta,
@@ -789,12 +806,128 @@ function completeTraceAfterPostBidLink(
     };
     return;
   }
+  if (!host.state.run) {
+    completeTraceWithoutRun(host, trace, "post_bid_link", legalAction, {
+      runnerLinkFallback: calculateRunnerLink(host),
+      deletePendingChoice: true,
+    });
+    return;
+  }
   host.run.applyPrintedTraceSuccessFollowups({
     trace,
     traceStep: "post_bid_link",
     legalAction,
     runnerLinkFallback: calculateRunnerLink(host),
   });
+}
+
+function completeTraceWithoutRun(
+  host: TraceOrchestrationHost,
+  trace: CurrentTrace,
+  traceStep: "runner_bid" | "post_bid_link",
+  legalAction: LegalAction,
+  options: {
+    runnerLinkFallback?: number;
+    extraPayload?: Record<string, unknown>;
+    deletePendingChoice?: boolean;
+  } = {},
+): void {
+  const { state } = host;
+  const result = describeTraceResultFromTrace(trace, {
+    runnerLinkFallback: options.runnerLinkFallback ?? calculateRunnerLink(host),
+  });
+  const successful = result.successful;
+  const tagsAdded = traceSuccessTagAmountForOperation(
+    trace.successEffect,
+    successful,
+    result,
+  );
+  if (successful) state.runner.tags += tagsAdded;
+  const hackerTrackerCountersAdded =
+    host.callbacks.addHackerTrackerTraceCounters();
+  const traceAvoidReward = successful
+    ? { amount: 0, sourceDefinitionIds: [] as string[] }
+    : applyTraceAvoidRewardsForOperation(state, trace);
+  const traceResourceTrashPayload =
+    successful && trace.successEffect.type === "trash_runner_resource_and_add_tag"
+      ? host.callbacks.resolveTraceTrashRunnerResourceSuccess(
+          trace.sourceDefinitionId,
+          trace.sourceCardInstanceId,
+          trace.traceId,
+          trace.successEffect.targetCardInstanceId,
+        )
+      : {};
+  if (options.deletePendingChoice) delete state.pendingChoice;
+  delete state.trace;
+  if (trace.returnTimingPoint && trace.returnActiveSide && trace.returnPhase) {
+    state.timingPoint = trace.returnTimingPoint;
+    state.activeSide = trace.returnActiveSide;
+    state.phase = trace.returnPhase;
+  }
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    traceId: trace.traceId,
+    traceStep,
+    baseTraceStrength: trace.baseTraceStrength,
+    sourceDefinitionId: trace.sourceDefinitionId,
+    corpBid: trace.corpBid ?? 0,
+    traceStrength: result.corpTraceStrength,
+    runnerLink: result.runnerLink,
+    runnerBid: result.runnerBid,
+    ...(options.extraPayload ?? {}),
+    runnerStrength: result.runnerTraceStrength,
+    ...(traceStep === "post_bid_link"
+      ? { postBidTraceLinkBonus: trace.postBidLinkBonus ?? 0 }
+      : {}),
+    traceSuccessful: successful,
+    tagsAdded,
+    ...(hackerTrackerCountersAdded > 0
+      ? {
+          hackerTrackerCountersAdded,
+          traceHostedCreditsAdded: hackerTrackerCountersAdded,
+        }
+      : {}),
+    ...(traceAvoidReward.amount > 0
+      ? {
+          traceAvoidRewardCredits: traceAvoidReward.amount,
+          gainedCredits: traceAvoidReward.amount,
+          runnerCreditsAfter: state.runner.credits,
+          traceAvoidRewardSourceDefinitionIds:
+            traceAvoidReward.sourceDefinitionIds.sort().join(","),
+        }
+      : {}),
+    ...traceResourceTrashPayload,
+  };
+}
+
+function traceSuccessTagAmountForOperation(
+  successEffect: TraceSuccessEffect,
+  successful: boolean,
+  result: ReturnType<typeof describeTraceResultFromTrace>,
+): number {
+  if (!successful) return 0;
+  if (successEffect.type === "add_tag_and_counter")
+    return successEffect.tagAmount;
+  if (successEffect.type === "add_tag") return successEffect.amount;
+  if (successEffect.type === "add_tags_by_trace_margin_over_runner_link")
+    return Math.max(0, result.corpTraceStrength - result.runnerLink);
+  if (successEffect.type === "trash_runner_resource_and_add_tag") return 1;
+  return 0;
+}
+
+function applyTraceAvoidRewardsForOperation(
+  state: GameState,
+  trace: CurrentTrace,
+): { amount: number; sourceDefinitionIds: string[] } {
+  let amount = 0;
+  const sourceDefinitionIds: string[] = [];
+  for (const reward of trace.traceAvoidRewardUsages ?? []) {
+    if (!Number.isInteger(reward.amount) || reward.amount <= 0) continue;
+    amount += reward.amount;
+    sourceDefinitionIds.push(reward.sourceDefinitionId);
+  }
+  if (amount > 0) state.runner.credits += amount;
+  return { amount, sourceDefinitionIds };
 }
 
 function traceSuccessCancelCandidates(
@@ -872,6 +1005,16 @@ function resolveTraceSuccessCancelChoice(
   const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
   if (selected === "pass") {
     delete host.state.pendingChoice;
+    if (!host.state.run) {
+      completeTraceWithoutRun(
+        host,
+        { ...trace, status: "post_bid_link" },
+        "post_bid_link",
+        legalAction,
+        { runnerLinkFallback: calculateRunnerLink(host) },
+      );
+      return;
+    }
     host.run.applyPrintedTraceSuccessFollowups({
       trace: { ...trace, status: "post_bid_link" },
       traceStep: "post_bid_link",

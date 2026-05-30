@@ -714,10 +714,12 @@ export function createActivatedCardRuntimeHosts(
     encounterPrintedEffectHostForState,
     encounterSpecialWindowHostForState,
     fortRunSideFamiliesHostForState,
+    addHackerTrackerTraceCounters,
     hackerTrackerCounterTotal,
     identityModifierAmount,
     krumzTraceBitTotal,
     rezzedCorpRootCardIds,
+    resolveTraceTrashRunnerResourceSuccess,
     runnerTracePaymentDeps,
     sanitizeId,
     scoredAgendaAbilityHost,
@@ -771,7 +773,9 @@ export function createActivatedCardRuntimeHosts(
       },
       fort: {
         parisCityGridTracePoolSource: () =>
-          parisCityGridTracePoolSource(fortRunSideFamiliesHostForState(state)),
+          state.run
+            ? parisCityGridTracePoolSource(fortRunSideFamiliesHostForState(state))
+            : undefined,
       },
       run: {
         markSubmarineUplinkJackOutAfterEncounter: (cardId, legalAction) =>
@@ -795,6 +799,21 @@ export function createActivatedCardRuntimeHosts(
       },
       callbacks: {
         sanitizeId,
+        addHackerTrackerTraceCounters: () =>
+          addHackerTrackerTraceCounters(state),
+        resolveTraceTrashRunnerResourceSuccess: (
+          sourceDefinitionId,
+          sourceCardInstanceId,
+          traceId,
+          targetCardId,
+        ) =>
+          resolveTraceTrashRunnerResourceSuccess(
+            state,
+            sourceDefinitionId,
+            sourceCardInstanceId,
+            traceId,
+            targetCardId,
+          ),
       },
       constants: {
         PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID,
