@@ -534,16 +534,23 @@ function applyPirateBroadcastRunResult(
     ...sequence.successfulServerIds,
     run.attackedServerId,
   ];
-  if (sequence.pendingServerIds.length > 0) {
+  const remainingPendingServerIds =
+    sequence.pendingServerIds[0] === run.attackedServerId
+      ? sequence.pendingServerIds.slice(1)
+      : sequence.pendingServerIds.filter(
+          (serverId) => serverId !== run.attackedServerId,
+        );
+  if (remainingPendingServerIds.length > 0) {
     host.runner.ensureTurnFlags().pirateBroadcastPending = {
       ...sequence,
+      pendingServerIds: remainingPendingServerIds,
       successfulServerIds,
     };
     if (legalAction) {
       legalAction.payload = {
         ...(legalAction.payload ?? {}),
         pirateBroadcastRunSuccessful: true,
-        pirateBroadcastPendingServerCount: sequence.pendingServerIds.length,
+        pirateBroadcastPendingServerCount: remainingPendingServerIds.length,
         sourceDefinitionId: sequence.sourceDefinitionId,
       };
     }

@@ -487,7 +487,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       hiddenZoneBarrier: true,
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"/,
+      /"privatePayload"|"cardInstances"|"corp_[a-z0-9_-]+_\d+"/,
     );
     const replay = replayEvents(initial, state.eventLog.slice(initial.eventLog.length));
     expect(replay.ok).toBe(true);

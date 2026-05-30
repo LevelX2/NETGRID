@@ -1041,8 +1041,8 @@ export function createEncounterMovementRuntimeHosts(
             fortRunSideFamiliesHostForState(state),
             serverId,
           ),
-        startRun: (serverId, legalAction) =>
-          runtime.startRun(state, serverId, undefined, 1, undefined, legalAction),
+        startRun: (serverId, legalAction, options) =>
+          runtime.startRun(state, serverId, undefined, 1, options, legalAction),
         activeWilsonSourceIds: () =>
           activeWilsonSourceIds(runDurationPaymentHost(state)),
       },

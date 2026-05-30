@@ -1117,6 +1117,178 @@ export function createHiddenZoneNonSearchRuntime(
     });
   }
 
+  function parsePro018ChoiceSource(source: string): {
+    sourceCardId: CardInstanceId;
+    sourceDefinitionId: CardDefinitionId;
+    value: string;
+  } {
+    const [, sourceCardId = "", sourceDefinitionId = "", value = ""] =
+      source.split(":");
+    if (!sourceCardId || !sourceDefinitionId)
+      throw new Error("Die PRO018-Choice ist ungueltig.");
+    return {
+      sourceCardId: sourceCardId as CardInstanceId,
+      sourceDefinitionId: sourceDefinitionId as CardDefinitionId,
+      value,
+    };
+  }
+
+  function installRunnerGripCardWithTemporaryCredits(
+    state: GameState,
+    cardId: CardInstanceId,
+    temporaryCredits: number,
+    legalAction: LegalAction,
+  ) {
+    if (!state.runner.grip.includes(cardId))
+      throw new Error("Die gewaehlte Karte liegt nicht im Grip.");
+    const definition = definitionFor(state, cardId);
+    if (definition.type !== "program" && definition.type !== "hardware")
+      throw new Error("Die gewaehlte Karte ist kein Programm oder keine Hardware.");
+    if (
+      isUniqueCard(definition) &&
+      hasInstalledUniqueCardDefinition(state, "runner", definition.id)
+    )
+      throw new Error("Eine Unique-Karte mit diesem Namen ist bereits installiert.");
+    if (
+      definition.type === "program" &&
+      state.runner.memoryUsed + (definition.memoryCost ?? 0) >
+        runnerMemoryLimit(state)
+    )
+      throw new Error("Der Runner hat nicht genug freien Speicher.");
+    const installCost = definition.installCost ?? 0;
+    const temporarySpent = Math.min(temporaryCredits, installCost);
+    const runnerPaid = installCost - temporarySpent;
+    if (state.runner.credits < runnerPaid)
+      throw new Error("Der Runner kann die Installationskosten nicht bezahlen.");
+    if (runnerPaid > 0) spendCredits(state, "runner", runnerPaid);
+    removeFromAllZones(state, cardId);
+    if (definition.type === "program") {
+      state.runner.rig.programs.push(cardId);
+      state.runner.memoryUsed += definition.memoryCost ?? 0;
+    } else {
+      state.runner.rig.hardware.push(cardId);
+      if (definition.memoryLimitModifier)
+        state.runner.memoryLimit += definition.memoryLimitModifier;
+    }
+    state.cardInstances[cardId] = {
+      ...mustInstance(state.cardInstances, cardId),
+      faceup: true,
+      rezzed: true,
+      zone: { side: "runner", zone: "rig" },
+    };
+    executeCardImplementationLifecycleEffects(
+      cardImplementationRuntimeDeps,
+      state,
+      legalAction,
+      definition,
+      cardId,
+      "on_install",
+    );
+    return { definition, temporarySpent, runnerPaid };
+  }
+
+  function resolveGripInstallTemporaryCreditChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ): void {
+    const choice = state.pendingChoice;
+    if (
+      !choice ||
+      !choice.source.startsWith(
+        "card_implementation.pro018_grip_install_temporary_credits:",
+      )
+    )
+      throw new Error("Es ist keine PRO018-Grip-Install-Choice offen.");
+    const { sourceDefinitionId, value } = parsePro018ChoiceSource(choice.source);
+    const temporaryCredits = Math.max(0, Math.floor(Number(value)));
+    const selectedIds = selectedChoiceCardIdsForChoice(choice, playerAction);
+    if (selectedIds.length !== 1)
+      throw new Error("Genau eine Karte muss gewaehlt werden.");
+    const { definition, temporarySpent, runnerPaid } =
+      installRunnerGripCardWithTemporaryCredits(
+        state,
+        selectedIds[0],
+        temporaryCredits,
+        legalAction,
+      );
+    delete state.pendingChoice;
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "pro018_grip_install_temporary_credits",
+      sourceDefinitionId,
+      installedCardDefinitionId: definition.id,
+      temporaryCreditsProvided: temporaryCredits,
+      temporaryCreditsSpent: temporarySpent,
+      temporaryCreditsReturned: temporaryCredits - temporarySpent,
+      installCostPaid: runnerPaid,
+      runnerCreditsAfter: state.runner.credits,
+    };
+  }
+
+  function resolveStackInstallRunCleanupChoice(
+    state: GameState,
+    legalAction: LegalAction,
+    playerAction: PlayerAction,
+  ): void {
+    const choice = state.pendingChoice;
+    if (
+      !choice ||
+      !choice.source.startsWith(
+        "card_implementation.pro018_stack_install_run_cleanup:",
+      )
+    )
+      throw new Error("Es ist keine PRO018-Stack-Install-Choice offen.");
+    const { sourceCardId, sourceDefinitionId, value: serverIdRaw } =
+      parsePro018ChoiceSource(choice.source);
+    const selectedIds = selectedChoiceCardIdsForChoice(choice, playerAction);
+    if (selectedIds.length !== 1)
+      throw new Error("Genau ein Programm muss gewaehlt werden.");
+    const selectedId = selectedIds[0];
+    const definition = definitionFor(state, selectedId);
+    const installCostPenalty = definition.installCost ?? 0;
+    const installed = installRunnerProgramFromZoneWithoutClick(
+      state,
+      selectedId,
+      "stack",
+      "free",
+      legalAction,
+    );
+    if (!installed) throw new Error("Das Programm kann nicht installiert werden.");
+    shuffleRunnerStack(state, `pro018_test_spin:${choice.choiceId}:shuffle`);
+    delete state.pendingChoice;
+    const serverId = (serverIdRaw || "hq") as Exclude<ServerId, "new_remote">;
+    startRun(
+      state,
+      serverId,
+      undefined,
+      1,
+      { bonusRunNoClick: true, testSpinRun: true },
+      legalAction,
+    );
+    if (!state.run) throw new Error("Test Spin konnte keinen Run starten.");
+    state.run.testSpinTemporaryInstall = {
+      cardId: selectedId,
+      sourceCardId,
+      sourceDefinitionId,
+      installCostPenalty,
+    };
+    legalAction.payload = {
+      ...(legalAction.payload ?? {}),
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "pro018_stack_install_run_cleanup",
+      sourceDefinitionId,
+      publicRevealDefinitionId: definition.id,
+      installedProgramDefinitionId: definition.id,
+      shufflePerformed: true,
+      shuffled: true,
+      randomCounterAfter: state.randomCounter,
+      testSpinRunStarted: true,
+      serverId,
+    };
+  }
+
   function resolveRunnerInstalledConnectionTrashBadPublicityChoice(
     state: GameState,
     legalAction: LegalAction,
@@ -1219,12 +1391,14 @@ export function createHiddenZoneNonSearchRuntime(
     resolveCoreCommandJettisonIceChoice,
     resolveForgedActivationOrdersCorpChoice,
     resolveForgedActivationOrdersTargetChoice,
+    resolveGripInstallTemporaryCreditChoice,
     resolveIncubatorTransformChoice,
     resolveOpenEndedMileageProgramReturnChoice,
     resolveRunnerProgramReturnChoice,
     resolveRunnerHostingChoice,
     resolveRunnerInstalledConnectionTrashBadPublicityChoice,
     resolveSecurityCodeWormChipTrashIceChoice,
+    resolveStackInstallRunCleanupChoice,
     resolveTrashInstalledRunnerConnectionsThenAddBadPublicityEvent,
     selectedChoiceCardIds,
     selectedChoiceCardIdsForChoice,

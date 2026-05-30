@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   activeAiApprovedCardIds,
+  PROTEUS_CARD_IDS,
   PROTEUS_VISIBLE_BASELINE_CARD_IDS,
 } from "@netgrid/catalog";
 import { DEMO_CARDS_BY_ID } from "@netgrid/shared";
@@ -270,9 +271,11 @@ describe("catalog API filters", () => {
   });
 
   it("guards the Proteus visible baseline against decklegal, AI or broad promotion", () => {
-    expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual([
-      ...EXPECTED_PROTEUS_VISIBLE_BASELINE_CARD_IDS,
-    ]);
+    expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toHaveLength(154);
+    expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual([...PROTEUS_CARD_IDS]);
+    expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual(
+      expect.arrayContaining([...EXPECTED_PROTEUS_VISIBLE_BASELINE_CARD_IDS]),
+    );
     for (const candidateId of PROTEUS_VISIBLE_BASELINE_CARD_IDS) {
       const candidateResponse = catalogDetailResponse(candidateId);
       expect(candidateResponse.status).toBe(200);
@@ -293,8 +296,8 @@ describe("catalog API filters", () => {
         catalogCardId: candidateId,
         statuses: {
           human_playable: true,
-          deck_legal: false,
-          format_legal: false,
+          deck_legal: true,
+          format_legal: true,
           ai_supported: false,
           blocked: false,
         },
@@ -313,34 +316,47 @@ describe("catalog API filters", () => {
       "onr_proteus_041_toughoniumtm-wall",
     ]);
 
-    for (const status of ["deck_legal", "format_legal", "ai_supported"] as const) {
+    for (const status of ["deck_legal", "format_legal"] as const) {
       const response = catalogListResponse(
         new URLSearchParams({ status, q: "Toughonium" }),
       );
       expect(response.status).toBe(200);
       const body = response.body as { cards: Array<{ catalogCardId: string }> };
-      expect(body.cards).toEqual([]);
+      expect(body.cards.map((card) => card.catalogCardId)).toEqual([
+        "onr_proteus_041_toughoniumtm-wall",
+      ]);
     }
 
-    const outsideResponse = catalogDetailResponse(
+    const aiSupportedResponse = catalogListResponse(
+      new URLSearchParams({ status: "ai_supported", q: "Toughonium" }),
+    );
+    expect(aiSupportedResponse.status).toBe(200);
+    const aiSupportedBody = aiSupportedResponse.body as {
+      cards: Array<{ catalogCardId: string }>;
+    };
+    expect(aiSupportedBody.cards).toEqual([]);
+
+    const firstProteusResponse = catalogDetailResponse(
       "onr_proteus_001_ai-board-member",
     );
-    expect(outsideResponse.status).toBe(200);
-    const outsideBody = outsideResponse.body as {
+    expect(firstProteusResponse.status).toBe(200);
+    const firstProteusBody = firstProteusResponse.body as {
       card: {
         statuses: {
           human_playable: boolean;
           deck_legal: boolean;
+          format_legal: boolean;
           ai_supported: boolean;
           blocked: boolean;
         };
       };
     };
-    expect(outsideBody.card.statuses).toMatchObject({
-      human_playable: false,
-      deck_legal: false,
+    expect(firstProteusBody.card.statuses).toMatchObject({
+      human_playable: true,
+      deck_legal: true,
+      format_legal: true,
       ai_supported: false,
-      blocked: true,
+      blocked: false,
     });
   });
 

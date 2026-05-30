@@ -1962,6 +1962,29 @@ function applyScoredAgendaActionEconomyAtCorpStart(
   }
 }
 
+function applyScoredAgendaCreditEconomyAtCorpStart(
+  state: GameState,
+  effects?: AutomaticEffectCollector,
+): void {
+  for (const cardId of state.corp.scoreArea.slice().sort()) {
+    const definition = definitionFor(state, cardId);
+    const implementation = scoredAgendaImplementationForDefinition(definition);
+    if (implementation?.kind !== "overadvance_start_of_corp_turn_credits")
+      continue;
+    const amount = cardCounter(state, cardId, "mark");
+    if (amount <= 0) continue;
+    state.corp.credits += amount;
+    effects?.push(
+      automaticGainCreditsEffect(
+        `corp.start.scored_agenda.credit.${cardId}`,
+        "corp",
+        amount,
+        definition.id,
+      ),
+    );
+  }
+}
+
 function acceptExtraActionOffer(state: GameState, legalAction: LegalAction): void {
   const offer = state.actionEconomy?.pendingOffer;
   if (!offer) throw new Error("Es gibt kein Extra-Action-Angebot.");
@@ -2100,6 +2123,7 @@ function startCorpTurn(
   ensureCorpTurnFlags(state).employeeEmpowermentStartTurnResolvedSourceIds = [];
   ensureCorpTurnFlags(state).pdcaUsedSourceIdsThisTurn = [];
   applyFutureExtraActionGrantsAtTurnStart(state, "corp", effects);
+  applyScoredAgendaCreditEconomyAtCorpStart(state, effects);
   applyScoredAgendaActionEconomyAtCorpStart(state, effects);
   applyInstalledIceCounterLifecycle(state);
   applyCorpStartOfTurnEffects(state, effects);
