@@ -243,9 +243,7 @@ describe("card set support catalog source", () => {
     expect([...new Set(scenarioCardIds)].sort()).toEqual(
       activeAiApprovedCardIds.slice().sort(),
     );
-    expect(runtimeIdsWithoutHints).toEqual([
-      ...EXPECTED_PROTEUS_VISIBLE_BASELINE_CARD_IDS,
-    ]);
+    expect(runtimeIdsWithoutHints).toEqual([...PROTEUS_CARD_IDS].sort());
 
     for (const cardId of activeAiApprovedCardIds) {
       const card = cardsById[cardId];
@@ -267,27 +265,28 @@ describe("card set support catalog source", () => {
     }
   });
 
-  it("models Proteus conservatively with only released detail slices playable", () => {
+  it("promotes Proteus for Human-vs-Human deck legality without AI support", () => {
     const cardsById = createRuntimeCardsById();
-    expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual([
+    expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toHaveLength(154);
+    expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual([...PROTEUS_CARD_IDS]);
+    expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual(expect.arrayContaining([
       ...EXPECTED_PROTEUS_VISIBLE_BASELINE_CARD_IDS,
-    ]);
-    for (const cardId of PROTEUS_VISIBLE_BASELINE_CARD_IDS) {
+    ]));
+    for (const cardId of PROTEUS_CARD_IDS) {
       expect(cardsById[cardId]?.statuses, cardId).toMatchObject({
         human_playable: true,
-        deck_legal: false,
-        format_legal: false,
+        deck_legal: true,
+        format_legal: true,
         ai_supported: false,
         blocked: false,
       });
     }
-    const blockedProteus = Object.values(cardsById).filter(
+    const aiSupportedProteus = Object.values(cardsById).filter(
       (card) =>
         card.catalogCardId.startsWith("onr_proteus_") &&
-        !PROTEUS_VISIBLE_BASELINE_CARD_IDS.includes(card.catalogCardId),
+        card.statuses.ai_supported,
     );
-    expect(blockedProteus).toHaveLength(67);
-    expect(blockedProteus.every((card) => card.statuses.blocked)).toBe(true);
+    expect(aiSupportedProteus).toHaveLength(0);
   });
 
   it("imports Classic as catalog-visible but blocked planning data", () => {

@@ -220,14 +220,32 @@ describe("deck validation and snapshots", () => {
     expect(corp.publicMetadata.formatProfileVersion).toBe("1.3.0");
   });
 
-  it("validates Proteus playtest snapshots and treats every Proteus catalog card as legal in the Proteus card pool", () => {
+  it("validates Proteus playtest snapshots through Human-vs-Human deck legality while keeping AI support closed", () => {
     const runtimeCardsById = createRuntimeCardsById();
     if (!runtimeCardsById["onr_proteus_001_ai-board-member"]) return;
     const contextProteus = { cardsById: runtimeCardsById, profile: profileProteus };
     const proteusSnapshots = snapshots08.filter((candidate) => candidate.formatProfileId === "netgrid_private_local_proteus_playtest_v1");
 
-    expect(profileProteus.allowedCardStatuses).toEqual(["catalog_ready"]);
-    expect(profileProteus.formatLegal).toMatchObject({ requiresDeckLegal: false, requiresHumanPlayable: false });
+    expect(profileProteus.allowedCardStatuses).toEqual([
+      "playable",
+      "human_playable",
+      "deck_legal",
+    ]);
+    expect(profileProteus.formatLegal).toMatchObject({
+      requiresDeckLegal: true,
+      requiresHumanPlayable: true,
+    });
+    expect(
+      Object.values(runtimeCardsById)
+        .filter((card) => card.catalogCardId.startsWith("onr_proteus_"))
+        .every(
+          (card) =>
+            card.statuses.human_playable === true &&
+            card.statuses.deck_legal === true &&
+            card.statuses.format_legal === true &&
+            card.statuses.ai_supported === false,
+        ),
+    ).toBe(true);
     expect(proteusSnapshots).toHaveLength(4);
     for (const snapshot of proteusSnapshots) {
       expect(validateDeckSnapshot(snapshot, contextProteus)).toMatchObject({
@@ -260,6 +278,11 @@ describe("deck validation and snapshots", () => {
       { snapshotId: "all_proteus_runner_probe_snapshot" },
     );
     expect(allProteusDeck.validation).toMatchObject({ ok: true, errors: [] });
+    expect(
+      allProteusDeck.cards.every(
+        (entry) => runtimeCardsById[entry.cardId]?.statuses.ai_supported === false,
+      ),
+    ).toBe(true);
   });
 
   it("validates the versioned King of the Road Runner AI snapshot from the local deck shape", () => {

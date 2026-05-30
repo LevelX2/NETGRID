@@ -14,8 +14,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -43,8 +43,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -80,8 +80,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -106,8 +106,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -132,8 +132,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -158,8 +158,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -187,8 +187,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -216,8 +216,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -242,8 +242,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -280,8 +280,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -306,8 +306,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -330,8 +330,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -368,8 +368,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -408,8 +408,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -435,8 +435,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -459,8 +459,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -486,8 +486,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -526,8 +526,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -553,8 +553,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -580,8 +580,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -619,8 +619,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -658,8 +658,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -697,8 +697,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -737,8 +737,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -777,8 +777,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -818,8 +818,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -857,8 +857,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -884,8 +884,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -924,8 +924,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -951,8 +951,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -990,8 +990,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1025,8 +1025,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1049,8 +1049,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1080,8 +1080,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1115,8 +1115,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1141,8 +1141,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1181,8 +1181,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1208,8 +1208,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1232,8 +1232,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1272,8 +1272,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1312,8 +1312,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1346,8 +1346,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1373,8 +1373,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1400,8 +1400,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1431,8 +1431,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1458,8 +1458,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1487,8 +1487,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1511,8 +1511,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1535,8 +1535,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1561,8 +1561,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1585,8 +1585,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1611,8 +1611,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1635,8 +1635,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1659,8 +1659,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1696,8 +1696,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1722,8 +1722,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1748,8 +1748,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1785,8 +1785,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1811,8 +1811,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1837,8 +1837,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1863,8 +1863,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1889,8 +1889,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1925,8 +1925,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1951,8 +1951,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -1977,8 +1977,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2011,8 +2011,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2037,8 +2037,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2063,8 +2063,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2099,8 +2099,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2125,8 +2125,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2161,8 +2161,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2187,8 +2187,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2221,8 +2221,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2247,8 +2247,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2273,8 +2273,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2309,8 +2309,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2335,8 +2335,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2369,8 +2369,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2404,8 +2404,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2435,8 +2435,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2461,8 +2461,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2492,8 +2492,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2518,8 +2518,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2549,8 +2549,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2577,8 +2577,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2614,8 +2614,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2650,8 +2650,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2676,8 +2676,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2702,8 +2702,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2731,8 +2731,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2760,8 +2760,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2786,8 +2786,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2812,8 +2812,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2843,8 +2843,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2878,8 +2878,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2909,8 +2909,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2945,8 +2945,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -2973,8 +2973,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3001,8 +3001,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3029,8 +3029,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3060,8 +3060,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3086,8 +3086,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3112,8 +3112,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3136,8 +3136,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3162,8 +3162,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3188,8 +3188,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3214,8 +3214,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3240,8 +3240,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3278,8 +3278,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3311,8 +3311,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3342,8 +3342,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3368,8 +3368,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3402,8 +3402,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3436,8 +3436,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3462,8 +3462,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3488,8 +3488,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3514,8 +3514,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3553,8 +3553,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3579,8 +3579,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3605,8 +3605,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3631,8 +3631,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3657,8 +3657,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3683,8 +3683,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3717,8 +3717,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3741,8 +3741,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3774,8 +3774,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3807,8 +3807,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3833,8 +3833,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3857,8 +3857,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3883,8 +3883,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3909,8 +3909,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3938,8 +3938,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3964,8 +3964,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -3988,8 +3988,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4025,8 +4025,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4061,8 +4061,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4087,8 +4087,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4113,8 +4113,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4149,8 +4149,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4175,8 +4175,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4201,8 +4201,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4227,8 +4227,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4251,8 +4251,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4275,8 +4275,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4304,8 +4304,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4330,8 +4330,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4364,8 +4364,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4388,8 +4388,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4414,8 +4414,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4438,8 +4438,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4472,8 +4472,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4510,8 +4510,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4534,8 +4534,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {
@@ -4558,8 +4558,8 @@
         "playable": true,
         "human_playable": true,
         "ai_supported": false,
-        "deck_legal": false,
-        "format_legal": false,
+        "deck_legal": true,
+        "format_legal": true,
         "blocked": false
       },
       "support": {

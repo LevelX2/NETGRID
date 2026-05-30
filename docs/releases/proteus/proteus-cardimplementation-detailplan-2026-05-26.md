@@ -7,10 +7,10 @@ Dieser Plan ist der führende Zuschnitt für die weitere Proteus-CardImplementat
 ## Ausgangslage
 
 - Proteus-Gesamtbasis: 154 Karten in `data/cards/proteus-cards.json`.
-- Aktueller Stand nach `PRO019`: 154 konkrete Proteus-CardImplementation-Dateien.
+- Aktueller Stand nach `PRO020`: 154 konkrete Proteus-CardImplementation-Dateien.
 - Fehlende konkrete CardImplementation-Dateien: 0.
 - Führende Zählweise bleibt Datei plus Registry plus Manifest-Driftprüfung.
-- Keine Proteus-Karte wird durch diesen Plan `deck_legal`, `format_legal` oder `ai_supported`.
+- Der spätere Human-vs-Human-Decklegal-Gate-Beschluss setzt für alle 154 Proteus-Karten `deck_legal` und `format_legal`; `ai_supported` bleibt für alle Proteus-Karten `false`.
 
 ## Verbindliche Paket-Gates
 
@@ -57,7 +57,7 @@ Jedes Umsetzungspaket muss vor Abschluss nachweisen:
 | PRO017 | Action Economy/Action Debt Suite | `Lucidrine™ Drip Feed`, `AI Board Member`, `Please Don't Choke Anyone`, `Project Venice`, `Corporate Guard(R) Temps`, `Bargain with Viacox` | Erledigt und mit PRO017-1 sowie PRO017-2 gehärtet: generische Action-Economy-Fakten für optionale restricted extra actions, forced runner actions, future action grants, Choice-basiertes PDCA-Replacement, turn-bound Grant-Ablauf, deterministische Viacox-"nicht möglich"-Auflösung und PDCA-Damage-Timing-Härtung. PDCA restauriert nach `pass`/`replace` den ursprünglichen Timing-Kontext, greift nach bestehenden Replacement-/Event-Modification-Fenstern für verbleibenden Corp-Damage und schließt Runner-self-/Core-Damage weiter aus. | Sechs Dateien; Action-Ledger, forced-action-Revalidierung, PDCA-Choice, Return-Kontext, Corp-Damage-Hook, Turn-Bound-Cleanup, Replay und Harness 154/144/10 ohne Drift. |
 | PRO018 | Hidden-Zone Search/Install Tutor Suite | `Hijack`, `Test Spin` | Erledigt: enger generischer Vertrag für runnerprivate Grip-Installationschoice mit genau drei temporären Installationscredits sowie Stack-Programmsuche, kostenlose Installation, deterministisches Shuffle, Run-Followup und Return-or-Penalty-Cleanup. | Zwei Dateien; runnerprivate Hidden-Zone-Auswahl, PublicPayload-Redaction, wrong-side-/stale-action-/illegal-choice-, Shuffle-/Penalty- und Replay-/StateHash-Tests; Harness 154/146/8 ohne Drift. |
 | PRO019 | Rule-Contract Baseline Utilities | `Emergency Rig`, `Ice and Data Special Report`, `Obfuscated Fortress`, `Pavit Bharat`, `Simon Francisco`, `Herman Revista`, `Marcel DeSoleil`, `Rent-to-Own Contract` | Erledigt und mit PRO019-1/PRO019-2 gehärtet: bounded Emergency-Rig-X `1..max(1, Rez-Kosten)`, Ice-and-Data-Play-Cost 3, rungebundenes Obfuscated-Fortress-Spend-Ledger, Pavit-HQ-to-Fort-Replacement, Simon-Access-Queue-Reduktion, Start-of-run-Fort-Reorder und Top-R&D-Trash-Kosten umgesetzt. PRO019-1 härtet zentrale Root-Access-Queues für Simon, Pavit-Rez-Fenster und Korp-private HQ-Auswahl, Obfuscated-Fortress-Trace-/Access-Trash-Zählung sowie fortgebundene Ice-and-Data-Choices. PRO019-2 ergänzt gemeinsame Pavit-Ersatzmengen-Legalität inklusive Root-Kapazität und bestätigt HQ-/R&D-Root-Upgrades vor gespeicherten Kartenzugriffen als globale Access-Policy. | Acht Dateien; Manifest/Registry/Coverage ohne Drift; fokussierte PRO019-/PRO019-1-/PRO019-2-Tests für LegalAction-/applyAction-, Hidden-Info-, Replay-/StateHash- und Access-Queue-Pfade. |
-| PRO020 | Finaler Proteus-Abschluss | Alle Proteus-Karten, Manifest, Registry, Coverage, Activities | Restliste ist nach PRO019 leer; Board- und Statusartefakte auf finalen Datei-/Registry-Stand bringen. | 154 konkrete Dateien, 154 Registry-Einträge, Manifest ohne Drift, vollständiger Verify-Lauf grün. |
+| PRO020 | Finaler Proteus-Abschluss | Alle Proteus-Karten, Manifest, Registry, Coverage, Activities | Erledigt: Restliste ist nach PRO019 leer; finaler Datei-/Registry-/Manifest- und Activity-Audit bestätigt den Abschlussstand. | 154 konkrete Dateien, 154 Registry-Einträge, Manifest ohne Drift, vollständiger Verify-Lauf grün. |
 
 ## Empfohlene Reihenfolge
 
@@ -65,7 +65,7 @@ Jedes Umsetzungspaket muss vor Abschluss nachweisen:
 2. PRO011 und PRO012 danach: Hidden-Resource-Arbeit in zwei größere, aber fachlich saubere Pakete bündeln.
 3. PRO013 bis PRO017: Agenda, Corp-Utility, Bad-Publicity, Random und Action-Economy als größere Mechanikfamilien schließen.
 4. PRO018 und PRO019 sind erledigt: Hidden-Zone-Tutor und regelvertragliche Sonderfälle sind umgesetzt.
-5. PRO020 ist der finale Abschluss-/Verify-Slice nach leerer Restliste.
+5. PRO020 ist als finaler Abschluss-/Verify-Slice nach leerer Restliste erledigt.
 
 ## Umsetzungshinweis für Activities
 
