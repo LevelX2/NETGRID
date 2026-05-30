@@ -1923,6 +1923,66 @@ describe("Proteus PRO006 Simple Corp ICE Resolver", () => {
     );
   });
 
+  it("PRO010 supports Washed-Up Solo Construct paid branch then reaching a second ICE and runner ending the run", () => {
+    let state = proteusSimpleCorpIceGame("proteus-pro010-washed-up-then-snowbank");
+    state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+    state.corp.credits = 30;
+    state.runner.credits = 20;
+    const secondIceId = putCorpIceOnServer(state, "rd", SNOWBANK);
+    const washedUpId = putCorpIceOnServer(state, "rd", WASHED_UP_SOLO_CONSTRUCT);
+    setRezzed(state, washedUpId);
+    setRezzed(state, secondIceId);
+    state = enterEncounterFromMovementWindow(
+      apply(
+        toRunnerTurnFromCorpMain(state),
+        "runner",
+        (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      ),
+    );
+    expect(state.run?.encounteredIceId).toBe(washedUpId);
+
+    const programId = installRunnerProgramForTest(state, "simple_decoder");
+    const heapBefore = state.runner.heap.length;
+    const creditsBefore = state.runner.credits;
+    const payWashed = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.payOrTrashProgramSubroutineIndexes === "0",
+    );
+    expect(payWashed.costs).toEqual([{ credits: 1 }]);
+    state = apply(state, "runner", (action) => action.actionId === payWashed.actionId);
+    expect(state.runner.credits).toBe(creditsBefore - 1);
+    expect(state.runner.rig.programs).toContain(programId);
+    expect(state.runner.heap).toHaveLength(heapBefore);
+
+    for (let index = 0; index < 4; index += 1) {
+      if (!state.run || state.run?.phase !== "encounter_ice") break;
+      if (state.run.encounteredIceId !== washedUpId) break;
+      state = apply(state, "runner", (action) => action.type === "continue_run");
+    }
+    expect(state.run?.phase).toBe("movement");
+    expect(state.run?.approachedIceId).toBe(secondIceId);
+
+    state = enterEncounterFromMovementWindow(state);
+    expect(state.run?.encounteredIceId).toBe(secondIceId);
+
+    const refuseSecond = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.encounterWillEndRun === true &&
+        action.payload?.payOrEndRunSubroutineIndexes === undefined,
+    );
+    state = apply(state, "runner", (action) => action.actionId === refuseSecond.actionId);
+
+    expect(state.run).toBeUndefined();
+    expect(state.runner.rig.programs).toContain(programId);
+    expect(state.runner.heap).toHaveLength(heapBefore);
+  });
+
   it("PRO010 adds Iceberg paid encounter ETR subroutines through the generic corp encounter window", () => {
     let state = startEncounterWithRezzedIce(
       proteusSimpleCorpIceGame("proteus-pro010-iceberg"),
