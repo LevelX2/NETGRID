@@ -356,17 +356,6 @@ function aiHintCoverageSkipReason(deck) {
     deck.publicMetadata?.cardPoolVersion,
   );
 
-  if (
-    [
-      formatProfileId,
-      publicFormatProfileId,
-      cardPoolVersion,
-      publicCardPoolVersion,
-    ].some((value) => value.includes("proteus_playtest"))
-  ) {
-    return "proteus_playtest_not_active_ai_hint_scope";
-  }
-
   return undefined;
 }
 

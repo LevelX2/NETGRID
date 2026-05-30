@@ -21564,6 +21564,6066 @@
       ]
     },
     {
+      "cardId": "onr_proteus_001_ai-board-member",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda"
+      ],
+      "planRoles": [
+        "corp_score_agenda",
+        "score_next_turn"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "scoring": 3
+      },
+      "riskTags": [
+        "hidden_until_score_or_access"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "conditions": [
+        {
+          "kind": "requires_scored_agenda"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_002_charity-takeover",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda"
+      ],
+      "planRoles": [
+        "corp_score_agenda",
+        "score_next_turn"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "scoring": 3
+      },
+      "riskTags": [
+        "hidden_until_score_or_access"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_003_corporate-headhunters",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda"
+      ],
+      "planRoles": [
+        "corp_score_agenda",
+        "score_next_turn"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "scoring": 3
+      },
+      "riskTags": [
+        "damage_window",
+        "hidden_until_score_or_access",
+        "tag_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "conditions": [
+        {
+          "kind": "requires_scored_agenda"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_004_fetal-ai",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda"
+      ],
+      "planRoles": [
+        "corp_score_agenda",
+        "score_next_turn"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "scoring": 3
+      },
+      "riskTags": [
+        "damage_window",
+        "hidden_until_score_or_access"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 2,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "on_access"
+        },
+        {
+          "amount": 2,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "scored_activated"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_005_marked-accounts",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda"
+      ],
+      "planRoles": [
+        "corp_score_agenda",
+        "score_next_turn"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "scoring": 3
+      },
+      "riskTags": [
+        "hidden_until_score_or_access",
+        "tag_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "tag_source",
+          "resource": "tags",
+          "scope": "runner",
+          "timing": "scored_activated"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_006_please-dont-choke-anyone",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda"
+      ],
+      "planRoles": [
+        "corp_score_agenda",
+        "score_next_turn"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "scoring": 3
+      },
+      "riskTags": [
+        "damage_window",
+        "hidden_until_score_or_access"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "conditions": [
+        {
+          "kind": "requires_scored_agenda"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_007_project-venice",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda"
+      ],
+      "planRoles": [
+        "corp_score_agenda",
+        "score_next_turn"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "scoring": 3
+      },
+      "riskTags": [
+        "hidden_until_score_or_access"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "conditions": [
+        {
+          "kind": "requires_scored_agenda"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_008_project-zurich",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda"
+      ],
+      "planRoles": [
+        "corp_score_agenda",
+        "score_next_turn"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "scoring": 3
+      },
+      "riskTags": [
+        "hidden_until_score_or_access"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "conditions": [
+        {
+          "kind": "requires_scored_agenda"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_009_viral-breeding-ground",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda"
+      ],
+      "planRoles": [
+        "corp_score_agenda",
+        "score_next_turn"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "scoring": 3
+      },
+      "riskTags": [
+        "hidden_until_score_or_access"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_010_world-domination",
+      "side": "corp",
+      "cardType": "agenda",
+      "roles": [
+        "agenda"
+      ],
+      "planRoles": [
+        "corp_score_agenda",
+        "score_next_turn"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "scoring": 3
+      },
+      "riskTags": [
+        "hidden_until_score_or_access"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "conditions": [
+        {
+          "kind": "requires_scored_agenda"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_011_brain-wash",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "damage_ice",
+        "ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "damage_window",
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_012_bug-zapper",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "damage_ice",
+        "etr_ice",
+        "ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "damage_window",
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_013_caryatid",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "barrier_ice",
+        "etr_ice",
+        "ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_014_chihuahua",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "damage_ice",
+        "ice",
+        "sentry_ice",
+        "trace_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "damage_window",
+        "hidden_ice",
+        "trace_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 2,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "action"
+        },
+        {
+          "kind": "trace",
+          "scope": "corp",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_trace_success"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_015_colonel-failure",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "etr_ice",
+        "ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "program_trash",
+          "scope": "runner",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_016_coyote",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "run_tax",
+          "resource": "strength",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "amount": 3,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "action"
+        },
+        {
+          "kind": "future_run_effect",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_during_run"
+        },
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_017_credit-blocks",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "etr_ice",
+        "ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_018_datacomb",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "barrier_ice",
+        "etr_ice",
+        "ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_019_death-yo-yo",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "damage_ice",
+        "etr_ice",
+        "ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "damage_window",
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "encounter"
+        },
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_020_digiconda",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "damage_ice",
+        "etr_ice",
+        "ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "damage_window",
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_021_dog-pile",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "damage_ice",
+        "etr_ice",
+        "ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "damage_window",
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_022_food-fight",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "etr_ice",
+        "ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_023_galatea",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "barrier_ice",
+        "etr_ice",
+        "ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_024_gatekeeper",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "code_gate_ice",
+        "etr_ice",
+        "ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_025_homing-missile",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "etr_ice",
+        "ice",
+        "sentry_ice",
+        "trace_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice",
+        "trace_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_026_hunting-pack",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "sentry_ice",
+        "tag_ice",
+        "trace_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice",
+        "tag_window",
+        "trace_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_027_iceberg",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "barrier_ice",
+        "damage_ice",
+        "etr_ice",
+        "ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "damage_window",
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "encounter"
+        },
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_028_lesser-arcana",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "etr_ice",
+        "ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_029_marionette",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "etr_ice",
+        "ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "program_trash",
+          "scope": "runner",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_030_mastermind",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "damage_ice",
+        "etr_ice",
+        "ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "damage_window",
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_031_minotaur",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "etr_ice",
+        "ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "future_encounter_effect",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "resource": "subroutines",
+          "scope": "fort",
+          "timing": "persistent"
+        }
+      ],
+      "remoteRole": {
+        "kind": "scoring_protection",
+        "serverScope": "fort",
+        "threatLevel": "high"
+      }
+    },
+    {
+      "cardId": "onr_proteus_032_misleading-access-menus",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "code_gate_ice",
+        "etr_ice",
+        "ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 3,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "action"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_033_mobile-barricade",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "barrier_ice",
+        "damage_ice",
+        "etr_ice",
+        "ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "damage_window",
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "encounter"
+        },
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_034_riddler",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "code_gate_ice",
+        "etr_ice",
+        "ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_035_roadblock",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "code_gate_ice",
+        "etr_ice",
+        "ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_036_sandstorm",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "barrier_ice",
+        "etr_ice",
+        "ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_037_scaffolding",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "barrier_ice",
+        "etr_ice",
+        "ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_038_snowbank",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "barrier_ice",
+        "etr_ice",
+        "ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 3,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "action"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_039_sphinx-2006",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "code_gate_ice",
+        "etr_ice",
+        "ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_040_sumo-2008",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "etr_ice",
+        "ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_041_toughoniumtm-wall",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "barrier_ice",
+        "etr_ice",
+        "ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_042_tumblers",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "code_gate_ice",
+        "etr_ice",
+        "ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_043_twisty-passages",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "code_gate_ice",
+        "etr_ice",
+        "ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_044_walking-wall",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "barrier_ice",
+        "etr_ice",
+        "ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "etr",
+          "scope": "run_path",
+          "timing": "encounter"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "run_path",
+          "timing": "encounter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_045_washed-up-solo-construct",
+      "side": "corp",
+      "cardType": "ice",
+      "roles": [
+        "ice",
+        "sentry_ice"
+      ],
+      "planRoles": [
+        "protect_hq",
+        "protect_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "defense": 2
+      },
+      "riskTags": [
+        "hidden_ice"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 3,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "action"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        },
+        {
+          "kind": "requires_unbroken_subroutine"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_046_corporate-guard-r-temps",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "economy_operation"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_047_credit-consolidation",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "economy_operation"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 15,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "action"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_048_data-sifters",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "tag_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "tag_source",
+          "resource": "tags",
+          "scope": "runner",
+          "timing": "action"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_049_emergency-rig",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_050_manhunt",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "tag_window",
+        "trace_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "trace",
+          "scope": "corp",
+          "timing": "action"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_trace_success"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_051_rent-to-own-contract",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_052_schlaghund-pointers",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "tag_window",
+        "trace_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "tag_source",
+          "resource": "tags",
+          "scope": "runner",
+          "timing": "trace_success"
+        },
+        {
+          "kind": "trace",
+          "scope": "corp",
+          "timing": "action"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_trace_success"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_053_underworld-mole",
+      "side": "corp",
+      "cardType": "operation",
+      "roles": [
+        "operation"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "tag_window",
+        "trace_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "trace",
+          "scope": "corp",
+          "timing": "action"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_trace_success"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_054_bel-digmo-antibody",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "asset_trash_target"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "damage_window",
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "action"
+        },
+        {
+          "amount": 1,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "on_access"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_055_cybertech-think-tank",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "asset_trash_target"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "damage_window",
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "conditions": [
+        {
+          "kind": "requires_advancement_counter"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_056_department-of-misinformation",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "asset_trash_target"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_057_doppelganger-antibody",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "asset_trash_target"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "counter_economy",
+          "resource": "credits",
+          "scope": "runner",
+          "timing": "action"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "resource": "counters",
+          "scope": "runner",
+          "timing": "on_access"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "resource": "counters",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_058_executive-boot-camp",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "economy_asset"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 2
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_059_government-contract",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "economy_asset"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 2
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "conditions": [
+        {
+          "kind": "requires_advancement_counter"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_060_herman-revista",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": [
+        "remote_support",
+        "upgrade"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_061_ldl-traffic-analyzers",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "economy_asset"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 2
+      },
+      "riskTags": [
+        "hidden_root",
+        "trace_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "conditions": [
+        {
+          "kind": "requires_advancement_counter"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_062_lesley-major",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": [
+        "remote_support",
+        "upgrade"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_063_lisa-blight",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": [
+        "remote_support",
+        "upgrade"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_064_marcel-desoleil",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": [
+        "remote_support",
+        "upgrade"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_065_networked-center",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": [
+        "remote_support",
+        "upgrade"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "global_modifier",
+          "resource": "advancement_counters",
+          "scope": "corp",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "score_acceleration",
+          "resource": "advancement_counters",
+          "scope": "corp",
+          "timing": "persistent"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_066_obfuscated-fortress",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": [
+        "remote_support",
+        "upgrade"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_067_panic-button",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": [
+        "remote_support",
+        "upgrade"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "draw",
+          "resource": "cards",
+          "scope": "corp",
+          "timing": "action"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_068_pattel-antibody",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "asset_trash_target"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_069_pavit-bharat",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": [
+        "remote_support",
+        "upgrade"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_070_rasmin-bridger",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": [
+        "remote_support",
+        "upgrade"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_071_raymond-ellison",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": [
+        "remote_support",
+        "upgrade"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_072_research-bunker",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": [
+        "remote_support",
+        "upgrade"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "global_modifier",
+          "resource": "advancement_counters",
+          "scope": "corp",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "score_acceleration",
+          "resource": "advancement_counters",
+          "scope": "corp",
+          "timing": "persistent"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_073_simon-francisco",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": [
+        "remote_support",
+        "upgrade"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_074_siren",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "asset_trash_target"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_075_stereogram-antibody",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "asset_trash_target"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "damage_window",
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "action"
+        },
+        {
+          "amount": 1,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "on_access"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_076_syd-meyer-superstores",
+      "side": "corp",
+      "cardType": "asset",
+      "roles": [
+        "economy_asset"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 2
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_077_weapons-depot",
+      "side": "corp",
+      "cardType": "upgrade",
+      "roles": [
+        "remote_support",
+        "upgrade"
+      ],
+      "planRoles": [
+        "build_scoring_remote"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_root"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "global_modifier",
+          "resource": "advancement_counters",
+          "scope": "corp",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "score_acceleration",
+          "resource": "advancement_counters",
+          "scope": "corp",
+          "timing": "persistent"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_078_armageddon",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_079_big-frackin-gun",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_killer",
+        "icebreaker",
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "rigCoverage": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 6,
+        "coverage": [
+          "sentry"
+        ],
+        "pumpCost": 1
+      }
+    },
+    {
+      "cardId": "onr_proteus_080_black-widow",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_killer",
+        "icebreaker",
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "rigCoverage": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 1,
+        "coverage": [
+          "sentry"
+        ],
+        "pumpCost": 2
+      }
+    },
+    {
+      "cardId": "onr_proteus_081_boring-bit",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_fracter",
+        "icebreaker",
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "rigCoverage": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 2,
+        "coverage": [
+          "wall"
+        ],
+        "pumpCost": 1
+      }
+    },
+    {
+      "cardId": "onr_proteus_082_bulldozer",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_fracter",
+        "breaker_killer",
+        "icebreaker",
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "rigCoverage": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 1,
+        "coverage": [
+          "wall"
+        ],
+        "pumpCost": 2,
+        "sideEffects": [
+          "stealth_loss"
+        ]
+      }
+    },
+    {
+      "cardId": "onr_proteus_083_corrosion",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_fracter",
+        "icebreaker",
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "rigCoverage": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 0,
+        "coverage": [
+          "wall"
+        ],
+        "pumpCost": 1
+      }
+    },
+    {
+      "cardId": "onr_proteus_084_crumble",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_085_disintegrator",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_086_enterprise-inc-shields",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "damage_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 2,
+          "damageTypes": [
+            "brain",
+            "net"
+          ],
+          "kind": "damage_prevention",
+          "perTurnLimit": 2,
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 2,
+          "kind": "brain_damage_prevention",
+          "perTurnLimit": 2,
+          "resource": "brain_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 2,
+          "kind": "net_damage_prevention",
+          "perTurnLimit": 2,
+          "resource": "net_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_brain_damage"
+        },
+        {
+          "kind": "requires_damage"
+        },
+        {
+          "kind": "requires_net_damage"
+        },
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_turn_limit_available"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_087_forwards-legacy",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_killer",
+        "icebreaker",
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "rigCoverage": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 0,
+        "coverage": [
+          "sentry"
+        ],
+        "sideEffects": [
+          "random_failure"
+        ]
+      }
+    },
+    {
+      "cardId": "onr_proteus_088_fubar",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_decoder",
+        "breaker_fracter",
+        "icebreaker",
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "rigCoverage": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 1,
+        "coverage": [
+          "unknown_special"
+        ],
+        "pumpCost": 2,
+        "sideEffects": [
+          "stealth_loss"
+        ]
+      }
+    },
+    {
+      "cardId": "onr_proteus_089_garbage-in",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_090_highlighter",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_091_lockjaw",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "icebreaker",
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "rigCoverage": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_092_morphing-tool",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_decoder",
+        "breaker_fracter",
+        "icebreaker",
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "rigCoverage": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 2,
+        "coverage": [
+          "unknown_special"
+        ],
+        "pumpCost": 1
+      }
+    },
+    {
+      "cardId": "onr_proteus_093_redecorator",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_killer",
+        "icebreaker",
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "rigCoverage": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 1,
+        "coverage": [
+          "sentry"
+        ],
+        "pumpCost": 3
+      }
+    },
+    {
+      "cardId": "onr_proteus_094_scaldan",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_095_skeleton-passkeys",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_decoder",
+        "icebreaker",
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "rigCoverage": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 0,
+        "coverage": [
+          "code_gate"
+        ],
+        "pumpCost": 3
+      }
+    },
+    {
+      "cardId": "onr_proteus_096_skullcap",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "damage_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "damageTypes": [
+            "brain",
+            "net"
+          ],
+          "kind": "damage_prevention",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "kind": "brain_damage_prevention",
+          "resource": "brain_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "kind": "net_damage_prevention",
+          "resource": "net_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_brain_damage"
+        },
+        {
+          "kind": "requires_damage"
+        },
+        {
+          "kind": "requires_net_damage"
+        },
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_turn_limit_available"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_097_taxman",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_098_vienna-22",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_099_viral-pipeline",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_100_wrecking-ball",
+      "side": "runner",
+      "cardType": "program",
+      "roles": [
+        "breaker_fracter",
+        "icebreaker",
+        "program"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "rigCoverage": 2
+      },
+      "riskTags": [
+        "encounter"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "breaker",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "breakerProfile": {
+        "breakCost": 0,
+        "coverage": [
+          "wall"
+        ],
+        "pumpCost": 2,
+        "sideEffects": [
+          "stealth_loss"
+        ]
+      }
+    },
+    {
+      "cardId": "onr_proteus_101_all-hands",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_pressure"
+      ],
+      "planRoles": [
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 4,
+          "kind": "multiaccess",
+          "resource": "cards",
+          "scope": "hq",
+          "timing": "successful_run"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_102_blackmail",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_pressure"
+      ],
+      "planRoles": [
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "access_replacement",
+          "scope": "hq",
+          "timing": "successful_run"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_103_cruising-for-netwatch",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "draw",
+        "economy",
+        "event"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "runner",
+          "timing": "action"
+        },
+        {
+          "amount": 2,
+          "kind": "draw",
+          "resource": "cards",
+          "scope": "runner",
+          "timing": "action"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_104_decoy-signal",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_pressure"
+      ],
+      "planRoles": [
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_105_demolition-run",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_pressure"
+      ],
+      "planRoles": [
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [
+        "tag_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 3,
+          "kind": "tag",
+          "resource": "tags",
+          "scope": "runner",
+          "timing": "successful_run"
+        },
+        {
+          "kind": "access_replacement",
+          "scope": "server",
+          "timing": "successful_run"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_106_disgruntled-ice-technician",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_pressure"
+      ],
+      "planRoles": [
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_107_drone-for-a-day",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "economy",
+        "event"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 1
+      },
+      "riskTags": [
+        "tag_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "tag_source",
+          "resource": "tags",
+          "scope": "runner",
+          "timing": "action"
+        },
+        {
+          "amount": 9,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "runner",
+          "timing": "action"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_108_faked-hit",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event"
+      ],
+      "planRoles": [
+        "build_rig"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "damage_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 2,
+          "kind": "damage",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "action"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_109_frame-up",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_pressure"
+      ],
+      "planRoles": [
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_110_hijack",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "economy",
+        "event"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_111_ice-and-data-special-report",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event"
+      ],
+      "planRoles": [
+        "build_rig"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_112_identity-donor",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event"
+      ],
+      "planRoles": [
+        "build_rig"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "damage_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "flatline_prevention",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "flatline_replacement"
+        },
+        {
+          "kind": "prevention_replacement",
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "flatline_replacement"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_flatline"
+        },
+        {
+          "kind": "requires_prevention_window"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_113_live-news-feed",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_pressure"
+      ],
+      "planRoles": [
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [
+        "tag_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_114_on-the-fast-track",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "economy",
+        "event"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_115_personal-touch-the",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event"
+      ],
+      "planRoles": [
+        "build_rig"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_116_pirate-broadcast",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_pressure"
+      ],
+      "planRoles": [
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_117_poisoned-water-supply",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event"
+      ],
+      "planRoles": [
+        "build_rig"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_118_prearranged-drop",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "economy",
+        "event"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_119_promises-promises",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event"
+      ],
+      "planRoles": [
+        "build_rig"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_120_reconnaissance",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "economy",
+        "event",
+        "run_pressure"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 1,
+        "runPressure": 2
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_121_remote-detonator",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_pressure"
+      ],
+      "planRoles": [
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [
+        "tag_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_122_rush-hour",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_pressure"
+      ],
+      "planRoles": [
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 4,
+          "kind": "multiaccess",
+          "resource": "cards",
+          "scope": "rnd",
+          "timing": "successful_run"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_123_senatorial-field-trip",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event"
+      ],
+      "planRoles": [
+        "build_rig"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_124_stakeout",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "draw",
+        "economy",
+        "event"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "draw",
+          "resource": "cards",
+          "scope": "runner",
+          "timing": "action"
+        },
+        {
+          "amount": 2,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "runner",
+          "timing": "action"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_125_subliminal-corruption",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_pressure"
+      ],
+      "planRoles": [
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_126_test-spin",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_pressure"
+      ],
+      "planRoles": [
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [
+        "damage_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_127_weefle-initiation",
+      "side": "runner",
+      "cardType": "event",
+      "roles": [
+        "event",
+        "run_pressure"
+      ],
+      "planRoles": [
+        "pressure_rnd"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "runPressure": 2
+      },
+      "riskTags": [
+        "damage_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_128_airport-locker",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_zone_barrier"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "search",
+          "scope": "runner",
+          "timing": "during_run"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_during_run"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "installCost": "normal",
+          "installsTarget": true,
+          "shuffleAfter": true,
+          "targetCardType": "program",
+          "zone": "stack"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_129_back-door-to-netwatch",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_zone_barrier",
+        "tag_window",
+        "trace_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_130_back-door-to-rivals",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "economy",
+        "resource"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 1
+      },
+      "riskTags": [
+        "trace_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 2,
+          "kind": "base_link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 2,
+          "kind": "trace_defense",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_trace_attempt"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_131_bargain-with-viacox",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "economy",
+        "resource"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_132_bolt-hole",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "damage_window",
+        "hidden_zone_barrier"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 2,
+          "damageTypes": [
+            "meat"
+          ],
+          "kind": "damage_prevention",
+          "perTurnLimit": 2,
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 2,
+          "kind": "meat_damage_prevention",
+          "perTurnLimit": 2,
+          "resource": "meat_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_damage"
+        },
+        {
+          "kind": "requires_meat_damage"
+        },
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_turn_limit_available"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_133_chiba-bank-account",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "economy",
+        "resource"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 1
+      },
+      "riskTags": [
+        "hidden_zone_barrier"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 4,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "runner",
+          "timing": "action"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_134_cortical-cybermodem",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "hardware",
+        "memory"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "memory": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 2,
+          "kind": "hand_size_modifier",
+          "resource": "hand_size",
+          "scope": "runner",
+          "timing": "persistent"
+        },
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_installed_card"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_135_cortical-stimulators",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "hardware"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "damage_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "damageTypes": [
+            "brain",
+            "net"
+          ],
+          "kind": "damage_prevention",
+          "perTurnLimit": 1,
+          "resource": "damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 1,
+          "kind": "brain_damage_prevention",
+          "perTurnLimit": 1,
+          "resource": "brain_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 1,
+          "kind": "net_damage_prevention",
+          "perTurnLimit": 1,
+          "resource": "net_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_brain_damage"
+        },
+        {
+          "kind": "requires_damage"
+        },
+        {
+          "kind": "requires_net_damage"
+        },
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_turn_limit_available"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_136_credit-subversion",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_zone_barrier"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_137_death-from-above",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_zone_barrier"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_138_deck-the",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "hardware",
+        "memory"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "memory": 1
+      },
+      "riskTags": [
+        "trace_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 5,
+          "kind": "base_link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 5,
+          "kind": "trace_defense",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_trace_attempt"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "hardware",
+        "memory"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "memory": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_140_expendable-family-member",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_zone_barrier",
+        "tag_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "tag_prevention",
+          "resource": "tags",
+          "scope": "runner",
+          "timing": "prevention_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_prevention_window"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_141_get-ready-to-rumble",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "damage_window",
+        "hidden_zone_barrier"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_142_hq-mole",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_zone_barrier"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_143_liberated-savings-account",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "economy",
+        "resource"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 1
+      },
+      "riskTags": [
+        "hidden_zone_barrier"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 11,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "runner",
+          "timing": "action"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_144_lucidrinetm-drip-feed",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "hardware"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "damage_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_145_mercenary-subcontract",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_zone_barrier"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_146_precision-bribery",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_147_r-and-d-mole",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_zone_barrier"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_148_runner-sensei",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "economy",
+        "resource"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 1
+      },
+      "riskTags": [
+        "trace_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 4,
+          "kind": "base_link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 4,
+          "kind": "trace_defense",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_trace_attempt"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_149_simulacrum",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_zone_barrier"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      }
+    },
+    {
+      "cardId": "onr_proteus_150_streetware-distributor",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "economy",
+        "resource"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "counter_economy",
+          "resource": "credits",
+          "scope": "corp",
+          "timing": "action"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_151_sunburst-cranial-interface",
+      "side": "runner",
+      "cardType": "hardware",
+      "roles": [
+        "hardware",
+        "memory"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "memory": 1
+      },
+      "riskTags": [],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 1,
+          "kind": "hand_size_modifier",
+          "resource": "hand_size",
+          "scope": "runner",
+          "timing": "persistent"
+        },
+        {
+          "kind": "trash_credit",
+          "resource": "trash_credits",
+          "scope": "runner",
+          "timing": "persistent"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_installed_card"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_152_swiss-bank-account",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "economy",
+        "resource"
+      ],
+      "planRoles": [
+        "recover_economy"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "economy": 1
+      },
+      "riskTags": [
+        "hidden_zone_barrier"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 2,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "runner",
+          "timing": "action"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_153_time-to-collect",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_zone_barrier"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "conditions": [
+        {
+          "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_program_trash"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_154_wired-switchboard",
+      "side": "runner",
+      "cardType": "resource",
+      "roles": [
+        "resource"
+      ],
+      "planRoles": [
+        "build_rig",
+        "safe_probe_run"
+      ],
+      "requiredMechanics": [],
+      "valueHints": {
+        "utility": 1
+      },
+      "riskTags": [
+        "hidden_zone_barrier",
+        "trace_window"
+      ],
+      "aiSupportStatus": "ai_supported",
+      "scenarioRefs": [
+        "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": false,
+        "strategyCovered": false,
+        "confidence": "low",
+        "needsHumanReview": true
+      },
+      "effects": [
+        {
+          "amount": 3,
+          "kind": "link",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 3,
+          "kind": "trace_defense",
+          "resource": "link",
+          "scope": "trace",
+          "timing": "trace_window"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_trace_attempt"
+        }
+      ]
+    },
+    {
       "cardId": "runner_identity_001",
       "side": "runner",
       "cardType": "identity",

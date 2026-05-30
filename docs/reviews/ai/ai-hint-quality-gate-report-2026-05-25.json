@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai-hint-quality-gate-report-v1",
   "generatedAt": "2026-05-25",
-  "hintCount": 410,
+  "hintCount": 564,
   "roleContractCount": 251,
   "planRoleContractCount": 102,
   "errors": [],
@@ -276,29 +276,8 @@
       "data/ai/ai-local-realistic-benchmark-deck-snapshots-2026-05-23.json",
       "data/ai/ai-real-scene-benchmark-deck-snapshots-2026-05-24.json"
     ],
-    "totalUniqueCards": 190,
-    "skippedDecks": [
-      {
-        "deckId": "proteus_corp_antibody_tax_snapshot_v2026_05_25",
-        "file": "data/decks/deck-snapshots-0.8.json",
-        "reason": "proteus_playtest_not_active_ai_hint_scope"
-      },
-      {
-        "deckId": "proteus_corp_region_fast_score_snapshot_v2026_05_25",
-        "file": "data/decks/deck-snapshots-0.8.json",
-        "reason": "proteus_playtest_not_active_ai_hint_scope"
-      },
-      {
-        "deckId": "proteus_runner_hq_virus_derez_snapshot_v2026_05_25",
-        "file": "data/decks/deck-snapshots-0.8.json",
-        "reason": "proteus_playtest_not_active_ai_hint_scope"
-      },
-      {
-        "deckId": "proteus_runner_rd_bad_publicity_snapshot_v2026_05_25",
-        "file": "data/decks/deck-snapshots-0.8.json",
-        "reason": "proteus_playtest_not_active_ai_hint_scope"
-      }
-    ],
+    "totalUniqueCards": 248,
+    "skippedDecks": [],
     "missingHintCards": [],
     "riskCards": []
   }

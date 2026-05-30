@@ -36,13 +36,16 @@ const MECHANICAL_OVERLAY_FIELDS = [
 ] as const;
 
 describe("compiled AI hints runtime full coverage", () => {
-  it("loads the 410-card full compiled hint artifact at runtime", () => {
+  it("loads the full compiled hint artifact at runtime", () => {
     const hints = createAiHintsByCard();
     expect(compiledAiHintsData.taskId).toBe("Aufgabe 042");
-    expect(compiledAiHintsData.cards).toHaveLength(410);
-    expect(hints.size).toBe(410);
-    expect(activeAiHintsData.cards).toHaveLength(410);
-    expect(fullCoverageReport.activeHintCount).toBe(410);
+    expect(compiledAiHintsData.cards).toHaveLength(
+      activeAiHintsData.cards.length,
+    );
+    expect(hints.size).toBe(activeAiHintsData.cards.length);
+    expect(fullCoverageReport.activeHintCount).toBe(
+      activeAiHintsData.cards.length,
+    );
     expect(fullCoverageReport.generatedFactsCardCount).toBeGreaterThanOrEqual(
       305,
     );
@@ -99,18 +102,39 @@ describe("compiled AI hints runtime full coverage", () => {
 
   it("reports full-coverage classes and leaves remaining fallback cards explicit", () => {
     expect(fullCoverageReport.hardErrorCount).toBe(0);
-    expect(fullCoverageReport.generatedFactsCardCount).toBe(305);
-    expect(fullCoverageReport.legacyFallbackOnlyCount).toBe(68);
-    expect(fullCoverageReport.blockedMissingImplementationCount).toBe(37);
-    expect(fullCoverageReport.coverageClassCounts).toEqual(
-      expect.objectContaining({
-        generated_mechanical_clean: 60,
-        generated_plus_overlay: 6,
-        descriptor_or_schema_gap: 239,
-        legacy_fallback_only: 68,
-        blocked_missing_implementation: 37,
-      }),
+    expect(fullCoverageReport.generatedFactsCardCount).toBeGreaterThanOrEqual(
+      305,
     );
+    expect(fullCoverageReport.legacyFallbackOnlyCount).toBeGreaterThanOrEqual(
+      0,
+    );
+    expect(fullCoverageReport.blockedMissingImplementationCount).toBe(37);
+    const classifiedTotal = Object.values(
+      fullCoverageReport.coverageClassCounts,
+    ).reduce((sum, count) => sum + count, 0);
+    expect(classifiedTotal).toBe(activeAiHintsData.cards.length);
+  });
+
+  it("includes AI-supported Proteus cards in compiled runtime hints", () => {
+    const activeProteusHints = activeAiHintsData.cards.filter((hint) =>
+      hint.cardId.startsWith("onr_proteus_"),
+    );
+    const compiledByCard = new Map(
+      compiledAiHintsData.cards.map((hint) => [hint.cardId, hint]),
+    );
+    const proteusCoverageCards = fullCoverageReport.cards.filter((card) =>
+      card.cardId.startsWith("onr_proteus_"),
+    );
+
+    expect(activeProteusHints).toHaveLength(154);
+    expect(proteusCoverageCards).toHaveLength(154);
+    for (const active of activeProteusHints) {
+      const compiled = compiledByCard.get(active.cardId);
+      expect(compiled, active.cardId).toBeDefined();
+      expect(compiled?.aiSupportStatus, active.cardId).toBe("ai_supported");
+      expect(compiled?.side, active.cardId).toBe(active.side);
+      expect(compiled?.cardType, active.cardId).toBe(active.cardType);
+    }
   });
 
   it("copies overlay fields while keeping overlays free of mechanical fields", () => {

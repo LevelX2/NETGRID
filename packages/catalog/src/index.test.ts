@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import activeAiHintsData from "../../../data/ai/ai-card-hints-active.json";
+import compiledAiHintsData from "../../../data/ai/ai-card-hints-compiled.json";
 import cardSupportAiSupportedScenarioData from "../../../data/scenarios/card-support-ai-supported-current.json";
 import {
   activeAiApprovedCardIds,
@@ -243,7 +244,7 @@ describe("card set support catalog source", () => {
     expect([...new Set(scenarioCardIds)].sort()).toEqual(
       activeAiApprovedCardIds.slice().sort(),
     );
-    expect(runtimeIdsWithoutHints).toEqual([...PROTEUS_CARD_IDS].sort());
+    expect(runtimeIdsWithoutHints).toEqual([]);
 
     for (const cardId of activeAiApprovedCardIds) {
       const card = cardsById[cardId];
@@ -265,42 +266,64 @@ describe("card set support catalog source", () => {
     }
   });
 
-  it("promotes Proteus for Human-vs-Human deck legality without AI support", () => {
+  it("promotes Proteus for Human-vs-Human deck legality and AI support", () => {
     const cardsById = createRuntimeCardsById();
     expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toHaveLength(154);
     expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual([...PROTEUS_CARD_IDS]);
-    expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual(expect.arrayContaining([
-      ...EXPECTED_PROTEUS_VISIBLE_BASELINE_CARD_IDS,
-    ]));
+    expect(PROTEUS_VISIBLE_BASELINE_CARD_IDS).toEqual(
+      expect.arrayContaining([...EXPECTED_PROTEUS_VISIBLE_BASELINE_CARD_IDS]),
+    );
     for (const cardId of PROTEUS_CARD_IDS) {
       expect(cardsById[cardId]?.statuses, cardId).toMatchObject({
         human_playable: true,
         deck_legal: true,
         format_legal: true,
-        ai_supported: false,
+        ai_supported: true,
         blocked: false,
       });
     }
+    const activeHintsById = new Map(
+      activeAiHintsData.cards.map((hint) => [hint.cardId, hint]),
+    );
+    const compiledHintsById = new Map(
+      compiledAiHintsData.cards.map((hint) => [hint.cardId, hint]),
+    );
     const aiSupportedProteus = Object.values(cardsById).filter(
       (card) =>
         card.catalogCardId.startsWith("onr_proteus_") &&
         card.statuses.ai_supported,
     );
-    expect(aiSupportedProteus).toHaveLength(0);
+    expect(aiSupportedProteus).toHaveLength(PROTEUS_CARD_IDS.length);
+    for (const cardId of PROTEUS_CARD_IDS) {
+      expect(activeHintsById.get(cardId)?.aiSupportStatus, cardId).toBe(
+        "ai_supported",
+      );
+      expect(compiledHintsById.has(cardId), cardId).toBe(true);
+      expect(cardsById[cardId]?.implementationManifest, cardId).toBeDefined();
+    }
   });
 
   it("imports Classic as catalog-visible but blocked planning data", () => {
-    const classicCards = Object.values(createRuntimeCardsById()).filter((card) =>
-      card.catalogCardId.startsWith("onr_classic_"),
+    const classicCards = Object.values(createRuntimeCardsById()).filter(
+      (card) => card.catalogCardId.startsWith("onr_classic_"),
     );
     expect(classicCards).toHaveLength(52);
     expect(classicCards.every((card) => card.setId === "classic")).toBe(true);
-    expect(classicCards.every((card) => card.statuses.catalog_ready)).toBe(true);
+    expect(classicCards.every((card) => card.statuses.catalog_ready)).toBe(
+      true,
+    );
     expect(classicCards.every((card) => card.statuses.blocked)).toBe(true);
-    expect(classicCards.every((card) => !card.statuses.human_playable)).toBe(true);
+    expect(classicCards.every((card) => !card.statuses.human_playable)).toBe(
+      true,
+    );
     expect(classicCards.every((card) => !card.statuses.deck_legal)).toBe(true);
-    expect(createRuntimeCardsById()["onr_classic_001_data-fort-remapping"]?.rarity?.code).toBe("common");
-    expect(createRuntimeCardsById()["onr_classic_052_zetatech-portastation"]?.title).toBe("Zetatech Portastation");
+    expect(
+      createRuntimeCardsById()["onr_classic_001_data-fort-remapping"]?.rarity
+        ?.code,
+    ).toBe("common");
+    expect(
+      createRuntimeCardsById()["onr_classic_052_zetatech-portastation"]?.title,
+    ).toBe("Zetatech Portastation");
   });
 
   it("creates a valid runtime snapshot, index and public payload", () => {

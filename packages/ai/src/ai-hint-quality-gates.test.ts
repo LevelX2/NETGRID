@@ -40,17 +40,17 @@ describe("AI hint quality gates", () => {
     const result = runQualityGate();
     expect(result.status).toBe("ok");
     const report = JSON.parse(result.output);
+    const activeHints = JSON.parse(
+      fs.readFileSync(
+        path.join(repoRoot, "data/ai/ai-card-hints-active.json"),
+        "utf8",
+      ),
+    );
     expect(report.errorCount).toBe(0);
-    expect(report.hintCount).toBe(410);
+    expect(report.hintCount).toBe(activeHints.cards.length);
     expect(report.benchmarkCoverage.totalUniqueCards).toBeGreaterThan(0);
     expect(report.benchmarkCoverage.missingHintCards).toEqual([]);
-    expect(report.benchmarkCoverage.skippedDecks.length).toBeGreaterThan(0);
-    expect(
-      report.benchmarkCoverage.skippedDecks.every(
-        (entry: { reason?: string }) =>
-          entry.reason === "proteus_playtest_not_active_ai_hint_scope",
-      ),
-    ).toBe(true);
+    expect(report.benchmarkCoverage.skippedDecks).toEqual([]);
   });
 
   it("keeps the Crystal Palace semantic denylist protected", () => {

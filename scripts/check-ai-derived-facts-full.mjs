@@ -16,10 +16,21 @@ const FULL_INVENTORY_PATH =
   "data/ai/ai-derived-basic-facts-full-cards-2026-05-25.json";
 const FULL_REPORT_PATH =
   "docs/reviews/ai/aufgabe-042-full-compiled-hint-coverage-report-2026-05-25.json";
-const IMPLEMENTATION_ROOT = "packages/engine/src/card-implementations/onr-v1";
+const IMPLEMENTATION_ROOTS = [
+  {
+    setId: "originalset-v1",
+    cardIdPrefix: "onr_v1_",
+    path: "packages/engine/src/card-implementations/onr-v1",
+  },
+  {
+    setId: "proteus",
+    cardIdPrefix: "onr_proteus_",
+    path: "packages/engine/src/card-implementations/proteus",
+  },
+];
 const OVERLAY_ROOT = "data/ai/hints/overlays";
 const GENERATED_AT = "2026-05-25";
-const EXPECTED_ACTIVE_HINT_COUNT = 410;
+const EXPECTED_ACTIVE_HINT_COUNT = 564;
 
 function repoPath(relativePath) {
   return path.join(REPO_ROOT, relativePath);
@@ -58,13 +69,15 @@ function listFiles(absoluteDir, predicate) {
 
 function implementationPathByCardId() {
   const byCardId = new Map();
-  for (const absolutePath of listFiles(repoPath(IMPLEMENTATION_ROOT), (file) =>
-    file.endsWith(".ts"),
-  )) {
-    const text = fs.readFileSync(absolutePath, "utf8");
-    const match = text.match(/cardDefinitionId:\s*"([^"]+)"/);
-    if (!match) continue;
-    byCardId.set(match[1], toRepoRelative(absolutePath));
+  for (const root of IMPLEMENTATION_ROOTS) {
+    for (const absolutePath of listFiles(repoPath(root.path), (file) =>
+      file.endsWith(".ts"),
+    )) {
+      const text = fs.readFileSync(absolutePath, "utf8");
+      const match = text.match(/cardDefinitionId:\s*"([^"]+)"/);
+      if (!match) continue;
+      byCardId.set(match[1], toRepoRelative(absolutePath));
+    }
   }
   return byCardId;
 }
@@ -113,7 +126,7 @@ export function buildFullCoverageInventory() {
     const expected = expectedByCard.get(hint.cardId);
     const implementationPath =
       implementations.get(hint.cardId) ??
-      `packages/engine/src/card-implementations/onr-v1/__missing__/${hint.cardId}.ts`;
+      `${implementationFallbackRoot(hint.cardId)}/__missing__/${hint.cardId}.ts`;
     return {
       cardId: hint.cardId,
       title: titleFromHint(hint),
@@ -140,12 +153,19 @@ export function buildFullCoverageInventory() {
     generatedAt: GENERATED_AT,
     source: {
       activeHintsPath: ACTIVE_HINTS_PATH,
-      implementationRoot: IMPLEMENTATION_ROOT,
+      implementationRoots: IMPLEMENTATION_ROOTS.map((root) => root.path),
       pilotInventoryPath: PILOT_INVENTORY_PATH,
       mode: "all active AI-supported hints; read-only CardImplementation scan; no LegalAction or runtime legality derivation",
     },
     cards,
   };
+}
+
+function implementationFallbackRoot(cardId) {
+  return (
+    IMPLEMENTATION_ROOTS.find((root) => cardId.startsWith(root.cardIdPrefix))
+      ?.path ?? IMPLEMENTATION_ROOTS[0].path
+  );
 }
 
 function derivedKindSet(derivedFacts = {}) {
