@@ -64,7 +64,7 @@
 - Monorepo-Hülle mit pnpm Workspace, Root-`package.json`, TypeScript-Basiskonfiguration und Vitest-Basiskonfiguration angelegt.
 - Erwartete Ordner für `docs/source`, `docs/codex`, `docs/derived`, `data`, `packages`, `apps`, `tests` und `scripts` angelegt.
 - Root- und bereichsspezifische `AGENTS.md`-Dateien angelegt.
-- Git-Modell festgelegt: lokales Git ohne Remote, Integrationsbranch `main`.
+- Git-Modell festgelegt: GitHub-Remote `origin` ist konfiguriert, `main` ist der lokale Integrationsbranch. Pushes, Pull Requests und Remote-Integrationen erfolgen nur auf ausdrücklichen Nutzerwunsch oder über die vorgesehenen Abschluss-/GitHub-Workflows.
 - MVP 0.1 Requirements wurden aus den priorisierten Quellen abgeleitet und als reviewfähige Derived-Artefakte eingefroren.
 - Versionierte MVP-0.1-Datenartefakte für RulesBaseline, Demo-Karten, Demo-Decks, Card-Manifest, Abweichungen und sechs Szenarien liegen vor.
 - Phase-1-Gate ist bestanden: `ready_for_implementation: true`.
@@ -182,7 +182,6 @@
 - Das nachgereichte Demo-Deck-Paket wurde einsortiert: `docs/source/Erstes Testdeck.txt`, `docs/source/Erstes Testdeck.md` und `data/decks/demo-decks.json`.
 - Die lokale Codex-Goal-Funktion wurde aktiviert und ist für die nächsten mehrphasigen NETGRID-Schritte vorgesehen.
 - NETGRID wurde in der lokalen Codex-Konfiguration als vertrauenswürdiges Projekt eingetragen.
-- Der historisch vorbereitete Arbeitsbranch `codex/mvp-0-1-requirements` enthält inzwischen nicht mehr den nächsten fachlichen Einstieg; aktueller Einstieg ist V0.3 Requirements.
 
 ## Offen
 

@@ -46,7 +46,8 @@ NETGRID ist eine private Webapplikation für regelgeführtes, deterministisches 
 
 ## Git- und Arbeitsmodell
 
-- Lokales Git ohne Remote.
+- GitHub-Remote `origin` ist konfiguriert.
 - `main` ist der lokale Integrationsbranch.
-- Laufende Arbeit nach dem Initialstand erfolgt auf `codex/`-Arbeitsbranches.
-- Kein Push und kein Pull Request ohne später eindeutig konfiguriertes Remote-Modell.
+- Kleine, nicht kollisionskritische Änderungen dürfen direkt auf `main` erfolgen.
+- Bei erwarteter Parallelität, größeren Änderungen oder potenziellen Kollisionen erfolgt Arbeit auf `codex/`-Arbeitsbranches.
+- Pushes, Pull Requests und Remote-Integrationen erfolgen nur auf ausdrücklichen Nutzerwunsch oder über die vorgesehenen Abschluss-/GitHub-Workflows.
