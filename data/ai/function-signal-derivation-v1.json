@@ -1,8 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI003",
+  "taskId": "AI003-1",
+  "updatesTaskId": "AI003",
   "generatedAt": "2026-05-31",
-  "description": "Read-only derivation contract for function signals from existing structured AI hint fields. Function signals are derived analysis inputs and are not manual hint truth.",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. Function signals are derived analysis inputs and are not manual hint truth.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -15,8 +16,19 @@
     "privateStateFields": "never_derive_from_hidden_or_opponent_private_fields",
     "valueHints": "do_not_use_valueHints_as_function_truth_in_v1",
     "rolesAndPlanRoles": "legacy_context_only_not_function_truth",
-    "lineSupport": "legacy_strategy_context_only_not_function_truth"
+    "lineSupport": "legacy_strategy_context_only_not_function_truth",
+    "strategyAnchors": "strategyAnchorFor must be side-gated; if side/cardType/scope evidence is missing, do not derive the anchor"
   },
+  "supportedGates": [
+    "side",
+    "cardType",
+    "effectScope",
+    "target",
+    "controller",
+    "beneficiary",
+    "remoteRole",
+    "breakerProfileCoverage"
+  ],
   "derivationRules": [
     {
       "signalId": "economy.generic",
@@ -80,6 +92,16 @@
       "match": {
         "kind": "advanceable_economy"
       },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "effectScope": [
+          "corp",
+          "installed_card",
+          "score_area"
+        ]
+      },
       "strategyAnchorFor": [
         "corp.economy_rez_reserve"
       ]
@@ -98,6 +120,16 @@
       "match": {
         "kind": "rez_discount"
       },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "effectScope": [
+          "corp",
+          "ice",
+          "installed_card"
+        ]
+      },
       "strategyAnchorFor": [
         "corp.economy_rez_reserve"
       ]
@@ -107,6 +139,16 @@
       "source": "effects",
       "match": {
         "kind": "trash_credit"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "runner",
+          "remote",
+          "accessed_card"
+        ]
       },
       "strategyAnchorFor": [
         "runner.remote_trash"
@@ -118,6 +160,23 @@
       "match": {
         "kind": "search"
       },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event",
+          "hardware",
+          "program",
+          "resource"
+        ],
+        "effectScope": [
+          "runner",
+          "stack",
+          "stack_top",
+          "heap"
+        ]
+      },
       "strategyAnchorFor": [
         "runner.breaker_search"
       ]
@@ -127,6 +186,16 @@
       "source": "effects",
       "match": {
         "kind": "card_recovery"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "runner",
+          "heap",
+          "stack"
+        ]
       },
       "strategyAnchorFor": [
         "runner.breaker_search"
@@ -235,6 +304,19 @@
         "kind": "multiaccess",
         "scope": "rnd"
       },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event",
+          "program",
+          "resource"
+        ],
+        "effectScope": [
+          "rnd"
+        ]
+      },
       "strategyAnchorFor": [
         "runner.rnd_pressure",
         "runner.interface_closeout"
@@ -247,6 +329,19 @@
         "kind": "multiaccess",
         "scope": "hq"
       },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event",
+          "program",
+          "resource"
+        ],
+        "effectScope": [
+          "hq"
+        ]
+      },
       "strategyAnchorFor": [
         "runner.hq_pressure",
         "runner.interface_closeout"
@@ -256,7 +351,21 @@
       "signalId": "info.rnd_topdeck",
       "source": "effects",
       "match": {
-        "kind": "topdeck_info"
+        "kind": "topdeck_info",
+        "scope": "rnd"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event",
+          "program",
+          "resource"
+        ],
+        "effectScope": [
+          "rnd"
+        ]
       },
       "strategyAnchorFor": [
         "runner.rnd_pressure"
@@ -266,7 +375,16 @@
       "signalId": "info.hq",
       "source": "effects",
       "match": {
-        "kind": "hq_info"
+        "kind": "hq_info",
+        "scope": "hq"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "hq"
+        ]
       },
       "strategyAnchorFor": [
         "runner.hq_pressure"
@@ -286,6 +404,19 @@
       "match": {
         "kind": "asset_economy"
       },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "agenda",
+          "upgrade"
+        ],
+        "remoteRole": [
+          "asset_economy"
+        ]
+      },
       "strategyAnchorFor": [
         "corp.asset_economy"
       ]
@@ -295,6 +426,19 @@
       "source": "remoteRole",
       "match": {
         "kind": "scoring_protection"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "agenda",
+          "upgrade"
+        ],
+        "remoteRole": [
+          "scoring_protection"
+        ]
       },
       "strategyAnchorFor": [
         "corp.remote_scoring"
@@ -306,6 +450,18 @@
       "match": {
         "kind": "bait"
       },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "upgrade"
+        ],
+        "remoteRole": [
+          "bait"
+        ]
+      },
       "strategyAnchorFor": [
         "corp.ambush_bluff"
       ]
@@ -316,6 +472,18 @@
       "match": {
         "kind": "ambush"
       },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "upgrade"
+        ],
+        "remoteRole": [
+          "ambush"
+        ]
+      },
       "strategyAnchorFor": [
         "corp.ambush_bluff"
       ]
@@ -325,6 +493,18 @@
       "source": "remoteRole",
       "match": {
         "kind": "agenda_steal_tax"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "upgrade"
+        ],
+        "remoteRole": [
+          "agenda_steal_tax"
+        ]
       },
       "strategyAnchorFor": [
         "corp.remote_scoring"
@@ -360,6 +540,21 @@
       "match": {
         "kind": "tag_source"
       },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "agenda",
+          "asset",
+          "ice",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
       "strategyAnchorFor": [
         "corp.tag_trace_punish"
       ]
@@ -369,6 +564,20 @@
       "source": "effects",
       "match": {
         "kind": "tag_punish_payoff"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "agenda",
+          "asset",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "runner"
+        ]
       },
       "strategyAnchorFor": [
         "corp.tag_trace_punish",
@@ -381,6 +590,18 @@
       "match": {
         "kind": "tag_punish_asset"
       },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "upgrade"
+        ],
+        "remoteRole": [
+          "tag_punish_asset"
+        ]
+      },
       "strategyAnchorFor": [
         "corp.tag_trace_punish"
       ]
@@ -390,6 +611,21 @@
       "source": "effects",
       "match": {
         "kind": "trace"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "agenda",
+          "asset",
+          "ice",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "runner"
+        ]
       },
       "strategyAnchorFor": [
         "corp.tag_trace_punish"
@@ -401,6 +637,21 @@
       "match": {
         "kind": "damage"
       },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "agenda",
+          "asset",
+          "ice",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
       "strategyAnchorFor": [
         "corp.damage_kill"
       ]
@@ -410,6 +661,18 @@
       "source": "effects",
       "match": {
         "kind": "access_punish"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "upgrade"
+        ],
+        "effectScope": [
+          "accessed_card"
+        ]
       },
       "strategyAnchorFor": [
         "corp.ambush_bluff"
@@ -421,6 +684,15 @@
       "match": {
         "kind": "damage_prevention"
       },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "runner",
+          "damage"
+        ]
+      },
       "strategyAnchorFor": [
         "runner.survival_defense"
       ]
@@ -430,6 +702,15 @@
       "source": "effects",
       "match": {
         "kind": "flatline_prevention"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "runner",
+          "damage"
+        ]
       },
       "strategyAnchorFor": [
         "runner.survival_defense"
@@ -441,6 +722,14 @@
       "match": {
         "kind": "tag_prevention"
       },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
       "strategyAnchorFor": [
         "runner.survival_defense"
       ]
@@ -450,6 +739,15 @@
       "source": "effects",
       "match": {
         "kind": "trace_defense"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "runner",
+          "trace"
+        ]
       },
       "strategyAnchorFor": [
         "runner.survival_defense"
@@ -461,6 +759,15 @@
       "match": {
         "kind": "link"
       },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "runner",
+          "trace"
+        ]
+      },
       "strategyAnchorFor": [
         "runner.survival_defense"
       ]
@@ -471,6 +778,20 @@
       "match": {
         "kind": "advance_burst"
       },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "operation",
+          "agenda"
+        ],
+        "effectScope": [
+          "installed_card",
+          "score_area",
+          "corp"
+        ]
+      },
       "strategyAnchorFor": [
         "corp.fast_advance"
       ]
@@ -480,6 +801,17 @@
       "source": "effects",
       "match": {
         "kind": "scored_agenda_action"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "agenda"
+        ],
+        "effectScope": [
+          "score_area"
+        ]
       },
       "strategyAnchorFor": [
         "corp.fast_advance"
@@ -492,6 +824,18 @@
         "kind": "run_tax",
         "scope": "ice"
       },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "ice"
+        ],
+        "effectScope": [
+          "ice",
+          "run_path"
+        ]
+      },
       "strategyAnchorFor": [
         "corp.ice_tax_glacier"
       ]
@@ -501,6 +845,17 @@
       "source": "effects",
       "match": {
         "kind": "etr"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "ice"
+        ],
+        "effectScope": [
+          "run_path"
+        ]
       },
       "strategyAnchorFor": [
         "corp.ice_tax_glacier"
@@ -512,6 +867,18 @@
       "match": {
         "kind": "future_encounter_effect"
       },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "ice"
+        ],
+        "effectScope": [
+          "run_path",
+          "runner"
+        ]
+      },
       "strategyAnchorFor": [
         "corp.ice_tax_glacier"
       ]
@@ -521,6 +888,25 @@
       "source": "effects",
       "match": {
         "kind": "future_run_effect"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event",
+          "program",
+          "resource"
+        ],
+        "effectScope": [
+          "run_path",
+          "runner",
+          "server",
+          "remote",
+          "hq",
+          "rnd",
+          "archives"
+        ]
       },
       "strategyAnchorFor": [
         "runner.run_event_tempo"
@@ -532,6 +918,21 @@
       "match": {
         "kind": "extra_action"
       },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event",
+          "hardware",
+          "program",
+          "resource"
+        ],
+        "effectScope": [
+          "runner",
+          "run_path"
+        ]
+      },
       "strategyAnchorFor": [
         "runner.run_event_tempo"
       ]
@@ -541,6 +942,24 @@
       "source": "effects",
       "match": {
         "kind": "run_lock"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event",
+          "program",
+          "resource"
+        ],
+        "effectScope": [
+          "run_path",
+          "server",
+          "remote",
+          "hq",
+          "rnd",
+          "archives"
+        ]
       },
       "strategyAnchorFor": [
         "runner.run_event_tempo"

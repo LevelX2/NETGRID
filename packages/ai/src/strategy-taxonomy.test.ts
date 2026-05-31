@@ -29,6 +29,10 @@ type CheckReport = {
     string,
     { signals: string[]; anchorStrategyIds: string[] }
   >;
+  sideAwareDerivation: {
+    preventedWrongSideAnchorCount: number;
+    wrongSideAnchorMatchCount: number;
+  };
 };
 
 const repoRoot = path.resolve(
@@ -58,7 +62,13 @@ function smokeTest(
     | "runnerEconomy"
     | "rndMultiaccess"
     | "normalBreaker"
-    | "corpTagPunishPayoff",
+    | "corpTagPunishPayoff"
+    | "corpDamagePayoff"
+    | "corpExtraAction"
+    | "corpIceFutureRunEffect"
+    | "corpTopdeckInfo"
+    | "runnerTagSource"
+    | "runnerDamage",
 ): { signals: string[]; anchorStrategyIds: string[] } {
   const result = report.derivationSmokeTests[key];
   expect(result).toBeDefined();
@@ -147,6 +157,59 @@ describe("AI003 strategy goal taxonomy", () => {
     expect(corpTagPunishPayoff.anchorStrategyIds).toContain(
       "corp.tag_trace_punish",
     );
+  });
+
+  it("prevents wrong-side strategy anchors for side-ambivalent effects", () => {
+    const report = loadStrategyTaxonomyReport();
+    const corpExtraAction = smokeTest(report, "corpExtraAction");
+    const corpIceFutureRunEffect = smokeTest(
+      report,
+      "corpIceFutureRunEffect",
+    );
+    const corpTopdeckInfo = smokeTest(report, "corpTopdeckInfo");
+    const runnerTagSource = smokeTest(report, "runnerTagSource");
+    const runnerDamage = smokeTest(report, "runnerDamage");
+
+    expect(corpExtraAction.signals).not.toContain("run.extra_action");
+    expect(corpExtraAction.anchorStrategyIds).not.toContain(
+      "runner.run_event_tempo",
+    );
+    expect(corpIceFutureRunEffect.signals).not.toContain("run.event_tempo");
+    expect(corpIceFutureRunEffect.anchorStrategyIds).not.toContain(
+      "runner.run_event_tempo",
+    );
+    expect(corpTopdeckInfo.signals).not.toContain("info.rnd_topdeck");
+    expect(corpTopdeckInfo.anchorStrategyIds).not.toContain(
+      "runner.rnd_pressure",
+    );
+    expect(runnerTagSource.signals).not.toContain("tag.source");
+    expect(runnerTagSource.anchorStrategyIds).not.toContain(
+      "corp.tag_trace_punish",
+    );
+    expect(runnerDamage.signals).not.toContain("damage.payoff");
+    expect(runnerDamage.anchorStrategyIds).not.toContain("corp.damage_kill");
+    expect(report.sideAwareDerivation.preventedWrongSideAnchorCount).toBeGreaterThan(
+      0,
+    );
+    expect(report.sideAwareDerivation.wrongSideAnchorMatchCount).toBe(0);
+  });
+
+  it("keeps valid side-aware anchors for Runner pressure and Corp punish", () => {
+    const report = loadStrategyTaxonomyReport();
+    const rndMultiaccess = smokeTest(report, "rndMultiaccess");
+    const corpTagPunishPayoff = smokeTest(report, "corpTagPunishPayoff");
+    const corpDamagePayoff = smokeTest(report, "corpDamagePayoff");
+
+    expect(rndMultiaccess.signals).toContain("access.rnd_multiaccess");
+    expect(rndMultiaccess.anchorStrategyIds).toContain(
+      "runner.rnd_pressure",
+    );
+    expect(corpTagPunishPayoff.signals).toContain("tag.payoff");
+    expect(corpTagPunishPayoff.anchorStrategyIds).toContain(
+      "corp.tag_trace_punish",
+    );
+    expect(corpDamagePayoff.signals).toContain("damage.payoff");
+    expect(corpDamagePayoff.anchorStrategyIds).toContain("corp.damage_kill");
   });
 
   it("keeps function signals derived and hidden-info free", () => {

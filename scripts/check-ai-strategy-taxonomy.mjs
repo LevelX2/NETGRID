@@ -10,7 +10,8 @@ const REPO_ROOT = path.resolve(
 );
 
 const GENERATED_AT = "2026-05-31";
-const TASK_ID = "AI003";
+const TASK_ID = "AI003-1";
+const UPDATES_TASK_ID = "AI003";
 
 const ACTIVE_HINTS_PATH = "data/ai/ai-card-hints-active.json";
 const COMPILED_HINTS_PATH = "data/ai/ai-card-hints-compiled.json";
@@ -20,6 +21,8 @@ const FUNCTION_SIGNAL_DERIVATION_PATH =
   "data/ai/function-signal-derivation-v1.json";
 const DEFAULT_REPORT_PATH =
   "docs/reviews/ai/ai003-strategy-taxonomy-report-2026-05-31.json";
+const DEFAULT_SIDE_AWARE_REPORT_PATH =
+  "docs/reviews/ai/ai003-1-side-aware-function-signal-derivation-report-2026-05-31.json";
 const DEFAULT_ALIAS_REPORT_PATH =
   "docs/reviews/ai/ai003-strategy-taxonomy-alias-report-2026-05-31.json";
 
@@ -41,6 +44,16 @@ const VALID_RULE_SOURCES = new Set([
   "conditions",
   "breakerProfile.coverage",
   "remoteRole",
+]);
+const VALID_RULE_GATE_FIELDS = new Set([
+  "side",
+  "cardType",
+  "effectScope",
+  "target",
+  "controller",
+  "beneficiary",
+  "remoteRole",
+  "breakerProfileCoverage",
 ]);
 
 const HIDDEN_INFO_RISK_FIELDS = [
@@ -313,7 +326,12 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
 
   validateStrategyGoals(strategyGoalsData, hardErrors);
   validateStrategicRoles(strategicRolesData, hardErrors);
-  validateFunctionDerivation(functionDerivationData, strategyIds, hardErrors);
+  validateFunctionDerivation(
+    functionDerivationData,
+    strategyIds,
+    hardErrors,
+    warnings,
+  );
   validateHiddenInfoKeys(
     strategyGoalsData,
     STRATEGY_GOALS_PATH,
@@ -383,6 +401,18 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     derivationRules,
   );
   const derivationSmokeTests = buildDerivationSmokeTests(derivationRules);
+  const sideAwareDerivation = analyzeSideAwareDerivation(
+    compiledCards,
+    derivationRules,
+  );
+  for (const mismatch of sideAwareDerivation.wrongSideAnchorMatches) {
+    hardErrors.push({
+      kind: "wrong_side_strategy_anchor_match",
+      path: FUNCTION_SIGNAL_DERIVATION_PATH,
+      message: `Rule ${mismatch.signalId} derived ${mismatch.strategyId} for ${mismatch.cardId} (${mismatch.side}).`,
+      item: mismatch,
+    });
+  }
 
   const legacyLineSupportValues = valueInventories.lineSupport
     .filter((entry) => !strategyIds.has(entry.value))
@@ -435,6 +465,7 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
   const report = {
     schemaVersion: "ai-strategy-taxonomy-check-report-v1",
     taskId: TASK_ID,
+    updatesTaskId: UPDATES_TASK_ID,
     generatedAt: GENERATED_AT,
     status: hardErrors.length === 0 ? "pass_with_warnings" : "fail",
     hardErrorCount: hardErrors.length,
@@ -446,7 +477,7 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
       strategicRolesPath: STRATEGIC_ROLES_PATH,
       functionSignalDerivationPath: FUNCTION_SIGNAL_DERIVATION_PATH,
       runtimeEffect:
-        "none; AI003 adds contract artifacts, a validator, reports, and tests only",
+        "none; AI003-1 sharpens read-only function-signal derivation gates only",
     },
     hintCounts: {
       active: activeCards.length,
@@ -532,7 +563,12 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     },
     functionSignals: {
       derivedSignalCounts: functionSignalSummary.signalCounts,
+      derivedStrategyAnchorCounts:
+        functionSignalSummary.strategyAnchorCounts,
+      totalDerivedStrategyAnchors:
+        functionSignalSummary.totalStrategyAnchorCount,
       cardsWithDerivedSignals: functionSignalSummary.cardsWithSignals,
+      cardsWithStrategyAnchors: functionSignalSummary.cardsWithStrategyAnchors,
       descriptorGaps,
       unsafeDerivationsSkipped: [
         "valueHints",
@@ -542,6 +578,7 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
         "opponent hidden state",
       ],
     },
+    sideAwareDerivation,
     derivationSmokeTests,
     aliasSummary: aliasReport.summary,
     hardErrors,
@@ -554,9 +591,13 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
       hiddenInfoFieldsFail: true,
       manualFunctionTagsFail: true,
       opponentSignalsVisibleEvidenceOnlyFail: true,
+      wrongSideStrategyAnchorMatchesFail: true,
+      strategyAnchorWithoutSideGateFail: true,
+      unknownRuleGateFieldFail: true,
       legacyLineSupportWarnOnly: true,
       unmappedRolesWarnOnly: true,
       descriptorGapsWarnOnly: true,
+      strategyAnchorWithoutEffectScopeWarn: true,
     },
     explicitNonScope: [
       "no Engine rule change",
@@ -733,17 +774,29 @@ function classifyExistingValue(
 
 function deriveFunctionSignalSummary(cards, rules) {
   const signalCounts = {};
+  const strategyAnchorCounts = {};
   let cardsWithSignals = 0;
+  let cardsWithStrategyAnchors = 0;
+  let totalStrategyAnchorCount = 0;
   for (const hint of cards) {
     const result = deriveFunctionSignalsFromHint(hint, rules);
     if (result.signals.length > 0) cardsWithSignals += 1;
+    if (result.anchorStrategyIds.length > 0) cardsWithStrategyAnchors += 1;
     for (const signal of result.signals) {
       signalCounts[signal] = (signalCounts[signal] ?? 0) + 1;
+    }
+    for (const strategyId of result.anchorStrategyIds) {
+      strategyAnchorCounts[strategyId] =
+        (strategyAnchorCounts[strategyId] ?? 0) + 1;
+      totalStrategyAnchorCount += 1;
     }
   }
   return {
     cardsWithSignals,
+    cardsWithStrategyAnchors,
     signalCounts: sortObjectByKey(signalCounts),
+    strategyAnchorCounts: sortObjectByKey(strategyAnchorCounts),
+    totalStrategyAnchorCount,
   };
 }
 
@@ -766,6 +819,35 @@ export function deriveFunctionSignalsFromHint(hint, rules) {
 
 function ruleMatchesHint(rule, hint) {
   if (rule.source === "effects") {
+    return (hint.effects ?? []).some(
+      (effect) =>
+        matchRecord(effect, rule.match) && ruleGatesMatch(rule, hint, effect),
+    );
+  }
+  if (rule.source === "conditions") {
+    return (hint.conditions ?? []).some((condition) =>
+      matchRecord(condition, rule.match) &&
+      ruleGatesMatch(rule, hint, undefined),
+    );
+  }
+  if (rule.source === "breakerProfile.coverage") {
+    const coverage = rule.match?.coverage;
+    return (
+      typeof coverage === "string" &&
+      Array.isArray(hint.breakerProfile?.coverage) &&
+      hint.breakerProfile.coverage.includes(coverage) &&
+      ruleGatesMatch(rule, hint, undefined)
+    );
+  }
+  if (rule.source === "remoteRole") {
+    return matchRecord(hint.remoteRole, rule.match) &&
+      ruleGatesMatch(rule, hint, undefined);
+  }
+  return false;
+}
+
+function ruleBaseMatchesHint(rule, hint) {
+  if (rule.source === "effects") {
     return (hint.effects ?? []).some((effect) => matchRecord(effect, rule.match));
   }
   if (rule.source === "conditions") {
@@ -781,10 +863,47 @@ function ruleMatchesHint(rule, hint) {
       hint.breakerProfile.coverage.includes(coverage)
     );
   }
-  if (rule.source === "remoteRole") {
-    return matchRecord(hint.remoteRole, rule.match);
-  }
+  if (rule.source === "remoteRole") return matchRecord(hint.remoteRole, rule.match);
   return false;
+}
+
+function ruleGatesMatch(rule, hint, effect) {
+  const gates = rule.gates;
+  if (!isRecord(gates)) return true;
+  if (!matchesGateValue(hint.side, gates.side)) return false;
+  if (!matchesGateValue(hint.cardType, gates.cardType)) return false;
+  if (!matchesGateValue(effect?.scope, gates.effectScope)) return false;
+  if (!matchesGateValue(effect?.target, gates.target)) return false;
+  if (!matchesGateValue(effect?.controller, gates.controller)) return false;
+  if (!matchesGateValue(effect?.beneficiary, gates.beneficiary)) return false;
+  if (!matchesGateValue(hint.remoteRole?.kind, gates.remoteRole)) return false;
+  if (gates.breakerProfileCoverage !== undefined) {
+    const expected = normalizeGateValues(gates.breakerProfileCoverage);
+    if (
+      expected.length === 0 ||
+      !Array.isArray(hint.breakerProfile?.coverage) ||
+      !hint.breakerProfile.coverage.some((coverage) =>
+        expected.includes(coverage),
+      )
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function matchesGateValue(actual, expected) {
+  if (expected === undefined) return true;
+  const allowed = normalizeGateValues(expected);
+  if (allowed.length === 0) return false;
+  return typeof actual === "string" && allowed.includes(actual);
+}
+
+function normalizeGateValues(value) {
+  if (typeof value === "string") return [value];
+  if (Array.isArray(value) && value.every((item) => typeof item === "string"))
+    return value;
+  return [];
 }
 
 function matchRecord(value, match) {
@@ -813,6 +932,7 @@ function buildDerivationSmokeTests(rules) {
     rndMultiaccess: {
       cardId: "ai003_smoke_rnd_multiaccess",
       side: "runner",
+      cardType: "event",
       effects: [
         {
           kind: "multiaccess",
@@ -836,6 +956,7 @@ function buildDerivationSmokeTests(rules) {
     corpTagPunishPayoff: {
       cardId: "ai003_smoke_tag_punish_payoff",
       side: "corp",
+      cardType: "operation",
       effects: [
         {
           kind: "tag_punish_payoff",
@@ -847,6 +968,88 @@ function buildDerivationSmokeTests(rules) {
       ],
       conditions: [{ kind: "requires_runner_tagged" }],
     },
+    corpDamagePayoff: {
+      cardId: "ai003_1_smoke_corp_damage_payoff",
+      side: "corp",
+      cardType: "operation",
+      effects: [
+        {
+          kind: "damage",
+          timing: "action",
+          scope: "runner",
+          resource: "damage",
+          amount: 4,
+        },
+      ],
+    },
+    corpExtraAction: {
+      cardId: "ai003_1_smoke_corp_extra_action",
+      side: "corp",
+      cardType: "agenda",
+      effects: [
+        {
+          kind: "extra_action",
+          timing: "scored_activated",
+          scope: "corp",
+          resource: "actions",
+          amount: 1,
+        },
+      ],
+    },
+    corpIceFutureRunEffect: {
+      cardId: "ai003_1_smoke_corp_ice_future_run_effect",
+      side: "corp",
+      cardType: "ice",
+      effects: [
+        {
+          kind: "future_run_effect",
+          timing: "encounter",
+          scope: "run_path",
+        },
+      ],
+    },
+    corpTopdeckInfo: {
+      cardId: "ai003_1_smoke_corp_topdeck_info",
+      side: "corp",
+      cardType: "operation",
+      effects: [
+        {
+          kind: "topdeck_info",
+          timing: "action",
+          scope: "rnd",
+          resource: "cards",
+          amount: 5,
+        },
+      ],
+    },
+    runnerTagSource: {
+      cardId: "ai003_1_smoke_runner_tag_source",
+      side: "runner",
+      cardType: "event",
+      effects: [
+        {
+          kind: "tag_source",
+          timing: "action",
+          scope: "runner",
+          resource: "tags",
+          amount: 1,
+        },
+      ],
+    },
+    runnerDamage: {
+      cardId: "ai003_1_smoke_runner_damage",
+      side: "runner",
+      cardType: "event",
+      effects: [
+        {
+          kind: "damage",
+          timing: "action",
+          scope: "runner",
+          resource: "damage",
+          amount: 1,
+        },
+      ],
+    },
   };
 
   return Object.fromEntries(
@@ -855,6 +1058,41 @@ function buildDerivationSmokeTests(rules) {
       deriveFunctionSignalsFromHint(hint, rules),
     ]),
   );
+}
+
+function analyzeSideAwareDerivation(cards, rules) {
+  const preventedWrongSideAnchors = [];
+  const wrongSideAnchorMatches = [];
+  for (const hint of cards) {
+    for (const rule of rules) {
+      const anchorStrategyIds = rule.strategyAnchorFor ?? [];
+      if (anchorStrategyIds.length === 0) continue;
+      const mismatchedAnchors = anchorStrategyIds.filter(
+        (strategyId) => strategySide(strategyId) !== hint.side,
+      );
+      if (mismatchedAnchors.length === 0) continue;
+      const baseMatches = ruleBaseMatchesHint(rule, hint);
+      if (!baseMatches) continue;
+      const gatedMatches = ruleMatchesHint(rule, hint);
+      for (const strategyId of mismatchedAnchors) {
+        const item = {
+          cardId: hint.cardId,
+          side: hint.side,
+          cardType: hint.cardType,
+          signalId: rule.signalId,
+          strategyId,
+        };
+        if (gatedMatches) wrongSideAnchorMatches.push(item);
+        else preventedWrongSideAnchors.push(item);
+      }
+    }
+  }
+  return {
+    preventedWrongSideAnchorCount: preventedWrongSideAnchors.length,
+    preventedWrongSideAnchorExamples: preventedWrongSideAnchors.slice(0, 50),
+    wrongSideAnchorMatchCount: wrongSideAnchorMatches.length,
+    wrongSideAnchorMatches,
+  };
 }
 
 function validateStrategyGoals(data, errors) {
@@ -981,7 +1219,7 @@ function validateStrategicRoles(data, errors) {
   }
 }
 
-function validateFunctionDerivation(data, strategyIds, errors) {
+function validateFunctionDerivation(data, strategyIds, errors, warnings) {
   if (data.schemaVersion !== "ai-function-signal-derivation-v1") {
     errors.push({
       kind: "invalid_function_signal_schema",
@@ -1028,6 +1266,7 @@ function validateFunctionDerivation(data, strategyIds, errors) {
         message: "match must be an object.",
       });
     }
+    validateRuleGates(rule, basePath, errors);
     if (!isStringArray(rule.strategyAnchorFor)) {
       errors.push({
         kind: "invalid_strategy_anchor_for",
@@ -1044,7 +1283,73 @@ function validateFunctionDerivation(data, strategyIds, errors) {
           });
         }
       }
+      validateStrategyAnchorGates(rule, basePath, errors, warnings);
     }
+  }
+}
+
+function validateRuleGates(rule, basePath, errors) {
+  if (rule.gates === undefined) return;
+  if (!isRecord(rule.gates)) {
+    errors.push({
+      kind: "invalid_rule_gates",
+      path: `${basePath}.gates`,
+      message: "gates must be an object when present.",
+    });
+    return;
+  }
+  for (const [gateField, gateValue] of Object.entries(rule.gates)) {
+    if (!VALID_RULE_GATE_FIELDS.has(gateField)) {
+      errors.push({
+        kind: "unknown_rule_gate_field",
+        path: `${basePath}.gates.${gateField}`,
+        message: `Unknown rule gate field ${gateField}.`,
+      });
+    }
+    if (normalizeGateValues(gateValue).length === 0) {
+      errors.push({
+        kind: "invalid_rule_gate_value",
+        path: `${basePath}.gates.${gateField}`,
+        message: "Rule gate values must be a string or string array.",
+      });
+    }
+  }
+}
+
+function validateStrategyAnchorGates(rule, basePath, errors, warnings) {
+  const strategyAnchorFor = rule.strategyAnchorFor ?? [];
+  if (strategyAnchorFor.length === 0) return;
+  const gateSides = normalizeGateValues(rule.gates?.side);
+  if (gateSides.length === 0) {
+    errors.push({
+      kind: "strategy_anchor_without_side_gate",
+      path: `${basePath}.gates.side`,
+      message: "Rules with strategyAnchorFor must declare a side gate.",
+    });
+  }
+  const anchorSides = sortedUnique(strategyAnchorFor.map(strategySide));
+  for (const anchorSide of anchorSides) {
+    if (!gateSides.includes(anchorSide)) {
+      errors.push({
+        kind: "strategy_anchor_side_gate_mismatch",
+        path: `${basePath}.gates.side`,
+        message: `strategyAnchorFor contains ${anchorSide} strategy but side gate is ${gateSides.join(",") || "missing"}.`,
+      });
+    }
+  }
+  const matchHasScope = isRecord(rule.match) && typeof rule.match.scope === "string";
+  const gatesHaveEffectScope =
+    normalizeGateValues(rule.gates?.effectScope).length > 0;
+  if (rule.source === "effects" && !matchHasScope && !gatesHaveEffectScope) {
+    warnings.push({
+      kind: "strategy_anchor_without_effect_scope_warn_only",
+      count: 1,
+      path: `${basePath}.gates.effectScope`,
+      message:
+        "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      signalId: rule.signalId,
+      strategyAnchorFor,
+    });
   }
 }
 
@@ -1253,6 +1558,13 @@ function countBy(values, selector) {
   return sortObjectByKey(counts);
 }
 
+function strategySide(strategyId) {
+  if (typeof strategyId !== "string") return undefined;
+  if (strategyId.startsWith("runner.")) return "runner";
+  if (strategyId.startsWith("corp.")) return "corp";
+  return undefined;
+}
+
 function readJson(repoRoot, relativePath) {
   return JSON.parse(fs.readFileSync(path.join(repoRoot, relativePath), "utf8"));
 }
@@ -1290,6 +1602,7 @@ function parseArgs(argv) {
     json: false,
     writeReports: false,
     reportPath: DEFAULT_REPORT_PATH,
+    sideAwareReportPath: DEFAULT_SIDE_AWARE_REPORT_PATH,
     aliasReportPath: DEFAULT_ALIAS_REPORT_PATH,
   };
   for (let index = 0; index < argv.length; index += 1) {
@@ -1297,6 +1610,8 @@ function parseArgs(argv) {
     if (arg === "--json") args.json = true;
     else if (arg === "--write-reports") args.writeReports = true;
     else if (arg === "--report") args.reportPath = argv[++index];
+    else if (arg === "--side-aware-report")
+      args.sideAwareReportPath = argv[++index];
     else if (arg === "--alias-report") args.aliasReportPath = argv[++index];
     else throw new Error(`Unknown argument: ${arg}`);
   }
@@ -1308,6 +1623,7 @@ export function runCli(argv = process.argv.slice(2)) {
   const { report, aliasReport } = buildAiStrategyTaxonomyReport();
   if (args.writeReports) {
     writeJson(REPO_ROOT, args.reportPath, report);
+    writeJson(REPO_ROOT, args.sideAwareReportPath, report);
     writeJson(REPO_ROOT, args.aliasReportPath, aliasReport);
   }
   if (args.json) {

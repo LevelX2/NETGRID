@@ -1,6 +1,6 @@
 {
   "schemaVersion": "ai003-strategy-taxonomy-alias-report-v1",
-  "taskId": "AI003",
+  "taskId": "AI003-1",
   "generatedAt": "2026-05-31",
   "source": {
     "compiledHintsPath": "data/ai/ai-card-hints-compiled.json",
