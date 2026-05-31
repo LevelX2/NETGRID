@@ -181,12 +181,21 @@ export {
   evaluateCorpOpeningHand,
   evaluateRunnerOpeningHand,
 } from "./deck-doctrine";
+export { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 export type {
   AiDeckDoctrineDeckSnapshot,
   CorpOpeningHandEvaluation,
   OpeningHandEvaluation,
   RunnerOpeningHandEvaluation,
 } from "./deck-doctrine";
+export type {
+  AiDeckStrategyProfile,
+  CorpDeckStrategyProfiles,
+  DeckStrategyConfidence,
+  DeckStrategyEvidence,
+  DeckStrategyScore,
+  RunnerDeckStrategyProfiles,
+} from "./deck-doctrine-strategy";
 export {
   classifyBreakerCoverageFromOntology,
   compareBreakerProfilesForCoverage,

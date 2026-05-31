@@ -24,6 +24,7 @@
     "check:ai-manual-overlays": "node scripts/check-ai-manual-overlays.mjs --check",
     "check:ai-hint-quality": "node scripts/check-ai-hint-quality.mjs --write-report",
     "check:ai-strategy-taxonomy": "node scripts/check-ai-strategy-taxonomy.mjs --write-reports",
+    "check:ai-deck-doctrine-strategy": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/check-ai-deck-doctrine-strategy.ts",
     "storage:backup": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts backup",
     "storage:restore": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts restore",
     "storage:inspect": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts inspect",
