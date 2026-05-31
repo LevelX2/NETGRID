@@ -247,6 +247,7 @@ import {
   type CatalogTypeFilterKey,
   type CatalogTypeFilterState
 } from "./catalog-ui";
+import { aiInspectorSections, type AiInspectorEntry, type CatalogAiInspector } from "./ai-hint-inspector-ui";
 import { isCardActionSurfaceTarget } from "./card-action-menu-ui";
 import { actionNeedsRegionReplacementConfirmation } from "./action-payload";
 import { researchAgendaDifficultyModifierLineForCard, scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
@@ -529,6 +530,7 @@ type CatalogCardDetail = CatalogCardSummary & {
   numeric: Record<string, number | null>;
   engineCardId: string | null;
   aiHints?: CatalogAiHints | null;
+  aiInspector?: CatalogAiInspector | null;
 };
 
 type DeckBuilderCardDetail = CatalogCardDetail & {
@@ -11021,7 +11023,7 @@ function CatalogPanel({
                   </span>
                 ) : null}
               </div>
-              {detail.aiHints ? <CatalogAiHintPanel hints={detail.aiHints} /> : null}
+              {detail.aiInspector || detail.aiHints ? <CatalogAiHintPanel hints={detail.aiHints ?? null} inspector={detail.aiInspector ?? null} /> : null}
               {detail.blockReasons.length > 0 ? <p className="notice catalogNotice">{detail.blockReasons.join(" ")}</p> : null}
             </>
           ) : (
@@ -12937,7 +12939,9 @@ function StatusBadges({ statuses, compact = false, showExpert = false }: { statu
   );
 }
 
-function CatalogAiHintPanel({ hints }: { hints: CatalogAiHints }) {
+function CatalogAiHintPanel({ hints, inspector }: { hints?: CatalogAiHints | null; inspector?: CatalogAiInspector | null }) {
+  if (inspector) return <CatalogAiHintInspectorPanel inspector={inspector} />;
+  if (!hints) return null;
   const valueHintEntries = Object.entries(hints.valueHints).filter(([, value]) => Number.isFinite(value));
   return (
     <section className="catalogAiHints">
@@ -12961,6 +12965,44 @@ function CatalogAiHintPanel({ hints }: { hints: CatalogAiHints }) {
       <AiHintChips title="Mechaniken" values={hints.requiredMechanics} quiet />
       <AiHintChips title="Szenarien" values={hints.scenarioRefs.map((ref) => ref.split("#").at(-1) ?? ref)} quiet />
     </section>
+  );
+}
+
+function CatalogAiHintInspectorPanel({ inspector }: { inspector: CatalogAiInspector }) {
+  const sections = aiInspectorSections(inspector);
+  return (
+    <section className="catalogAiHints catalogAiInspector" data-testid="catalog-ai-hint-inspector">
+      <div className="catalogAiHintsHead">
+        <strong>KI-Hinweise</strong>
+        <span>AI Hint Inspector · {inspector.schemaVersion}</span>
+      </div>
+      <div className="catalogAiInspectorGrid">
+        {sections.map((section) => (
+          <section className={`catalogAiInspectorSection section-${section.key}`} key={section.key}>
+            <h4>{section.title}</h4>
+            {section.entries.length > 0 ? (
+              <div className="catalogAiInspectorEntries">
+                {section.entries.map((entry, index) => (
+                  <CatalogAiInspectorEntryItem entry={entry} key={`${section.key}-${entry.label}-${entry.value ?? index}`} />
+                ))}
+              </div>
+            ) : section.emptyText ? (
+              <p className="meta">{section.emptyText}</p>
+            ) : null}
+          </section>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function CatalogAiInspectorEntryItem({ entry }: { entry: AiInspectorEntry }) {
+  return (
+    <span className={`catalogAiInspectorEntry tone-${entry.tone}`}>
+      <span>{entry.label}</span>
+      {entry.value ? <strong>{entry.value}</strong> : null}
+      {entry.detail ? <small>{entry.detail}</small> : null}
+    </span>
   );
 }
 

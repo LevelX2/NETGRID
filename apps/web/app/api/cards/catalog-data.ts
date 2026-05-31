@@ -9,6 +9,8 @@ import {
   type CatalogStatusKey
 } from "@netgrid/catalog";
 import activeAiHintsData from "../../../../../data/ai/ai-card-hints-active.json";
+import compiledAiHintsData from "../../../../../data/ai/ai-card-hints-compiled.json";
+import aiHintInspectorIndexData from "../../../../../data/ai/ai-hint-inspector-index.json";
 import { createRuntimeCardPool } from "../card-pool-runtime";
 
 type CatalogAiHint = {
@@ -22,8 +24,58 @@ type CatalogAiHint = {
   scenarioRefs: string[];
 };
 
+type CatalogCompiledAiHint = CatalogAiHint & {
+  effects?: Array<Record<string, unknown>>;
+  conditions?: Array<Record<string, unknown>>;
+  costProfile?: Record<string, unknown>;
+  breakerProfile?: Record<string, unknown>;
+  remoteRole?: Record<string, unknown>;
+  targetProfiles?: Array<Record<string, unknown>>;
+  lineSupport?: string[];
+  strategicRole?: string[];
+  quality?: Record<string, unknown>;
+  manualNotes?: string[];
+  strategicNotes?: string[];
+};
+
+type AiInspectorClassification = {
+  value: string;
+  category: string;
+  triageCategory: string;
+  mapsTo: string[];
+  rationale: string;
+};
+
+type AiInspectorIndexEntry = {
+  cardId: string;
+  supportStatus: {
+    aiSupportStatus: CatalogAiHint["aiSupportStatus"];
+    compiledHintFound: boolean;
+    mechanicalFactsFound: boolean;
+    generatedFactsFound: boolean;
+    overlayFields: string[];
+    legacyFallbackOnly: boolean;
+    warningCount: number;
+  };
+  derivedFunctionSignals: string[];
+  derivedStrategyAnchors: string[];
+  lineSupportClassification: AiInspectorClassification[];
+  rolesClassification: AiInspectorClassification[];
+  planRolesClassification: AiInspectorClassification[];
+  warningCategories: string[];
+  descriptorGaps: Array<Record<string, unknown>>;
+  legacyStatus: Record<string, unknown>;
+  strategicRoleStatus: Record<string, unknown>;
+};
+
 const AI_HINTS_BY_CARD_ID = new Map(
   (activeAiHintsData.cards as CatalogAiHint[]).map((hint) => [hint.cardId, hint])
+);
+const COMPILED_AI_HINTS_BY_CARD_ID = new Map(
+  (compiledAiHintsData.cards as CatalogCompiledAiHint[]).map((hint) => [hint.cardId, hint])
+);
+const AI_HINT_INSPECTOR_BY_CARD_ID = new Map(
+  (aiHintInspectorIndexData.cards as AiInspectorIndexEntry[]).map((entry) => [entry.cardId, entry])
 );
 
 export function catalogListResponse(searchParams: URLSearchParams) {
@@ -53,7 +105,15 @@ export function catalogDetailResponse(catalogCardId: string) {
   if (!validation.ok) return safeCatalogError(500, "catalog_invalid", "Katalogdaten sind ungültig.");
   const card = getCatalogCard(snapshot, catalogCardId);
   if (!card) return safeCatalogError(404, "catalog_card_not_found", "Karte wurde im Katalog nicht gefunden.");
-  return safeCatalogPayload({ snapshotId: snapshot.snapshotId, snapshotHash, card: { ...card, aiHints: AI_HINTS_BY_CARD_ID.get(card.catalogCardId) ?? null } });
+  return safeCatalogPayload({
+    snapshotId: snapshot.snapshotId,
+    snapshotHash,
+    card: {
+      ...card,
+      aiHints: AI_HINTS_BY_CARD_ID.get(card.catalogCardId) ?? null,
+      aiInspector: catalogAiInspectorForCard(card.catalogCardId)
+    }
+  });
 }
 
 export function catalogStatusSummaryResponse() {
@@ -91,4 +151,80 @@ function isStatus(value: string | null): value is CatalogStatusKey {
 
 function createCatalogRuntime() {
   return createRuntimeCardPool();
+}
+
+function catalogAiInspectorForCard(catalogCardId: string) {
+  const activeHint = AI_HINTS_BY_CARD_ID.get(catalogCardId) ?? null;
+  const compiledHint = COMPILED_AI_HINTS_BY_CARD_ID.get(catalogCardId) ?? null;
+  const inspector = AI_HINT_INSPECTOR_BY_CARD_ID.get(catalogCardId) ?? null;
+  if (!activeHint && !compiledHint && !inspector) return null;
+
+  const supportStatus = inspector?.supportStatus ?? {
+    aiSupportStatus: compiledHint?.aiSupportStatus ?? activeHint?.aiSupportStatus ?? "none",
+    compiledHintFound: Boolean(compiledHint),
+    mechanicalFactsFound: hasMechanicalFacts(compiledHint),
+    generatedFactsFound: false,
+    overlayFields: [],
+    legacyFallbackOnly: false,
+    warningCount: compiledHint ? 0 : 1
+  };
+
+  return {
+    schemaVersion: aiHintInspectorIndexData.schemaVersion,
+    source: aiHintInspectorIndexData.source,
+    supportStatus,
+    compiledHint: compiledHint
+      ? {
+          aiSupportStatus: compiledHint.aiSupportStatus,
+          requiredMechanics: compiledHint.requiredMechanics ?? [],
+          valueHints: compiledHint.valueHints ?? {},
+          riskTags: compiledHint.riskTags ?? [],
+          scenarioRefs: compiledHint.scenarioRefs ?? [],
+          manualNotes: compiledHint.manualNotes ?? [],
+          strategicNotes: compiledHint.strategicNotes ?? []
+        }
+      : null,
+    mechanicalFacts: compiledHint
+      ? {
+          effects: compiledHint.effects ?? [],
+          conditions: compiledHint.conditions ?? [],
+          costProfile: compiledHint.costProfile ?? null,
+          breakerProfile: compiledHint.breakerProfile ?? null,
+          remoteRole: compiledHint.remoteRole ?? null,
+          targetProfiles: compiledHint.targetProfiles ?? []
+        }
+      : null,
+    functionSignals: inspector?.derivedFunctionSignals ?? [],
+    strategyAnchors: inspector?.derivedStrategyAnchors ?? [],
+    lineSupport: {
+      values: compiledHint?.lineSupport ?? [],
+      classification: inspector?.lineSupportClassification ?? []
+    },
+    strategicRole: compiledHint?.strategicRole ?? [],
+    quality: compiledHint?.quality ?? null,
+    legacyRoles: {
+      roles: compiledHint?.roles ?? activeHint?.roles ?? [],
+      planRoles: compiledHint?.planRoles ?? activeHint?.planRoles ?? [],
+      rolesClassification: inspector?.rolesClassification ?? [],
+      planRolesClassification: inspector?.planRolesClassification ?? []
+    },
+    warnings: {
+      categories: inspector?.warningCategories ?? (compiledHint ? [] : ["missing_compiled_hint"]),
+      descriptorGaps: inspector?.descriptorGaps ?? [],
+      legacyStatus: inspector?.legacyStatus ?? {},
+      strategicRoleStatus: inspector?.strategicRoleStatus ?? {}
+    }
+  };
+}
+
+function hasMechanicalFacts(hint: CatalogCompiledAiHint | null): boolean {
+  if (!hint) return false;
+  return Boolean(
+    hint.effects?.length ||
+      hint.conditions?.length ||
+      hint.targetProfiles?.length ||
+      (hint.costProfile && Object.keys(hint.costProfile).length > 0) ||
+      (hint.breakerProfile && Object.keys(hint.breakerProfile).length > 0) ||
+      (hint.remoteRole && Object.keys(hint.remoteRole).length > 0)
+  );
 }

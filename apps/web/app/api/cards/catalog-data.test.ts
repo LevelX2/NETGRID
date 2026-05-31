@@ -30,6 +30,52 @@ type CatalogDetailAiHints = {
   };
 };
 
+type CatalogDetailAiInspector = {
+  card: {
+    aiInspector: {
+      schemaVersion: string;
+      supportStatus: {
+        aiSupportStatus: string;
+        compiledHintFound: boolean;
+        mechanicalFactsFound: boolean;
+        generatedFactsFound: boolean;
+        warningCount: number;
+      };
+      compiledHint: {
+        requiredMechanics: string[];
+        valueHints: Record<string, number>;
+      } | null;
+      mechanicalFacts: {
+        effects: Array<{ kind: string; scope?: string }>;
+        breakerProfile: { coverage?: string[] } | null;
+        remoteRole: { kind?: string } | null;
+      } | null;
+      functionSignals: string[];
+      strategyAnchors: string[];
+      lineSupport: {
+        values: string[];
+        classification: Array<{
+          value: string;
+          triageCategory: string;
+          mapsTo: string[];
+        }>;
+      };
+      strategicRole: string[];
+      quality: Record<string, unknown> | null;
+      legacyRoles: {
+        roles: string[];
+        planRoles: string[];
+        rolesClassification: Array<{ value: string; triageCategory: string }>;
+        planRolesClassification: Array<{ value: string; triageCategory: string }>;
+      };
+      warnings: {
+        categories: string[];
+        descriptorGaps: Array<{ gapId?: string }>;
+      };
+    } | null;
+  };
+};
+
 const EXPECTED_PROTEUS_VISIBLE_BASELINE_CARD_IDS = [
   "onr_proteus_002_charity-takeover",
   "onr_proteus_009_viral-breeding-ground",
@@ -394,6 +440,74 @@ describe("catalog API filters", () => {
       listBody.cards.find((card) => card.catalogCardId === "onr_v1_001_afreet")
         ?.rarity,
     ).toMatchObject({ code: "uncommon", labelDe: "Ungewöhnlich" });
+  });
+
+  it("exposes the AI005 card-catalog inspector from compiled hints", () => {
+    const response = catalogDetailResponse("onr_v1_002_ai-boon");
+    expect(response.status).toBe(200);
+    const body = response.body as CatalogDetailAiInspector;
+    const inspector = body.card.aiInspector;
+
+    expect(inspector).not.toBeNull();
+    if (!inspector) throw new Error("Missing AI inspector for onr_v1_002_ai-boon");
+    expect(inspector.schemaVersion).toBe("ai-hint-inspector-index-v1");
+    expect(inspector.supportStatus).toMatchObject({
+      aiSupportStatus: "ai_supported",
+      compiledHintFound: true,
+      mechanicalFactsFound: true,
+    });
+    expect(inspector.mechanicalFacts?.effects).toEqual(
+      expect.arrayContaining([expect.objectContaining({ kind: "breaker" })]),
+    );
+    expect(inspector.mechanicalFacts?.breakerProfile?.coverage).toContain(
+      "sentry",
+    );
+    expect(inspector.functionSignals).toContain("breaker.sentry");
+    expect(inspector.lineSupport.values).toContain("rig_first");
+    expect(inspector.lineSupport.classification).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          value: "rig_first",
+          triageCategory: "deferred_requires_human_review",
+          mapsTo: ["runner.rig_first"],
+        }),
+      ]),
+    );
+    expect(inspector.strategicRole).toEqual([]);
+    expect(inspector.quality).toMatchObject({ hintReviewed: true });
+    expect(Object.keys(inspector.quality ?? {})).not.toContain(
+      "economyQuality",
+    );
+    expect(inspector.legacyRoles.roles).toEqual(
+      expect.arrayContaining(["program", "random"]),
+    );
+    expect(inspector.warnings.categories).toContain("legacy_lineSupport");
+  });
+
+  it("exposes generated remoteRole facts and descriptor-gap warnings in the inspector", () => {
+    const remoteResponse = catalogDetailResponse("onr_v1_012_clown");
+    expect(remoteResponse.status).toBe(200);
+    const remoteBody = remoteResponse.body as CatalogDetailAiInspector;
+    expect(remoteBody.card.aiInspector?.supportStatus.generatedFactsFound).toBe(
+      true,
+    );
+    expect(remoteBody.card.aiInspector?.mechanicalFacts?.remoteRole).toMatchObject(
+      { kind: "ice_modifier" },
+    );
+
+    const gapResponse = catalogDetailResponse("onr_v1_017_deep-thought");
+    expect(gapResponse.status).toBe(200);
+    const gapBody = gapResponse.body as CatalogDetailAiInspector;
+    expect(gapBody.card.aiInspector?.warnings.categories).toContain(
+      "function_signal_descriptor_gap",
+    );
+    expect(gapBody.card.aiInspector?.warnings.descriptorGaps).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          gapId: "interface_closeout_density_requires_aggregation",
+        }),
+      ]),
+    );
   });
 
   it("serves The Shell Traders catalog text from the confirmed spoiler instead of the old recurring-credit placeholder", () => {

@@ -1614,6 +1614,88 @@ select {
   color: var(--muted);
 }
 
+.catalogAiInspector {
+  gap: 12px;
+}
+
+.catalogAiInspectorGrid {
+  display: grid;
+  gap: 14px;
+}
+
+.catalogAiInspectorSection {
+  display: grid;
+  min-width: 0;
+  gap: 7px;
+}
+
+.catalogAiInspectorSection h4 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.catalogAiInspectorEntries {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.catalogAiInspectorEntry {
+  max-width: 100%;
+  display: grid;
+  gap: 3px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 6px 8px;
+  background: var(--section-bg);
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.catalogAiInspectorEntry > span {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.catalogAiInspectorEntry strong {
+  color: var(--text);
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.catalogAiInspectorEntry small {
+  color: var(--muted);
+  font-size: 10px;
+  line-height: 1.35;
+}
+
+.catalogAiInspectorEntry.tone-valid {
+  border-color: color-mix(in srgb, var(--ok), var(--line) 45%);
+  background: color-mix(in srgb, var(--ok), var(--section-bg) 86%);
+}
+
+.catalogAiInspectorEntry.tone-warning {
+  border-color: color-mix(in srgb, #d2a64f, var(--line) 45%);
+  background: color-mix(in srgb, #d2a64f, var(--section-bg) 88%);
+}
+
+.catalogAiInspectorEntry.tone-danger {
+  border-color: color-mix(in srgb, var(--danger), var(--line) 35%);
+  background: color-mix(in srgb, var(--danger), var(--section-bg) 86%);
+}
+
+.catalogAiInspectorEntry.tone-info {
+  border-color: color-mix(in srgb, var(--ice), var(--line) 45%);
+  background: color-mix(in srgb, var(--ice), var(--section-bg) 88%);
+}
+
+.catalogAiInspectorEntry.tone-legacy {
+  border-color: color-mix(in srgb, var(--muted), var(--line) 55%);
+}
+
 .catalogAiValueGrid strong {
   color: var(--text);
   font-size: 14px;
