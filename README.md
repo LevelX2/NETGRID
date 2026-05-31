@@ -1,59 +1,67 @@
 # NETGRID
 
-NETGRID ist eine private Webanwendung für ein asymmetrisches, rundenbasiertes Kartenspiel mit verdeckten Informationen.
+NETGRID ist eine private, lokale Webapplikation für regelgeführte NETGRID-Partien. Das Projekt ist eine Version-0-/Vor-Produktionsumgebung ohne öffentlichen Produktivbetrieb und ohne stabile Zusage für Datenformate, Replays oder lokale Laufzeitdaten.
 
-## Spielidee
+Die Rules Engine ist die einzige Regelautorität. UI, Server, menschliche Spieler und KI reichen nur `PlayerActions` ein, die aus `LegalActions` abgeleitet wurden; `applyAction` validiert Timing, Seite, `actionId`, `stateVersion`, Kosten, Ziele und Choices erneut. Verdeckte Kartendaten dürfen nicht in PlayerViews, KI-Eingaben, WebSocket-Payloads, Reconnects, Replays, Logs oder Client-Fehler leaken. Replay, StateHash und deterministische Zufallsaufzeichnungen sind zentrale Projektverträge.
 
-Zwei Seiten treten mit unterschiedlichen Möglichkeiten gegeneinander an:
+## Aktueller Funktionsumfang
 
-- Eine Seite versucht, gezielt Ziele zu erreichen und dabei Risiken einzugehen.
-- Die andere Seite baut Druck auf, kontrolliert kritische Bereiche und reagiert auf Vorstöße.
-- Karten, Ressourcen und Timing entscheiden darüber, wann ein direkter Vorstoß sinnvoll ist und wann Absicherung wichtiger ist.
+- Human-vs-KI-Partien in beiden Seitenrollen.
+- Human-vs-Human-Partien über privaten Link mit lokalem Multiplayer-Backend.
+- KI-vs-KI- und Simulationspfade für lokale Analyse und Regressionen.
+- Lokale Karten-, Deck- und Matchstart-Verwaltung mit serverseitiger Deck-/Format-Revalidierung.
+- Private Replays, Chronik- und Analyseansichten im Rahmen der aktuellen Hidden-Info-Gates.
+- Kartenpool-Auswahl beim Matchstart: `Nur Originalset` oder `Originalset & Protheus`.
 
-Das Spiel wird vollständig durch eine deterministische Regel-Engine gesteuert. Alle Clients sehen nur die Informationen, die sie laut Spielzustand sehen dürfen.
+Der aktuelle private Originalset-Stand ist deck-/formatvalidiert nach den freigegebenen lokalen Gates. Protheus ist als privater Human-vs-Human-Playtest-Kartenpool auswählbar; KI-Unterstützung bleibt dafür geschlossen, solange separate AI-Hints, Szenarien und Smokes fehlen.
 
-## Was die App bietet
+## Bewusste Grenzen
 
-- Partien Mensch gegen KI in beiden Seitenrollen
-- KI-gegen-KI-Simulationen
-- Lokaler privater Multiplayer für zwei menschliche Spieler
-- Kartenverwaltung, Deckauswahl und Match-Setup
+- Keine öffentliche Plattform, kein öffentlicher Produktivbetrieb.
+- Kein freigegebenes öffentliches Matchmaking, Ranking, Turnier- oder Public-Lobby-Feature.
+- Keine offiziellen Artworks, Card Frames, Card Backs, Logos oder externen Kartendatenbank-Abhängigkeiten ohne separates Asset-/Rechts-Gate.
+- Private Laufzeitdaten, lokale SQLite-Dateien, Caches, Logs, lokale Assets und Secrets bleiben lokal und werden nicht versioniert.
+- Account-, Cloud-Deck-, Moderations- und Public-Replay-Themen sind nur in engen Gate-/Planungsschnitten vorhanden, nicht als öffentliche Produktfläche.
 
 ## Technischer Rahmen
 
 - Node 24 LTS
-- pnpm Workspaces
-- TypeScript (strict)
+- pnpm Workspaces über Corepack
+- TypeScript
 - Vitest
 - Next.js/React für die Weboberfläche
-- SQLite für lokalen Laufzeit-Storage
+- lokaler Server mit SQLite-Storage für private Multiplayer-Matches
 
 ## Lokaler Start
 
+Abhängigkeiten installieren:
+
 ```powershell
 corepack pnpm install
-corepack pnpm -F @netgrid/server dev
-corepack pnpm -F @netgrid/web dev
 ```
 
-- Server: `http://127.0.0.1:8787`
-- Weboberfläche: `http://127.0.0.1:3100`
-- Abweichende Server-URL über `NEXT_PUBLIC_NETGRID_SERVER_URL`
+Normaler lokaler Betrieb startet über das Projekt-Startscript:
 
-## Lokales Match starten
+```powershell
+powershell -ExecutionPolicy Bypass -File .\scripts\start-netgrid.ps1
+```
 
-1. Browser öffnen: `http://127.0.0.1:3100`
-2. Match erstellen und Join-Link teilen
-3. Zweiten Client über den Join-Link beitreten lassen
-4. Auf beiden Seiten ein gespeichertes Deck wählen und starten
+Das Script startet Backend und Webclient im passenden LAN-/Local-Modus, ermittelt die LAN-IP und setzt die zusammengehörigen URLs, Origins und Umgebungsvariablen, unter anderem `NETGRID_PUBLIC_HOST`, `NETGRID_WEB_BASE_URL`, `NETGRID_SERVER_BASE_URL`, `NETGRID_ALLOWED_ORIGINS` und `NEXT_PUBLIC_NETGRID_SERVER_URL`.
 
-Hinweise:
+Standard-Ports:
 
-- KI-Partien sind direkt in der Startansicht verfügbar.
-- Für Nutzung außerhalb von localhost HTTPS/WSS verwenden und Tokens wie Passwörter behandeln.
-- Laufzeitdaten liegen unter `data/runtime/` (Default: `data/runtime/multiplayer/netgrid.sqlite`).
+- Weboberfläche: `http://127.0.0.1:3100` beziehungsweise die vom Script geöffnete LAN-URL.
+- Server/Health: `http://127.0.0.1:8787/health` beziehungsweise die LAN-URL auf Port `8787`.
 
-## Checks
+Direkte Dev-Starts mit `corepack pnpm --filter @netgrid/server dev`, `tsx` oder `next dev` sind nur Diagnose- oder isolierte Testpfade. Für den normalen lokalen Betrieb gilt wieder der Script-Startpfad, damit LAN-IP, Web-/Server-URLs und Origin-Allowlist konsistent bleiben.
+
+## Konfiguration und Daten
+
+`.env.example` dokumentiert die wichtigsten lokalen Variablen. Das Startscript setzt die für den normalen lokalen Betrieb relevanten Werte selbst; lokale Overrides und Secrets gehören nicht in versionierte Dateien.
+
+Laufzeitdaten liegen lokal, typischerweise unter `data/runtime/` und für Multiplayer standardmäßig in `data/runtime/multiplayer/netgrid.sqlite`. Persönliche Decks können lokal über die Deckbibliothek verwaltet werden.
+
+## Übliche Checks
 
 ```powershell
 corepack pnpm lint
@@ -62,4 +70,12 @@ corepack pnpm test
 corepack pnpm build
 corepack pnpm e2e
 corepack pnpm check:ai-approval-consistency
+```
+
+Für engere Änderungen sind paketbezogene Checks üblich, zum Beispiel:
+
+```powershell
+corepack pnpm --filter @netgrid/engine test
+corepack pnpm --filter @netgrid/server typecheck
+corepack pnpm --filter @netgrid/web test
 ```
