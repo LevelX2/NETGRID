@@ -5,6 +5,7 @@
 ## Neue AI-Aufgaben ab AI001
 
 - `ai001-decision-architecture-inventory-2026-05-25.md`: Aufgabe AI001 dokumentiert die aktuelle AI-Entscheidungsarchitektur als reine Ist-Bestandsaufnahme mit Entscheidungsfluss, Runner-/Corp-Kontextverlusten, lokalen Fixes, Datenquellen und offenen Ist-Risiken. Keine Zielarchitektur, Roadmap, Folgepakete oder Codeänderung.
+- `ai002-runner-run-context-window-analysis-2026-05-25.md`: Aufgabe AI002 analysiert den aktuellen Runner-Run-Kontext über Run-Start, Encounter, Jack-out-Fenster, Continue-run, Access und Repeat-Bewertung hinweg. Reine Ist-Analyse ohne Zielstruktur, Folgepakete, Heuristik-Fixes oder Codeänderung.
 
 ## Enthaltene Artefakte
 
