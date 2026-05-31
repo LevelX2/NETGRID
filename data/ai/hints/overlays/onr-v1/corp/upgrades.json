@@ -10,7 +10,7 @@
     {
       "cardId": "onr_v1_355_crystal-palace-station-grid",
       "overlay": {
-        "lineSupport": ["remote_scoring_build", "ice_tax_glacier"],
+        "lineSupport": ["corp.remote_scoring", "corp.ice_tax_glacier"],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -26,11 +26,7 @@
     {
       "cardId": "onr_v1_366_red-herrings",
       "overlay": {
-        "lineSupport": [
-          "remote_scoring_build",
-          "ice_tax_glacier",
-          "score_closeout"
-        ],
+        "lineSupport": ["corp.remote_scoring"],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,

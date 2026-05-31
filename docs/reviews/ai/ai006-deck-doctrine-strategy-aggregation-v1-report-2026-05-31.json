@@ -3480,9 +3480,9 @@
           "confidence": "high"
         },
         "corp.damage_kill": {
-          "anchorScore": 64,
+          "anchorScore": 100,
           "supportScore": 45,
-          "finalScore": 56,
+          "finalScore": 78,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_285_closed-accounts",
@@ -3492,11 +3492,35 @@
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
+              "cardId": "onr_v1_285_closed-accounts",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "punish_payoff",
+              "strategyId": "corp.damage_kill",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
+            },
+            {
               "cardId": "onr_v1_301_punitive-counterstrike",
               "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.damage_kill",
               "reason": "derived_strategy_anchor_from_inspector_index"
+            },
+            {
+              "cardId": "onr_v1_301_punitive-counterstrike",
+              "quantity": 1,
+              "source": "lineSupport",
+              "signal": "corp.damage_kill",
+              "strategyId": "corp.damage_kill",
+              "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_301_punitive-counterstrike",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "punish_payoff,win_condition",
+              "strategyId": "corp.damage_kill",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -3540,12 +3564,12 @@
             "low_ambush_support",
             "low_tagOrTrace_support"
           ],
-          "confidence": "medium"
+          "confidence": "high"
         },
         "corp.economy_rez_reserve": {
-          "anchorScore": 32,
+          "anchorScore": 44,
           "supportScore": 90,
-          "finalScore": 64,
+          "finalScore": 69,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_317_data-masons",
@@ -3553,6 +3577,14 @@
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.economy_rez_reserve",
               "reason": "derived_strategy_anchor_from_inspector_index"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "engine_anchor",
+              "strategyId": "corp.economy_rez_reserve",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -3651,20 +3683,28 @@
           "supportGaps": [
             "low_scorePlan_support"
           ],
-          "confidence": "medium"
+          "confidence": "high"
         },
         "corp.fast_advance": {
-          "anchorScore": 28,
+          "anchorScore": 40,
           "supportScore": 60,
-          "finalScore": 41,
+          "finalScore": 48,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_214_project-babylon",
               "quantity": 1,
               "source": "lineSupport",
-              "signal": "fast_advance_or_counter_ops",
+              "signal": "corp.fast_advance",
               "strategyId": "corp.fast_advance",
-              "reason": "safe_lineSupport_strategy_alias_from_inspector_index"
+              "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_214_project-babylon",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "scoring_tool",
+              "strategyId": "corp.fast_advance",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -3823,17 +3863,33 @@
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
               "source": "lineSupport",
-              "signal": "ice_tax_glacier",
+              "signal": "corp.ice_tax_glacier",
               "strategyId": "corp.ice_tax_glacier",
-              "reason": "safe_lineSupport_strategy_alias_from_inspector_index"
+              "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "engine_anchor",
+              "strategyId": "corp.ice_tax_glacier",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
               "cardId": "onr_v1_350_antiquated-interface-routines",
               "quantity": 1,
               "source": "lineSupport",
-              "signal": "ice_tax_glacier",
+              "signal": "corp.ice_tax_glacier",
               "strategyId": "corp.ice_tax_glacier",
-              "reason": "safe_lineSupport_strategy_alias_from_inspector_index"
+              "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_350_antiquated-interface-routines",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "tax_tool",
+              "strategyId": "corp.ice_tax_glacier",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -3935,25 +3991,41 @@
           "confidence": "high"
         },
         "corp.remote_scoring": {
-          "anchorScore": 56,
+          "anchorScore": 80,
           "supportScore": 100,
-          "finalScore": 74,
+          "finalScore": 88,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
               "source": "lineSupport",
-              "signal": "remote_scoring_build",
+              "signal": "corp.remote_scoring",
               "strategyId": "corp.remote_scoring",
-              "reason": "safe_lineSupport_strategy_alias_from_inspector_index"
+              "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "engine_anchor",
+              "strategyId": "corp.remote_scoring",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
               "cardId": "onr_v1_350_antiquated-interface-routines",
               "quantity": 1,
               "source": "lineSupport",
-              "signal": "remote_scoring_build",
+              "signal": "corp.remote_scoring",
               "strategyId": "corp.remote_scoring",
-              "reason": "safe_lineSupport_strategy_alias_from_inspector_index"
+              "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_350_antiquated-interface-routines",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "tax_tool",
+              "strategyId": "corp.remote_scoring",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -4218,6 +4290,14 @@
               "reason": "normalized_lineSupport_strategy_goal"
             },
             {
+              "cardId": "onr_v1_285_closed-accounts",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "punish_payoff",
+              "strategyId": "corp.tag_trace_punish",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
+            },
+            {
               "cardId": "onr_v1_301_punitive-counterstrike",
               "quantity": 1,
               "source": "derivedStrategyAnchor",
@@ -4231,6 +4311,14 @@
               "signal": "corp.tag_trace_punish",
               "strategyId": "corp.tag_trace_punish",
               "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_301_punitive-counterstrike",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "punish_payoff,win_condition",
+              "strategyId": "corp.tag_trace_punish",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -4294,14 +4382,14 @@
       "primaryStrategies": [
         "corp.central_stabilize",
         "corp.ice_tax_glacier",
-        "corp.tag_trace_punish"
+        "corp.remote_scoring"
       ],
       "secondaryStrategies": [
-        "corp.remote_scoring",
-        "corp.economy_rez_reserve",
+        "corp.tag_trace_punish",
         "corp.damage_kill",
-        "corp.rush_score",
-        "corp.fast_advance"
+        "corp.economy_rez_reserve",
+        "corp.fast_advance",
+        "corp.rush_score"
       ],
       "functionSignalCounts": {
         "damage.payoff": 1,
@@ -4314,12 +4402,14 @@
       },
       "legacySignalCounts": {
         "lineSupport:central_stabilize": 4,
+        "lineSupport:corp.damage_kill": 1,
+        "lineSupport:corp.fast_advance": 1,
+        "lineSupport:corp.ice_tax_glacier": 2,
+        "lineSupport:corp.remote_scoring": 2,
         "lineSupport:corp.tag_trace_punish": 2,
         "lineSupport:economy_rez_reserve": 7,
-        "lineSupport:fast_advance_or_counter_ops": 1,
-        "lineSupport:ice_tax_glacier": 2,
-        "lineSupport:remote_scoring_build": 6,
-        "lineSupport:score_closeout": 4,
+        "lineSupport:remote_scoring_build": 4,
+        "lineSupport:score_closeout": 3,
         "planRole:bait_runner": 3,
         "planRole:build_scoring_remote": 6,
         "planRole:protect_hq": 10,
@@ -4366,7 +4456,7 @@
         "scoreProfile": {
           "scoreAcceleration": 0,
           "agendaInstallAdvanceScoreSupport": 6,
-          "remoteScoringProtection": 2,
+          "remoteScoringProtection": 3,
           "stealTax": 0
         },
         "economyProfile": {
@@ -4707,9 +4797,9 @@
           "confidence": "high"
         },
         "corp.damage_kill": {
-          "anchorScore": 96,
+          "anchorScore": 100,
           "supportScore": 45,
-          "finalScore": 76,
+          "finalScore": 78,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_285_closed-accounts",
@@ -4717,6 +4807,14 @@
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.damage_kill",
               "reason": "derived_strategy_anchor_from_inspector_index"
+            },
+            {
+              "cardId": "onr_v1_285_closed-accounts",
+              "quantity": 2,
+              "source": "strategicRole",
+              "role": "punish_payoff",
+              "strategyId": "corp.damage_kill",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
               "cardId": "onr_v1_287_datapool-by-zetatech",
@@ -4812,9 +4910,9 @@
           "confidence": "high"
         },
         "corp.economy_rez_reserve": {
-          "anchorScore": 32,
+          "anchorScore": 44,
           "supportScore": 90,
-          "finalScore": 64,
+          "finalScore": 69,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_317_data-masons",
@@ -4822,6 +4920,14 @@
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.economy_rez_reserve",
               "reason": "derived_strategy_anchor_from_inspector_index"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "engine_anchor",
+              "strategyId": "corp.economy_rez_reserve",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -4962,7 +5068,7 @@
           "supportGaps": [
             "low_scorePlan_support"
           ],
-          "confidence": "medium"
+          "confidence": "high"
         },
         "corp.fast_advance": {
           "anchorScore": 0,
@@ -5153,17 +5259,33 @@
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
               "source": "lineSupport",
-              "signal": "ice_tax_glacier",
+              "signal": "corp.ice_tax_glacier",
               "strategyId": "corp.ice_tax_glacier",
-              "reason": "safe_lineSupport_strategy_alias_from_inspector_index"
+              "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "engine_anchor",
+              "strategyId": "corp.ice_tax_glacier",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
               "cardId": "onr_v1_350_antiquated-interface-routines",
               "quantity": 1,
               "source": "lineSupport",
-              "signal": "ice_tax_glacier",
+              "signal": "corp.ice_tax_glacier",
               "strategyId": "corp.ice_tax_glacier",
-              "reason": "safe_lineSupport_strategy_alias_from_inspector_index"
+              "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_350_antiquated-interface-routines",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "tax_tool",
+              "strategyId": "corp.ice_tax_glacier",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -5307,25 +5429,41 @@
           "confidence": "high"
         },
         "corp.remote_scoring": {
-          "anchorScore": 56,
+          "anchorScore": 80,
           "supportScore": 100,
-          "finalScore": 74,
+          "finalScore": 88,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
               "source": "lineSupport",
-              "signal": "remote_scoring_build",
+              "signal": "corp.remote_scoring",
               "strategyId": "corp.remote_scoring",
-              "reason": "safe_lineSupport_strategy_alias_from_inspector_index"
+              "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "engine_anchor",
+              "strategyId": "corp.remote_scoring",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
               "cardId": "onr_v1_350_antiquated-interface-routines",
               "quantity": 1,
               "source": "lineSupport",
-              "signal": "remote_scoring_build",
+              "signal": "corp.remote_scoring",
               "strategyId": "corp.remote_scoring",
-              "reason": "safe_lineSupport_strategy_alias_from_inspector_index"
+              "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_350_antiquated-interface-routines",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "tax_tool",
+              "strategyId": "corp.remote_scoring",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -5690,6 +5828,14 @@
               "reason": "normalized_lineSupport_strategy_goal"
             },
             {
+              "cardId": "onr_v1_285_closed-accounts",
+              "quantity": 2,
+              "source": "strategicRole",
+              "role": "punish_payoff",
+              "strategyId": "corp.tag_trace_punish",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
+            },
+            {
               "cardId": "onr_v1_287_datapool-by-zetatech",
               "quantity": 1,
               "source": "derivedStrategyAnchor",
@@ -5823,8 +5969,8 @@
         "corp.ice_tax_glacier"
       ],
       "secondaryStrategies": [
-        "corp.damage_kill",
         "corp.remote_scoring",
+        "corp.damage_kill",
         "corp.economy_rez_reserve",
         "corp.rush_score"
       ],
@@ -5840,10 +5986,11 @@
       },
       "legacySignalCounts": {
         "lineSupport:central_stabilize": 6,
+        "lineSupport:corp.ice_tax_glacier": 2,
+        "lineSupport:corp.remote_scoring": 2,
         "lineSupport:corp.tag_trace_punish": 6,
         "lineSupport:economy_rez_reserve": 8,
-        "lineSupport:ice_tax_glacier": 2,
-        "lineSupport:remote_scoring_build": 6,
+        "lineSupport:remote_scoring_build": 4,
         "lineSupport:score_closeout": 3,
         "planRole:bait_runner": 5,
         "planRole:build_scoring_remote": 5,
@@ -5892,7 +6039,7 @@
         "scoreProfile": {
           "scoreAcceleration": 0,
           "agendaInstallAdvanceScoreSupport": 4,
-          "remoteScoringProtection": 2,
+          "remoteScoringProtection": 3,
           "stealTax": 0
         },
         "economyProfile": {
@@ -5945,7 +6092,8 @@
     "primaryStrategyCounts": {
       "corp.central_stabilize": 2,
       "corp.ice_tax_glacier": 2,
-      "corp.tag_trace_punish": 2,
+      "corp.remote_scoring": 1,
+      "corp.tag_trace_punish": 1,
       "runner.economy_first": 2,
       "runner.hq_pressure": 2,
       "runner.interface_closeout": 1,
@@ -5958,6 +6106,6 @@
       "inspector:legacy_fallback_only": 5,
       "inspector:legacy_lineSupport": 5
     },
-    "contentSha256": "d60bc2cff8e398ce0e4892e1d17fab15ca7bd28e68914d5bfd7cef1ba894abf1"
+    "contentSha256": "98ff6c23854b8dea79ea0d4bffe09995049e3de12ce7fea90d811d13e6c3cfb2"
   }
 }

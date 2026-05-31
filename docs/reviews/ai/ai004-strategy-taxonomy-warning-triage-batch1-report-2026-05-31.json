@@ -5,7 +5,7 @@
   "generatedAt": "2026-05-31",
   "status": "pass_with_warnings",
   "hardErrorCount": 0,
-  "warningCount": 69,
+  "warningCount": 66,
   "source": {
     "activeHintsPath": "data/ai/ai-card-hints-active.json",
     "compiledHintsPath": "data/ai/ai-card-hints-compiled.json",
@@ -201,7 +201,7 @@
       "effects[].resource": 532,
       "effects[].scope": 841,
       "effects[].timing": 841,
-      "lineSupport": 118,
+      "lineSupport": 131,
       "manualNotes": 3,
       "planRoles": 564,
       "quality": 380,
@@ -223,6 +223,7 @@
       "scenarioRefs": 564,
       "side": 564,
       "strategicNotes": 3,
+      "strategicRole": 47,
       "targetProfiles": 3,
       "targetProfiles[].installCost": 3,
       "targetProfiles[].installsTarget": 3,
@@ -300,7 +301,7 @@
   "wildGrowth": {
     "roleValueCount": 251,
     "planRoleValueCount": 102,
-    "lineSupportValueCount": 19,
+    "lineSupportValueCount": 23,
     "lineSupportLegacyStatus": "legacy_warn_only_in_ai003"
   },
   "functionSignals": {
@@ -664,21 +665,21 @@
     "totals": {
       "roles": 251,
       "planRoles": 102,
-      "lineSupport": 19,
-      "allValues": 372
+      "lineSupport": 23,
+      "allValues": 376
     },
     "categoryCounts": {
-      "alias_to_strategy_goal": 86,
+      "alias_to_strategy_goal": 83,
       "deferred_requires_human_review": 1,
       "descriptor_gap": 10,
-      "exact_strategy_goal": 8,
+      "exact_strategy_goal": 15,
       "function_signal_only": 219,
       "legacy_role_only": 47,
       "remove_or_deprecate": 1
     },
     "mappedCounts": {
-      "exactStrategyGoal": 8,
-      "aliasToStrategyGoal": 86,
+      "exactStrategyGoal": 15,
+      "aliasToStrategyGoal": 83,
       "functionSignalOnly": 219,
       "legacyRoleOnly": 47,
       "unknownUnmapped": 0,
@@ -687,22 +688,18 @@
   },
   "ai004Triage": {
     "lineSupport": {
-      "totalOccurrences": 192,
-      "legacyOccurrences": 161,
+      "totalOccurrences": 190,
+      "legacyOccurrences": 110,
       "categoryCounts": {
-        "deferred_requires_human_review": 25,
-        "normalized_strategy_id": 31,
-        "safe_strategy_anchor_alias": 74,
-        "should_be_removed_from_lineSupport": 3,
-        "structure_or_support_goal_requires_card_review": 59
+        "deferred_requires_human_review": 18,
+        "normalized_strategy_id": 80,
+        "safe_strategy_anchor_alias": 44,
+        "should_be_removed_from_lineSupport": 2,
+        "structure_or_support_goal_requires_card_review": 46
       },
       "valueCounts": [
         {
           "value": "rig_first",
-          "count": 34
-        },
-        {
-          "value": "ice_tax_glacier",
           "count": 26
         },
         {
@@ -714,35 +711,63 @@
           "count": 20
         },
         {
+          "value": "ice_tax_glacier",
+          "count": 18
+        },
+        {
           "value": "economy_rez_reserve",
-          "count": 19
+          "count": 15
         },
         {
-          "value": "remote_scoring_build",
-          "count": 19
-        },
-        {
-          "value": "breaker_search_first",
-          "count": 11
-        },
-        {
-          "value": "score_closeout",
+          "value": "corp.remote_scoring",
           "count": 10
         },
         {
-          "value": "economy_first",
+          "value": "remote_scoring_build",
+          "count": 9
+        },
+        {
+          "value": "corp.asset_economy",
           "count": 8
+        },
+        {
+          "value": "runner.breaker_search",
+          "count": 8
+        },
+        {
+          "value": "corp.fast_advance",
+          "count": 7
+        },
+        {
+          "value": "economy_first",
+          "count": 7
+        },
+        {
+          "value": "score_closeout",
+          "count": 6
+        },
+        {
+          "value": "corp.damage_kill",
+          "count": 5
+        },
+        {
+          "value": "runner.rnd_pressure",
+          "count": 5
+        },
+        {
+          "value": "runner.survival_defense",
+          "count": 5
+        },
+        {
+          "value": "corp.ice_tax_glacier",
+          "count": 4
         },
         {
           "value": "runner.interface_closeout",
           "count": 4
         },
         {
-          "value": "closeout_pressure",
-          "count": 3
-        },
-        {
-          "value": "fast_advance_or_counter_ops",
+          "value": "breaker_search_first",
           "count": 3
         },
         {
@@ -750,15 +775,7 @@
           "count": 3
         },
         {
-          "value": "runner.rnd_pressure",
-          "count": 3
-        },
-        {
-          "value": "early_rnd_pressure",
-          "count": 2
-        },
-        {
-          "value": "interface_pressure",
+          "value": "closeout_pressure",
           "count": 2
         },
         {
@@ -1132,11 +1149,10 @@
           "cardId": "onr_v1_017_deep-thought",
           "side": "runner",
           "cardType": "program",
-          "value": "early_rnd_pressure",
+          "value": "runner.rnd_pressure",
           "evidence": {
             "lineSupport": [
-              "early_rnd_pressure",
-              "interface_pressure"
+              "runner.rnd_pressure"
             ],
             "effects": [
               {
@@ -1165,54 +1181,11 @@
               "strategyCovered": false
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.rnd_pressure"
           ],
-          "rationale": "R&D access/topdeck evidence supports Runner R&D pressure."
-        },
-        {
-          "cardId": "onr_v1_017_deep-thought",
-          "side": "runner",
-          "cardType": "program",
-          "value": "interface_pressure",
-          "evidence": {
-            "lineSupport": [
-              "early_rnd_pressure",
-              "interface_pressure"
-            ],
-            "effects": [
-              {
-                "kind": "topdeck_info",
-                "scope": "rnd",
-                "timing": "start_of_turn",
-                "resource": "cards"
-              },
-              {
-                "kind": "topdeck_info",
-                "scope": "rnd",
-                "timing": "start_of_turn",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_successful_run",
-              "requires_rnd_pressure"
-            ],
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "needsHumanReview": false,
-              "strategyCovered": false
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "runner.interface_closeout"
-          ],
-          "rationale": "Interface pressure is the payoff-anchor closeout package."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_019_dropp",
@@ -1259,6 +1232,71 @@
             "runner.rig_first"
           ],
           "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+        },
+        {
+          "cardId": "onr_v1_022_emergency-self-construct",
+          "side": "runner",
+          "cardType": "program",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "hand_size_modifier",
+                "scope": "runner",
+                "timing": "persistent",
+                "resource": "hand_size"
+              },
+              {
+                "kind": "action_penalty",
+                "scope": "runner",
+                "timing": "persistent",
+                "resource": "actions"
+              },
+              {
+                "kind": "flatline_prevention",
+                "scope": "runner",
+                "timing": "flatline_replacement",
+                "resource": "damage"
+              },
+              {
+                "kind": "meat_damage_prevention",
+                "scope": "runner",
+                "timing": "persistent",
+                "resource": "meat_damage"
+              },
+              {
+                "kind": "persistent_survival_modifier",
+                "scope": "runner",
+                "timing": "persistent"
+              },
+              {
+                "kind": "prevention_replacement",
+                "scope": "runner",
+                "timing": "flatline_replacement",
+                "resource": "damage"
+              },
+              {
+                "kind": "remove_brain_damage",
+                "scope": "runner",
+                "timing": "flatline_replacement",
+                "resource": "brain_damage"
+              }
+            ],
+            "conditions": [
+              "requires_flatline",
+              "requires_prevention_window"
+            ],
+            "cardType": "program",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_037_japanese-water-torture",
@@ -1503,11 +1541,10 @@
           "cardId": "onr_v1_043_mystery-box",
           "side": "runner",
           "cardType": "program",
-          "value": "breaker_search_first",
+          "value": "runner.breaker_search",
           "evidence": {
             "lineSupport": [
-              "breaker_search_first",
-              "rig_first"
+              "runner.breaker_search"
             ],
             "effects": [
               {
@@ -1557,75 +1594,11 @@
               "strategyCovered": false
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.breaker_search"
           ],
-          "rationale": "Legacy setup/search line."
-        },
-        {
-          "cardId": "onr_v1_043_mystery-box",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "breaker_search_first",
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "search",
-                "scope": "runner",
-                "timing": "during_run"
-              },
-              {
-                "kind": "install_discount",
-                "scope": "installed_card",
-                "timing": "during_run"
-              },
-              {
-                "kind": "install_discount",
-                "scope": "runner",
-                "timing": "during_run"
-              },
-              {
-                "kind": "topdeck_info",
-                "scope": "runner",
-                "timing": "during_run",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_during_run",
-              "requires_installed_program"
-            ],
-            "targetProfiles": [
-              {
-                "installCost": "free",
-                "installsTarget": true,
-                "lookCount": 5,
-                "oncePerRun": true,
-                "showToOpponent": true,
-                "shuffleAfter": true,
-                "targetCardType": "program",
-                "zone": "stack_top"
-              }
-            ],
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "needsHumanReview": false,
-              "strategyCovered": false
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_045_newsgroup-filter",
@@ -2083,11 +2056,10 @@
           "cardId": "onr_v1_059_self-modifying-code",
           "side": "runner",
           "cardType": "program",
-          "value": "breaker_search_first",
+          "value": "runner.breaker_search",
           "evidence": {
             "lineSupport": [
-              "breaker_search_first",
-              "rig_first"
+              "runner.breaker_search"
             ],
             "effects": [
               {
@@ -2118,56 +2090,11 @@
               "strategyCovered": false
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.breaker_search"
           ],
-          "rationale": "Legacy setup/search line."
-        },
-        {
-          "cardId": "onr_v1_059_self-modifying-code",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "breaker_search_first",
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "search",
-                "scope": "runner",
-                "timing": "during_run"
-              }
-            ],
-            "conditions": [
-              "requires_during_run",
-              "requires_installed_program"
-            ],
-            "targetProfiles": [
-              {
-                "installCost": "normal",
-                "installsTarget": true,
-                "shuffleAfter": true,
-                "targetCardType": "program",
-                "zone": "stack"
-              }
-            ],
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "needsHumanReview": false,
-              "strategyCovered": false
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_060_shaka",
@@ -2633,6 +2560,42 @@
           "rationale": "Legacy setup/search line."
         },
         {
+          "cardId": "onr_v1_078_arasaka-owns-you",
+          "side": "runner",
+          "cardType": "event",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "flatline_prevention",
+                "scope": "runner",
+                "timing": "flatline_replacement",
+                "resource": "damage"
+              },
+              {
+                "kind": "prevention_replacement",
+                "scope": "runner",
+                "timing": "flatline_replacement",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_flatline",
+              "requires_prevention_window"
+            ],
+            "cardType": "event",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "cardId": "onr_v1_079_bodyweight-synthetic-blood",
           "side": "runner",
           "cardType": "event",
@@ -3037,11 +3000,10 @@
           "cardId": "onr_v1_087_forgotten-backup-chip",
           "side": "runner",
           "cardType": "event",
-          "value": "rig_first",
+          "value": "runner.breaker_search",
           "evidence": {
             "lineSupport": [
-              "rig_first",
-              "breaker_search_first"
+              "runner.breaker_search"
             ],
             "effects": [
               {
@@ -3082,76 +3044,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_087_forgotten-backup-chip",
-          "side": "runner",
-          "cardType": "event",
-          "value": "breaker_search_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first",
-              "breaker_search_first"
-            ],
-            "effects": [
-              {
-                "kind": "search",
-                "scope": "runner",
-                "timing": "action"
-              },
-              {
-                "kind": "zone_shuffle",
-                "scope": "runner",
-                "timing": "action"
-              },
-              {
-                "kind": "card_recovery",
-                "scope": "heap",
-                "timing": "action",
-                "resource": "cards"
-              },
-              {
-                "kind": "search",
-                "scope": "heap",
-                "timing": "action",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_heap_card"
-            ],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.breaker_search"
           ],
-          "rationale": "Legacy setup/search line."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_089_gideons-pawnshop",
           "side": "runner",
           "cardType": "event",
-          "value": "rig_first",
+          "value": "runner.breaker_search",
           "evidence": {
             "lineSupport": [
-              "rig_first",
-              "breaker_search_first"
+              "runner.breaker_search"
             ],
             "effects": [
               {
@@ -3187,71 +3093,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
-          "cardId": "onr_v1_089_gideons-pawnshop",
-          "side": "runner",
-          "cardType": "event",
-          "value": "breaker_search_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first",
-              "breaker_search_first"
-            ],
-            "effects": [
-              {
-                "kind": "search",
-                "scope": "runner",
-                "timing": "action"
-              },
-              {
-                "kind": "card_recovery",
-                "scope": "heap",
-                "timing": "action",
-                "resource": "cards"
-              },
-              {
-                "kind": "search",
-                "scope": "heap",
-                "timing": "action",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_heap_card"
-            ],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "deferred_requires_human_review",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.breaker_search"
           ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_093_if-you-want-it-done-right",
           "side": "runner",
           "cardType": "event",
-          "value": "rig_first",
+          "value": "runner.breaker_search",
           "evidence": {
             "lineSupport": [
-              "rig_first",
-              "breaker_search_first"
+              "runner.breaker_search"
             ],
             "effects": [
               {
@@ -3281,55 +3136,11 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
-          "cardId": "onr_v1_093_if-you-want-it-done-right",
-          "side": "runner",
-          "cardType": "event",
-          "value": "breaker_search_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first",
-              "breaker_search_first"
-            ],
-            "effects": [
-              {
-                "kind": "search",
-                "scope": "runner",
-                "timing": "action"
-              },
-              {
-                "kind": "search",
-                "scope": "stack",
-                "timing": "action",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_stack_search"
-            ],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "deferred_requires_human_review",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.breaker_search"
           ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_095_jack-n-joe",
@@ -3419,12 +3230,10 @@
           "cardId": "onr_v1_096_kilroy-was-here",
           "side": "runner",
           "cardType": "event",
-          "value": "early_rnd_pressure",
+          "value": "runner.rnd_pressure",
           "evidence": {
             "lineSupport": [
-              "early_rnd_pressure",
-              "interface_pressure",
-              "closeout_pressure"
+              "runner.rnd_pressure"
             ],
             "effects": [
               {
@@ -3454,99 +3263,11 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.rnd_pressure"
           ],
-          "rationale": "R&D access/topdeck evidence supports Runner R&D pressure."
-        },
-        {
-          "cardId": "onr_v1_096_kilroy-was-here",
-          "side": "runner",
-          "cardType": "event",
-          "value": "interface_pressure",
-          "evidence": {
-            "lineSupport": [
-              "early_rnd_pressure",
-              "interface_pressure",
-              "closeout_pressure"
-            ],
-            "effects": [
-              {
-                "kind": "access_replacement",
-                "scope": "rnd",
-                "timing": "successful_run"
-              },
-              {
-                "kind": "trash_credit",
-                "scope": "accessed_card",
-                "timing": "on_access",
-                "resource": "trash_credits"
-              }
-            ],
-            "conditions": [
-              "requires_successful_run"
-            ],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "runner.interface_closeout"
-          ],
-          "rationale": "Interface pressure is the payoff-anchor closeout package."
-        },
-        {
-          "cardId": "onr_v1_096_kilroy-was-here",
-          "side": "runner",
-          "cardType": "event",
-          "value": "closeout_pressure",
-          "evidence": {
-            "lineSupport": [
-              "early_rnd_pressure",
-              "interface_pressure",
-              "closeout_pressure"
-            ],
-            "effects": [
-              {
-                "kind": "access_replacement",
-                "scope": "rnd",
-                "timing": "successful_run"
-              },
-              {
-                "kind": "trash_credit",
-                "scope": "accessed_card",
-                "timing": "on_access",
-                "resource": "trash_credits"
-              }
-            ],
-            "conditions": [
-              "requires_successful_run"
-            ],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "should_be_removed_from_lineSupport",
-          "mapsTo": [],
-          "rationale": "Closeout pressure without multiaccess/interface evidence is too broad for lineSupport."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_097_livewires-contacts",
@@ -3593,12 +3314,10 @@
           "cardId": "onr_v1_099_mantis-fixer-at-large",
           "side": "runner",
           "cardType": "event",
-          "value": "rig_first",
+          "value": "runner.breaker_search",
           "evidence": {
             "lineSupport": [
-              "rig_first",
-              "breaker_search_first",
-              "economy_first"
+              "runner.breaker_search"
             ],
             "effects": [
               {
@@ -3634,113 +3353,11 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_099_mantis-fixer-at-large",
-          "side": "runner",
-          "cardType": "event",
-          "value": "breaker_search_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first",
-              "breaker_search_first",
-              "economy_first"
-            ],
-            "effects": [
-              {
-                "kind": "search",
-                "scope": "runner",
-                "timing": "action"
-              },
-              {
-                "kind": "draw",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "cards"
-              },
-              {
-                "kind": "search",
-                "scope": "stack",
-                "timing": "action",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_stack_search"
-            ],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.breaker_search"
           ],
-          "rationale": "Legacy setup/search line."
-        },
-        {
-          "cardId": "onr_v1_099_mantis-fixer-at-large",
-          "side": "runner",
-          "cardType": "event",
-          "value": "economy_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first",
-              "breaker_search_first",
-              "economy_first"
-            ],
-            "effects": [
-              {
-                "kind": "search",
-                "scope": "runner",
-                "timing": "action"
-              },
-              {
-                "kind": "draw",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "cards"
-              },
-              {
-                "kind": "search",
-                "scope": "stack",
-                "timing": "action",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_stack_search"
-            ],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.economy_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_108_score",
@@ -3830,11 +3447,10 @@
           "cardId": "onr_v1_110_sneak-preview",
           "side": "runner",
           "cardType": "event",
-          "value": "rig_first",
+          "value": "runner.breaker_search",
           "evidence": {
             "lineSupport": [
-              "rig_first",
-              "breaker_search_first"
+              "runner.breaker_search"
             ],
             "effects": [
               {
@@ -3861,62 +3477,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_110_sneak-preview",
-          "side": "runner",
-          "cardType": "event",
-          "value": "breaker_search_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first",
-              "breaker_search_first"
-            ],
-            "effects": [
-              {
-                "kind": "search",
-                "scope": "runner",
-                "timing": "action"
-              },
-              {
-                "kind": "install_discount",
-                "scope": "installed_card",
-                "timing": "action"
-              }
-            ],
-            "conditions": [],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.breaker_search"
           ],
-          "rationale": "Legacy setup/search line."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_114_temple-microcode-outlet",
           "side": "runner",
           "cardType": "event",
-          "value": "rig_first",
+          "value": "runner.breaker_search",
           "evidence": {
             "lineSupport": [
-              "rig_first",
-              "breaker_search_first"
+              "runner.breaker_search"
             ],
             "effects": [
               {
@@ -3952,61 +3526,91 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_114_temple-microcode-outlet",
-          "side": "runner",
-          "cardType": "event",
-          "value": "breaker_search_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first",
-              "breaker_search_first"
-            ],
-            "effects": [
-              {
-                "kind": "search",
-                "scope": "runner",
-                "timing": "action"
-              },
-              {
-                "kind": "draw",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "cards"
-              },
-              {
-                "kind": "search",
-                "scope": "stack",
-                "timing": "action",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_stack_search"
-            ],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.breaker_search"
           ],
-          "rationale": "Legacy setup/search line."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_116_total-genetic-retrofit",
+          "side": "runner",
+          "cardType": "event",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "tag_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "tags"
+              },
+              {
+                "kind": "survival_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "tags"
+              }
+            ],
+            "conditions": [
+              "requires_prevention_window",
+              "requires_runner_tagged"
+            ],
+            "cardType": "event",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_167_leland-corporate-bodyguard",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "meat_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "meat_damage"
+              },
+              {
+                "kind": "tag_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "tags"
+              }
+            ],
+            "conditions": [
+              "requires_damage",
+              "requires_meat_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "resource",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_168_loan-from-chiba",
@@ -4233,6 +3837,44 @@
             "runner.economy_first"
           ],
           "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+        },
+        {
+          "cardId": "onr_v1_185_trauma-team",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "meat_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "meat_damage"
+              }
+            ],
+            "conditions": [
+              "requires_damage",
+              "requires_meat_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "resource",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_188_ai-chief-financial-officer",
@@ -4470,11 +4112,10 @@
           "cardId": "onr_v1_192_corporate-boon",
           "side": "corp",
           "cardType": "agenda",
-          "value": "fast_advance_or_counter_ops",
+          "value": "corp.fast_advance",
           "evidence": {
             "lineSupport": [
-              "fast_advance_or_counter_ops",
-              "score_closeout"
+              "corp.fast_advance"
             ],
             "effects": [
               {
@@ -4511,62 +4152,11 @@
               "focusedDecisionTest": "packages/ai/src/index.test.ts::uses Corporate Boon extra-action ability as scored-agenda tempo"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.fast_advance"
           ],
-          "rationale": "Counter-operation details are support facts under fast advance."
-        },
-        {
-          "cardId": "onr_v1_192_corporate-boon",
-          "side": "corp",
-          "cardType": "agenda",
-          "value": "score_closeout",
-          "evidence": {
-            "lineSupport": [
-              "fast_advance_or_counter_ops",
-              "score_closeout"
-            ],
-            "effects": [
-              {
-                "kind": "scored_agenda_action",
-                "scope": "score_area",
-                "timing": "scored_activated"
-              },
-              {
-                "kind": "extra_action",
-                "scope": "corp",
-                "timing": "scored_activated",
-                "resource": "actions"
-              },
-              {
-                "kind": "extra_action",
-                "scope": "corp",
-                "timing": "scored_activated",
-                "resource": "actions"
-              }
-            ],
-            "conditions": [
-              "requires_scored_agenda"
-            ],
-            "cardType": "agenda",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex",
-              "focusedDecisionTest": "packages/ai/src/index.test.ts::uses Corporate Boon extra-action ability as scored-agenda tempo"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.rush_score"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_193_corporate-coup",
@@ -5049,7 +4639,8 @@
           "value": "corp.tag_trace_punish",
           "evidence": {
             "lineSupport": [
-              "corp.tag_trace_punish"
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
             ],
             "effects": [
               {
@@ -5101,6 +4692,69 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_208_on-call-solo-team",
+          "side": "corp",
+          "cardType": "agenda",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "scored_agenda_action",
+                "scope": "score_area",
+                "timing": "scored_activated"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "scored_activated",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "scored_activated",
+                "resource": "damage"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "scored_activated",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "scored_activated",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_scored_agenda",
+              "requires_runner_tagged"
+            ],
+            "cardType": "agenda",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "high",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-05-25",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -5559,11 +5213,10 @@
           "cardId": "onr_v1_214_project-babylon",
           "side": "corp",
           "cardType": "agenda",
-          "value": "fast_advance_or_counter_ops",
+          "value": "corp.fast_advance",
           "evidence": {
             "lineSupport": [
-              "fast_advance_or_counter_ops",
-              "score_closeout"
+              "corp.fast_advance"
             ],
             "effects": [
               {
@@ -5588,50 +5241,11 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.fast_advance"
           ],
-          "rationale": "Counter-operation details are support facts under fast advance."
-        },
-        {
-          "cardId": "onr_v1_214_project-babylon",
-          "side": "corp",
-          "cardType": "agenda",
-          "value": "score_closeout",
-          "evidence": {
-            "lineSupport": [
-              "fast_advance_or_counter_ops",
-              "score_closeout"
-            ],
-            "effects": [
-              {
-                "kind": "score_acceleration",
-                "scope": "score_area",
-                "timing": "when_scored",
-                "resource": "advancement_counters"
-              }
-            ],
-            "conditions": [
-              "requires_scored_agenda"
-            ],
-            "cardType": "agenda",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.rush_score"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_217_strike-force-kali",
@@ -5640,7 +5254,8 @@
           "value": "corp.tag_trace_punish",
           "evidence": {
             "lineSupport": [
-              "corp.tag_trace_punish"
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
             ],
             "effects": [
               {
@@ -5692,6 +5307,69 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_217_strike-force-kali",
+          "side": "corp",
+          "cardType": "agenda",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "scored_agenda_action",
+                "scope": "score_area",
+                "timing": "scored_activated"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "scored_activated",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "scored_activated",
+                "resource": "damage"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "scored_activated",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "scored_activated",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_scored_agenda",
+              "requires_runner_tagged"
+            ],
+            "cardType": "agenda",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "high",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-05-25",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -8688,6 +8366,38 @@
           "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
         },
         {
+          "cardId": "onr_v1_292_management-shake-up",
+          "side": "corp",
+          "cardType": "operation",
+          "value": "corp.fast_advance",
+          "evidence": {
+            "lineSupport": [
+              "corp.fast_advance"
+            ],
+            "effects": [
+              {
+                "kind": "score_acceleration",
+                "scope": "installed_card",
+                "timing": "action",
+                "resource": "advancement_counters"
+              }
+            ],
+            "conditions": [],
+            "remoteRole": {
+              "kind": "asset_economy",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "operation",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.fast_advance"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "cardId": "onr_v1_293_netwatch-credit-voucher",
           "side": "corp",
           "cardType": "operation",
@@ -9004,13 +8714,168 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
+          "cardId": "onr_v1_300_project-consultants",
+          "side": "corp",
+          "cardType": "operation",
+          "value": "corp.fast_advance",
+          "evidence": {
+            "lineSupport": [
+              "corp.fast_advance"
+            ],
+            "effects": [
+              {
+                "kind": "advance_burst",
+                "scope": "installed_card",
+                "timing": "action",
+                "resource": "advancement_counters"
+              },
+              {
+                "kind": "score_acceleration",
+                "scope": "installed_card",
+                "timing": "action",
+                "resource": "advancement_counters"
+              }
+            ],
+            "conditions": [
+              "requires_score_window"
+            ],
+            "remoteRole": {
+              "kind": "asset_economy",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "operation",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.fast_advance"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "cardId": "onr_v1_301_punitive-counterstrike",
           "side": "corp",
           "cardType": "operation",
           "value": "corp.tag_trace_punish",
           "evidence": {
             "lineSupport": [
-              "corp.tag_trace_punish"
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_runner_tagged"
+            ],
+            "cardType": "operation",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "high",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-05-25",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_301_punitive-counterstrike",
+          "side": "corp",
+          "cardType": "operation",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_runner_tagged"
+            ],
+            "cardType": "operation",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "high",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-05-25",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_302_scorched-earth",
+          "side": "corp",
+          "cardType": "operation",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
             ],
             "effects": [
               {
@@ -9063,10 +8928,11 @@
           "cardId": "onr_v1_302_scorched-earth",
           "side": "corp",
           "cardType": "operation",
-          "value": "corp.tag_trace_punish",
+          "value": "corp.damage_kill",
           "evidence": {
             "lineSupport": [
-              "corp.tag_trace_punish"
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
             ],
             "effects": [
               {
@@ -9111,7 +8977,94 @@
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.tag_trace_punish"
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_304_systematic-layoffs",
+          "side": "corp",
+          "cardType": "operation",
+          "value": "corp.fast_advance",
+          "evidence": {
+            "lineSupport": [
+              "corp.fast_advance"
+            ],
+            "effects": [
+              {
+                "kind": "advance_burst",
+                "scope": "installed_card",
+                "timing": "action",
+                "resource": "advancement_counters"
+              },
+              {
+                "kind": "score_acceleration",
+                "scope": "installed_card",
+                "timing": "action",
+                "resource": "advancement_counters"
+              }
+            ],
+            "conditions": [
+              "requires_score_window"
+            ],
+            "remoteRole": {
+              "kind": "asset_economy",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "operation",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.fast_advance"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_305_team-restructuring",
+          "side": "corp",
+          "cardType": "operation",
+          "value": "corp.fast_advance",
+          "evidence": {
+            "lineSupport": [
+              "corp.fast_advance"
+            ],
+            "effects": [
+              {
+                "kind": "advance_burst",
+                "scope": "installed_card",
+                "timing": "action",
+                "resource": "advancement_counters"
+              },
+              {
+                "kind": "score_acceleration",
+                "scope": "installed_card",
+                "timing": "action",
+                "resource": "advancement_counters"
+              }
+            ],
+            "conditions": [
+              "requires_score_window"
+            ],
+            "remoteRole": {
+              "kind": "asset_economy",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "operation",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.fast_advance"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -9166,7 +9119,8 @@
           "value": "corp.tag_trace_punish",
           "evidence": {
             "lineSupport": [
-              "corp.tag_trace_punish"
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
             ],
             "effects": [
               {
@@ -9216,13 +9170,70 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
+          "cardId": "onr_v1_307_urban-renewal",
+          "side": "corp",
+          "cardType": "operation",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_runner_tagged"
+            ],
+            "cardType": "operation",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "high",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-05-25",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "cardId": "onr_v1_308_acme-savings-and-loan",
           "side": "corp",
           "cardType": "asset",
-          "value": "economy_rez_reserve",
+          "value": "corp.asset_economy",
           "evidence": {
             "lineSupport": [
-              "economy_rez_reserve"
+              "corp.asset_economy"
             ],
             "effects": [
               {
@@ -9262,20 +9273,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "deferred_requires_human_review",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.economy_rez_reserve"
+            "corp.asset_economy"
           ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_309_bbs-whispering-campaign",
           "side": "corp",
           "cardType": "asset",
-          "value": "economy_rez_reserve",
+          "value": "corp.asset_economy",
           "evidence": {
             "lineSupport": [
-              "economy_rez_reserve"
+              "corp.asset_economy"
             ],
             "effects": [
               {
@@ -9321,20 +9332,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.economy_rez_reserve"
+            "corp.asset_economy"
           ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_311_braindance-campaign",
           "side": "corp",
           "cardType": "asset",
-          "value": "economy_rez_reserve",
+          "value": "corp.asset_economy",
           "evidence": {
             "lineSupport": [
-              "economy_rez_reserve"
+              "corp.asset_economy"
             ],
             "effects": [
               {
@@ -9394,22 +9405,21 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.economy_rez_reserve"
+            "corp.asset_economy"
           ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_312_chicago-branch",
           "side": "corp",
           "cardType": "asset",
-          "value": "fast_advance_or_counter_ops",
+          "value": "corp.fast_advance",
           "evidence": {
             "lineSupport": [
-              "fast_advance_or_counter_ops",
-              "remote_scoring_build",
-              "score_closeout"
+              "corp.fast_advance",
+              "corp.remote_scoring"
             ],
             "effects": [
               {
@@ -9443,22 +9453,21 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.fast_advance"
           ],
-          "rationale": "Counter-operation details are support facts under fast advance."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_312_chicago-branch",
           "side": "corp",
           "cardType": "asset",
-          "value": "remote_scoring_build",
+          "value": "corp.remote_scoring",
           "evidence": {
             "lineSupport": [
-              "fast_advance_or_counter_ops",
-              "remote_scoring_build",
-              "score_closeout"
+              "corp.fast_advance",
+              "corp.remote_scoring"
             ],
             "effects": [
               {
@@ -9492,69 +9501,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
-        },
-        {
-          "cardId": "onr_v1_312_chicago-branch",
-          "side": "corp",
-          "cardType": "asset",
-          "value": "score_closeout",
-          "evidence": {
-            "lineSupport": [
-              "fast_advance_or_counter_ops",
-              "remote_scoring_build",
-              "score_closeout"
-            ],
-            "effects": [
-              {
-                "kind": "score_acceleration",
-                "scope": "installed_card",
-                "timing": "action",
-                "resource": "advancement_counters"
-              },
-              {
-                "kind": "score_acceleration",
-                "scope": "installed_card",
-                "timing": "action",
-                "resource": "advancement_counters"
-              }
-            ],
-            "conditions": [],
-            "remoteRole": {
-              "kind": "asset_economy",
-              "serverScope": "remote",
-              "threatLevel": "medium"
-            },
-            "cardType": "asset",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.rush_score"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_314_corporate-negotiating-center",
           "side": "corp",
           "cardType": "asset",
-          "value": "economy_rez_reserve",
+          "value": "corp.asset_economy",
           "evidence": {
             "lineSupport": [
-              "economy_rez_reserve"
+              "corp.asset_economy"
             ],
             "effects": [
               {
@@ -9584,21 +9544,21 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "deferred_requires_human_review",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.economy_rez_reserve"
+            "corp.asset_economy"
           ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_317_data-masons",
           "side": "corp",
           "cardType": "asset",
-          "value": "remote_scoring_build",
+          "value": "corp.remote_scoring",
           "evidence": {
             "lineSupport": [
-              "remote_scoring_build",
-              "ice_tax_glacier"
+              "corp.remote_scoring",
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -9650,21 +9610,21 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_317_data-masons",
           "side": "corp",
           "cardType": "asset",
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "remote_scoring_build",
-              "ice_tax_glacier"
+              "corp.remote_scoring",
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -9716,21 +9676,228 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_326_holovid-campaign",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.asset_economy",
+          "evidence": {
+            "lineSupport": [
+              "corp.asset_economy"
+            ],
+            "effects": [
+              {
+                "kind": "counter_economy",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "credits"
+              },
+              {
+                "kind": "counter_economy",
+                "scope": "corp",
+                "timing": "start_of_turn",
+                "resource": "credits"
+              },
+              {
+                "kind": "recurring_economy",
+                "scope": "corp",
+                "timing": "start_of_turn",
+                "resource": "credits"
+              },
+              {
+                "kind": "start_of_turn_economy",
+                "scope": "corp",
+                "timing": "start_of_turn",
+                "resource": "credits"
+              },
+              {
+                "kind": "finite_economy_pool",
+                "scope": "remote",
+                "timing": "action",
+                "resource": "credits"
+              }
+            ],
+            "conditions": [
+              "requires_start_of_turn"
+            ],
+            "remoteRole": {
+              "kind": "asset_economy",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.asset_economy"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_329_investment-firm",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.asset_economy",
+          "evidence": {
+            "lineSupport": [
+              "corp.asset_economy"
+            ],
+            "effects": [
+              {
+                "kind": "recurring_economy",
+                "scope": "corp",
+                "timing": "start_of_turn",
+                "resource": "credits"
+              },
+              {
+                "kind": "finite_economy_pool",
+                "scope": "remote",
+                "timing": "persistent",
+                "resource": "credits"
+              }
+            ],
+            "conditions": [],
+            "remoteRole": {
+              "kind": "asset_economy",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.asset_economy"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_334_pacifica-regional-ai",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.asset_economy",
+          "evidence": {
+            "lineSupport": [
+              "corp.asset_economy"
+            ],
+            "effects": [
+              {
+                "kind": "extra_action",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "actions"
+              },
+              {
+                "kind": "advanceable_economy",
+                "scope": "remote",
+                "timing": "action",
+                "resource": "advancement_counters"
+              }
+            ],
+            "conditions": [
+              "requires_advancement_counter"
+            ],
+            "remoteRole": {
+              "kind": "asset_economy",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.asset_economy"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_344_spinn-public-relations",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.asset_economy",
+          "evidence": {
+            "lineSupport": [
+              "corp.asset_economy"
+            ],
+            "effects": [
+              {
+                "kind": "action_economy",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "credits"
+              },
+              {
+                "kind": "counter_economy",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "credits"
+              },
+              {
+                "kind": "counter_economy",
+                "scope": "corp",
+                "timing": "start_of_turn",
+                "resource": "credits"
+              },
+              {
+                "kind": "recurring_economy",
+                "scope": "corp",
+                "timing": "start_of_turn",
+                "resource": "credits"
+              },
+              {
+                "kind": "start_of_turn_economy",
+                "scope": "corp",
+                "timing": "start_of_turn",
+                "resource": "credits"
+              },
+              {
+                "kind": "finite_economy_pool",
+                "scope": "remote",
+                "timing": "action",
+                "resource": "credits"
+              }
+            ],
+            "conditions": [
+              "requires_start_of_turn"
+            ],
+            "remoteRole": {
+              "kind": "asset_economy",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.asset_economy"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_350_antiquated-interface-routines",
           "side": "corp",
           "cardType": "upgrade",
-          "value": "remote_scoring_build",
+          "value": "corp.remote_scoring",
           "evidence": {
             "lineSupport": [
-              "remote_scoring_build",
-              "ice_tax_glacier"
+              "corp.remote_scoring",
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -9764,21 +9931,21 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_350_antiquated-interface-routines",
           "side": "corp",
           "cardType": "upgrade",
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "remote_scoring_build",
-              "ice_tax_glacier"
+              "corp.remote_scoring",
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -9812,21 +9979,21 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_355_crystal-palace-station-grid",
           "side": "corp",
           "cardType": "upgrade",
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier",
-              "remote_scoring_build"
+              "corp.ice_tax_glacier",
+              "corp.remote_scoring"
             ],
             "effects": [
               {
@@ -9862,21 +10029,21 @@
               "strategyCovered": false
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_355_crystal-palace-station-grid",
           "side": "corp",
           "cardType": "upgrade",
-          "value": "remote_scoring_build",
+          "value": "corp.remote_scoring",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier",
-              "remote_scoring_build"
+              "corp.ice_tax_glacier",
+              "corp.remote_scoring"
             ],
             "effects": [
               {
@@ -9912,21 +10079,20 @@
               "strategyCovered": false
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_359_jenny-jett",
           "side": "corp",
           "cardType": "upgrade",
-          "value": "remote_scoring_build",
+          "value": "corp.remote_scoring",
           "evidence": {
             "lineSupport": [
-              "remote_scoring_build",
-              "ice_tax_glacier"
+              "corp.remote_scoring"
             ],
             "effects": [
               {
@@ -9960,68 +10126,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
-        },
-        {
-          "cardId": "onr_v1_359_jenny-jett",
-          "side": "corp",
-          "cardType": "upgrade",
-          "value": "ice_tax_glacier",
-          "evidence": {
-            "lineSupport": [
-              "remote_scoring_build",
-              "ice_tax_glacier"
-            ],
-            "effects": [
-              {
-                "kind": "future_encounter_effect",
-                "scope": "fort",
-                "timing": "successful_run"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "fort",
-                "timing": "successful_run"
-              }
-            ],
-            "conditions": [
-              "requires_successful_run"
-            ],
-            "remoteRole": {
-              "kind": "scoring_protection",
-              "serverScope": "fort",
-              "threatLevel": "high"
-            },
-            "cardType": "upgrade",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_361_namatoki-plaza",
           "side": "corp",
           "cardType": "upgrade",
-          "value": "remote_scoring_build",
+          "value": "corp.remote_scoring",
           "evidence": {
             "lineSupport": [
-              "remote_scoring_build"
+              "corp.remote_scoring"
             ],
             "effects": [
               {
@@ -10055,21 +10173,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "deferred_requires_human_review",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_363_olivia-salazar",
           "side": "corp",
           "cardType": "upgrade",
-          "value": "remote_scoring_build",
+          "value": "corp.remote_scoring",
           "evidence": {
             "lineSupport": [
-              "remote_scoring_build",
-              "ice_tax_glacier"
+              "corp.remote_scoring"
             ],
             "effects": [
               {
@@ -10103,70 +10220,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
-        },
-        {
-          "cardId": "onr_v1_363_olivia-salazar",
-          "side": "corp",
-          "cardType": "upgrade",
-          "value": "ice_tax_glacier",
-          "evidence": {
-            "lineSupport": [
-              "remote_scoring_build",
-              "ice_tax_glacier"
-            ],
-            "effects": [
-              {
-                "kind": "rez_discount",
-                "scope": "ice",
-                "timing": "during_run"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "fort",
-                "timing": "during_run"
-              }
-            ],
-            "conditions": [
-              "requires_during_run"
-            ],
-            "remoteRole": {
-              "kind": "scoring_protection",
-              "serverScope": "fort",
-              "threatLevel": "medium"
-            },
-            "cardType": "upgrade",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_366_red-herrings",
           "side": "corp",
           "cardType": "upgrade",
-          "value": "ice_tax_glacier",
+          "value": "corp.remote_scoring",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier",
-              "remote_scoring_build",
-              "score_closeout"
+              "corp.remote_scoring"
             ],
             "effects": [
               {
@@ -10204,127 +10271,20 @@
               "strategyCovered": false
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_366_red-herrings",
-          "side": "corp",
-          "cardType": "upgrade",
-          "value": "remote_scoring_build",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "remote_scoring_build",
-              "score_closeout"
-            ],
-            "effects": [
-              {
-                "kind": "run_tax",
-                "scope": "accessed_card",
-                "timing": "on_access",
-                "resource": "credits"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "fort",
-                "timing": "persistent"
-              },
-              {
-                "kind": "run_tax",
-                "scope": "accessed_card",
-                "timing": "on_access",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [
-              "requires_accessed_card"
-            ],
-            "remoteRole": {
-              "kind": "agenda_steal_tax",
-              "serverScope": "remote",
-              "threatLevel": "high"
-            },
-            "cardType": "upgrade",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "needsHumanReview": false,
-              "strategyCovered": false
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
-        },
-        {
-          "cardId": "onr_v1_366_red-herrings",
-          "side": "corp",
-          "cardType": "upgrade",
-          "value": "score_closeout",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "remote_scoring_build",
-              "score_closeout"
-            ],
-            "effects": [
-              {
-                "kind": "run_tax",
-                "scope": "accessed_card",
-                "timing": "on_access",
-                "resource": "credits"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "fort",
-                "timing": "persistent"
-              },
-              {
-                "kind": "run_tax",
-                "scope": "accessed_card",
-                "timing": "on_access",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [
-              "requires_accessed_card"
-            ],
-            "remoteRole": {
-              "kind": "agenda_steal_tax",
-              "serverScope": "remote",
-              "threatLevel": "high"
-            },
-            "cardType": "upgrade",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "needsHumanReview": false,
-              "strategyCovered": false
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.rush_score"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
           "side": "corp",
           "cardType": "upgrade",
-          "value": "remote_scoring_build",
+          "value": "corp.remote_scoring",
           "evidence": {
             "lineSupport": [
-              "remote_scoring_build",
-              "ice_tax_glacier"
+              "corp.remote_scoring"
             ],
             "effects": [
               {
@@ -10358,69 +10318,21 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
-        },
-        {
-          "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
-          "side": "corp",
-          "cardType": "upgrade",
-          "value": "ice_tax_glacier",
-          "evidence": {
-            "lineSupport": [
-              "remote_scoring_build",
-              "ice_tax_glacier"
-            ],
-            "effects": [
-              {
-                "kind": "future_encounter_effect",
-                "scope": "fort",
-                "timing": "during_run"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "fort",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [
-              "requires_during_run"
-            ],
-            "remoteRole": {
-              "kind": "scoring_protection",
-              "serverScope": "fort",
-              "threatLevel": "medium"
-            },
-            "cardType": "upgrade",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_370_tesseract-fort-construction",
           "side": "corp",
           "cardType": "upgrade",
-          "value": "remote_scoring_build",
+          "value": "corp.remote_scoring",
           "evidence": {
             "lineSupport": [
-              "remote_scoring_build",
-              "ice_tax_glacier"
+              "corp.remote_scoring",
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -10458,21 +10370,21 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_370_tesseract-fort-construction",
           "side": "corp",
           "cardType": "upgrade",
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "remote_scoring_build",
-              "ice_tax_glacier"
+              "corp.remote_scoring",
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -10510,11 +10422,11 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ]
     },
@@ -15739,24 +15651,16 @@
   "warnings": [
     {
       "kind": "legacy_lineSupport_values_warn_only",
-      "count": 14,
-      "occurrences": 161,
+      "count": 11,
+      "occurrences": 110,
       "message": "Existing lineSupport values are known legacy aliases and remain warn-only when allowlisted and side-correct.",
       "items": [
         {
           "value": "rig_first",
-          "count": 34,
+          "count": 26,
           "category": "alias_to_strategy_goal",
           "mapsTo": [
             "runner.rig_first"
-          ]
-        },
-        {
-          "value": "ice_tax_glacier",
-          "count": 26,
-          "category": "exact_strategy_goal",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
           ]
         },
         {
@@ -15768,8 +15672,16 @@
           ]
         },
         {
+          "value": "ice_tax_glacier",
+          "count": 18,
+          "category": "exact_strategy_goal",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ]
+        },
+        {
           "value": "economy_rez_reserve",
-          "count": 19,
+          "count": 15,
           "category": "alias_to_strategy_goal",
           "mapsTo": [
             "corp.economy_rez_reserve"
@@ -15777,50 +15689,34 @@
         },
         {
           "value": "remote_scoring_build",
-          "count": 19,
+          "count": 9,
           "category": "alias_to_strategy_goal",
           "mapsTo": [
             "corp.remote_scoring"
           ]
         },
         {
-          "value": "breaker_search_first",
-          "count": 11,
-          "category": "alias_to_strategy_goal",
-          "mapsTo": [
-            "runner.breaker_search"
-          ]
-        },
-        {
-          "value": "score_closeout",
-          "count": 10,
-          "category": "alias_to_strategy_goal",
-          "mapsTo": [
-            "corp.rush_score"
-          ]
-        },
-        {
           "value": "economy_first",
-          "count": 8,
+          "count": 7,
           "category": "alias_to_strategy_goal",
           "mapsTo": [
             "runner.economy_first"
           ]
         },
         {
-          "value": "closeout_pressure",
-          "count": 3,
+          "value": "score_closeout",
+          "count": 6,
           "category": "alias_to_strategy_goal",
           "mapsTo": [
-            "runner.interface_closeout"
+            "corp.rush_score"
           ]
         },
         {
-          "value": "fast_advance_or_counter_ops",
+          "value": "breaker_search_first",
           "count": 3,
           "category": "alias_to_strategy_goal",
           "mapsTo": [
-            "corp.fast_advance"
+            "runner.breaker_search"
           ]
         },
         {
@@ -15832,15 +15728,7 @@
           ]
         },
         {
-          "value": "early_rnd_pressure",
-          "count": 2,
-          "category": "alias_to_strategy_goal",
-          "mapsTo": [
-            "runner.rnd_pressure"
-          ]
-        },
-        {
-          "value": "interface_pressure",
+          "value": "closeout_pressure",
           "count": 2,
           "category": "alias_to_strategy_goal",
           "mapsTo": [

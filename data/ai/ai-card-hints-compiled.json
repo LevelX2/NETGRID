@@ -1021,8 +1021,10 @@
         }
       ],
       "lineSupport": [
-        "early_rnd_pressure",
-        "interface_pressure"
+        "runner.rnd_pressure"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -1280,6 +1282,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_root_modifier_upgrade"
+      ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "emergency_tool"
       ],
       "effects": [
         {
@@ -2428,8 +2436,10 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "breaker_search_first",
-        "rig_first"
+        "runner.breaker_search"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -3386,8 +3396,10 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "breaker_search_first",
-        "rig_first"
+        "runner.breaker_search"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ],
       "targetProfiles": [
         {
@@ -4383,6 +4395,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#runner_v1919_agenda_counter"
       ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "emergency_tool"
+      ],
       "effects": [
         {
           "kind": "flatline_prevention",
@@ -4893,8 +4911,10 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "rig_first",
-        "breaker_search_first"
+        "runner.breaker_search"
+      ],
+      "strategicRole": [
+        "enabler"
       ],
       "conditions": [
         {
@@ -4991,8 +5011,10 @@
         }
       ],
       "lineSupport": [
-        "rig_first",
-        "breaker_search_first"
+        "runner.breaker_search"
+      ],
+      "strategicRole": [
+        "enabler"
       ],
       "conditions": [
         {
@@ -5143,8 +5165,10 @@
         }
       ],
       "lineSupport": [
-        "rig_first",
-        "breaker_search_first"
+        "runner.breaker_search"
+      ],
+      "strategicRole": [
+        "enabler"
       ],
       "conditions": [
         {
@@ -5298,9 +5322,10 @@
         }
       ],
       "lineSupport": [
-        "early_rnd_pressure",
-        "interface_pressure",
-        "closeout_pressure"
+        "runner.rnd_pressure"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -5459,9 +5484,10 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "rig_first",
-        "breaker_search_first",
-        "economy_first"
+        "runner.breaker_search"
+      ],
+      "strategicRole": [
+        "enabler"
       ],
       "conditions": [
         {
@@ -5930,8 +5956,10 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "rig_first",
-        "breaker_search_first"
+        "runner.breaker_search"
+      ],
+      "strategicRole": [
+        "enabler"
       ]
     },
     {
@@ -6095,8 +6123,10 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "rig_first",
-        "breaker_search_first"
+        "runner.breaker_search"
+      ],
+      "strategicRole": [
+        "enabler"
       ],
       "conditions": [
         {
@@ -6161,6 +6191,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"
+      ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
       ],
       "effects": [
         {
@@ -8562,6 +8598,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"
       ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -9502,6 +9544,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
       ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -9998,8 +10046,10 @@
         "opportunityCost": "low"
       },
       "lineSupport": [
-        "fast_advance_or_counter_ops",
-        "score_closeout"
+        "corp.fast_advance"
+      ],
+      "strategicRole": [
+        "scoring_tool"
       ]
     },
     {
@@ -11093,7 +11143,11 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "corp.tag_trace_punish"
+        "corp.tag_trace_punish",
+        "corp.damage_kill"
+      ],
+      "strategicRole": [
+        "punish_payoff"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -11556,8 +11610,10 @@
         }
       ],
       "lineSupport": [
-        "fast_advance_or_counter_ops",
-        "score_closeout"
+        "corp.fast_advance"
+      ],
+      "strategicRole": [
+        "scoring_tool"
       ],
       "conditions": [
         {
@@ -11768,7 +11824,11 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "corp.tag_trace_punish"
+        "corp.tag_trace_punish",
+        "corp.damage_kill"
+      ],
+      "strategicRole": [
+        "punish_payoff"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -16344,6 +16404,9 @@
       },
       "lineSupport": [
         "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "punish_payoff"
       ]
     },
     {
@@ -16413,6 +16476,9 @@
       },
       "lineSupport": [
         "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "punish_payoff"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -16710,6 +16776,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_operation_counter"
+      ],
+      "lineSupport": [
+        "corp.fast_advance"
+      ],
+      "strategicRole": [
+        "scoring_tool"
       ],
       "effects": [
         {
@@ -17160,6 +17232,9 @@
       },
       "lineSupport": [
         "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "punish_payoff"
       ]
     },
     {
@@ -17189,6 +17264,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_operation_counter"
+      ],
+      "lineSupport": [
+        "corp.fast_advance"
+      ],
+      "strategicRole": [
+        "scoring_tool"
       ],
       "effects": [
         {
@@ -17299,7 +17380,12 @@
         "opportunityCost": "low"
       },
       "lineSupport": [
-        "corp.tag_trace_punish"
+        "corp.tag_trace_punish",
+        "corp.damage_kill"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "win_condition"
       ]
     },
     {
@@ -17382,7 +17468,12 @@
         "opportunityCost": "low"
       },
       "lineSupport": [
-        "corp.tag_trace_punish"
+        "corp.tag_trace_punish",
+        "corp.damage_kill"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "win_condition"
       ]
     },
     {
@@ -17459,6 +17550,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_operation_counter"
       ],
+      "lineSupport": [
+        "corp.fast_advance"
+      ],
+      "strategicRole": [
+        "scoring_tool"
+      ],
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": false,
@@ -17520,6 +17617,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_operation_counter"
+      ],
+      "lineSupport": [
+        "corp.fast_advance"
+      ],
+      "strategicRole": [
+        "scoring_tool"
       ],
       "effects": [
         {
@@ -17698,7 +17801,12 @@
         "opportunityCost": "low"
       },
       "lineSupport": [
-        "corp.tag_trace_punish"
+        "corp.tag_trace_punish",
+        "corp.damage_kill"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "win_condition"
       ]
     },
     {
@@ -17770,7 +17878,10 @@
         "opportunityCost": "high"
       },
       "lineSupport": [
-        "economy_rez_reserve"
+        "corp.asset_economy"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -17868,7 +17979,10 @@
         "threatLevel": "medium"
       },
       "lineSupport": [
-        "economy_rez_reserve"
+        "corp.asset_economy"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ]
     },
     {
@@ -18017,7 +18131,10 @@
         "threatLevel": "medium"
       },
       "lineSupport": [
-        "economy_rez_reserve"
+        "corp.asset_economy"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ],
       "conditions": [
         {
@@ -18082,9 +18199,11 @@
         "threatLevel": "medium"
       },
       "lineSupport": [
-        "fast_advance_or_counter_ops",
-        "remote_scoring_build",
-        "score_closeout"
+        "corp.fast_advance",
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "scoring_tool"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -18221,7 +18340,10 @@
         "threatLevel": "medium"
       },
       "lineSupport": [
-        "economy_rez_reserve"
+        "corp.asset_economy"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ],
       "conditions": [
         {
@@ -18418,8 +18540,11 @@
         "threatLevel": "medium"
       },
       "lineSupport": [
-        "remote_scoring_build",
-        "ice_tax_glacier"
+        "corp.remote_scoring",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ]
     },
     {
@@ -18849,6 +18974,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_economy_recurring"
       ],
+      "lineSupport": [
+        "corp.asset_economy"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -19052,6 +19183,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_economy_recurring"
+      ],
+      "lineSupport": [
+        "corp.asset_economy"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ],
       "quality": {
         "benchmarkCovered": true,
@@ -19284,6 +19421,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_rezzed_modifier_asset"
+      ],
+      "lineSupport": [
+        "corp.asset_economy"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ],
       "effects": [
         {
@@ -19839,6 +19982,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_economy_recurring"
       ],
+      "lineSupport": [
+        "corp.asset_economy"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -20208,8 +20357,11 @@
         "threatLevel": "medium"
       },
       "lineSupport": [
-        "remote_scoring_build",
-        "ice_tax_glacier"
+        "corp.remote_scoring",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ]
     },
     {
@@ -20479,8 +20631,11 @@
         "threatLevel": "medium"
       },
       "lineSupport": [
-        "ice_tax_glacier",
-        "remote_scoring_build"
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ],
       "strategicNotes": [
         "Remote protection is context-dependent strategic overlay; the run tax stays mechanical."
@@ -20720,8 +20875,10 @@
         "threatLevel": "high"
       },
       "lineSupport": [
-        "remote_scoring_build",
-        "ice_tax_glacier"
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "scoring_tool"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -20859,7 +21016,10 @@
         "threatLevel": "medium"
       },
       "lineSupport": [
-        "remote_scoring_build"
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "scoring_tool"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -20986,8 +21146,10 @@
         "threatLevel": "medium"
       },
       "lineSupport": [
-        "remote_scoring_build",
-        "ice_tax_glacier"
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "support_tool"
       ]
     },
     {
@@ -21145,9 +21307,10 @@
         "threatLevel": "high"
       },
       "lineSupport": [
-        "ice_tax_glacier",
-        "remote_scoring_build",
-        "score_closeout"
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ],
       "strategicNotes": [
         "Remote protection is context-dependent strategic overlay; agenda steal tax and access condition stay mechanical."
@@ -21215,8 +21378,10 @@
         "threatLevel": "medium"
       },
       "lineSupport": [
-        "remote_scoring_build",
-        "ice_tax_glacier"
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "scoring_tool"
       ]
     },
     {
@@ -21386,8 +21551,11 @@
         "threatLevel": "high"
       },
       "lineSupport": [
-        "remote_scoring_build",
-        "ice_tax_glacier"
+        "corp.remote_scoring",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ]
     },
     {

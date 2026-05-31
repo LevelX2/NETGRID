@@ -6149,8 +6149,7 @@
           }
         ],
         "lineSupport": [
-          "early_rnd_pressure",
-          "interface_pressure"
+          "runner.rnd_pressure"
         ],
         "quality": {
           "hintReviewed": true,
@@ -6422,7 +6421,9 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [
+          "runner.survival_defense"
+        ]
       },
       "overlap": {
         "matches": [],
@@ -7816,8 +7817,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "breaker_search_first",
-          "rig_first"
+          "runner.breaker_search"
         ],
         "quality": {
           "hintReviewed": true,
@@ -9005,8 +9005,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "breaker_search_first",
-          "rig_first"
+          "runner.breaker_search"
         ],
         "quality": {
           "hintReviewed": true,
@@ -10437,8 +10436,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "breaker_search_first",
-          "rig_first"
+          "runner.breaker_search"
         ],
         "quality": {
           "hintReviewed": true,
@@ -10571,8 +10569,7 @@
         ],
         "conditions": [],
         "lineSupport": [
-          "breaker_search_first",
-          "rig_first"
+          "runner.breaker_search"
         ],
         "quality": {
           "hintReviewed": true,
@@ -10686,8 +10683,7 @@
         ],
         "conditions": [],
         "lineSupport": [
-          "breaker_search_first",
-          "rig_first"
+          "runner.breaker_search"
         ],
         "quality": {
           "hintReviewed": true,
@@ -10964,9 +10960,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "breaker_search_first",
-          "economy_first",
-          "rig_first"
+          "runner.breaker_search"
         ],
         "quality": {
           "hintReviewed": true,
@@ -11264,8 +11258,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "breaker_search_first",
-          "rig_first"
+          "runner.breaker_search"
         ],
         "quality": {
           "hintReviewed": true,
@@ -11385,7 +11378,9 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [
+          "runner.survival_defense"
+        ]
       },
       "overlap": {
         "matches": [],
@@ -13190,8 +13185,7 @@
           "opportunityCost": "low"
         },
         "lineSupport": [
-          "fast_advance_or_counter_ops",
-          "score_closeout"
+          "corp.fast_advance"
         ],
         "quality": {
           "hintReviewed": true,
@@ -15041,6 +15035,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
+          "corp.damage_kill",
           "corp.tag_trace_punish"
         ],
         "quality": {
@@ -16052,6 +16047,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
+          "corp.damage_kill",
           "corp.tag_trace_punish"
         ],
         "quality": {
@@ -21838,7 +21834,9 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [
+          "corp.fast_advance"
+        ]
       },
       "overlap": {
         "matches": [],
@@ -21969,6 +21967,7 @@
           "opportunityCost": "low"
         },
         "lineSupport": [
+          "corp.damage_kill",
           "corp.tag_trace_punish"
         ],
         "quality": {
@@ -22080,6 +22079,7 @@
           "opportunityCost": "low"
         },
         "lineSupport": [
+          "corp.damage_kill",
           "corp.tag_trace_punish"
         ],
         "quality": {
@@ -22264,7 +22264,9 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
         "quality": {
           "hintReviewed": false,
           "strategyCovered": false,
@@ -22391,7 +22393,9 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [
+          "corp.fast_advance"
+        ]
       },
       "overlap": {
         "matches": [],
@@ -22629,6 +22633,7 @@
           "opportunityCost": "low"
         },
         "lineSupport": [
+          "corp.damage_kill",
           "corp.tag_trace_punish"
         ],
         "quality": {
@@ -22732,7 +22737,7 @@
           "opportunityCost": "high"
         },
         "lineSupport": [
-          "economy_rez_reserve"
+          "corp.asset_economy"
         ],
         "quality": {
           "hintReviewed": true,
@@ -22872,7 +22877,7 @@
           "serverScope": "remote"
         },
         "lineSupport": [
-          "economy_rez_reserve"
+          "corp.asset_economy"
         ],
         "quality": {
           "hintReviewed": true,
@@ -23147,7 +23152,7 @@
           "serverScope": "remote"
         },
         "lineSupport": [
-          "economy_rez_reserve"
+          "corp.asset_economy"
         ],
         "quality": {
           "hintReviewed": true,
@@ -23280,9 +23285,8 @@
           "serverScope": "remote"
         },
         "lineSupport": [
-          "fast_advance_or_counter_ops",
-          "remote_scoring_build",
-          "score_closeout"
+          "corp.fast_advance",
+          "corp.remote_scoring"
         ],
         "quality": {
           "hintReviewed": true,
@@ -23512,7 +23516,7 @@
           "serverScope": "remote"
         },
         "lineSupport": [
-          "economy_rez_reserve"
+          "corp.asset_economy"
         ],
         "quality": {
           "hintReviewed": true,
@@ -23888,8 +23892,8 @@
           "serverScope": "server"
         },
         "lineSupport": [
-          "ice_tax_glacier",
-          "remote_scoring_build"
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
         ],
         "quality": {
           "hintReviewed": true,
@@ -24568,7 +24572,9 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [
+          "corp.asset_economy"
+        ]
       },
       "overlap": {
         "matches": [],
@@ -24938,7 +24944,9 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
         "quality": {
           "hintReviewed": false,
           "strategyCovered": false,
@@ -25269,7 +25277,9 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [
+          "corp.asset_economy"
+        ]
       },
       "overlap": {
         "matches": [],
@@ -26322,7 +26332,9 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [
+          "corp.asset_economy"
+        ]
       },
       "overlap": {
         "matches": [],
@@ -26609,8 +26621,8 @@
           "serverScope": "fort"
         },
         "lineSupport": [
-          "ice_tax_glacier",
-          "remote_scoring_build"
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
         ],
         "quality": {
           "hintReviewed": true,
@@ -26974,8 +26986,8 @@
           "serverScope": "fort"
         },
         "lineSupport": [
-          "ice_tax_glacier",
-          "remote_scoring_build"
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
         ],
         "quality": {
           "hintReviewed": true,
@@ -27240,8 +27252,7 @@
           "serverScope": "fort"
         },
         "lineSupport": [
-          "ice_tax_glacier",
-          "remote_scoring_build"
+          "corp.remote_scoring"
         ],
         "quality": {
           "hintReviewed": true,
@@ -27496,7 +27507,7 @@
           "serverScope": "remote"
         },
         "lineSupport": [
-          "remote_scoring_build"
+          "corp.remote_scoring"
         ],
         "quality": {
           "hintReviewed": true,
@@ -27716,8 +27727,7 @@
           "serverScope": "fort"
         },
         "lineSupport": [
-          "ice_tax_glacier",
-          "remote_scoring_build"
+          "corp.remote_scoring"
         ],
         "quality": {
           "hintReviewed": true,
@@ -27938,9 +27948,7 @@
           "serverScope": "fort"
         },
         "lineSupport": [
-          "ice_tax_glacier",
-          "remote_scoring_build",
-          "score_closeout"
+          "corp.remote_scoring"
         ],
         "quality": {
           "hintReviewed": true,
@@ -28070,8 +28078,7 @@
           "serverScope": "fort"
         },
         "lineSupport": [
-          "ice_tax_glacier",
-          "remote_scoring_build"
+          "corp.remote_scoring"
         ],
         "quality": {
           "hintReviewed": true,
@@ -28390,8 +28397,8 @@
           "serverScope": "fort"
         },
         "lineSupport": [
-          "ice_tax_glacier",
-          "remote_scoring_build"
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
         ],
         "quality": {
           "hintReviewed": true,

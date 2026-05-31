@@ -10,7 +10,7 @@
     {
       "cardId": "onr_v1_017_deep-thought",
       "overlay": {
-        "lineSupport": ["early_rnd_pressure", "interface_pressure"],
+        "lineSupport": ["runner.rnd_pressure"],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -42,7 +42,7 @@
     {
       "cardId": "onr_v1_043_mystery-box",
       "overlay": {
-        "lineSupport": ["rig_first", "breaker_search_first"],
+        "lineSupport": ["runner.breaker_search"],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -58,7 +58,7 @@
     {
       "cardId": "onr_v1_059_self-modifying-code",
       "overlay": {
-        "lineSupport": ["rig_first", "breaker_search_first"],
+        "lineSupport": ["runner.breaker_search"],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,

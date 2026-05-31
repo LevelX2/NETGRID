@@ -18,13 +18,13 @@
     "cardsWithOverlays": 6,
     "cardsWithFunctionSignals": 330,
     "cardsWithStrategyAnchors": 226,
-    "cardsWithWarnings": 423,
+    "cardsWithWarnings": 411,
     "warningCategoryCounts": {
       "deferred_requires_human_review": 282,
       "descriptor_gap": 33,
-      "function_signal_descriptor_gap": 65,
+      "function_signal_descriptor_gap": 54,
       "legacy_fallback_only": 172,
-      "legacy_lineSupport": 97
+      "legacy_lineSupport": 71
     }
   },
   "cards": [
@@ -12827,7 +12827,7 @@
           "strategicNotes"
         ],
         "legacyFallbackOnly": false,
-        "warningCount": 3
+        "warningCount": 1
       },
       "derivedFunctionSignals": [
         "info.rnd_topdeck"
@@ -12837,22 +12837,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "early_rnd_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "value": "runner.rnd_pressure",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.rnd_pressure"
           ],
-          "rationale": "R&D access/topdeck evidence supports Runner R&D pressure."
-        },
-        {
-          "value": "interface_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "runner.interface_closeout"
-          ],
-          "rationale": "Interface pressure is the payoff-anchor closeout package."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -12897,28 +12888,13 @@
         }
       ],
       "warningCategories": [
-        "descriptor_gap",
-        "function_signal_descriptor_gap",
-        "legacy_lineSupport"
+        "descriptor_gap"
       ],
-      "descriptorGaps": [
-        {
-          "gapId": "interface_closeout_density_requires_aggregation",
-          "description": "Interface closeout is a DeckDoctrine aggregation over multiaccess density and central reach, not a per-card generic function tag.",
-          "affectedSignalsOrValues": [
-            "interface_pressure",
-            "closeout_pressure",
-            "information",
-            "hidden_information_pressure"
-          ],
-          "batchMigrationDecision": "do_not_bulk_migrate_in_AI004",
-          "needsSchemaOrDescriptorExtension": true
-        }
-      ],
+      "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "conditions"
@@ -12937,8 +12913,12 @@
         ]
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "engine_anchor"
+        ],
+        "validValues": [
+          "engine_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -13376,7 +13356,17 @@
       "derivedStrategyAnchors": [
         "runner.survival_defense"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "runner.survival_defense",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "handlimit",
@@ -13427,8 +13417,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "emergency_tool"
+        ],
+        "validValues": [
+          "emergency_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -15197,7 +15191,7 @@
           "quality"
         ],
         "legacyFallbackOnly": false,
-        "warningCount": 3
+        "warningCount": 2
       },
       "derivedFunctionSignals": [
         "setup.install_discount",
@@ -15208,22 +15202,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "breaker_search_first",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "value": "runner.breaker_search",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.breaker_search"
           ],
-          "rationale": "Legacy setup/search line."
-        },
-        {
-          "value": "rig_first",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -15287,8 +15272,7 @@
       ],
       "warningCategories": [
         "descriptor_gap",
-        "function_signal_descriptor_gap",
-        "legacy_lineSupport"
+        "function_signal_descriptor_gap"
       ],
       "descriptorGaps": [
         {
@@ -15307,7 +15291,7 @@
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "conditions",
@@ -15330,8 +15314,12 @@
         ]
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "engine_anchor"
+        ],
+        "validValues": [
+          "engine_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -16866,7 +16854,7 @@
           "quality"
         ],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [
         "setup.search"
@@ -16876,22 +16864,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "breaker_search_first",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "value": "runner.breaker_search",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.breaker_search"
           ],
-          "rationale": "Legacy setup/search line."
-        },
-        {
-          "value": "rig_first",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -16940,14 +16919,13 @@
         }
       ],
       "warningCategories": [
-        "descriptor_gap",
-        "legacy_lineSupport"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "conditions",
@@ -16969,8 +16947,12 @@
         ]
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "engine_anchor"
+        ],
+        "validValues": [
+          "engine_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -18680,7 +18662,17 @@
       "derivedStrategyAnchors": [
         "runner.survival_defense"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "runner.survival_defense",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "agenda",
@@ -18738,8 +18730,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "emergency_tool"
+        ],
+        "validValues": [
+          "emergency_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -19550,7 +19546,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [
         "setup.recovery",
@@ -19561,22 +19557,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "breaker_search_first",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "value": "runner.breaker_search",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.breaker_search"
           ],
-          "rationale": "Legacy setup/search line."
-        },
-        {
-          "value": "rig_first",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -19625,14 +19612,13 @@
         }
       ],
       "warningCategories": [
-        "descriptor_gap",
-        "legacy_lineSupport"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "costProfile"
@@ -19649,8 +19635,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "enabler"
+        ],
+        "validValues": [
+          "enabler"
+        ],
         "unknownValues": []
       }
     },
@@ -19757,7 +19747,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [
         "setup.recovery",
@@ -19768,22 +19758,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "breaker_search_first",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "deferred_requires_human_review",
+          "value": "runner.breaker_search",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.breaker_search"
           ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
-          "value": "rig_first",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -19823,14 +19804,13 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_lineSupport"
+        "deferred_requires_human_review"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects"
         ],
@@ -19845,8 +19825,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "enabler"
+        ],
+        "validValues": [
+          "enabler"
+        ],
         "unknownValues": []
       }
     },
@@ -20111,7 +20095,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [
         "setup.search"
@@ -20121,22 +20105,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "breaker_search_first",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "deferred_requires_human_review",
+          "value": "runner.breaker_search",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.breaker_search"
           ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
-          "value": "rig_first",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -20183,14 +20158,13 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_lineSupport"
+        "deferred_requires_human_review"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects"
         ],
@@ -20205,8 +20179,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "enabler"
+        ],
+        "validValues": [
+          "enabler"
+        ],
         "unknownValues": []
       }
     },
@@ -20410,7 +20388,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [
         "economy.trash_credit"
@@ -20420,29 +20398,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "closeout_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "should_be_removed_from_lineSupport",
-          "mapsTo": [],
-          "rationale": "Closeout pressure without multiaccess/interface evidence is too broad for lineSupport."
-        },
-        {
-          "value": "early_rnd_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "value": "runner.rnd_pressure",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.rnd_pressure"
           ],
-          "rationale": "R&D access/topdeck evidence supports Runner R&D pressure."
-        },
-        {
-          "value": "interface_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "runner.interface_closeout"
-          ],
-          "rationale": "Interface pressure is the payoff-anchor closeout package."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -20498,8 +20460,7 @@
         }
       ],
       "warningCategories": [
-        "function_signal_descriptor_gap",
-        "legacy_lineSupport"
+        "function_signal_descriptor_gap"
       ],
       "descriptorGaps": [
         {
@@ -20512,24 +20473,12 @@
           ],
           "batchMigrationDecision": "do_not_bulk_migrate_in_AI004",
           "needsSchemaOrDescriptorExtension": true
-        },
-        {
-          "gapId": "interface_closeout_density_requires_aggregation",
-          "description": "Interface closeout is a DeckDoctrine aggregation over multiaccess density and central reach, not a per-card generic function tag.",
-          "affectedSignalsOrValues": [
-            "interface_pressure",
-            "closeout_pressure",
-            "information",
-            "hidden_information_pressure"
-          ],
-          "batchMigrationDecision": "do_not_bulk_migrate_in_AI004",
-          "needsSchemaOrDescriptorExtension": true
         }
       ],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "conditions"
@@ -20542,8 +20491,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "payoff_anchor"
+        ],
+        "validValues": [
+          "payoff_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -20701,7 +20654,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [
         "setup.draw",
@@ -20712,31 +20665,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "breaker_search_first",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "value": "runner.breaker_search",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.breaker_search"
           ],
-          "rationale": "Legacy setup/search line."
-        },
-        {
-          "value": "economy_first",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.economy_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "value": "rig_first",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -20792,14 +20727,13 @@
         }
       ],
       "warningCategories": [
-        "descriptor_gap",
-        "legacy_lineSupport"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "costProfile"
@@ -20816,8 +20750,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "enabler"
+        ],
+        "validValues": [
+          "enabler"
+        ],
         "unknownValues": []
       }
     },
@@ -21670,7 +21608,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [
         "setup.install_discount",
@@ -21681,22 +21619,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "breaker_search_first",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "value": "runner.breaker_search",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.breaker_search"
           ],
-          "rationale": "Legacy setup/search line."
-        },
-        {
-          "value": "rig_first",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -21743,14 +21672,13 @@
         }
       ],
       "warningCategories": [
-        "descriptor_gap",
-        "legacy_lineSupport"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "costProfile"
@@ -21763,8 +21691,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "enabler"
+        ],
+        "validValues": [
+          "enabler"
+        ],
         "unknownValues": []
       }
     },
@@ -21996,7 +21928,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [
         "setup.draw",
@@ -22007,22 +21939,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "breaker_search_first",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "value": "runner.breaker_search",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.breaker_search"
           ],
-          "rationale": "Legacy setup/search line."
-        },
-        {
-          "value": "rig_first",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -22069,14 +21992,13 @@
         }
       ],
       "warningCategories": [
-        "descriptor_gap",
-        "legacy_lineSupport"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "costProfile"
@@ -22093,8 +22015,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "enabler"
+        ],
+        "validValues": [
+          "enabler"
+        ],
         "unknownValues": []
       }
     },
@@ -22217,7 +22143,17 @@
       "derivedStrategyAnchors": [
         "runner.survival_defense"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "runner.survival_defense",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "event",
@@ -22263,8 +22199,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "defensive_tool"
+        ],
+        "validValues": [
+          "defensive_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -26349,7 +26289,17 @@
       "derivedStrategyAnchors": [
         "runner.survival_defense"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "runner.survival_defense",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "damage_prevention",
@@ -26411,8 +26361,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "defensive_tool"
+        ],
+        "validValues": [
+          "defensive_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -27987,7 +27941,17 @@
       "derivedStrategyAnchors": [
         "runner.survival_defense"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "runner.survival_defense",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "counter",
@@ -28049,8 +28013,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "defensive_tool"
+        ],
+        "validValues": [
+          "defensive_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -28651,7 +28619,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "score.agenda_action"
@@ -28661,22 +28629,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "fast_advance_or_counter_ops",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "value": "corp.fast_advance",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.fast_advance"
           ],
-          "rationale": "Counter-operation details are support facts under fast advance."
-        },
-        {
-          "value": "score_closeout",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.rush_score"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -28713,28 +28672,12 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "function_signal_descriptor_gap",
-        "legacy_lineSupport"
-      ],
-      "descriptorGaps": [
-        {
-          "gapId": "cheap_ice_and_rush_shape_partial",
-          "description": "Cheap early ICE and rush-score shape can be inferred only partially from current effects and roles; it remains a later ontology extension candidate.",
-          "affectedSignalsOrValues": [
-            "score_closeout",
-            "ice_tax_glacier",
-            "server_defense",
-            "etr_tax"
-          ],
-          "batchMigrationDecision": "do_not_bulk_migrate_in_AI004",
-          "needsSchemaOrDescriptorExtension": true
-        }
-      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "conditions",
@@ -28751,8 +28694,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -30210,6 +30157,15 @@
       ],
       "lineSupportClassification": [
         {
+          "value": "corp.damage_kill",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "value": "corp.tag_trace_punish",
           "category": "exact_strategy_goal",
           "triageCategory": "normalized_strategy_id",
@@ -30293,8 +30249,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "punish_payoff"
+        ],
+        "validValues": [
+          "punish_payoff"
+        ],
         "unknownValues": []
       }
     },
@@ -30959,28 +30919,19 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 0
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
-          "value": "fast_advance_or_counter_ops",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "value": "corp.fast_advance",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.fast_advance"
           ],
-          "rationale": "Counter-operation details are support facts under fast advance."
-        },
-        {
-          "value": "score_closeout",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.rush_score"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -31035,28 +30986,12 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "function_signal_descriptor_gap",
-        "legacy_lineSupport"
-      ],
-      "descriptorGaps": [
-        {
-          "gapId": "cheap_ice_and_rush_shape_partial",
-          "description": "Cheap early ICE and rush-score shape can be inferred only partially from current effects and roles; it remains a later ontology extension candidate.",
-          "affectedSignalsOrValues": [
-            "score_closeout",
-            "ice_tax_glacier",
-            "server_defense",
-            "etr_tax"
-          ],
-          "batchMigrationDecision": "do_not_bulk_migrate_in_AI004",
-          "needsSchemaOrDescriptorExtension": true
-        }
-      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects"
         ],
@@ -31070,8 +31005,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -31277,6 +31216,15 @@
       ],
       "lineSupportClassification": [
         {
+          "value": "corp.damage_kill",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "value": "corp.tag_trace_punish",
           "category": "exact_strategy_goal",
           "triageCategory": "normalized_strategy_id",
@@ -31360,8 +31308,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "punish_payoff"
+        ],
+        "validValues": [
+          "punish_payoff"
+        ],
         "unknownValues": []
       }
     },
@@ -38551,8 +38503,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "punish_payoff"
+        ],
+        "validValues": [
+          "punish_payoff"
+        ],
         "unknownValues": []
       }
     },
@@ -38654,8 +38610,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "punish_payoff"
+        ],
+        "validValues": [
+          "punish_payoff"
+        ],
         "unknownValues": []
       }
     },
@@ -39099,7 +39059,17 @@
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.fast_advance",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.fast_advance"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "advance",
@@ -39154,8 +39124,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -39780,8 +39754,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "punish_payoff"
+        ],
+        "validValues": [
+          "punish_payoff"
+        ],
         "unknownValues": []
       }
     },
@@ -39805,7 +39783,17 @@
       "derivedStrategyAnchors": [
         "corp.fast_advance"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.fast_advance",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.fast_advance"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "advance",
@@ -39862,8 +39850,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -39890,6 +39882,15 @@
       ],
       "lineSupportClassification": [
         {
+          "value": "corp.damage_kill",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "value": "corp.tag_trace_punish",
           "category": "exact_strategy_goal",
           "triageCategory": "normalized_strategy_id",
@@ -39959,8 +39960,14 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "punish_payoff",
+          "win_condition"
+        ],
+        "validValues": [
+          "punish_payoff",
+          "win_condition"
+        ],
         "unknownValues": []
       }
     },
@@ -39987,6 +39994,15 @@
       ],
       "lineSupportClassification": [
         {
+          "value": "corp.damage_kill",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "value": "corp.tag_trace_punish",
           "category": "exact_strategy_goal",
           "triageCategory": "normalized_strategy_id",
@@ -40056,8 +40072,14 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "punish_payoff",
+          "win_condition"
+        ],
+        "validValues": [
+          "punish_payoff",
+          "win_condition"
+        ],
         "unknownValues": []
       }
     },
@@ -40156,7 +40178,17 @@
       "derivedStrategyAnchors": [
         "corp.fast_advance"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.fast_advance",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.fast_advance"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "advance",
@@ -40222,8 +40254,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -40247,7 +40283,17 @@
       "derivedStrategyAnchors": [
         "corp.fast_advance"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.fast_advance",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.fast_advance"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "agenda",
@@ -40302,8 +40348,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -40430,6 +40480,15 @@
       ],
       "lineSupportClassification": [
         {
+          "value": "corp.damage_kill",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "value": "corp.tag_trace_punish",
           "category": "exact_strategy_goal",
           "triageCategory": "normalized_strategy_id",
@@ -40499,8 +40558,14 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "punish_payoff",
+          "win_condition"
+        ],
+        "validValues": [
+          "punish_payoff",
+          "win_condition"
+        ],
         "unknownValues": []
       }
     },
@@ -40515,7 +40580,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [
         "economy.counter",
@@ -40527,13 +40592,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "economy_rez_reserve",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "deferred_requires_human_review",
+          "value": "corp.asset_economy",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.economy_rez_reserve"
+            "corp.asset_economy"
           ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -40589,14 +40654,13 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_lineSupport"
+        "deferred_requires_human_review"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "costProfile"
@@ -40613,8 +40677,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "engine_anchor"
+        ],
+        "validValues": [
+          "engine_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -40629,7 +40697,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "economy.action",
@@ -40642,13 +40710,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "economy_rez_reserve",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "structure_or_support_goal_requires_card_review",
+          "value": "corp.asset_economy",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.economy_rez_reserve"
+            "corp.asset_economy"
           ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -40692,14 +40760,12 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "legacy_lineSupport"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "costProfile",
@@ -40716,8 +40782,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "engine_anchor"
+        ],
+        "validValues": [
+          "engine_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -40812,7 +40882,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "economy.counter",
@@ -40826,13 +40896,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "economy_rez_reserve",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "structure_or_support_goal_requires_card_review",
+          "value": "corp.asset_economy",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.economy_rez_reserve"
+            "corp.asset_economy"
           ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -40876,14 +40946,12 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "legacy_lineSupport"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "costProfile",
@@ -40902,8 +40970,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "engine_anchor"
+        ],
+        "validValues": [
+          "engine_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -40918,7 +40990,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "remote.asset_economy"
@@ -40928,31 +41000,22 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "fast_advance_or_counter_ops",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "value": "corp.fast_advance",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.fast_advance"
           ],
-          "rationale": "Counter-operation details are support facts under fast advance."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "value": "remote_scoring_build",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "value": "corp.remote_scoring",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
-        },
-        {
-          "value": "score_closeout",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.rush_score"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -40989,28 +41052,12 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "function_signal_descriptor_gap",
-        "legacy_lineSupport"
-      ],
-      "descriptorGaps": [
-        {
-          "gapId": "cheap_ice_and_rush_shape_partial",
-          "description": "Cheap early ICE and rush-score shape can be inferred only partially from current effects and roles; it remains a later ontology extension candidate.",
-          "affectedSignalsOrValues": [
-            "score_closeout",
-            "ice_tax_glacier",
-            "server_defense",
-            "etr_tax"
-          ],
-          "batchMigrationDecision": "do_not_bulk_migrate_in_AI004",
-          "needsSchemaOrDescriptorExtension": true
-        }
-      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "costProfile",
@@ -41027,8 +41074,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -41123,7 +41174,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 4
+        "warningCount": 3
       },
       "derivedFunctionSignals": [
         "economy.generic",
@@ -41134,13 +41185,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "economy_rez_reserve",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "deferred_requires_human_review",
+          "value": "corp.asset_economy",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.economy_rez_reserve"
+            "corp.asset_economy"
           ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -41194,8 +41245,7 @@
       "warningCategories": [
         "deferred_requires_human_review",
         "descriptor_gap",
-        "function_signal_descriptor_gap",
-        "legacy_lineSupport"
+        "function_signal_descriptor_gap"
       ],
       "descriptorGaps": [
         {
@@ -41214,7 +41264,7 @@
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "costProfile",
@@ -41232,8 +41282,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "engine_anchor"
+        ],
+        "validValues": [
+          "engine_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -41401,7 +41455,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "economy.rez_discount"
@@ -41411,22 +41465,22 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "category": "exact_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "value": "remote_scoring_build",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "value": "corp.remote_scoring",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -41490,28 +41544,12 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "function_signal_descriptor_gap",
-        "legacy_lineSupport"
-      ],
-      "descriptorGaps": [
-        {
-          "gapId": "cheap_ice_and_rush_shape_partial",
-          "description": "Cheap early ICE and rush-score shape can be inferred only partially from current effects and roles; it remains a later ontology extension candidate.",
-          "affectedSignalsOrValues": [
-            "score_closeout",
-            "ice_tax_glacier",
-            "server_defense",
-            "etr_tax"
-          ],
-          "batchMigrationDecision": "do_not_bulk_migrate_in_AI004",
-          "needsSchemaOrDescriptorExtension": true
-        }
-      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "remoteRole"
@@ -41526,8 +41564,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "engine_anchor"
+        ],
+        "validValues": [
+          "engine_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -42203,7 +42245,17 @@
       "derivedStrategyAnchors": [
         "corp.asset_economy"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.asset_economy",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.asset_economy"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "asset",
@@ -42265,8 +42317,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "engine_anchor"
+        ],
+        "validValues": [
+          "engine_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -42461,7 +42517,17 @@
       "derivedStrategyAnchors": [
         "corp.asset_economy"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.asset_economy",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.asset_economy"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "asset",
@@ -42523,8 +42589,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "engine_anchor"
+        ],
+        "validValues": [
+          "engine_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -42840,7 +42910,17 @@
       "derivedStrategyAnchors": [
         "corp.asset_economy"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.asset_economy",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.asset_economy"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "action",
@@ -42893,8 +42973,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "engine_anchor"
+        ],
+        "validValues": [
+          "engine_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -43712,7 +43796,17 @@
       "derivedStrategyAnchors": [
         "corp.asset_economy"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.asset_economy",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.asset_economy"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "asset",
@@ -43774,8 +43868,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "engine_anchor"
+        ],
+        "validValues": [
+          "engine_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -44226,28 +44324,28 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 0
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "category": "exact_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "value": "remote_scoring_build",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "value": "corp.remote_scoring",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -44302,28 +44400,12 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "function_signal_descriptor_gap",
-        "legacy_lineSupport"
-      ],
-      "descriptorGaps": [
-        {
-          "gapId": "cheap_ice_and_rush_shape_partial",
-          "description": "Cheap early ICE and rush-score shape can be inferred only partially from current effects and roles; it remains a later ontology extension candidate.",
-          "affectedSignalsOrValues": [
-            "score_closeout",
-            "ice_tax_glacier",
-            "server_defense",
-            "etr_tax"
-          ],
-          "batchMigrationDecision": "do_not_bulk_migrate_in_AI004",
-          "needsSchemaOrDescriptorExtension": true
-        }
-      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "remoteRole"
@@ -44338,8 +44420,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -44730,7 +44816,7 @@
           "strategicNotes"
         ],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "tax.remote"
@@ -44738,22 +44824,22 @@
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "category": "exact_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "value": "remote_scoring_build",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "value": "corp.remote_scoring",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -44795,28 +44881,12 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "function_signal_descriptor_gap",
-        "legacy_lineSupport"
-      ],
-      "descriptorGaps": [
-        {
-          "gapId": "cheap_ice_and_rush_shape_partial",
-          "description": "Cheap early ICE and rush-score shape can be inferred only partially from current effects and roles; it remains a later ontology extension candidate.",
-          "affectedSignalsOrValues": [
-            "score_closeout",
-            "ice_tax_glacier",
-            "server_defense",
-            "etr_tax"
-          ],
-          "batchMigrationDecision": "do_not_bulk_migrate_in_AI004",
-          "needsSchemaOrDescriptorExtension": true
-        }
-      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "remoteRole"
@@ -44835,8 +44905,12 @@
         ]
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -45097,7 +45171,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "remote.scoring_protection"
@@ -45107,22 +45181,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "ice_tax_glacier",
+          "value": "corp.remote_scoring",
           "category": "exact_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "value": "remote_scoring_build",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -45187,28 +45252,12 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "function_signal_descriptor_gap",
-        "legacy_lineSupport"
-      ],
-      "descriptorGaps": [
-        {
-          "gapId": "cheap_ice_and_rush_shape_partial",
-          "description": "Cheap early ICE and rush-score shape can be inferred only partially from current effects and roles; it remains a later ontology extension candidate.",
-          "affectedSignalsOrValues": [
-            "score_closeout",
-            "ice_tax_glacier",
-            "server_defense",
-            "etr_tax"
-          ],
-          "batchMigrationDecision": "do_not_bulk_migrate_in_AI004",
-          "needsSchemaOrDescriptorExtension": true
-        }
-      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "conditions",
@@ -45225,8 +45274,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -45320,19 +45373,19 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
-          "value": "remote_scoring_build",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "deferred_requires_human_review",
+          "value": "corp.remote_scoring",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -45386,14 +45439,13 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_lineSupport"
+        "deferred_requires_human_review"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "conditions",
@@ -45408,8 +45460,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -45513,7 +45569,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "economy.rez_discount",
@@ -45525,22 +45581,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "ice_tax_glacier",
+          "value": "corp.remote_scoring",
           "category": "exact_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "value": "remote_scoring_build",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -45575,28 +45622,12 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "function_signal_descriptor_gap",
-        "legacy_lineSupport"
-      ],
-      "descriptorGaps": [
-        {
-          "gapId": "cheap_ice_and_rush_shape_partial",
-          "description": "Cheap early ICE and rush-score shape can be inferred only partially from current effects and roles; it remains a later ontology extension candidate.",
-          "affectedSignalsOrValues": [
-            "score_closeout",
-            "ice_tax_glacier",
-            "server_defense",
-            "etr_tax"
-          ],
-          "batchMigrationDecision": "do_not_bulk_migrate_in_AI004",
-          "needsSchemaOrDescriptorExtension": true
-        }
-      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "conditions",
@@ -45611,8 +45642,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "support_tool"
+        ],
+        "validValues": [
+          "support_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -45787,7 +45822,7 @@
           "strategicNotes"
         ],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "remote.agenda_steal_tax"
@@ -45797,31 +45832,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "ice_tax_glacier",
+          "value": "corp.remote_scoring",
           "category": "exact_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "value": "remote_scoring_build",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
-        },
-        {
-          "value": "score_closeout",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.rush_score"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -45881,28 +45898,12 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "function_signal_descriptor_gap",
-        "legacy_lineSupport"
-      ],
-      "descriptorGaps": [
-        {
-          "gapId": "cheap_ice_and_rush_shape_partial",
-          "description": "Cheap early ICE and rush-score shape can be inferred only partially from current effects and roles; it remains a later ontology extension candidate.",
-          "affectedSignalsOrValues": [
-            "score_closeout",
-            "ice_tax_glacier",
-            "server_defense",
-            "etr_tax"
-          ],
-          "batchMigrationDecision": "do_not_bulk_migrate_in_AI004",
-          "needsSchemaOrDescriptorExtension": true
-        }
-      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "conditions",
@@ -45924,8 +45925,12 @@
         ]
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -45940,7 +45945,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "remote.scoring_protection"
@@ -45950,22 +45955,13 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "ice_tax_glacier",
+          "value": "corp.remote_scoring",
           "category": "exact_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "value": "remote_scoring_build",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -46014,28 +46010,12 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "function_signal_descriptor_gap",
-        "legacy_lineSupport"
-      ],
-      "descriptorGaps": [
-        {
-          "gapId": "cheap_ice_and_rush_shape_partial",
-          "description": "Cheap early ICE and rush-score shape can be inferred only partially from current effects and roles; it remains a later ontology extension candidate.",
-          "affectedSignalsOrValues": [
-            "score_closeout",
-            "ice_tax_glacier",
-            "server_defense",
-            "etr_tax"
-          ],
-          "batchMigrationDecision": "do_not_bulk_migrate_in_AI004",
-          "needsSchemaOrDescriptorExtension": true
-        }
-      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "conditions",
@@ -46050,8 +46030,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -46222,7 +46206,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [
         "remote.scoring_protection"
@@ -46232,22 +46216,22 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "category": "exact_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "value": "remote_scoring_build",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "safe_strategy_anchor_alias",
+          "value": "corp.remote_scoring",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -46297,8 +46281,7 @@
         }
       ],
       "warningCategories": [
-        "function_signal_descriptor_gap",
-        "legacy_lineSupport"
+        "function_signal_descriptor_gap"
       ],
       "descriptorGaps": [
         {
@@ -46317,7 +46300,7 @@
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
-        "legacyLineSupportPresent": true,
+        "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "remoteRole"
@@ -46332,8 +46315,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "engine_anchor"
+        ],
+        "validValues": [
+          "engine_anchor"
+        ],
         "unknownValues": []
       }
     },

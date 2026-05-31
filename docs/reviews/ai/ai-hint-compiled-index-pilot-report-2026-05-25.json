@@ -9755,7 +9755,7 @@
             "timing": "start_of_turn"
           }
         ],
-        "lineSupport": ["early_rnd_pressure", "interface_pressure"],
+        "lineSupport": ["runner.rnd_pressure"],
         "quality": {
           "benchmarkCovered": false,
           "confidence": "high",
@@ -9776,6 +9776,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -10006,9 +10007,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -11105,7 +11108,7 @@
             "zone": "stack_top"
           }
         ],
-        "lineSupport": ["breaker_search_first", "rig_first"],
+        "lineSupport": ["runner.breaker_search"],
         "quality": {
           "benchmarkCovered": false,
           "confidence": "high",
@@ -11132,6 +11135,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "targetProfiles"],
@@ -12128,7 +12132,7 @@
             "zone": "stack"
           }
         ],
-        "lineSupport": ["breaker_search_first", "rig_first"],
+        "lineSupport": ["runner.breaker_search"],
         "quality": {
           "benchmarkCovered": true,
           "confidence": "high",
@@ -12153,6 +12157,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["conditions", "targetProfiles"],
@@ -13398,6 +13403,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -13500,6 +13506,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -13591,6 +13598,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -13817,6 +13825,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -14062,6 +14071,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -14168,9 +14178,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -15689,6 +15701,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -17227,6 +17240,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -18059,6 +18073,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -21927,6 +21942,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -22023,6 +22039,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -22698,6 +22715,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -22804,9 +22822,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": [
@@ -22921,6 +22941,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -23015,6 +23036,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -23205,10 +23227,12 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": [
@@ -23335,9 +23359,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": [
@@ -23543,6 +23569,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -23646,6 +23673,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "remoteRole"],
@@ -23761,6 +23789,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -24015,6 +24044,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -24124,6 +24154,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "costProfile"],
@@ -24345,6 +24376,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["conditions"],
@@ -24643,6 +24675,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -25289,9 +25322,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
@@ -25624,10 +25659,12 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "remoteRole"],
@@ -25940,9 +25977,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
@@ -26938,9 +26977,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
@@ -27167,6 +27208,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -27476,7 +27518,7 @@
           "source": "implementation.modifiers.break_subroutine_cost",
           "threatLevel": "medium"
         },
-        "lineSupport": ["ice_tax_glacier", "remote_scoring_build"],
+        "lineSupport": ["corp.ice_tax_glacier", "corp.remote_scoring"],
         "quality": {
           "benchmarkCovered": true,
           "confidence": "high",
@@ -27496,6 +27538,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -27733,6 +27776,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": [],
@@ -27962,6 +28006,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": [],
@@ -28165,6 +28210,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": [],
@@ -28351,11 +28397,7 @@
           "source": "implementation.modifiers.steal_cost",
           "threatLevel": "high"
         },
-        "lineSupport": [
-          "ice_tax_glacier",
-          "remote_scoring_build",
-          "score_closeout"
-        ],
+        "lineSupport": ["corp.remote_scoring"],
         "quality": {
           "benchmarkCovered": true,
           "confidence": "high",
@@ -28383,6 +28425,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "remoteRole"],
@@ -28512,6 +28555,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": [],
@@ -28803,6 +28847,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],

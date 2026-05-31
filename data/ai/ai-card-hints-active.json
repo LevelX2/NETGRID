@@ -711,7 +711,8 @@
           "kind": "requires_rnd_pressure"
         }
       ],
-      "lineSupport": ["early_rnd_pressure", "interface_pressure"],
+      "lineSupport": ["runner.rnd_pressure"],
+      "strategicRole": ["engine_anchor"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -872,7 +873,9 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_root_modifier_upgrade"
-      ]
+      ],
+      "lineSupport": ["runner.survival_defense"],
+      "strategicRole": ["emergency_tool"]
     },
     {
       "cardId": "onr_v1_023_evil-twin",
@@ -1512,7 +1515,8 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["rig_first", "breaker_search_first"],
+      "lineSupport": ["runner.breaker_search"],
+      "strategicRole": ["engine_anchor"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -2227,7 +2231,8 @@
         "reserveRisk": "medium",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["rig_first", "breaker_search_first"]
+      "lineSupport": ["runner.breaker_search"],
+      "strategicRole": ["engine_anchor"]
     },
     {
       "cardId": "onr_v1_060_shaka",
@@ -2909,7 +2914,9 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#runner_v1919_agenda_counter"
-      ]
+      ],
+      "lineSupport": ["runner.survival_defense"],
+      "strategicRole": ["emergency_tool"]
     },
     {
       "cardId": "onr_v1_079_bodyweight-synthetic-blood",
@@ -3250,7 +3257,8 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["rig_first", "breaker_search_first"]
+      "lineSupport": ["runner.breaker_search"],
+      "strategicRole": ["enabler"]
     },
     {
       "cardId": "onr_v1_088_fortress-respecification",
@@ -3310,7 +3318,8 @@
           "scope": "runner"
         }
       ],
-      "lineSupport": ["rig_first", "breaker_search_first"]
+      "lineSupport": ["runner.breaker_search"],
+      "strategicRole": ["enabler"]
     },
     {
       "cardId": "onr_v1_090_hot-tip-for-wns",
@@ -3408,7 +3417,8 @@
           "scope": "runner"
         }
       ],
-      "lineSupport": ["rig_first", "breaker_search_first"]
+      "lineSupport": ["runner.breaker_search"],
+      "strategicRole": ["enabler"]
     },
     {
       "cardId": "onr_v1_094_inside-job",
@@ -3513,11 +3523,8 @@
           "kind": "requires_successful_run"
         }
       ],
-      "lineSupport": [
-        "early_rnd_pressure",
-        "interface_pressure",
-        "closeout_pressure"
-      ],
+      "lineSupport": ["runner.rnd_pressure"],
+      "strategicRole": ["payoff_anchor"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -3629,7 +3636,8 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["rig_first", "breaker_search_first", "economy_first"]
+      "lineSupport": ["runner.breaker_search"],
+      "strategicRole": ["enabler"]
     },
     {
       "cardId": "onr_v1_100_misc-for-sale",
@@ -3953,7 +3961,8 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["rig_first", "breaker_search_first"]
+      "lineSupport": ["runner.breaker_search"],
+      "strategicRole": ["enabler"]
     },
     {
       "cardId": "onr_v1_111_social-engineering",
@@ -4063,7 +4072,8 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["rig_first", "breaker_search_first"]
+      "lineSupport": ["runner.breaker_search"],
+      "strategicRole": ["enabler"]
     },
     {
       "cardId": "onr_v1_115_terrorist-reprisal",
@@ -4106,7 +4116,9 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"
-      ]
+      ],
+      "lineSupport": ["runner.survival_defense"],
+      "strategicRole": ["defensive_tool"]
     },
     {
       "cardId": "onr_v1_117_valu-pak-software-bundle",
@@ -5289,7 +5301,9 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"
-      ]
+      ],
+      "lineSupport": ["runner.survival_defense"],
+      "strategicRole": ["defensive_tool"]
     },
     {
       "cardId": "onr_v1_168_loan-from-chiba",
@@ -5815,7 +5829,9 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
-      ]
+      ],
+      "lineSupport": ["runner.survival_defense"],
+      "strategicRole": ["defensive_tool"]
     },
     {
       "cardId": "onr_v1_186_umbrella-policy",
@@ -6079,7 +6095,8 @@
         "reserveRisk": "low",
         "opportunityCost": "low"
       },
-      "lineSupport": ["fast_advance_or_counter_ops", "score_closeout"]
+      "lineSupport": ["corp.fast_advance"],
+      "strategicRole": ["scoring_tool"]
     },
     {
       "cardId": "onr_v1_193_corporate-coup",
@@ -6714,7 +6731,8 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["corp.tag_trace_punish"],
+      "lineSupport": ["corp.tag_trace_punish", "corp.damage_kill"],
+      "strategicRole": ["punish_payoff"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -7051,7 +7069,8 @@
           "repeatable": false
         }
       ],
-      "lineSupport": ["fast_advance_or_counter_ops", "score_closeout"]
+      "lineSupport": ["corp.fast_advance"],
+      "strategicRole": ["scoring_tool"]
     },
     {
       "cardId": "onr_v1_215_security-net-optimization",
@@ -7166,7 +7185,8 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["corp.tag_trace_punish"],
+      "lineSupport": ["corp.tag_trace_punish", "corp.damage_kill"],
+      "strategicRole": ["punish_payoff"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -9605,7 +9625,8 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["corp.tag_trace_punish"]
+      "lineSupport": ["corp.tag_trace_punish"],
+      "strategicRole": ["punish_payoff"]
     },
     {
       "cardId": "onr_v1_286_corporate-detective-agency",
@@ -9653,6 +9674,7 @@
         "opportunityCost": "medium"
       },
       "lineSupport": ["corp.tag_trace_punish"],
+      "strategicRole": ["punish_payoff"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -9862,7 +9884,9 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_operation_counter"
-      ]
+      ],
+      "lineSupport": ["corp.fast_advance"],
+      "strategicRole": ["scoring_tool"]
     },
     {
       "cardId": "onr_v1_293_netwatch-credit-voucher",
@@ -10153,7 +10177,8 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["corp.tag_trace_punish"]
+      "lineSupport": ["corp.tag_trace_punish"],
+      "strategicRole": ["punish_payoff"]
     },
     {
       "cardId": "onr_v1_300_project-consultants",
@@ -10174,7 +10199,9 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_operation_counter"
-      ]
+      ],
+      "lineSupport": ["corp.fast_advance"],
+      "strategicRole": ["scoring_tool"]
     },
     {
       "cardId": "onr_v1_301_punitive-counterstrike",
@@ -10234,7 +10261,8 @@
         "reserveRisk": "low",
         "opportunityCost": "low"
       },
-      "lineSupport": ["corp.tag_trace_punish"]
+      "lineSupport": ["corp.tag_trace_punish", "corp.damage_kill"],
+      "strategicRole": ["punish_payoff", "win_condition"]
     },
     {
       "cardId": "onr_v1_302_scorched-earth",
@@ -10293,7 +10321,8 @@
         "reserveRisk": "low",
         "opportunityCost": "low"
       },
-      "lineSupport": ["corp.tag_trace_punish"]
+      "lineSupport": ["corp.tag_trace_punish", "corp.damage_kill"],
+      "strategicRole": ["punish_payoff", "win_condition"]
     },
     {
       "cardId": "onr_v1_303_silver-lining-recovery-protocol",
@@ -10337,6 +10366,8 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_operation_counter"
       ],
+      "lineSupport": ["corp.fast_advance"],
+      "strategicRole": ["scoring_tool"],
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": false,
@@ -10359,7 +10390,9 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_operation_counter"
-      ]
+      ],
+      "lineSupport": ["corp.fast_advance"],
+      "strategicRole": ["scoring_tool"]
     },
     {
       "cardId": "onr_v1_306_trojan-horse",
@@ -10464,7 +10497,8 @@
         "reserveRisk": "low",
         "opportunityCost": "low"
       },
-      "lineSupport": ["corp.tag_trace_punish"]
+      "lineSupport": ["corp.tag_trace_punish", "corp.damage_kill"],
+      "strategicRole": ["punish_payoff", "win_condition"]
     },
     {
       "cardId": "onr_v1_308_acme-savings-and-loan",
@@ -10517,7 +10551,8 @@
         "reserveRisk": "high",
         "opportunityCost": "high"
       },
-      "lineSupport": ["economy_rez_reserve"],
+      "lineSupport": ["corp.asset_economy"],
+      "strategicRole": ["engine_anchor"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -10578,7 +10613,8 @@
         "threatLevel": "medium",
         "serverScope": "remote"
       },
-      "lineSupport": ["economy_rez_reserve"]
+      "lineSupport": ["corp.asset_economy"],
+      "strategicRole": ["engine_anchor"]
     },
     {
       "cardId": "onr_v1_310_blood-cat",
@@ -10645,7 +10681,8 @@
         "threatLevel": "medium",
         "serverScope": "remote"
       },
-      "lineSupport": ["economy_rez_reserve"]
+      "lineSupport": ["corp.asset_economy"],
+      "strategicRole": ["engine_anchor"]
     },
     {
       "cardId": "onr_v1_312_chicago-branch",
@@ -10688,11 +10725,8 @@
         "threatLevel": "medium",
         "serverScope": "remote"
       },
-      "lineSupport": [
-        "fast_advance_or_counter_ops",
-        "remote_scoring_build",
-        "score_closeout"
-      ],
+      "lineSupport": ["corp.fast_advance", "corp.remote_scoring"],
+      "strategicRole": ["scoring_tool"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -10778,7 +10812,8 @@
         "threatLevel": "medium",
         "serverScope": "remote"
       },
-      "lineSupport": ["economy_rez_reserve"]
+      "lineSupport": ["corp.asset_economy"],
+      "strategicRole": ["engine_anchor"]
     },
     {
       "cardId": "onr_v1_315_corprunners-shattered-remains",
@@ -10875,7 +10910,8 @@
         "threatLevel": "medium",
         "serverScope": "server"
       },
-      "lineSupport": ["remote_scoring_build", "ice_tax_glacier"]
+      "lineSupport": ["corp.remote_scoring", "corp.ice_tax_glacier"],
+      "strategicRole": ["engine_anchor"]
     },
     {
       "cardId": "onr_v1_318_department-of-truth-enhancement",
@@ -11065,7 +11101,9 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_economy_recurring"
-      ]
+      ],
+      "lineSupport": ["corp.asset_economy"],
+      "strategicRole": ["engine_anchor"]
     },
     {
       "cardId": "onr_v1_327_i-got-a-rock",
@@ -11142,6 +11180,8 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_economy_recurring"
       ],
+      "lineSupport": ["corp.asset_economy"],
+      "strategicRole": ["engine_anchor"],
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": false,
@@ -11254,7 +11294,9 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_rezzed_modifier_asset"
-      ]
+      ],
+      "lineSupport": ["corp.asset_economy"],
+      "strategicRole": ["engine_anchor"]
     },
     {
       "cardId": "onr_v1_335_remote-facility",
@@ -11478,7 +11520,9 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_economy_recurring"
-      ]
+      ],
+      "lineSupport": ["corp.asset_economy"],
+      "strategicRole": ["engine_anchor"]
     },
     {
       "cardId": "onr_v1_345_trap",
@@ -11632,7 +11676,8 @@
         "threatLevel": "medium",
         "serverScope": "fort"
       },
-      "lineSupport": ["remote_scoring_build", "ice_tax_glacier"]
+      "lineSupport": ["corp.remote_scoring", "corp.ice_tax_glacier"],
+      "strategicRole": ["tax_tool"]
     },
     {
       "cardId": "onr_v1_351_bizarre-encryption-scheme",
@@ -11783,7 +11828,8 @@
         "threatLevel": "medium",
         "serverScope": "fort"
       },
-      "lineSupport": ["remote_scoring_build", "ice_tax_glacier"]
+      "lineSupport": ["corp.remote_scoring", "corp.ice_tax_glacier"],
+      "strategicRole": ["tax_tool"]
     },
     {
       "cardId": "onr_v1_356_dedicated-response-team",
@@ -11917,7 +11963,8 @@
         "threatLevel": "high",
         "serverScope": "fort"
       },
-      "lineSupport": ["remote_scoring_build", "ice_tax_glacier"],
+      "lineSupport": ["corp.remote_scoring"],
+      "strategicRole": ["scoring_tool"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -12008,7 +12055,8 @@
         "threatLevel": "medium",
         "serverScope": "remote"
       },
-      "lineSupport": ["remote_scoring_build"],
+      "lineSupport": ["corp.remote_scoring"],
+      "strategicRole": ["scoring_tool"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -12094,7 +12142,8 @@
         "threatLevel": "medium",
         "serverScope": "fort"
       },
-      "lineSupport": ["remote_scoring_build", "ice_tax_glacier"]
+      "lineSupport": ["corp.remote_scoring"],
+      "strategicRole": ["support_tool"]
     },
     {
       "cardId": "onr_v1_364_omni-kismet-ph-d",
@@ -12209,11 +12258,8 @@
         "threatLevel": "high",
         "serverScope": "fort"
       },
-      "lineSupport": [
-        "remote_scoring_build",
-        "ice_tax_glacier",
-        "score_closeout"
-      ]
+      "lineSupport": ["corp.remote_scoring"],
+      "strategicRole": ["tax_tool"]
     },
     {
       "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
@@ -12271,7 +12317,8 @@
         "threatLevel": "medium",
         "serverScope": "fort"
       },
-      "lineSupport": ["remote_scoring_build", "ice_tax_glacier"]
+      "lineSupport": ["corp.remote_scoring"],
+      "strategicRole": ["scoring_tool"]
     },
     {
       "cardId": "onr_v1_368_roving-submarine",
@@ -12371,7 +12418,8 @@
         "threatLevel": "high",
         "serverScope": "fort"
       },
-      "lineSupport": ["remote_scoring_build", "ice_tax_glacier"]
+      "lineSupport": ["corp.remote_scoring", "corp.ice_tax_glacier"],
+      "strategicRole": ["engine_anchor"]
     },
     {
       "cardId": "onr_v1_371_tokyo-chiba-infighting",
