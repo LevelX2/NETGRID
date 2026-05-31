@@ -10,8 +10,8 @@ const REPO_ROOT = path.resolve(
 );
 
 const GENERATED_AT = "2026-05-31";
-const TASK_ID = "AI003-1";
-const UPDATES_TASK_ID = "AI003";
+const TASK_ID = "AI004";
+const UPDATES_TASK_ID = "AI003/AI003-1";
 
 const ACTIVE_HINTS_PATH = "data/ai/ai-card-hints-active.json";
 const COMPILED_HINTS_PATH = "data/ai/ai-card-hints-compiled.json";
@@ -20,11 +20,11 @@ const STRATEGIC_ROLES_PATH = "data/ai/strategic-roles-v1.json";
 const FUNCTION_SIGNAL_DERIVATION_PATH =
   "data/ai/function-signal-derivation-v1.json";
 const DEFAULT_REPORT_PATH =
-  "docs/reviews/ai/ai003-strategy-taxonomy-report-2026-05-31.json";
+  "docs/reviews/ai/ai004-strategy-taxonomy-warning-triage-batch1-report-2026-05-31.json";
 const DEFAULT_SIDE_AWARE_REPORT_PATH =
-  "docs/reviews/ai/ai003-1-side-aware-function-signal-derivation-report-2026-05-31.json";
+  "docs/reviews/ai/ai004-side-aware-function-signal-derivation-report-2026-05-31.json";
 const DEFAULT_ALIAS_REPORT_PATH =
-  "docs/reviews/ai/ai003-strategy-taxonomy-alias-report-2026-05-31.json";
+  "docs/reviews/ai/ai004-strategy-taxonomy-warning-triage-batch1-alias-report-2026-05-31.json";
 
 const VALID_SIDES = new Set(["runner", "corp"]);
 const VALID_DETECTION_MODES = new Set([
@@ -296,6 +296,224 @@ const LEGACY_ROLE_PATTERNS = [
   /deck/,
 ];
 
+const ROLE_PLAN_ROLE_TRIAGE = {
+  action: {
+    category: "function_signal_only",
+    rationale:
+      "Generic action economy or action use context; not a StrategyGoal source.",
+  },
+  bit_depot: {
+    category: "function_signal_only",
+    rationale: "Legacy bit/credit storage vocabulary; economy function context only.",
+  },
+  bit_pool: {
+    category: "function_signal_only",
+    rationale: "Legacy bit/credit pool vocabulary; economy function context only.",
+  },
+  black_ops: {
+    category: "legacy_role_only",
+    rationale: "Flavor/subtype-style legacy context; not a strategy anchor.",
+  },
+  break_walls: {
+    category: "function_signal_only",
+    rationale: "Breaker coverage intent; kept as function context, not a strategy anchor.",
+  },
+  city_grid: {
+    category: "legacy_role_only",
+    rationale: "Card subtype/catalog context for City Grid upgrades.",
+  },
+  click_for_credits_when_safe: {
+    category: "function_signal_only",
+    rationale: "Tactical economy action hint; not a StrategyGoal source.",
+  },
+  code_gate: {
+    category: "function_signal_only",
+    rationale: "ICE subtype or breaker coverage context only.",
+  },
+  connection: {
+    category: "legacy_role_only",
+    rationale: "Runner resource subtype/catalog context.",
+  },
+  credit_swing: {
+    category: "function_signal_only",
+    rationale: "Economy swing descriptor; not a strategy anchor.",
+  },
+  daemon: {
+    category: "legacy_role_only",
+    rationale: "Program subtype/catalog context.",
+  },
+  daemon_host: {
+    category: "function_signal_only",
+    rationale: "Hosting function context for Daemon programs.",
+  },
+  etr_tax: {
+    category: "function_signal_only",
+    rationale: "End-the-run tax descriptor; covered by ICE/tax function signals.",
+  },
+  expose: {
+    category: "function_signal_only",
+    rationale: "Expose/information function context only.",
+  },
+  expose_helper: {
+    category: "function_signal_only",
+    rationale: "Expose/information support context only.",
+  },
+  gray_ops: {
+    category: "legacy_role_only",
+    rationale: "Subtype/flavor-like legacy context; not a strategy anchor.",
+  },
+  handlimit: {
+    category: "function_signal_only",
+    rationale: "Hand-size/limit function context only.",
+  },
+  hidden_information_pressure: {
+    category: "descriptor_gap",
+    rationale:
+      "Broad hidden-information pressure needs structured info descriptors before strategy use.",
+  },
+  hidden_zone: {
+    category: "descriptor_gap",
+    rationale:
+      "Hidden-zone access/search/reorder needs structured descriptors, not StrategyGoal aliasing.",
+  },
+  hidden_zone_tool: {
+    category: "descriptor_gap",
+    rationale:
+      "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly.",
+  },
+  hosting: {
+    category: "function_signal_only",
+    rationale: "Hosting/host relationship function context only.",
+  },
+  ice_modifier: {
+    category: "function_signal_only",
+    rationale: "ICE modifier/support function context only.",
+  },
+  information: {
+    category: "descriptor_gap",
+    rationale:
+      "Broad information pressure is not stable enough to map without a narrower descriptor.",
+  },
+  killer_support: {
+    category: "function_signal_only",
+    rationale: "Breaker/support function context only.",
+  },
+  modifier: {
+    category: "function_signal_only",
+    rationale: "Generic modifier context; requires structured source fields for derivation.",
+  },
+  noisy: {
+    category: "remove_or_deprecate",
+    rationale: "Low-signal legacy vocabulary; keep out of strategy derivation.",
+  },
+  persistent: {
+    category: "legacy_role_only",
+    rationale: "Persistence/lifecycle context; not a strategy anchor.",
+  },
+  persistent_liability: {
+    category: "legacy_role_only",
+    rationale: "Risk/liability context; not a StrategyGoal source.",
+  },
+  position: {
+    category: "legacy_role_only",
+    rationale: "Runner resource subtype/catalog context.",
+  },
+  protect_rig: {
+    category: "function_signal_only",
+    rationale: "Rig-defense tactical context, not a strategy anchor.",
+  },
+  rd_reorder: {
+    category: "descriptor_gap",
+    rationale:
+      "R&D reorder needs a structured information descriptor before strategy use.",
+  },
+  rd_reveal: {
+    category: "descriptor_gap",
+    rationale:
+      "R&D reveal needs a structured information descriptor before strategy use.",
+  },
+  rd_success_replacement: {
+    category: "descriptor_gap",
+    rationale:
+      "Successful-run replacement is not precise enough for direct strategy aliasing.",
+  },
+  recursion: {
+    category: "function_signal_only",
+    rationale: "Card recovery/recursion function context only.",
+  },
+  recycle_zones: {
+    category: "function_signal_only",
+    rationale: "Zone recycle/shuffle function context only.",
+  },
+  region: {
+    category: "legacy_role_only",
+    rationale: "Region subtype/catalog context.",
+  },
+  rig_defense: {
+    category: "function_signal_only",
+    rationale: "Rig protection function context only.",
+  },
+  sentry: {
+    category: "function_signal_only",
+    rationale: "ICE subtype or breaker coverage context only.",
+  },
+  server_defense: {
+    category: "function_signal_only",
+    rationale: "Broad server protection context; use structured remote/ICE descriptors.",
+  },
+  server_development: {
+    category: "descriptor_gap",
+    rationale:
+      "Remote/server development shape needs structured scoring descriptors before strategy use.",
+  },
+  server_tax: {
+    category: "function_signal_only",
+    rationale: "Server tax function context only.",
+  },
+  stack_reorder: {
+    category: "descriptor_gap",
+    rationale:
+      "Stack reorder needs a structured hidden-zone descriptor before strategy use.",
+  },
+  start_of_turn: {
+    category: "function_signal_only",
+    rationale: "Timing context only.",
+  },
+  steal_reward: {
+    category: "deferred_requires_human_review",
+    rationale:
+      "Steal reward can be payoff or tactical value depending on the card; defer.",
+  },
+  stealth: {
+    category: "function_signal_only",
+    rationale: "Stealth/economy support context only.",
+  },
+  stealth_loss: {
+    category: "function_signal_only",
+    rationale: "Breaker drawback/function context only.",
+  },
+  sysop: {
+    category: "legacy_role_only",
+    rationale: "Corp subtype/catalog context.",
+  },
+  tempo: {
+    category: "function_signal_only",
+    rationale: "Broad tempo function context; not a StrategyGoal source.",
+  },
+  transactions: {
+    category: "legacy_role_only",
+    rationale: "Operation subtype/catalog context.",
+  },
+  virus: {
+    category: "function_signal_only",
+    rationale: "Virus counter/card-function context only.",
+  },
+  worm_hate: {
+    category: "function_signal_only",
+    rationale: "Specific tech/function context; not a strategy anchor.",
+  },
+};
+
 export function buildAiStrategyTaxonomyReport(options = {}) {
   const repoRoot = options.repoRoot ?? REPO_ROOT;
   const activeHints = readJson(repoRoot, ACTIVE_HINTS_PATH);
@@ -359,6 +577,20 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
   );
   validateOpponentSignals(activeHints, ACTIVE_HINTS_PATH, hardErrors);
   validateOpponentSignals(compiledHints, COMPILED_HINTS_PATH, hardErrors);
+  validateHiddenInfoKeys(activeHints, ACTIVE_HINTS_PATH, hardErrors);
+  validateHiddenInfoKeys(compiledHints, COMPILED_HINTS_PATH, hardErrors);
+  validateLineSupportValues(
+    activeHints,
+    ACTIVE_HINTS_PATH,
+    strategyIds,
+    hardErrors,
+  );
+  validateLineSupportValues(
+    compiledHints,
+    COMPILED_HINTS_PATH,
+    strategyIds,
+    hardErrors,
+  );
   validateStrategicRoleIfPresent(
     activeHints,
     ACTIVE_HINTS_PATH,
@@ -430,23 +662,78 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     warnings.push({
       kind: "legacy_lineSupport_values_warn_only",
       count: legacyLineSupportValues.length,
+      occurrences: legacyLineSupportValues.reduce(
+        (sum, item) => sum + item.count,
+        0,
+      ),
       message:
-        "Existing lineSupport values are legacy AI003 inputs and are not hard-gated yet.",
+        "Existing lineSupport values are known legacy aliases and remain warn-only when allowlisted and side-correct.",
       items: legacyLineSupportValues,
     });
   }
 
-  const unknownRoleValues = [
-    ...aliasReport.roles,
-    ...aliasReport.planRoles,
-  ].filter((entry) => entry.mappingCategory === "unknown_unmapped");
+  const rolePlanRoleValues = [...aliasReport.roles, ...aliasReport.planRoles];
+  for (const warningClass of [
+    {
+      category: "function_signal_only",
+      kind: "function_signal_only_role_or_planRole_values_warn_only",
+      message:
+        "Known roles or planRoles describe function/tactical context only and are not strategy anchors.",
+    },
+    {
+      category: "legacy_role_only",
+      kind: "legacy_role_or_planRole_values_warn_only",
+      message:
+        "Known roles or planRoles are retained as legacy/catalog context only.",
+    },
+    {
+      category: "descriptor_gap",
+      kind: "descriptor_gap_role_or_planRole_values_warn_only",
+      message:
+        "Known roles or planRoles point at descriptor gaps and require structured ontology work before strategy use.",
+    },
+    {
+      category: "remove_or_deprecate",
+      kind: "remove_or_deprecate_role_or_planRole_values_warn_only",
+      message:
+        "Known roles or planRoles are low-signal legacy vocabulary and should not be used for strategy derivation.",
+    },
+    {
+      category: "deferred_requires_human_review",
+      kind: "deferred_role_or_planRole_values_warn_only",
+      message:
+        "Known roles or planRoles are intentionally deferred until card-level review.",
+    },
+  ]) {
+    const items = rolePlanRoleValues.filter(
+      (entry) =>
+        entry.mappingCategory === warningClass.category &&
+        entry.triageSource === "ai004_explicit",
+    );
+    if (items.length === 0) continue;
+    warnings.push({
+      kind: warningClass.kind,
+      count: items.length,
+      occurrences: items.reduce((sum, item) => sum + item.count, 0),
+      message: warningClass.message,
+      items,
+    });
+  }
+
+  const unknownRoleValues = rolePlanRoleValues.filter(
+    (entry) => entry.mappingCategory === "unknown_unmapped",
+  );
   if (unknownRoleValues.length > 0) {
     warnings.push({
       kind: "unknown_role_or_planRole_values_warn_only",
       count: unknownRoleValues.length,
+      occurrences: unknownRoleValues.reduce(
+        (sum, item) => sum + item.count,
+        0,
+      ),
       message:
         "Some existing roles or planRoles are unmapped in the AI003 contract report.",
-      examples: unknownRoleValues.slice(0, 25),
+      items: unknownRoleValues,
     });
   }
 
@@ -581,6 +868,19 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     sideAwareDerivation,
     derivationSmokeTests,
     aliasSummary: aliasReport.summary,
+    ai004Triage: {
+      lineSupport: buildLineSupportTriage(compiledCards, strategyIds),
+      roles: aliasReport.roles,
+      planRoles: aliasReport.planRoles,
+      descriptorGaps: buildDescriptorGapTriage(descriptorGaps),
+      explicitNonRuntimePolicy: {
+        plannerEffect: "none",
+        deckDoctrineCutover: "none",
+        actionScoreChange: "none",
+        planWeightChange: "none",
+        profileOrDefaultSwitch: "none",
+      },
+    },
     hardErrors,
     warnings,
     gates: {
@@ -590,11 +890,15 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
       invalidStrategicRolesFail: true,
       hiddenInfoFieldsFail: true,
       manualFunctionTagsFail: true,
+      hiddenInfoFieldsInHintsFail: true,
       opponentSignalsVisibleEvidenceOnlyFail: true,
+      unknownLineSupportFail: true,
+      lineSupportSideMismatchFail: true,
       wrongSideStrategyAnchorMatchesFail: true,
       strategyAnchorWithoutSideGateFail: true,
       unknownRuleGateFieldFail: true,
       legacyLineSupportWarnOnly: true,
+      knownRolePlanRoleTriageWarnOnly: true,
       unmappedRolesWarnOnly: true,
       descriptorGapsWarnOnly: true,
       strategyAnchorWithoutEffectScopeWarn: true,
@@ -607,9 +911,7 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
       "no plan weight change",
       "no profile/default switch",
       "no deck change",
-      "no hint migration",
-      "no ai-card-hints-active.json change",
-      "no ai-card-hints-compiled.json change",
+      "no broad hint migration",
       "no Catalog or Proteus baseline change",
     ],
   };
@@ -713,6 +1015,8 @@ function mapInventoryValues(field, entries, strategyIds, functionSignalIds) {
       value: entry.value,
       count: entry.count,
       mappingCategory: mapping.category,
+      triageCategory: mapping.triageCategory ?? mapping.category,
+      triageSource: mapping.triageSource ?? "classifier",
       mapsTo: mapping.mapsTo,
       rationale: mapping.rationale,
       examples: entry.examples,
@@ -735,20 +1039,32 @@ function classifyExistingValue(
   }
 
   if (field === "lineSupport" && LINE_SUPPORT_MAPPINGS[value]) {
-    return LINE_SUPPORT_MAPPINGS[value];
+    return withLineSupportTriageCategory(value, LINE_SUPPORT_MAPPINGS[value]);
   }
 
   if (ROLE_ALIASES[value]) {
     return {
       category: "alias_to_strategy_goal",
+      triageCategory: "strategy_alias",
       mapsTo: ROLE_ALIASES[value],
       rationale: "Legacy role or planRole aliases to a normalized strategy.",
+    };
+  }
+
+  if ((field === "roles" || field === "planRoles") && ROLE_PLAN_ROLE_TRIAGE[value]) {
+    return {
+      category: ROLE_PLAN_ROLE_TRIAGE[value].category,
+      triageCategory: ROLE_PLAN_ROLE_TRIAGE[value].category,
+      triageSource: "ai004_explicit",
+      mapsTo: [],
+      rationale: ROLE_PLAN_ROLE_TRIAGE[value].rationale,
     };
   }
 
   if (functionSignalIds.has(value) || isFunctionLikeValue(value)) {
     return {
       category: "function_signal_only",
+      triageCategory: "function_signal_only",
       mapsTo: [],
       rationale:
         "Value describes a card function or tactical support signal, not a direct strategy anchor.",
@@ -758,6 +1074,7 @@ function classifyExistingValue(
   if (isLegacyRoleOnlyValue(value)) {
     return {
       category: "legacy_role_only",
+      triageCategory: "legacy_role_only",
       mapsTo: [],
       rationale:
         "Value is retained as legacy role/catalog/review context and is not a strategy goal.",
@@ -766,10 +1083,246 @@ function classifyExistingValue(
 
   return {
     category: "unknown_unmapped",
+    triageCategory: "unknown_unmapped",
     mapsTo: [],
     rationale:
       "No AI003 mapping rule matched this value; later migration should review it explicitly.",
   };
+}
+
+function withLineSupportTriageCategory(value, mapping) {
+  if (mapping.triageCategory) return mapping;
+  if (mapping.category === "should_be_removed_from_lineSupport") {
+    return {
+      ...mapping,
+      triageCategory: "should_be_removed_from_lineSupport",
+    };
+  }
+  if (
+    [
+      "rig_first",
+      "economy_first",
+      "economy_rez_reserve",
+      "score_closeout",
+      "remote_contest",
+      "closeout_pressure",
+    ].includes(value)
+  ) {
+    return {
+      ...mapping,
+      triageCategory: "structure_or_support_goal_requires_card_review",
+    };
+  }
+  return {
+    ...mapping,
+    triageCategory: "safe_strategy_anchor_alias",
+  };
+}
+
+function buildLineSupportTriage(cards, strategyIds) {
+  const entries = [];
+  for (const hint of cards) {
+    for (const value of hint.lineSupport ?? []) {
+      entries.push(classifyLineSupportForCard(value, hint, strategyIds));
+    }
+  }
+  return {
+    totalOccurrences: entries.length,
+    legacyOccurrences: entries.filter(
+      (entry) => entry.triageCategory !== "normalized_strategy_id",
+    ).length,
+    categoryCounts: countBy(entries, (entry) => entry.triageCategory),
+    valueCounts: collectValueInventory(cards, "lineSupport").map((entry) => ({
+      value: entry.value,
+      count: entry.count,
+    })),
+    entries,
+  };
+}
+
+function classifyLineSupportForCard(value, hint, strategyIds) {
+  const base = {
+    cardId: hint.cardId,
+    side: hint.side,
+    cardType: hint.cardType,
+    value,
+    evidence: lineSupportEvidence(hint),
+  };
+  if (strategyIds.has(value)) {
+    return {
+      ...base,
+      triageCategory: "normalized_strategy_id",
+      mapsTo: [value],
+      rationale: "Already normalized to a side-prefixed StrategyGoal.",
+    };
+  }
+  const mapping = LINE_SUPPORT_MAPPINGS[value];
+  if (!mapping) {
+    return {
+      ...base,
+      triageCategory: "unknown_unmapped",
+      mapsTo: [],
+      rationale: "Not in the known legacy lineSupport allowlist.",
+    };
+  }
+  if (hint.quality?.needsHumanReview === true) {
+    return {
+      ...base,
+      triageCategory: "deferred_requires_human_review",
+      mapsTo: mapping.mapsTo ?? [],
+      rationale: "Card is already flagged for human review; do not batch-migrate.",
+    };
+  }
+  const effectKinds = new Set((hint.effects ?? []).map((effect) => effect.kind));
+  const effectScopes = new Set((hint.effects ?? []).map((effect) => effect.scope));
+  const roles = new Set([...(hint.roles ?? []), ...(hint.planRoles ?? [])]);
+  if (
+    value === "remote_contest" &&
+    effectKinds.has("trash_credit") &&
+    hint.side === "runner"
+  ) {
+    return {
+      ...base,
+      triageCategory: "safe_strategy_anchor_alias",
+      mapsTo: ["runner.remote_trash"],
+      rationale:
+        "Runner trash-credit payoff is a remote trash anchor, not generic remote contest.",
+    };
+  }
+  if (
+    value === "remote_contest" ||
+    value === "rig_first" ||
+    value === "economy_first" ||
+    value === "economy_rez_reserve" ||
+    value === "score_closeout"
+  ) {
+    return {
+      ...base,
+      triageCategory: "structure_or_support_goal_requires_card_review",
+      mapsTo: mapping.mapsTo ?? [],
+      rationale:
+        "Broad structural/support lineSupport value; keep legacy until card-level review.",
+    };
+  }
+  if (
+    value === "closeout_pressure" &&
+    !effectKinds.has("multiaccess") &&
+    !roles.has("multiaccess")
+  ) {
+    return {
+      ...base,
+      triageCategory: "should_be_removed_from_lineSupport",
+      mapsTo: [],
+      rationale:
+        "Closeout pressure without multiaccess/interface evidence is too broad for lineSupport.",
+    };
+  }
+  if (
+    value === "early_rnd_pressure" &&
+    (effectScopes.has("rnd") || roles.has("pressure_rnd") || roles.has("rd_run"))
+  ) {
+    return {
+      ...base,
+      triageCategory: "safe_strategy_anchor_alias",
+      mapsTo: ["runner.rnd_pressure"],
+      rationale: "R&D access/topdeck evidence supports Runner R&D pressure.",
+    };
+  }
+  if (
+    value === "early_hq_pressure" &&
+    (effectScopes.has("hq") || roles.has("pressure_hq") || roles.has("hq_run"))
+  ) {
+    return {
+      ...base,
+      triageCategory: "safe_strategy_anchor_alias",
+      mapsTo: ["runner.hq_pressure"],
+      rationale: "HQ access evidence supports Runner HQ pressure.",
+    };
+  }
+  if (
+    value === "interface_pressure" &&
+    (effectKinds.has("multiaccess") ||
+      roles.has("multiaccess") ||
+      hint.cardId.includes("interface"))
+  ) {
+    return {
+      ...base,
+      triageCategory: "safe_strategy_anchor_alias",
+      mapsTo: ["runner.interface_closeout"],
+      rationale: "Interface/multiaccess evidence supports interface closeout.",
+    };
+  }
+  if (
+    value === "tag_trace_punish" &&
+    hint.side === "corp" &&
+    ["tag_source", "tag_punish_payoff", "trace", "damage"].some((kind) =>
+      effectKinds.has(kind),
+    )
+  ) {
+    return {
+      ...base,
+      triageCategory: "safe_strategy_anchor_alias",
+      mapsTo: ["corp.tag_trace_punish"],
+      rationale: "Corp tag/trace/punish effects support the normalized anchor.",
+    };
+  }
+  return {
+    ...base,
+    triageCategory:
+      withLineSupportTriageCategory(value, mapping).triageCategory,
+    mapsTo: mapping.mapsTo ?? [],
+    rationale: mapping.rationale,
+  };
+}
+
+function lineSupportEvidence(hint) {
+  return {
+    lineSupport: hint.lineSupport ?? [],
+    effects: (hint.effects ?? []).map((effect) => ({
+      kind: effect.kind,
+      scope: effect.scope,
+      timing: effect.timing,
+      resource: effect.resource,
+    })),
+    conditions: (hint.conditions ?? []).map((condition) => condition.kind),
+    breakerProfile: hint.breakerProfile,
+    remoteRole: hint.remoteRole,
+    targetProfiles: hint.targetProfiles,
+    cardType: hint.cardType,
+    side: hint.side,
+    quality: hint.quality,
+  };
+}
+
+function buildDescriptorGapTriage(descriptorGaps) {
+  const affectedValuesByGap = {
+    remote_contest_pressure_not_first_class: [
+      "remote_contest",
+      "contest_remote",
+      "server_development",
+    ],
+    cheap_ice_and_rush_shape_partial: [
+      "score_closeout",
+      "ice_tax_glacier",
+      "server_defense",
+      "etr_tax",
+    ],
+    interface_closeout_density_requires_aggregation: [
+      "interface_pressure",
+      "closeout_pressure",
+      "information",
+      "hidden_information_pressure",
+    ],
+  };
+  return descriptorGaps.map((gap) => ({
+    gapId: gap.gapId,
+    description: gap.description,
+    affectedSignalsOrValues: affectedValuesByGap[gap.gapId] ?? [],
+    batchMigrationDecision: "do_not_bulk_migrate_in_AI004",
+    needsSchemaOrDescriptorExtension: true,
+    laterDeckDoctrineAggregation:
+      gap.gapId === "interface_closeout_density_requires_aggregation",
+  }));
 }
 
 function deriveFunctionSignalSummary(cards, rules) {
@@ -938,6 +1491,20 @@ function buildDerivationSmokeTests(rules) {
           kind: "multiaccess",
           timing: "successful_run",
           scope: "rnd",
+          resource: "cards",
+          amount: 1,
+        },
+      ],
+    },
+    hqMultiaccess: {
+      cardId: "ai004_smoke_hq_multiaccess",
+      side: "runner",
+      cardType: "event",
+      effects: [
+        {
+          kind: "multiaccess",
+          timing: "successful_run",
+          scope: "hq",
           resource: "cards",
           amount: 1,
         },
@@ -1463,6 +2030,49 @@ function validateOpponentSignals(data, sourcePath, errors) {
   }
 }
 
+function validateLineSupportValues(data, sourcePath, strategyIds, errors) {
+  for (const [cardIndex, hint] of (data.cards ?? []).entries()) {
+    if (hint.lineSupport === undefined) continue;
+    if (!isStringArray(hint.lineSupport)) {
+      errors.push({
+        kind: "invalid_lineSupport_shape",
+        path: `${sourcePath}.cards[${cardIndex}].lineSupport`,
+        message: "lineSupport must be a string array when present.",
+      });
+      continue;
+    }
+    for (const value of hint.lineSupport) {
+      const isNormalizedStrategy = strategyIds.has(value);
+      const legacyMapping = LINE_SUPPORT_MAPPINGS[value];
+      if (!isNormalizedStrategy && legacyMapping === undefined) {
+        errors.push({
+          kind: "unknown_lineSupport_value",
+          path: `${sourcePath}.cards[${cardIndex}].lineSupport`,
+          cardId: hint.cardId,
+          message: `Unknown lineSupport value ${value}.`,
+        });
+        continue;
+      }
+      const mappedStrategyIds = isNormalizedStrategy
+        ? [value]
+        : legacyMapping.mapsTo ?? [];
+      const mappedSides = sortedUnique(mappedStrategyIds.map(strategySide));
+      if (
+        mappedSides.length > 0 &&
+        typeof hint.side === "string" &&
+        !mappedSides.includes(hint.side)
+      ) {
+        errors.push({
+          kind: "lineSupport_side_mismatch",
+          path: `${sourcePath}.cards[${cardIndex}].lineSupport`,
+          cardId: hint.cardId,
+          message: `lineSupport value ${value} maps to ${mappedSides.join(",")} but card side is ${hint.side}.`,
+        });
+      }
+    }
+  }
+}
+
 function validateStrategicRoleIfPresent(data, sourcePath, strategicRoleIds, errors) {
   for (const [cardIndex, hint] of (data.cards ?? []).entries()) {
     if (hint.strategicRole === undefined) continue;
@@ -1653,7 +2263,10 @@ export function runCli(argv = process.argv.slice(2)) {
   if (report.hardErrorCount > 0) process.exitCode = 1;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(process.argv[1]).href
+) {
   try {
     runCli();
   } catch (error) {

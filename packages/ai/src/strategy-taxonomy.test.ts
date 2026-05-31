@@ -1,6 +1,6 @@
 import { execFileSync } from "node:child_process";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { describe, expect, it } from "vitest";
 import functionSignalDerivationData from "../../../data/ai/function-signal-derivation-v1.json";
 import strategicRolesData from "../../../data/ai/strategic-roles-v1.json";
@@ -19,12 +19,16 @@ type StrategyGoal = {
 
 type CheckReport = {
   hardErrorCount: number;
+  warningCount: number;
+  hardErrors: Array<{ kind: string; path?: string; cardId?: string }>;
+  warnings: Array<{ kind: string; count?: number; items?: unknown[] }>;
   taxonomy: {
     strategyGoalCount: number;
     runnerStrategyGoalCount: number;
     corpStrategyGoalCount: number;
     strategicRoleIds: string[];
   };
+  gates: Record<string, boolean>;
   derivationSmokeTests: Record<
     string,
     { signals: string[]; anchorStrategyIds: string[] }
@@ -32,6 +36,19 @@ type CheckReport = {
   sideAwareDerivation: {
     preventedWrongSideAnchorCount: number;
     wrongSideAnchorMatchCount: number;
+  };
+  ai004Triage: {
+    roles: Array<{
+      value: string;
+      mappingCategory: string;
+      triageSource?: string;
+    }>;
+    planRoles: Array<{
+      value: string;
+      mappingCategory: string;
+      triageSource?: string;
+    }>;
+    descriptorGaps: Array<{ gapId: string; batchMigrationDecision: string }>;
   };
 };
 
@@ -56,11 +73,72 @@ function loadStrategyTaxonomyReport(): CheckReport {
   return cachedReport;
 }
 
+function loadMutatedStrategyTaxonomyReport(mutator: string): CheckReport {
+  const scriptPath = path.join(repoRoot, "scripts/check-ai-strategy-taxonomy.mjs");
+  const checkerUrl = pathToFileURL(scriptPath).href;
+  const script = `
+    import fs from "node:fs";
+    import os from "node:os";
+    import path from "node:path";
+    import { buildAiStrategyTaxonomyReport } from ${JSON.stringify(checkerUrl)};
+    const tempRoot = fs.mkdtempSync(path.join(os.tmpdir(), "netgrid-ai-taxonomy-"));
+    const files = [
+      "data/ai/ai-card-hints-active.json",
+      "data/ai/ai-card-hints-compiled.json",
+      "data/ai/strategy-goals-v1.json",
+      "data/ai/strategic-roles-v1.json",
+      "data/ai/function-signal-derivation-v1.json",
+    ];
+    for (const relative of files) {
+      const target = path.join(tempRoot, relative);
+      fs.mkdirSync(path.dirname(target), { recursive: true });
+      fs.copyFileSync(path.join(${JSON.stringify(repoRoot)}, relative), target);
+    }
+    const activePath = path.join(tempRoot, "data/ai/ai-card-hints-active.json");
+    const compiledPath = path.join(tempRoot, "data/ai/ai-card-hints-compiled.json");
+    const active = JSON.parse(fs.readFileSync(activePath, "utf8"));
+    const compiled = JSON.parse(fs.readFileSync(compiledPath, "utf8"));
+    function setLineSupport(cardId, lineSupport) {
+      for (const data of [active, compiled]) {
+        const card = data.cards.find((candidate) => candidate.cardId === cardId);
+        if (!card) throw new Error("Missing test card " + cardId);
+        card.lineSupport = lineSupport;
+      }
+    }
+    function setStrategicRole(cardId, strategicRole) {
+      for (const data of [active, compiled]) {
+        const card = data.cards.find((candidate) => candidate.cardId === cardId);
+        if (!card) throw new Error("Missing test card " + cardId);
+        card.strategicRole = strategicRole;
+      }
+    }
+    function setFunctionTags(cardId) {
+      for (const data of [active, compiled]) {
+        const card = data.cards.find((candidate) => candidate.cardId === cardId);
+        if (!card) throw new Error("Missing test card " + cardId);
+        card.functionTags = ["manual"];
+      }
+    }
+    ${mutator}
+    fs.writeFileSync(activePath, JSON.stringify(active, null, 2) + "\\n");
+    fs.writeFileSync(compiledPath, JSON.stringify(compiled, null, 2) + "\\n");
+    const { report } = buildAiStrategyTaxonomyReport({ repoRoot: tempRoot });
+    console.log(JSON.stringify(report));
+  `;
+  return JSON.parse(
+    execFileSync(process.execPath, ["--input-type=module", "-e", script], {
+      cwd: repoRoot,
+      encoding: "utf8",
+    }),
+  ) as CheckReport;
+}
+
 function smokeTest(
   report: CheckReport,
   key:
     | "runnerEconomy"
     | "rndMultiaccess"
+    | "hqMultiaccess"
     | "normalBreaker"
     | "corpTagPunishPayoff"
     | "corpDamagePayoff"
@@ -138,6 +216,7 @@ describe("AI003 strategy goal taxonomy", () => {
     const report = loadStrategyTaxonomyReport();
     const runnerEconomy = smokeTest(report, "runnerEconomy");
     const rndMultiaccess = smokeTest(report, "rndMultiaccess");
+    const hqMultiaccess = smokeTest(report, "hqMultiaccess");
     const normalBreaker = smokeTest(report, "normalBreaker");
     const corpTagPunishPayoff = smokeTest(report, "corpTagPunishPayoff");
 
@@ -148,6 +227,16 @@ describe("AI003 strategy goal taxonomy", () => {
     expect(rndMultiaccess.signals).toContain("access.rnd_multiaccess");
     expect(rndMultiaccess.anchorStrategyIds).toContain(
       "runner.rnd_pressure",
+    );
+    expect(rndMultiaccess.anchorStrategyIds).toContain(
+      "runner.interface_closeout",
+    );
+    expect(hqMultiaccess.signals).toContain("access.hq_multiaccess");
+    expect(hqMultiaccess.anchorStrategyIds).toContain(
+      "runner.hq_pressure",
+    );
+    expect(hqMultiaccess.anchorStrategyIds).toContain(
+      "runner.interface_closeout",
     );
     expect(normalBreaker.signals).toContain("breaker.wall");
     expect(normalBreaker.anchorStrategyIds).not.toContain(
@@ -210,6 +299,85 @@ describe("AI003 strategy goal taxonomy", () => {
     );
     expect(corpDamagePayoff.signals).toContain("damage.payoff");
     expect(corpDamagePayoff.anchorStrategyIds).toContain("corp.damage_kill");
+  });
+
+  it("keeps AI004 legacy lineSupport allowlist warn-only but rejects new or wrong-side lineSupport", () => {
+    const report = loadStrategyTaxonomyReport();
+    const legacyWarning = report.warnings.find(
+      (warning) => warning.kind === "legacy_lineSupport_values_warn_only",
+    );
+    expect(legacyWarning?.count).toBeGreaterThan(0);
+    expect(report.hardErrorCount).toBe(0);
+    expect(report.gates.unknownLineSupportFail).toBe(true);
+    expect(report.gates.lineSupportSideMismatchFail).toBe(true);
+
+    const unknownLineSupport = loadMutatedStrategyTaxonomyReport(
+      `setLineSupport("onr_v1_041_microtech-ai-interface", ["not_a_strategy"]);`,
+    );
+    expect(
+      unknownLineSupport.hardErrors.some(
+        (error) => error.kind === "unknown_lineSupport_value",
+      ),
+    ).toBe(true);
+
+    const wrongSideLineSupport = loadMutatedStrategyTaxonomyReport(
+      `setLineSupport("onr_v1_041_microtech-ai-interface", ["corp.tag_trace_punish"]);`,
+    );
+    expect(
+      wrongSideLineSupport.hardErrors.some(
+        (error) => error.kind === "lineSupport_side_mismatch",
+      ),
+    ).toBe(true);
+  });
+
+  it("keeps strategicRole and manual functionTags hard-gated", () => {
+    const invalidStrategicRole = loadMutatedStrategyTaxonomyReport(
+      `setStrategicRole("onr_v1_041_microtech-ai-interface", ["invalid_role"]);`,
+    );
+    expect(
+      invalidStrategicRole.hardErrors.some(
+        (error) => error.kind === "unknown_strategicRole_value",
+      ),
+    ).toBe(true);
+
+    const manualFunctionTags = loadMutatedStrategyTaxonomyReport(
+      `setFunctionTags("onr_v1_041_microtech-ai-interface");`,
+    );
+    expect(
+      manualFunctionTags.hardErrors.some(
+        (error) => error.kind === "manual_functionTags_field",
+      ),
+    ).toBe(true);
+  });
+
+  it("classifies AI004 role and planRole warning triage without strategy cutover", () => {
+    const report = loadStrategyTaxonomyReport();
+    const explicitTriage = [
+      ...report.ai004Triage.roles,
+      ...report.ai004Triage.planRoles,
+    ].filter((entry) => entry.triageSource === "ai004_explicit");
+
+    expect(explicitTriage).toHaveLength(52);
+    expect(
+      report.warnings.some(
+        (warning) => warning.kind === "unknown_role_or_planRole_values_warn_only",
+      ),
+    ).toBe(false);
+    expect(
+      explicitTriage.filter(
+        (entry) => entry.mappingCategory === "function_signal_only",
+      ).length,
+    ).toBeGreaterThan(0);
+    expect(
+      explicitTriage.filter((entry) => entry.mappingCategory === "descriptor_gap")
+        .length,
+    ).toBeGreaterThan(0);
+    expect(report.ai004Triage.descriptorGaps).toHaveLength(3);
+    expect(
+      report.ai004Triage.descriptorGaps.every(
+        (gap) => gap.batchMigrationDecision === "do_not_bulk_migrate_in_AI004",
+      ),
+    ).toBe(true);
   });
 
   it("keeps function signals derived and hidden-info free", () => {

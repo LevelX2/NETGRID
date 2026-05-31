@@ -26605,9 +26605,8 @@
           }
         ],
         "lineSupport": [
-          "closeout_pressure",
-          "early_rnd_pressure",
-          "interface_pressure"
+          "runner.interface_closeout",
+          "runner.rnd_pressure"
         ],
         "quality": {
           "hintReviewed": true,
@@ -27254,7 +27253,7 @@
           "opportunityCost": "low"
         },
         "lineSupport": [
-          "remote_contest"
+          "runner.remote_trash"
         ],
         "quality": {
           "hintReviewed": true,
@@ -27403,8 +27402,8 @@
           }
         ],
         "lineSupport": [
-          "early_rnd_pressure",
-          "interface_pressure"
+          "runner.interface_closeout",
+          "runner.rnd_pressure"
         ],
         "quality": {
           "hintReviewed": true,
@@ -28106,7 +28105,7 @@
           "opportunityCost": "low"
         },
         "lineSupport": [
-          "remote_contest"
+          "runner.remote_trash"
         ],
         "quality": {
           "hintReviewed": true,
@@ -30290,9 +30289,8 @@
           }
         ],
         "lineSupport": [
-          "closeout_pressure",
-          "early_rnd_pressure",
-          "interface_pressure"
+          "runner.interface_closeout",
+          "runner.rnd_pressure"
         ],
         "quality": {
           "hintReviewed": true,
@@ -30505,8 +30503,7 @@
           }
         ],
         "lineSupport": [
-          "closeout_pressure",
-          "early_hq_pressure"
+          "runner.hq_pressure"
         ],
         "quality": {
           "hintReviewed": true,
@@ -30600,9 +30597,8 @@
           }
         ],
         "lineSupport": [
-          "closeout_pressure",
-          "early_hq_pressure",
-          "interface_pressure"
+          "runner.hq_pressure",
+          "runner.interface_closeout"
         ],
         "quality": {
           "hintReviewed": true,
@@ -41887,7 +41883,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "tag_trace_punish"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -42027,7 +42023,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "tag_trace_punish"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -42662,7 +42658,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "tag_trace_punish"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -43157,7 +43153,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "tag_trace_punish"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -44585,8 +44581,8 @@
         ],
         "lineSupport": [
           "central_stabilize",
-          "ice_tax_glacier",
-          "tag_trace_punish"
+          "corp.tag_trace_punish",
+          "ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
@@ -44786,8 +44782,8 @@
         ],
         "lineSupport": [
           "central_stabilize",
-          "ice_tax_glacier",
-          "tag_trace_punish"
+          "corp.tag_trace_punish",
+          "ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
@@ -45856,7 +45852,7 @@
         ],
         "lineSupport": [
           "central_stabilize",
-          "tag_trace_punish"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -46801,7 +46797,7 @@
         ],
         "lineSupport": [
           "central_stabilize",
-          "tag_trace_punish"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -47635,7 +47631,7 @@
         ],
         "lineSupport": [
           "central_stabilize",
-          "tag_trace_punish"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -51873,7 +51869,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "tag_trace_punish"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -51987,7 +51983,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "tag_trace_punish"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -52098,7 +52094,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "tag_trace_punish"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -52208,7 +52204,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "tag_trace_punish"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -52299,7 +52295,7 @@
           }
         ],
         "lineSupport": [
-          "tag_trace_punish"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -52797,8 +52793,8 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "economy_rez_reserve",
-          "tag_trace_punish"
+          "corp.tag_trace_punish",
+          "economy_rez_reserve"
         ],
         "quality": {
           "hintReviewed": true,
@@ -53409,7 +53405,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "tag_trace_punish"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -53640,7 +53636,7 @@
           "opportunityCost": "low"
         },
         "lineSupport": [
-          "tag_trace_punish"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -53753,7 +53749,7 @@
           "opportunityCost": "low"
         },
         "lineSupport": [
-          "tag_trace_punish"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -54183,7 +54179,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "tag_trace_punish"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -54312,7 +54308,7 @@
           "opportunityCost": "low"
         },
         "lineSupport": [
-          "tag_trace_punish"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,

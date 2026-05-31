@@ -1432,11 +1432,7 @@
           "kind": "requires_accessed_card"
         }
       ],
-      "lineSupport": [
-        "early_rnd_pressure",
-        "interface_pressure",
-        "closeout_pressure"
-      ],
+      "lineSupport": ["runner.rnd_pressure", "runner.interface_closeout"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -1723,7 +1719,7 @@
         "reserveRisk": "low",
         "opportunityCost": "low"
       },
-      "lineSupport": ["remote_contest"],
+      "lineSupport": ["runner.remote_trash"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -1807,7 +1803,7 @@
           "kind": "requires_successful_run"
         }
       ],
-      "lineSupport": ["early_rnd_pressure", "interface_pressure"]
+      "lineSupport": ["runner.rnd_pressure", "runner.interface_closeout"]
     },
     {
       "cardId": "onr_v1_051_rabbit",
@@ -2139,7 +2135,7 @@
         "reserveRisk": "low",
         "opportunityCost": "low"
       },
-      "lineSupport": ["remote_contest"],
+      "lineSupport": ["runner.remote_trash"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -3035,11 +3031,7 @@
           "kind": "requires_successful_run"
         }
       ],
-      "lineSupport": [
-        "early_rnd_pressure",
-        "interface_pressure",
-        "closeout_pressure"
-      ]
+      "lineSupport": ["runner.rnd_pressure", "runner.interface_closeout"]
     },
     {
       "cardId": "onr_v1_082_deal-with-militech",
@@ -3142,7 +3134,7 @@
           "kind": "requires_successful_run"
         }
       ],
-      "lineSupport": ["early_hq_pressure", "closeout_pressure"]
+      "lineSupport": ["runner.hq_pressure"]
     },
     {
       "cardId": "onr_v1_085_executive-wiretaps",
@@ -3183,11 +3175,7 @@
           "kind": "requires_successful_run"
         }
       ],
-      "lineSupport": [
-        "early_hq_pressure",
-        "interface_pressure",
-        "closeout_pressure"
-      ]
+      "lineSupport": ["runner.hq_pressure", "runner.interface_closeout"]
     },
     {
       "cardId": "onr_v1_086_forged-activation-orders",
@@ -6665,7 +6653,7 @@
         "reserveRisk": "medium",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["tag_trace_punish"]
+      "lineSupport": ["corp.tag_trace_punish"]
     },
     {
       "cardId": "onr_v1_208_on-call-solo-team",
@@ -6726,7 +6714,7 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["tag_trace_punish"],
+      "lineSupport": ["corp.tag_trace_punish"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -7014,7 +7002,7 @@
         "reserveRisk": "medium",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["tag_trace_punish"],
+      "lineSupport": ["corp.tag_trace_punish"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -7178,7 +7166,7 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["tag_trace_punish"],
+      "lineSupport": ["corp.tag_trace_punish"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -7645,11 +7633,7 @@
           "kind": "requires_trace_success"
         }
       ],
-      "lineSupport": [
-        "tag_trace_punish",
-        "ice_tax_glacier",
-        "central_stabilize"
-      ],
+      "lineSupport": ["corp.tag_trace_punish", "ice_tax_glacier", "central_stabilize"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -7721,11 +7705,7 @@
           "kind": "requires_trace_success"
         }
       ],
-      "lineSupport": [
-        "tag_trace_punish",
-        "ice_tax_glacier",
-        "central_stabilize"
-      ]
+      "lineSupport": ["corp.tag_trace_punish", "ice_tax_glacier", "central_stabilize"]
     },
     {
       "cardId": "onr_v1_229_code-corpse",
@@ -7976,7 +7956,7 @@
           "kind": "requires_trace_success"
         }
       ],
-      "lineSupport": ["tag_trace_punish", "central_stabilize"],
+      "lineSupport": ["corp.tag_trace_punish", "central_stabilize"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -8204,7 +8184,7 @@
           "kind": "requires_trace_success"
         }
       ],
-      "lineSupport": ["tag_trace_punish", "central_stabilize"]
+      "lineSupport": ["corp.tag_trace_punish", "central_stabilize"]
     },
     {
       "cardId": "onr_v1_244_filter",
@@ -8399,7 +8379,7 @@
           "kind": "requires_trace_success"
         }
       ],
-      "lineSupport": ["tag_trace_punish", "central_stabilize"]
+      "lineSupport": ["corp.tag_trace_punish", "central_stabilize"]
     },
     {
       "cardId": "onr_v1_250_ice-pick-willie",
@@ -9504,7 +9484,7 @@
         "reserveRisk": "medium",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["tag_trace_punish"]
+      "lineSupport": ["corp.tag_trace_punish"]
     },
     {
       "cardId": "onr_v1_284_chance-observation",
@@ -9567,7 +9547,7 @@
         "reserveRisk": "medium",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["tag_trace_punish"]
+      "lineSupport": ["corp.tag_trace_punish"]
     },
     {
       "cardId": "onr_v1_285_closed-accounts",
@@ -9625,7 +9605,7 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["tag_trace_punish"]
+      "lineSupport": ["corp.tag_trace_punish"]
     },
     {
       "cardId": "onr_v1_286_corporate-detective-agency",
@@ -9672,7 +9652,7 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["tag_trace_punish"],
+      "lineSupport": ["corp.tag_trace_punish"],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -9726,7 +9706,7 @@
           "kind": "requires_runner_tagged"
         }
       ],
-      "lineSupport": ["tag_trace_punish"]
+      "lineSupport": ["corp.tag_trace_punish"]
     },
     {
       "cardId": "onr_v1_288_day-shift",
@@ -9950,7 +9930,7 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["tag_trace_punish", "economy_rez_reserve"]
+      "lineSupport": ["corp.tag_trace_punish", "economy_rez_reserve"]
     },
     {
       "cardId": "onr_v1_294_new-blood",
@@ -10173,7 +10153,7 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["tag_trace_punish"]
+      "lineSupport": ["corp.tag_trace_punish"]
     },
     {
       "cardId": "onr_v1_300_project-consultants",
@@ -10254,7 +10234,7 @@
         "reserveRisk": "low",
         "opportunityCost": "low"
       },
-      "lineSupport": ["tag_trace_punish"]
+      "lineSupport": ["corp.tag_trace_punish"]
     },
     {
       "cardId": "onr_v1_302_scorched-earth",
@@ -10313,7 +10293,7 @@
         "reserveRisk": "low",
         "opportunityCost": "low"
       },
-      "lineSupport": ["tag_trace_punish"]
+      "lineSupport": ["corp.tag_trace_punish"]
     },
     {
       "cardId": "onr_v1_303_silver-lining-recovery-protocol",
@@ -10425,7 +10405,7 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": ["tag_trace_punish"]
+      "lineSupport": ["corp.tag_trace_punish"]
     },
     {
       "cardId": "onr_v1_307_urban-renewal",
@@ -10484,7 +10464,7 @@
         "reserveRisk": "low",
         "opportunityCost": "low"
       },
-      "lineSupport": ["tag_trace_punish"]
+      "lineSupport": ["corp.tag_trace_punish"]
     },
     {
       "cardId": "onr_v1_308_acme-savings-and-loan",

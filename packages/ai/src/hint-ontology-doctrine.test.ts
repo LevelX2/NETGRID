@@ -26,7 +26,7 @@ describe("AI hint ontology doctrine diagnostics", () => {
       "onr_v1_210_political-overthrow",
     ]);
     expect(summary.tagPunish.hasTagSourceAndPayoff).toBe(true);
-    expect(summary.lineSupportCounts.byKind.tag_trace_punish).toBe(4);
+    expect(summary.lineSupportCounts.byKind["corp.tag_trace_punish"]).toBe(4);
     expect(summary.remoteRoles.roleCounts.agenda_steal_tax).toBe(1);
   });
 
@@ -56,7 +56,9 @@ describe("AI hint ontology doctrine diagnostics", () => {
     expect(summary.effectCounts.byKind.trash_credit).toBe(2);
     expect(summary.effectCounts.byKind.topdeck_info).toBe(1);
     expect(summary.lineSupportCounts.byKind.breaker_search_first).toBe(2);
-    expect(summary.lineSupportCounts.byKind.early_rnd_pressure).toBe(1);
+    expect(summary.lineSupportCounts.byKind["runner.rnd_pressure"]).toBe(1);
+    expect(summary.lineSupportCounts.byKind["runner.interface_closeout"]).toBe(1);
+    expect(summary.lineSupportCounts.byKind["runner.remote_trash"]).toBe(2);
   });
 
   it("reports quality review gaps without changing plan weights", () => {
