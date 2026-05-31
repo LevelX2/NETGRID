@@ -13401,7 +13401,7 @@ function CatalogAiHintInspectorPanel({ inspector }: { inspector: CatalogAiInspec
   return (
     <section className="catalogAiHints catalogAiInspector" data-testid="catalog-ai-hint-inspector">
       <div className="catalogAiHintsHead">
-        <strong>KI-Hinweise</strong>
+        <strong>Aktive KI-Semantik</strong>
         <span>AI Hint Inspector · {inspector.schemaVersion}</span>
       </div>
       <div className="catalogAiInspectorGrid">
