@@ -1980,6 +1980,7 @@ select {
 .deckPickerPanel,
 .deckLibraryPanel,
 .deckDetailsPanel,
+.deckStrategyPanel,
 .deckListPanel,
 .deckControlsPanel {
   display: grid;
@@ -2067,6 +2068,356 @@ select {
 
 .deckDetailsPanel .deckFormGrid {
   grid-template-columns: 1fr;
+}
+
+.deckStrategyPanel {
+  align-content: start;
+  background: color-mix(in srgb, var(--section-bg), var(--panel-soft) 34%);
+}
+
+.deckStrategyHeader {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.deckStrategyHeader h3 {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+  font-size: 15px;
+}
+
+.deckStrategyHeader h3 svg {
+  color: var(--ice);
+}
+
+.deckStrategyContent {
+  display: grid;
+  gap: 12px;
+  min-width: 0;
+}
+
+.deckStrategyUnavailable {
+  display: grid;
+  gap: 6px;
+}
+
+.deckStrategyUnavailable .notice {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.deckStrategyUnavailable small,
+.deckStrategyDiagnosticNotice {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.deckStrategyDiagnosticNotice {
+  margin: 0;
+  padding: 7px 9px;
+  border: 1px solid color-mix(in srgb, var(--ice), var(--line) 55%);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--ice), transparent 91%);
+}
+
+.deckStrategyStatusGrid,
+.deckStrategyEntryList {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  min-width: 0;
+}
+
+.deckStrategySection {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+}
+
+.deckStrategySection h4,
+.deckStrategyMetricGroup h5,
+.deckStrategyEvidenceColumns h5 {
+  margin: 0;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+}
+
+.deckStrategyRows {
+  display: grid;
+  gap: 8px;
+}
+
+.deckStrategyRow {
+  display: grid;
+  gap: 7px;
+  min-width: 0;
+  padding: 9px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.deckStrategyRow.status-primary {
+  border-color: color-mix(in srgb, var(--ok), var(--line) 42%);
+}
+
+.deckStrategyRow.status-secondary {
+  border-color: color-mix(in srgb, var(--ice), var(--line) 42%);
+}
+
+.deckStrategyRowHead {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.deckStrategyRowHead > div {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.deckStrategyRowHead strong {
+  color: var(--text);
+  font-size: 12px;
+  overflow-wrap: anywhere;
+}
+
+.deckStrategyRowHead span,
+.deckStrategyRow p,
+.deckStrategyRowMeta {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.deckStrategyRow p {
+  margin: 0;
+  line-height: 1.35;
+}
+
+.deckStrategyStatus,
+.deckStrategyEntry {
+  max-width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 5px 7px;
+  background: var(--section-bg);
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.deckStrategyStatus {
+  flex: 0 0 auto;
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.deckStrategyEntry {
+  display: grid;
+  gap: 2px;
+  font-size: 11px;
+}
+
+.deckStrategyEntry > span,
+.deckStrategyEntry small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.deckStrategyEntry strong {
+  color: var(--text);
+  font-size: 11px;
+}
+
+.deckStrategyStatus.tone-valid,
+.deckStrategyEntry.tone-valid {
+  border-color: color-mix(in srgb, var(--ok), var(--line) 45%);
+  background: color-mix(in srgb, var(--ok), var(--section-bg) 88%);
+}
+
+.deckStrategyStatus.tone-warning,
+.deckStrategyEntry.tone-warning {
+  border-color: color-mix(in srgb, #d2a64f, var(--line) 45%);
+  background: color-mix(in srgb, #d2a64f, var(--section-bg) 89%);
+}
+
+.deckStrategyStatus.tone-danger,
+.deckStrategyEntry.tone-danger {
+  border-color: color-mix(in srgb, var(--danger), var(--line) 40%);
+  background: color-mix(in srgb, var(--danger), var(--section-bg) 88%);
+}
+
+.deckStrategyStatus.tone-info,
+.deckStrategyEntry.tone-info {
+  border-color: color-mix(in srgb, var(--ice), var(--line) 45%);
+  background: color-mix(in srgb, var(--ice), var(--section-bg) 90%);
+}
+
+.deckStrategyStatus.tone-legacy,
+.deckStrategyEntry.tone-legacy {
+  border-color: color-mix(in srgb, var(--muted), var(--line) 55%);
+  color: var(--muted);
+}
+
+.deckStrategyScoreGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+}
+
+.deckStrategyScore {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.deckStrategyScore span:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+}
+
+.deckStrategyScore strong {
+  color: var(--text);
+}
+
+.deckStrategyScoreTrack {
+  position: relative;
+  height: 6px;
+  overflow: hidden;
+  border-radius: 999px;
+  background: var(--line);
+}
+
+.deckStrategyScoreFill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--ice), var(--ok));
+}
+
+.deckStrategyRowMeta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.deckStrategyRowMeta span {
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  padding: 3px 6px;
+  background: var(--section-bg);
+}
+
+.deckStrategyDetails {
+  display: grid;
+  gap: 8px;
+}
+
+.deckStrategyDetails summary,
+.deckStrategyEvidenceGroup summary {
+  cursor: pointer;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.deckStrategySectionGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.deckStrategyMetricGroup {
+  display: grid;
+  align-content: start;
+  gap: 7px;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.deckStrategyEvidenceGroups {
+  display: grid;
+  gap: 8px;
+}
+
+.deckStrategyEvidenceGroup {
+  display: grid;
+  gap: 8px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.deckStrategyEvidenceGroup summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.deckStrategyEvidenceGroup summary small {
+  color: var(--muted);
+  font-weight: 500;
+}
+
+.deckStrategyEvidenceColumns {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 8px;
+}
+
+.deckStrategyEvidenceColumns section {
+  display: grid;
+  align-content: start;
+  gap: 6px;
+  min-width: 0;
+}
+
+.deckStrategyEvidenceList {
+  display: grid;
+  gap: 6px;
+}
+
+.deckStrategyEvidenceItem {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+  padding: 6px 7px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--section-bg);
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.deckStrategyEvidenceItem strong {
+  font-size: 11px;
+}
+
+.deckStrategyEvidenceItem small {
+  color: var(--muted);
+  font-size: 10px;
+}
+
+.deckStrategyEvidenceItem.tone-warning {
+  border-color: color-mix(in srgb, #d2a64f, var(--line) 45%);
 }
 
 .deckListColumn {

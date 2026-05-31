@@ -257,6 +257,20 @@ import {
   type CatalogTypeFilterState
 } from "./catalog-ui";
 import { aiInspectorEntryKey, aiInspectorSections, defaultCollapsedAiInspectorSections, type AiInspectorEntry, type CatalogAiInspector } from "./ai-hint-inspector-ui";
+import {
+  deckStrategyEvidenceKey,
+  deckStrategyProfileEntryKey,
+  formatDeckStrategyValue,
+  formatStrategyScore,
+  scoreWidthPercent,
+  strategyStatusLabel,
+  strategyStatusTone,
+  type DeckStrategyProfileEntry,
+  type DeckStrategyProfileEvidenceGroup,
+  type DeckStrategyProfileSection,
+  type DeckStrategyProfileViewer,
+  type DeckStrategyProfileViewerResponse,
+} from "./deck-strategy-profile-ui";
 import { isCardActionSurfaceTarget } from "./card-action-menu-ui";
 import { actionNeedsRegionReplacementConfirmation } from "./action-payload";
 import { researchAgendaDifficultyModifierLineForCard, scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
@@ -1637,6 +1651,23 @@ function deckFingerprint(deck: EditableDeck): string {
     notes: deck.notes ?? "",
     tableLayout: deck.tableLayout ?? null,
     cards: [...deck.cards].sort((left, right) => left.cardId.localeCompare(right.cardId))
+  });
+}
+
+function deckStrategyProfileFingerprint(deck: EditableDeck): string {
+  return JSON.stringify({
+    deckId: deck.deckId,
+    name: deck.name,
+    side: deck.side,
+    identityCardId: deck.identityCardId,
+    cardPoolSnapshotId: deck.cardPoolSnapshotId,
+    cardPoolVersion: deck.cardPoolVersion ?? "",
+    formatProfileId: deck.formatProfileId,
+    formatProfileVersion: deck.formatProfileVersion ?? "",
+    cards: [...deck.cards]
+      .map((entry) => ({ cardId: entry.cardId, quantity: Math.max(0, Math.floor(entry.quantity)) }))
+      .filter((entry) => entry.quantity > 0)
+      .sort((left, right) => left.cardId.localeCompare(right.cardId))
   });
 }
 
@@ -11364,6 +11395,50 @@ function DeckEditorPanel({
   };
   const previewCard = (previewCardId ? cardLookup.get(previewCardId) : null) ?? libraryCards[0] ?? deckRows[0]?.card ?? null;
   const previewQuantity = previewCard ? deckQuantities.get(previewCard.catalogCardId) ?? 0 : 0;
+  const deckStrategyProfileKey = useMemo(() => (selectedDeck ? deckStrategyProfileFingerprint(selectedDeck) : ""), [selectedDeck]);
+  const [deckStrategyProfileResponse, setDeckStrategyProfileResponse] = useState<DeckStrategyProfileViewerResponse | null>(null);
+  const [deckStrategyProfileLoading, setDeckStrategyProfileLoading] = useState(false);
+  useEffect(() => {
+    if (!selectedDeck) {
+      setDeckStrategyProfileResponse(null);
+      setDeckStrategyProfileLoading(false);
+      return;
+    }
+    let cancelled = false;
+    setDeckStrategyProfileLoading(true);
+    setDeckStrategyProfileResponse(null);
+    void fetch("/api/decks/strategy-profile", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ deck: selectedDeck })
+    })
+      .then((response) => response.json() as Promise<DeckStrategyProfileViewerResponse>)
+      .then((data) => {
+        if (!cancelled) setDeckStrategyProfileResponse(data);
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setDeckStrategyProfileResponse({
+            schemaVersion: "ai007-deck-strategy-viewer-response-v1",
+            taskId: "AI007",
+            status: "unavailable",
+            reason: "Deckprofil konnte nicht berechnet werden",
+            deck: {
+              deckId: selectedDeck.deckId,
+              deckName: selectedDeck.name,
+              side: selectedDeck.side,
+              cardCount: totalCards
+            }
+          });
+        }
+      })
+      .finally(() => {
+        if (!cancelled) setDeckStrategyProfileLoading(false);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [deckStrategyProfileKey]);
   useEffect(() => {
     if (!selectedDeck || deckSideFilter === "all" || selectedDeck.side === deckSideFilter) return;
     setDeckSideFilter(selectedDeck.side);
@@ -11977,6 +12052,7 @@ function DeckEditorPanel({
                       ) : null}
                     </section>
                   )}
+                  <DeckStrategyProfilePanel response={deckStrategyProfileResponse} loading={deckStrategyProfileLoading} />
                   {deckEditorMode === "table" && tableLayout ? (
                     <DeckTableBoard
                       layout={tableLayout}
@@ -12149,6 +12225,271 @@ function DeckAgendaStatusBadge({ status }: { status: DeckAgendaStatus | null }) 
       <span>{loading ? `Agenda-Punkte / min. ${status.minimumAgendaPoints}` : `${status.agendaPoints} / ${status.minimumAgendaPoints} Agenda-Punkte`}</span>
       <strong>{missingLabel}</strong>
     </p>
+  );
+}
+
+function DeckStrategyProfilePanel({ response, loading }: { response: DeckStrategyProfileViewerResponse | null; loading: boolean }) {
+  const [isOpen, setIsOpen] = useState(true);
+  const viewer = response?.status === "available" ? response.viewer : null;
+  const unavailableReason = response?.status === "unavailable" ? response.reason : null;
+  return (
+    <section className={`deckStrategyPanel ${viewer ? "" : "is-unavailable"}`} data-testid="deck-strategy-profile">
+      <div className="deckStrategyHeader">
+        <div>
+          <h3>
+            <Bot size={16} />
+            KI-Deckprofil
+          </h3>
+          <p className="meta">
+            {viewer ? `${sideLabel(viewer.side)} · ${viewer.cardCount} Karten · ${viewer.source.aggregation}` : loading ? "Analyse läuft" : "DeckDoctrine diagnostic"}
+          </p>
+        </div>
+        <button
+          className="button iconOnly"
+          type="button"
+          aria-expanded={isOpen}
+          aria-label={isOpen ? "KI-Deckprofil einklappen" : "KI-Deckprofil ausklappen"}
+          title={isOpen ? "KI-Deckprofil einklappen" : "KI-Deckprofil ausklappen"}
+          onClick={() => setIsOpen((current) => !current)}
+        >
+          {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        </button>
+      </div>
+      {isOpen ? (
+        viewer ? (
+          <DeckStrategyProfileViewerPanel viewer={viewer} loading={loading} />
+        ) : (
+          <div className="deckStrategyUnavailable">
+            <p className="notice">
+              <AlertTriangle size={15} />
+              KI-Deckprofil nicht verfügbar
+            </p>
+            <small>{loading ? "Deckprofil wird berechnet." : unavailableReason ?? "Deckprofil konnte nicht berechnet werden"}</small>
+          </div>
+        )
+      ) : null}
+    </section>
+  );
+}
+
+function DeckStrategyProfileViewerPanel({ viewer, loading }: { viewer: DeckStrategyProfileViewer; loading: boolean }) {
+  const primaryRows = viewer.strategies.filter((strategy) => strategy.status === "primary" || strategy.status === "secondary");
+  const fallbackRows = primaryRows.length > 0 ? primaryRows : viewer.strategies.slice(0, 3);
+  const lowRows = viewer.strategies.filter((strategy) => !fallbackRows.includes(strategy));
+  return (
+    <div className="deckStrategyContent" aria-busy={loading}>
+      <div className="deckStrategyStatusGrid">
+        {viewer.statusEntries.map((entry, index) => (
+          <DeckStrategyEntryBadge entry={entry} key={deckStrategyProfileEntryKey("status", entry, index)} />
+        ))}
+      </div>
+      <p className="deckStrategyDiagnosticNotice">{viewer.diagnosticNotice}</p>
+      <DeckStrategyRows title="Strategien" strategies={fallbackRows} prominent />
+      {lowRows.length > 0 ? (
+        <details className="deckStrategyDetails">
+          <summary>Weitere Strategien ({lowRows.length})</summary>
+          <DeckStrategyRows title="" strategies={lowRows} />
+        </details>
+      ) : null}
+      <DeckStrategySections title={viewer.sideProfileTitle} sections={viewer.sideProfileGroups} />
+      <DeckStrategyEvidenceGroups groups={viewer.evidenceGroups} />
+      <DeckStrategyFlatEntries title="Function-Signal-Counts" entries={viewer.functionSignalCounts} emptyText="Keine Function-Signals." />
+      <DeckStrategySections title="Legacy-Signal-Counts" sections={viewer.legacySignalGroups} />
+      <DeckStrategyWarnings warnings={viewer.warnings} />
+    </div>
+  );
+}
+
+function DeckStrategyRows({ title, strategies, prominent = false }: { title: string; strategies: DeckStrategyProfileViewer["strategies"]; prominent?: boolean }) {
+  if (strategies.length === 0) return null;
+  return (
+    <section className={`deckStrategySection ${prominent ? "prominent" : ""}`}>
+      {title ? <h4>{title}</h4> : null}
+      <div className="deckStrategyRows">
+        {strategies.map((strategy) => (
+          <article className={`deckStrategyRow status-${strategy.status}`} key={strategy.strategyId}>
+            <div className="deckStrategyRowHead">
+              <div>
+                <strong>{strategy.strategyId}</strong>
+                <span>{strategy.label}</span>
+              </div>
+              <span className={`deckStrategyStatus tone-${strategyStatusTone(strategy.status)}`}>{strategyStatusLabel(strategy.status)}</span>
+            </div>
+            {strategy.description ? <p>{strategy.description}</p> : null}
+            <div className="deckStrategyScoreGrid">
+              <DeckStrategyScoreBar label="Final" value={strategy.finalScore} />
+              <DeckStrategyScoreBar label="Anchor" value={strategy.anchorScore} />
+              <DeckStrategyScoreBar label="Support" value={strategy.supportScore} />
+            </div>
+            <div className="deckStrategyRowMeta">
+              <span>Confidence {formatDeckStrategyValue(strategy.confidence)}</span>
+              <span>Evidence {strategy.evidenceCount}</span>
+              <span>Gaps {strategy.gapCount}</span>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function DeckStrategyScoreBar({ label, value }: { label: string; value: number }) {
+  return (
+    <span className="deckStrategyScore">
+      <span>
+        {label} <strong>{formatStrategyScore(value)}</strong>
+      </span>
+      <span className="deckStrategyScoreTrack" aria-hidden="true">
+        <span className="deckStrategyScoreFill" style={{ width: scoreWidthPercent(value) }} />
+      </span>
+    </span>
+  );
+}
+
+function DeckStrategySections({ title, sections }: { title: string; sections: DeckStrategyProfileSection[] }) {
+  return (
+    <section className="deckStrategySection">
+      <h4>{title}</h4>
+      {sections.length > 0 ? (
+        <div className="deckStrategySectionGrid">
+          {sections.map((section) => (
+            <section className="deckStrategyMetricGroup" key={section.key}>
+              <h5>{section.title}</h5>
+              <DeckStrategyEntryList entries={section.entries} emptyText={section.emptyText ?? "Keine Daten."} sectionKey={section.key} />
+            </section>
+          ))}
+        </div>
+      ) : (
+        <p className="meta">Keine Profildaten.</p>
+      )}
+    </section>
+  );
+}
+
+function DeckStrategyEvidenceGroups({ groups }: { groups: DeckStrategyProfileEvidenceGroup[] }) {
+  return (
+    <section className="deckStrategySection">
+      <h4>Evidence / Gaps</h4>
+      {groups.length > 0 ? (
+        <div className="deckStrategyEvidenceGroups">
+          {groups.map((group, index) => (
+            <details className="deckStrategyEvidenceGroup" open={index < 2} key={group.strategyId}>
+              <summary>
+                <span>{group.strategyId}</span>
+                <small>{group.anchorEvidence.length} Anker · {group.supportEvidence.length} Support · {group.supportGaps.length} Gaps</small>
+              </summary>
+              {group.description ? <p className="meta">{group.description}</p> : null}
+              <div className="deckStrategyEvidenceColumns">
+                <section>
+                  <h5>Anchor Evidence</h5>
+                  {group.anchorEvidence.length > 0 ? (
+                    <div className="deckStrategyEvidenceList">
+                      {group.anchorEvidence.map((entry, entryIndex) => (
+                        <span className="deckStrategyEvidenceItem" key={deckStrategyEvidenceKey(group.strategyId, entry.source, entry.cardId, entryIndex)}>
+                          <strong>{entry.cardTitle}</strong>
+                          <small>
+                            {entry.quantity}x · {entry.signal ?? entry.source}
+                            {entry.role ? ` · ${entry.role}` : ""}
+                          </small>
+                          <small>{entry.reason}</small>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="meta">Keine Anker-Evidence.</p>
+                  )}
+                </section>
+                <section>
+                  <h5>Support Evidence</h5>
+                  {group.supportEvidence.length > 0 ? (
+                    <div className="deckStrategyEvidenceList">
+                      {group.supportEvidence.map((entry, entryIndex) => (
+                        <span className="deckStrategyEvidenceItem" key={deckStrategyEvidenceKey(group.strategyId, "support", entry.signal, entryIndex)}>
+                          <strong>{entry.signal}</strong>
+                          <small>
+                            {formatDeckStrategyValue(entry.category)} · {entry.count} Karten
+                          </small>
+                          <small>{entry.exampleCards.join(", ")}</small>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="meta">Keine Support-Evidence.</p>
+                  )}
+                </section>
+                <section>
+                  <h5>Support Gaps</h5>
+                  {group.supportGaps.length > 0 ? (
+                    <div className="deckStrategyEvidenceList">
+                      {group.supportGaps.map((gap, gapIndex) => (
+                        <span className={`deckStrategyEvidenceItem tone-${gap.tone}`} key={deckStrategyEvidenceKey(group.strategyId, "gap", gap.gapName, gapIndex)}>
+                          <strong>{gap.gapName}</strong>
+                          <small>{gap.strategyId}</small>
+                        </span>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="meta">Keine Support-Gaps.</p>
+                  )}
+                </section>
+              </div>
+            </details>
+          ))}
+        </div>
+      ) : (
+        <p className="meta">Keine Evidence-Gruppen.</p>
+      )}
+    </section>
+  );
+}
+
+function DeckStrategyFlatEntries({ title, entries, emptyText }: { title: string; entries: DeckStrategyProfileEntry[]; emptyText: string }) {
+  return (
+    <section className="deckStrategySection">
+      <h4>{title}</h4>
+      <DeckStrategyEntryList entries={entries} emptyText={emptyText} sectionKey={title} />
+    </section>
+  );
+}
+
+function DeckStrategyEntryList({ entries, emptyText, sectionKey }: { entries: DeckStrategyProfileEntry[]; emptyText: string; sectionKey: string }) {
+  if (entries.length === 0) return <p className="meta">{emptyText}</p>;
+  return (
+    <div className="deckStrategyEntryList">
+      {entries.map((entry, index) => (
+        <DeckStrategyEntryBadge entry={entry} key={deckStrategyProfileEntryKey(sectionKey, entry, index)} />
+      ))}
+    </div>
+  );
+}
+
+function DeckStrategyEntryBadge({ entry }: { entry: DeckStrategyProfileEntry }) {
+  return (
+    <span className={`deckStrategyEntry tone-${entry.tone}`}>
+      <span>{entry.label}</span>
+      <strong>{entry.value}</strong>
+      {entry.detail ? <small>{entry.detail}</small> : null}
+    </span>
+  );
+}
+
+function DeckStrategyWarnings({ warnings }: { warnings: DeckStrategyProfileViewer["warnings"] }) {
+  return (
+    <section className="deckStrategySection">
+      <h4>Warnings / Hinweise</h4>
+      {warnings.length > 0 ? (
+        <div className="deckStrategyEntryList">
+          {warnings.map((warning, index) => (
+            <span className={`deckStrategyEntry tone-${warning.tone}`} key={`${warning.label}-${index}-${warning.value}`}>
+              <span>{warning.label}</span>
+              <strong>{formatDeckStrategyValue(warning.value)}</strong>
+            </span>
+          ))}
+        </div>
+      ) : (
+        <p className="meta">Keine Warnings.</p>
+      )}
+    </section>
   );
 }
 
