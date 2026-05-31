@@ -2,6 +2,10 @@
 
 `docs/reviews/ai/` enthält KI-bezogene Audits, Diagnoseberichte, Benchmark-Nachweise und Beobachtungen, die nicht als dauerhafte Architekturvorgabe oder einzelne Releasefamilie geführt werden.
 
+## Neue AI-Aufgaben ab AI001
+
+- `ai001-decision-architecture-inventory-2026-05-25.md`: Aufgabe AI001 dokumentiert die aktuelle AI-Entscheidungsarchitektur als reine Ist-Bestandsaufnahme mit Entscheidungsfluss, Runner-/Corp-Kontextverlusten, lokalen Fixes, Datenquellen und offenen Ist-Risiken. Keine Zielarchitektur, Roadmap, Folgepakete oder Codeänderung.
+
 ## Enthaltene Artefakte
 
 - `capability-deep-analysis-2026-05-17.md`: übergreifende KI-Fähigkeitsanalyse mit Prioritäten.
