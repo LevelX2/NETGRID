@@ -510,6 +510,59 @@ describe("catalog API filters", () => {
     );
   });
 
+  it("exposes lightweight AI inspector summaries for catalog filtering", () => {
+    const response = catalogListResponse(
+      new URLSearchParams("q=Bodyweight%E2%84%A2%20Synthetic%20Blood"),
+    );
+    expect(response.status).toBe(200);
+    const body = response.body as {
+      cards: Array<{
+        catalogCardId: string;
+        aiInspectorSummary?: {
+          available: boolean;
+          mechanicalFactsFound: boolean;
+          generatedFactsFound: boolean;
+          hasClassifications: boolean;
+          hasWarnings: boolean;
+        } | null;
+      }>;
+    };
+
+    expect(body.cards).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          catalogCardId: "onr_v1_079_bodyweight-synthetic-blood",
+          aiInspectorSummary: expect.objectContaining({
+            available: true,
+            mechanicalFactsFound: true,
+            generatedFactsFound: true,
+            hasClassifications: true,
+            hasWarnings: true,
+          }),
+        }),
+      ]),
+    );
+
+    const blockedResponse = catalogListResponse(
+      new URLSearchParams("status=blocked&q=Baskerville"),
+    );
+    expect(blockedResponse.status).toBe(200);
+    const blockedBody = blockedResponse.body as {
+      cards: Array<{
+        catalogCardId: string;
+        aiInspectorSummary?: unknown;
+      }>;
+    };
+    expect(blockedBody.cards).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          catalogCardId: "onr_classic_005_baskerville",
+          aiInspectorSummary: null,
+        }),
+      ]),
+    );
+  });
+
   it("serves The Shell Traders catalog text from the confirmed spoiler instead of the old recurring-credit placeholder", () => {
     const response = catalogDetailResponse("onr_v1_176_the-shell-traders");
     expect(response.status).toBe(200);

@@ -1,17 +1,25 @@
 import { describe, expect, it } from "vitest";
 import {
+  CATALOG_AI_HINT_FILTERS,
+  CATALOG_BLOCK_STATUS_FILTERS,
   catalogSetDetailLabel,
   catalogRarityLabel,
   catalogSetFilterOptions,
   catalogSetKeyForCard,
   catalogSetShortLabelForSetId,
+  filterCatalogCardsByBlockStatus,
+  filterCatalogCardsByAiHint,
   filterCatalogCardsBySetId,
   filterCatalogCardsByRarity,
   filterCatalogCardsBySet,
   filterCatalogCardsByType,
   nextCatalogSelection,
+  summarizeCatalogBlockStatusFilters,
+  summarizeCatalogAiHintFilters,
   summarizeCatalogRarityFilters,
   summarizeCatalogSetFilters,
+  type CatalogAiHintFilterKey,
+  type CatalogBlockStatusFilterKey,
   type CatalogTypeFilterState
 } from "./catalog-ui";
 
@@ -147,5 +155,78 @@ describe("catalog UI filtering", () => {
     expect(catalogRarityLabel(cards[0]!)).toBe("Häufig");
     expect(catalogRarityLabel(cards[3]!)).toBe("Promo");
     expect(catalogRarityLabel(cards[2]!)).toBeNull();
+  });
+
+  it("filters cards by AI hint inspector coverage", () => {
+    const cards = [
+      {
+        catalogCardId: "new",
+        aiInspectorSummary: {
+          available: true,
+          aiSupportStatus: "ai_supported",
+          compiledHintFound: true,
+          mechanicalFactsFound: true,
+          generatedFactsFound: false,
+          hasClassifications: true,
+          hasWarnings: false
+        }
+      },
+      {
+        catalogCardId: "generated",
+        aiInspectorSummary: {
+          available: true,
+          aiSupportStatus: "ai_supported",
+          compiledHintFound: true,
+          mechanicalFactsFound: true,
+          generatedFactsFound: true,
+          hasClassifications: true,
+          hasWarnings: true
+        }
+      },
+      {
+        catalogCardId: "legacy-only",
+        aiInspectorSummary: {
+          available: true,
+          aiSupportStatus: "ai_supported",
+          compiledHintFound: true,
+          mechanicalFactsFound: false,
+          generatedFactsFound: false,
+          hasClassifications: true,
+          hasWarnings: false
+        }
+      },
+      { catalogCardId: "blocked", aiInspectorSummary: null }
+    ];
+
+    expect(filterCatalogCardsByAiHint(cards, "new_facts").map((card) => card.catalogCardId)).toEqual(["new", "generated"]);
+    expect(filterCatalogCardsByAiHint(cards, "generated_facts").map((card) => card.catalogCardId)).toEqual(["generated"]);
+    expect(filterCatalogCardsByAiHint(cards, "warnings").map((card) => card.catalogCardId)).toEqual(["generated"]);
+    expect(filterCatalogCardsByAiHint(cards, "missing").map((card) => card.catalogCardId)).toEqual(["blocked"]);
+    expect(summarizeCatalogAiHintFilters(cards)).toEqual({ all: 4, new_facts: 2, generated_facts: 1, warnings: 1, missing: 1 });
+    expect(CATALOG_AI_HINT_FILTERS.map((filter) => filter.key)).toEqual([
+      "all",
+      "new_facts",
+      "generated_facts",
+      "warnings",
+      "missing",
+    ] satisfies CatalogAiHintFilterKey[]);
+  });
+
+  it("filters cards by block status", () => {
+    const cards = [
+      { catalogCardId: "classic", statuses: { blocked: true } },
+      { catalogCardId: "original", statuses: { blocked: false } },
+      { catalogCardId: "proteus", statuses: { blocked: false } }
+    ];
+
+    expect(filterCatalogCardsByBlockStatus(cards, "all").map((card) => card.catalogCardId)).toEqual(["classic", "original", "proteus"]);
+    expect(filterCatalogCardsByBlockStatus(cards, "blocked").map((card) => card.catalogCardId)).toEqual(["classic"]);
+    expect(filterCatalogCardsByBlockStatus(cards, "not_blocked").map((card) => card.catalogCardId)).toEqual(["original", "proteus"]);
+    expect(summarizeCatalogBlockStatusFilters(cards)).toEqual({ all: 3, not_blocked: 2, blocked: 1 });
+    expect(CATALOG_BLOCK_STATUS_FILTERS.map((filter) => filter.key)).toEqual([
+      "all",
+      "not_blocked",
+      "blocked"
+    ] satisfies CatalogBlockStatusFilterKey[]);
   });
 });

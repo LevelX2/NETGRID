@@ -92,16 +92,29 @@ const FORBIDDEN_RUNTIME_KEYS = [
 
 export function aiInspectorSections(inspector: CatalogAiInspector): AiInspectorSection[] {
   return [
-    supportStatusSection(inspector),
-    compiledHintSection(inspector),
-    mechanicalFactsSection(inspector),
     functionSignalSection(inspector),
     lineSupportSection(inspector),
     strategicRoleSection(inspector),
+    mechanicalFactsSection(inspector),
+    supportStatusSection(inspector),
     qualitySection(inspector),
+    compiledHintSection(inspector),
     legacyRoleSection(inspector),
     warningSection(inspector),
   ];
+}
+
+export function defaultCollapsedAiInspectorSections(sections: AiInspectorSection[]): Record<string, boolean> {
+  const openByDefault = new Set(["functions", "strategy", "strategicRole", "mechanical"]);
+  return Object.fromEntries(
+    sections
+      .filter((section) => !openByDefault.has(section.key))
+      .map((section) => [section.key, true]),
+  );
+}
+
+export function aiInspectorEntryKey(sectionKey: string, entry: AiInspectorEntry, index: number): string {
+  return `${sectionKey}-${index}-${entry.label}-${entry.value ?? "empty"}`;
 }
 
 export function aiInspectorToneForCategory(category: string): AiInspectorTone {

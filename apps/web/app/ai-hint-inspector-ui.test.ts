@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  aiInspectorEntryKey,
   aiInspectorSections,
   containsForbiddenInspectorField,
+  defaultCollapsedAiInspectorSections,
   forbiddenInspectorFields,
   type CatalogAiInspector,
 } from "./ai-hint-inspector-ui";
@@ -100,16 +102,27 @@ describe("AI hint inspector UI view model", () => {
   it("builds the required read-only card catalog sections", () => {
     const sections = aiInspectorSections(INSPECTOR_FIXTURE);
     expect(sections.map((section) => section.title)).toEqual([
-      "Supportstatus",
-      "Compiled Hint / Quelle",
-      "Mechanische Facts",
       "Function-Signals",
       "Strategie / lineSupport",
       "Strategic Role",
+      "Mechanische Facts",
+      "Supportstatus",
       "Quality",
+      "Compiled Hint / Quelle",
       "Legacy-Rollen",
       "Warnings / Gaps / Legacy",
     ]);
+  });
+
+  it("opens only the future-facing value sections by default", () => {
+    const sections = aiInspectorSections(INSPECTOR_FIXTURE);
+    expect(defaultCollapsedAiInspectorSections(sections)).toEqual({
+      support: true,
+      quality: true,
+      compiled: true,
+      legacyRoles: true,
+      warnings: true,
+    });
   });
 
   it("shows support, compiled facts, function signals, strategy, quality and warnings without raw JSON", () => {
@@ -143,6 +156,31 @@ describe("AI hint inspector UI view model", () => {
         nested: { stateHash: "forbidden" },
       }),
     ).toEqual(["cardInstances", "stateHash"]);
+  });
+
+  it("creates unique render keys when cards have repeated mechanical effects", () => {
+    const sections = aiInspectorSections({
+      ...INSPECTOR_FIXTURE,
+      mechanicalFacts: {
+        ...INSPECTOR_FIXTURE.mechanicalFacts!,
+        effects: [
+          { kind: "draw", amount: 1 },
+          { kind: "draw", amount: 2 },
+        ],
+      },
+    });
+    const mechanicalSection = sections.find((section) => section.key === "mechanical");
+    expect(mechanicalSection).toBeDefined();
+
+    const effectEntries = mechanicalSection!.entries.filter(
+      (entry) => entry.label === "Effekt" && entry.value === "draw",
+    );
+    const keys = mechanicalSection!.entries.map((entry, index) =>
+      aiInspectorEntryKey(mechanicalSection!.key, entry, index),
+    );
+
+    expect(effectEntries).toHaveLength(2);
+    expect(new Set(keys).size).toBe(keys.length);
   });
 });
 

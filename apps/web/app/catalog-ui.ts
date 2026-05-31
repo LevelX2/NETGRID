@@ -3,6 +3,8 @@ export type CatalogTypeFilterKey = "ice" | "agenda" | "icebreaker" | "asset" | "
 export type CatalogTypeFilterState = Record<CatalogTypeFilterKey, boolean>;
 export type CatalogSetFilterKey = "all" | "original" | "test" | "other";
 export type CatalogRarityFilterKey = "all" | "common" | "uncommon" | "rare" | "vital";
+export type CatalogAiHintFilterKey = "all" | "new_facts" | "generated_facts" | "warnings" | "missing";
+export type CatalogBlockStatusFilterKey = "all" | "not_blocked" | "blocked";
 
 export type CatalogCardForTypeFilter = {
   catalogCardId: string;
@@ -35,12 +37,48 @@ export type CatalogCardForRarityFilter = {
   } | null;
 };
 
+export type CatalogAiInspectorSummary = {
+  available: boolean;
+  aiSupportStatus: string;
+  compiledHintFound: boolean;
+  mechanicalFactsFound: boolean;
+  generatedFactsFound: boolean;
+  hasClassifications: boolean;
+  hasWarnings: boolean;
+};
+
+export type CatalogCardForAiHintFilter = {
+  catalogCardId: string;
+  aiInspectorSummary?: CatalogAiInspectorSummary | null;
+};
+
+export type CatalogCardForBlockStatusFilter = {
+  catalogCardId: string;
+  statuses: {
+    blocked: boolean;
+  };
+};
+
 export const CATALOG_RARITY_FILTERS: Array<{ key: CatalogRarityFilterKey; label: string }> = [
   { key: "all", label: "Alle Raritäten" },
   { key: "common", label: "Häufig" },
   { key: "uncommon", label: "Ungewöhnlich" },
   { key: "rare", label: "Selten" },
   { key: "vital", label: "Vital" }
+];
+
+export const CATALOG_AI_HINT_FILTERS: Array<{ key: CatalogAiHintFilterKey; label: string }> = [
+  { key: "all", label: "Alle KI-Hinweise" },
+  { key: "new_facts", label: "Neu versorgt" },
+  { key: "generated_facts", label: "Generierte Facts" },
+  { key: "warnings", label: "Warnings" },
+  { key: "missing", label: "Ohne KI-Hinweise" }
+];
+
+export const CATALOG_BLOCK_STATUS_FILTERS: Array<{ key: CatalogBlockStatusFilterKey; label: string }> = [
+  { key: "all", label: "Alle Blockstatus" },
+  { key: "not_blocked", label: "Nicht blockiert" },
+  { key: "blocked", label: "Blockiert" }
 ];
 
 const CATALOG_RARITY_LABELS_DE: Record<Exclude<CatalogRarityFilterKey, "all">, string> = {
@@ -215,6 +253,60 @@ export function summarizeCatalogRarityFilters(cards: CatalogCardForRarityFilter[
   for (const card of cards) {
     const code = card.rarity?.code;
     if (isCatalogRarityCode(code)) counts[code] += 1;
+  }
+  return counts;
+}
+
+export function catalogCardMatchesAiHintFilter(card: CatalogCardForAiHintFilter, filter: CatalogAiHintFilterKey): boolean {
+  const summary = card.aiInspectorSummary;
+  switch (filter) {
+    case "all":
+      return true;
+    case "new_facts":
+      return Boolean(summary?.mechanicalFactsFound);
+    case "generated_facts":
+      return Boolean(summary?.generatedFactsFound);
+    case "warnings":
+      return Boolean(summary?.hasWarnings);
+    case "missing":
+      return !summary?.available;
+  }
+}
+
+export function filterCatalogCardsByAiHint<T extends CatalogCardForAiHintFilter>(cards: T[], filter: CatalogAiHintFilterKey): T[] {
+  return cards.filter((card) => catalogCardMatchesAiHintFilter(card, filter));
+}
+
+export function summarizeCatalogAiHintFilters(cards: CatalogCardForAiHintFilter[]): Record<CatalogAiHintFilterKey, number> {
+  const counts: Record<CatalogAiHintFilterKey, number> = { all: cards.length, new_facts: 0, generated_facts: 0, warnings: 0, missing: 0 };
+  for (const card of cards) {
+    if (catalogCardMatchesAiHintFilter(card, "new_facts")) counts.new_facts += 1;
+    if (catalogCardMatchesAiHintFilter(card, "generated_facts")) counts.generated_facts += 1;
+    if (catalogCardMatchesAiHintFilter(card, "warnings")) counts.warnings += 1;
+    if (catalogCardMatchesAiHintFilter(card, "missing")) counts.missing += 1;
+  }
+  return counts;
+}
+
+export function catalogCardMatchesBlockStatusFilter(card: CatalogCardForBlockStatusFilter, filter: CatalogBlockStatusFilterKey): boolean {
+  switch (filter) {
+    case "all":
+      return true;
+    case "not_blocked":
+      return !card.statuses.blocked;
+    case "blocked":
+      return card.statuses.blocked;
+  }
+}
+
+export function filterCatalogCardsByBlockStatus<T extends CatalogCardForBlockStatusFilter>(cards: T[], filter: CatalogBlockStatusFilterKey): T[] {
+  return cards.filter((card) => catalogCardMatchesBlockStatusFilter(card, filter));
+}
+
+export function summarizeCatalogBlockStatusFilters(cards: CatalogCardForBlockStatusFilter[]): Record<CatalogBlockStatusFilterKey, number> {
+  const counts: Record<CatalogBlockStatusFilterKey, number> = { all: cards.length, not_blocked: 0, blocked: 0 };
+  for (const card of cards) {
+    counts[card.statuses.blocked ? "blocked" : "not_blocked"] += 1;
   }
   return counts;
 }

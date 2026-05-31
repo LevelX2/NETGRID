@@ -1572,6 +1572,28 @@ select {
   font-size: 12px;
 }
 
+.catalogAiHintsHeadToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--text);
+  font: inherit;
+  cursor: pointer;
+}
+
+.catalogAiHintsHeadToggle svg {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.catalogAiHintsHeadToggle:hover svg,
+.catalogAiHintsHeadToggle:focus-visible svg {
+  color: var(--text);
+}
+
 .catalogAiHintRow {
   display: grid;
   gap: 5px;
@@ -1631,10 +1653,36 @@ select {
 
 .catalogAiInspectorSection h4 {
   margin: 0;
+}
+
+.catalogAiInspectorSectionToggle {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--muted);
   font-size: 12px;
   font-weight: 700;
   letter-spacing: 0;
+  text-align: left;
+  cursor: pointer;
+}
+
+.catalogAiInspectorSectionToggle:hover,
+.catalogAiInspectorSectionToggle:focus-visible {
+  color: var(--text);
+}
+
+.catalogAiInspectorSectionToggle svg {
+  flex: 0 0 auto;
+}
+
+.catalogAiInspectorSection.is-collapsed {
+  gap: 0;
 }
 
 .catalogAiInspectorEntries {

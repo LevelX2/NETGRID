@@ -226,7 +226,11 @@ import { parseMatchStartSettingsFromStorage, serializeMatchStartSettingsForStora
 import { createMatchSeed, normalizeMatchSeed } from "./match-seed";
 import { gameStandingForResult, resultExitButtonUi, resultFooterOutcomeLabel, resultOutcomeHeadline, resultOutcomeText, resultPlayerLabel, resultPlayerRoleLabel, resultWinnerMotifFor, resultWinnerMotifUi, retentionProtectionUi, seriesResultHeadline, type ResultWinnerMotifKind } from "./result-modal-ui";
 import {
+  CATALOG_AI_HINT_FILTERS,
+  CATALOG_BLOCK_STATUS_FILTERS,
   CATALOG_RARITY_FILTERS,
+  filterCatalogCardsByBlockStatus,
+  filterCatalogCardsByAiHint,
   catalogCardMatchesTypeFilters,
   catalogRarityLabel,
   catalogSetDetailLabel,
@@ -241,13 +245,18 @@ import {
   summarizeCatalogRarityFilters,
   summarizeCatalogSetFilters,
   summarizeCatalogTypeFilters,
+  summarizeCatalogBlockStatusFilters,
+  summarizeCatalogAiHintFilters,
+  type CatalogAiHintFilterKey,
+  type CatalogAiInspectorSummary,
+  type CatalogBlockStatusFilterKey,
   type CatalogSetIdFilterOption,
   type CatalogRarityFilterKey,
   type CatalogSetFilterKey,
   type CatalogTypeFilterKey,
   type CatalogTypeFilterState
 } from "./catalog-ui";
-import { aiInspectorSections, type AiInspectorEntry, type CatalogAiInspector } from "./ai-hint-inspector-ui";
+import { aiInspectorEntryKey, aiInspectorSections, defaultCollapsedAiInspectorSections, type AiInspectorEntry, type CatalogAiInspector } from "./ai-hint-inspector-ui";
 import { isCardActionSurfaceTarget } from "./card-action-menu-ui";
 import { actionNeedsRegionReplacementConfirmation } from "./action-payload";
 import { researchAgendaDifficultyModifierLineForCard, scoredAgendaEffectLineForScoreArea } from "./score-area-ui";
@@ -521,6 +530,7 @@ type CatalogCardSummary = {
   };
   statuses: CatalogStatuses;
   blockReasons: string[];
+  aiInspectorSummary?: CatalogAiInspectorSummary | null;
 };
 
 type CatalogCardDetail = CatalogCardSummary & {
@@ -2168,7 +2178,9 @@ export default function Page() {
   const [catalogTypeFilters, setCatalogTypeFilters] = useState<CatalogTypeFilterState>({ ...ALL_CATALOG_TYPE_FILTERS });
   const [catalogSetFilter, setCatalogSetFilter] = useState("all");
   const [catalogFiltersOpen, setCatalogFiltersOpen] = useState(false);
+  const [catalogBlockStatusFilter, setCatalogBlockStatusFilter] = useState<CatalogBlockStatusFilterKey>("all");
   const [catalogRarityFilter, setCatalogRarityFilter] = useState<CatalogRarityFilterKey>("all");
+  const [catalogAiHintFilter, setCatalogAiHintFilter] = useState<CatalogAiHintFilterKey>("all");
   const [catalogCards, setCatalogCards] = useState<CatalogCardSummary[]>([]);
   const [catalogFilters, setCatalogFilters] = useState<CatalogListResponse["filters"] | null>(null);
   const [selectedCatalogId, setSelectedCatalogId] = useState<string | null>(null);
@@ -2753,12 +2765,16 @@ export default function Page() {
     return () => socketRef.current?.close();
   }, [session?.matchId, session?.sessionToken]);
 
-  const catalogSetOptions = useMemo(() => catalogSetFilterOptions(catalogCards), [catalogCards]);
-  const setFilteredCatalogCards = useMemo(() => filterCatalogCardsBySetId(catalogCards, catalogSetFilter), [catalogCards, catalogSetFilter]);
-  const rarityFilteredCatalogCards = useMemo(() => filterCatalogCardsByRarity(setFilteredCatalogCards, catalogRarityFilter), [setFilteredCatalogCards, catalogRarityFilter]);
+  const blockStatusFilteredCatalogCards = useMemo(() => filterCatalogCardsByBlockStatus(catalogCards, catalogBlockStatusFilter), [catalogBlockStatusFilter, catalogCards]);
+  const catalogBlockStatusCounts = useMemo(() => summarizeCatalogBlockStatusFilters(catalogCards), [catalogCards]);
+  const catalogSetOptions = useMemo(() => catalogSetFilterOptions(blockStatusFilteredCatalogCards), [blockStatusFilteredCatalogCards]);
+  const setFilteredCatalogCards = useMemo(() => filterCatalogCardsBySetId(blockStatusFilteredCatalogCards, catalogSetFilter), [blockStatusFilteredCatalogCards, catalogSetFilter]);
+  const aiHintFilteredCatalogCards = useMemo(() => filterCatalogCardsByAiHint(setFilteredCatalogCards, catalogAiHintFilter), [setFilteredCatalogCards, catalogAiHintFilter]);
+  const rarityFilteredCatalogCards = useMemo(() => filterCatalogCardsByRarity(aiHintFilteredCatalogCards, catalogRarityFilter), [aiHintFilteredCatalogCards, catalogRarityFilter]);
   const filteredCatalogCards = useMemo(() => filterCatalogCardsByType(rarityFilteredCatalogCards, catalogTypeFilters), [catalogTypeFilters, rarityFilteredCatalogCards]);
   const filteredCatalogSummary = useMemo(() => summarizeCatalogStatuses(filteredCatalogCards), [filteredCatalogCards]);
-  const catalogRarityCounts = useMemo(() => summarizeCatalogRarityFilters(setFilteredCatalogCards), [setFilteredCatalogCards]);
+  const catalogAiHintCounts = useMemo(() => summarizeCatalogAiHintFilters(setFilteredCatalogCards), [setFilteredCatalogCards]);
+  const catalogRarityCounts = useMemo(() => summarizeCatalogRarityFilters(aiHintFilteredCatalogCards), [aiHintFilteredCatalogCards]);
   const catalogTypeCounts = useMemo(() => summarizeCatalogTypeFilters(rarityFilteredCatalogCards), [rarityFilteredCatalogCards]);
 
   useEffect(() => {
@@ -5322,6 +5338,10 @@ export default function Page() {
             selectedId={selectedCatalogId}
             filtersOpen={catalogFiltersOpen}
             showExpertStatuses={catalogExpertStatuses}
+            blockStatusCounts={catalogBlockStatusCounts}
+            blockStatusFilter={catalogBlockStatusFilter}
+            aiHintCounts={catalogAiHintCounts}
+            aiHintFilter={catalogAiHintFilter}
             rarityCounts={catalogRarityCounts}
             rarityFilter={catalogRarityFilter}
             typeCounts={catalogTypeCounts}
@@ -5333,6 +5353,8 @@ export default function Page() {
             onSelect={setSelectedCatalogId}
             onFiltersOpen={setCatalogFiltersOpen}
             onToggleExpertStatuses={setCatalogExpertStatuses}
+            onBlockStatusFilter={setCatalogBlockStatusFilter}
+            onAiHintFilter={setCatalogAiHintFilter}
             onRarity={setCatalogRarityFilter}
             onTypeFilter={(key, selected) => setCatalogTypeFilters((current) => ({ ...current, [key]: selected }))}
             onSelectAllTypes={() => setCatalogTypeFilters({ ...ALL_CATALOG_TYPE_FILTERS })}
@@ -6243,6 +6265,10 @@ export default function Page() {
               selectedId={selectedCatalogId}
               filtersOpen={catalogFiltersOpen}
               showExpertStatuses={catalogExpertStatuses}
+              blockStatusCounts={catalogBlockStatusCounts}
+              blockStatusFilter={catalogBlockStatusFilter}
+              aiHintCounts={catalogAiHintCounts}
+              aiHintFilter={catalogAiHintFilter}
               rarityCounts={catalogRarityCounts}
               rarityFilter={catalogRarityFilter}
               typeCounts={catalogTypeCounts}
@@ -6254,6 +6280,8 @@ export default function Page() {
               onSelect={setSelectedCatalogId}
               onFiltersOpen={setCatalogFiltersOpen}
               onToggleExpertStatuses={setCatalogExpertStatuses}
+              onBlockStatusFilter={setCatalogBlockStatusFilter}
+              onAiHintFilter={setCatalogAiHintFilter}
               onRarity={setCatalogRarityFilter}
               onTypeFilter={(key, selected) => setCatalogTypeFilters((current) => ({ ...current, [key]: selected }))}
               onSelectAllTypes={() => setCatalogTypeFilters({ ...ALL_CATALOG_TYPE_FILTERS })}
@@ -10748,6 +10776,10 @@ function CatalogPanel({
   selectedId,
   filtersOpen,
   showExpertStatuses,
+  blockStatusCounts,
+  blockStatusFilter,
+  aiHintCounts,
+  aiHintFilter,
   rarityCounts,
   rarityFilter,
   typeCounts,
@@ -10759,6 +10791,8 @@ function CatalogPanel({
   onSelect,
   onFiltersOpen,
   onToggleExpertStatuses,
+  onBlockStatusFilter,
+  onAiHintFilter,
   onRarity,
   onTypeFilter,
   onSelectAllTypes,
@@ -10776,6 +10810,10 @@ function CatalogPanel({
   selectedId: string | null;
   filtersOpen: boolean;
   showExpertStatuses: boolean;
+  blockStatusCounts: Record<CatalogBlockStatusFilterKey, number>;
+  blockStatusFilter: CatalogBlockStatusFilterKey;
+  aiHintCounts: Record<CatalogAiHintFilterKey, number>;
+  aiHintFilter: CatalogAiHintFilterKey;
   rarityCounts: Record<CatalogRarityFilterKey, number>;
   rarityFilter: CatalogRarityFilterKey;
   typeCounts: Partial<Record<CatalogTypeFilterKey, number>>;
@@ -10787,6 +10825,8 @@ function CatalogPanel({
   onSelect(value: string): void;
   onFiltersOpen(value: boolean): void;
   onToggleExpertStatuses(value: boolean): void;
+  onBlockStatusFilter(value: CatalogBlockStatusFilterKey): void;
+  onAiHintFilter(value: CatalogAiHintFilterKey): void;
   onRarity(value: CatalogRarityFilterKey): void;
   onTypeFilter(key: CatalogTypeFilterKey, selected: boolean): void;
   onSelectAllTypes(): void;
@@ -10805,6 +10845,8 @@ function CatalogPanel({
   const detailRef = useRef<HTMLElement | null>(null);
   const [catalogListHeight, setCatalogListHeight] = useState<number | null>(null);
   const selectedSetLabel = setOptions.find((option) => option.key === setFilter)?.label ?? setFilter;
+  const selectedBlockStatusLabel = CATALOG_BLOCK_STATUS_FILTERS.find((filter) => filter.key === blockStatusFilter)?.label ?? blockStatusFilter;
+  const selectedAiHintLabel = CATALOG_AI_HINT_FILTERS.find((filter) => filter.key === aiHintFilter)?.label ?? aiHintFilter;
   const selectedRarityLabel = CATALOG_RARITY_FILTERS.find((filter) => filter.key === rarityFilter)?.label ?? rarityFilter;
   const hasTypeFilter = Object.values(typeFilters).some((selected) => !selected);
   const activeFilterLabels = [
@@ -10812,6 +10854,8 @@ function CatalogPanel({
     setFilter !== "all" ? selectedSetLabel : null,
     side !== "all" ? side : null,
     status !== "all" ? CATALOG_STATUS_LABELS[status] : null,
+    blockStatusFilter !== "all" ? selectedBlockStatusLabel : null,
+    aiHintFilter !== "all" ? selectedAiHintLabel : null,
     rarityFilter !== "all" ? selectedRarityLabel : null,
     hasTypeFilter ? "Kartentypen" : null
   ].filter((label): label is string => Boolean(label));
@@ -10894,6 +10938,26 @@ function CatalogPanel({
               {statusOptions.map((value) => (
                 <option value={value} key={value}>
                   {CATALOG_STATUS_LABELS[value]}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Blockstatus
+            <select value={blockStatusFilter} onChange={(event) => onBlockStatusFilter(event.target.value as CatalogBlockStatusFilterKey)}>
+              {CATALOG_BLOCK_STATUS_FILTERS.map((filter) => (
+                <option value={filter.key} key={filter.key}>
+                  {filter.label} ({blockStatusCounts[filter.key]})
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            KI-Hinweise
+            <select value={aiHintFilter} onChange={(event) => onAiHintFilter(event.target.value as CatalogAiHintFilterKey)}>
+              {CATALOG_AI_HINT_FILTERS.map((filter) => (
+                <option value={filter.key} key={filter.key}>
+                  {filter.label} ({aiHintCounts[filter.key]})
                 </option>
               ))}
             </select>
@@ -12942,34 +13006,57 @@ function StatusBadges({ statuses, compact = false, showExpert = false }: { statu
 function CatalogAiHintPanel({ hints, inspector }: { hints?: CatalogAiHints | null; inspector?: CatalogAiInspector | null }) {
   if (inspector) return <CatalogAiHintInspectorPanel inspector={inspector} />;
   if (!hints) return null;
+  return <CatalogLegacyAiHintPanel hints={hints} />;
+}
+
+function CatalogLegacyAiHintPanel({ hints }: { hints: CatalogAiHints }) {
+  const [isOpen, setIsOpen] = useState(false);
   const valueHintEntries = Object.entries(hints.valueHints).filter(([, value]) => Number.isFinite(value));
   return (
-    <section className="catalogAiHints">
+    <section className={`catalogAiHints catalogLegacyAiHints ${isOpen ? "" : "is-collapsed"}`}>
       <div className="catalogAiHintsHead">
-        <strong>KI-Hinweise</strong>
+        <button
+          className="catalogAiHintsHeadToggle"
+          type="button"
+          aria-expanded={isOpen}
+          onClick={() => setIsOpen((current) => !current)}
+          title={isOpen ? "Alte KI-Hinweise einklappen" : "Alte KI-Hinweise öffnen"}
+        >
+          <strong>KI-Hinweise</strong>
+          {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
+        </button>
         <span>{CATALOG_STATUS_LABELS.ai_supported}: {hints.aiSupportStatus === "ai_supported" ? "ja" : hints.aiSupportStatus}</span>
       </div>
-      <AiHintChips title="Rollen" values={hints.roles} />
-      <AiHintChips title="Pläne" values={hints.planRoles} />
-      {valueHintEntries.length > 0 ? (
-        <div className="catalogAiValueGrid">
-          {valueHintEntries.map(([key, value]) => (
-            <span key={key}>
-              <strong>{value}</strong>
-              {formatAiHintLabel(key)}
-            </span>
-          ))}
-        </div>
+      {isOpen ? (
+        <>
+          <AiHintChips title="Rollen" values={hints.roles} />
+          <AiHintChips title="Pläne" values={hints.planRoles} />
+          {valueHintEntries.length > 0 ? (
+            <div className="catalogAiValueGrid">
+              {valueHintEntries.map(([key, value]) => (
+                <span key={key}>
+                  <strong>{value}</strong>
+                  {formatAiHintLabel(key)}
+                </span>
+              ))}
+            </div>
+          ) : null}
+          <AiHintChips title="Risiken" values={hints.riskTags} quiet />
+          <AiHintChips title="Mechaniken" values={hints.requiredMechanics} quiet />
+          <AiHintChips title="Szenarien" values={hints.scenarioRefs.map((ref) => ref.split("#").at(-1) ?? ref)} quiet />
+        </>
       ) : null}
-      <AiHintChips title="Risiken" values={hints.riskTags} quiet />
-      <AiHintChips title="Mechaniken" values={hints.requiredMechanics} quiet />
-      <AiHintChips title="Szenarien" values={hints.scenarioRefs.map((ref) => ref.split("#").at(-1) ?? ref)} quiet />
     </section>
   );
 }
 
 function CatalogAiHintInspectorPanel({ inspector }: { inspector: CatalogAiInspector }) {
-  const sections = aiInspectorSections(inspector);
+  const sections = useMemo(() => aiInspectorSections(inspector), [inspector]);
+  const defaultCollapsedSections = useMemo(() => defaultCollapsedAiInspectorSections(sections), [sections]);
+  const [collapsedSections, setCollapsedSections] = useState<Record<string, boolean>>(defaultCollapsedSections);
+  useEffect(() => {
+    setCollapsedSections(defaultCollapsedSections);
+  }, [defaultCollapsedSections]);
   return (
     <section className="catalogAiHints catalogAiInspector" data-testid="catalog-ai-hint-inspector">
       <div className="catalogAiHintsHead">
@@ -12977,20 +13064,39 @@ function CatalogAiHintInspectorPanel({ inspector }: { inspector: CatalogAiInspec
         <span>AI Hint Inspector · {inspector.schemaVersion}</span>
       </div>
       <div className="catalogAiInspectorGrid">
-        {sections.map((section) => (
-          <section className={`catalogAiInspectorSection section-${section.key}`} key={section.key}>
-            <h4>{section.title}</h4>
-            {section.entries.length > 0 ? (
-              <div className="catalogAiInspectorEntries">
-                {section.entries.map((entry, index) => (
-                  <CatalogAiInspectorEntryItem entry={entry} key={`${section.key}-${entry.label}-${entry.value ?? index}`} />
-                ))}
-              </div>
-            ) : section.emptyText ? (
-              <p className="meta">{section.emptyText}</p>
-            ) : null}
-          </section>
-        ))}
+        {sections.map((section) => {
+          const isCollapsed = Boolean(collapsedSections[section.key]);
+          return (
+            <section className={`catalogAiInspectorSection section-${section.key} ${isCollapsed ? "is-collapsed" : ""}`} key={section.key}>
+              <h4>
+                <button
+                  className="catalogAiInspectorSectionToggle"
+                  type="button"
+                  aria-expanded={!isCollapsed}
+                  onClick={() =>
+                    setCollapsedSections((current) => ({
+                      ...current,
+                      [section.key]: !current[section.key],
+                    }))
+                  }
+                  title={isCollapsed ? "Abschnitt öffnen" : "Abschnitt einklappen"}
+                >
+                  <span>{section.title}</span>
+                  {isCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+                </button>
+              </h4>
+              {!isCollapsed && section.entries.length > 0 ? (
+                <div className="catalogAiInspectorEntries">
+                  {section.entries.map((entry, index) => (
+                    <CatalogAiInspectorEntryItem entry={entry} key={aiInspectorEntryKey(section.key, entry, index)} />
+                  ))}
+                </div>
+              ) : !isCollapsed && section.emptyText ? (
+                <p className="meta">{section.emptyText}</p>
+              ) : null}
+            </section>
+          );
+        })}
       </div>
     </section>
   );

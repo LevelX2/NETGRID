@@ -68,6 +68,16 @@ type AiInspectorIndexEntry = {
   strategicRoleStatus: Record<string, unknown>;
 };
 
+type CatalogAiInspectorListSummary = {
+  available: boolean;
+  aiSupportStatus: CatalogAiHint["aiSupportStatus"];
+  compiledHintFound: boolean;
+  mechanicalFactsFound: boolean;
+  generatedFactsFound: boolean;
+  hasClassifications: boolean;
+  hasWarnings: boolean;
+};
+
 const AI_HINTS_BY_CARD_ID = new Map(
   (activeAiHintsData.cards as CatalogAiHint[]).map((hint) => [hint.cardId, hint])
 );
@@ -94,7 +104,7 @@ export function catalogListResponse(searchParams: URLSearchParams) {
   return safeCatalogPayload({
     snapshotId: snapshot.snapshotId,
     snapshotHash,
-    cards: searchCatalog(snapshot, query),
+    cards: searchCatalog(snapshot, query).map(catalogSummaryWithAiInspector),
     filters: catalogIndex.filters,
     summary: catalogIndex.statusSummary
   });
@@ -151,6 +161,45 @@ function isStatus(value: string | null): value is CatalogStatusKey {
 
 function createCatalogRuntime() {
   return createRuntimeCardPool();
+}
+
+function catalogSummaryWithAiInspector<T extends { catalogCardId: string }>(card: T) {
+  return {
+    ...card,
+    aiInspectorSummary: catalogAiInspectorSummaryForCard(card.catalogCardId)
+  };
+}
+
+function catalogAiInspectorSummaryForCard(catalogCardId: string): CatalogAiInspectorListSummary | null {
+  const activeHint = AI_HINTS_BY_CARD_ID.get(catalogCardId) ?? null;
+  const compiledHint = COMPILED_AI_HINTS_BY_CARD_ID.get(catalogCardId) ?? null;
+  const inspector = AI_HINT_INSPECTOR_BY_CARD_ID.get(catalogCardId) ?? null;
+  if (!activeHint && !compiledHint && !inspector) return null;
+
+  const supportStatus = inspector?.supportStatus ?? {
+    aiSupportStatus: compiledHint?.aiSupportStatus ?? activeHint?.aiSupportStatus ?? "none",
+    compiledHintFound: Boolean(compiledHint),
+    mechanicalFactsFound: hasMechanicalFacts(compiledHint),
+    generatedFactsFound: false,
+    overlayFields: [],
+    legacyFallbackOnly: false,
+    warningCount: compiledHint ? 0 : 1
+  };
+  const classificationCount =
+    (inspector?.lineSupportClassification.length ?? 0) +
+    (inspector?.rolesClassification.length ?? 0) +
+    (inspector?.planRolesClassification.length ?? 0);
+  const warningCount = (inspector?.warningCategories.length ?? 0) + (inspector?.descriptorGaps.length ?? 0);
+
+  return {
+    available: Boolean(inspector),
+    aiSupportStatus: supportStatus.aiSupportStatus,
+    compiledHintFound: supportStatus.compiledHintFound,
+    mechanicalFactsFound: supportStatus.mechanicalFactsFound,
+    generatedFactsFound: supportStatus.generatedFactsFound,
+    hasClassifications: classificationCount > 0,
+    hasWarnings: supportStatus.warningCount > 0 || warningCount > 0
+  };
 }
 
 function catalogAiInspectorForCard(catalogCardId: string) {
