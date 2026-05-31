@@ -135,7 +135,9 @@ describe("AI hint inspector UI view model", () => {
     expect(text).toContain("Breaker");
     expect(text).toContain("RemoteRole");
     expect(text).toContain("breaker.wall");
-    expect(text).toContain("runner.remote_contest [normalized_strategy_id]");
+    expect(text).toContain("lineSupport runner.remote_contest");
+    expect(text).not.toContain("runner.remote_contest [normalized_strategy_id]");
+    expect(text).not.toContain("runner.remote_contest -> runner.remote_contest");
     expect(text).toContain("StrategicRole nicht gesetzt");
     expect(text).toContain("hint reviewed: ja");
     expect(text).toContain("roles breaker [function_signal_only]");

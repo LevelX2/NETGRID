@@ -342,10 +342,13 @@ function warningSection(inspector: CatalogAiInspector): AiInspectorSection {
 }
 
 function classificationEntry(field: string, entry: CatalogAiInspectorClassification): AiInspectorEntry {
-  const mapsTo = entry.mapsTo.length > 0 ? ` -> ${entry.mapsTo.join(", ")}` : "";
+  const isSelfMapping = entry.mapsTo.length === 1 && entry.mapsTo[0] === entry.value;
+  const classification =
+    entry.triageCategory === "normalized_strategy_id" ? "" : ` [${entry.triageCategory}]`;
+  const mapsTo = entry.mapsTo.length > 0 && !isSelfMapping ? ` -> ${entry.mapsTo.join(", ")}` : "";
   return {
     label: field,
-    value: `${entry.value} [${entry.triageCategory}]${mapsTo}`,
+    value: `${entry.value}${classification}${mapsTo}`,
     detail: entry.rationale,
     tone: aiInspectorToneForCategory(entry.triageCategory),
   };
