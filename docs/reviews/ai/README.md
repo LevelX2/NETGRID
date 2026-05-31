@@ -2,6 +2,14 @@
 
 `docs/reviews/ai/` enthält KI-bezogene Audits, Diagnoseberichte, Benchmark-Nachweise und Beobachtungen, die nicht als dauerhafte Architekturvorgabe oder einzelne Releasefamilie geführt werden.
 
+## Aktive Root-Kommandos
+
+- `corepack pnpm check:ai`: kompakter Basislauf für die stabilen read-only AI-Gates: compiled Hints, Derived Facts, Compiled Index und Manual Overlays.
+- `corepack pnpm check:ai:full`: Basislauf plus Full-Derived-Facts-Scan.
+- `corepack pnpm build:ai`: kompakter Alias zum Neubauen der compiled AI-Hints.
+- Die direkten Kernkommandos wie `check:ai-derived-facts`, `check:ai-manual-overlays`, `check:ai-hint-quality` und `check:ai-approval-consistency` bleiben für bestehende Review- und Diagnosebelege verfügbar.
+- Historische `check:ai-generated-fact-*` Batch- und Migrationsaliase stehen nicht mehr in der Root-`package.json`. Die zugehörigen `scripts/check-ai-generated-fact-*.mjs` bleiben als Spezialwerkzeuge erhalten und werden bei Bedarf direkt mit `node <script> --check` aus dem jeweiligen Review-Kontext ausgeführt.
+
 ## Neue AI-Aufgaben ab AI001
 
 - `ai001-decision-architecture-inventory-2026-05-25.md`: Aufgabe AI001 dokumentiert die aktuelle AI-Entscheidungsarchitektur als reine Ist-Bestandsaufnahme mit Entscheidungsfluss, Runner-/Corp-Kontextverlusten, lokalen Fixes, Datenquellen und offenen Ist-Risiken. Keine Zielarchitektur, Roadmap, Folgepakete oder Codeänderung.
