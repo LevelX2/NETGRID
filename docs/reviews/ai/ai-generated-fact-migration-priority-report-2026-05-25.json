@@ -931,7 +931,7 @@
       "monolithFields": ["effects", "costProfile", "breakerProfile"],
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "generatedOnlyFields": ["breakerProfile"],
-      "overlayFields": ["lineSupport", "manualNotes", "quality"],
+      "overlayFields": ["manualNotes", "quality"],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
         "generated_fact_absent_from_monolith": 1,
@@ -943,7 +943,6 @@
       "rationale": "Breaker coverage and forgo_actions side effect are exact implementation facts and low-risk generated candidates.",
       "doNotMigrateFields": [
         "aiSupportStatus",
-        "lineSupport",
         "manualNotes",
         "planRoles",
         "quality",

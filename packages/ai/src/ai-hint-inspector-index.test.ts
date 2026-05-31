@@ -48,7 +48,7 @@ describe("AI005 hint inspector index", () => {
     });
   });
 
-  it("exposes compiled, mechanical, function-signal and legacy classifications without runtime fields", () => {
+  it("exposes compiled, mechanical, function-signal and warning classifications without runtime fields", () => {
     const index = readIndex();
     expect(index.schemaVersion).toBe("ai-hint-inspector-index-v1");
     expect(index.source.compiledHintsPath).toBe("data/ai/ai-card-hints-compiled.json");
@@ -66,16 +66,9 @@ describe("AI005 hint inspector index", () => {
       mechanicalFactsFound: true,
     });
     expect(aiBoon.derivedFunctionSignals).toContain("breaker.sentry");
-    expect(aiBoon.lineSupportClassification).toEqual(
-      expect.arrayContaining([
-        expect.objectContaining({
-          value: "rig_first",
-          triageCategory: "deferred_requires_human_review",
-          mapsTo: ["runner.rig_first"],
-        }),
-      ]),
-    );
-    expect(aiBoon.warningCategories).toContain("legacy_lineSupport");
+    expect(aiBoon.lineSupportClassification).toEqual([]);
+    expect(aiBoon.warningCategories).not.toContain("legacy_lineSupport");
+    expect(aiBoon.warningCategories).toContain("deferred_requires_human_review");
 
     const clown = card(index, "onr_v1_012_clown");
     expect(clown.supportStatus.generatedFactsFound).toBe(true);

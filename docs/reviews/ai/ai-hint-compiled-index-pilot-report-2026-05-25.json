@@ -9087,7 +9087,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -9266,7 +9265,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -9346,7 +9344,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -9426,7 +9423,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -9599,7 +9595,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -9685,7 +9680,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -9853,7 +9847,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -10554,7 +10547,6 @@
           "sideEffects": ["forgo_actions"],
           "source": "implementation.icebreakerAbilities"
         },
-        "lineSupport": ["rig_first"],
         "quality": {
           "benchmarkCovered": false,
           "confidence": "high",
@@ -10568,7 +10560,7 @@
       },
       "mechanicalFactsFromGenerated": ["breakerProfile", "effect:breaker"],
       "generatedFields": ["breakerProfile", "effects"],
-      "strategyFieldsFromOverlay": ["lineSupport", "quality", "manualNotes"],
+      "strategyFieldsFromOverlay": ["quality", "manualNotes"],
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
@@ -10763,7 +10755,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -10843,7 +10834,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -11242,7 +11232,6 @@
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -11328,7 +11317,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -11666,7 +11654,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -11752,7 +11739,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -11831,7 +11817,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -11911,7 +11896,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -12255,7 +12239,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -12713,7 +12696,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -12793,7 +12775,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -12873,7 +12854,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -12959,7 +12939,6 @@
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -13033,7 +13012,6 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -13675,7 +13653,6 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -13741,7 +13718,6 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -13987,7 +13963,6 @@
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -14911,7 +14886,6 @@
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -15230,7 +15204,6 @@
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -15349,7 +15322,6 @@
       "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -15609,6 +15581,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -15795,6 +15768,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -16124,6 +16098,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -16449,7 +16424,6 @@
       "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -16823,6 +16797,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -17025,6 +17000,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -17344,6 +17320,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -17444,6 +17421,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -17642,6 +17620,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -18292,6 +18271,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -18546,6 +18526,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -18669,6 +18650,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -18799,6 +18781,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["conditions"],
@@ -18929,6 +18912,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -19051,6 +19035,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -19201,6 +19186,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -19348,6 +19334,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -19470,7 +19457,6 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -19820,6 +19806,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -20304,6 +20291,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -20693,6 +20681,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -21125,6 +21114,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["conditions"],
@@ -21365,6 +21355,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -21470,6 +21461,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": [],
@@ -21562,6 +21554,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -21653,6 +21646,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -22231,6 +22225,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -22372,7 +22367,6 @@
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -22453,7 +22447,6 @@
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",

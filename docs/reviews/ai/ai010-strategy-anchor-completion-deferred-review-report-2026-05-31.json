@@ -1,0 +1,5035 @@
+{
+  "schemaVersion": "ai010-strategy-anchor-completion-deferred-review-report-v1",
+  "taskId": "AI010",
+  "generatedAt": "2026-05-31",
+  "source": {
+    "activeHints": "data/ai/ai-card-hints-active.json",
+    "compiledHints": "data/ai/ai-card-hints-compiled.json",
+    "inspectorIndex": "data/ai/ai-hint-inspector-index.json",
+    "strategyGoals": "data/ai/strategy-goals-v1.json",
+    "ai009Report": "docs/reviews/ai/ai009-strategy-anchor-normalization-batch2-report-2026-05-31.json",
+    "deckDoctrineReport": "docs/reviews/ai/ai006-deck-doctrine-strategy-aggregation-v1-report-2026-05-31.json"
+  },
+  "summary": {
+    "reviewedDeferredCardCount": 71,
+    "changedCardCount": 71,
+    "safeStrategyAnchorCount": 28,
+    "cardsWithoutLineSupportCount": 43,
+    "supportFunctionOnlyCount": 32,
+    "descriptorGapCount": 2,
+    "deferredRequiresHumanReviewClassCount": 9,
+    "reviewedCardsWithDeferredWarningAfter": 12,
+    "perCardDecision": true,
+    "usedRolesOrPlanRolesAloneAsEvidence": false,
+    "plannerEffectIntroduced": false,
+    "massMigration": false,
+    "engineOrLegalityChange": false,
+    "profileOrDefaultSwitch": false,
+    "hiddenInfoUsed": false
+  },
+  "classificationCounts": {
+    "descriptor_gap": 2,
+    "support_function_only": 32,
+    "safe_strategy_anchor": 28,
+    "deferred_requires_human_review": 9
+  },
+  "candidateGroupCounts": {
+    "Runner pressure / remote contest review": 4,
+    "Corp scoreline and economy review": 6,
+    "Corp structure / scoring protection review": 2,
+    "Generic economy / reserve support review": 13,
+    "Normal breaker function-signal review": 20,
+    "Normal draw/setup support review": 3,
+    "ICE tax / tag / damage / support review": 20,
+    "Rig support review": 3
+  },
+  "lineSupportStrategyIdsSet": [
+    "corp.damage_kill",
+    "corp.economy_rez_reserve",
+    "corp.ice_tax_glacier",
+    "corp.remote_scoring",
+    "corp.tag_trace_punish",
+    "runner.remote_contest"
+  ],
+  "strategicRolesAdded": [
+    "engine_anchor",
+    "punish_payoff",
+    "support_tool",
+    "tax_tool"
+  ],
+  "warningDelta": {
+    "before": {
+      "source": "AI009 after-state",
+      "taxonomyWarningCount": 66,
+      "legacyLineSupportDistinct": 11,
+      "legacyLineSupportOccurrences": 110,
+      "normalizedLineSupportOccurrences": 80,
+      "inspectorCardsWithWarnings": 411,
+      "inspectorLegacyLineSupportCards": 71,
+      "activeLegacyLineSupportDistinct": 11,
+      "activeLegacyLineSupportOccurrences": 110
+    },
+    "after": {
+      "taxonomyWarningCount": 55,
+      "legacyLineSupportDistinct": 0,
+      "legacyLineSupportOccurrences": 0,
+      "normalizedLineSupportOccurrences": 110,
+      "inspectorCardsWithWarnings": 353,
+      "inspectorLegacyLineSupportCards": 0,
+      "activeLegacyLineSupportDistinct": 0,
+      "activeLegacyLineSupportOccurrences": 0
+    }
+  },
+  "deckDoctrineDiagnostics": {
+    "effect": "diagnostic_only_no_planner_consumption",
+    "deltas": [
+      {
+        "deckId": "onr_origin_corp_ai_snapshot_v1",
+        "strategyId": "corp.central_stabilize",
+        "before": {
+          "finalScore": 95,
+          "anchorScore": 100,
+          "anchorEvidenceCount": 2
+        },
+        "after": {
+          "finalScore": 50,
+          "anchorScore": 0,
+          "anchorEvidenceCount": 0
+        },
+        "delta": {
+          "finalScore": -45,
+          "anchorScore": -100,
+          "anchorEvidenceCount": -2
+        }
+      },
+      {
+        "deckId": "onr_origin_corp_ai_snapshot_v1",
+        "strategyId": "corp.economy_rez_reserve",
+        "before": {
+          "finalScore": 69,
+          "anchorScore": 44,
+          "anchorEvidenceCount": 2
+        },
+        "after": {
+          "finalScore": 95,
+          "anchorScore": 100,
+          "anchorEvidenceCount": 3
+        },
+        "delta": {
+          "finalScore": 26,
+          "anchorScore": 56,
+          "anchorEvidenceCount": 1
+        }
+      },
+      {
+        "deckId": "onr_origin_corp_ai_tag_ops_snapshot_v1",
+        "strategyId": "corp.central_stabilize",
+        "before": {
+          "finalScore": 95,
+          "anchorScore": 100,
+          "anchorEvidenceCount": 4
+        },
+        "after": {
+          "finalScore": 50,
+          "anchorScore": 0,
+          "anchorEvidenceCount": 0
+        },
+        "delta": {
+          "finalScore": -45,
+          "anchorScore": -100,
+          "anchorEvidenceCount": -4
+        }
+      },
+      {
+        "deckId": "onr_origin_corp_ai_tag_ops_snapshot_v1",
+        "strategyId": "corp.economy_rez_reserve",
+        "before": {
+          "finalScore": 69,
+          "anchorScore": 44,
+          "anchorEvidenceCount": 2
+        },
+        "after": {
+          "finalScore": 95,
+          "anchorScore": 100,
+          "anchorEvidenceCount": 3
+        },
+        "delta": {
+          "finalScore": 26,
+          "anchorScore": 56,
+          "anchorEvidenceCount": 1
+        }
+      },
+      {
+        "deckId": "onr_origin_corp_ai_tag_ops_snapshot_v1",
+        "strategyId": "corp.tag_trace_punish",
+        "before": {
+          "finalScore": 100,
+          "anchorScore": 100,
+          "anchorEvidenceCount": 11
+        },
+        "after": {
+          "finalScore": 100,
+          "anchorScore": 100,
+          "anchorEvidenceCount": 14
+        },
+        "delta": {
+          "finalScore": 0,
+          "anchorScore": 0,
+          "anchorEvidenceCount": 3
+        }
+      }
+    ]
+  },
+  "reviewedCards": [
+    {
+      "cardId": "onr_v1_068_startup-immolator",
+      "title": "Startup Immolator",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "ambiguous_pressure_or_remote_contest_requires_human_review",
+      "ai010Class": "descriptor_gap",
+      "candidateGroup": "Runner pressure / remote contest review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "remote_contest",
+          "closeout_pressure"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "program_trash",
+            "timing": "during_run",
+            "scope": "ice"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "costProfile": {
+          "clicks": 0,
+          "reserveRisk": "high",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "perCardLongtailPriority": 2
+        },
+        "derivedFunctionSignalsBefore": [],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Existing effects show pressure potential, but current descriptors do not distinguish remote contest, central pressure, or closeout safely enough for lineSupport.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_080_core-command-jettison-ice",
+      "title": "Core Command: Jettison Ice",
+      "side": "runner",
+      "cardType": "event",
+      "ai009DeferredReason": "ambiguous_pressure_or_remote_contest_requires_human_review",
+      "ai010Class": "descriptor_gap",
+      "candidateGroup": "Runner pressure / remote contest review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "early_hq_pressure",
+          "remote_contest"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "program_trash",
+            "timing": "action",
+            "scope": "ice"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "valueHints": {
+          "perCardLongtailPriority": 2
+        },
+        "derivedFunctionSignalsBefore": [],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Existing effects show pressure potential, but current descriptors do not distinguish remote contest, central pressure, or closeout safely enough for lineSupport.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_108_score",
+      "title": "Score!",
+      "side": "runner",
+      "cardType": "event",
+      "ai009DeferredReason": "ambiguous_pressure_or_remote_contest_requires_human_review",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Runner pressure / remote contest review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "economy_first",
+          "closeout_pressure"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 9,
+            "finite": true
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "valueHints": {
+          "economy": 5,
+          "runPressure": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.generic"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Economy, draw, install, or setup Function-Signals are sufficient; no direct strategy anchor was evidenced.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_173_restrictive-net-zoning",
+      "title": "Restrictive Net Zoning",
+      "side": "runner",
+      "cardType": "resource",
+      "ai009DeferredReason": "ambiguous_pressure_or_remote_contest_requires_human_review",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "Runner pressure / remote contest review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "remote_contest"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.remote_contest"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "remote",
+            "resource": "credits",
+            "amount": 2,
+            "repeatable": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_remote_server"
+          }
+        ],
+        "valueHints": {
+          "utility": 2,
+          "runPressure": 1
+        },
+        "derivedFunctionSignalsBefore": [
+          "setup.install_discount"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "deferred_requires_human_review",
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": [
+          "deferred_requires_human_review",
+          "function_signal_descriptor_gap"
+        ]
+      },
+      "rationale": "Persistent remote-server tax is direct remote-contest pressure, not generic setup.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_193_corporate-coup",
+      "title": "Corporate Coup",
+      "side": "corp",
+      "cardType": "agenda",
+      "ai009DeferredReason": "broad_score_closeout_requires_card_review",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "Corp scoreline and economy review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "economy_rez_reserve",
+          "score_closeout"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.economy_rez_reserve"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "counter_economy",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3,
+            "repeatable": true,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "valueHints": {
+          "scoring": 2,
+          "economy": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.counter",
+          "score.agenda_action"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.fast_advance"
+        ],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Scored agenda action plus repeatable finite counter economy is a real economy/reserve engine.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_196_corporate-war",
+      "title": "Corporate War",
+      "side": "corp",
+      "cardType": "agenda",
+      "ai009DeferredReason": "broad_score_closeout_requires_card_review",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "Corp scoreline and economy review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "score_closeout",
+          "economy_rez_reserve"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.economy_rez_reserve"
+        ],
+        "strategicRole": [
+          "support_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "when_scored",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 12,
+            "finite": true
+          }
+        ],
+        "conditions": [],
+        "valueHints": {
+          "perCardLongtailPriority": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.counter",
+          "economy.generic"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "deferred_requires_human_review",
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": [
+          "deferred_requires_human_review"
+        ]
+      },
+      "rationale": "When-scored credit burst is scoreline economy support, not score-closeout or remote scoring.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_203_hostile-takeover",
+      "title": "Hostile Takeover",
+      "side": "corp",
+      "cardType": "agenda",
+      "ai009DeferredReason": "broad_score_closeout_requires_card_review",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "Corp scoreline and economy review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "score_closeout",
+          "economy_rez_reserve"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.economy_rez_reserve"
+        ],
+        "strategicRole": [
+          "support_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "when_scored",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 5,
+            "finite": true
+          }
+        ],
+        "conditions": [],
+        "valueHints": {
+          "scoring": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.generic"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "When-scored credit burst is explicit scoreline economy support.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_209_political-coup",
+      "title": "Political Coup",
+      "side": "corp",
+      "cardType": "agenda",
+      "ai009DeferredReason": "broad_score_closeout_requires_card_review",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "Corp scoreline and economy review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "economy_rez_reserve",
+          "score_closeout"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.economy_rez_reserve"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "counter_economy",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3,
+            "repeatable": true,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "valueHints": {
+          "scoring": 3,
+          "economy": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.counter",
+          "economy.finite_pool",
+          "score.agenda_action"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.fast_advance"
+        ],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Scored agenda action plus repeatable finite counter economy is a real economy/reserve engine.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_210_political-overthrow",
+      "title": "Political Overthrow",
+      "side": "corp",
+      "cardType": "agenda",
+      "ai009DeferredReason": "broad_score_closeout_requires_card_review",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "Corp scoreline and economy review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "economy_rez_reserve",
+          "score_closeout"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.economy_rez_reserve"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "economy",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3,
+            "repeatable": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "valueHints": {
+          "perCardLongtailPriority": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.generic",
+          "score.agenda_action"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.fast_advance"
+        ],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Scored agenda action plus repeatable economy is a reserve engine after scoring.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_212_priority-requisition",
+      "title": "Priority Requisition",
+      "side": "corp",
+      "cardType": "agenda",
+      "ai009DeferredReason": "broad_score_closeout_requires_card_review",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "Corp scoreline and economy review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "remote_scoring_build",
+          "ice_tax_glacier",
+          "score_closeout"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.economy_rez_reserve"
+        ],
+        "strategicRole": [
+          "support_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "rez_discount",
+            "timing": "when_scored",
+            "scope": "ice",
+            "resource": "credits",
+            "finite": true
+          },
+          {
+            "kind": "remote_protection",
+            "timing": "when_scored",
+            "scope": "server",
+            "finite": true
+          }
+        ],
+        "conditions": [],
+        "valueHints": {
+          "scoring": 4,
+          "tempo": 3,
+          "defense": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.rez_discount"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.economy_rez_reserve"
+        ],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "When-scored rez discount is explicit rez-reserve scoreline support; old remote/score labels were too broad.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_191_black-ice-quality-assurance",
+      "title": "Black Ice Quality Assurance",
+      "side": "corp",
+      "cardType": "agenda",
+      "ai009DeferredReason": "corp_structure_or_protection_requires_card_review",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "Corp structure / scoring protection review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "ice_tax_glacier",
+          "remote_scoring_build"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.remote_scoring",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "ice",
+            "resource": "strength",
+            "amount": 2,
+            "repeatable": true
+          }
+        ],
+        "conditions": [],
+        "valueHints": {
+          "modifier": 1
+        },
+        "derivedFunctionSignalsBefore": [],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Persistent ICE strength protection supports remote scoring and ICE-tax/glacier structure.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_219_superior-net-barriers",
+      "title": "Superior Net Barriers",
+      "side": "corp",
+      "cardType": "agenda",
+      "ai009DeferredReason": "corp_structure_or_protection_requires_card_review",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "Corp structure / scoring protection review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "ice_tax_glacier",
+          "remote_scoring_build"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.remote_scoring",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "ice",
+            "resource": "strength",
+            "amount": 1,
+            "repeatable": true
+          },
+          {
+            "kind": "economy",
+            "timing": "when_scored",
+            "scope": "corp",
+            "resource": "credits",
+            "repeatable": false
+          }
+        ],
+        "conditions": [],
+        "valueHints": {
+          "scoring": 4,
+          "defense": 3,
+          "economy": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.generic"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "deferred_requires_human_review",
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": [
+          "deferred_requires_human_review"
+        ]
+      },
+      "rationale": "Persistent ICE strength protection supports remote scoring and ICE-tax/glacier structure.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_045_newsgroup-filter",
+      "title": "Newsgroup Filter",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "generic_economy_or_reserve_support_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Generic economy / reserve support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "economy_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 2,
+            "repeatable": true
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "perCardLongtailPriority": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.action",
+          "economy.generic"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Economy, draw, install, or setup Function-Signals are sufficient; no direct strategy anchor was evidenced.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_097_livewires-contacts",
+      "title": "Livewire’s Contacts",
+      "side": "runner",
+      "cardType": "event",
+      "ai009DeferredReason": "generic_economy_or_reserve_support_only",
+      "ai010Class": "deferred_requires_human_review",
+      "candidateGroup": "Generic economy / reserve support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "economy_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "valueHints": {
+          "economy": 3,
+          "tempo": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.generic"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "deferred_requires_human_review",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": [
+          "deferred_requires_human_review"
+        ]
+      },
+      "rationale": "Old lineSupport was broad legacy support; card keeps its existing human-review warning because confidence or semantics remain too narrow/unclear for a new strategy anchor.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_178_short-term-contract",
+      "title": "Short-Term Contract",
+      "side": "runner",
+      "cardType": "resource",
+      "ai009DeferredReason": "generic_economy_or_reserve_support_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Generic economy / reserve support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "economy_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "counter_economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 2,
+            "repeatable": true,
+            "finite": true
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "economy": 3,
+          "tempo": 1
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.action",
+          "economy.counter",
+          "economy.finite_pool"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Economy, draw, install, or setup Function-Signals are sufficient; no direct strategy anchor was evidenced.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_188_ai-chief-financial-officer",
+      "title": "AI Chief Financial Officer",
+      "side": "corp",
+      "cardType": "agenda",
+      "ai009DeferredReason": "generic_economy_or_reserve_support_only",
+      "ai010Class": "deferred_requires_human_review",
+      "candidateGroup": "Generic economy / reserve support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "economy_rez_reserve",
+          "central_stabilize"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "zone_shuffle",
+            "timing": "scored_activated",
+            "scope": "corp"
+          },
+          {
+            "kind": "draw",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 5,
+            "repeatable": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "scoring": 2,
+          "cardFlow": 3
+        },
+        "derivedFunctionSignalsBefore": [
+          "score.agenda_action",
+          "setup.draw"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.fast_advance"
+        ],
+        "warningCategoriesBefore": [
+          "deferred_requires_human_review",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": [
+          "deferred_requires_human_review"
+        ]
+      },
+      "rationale": "Old lineSupport was broad legacy support; card keeps its existing human-review warning because confidence or semantics remain too narrow/unclear for a new strategy anchor.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_199_employee-empowerment",
+      "title": "Employee Empowerment",
+      "side": "corp",
+      "cardType": "agenda",
+      "ai009DeferredReason": "generic_economy_or_reserve_support_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Generic economy / reserve support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "economy_rez_reserve"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 1,
+            "repeatable": true
+          },
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "draw",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 2,
+            "repeatable": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "agenda": 2,
+          "economy": 1
+        },
+        "derivedFunctionSignalsBefore": [
+          "score.agenda_action",
+          "setup.draw"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.fast_advance"
+        ],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Economy, draw, install, or setup Function-Signals are sufficient; no direct strategy anchor was evidenced.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_206_marine-arcology",
+      "title": "Marine Arcology",
+      "side": "corp",
+      "cardType": "agenda",
+      "ai009DeferredReason": "generic_economy_or_reserve_support_only",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "Generic economy / reserve support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "economy_rez_reserve"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.economy_rez_reserve"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "economy",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3,
+            "repeatable": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ],
+        "costProfile": {
+          "clicks": 2,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "perCardLongtailPriority": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.generic",
+          "score.agenda_action"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.fast_advance"
+        ],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Scored agenda action plus repeatable economy is a reserve engine after scoring.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_281_accounts-receivable",
+      "title": "Accounts Receivable",
+      "side": "corp",
+      "cardType": "operation",
+      "ai009DeferredReason": "generic_economy_or_reserve_support_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Generic economy / reserve support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "economy_rez_reserve"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 9,
+            "finite": true
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "valueHints": {
+          "economy": 3
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.generic"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Economy, draw, install, or setup Function-Signals are sufficient; no direct strategy anchor was evidenced.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_282_annual-reviews",
+      "title": "Annual Reviews",
+      "side": "corp",
+      "cardType": "operation",
+      "ai009DeferredReason": "generic_economy_or_reserve_support_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Generic economy / reserve support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "economy_rez_reserve"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 3,
+            "finite": true
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "cardFlow": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "setup.draw"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Economy, draw, install, or setup Function-Signals are sufficient; no direct strategy anchor was evidenced.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_288_day-shift",
+      "title": "Day Shift",
+      "side": "corp",
+      "cardType": "operation",
+      "ai009DeferredReason": "generic_economy_or_reserve_support_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Generic economy / reserve support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "economy_rez_reserve"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 2,
+            "finite": true
+          },
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "valueHints": {
+          "economy": 3,
+          "cardFlow": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.generic",
+          "setup.draw"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Economy, draw, install, or setup Function-Signals are sufficient; no direct strategy anchor was evidenced.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_290_efficiency-experts",
+      "title": "Efficiency Experts",
+      "side": "corp",
+      "cardType": "operation",
+      "ai009DeferredReason": "generic_economy_or_reserve_support_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Generic economy / reserve support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "economy_rez_reserve"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 3,
+            "finite": true
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "valueHints": {
+          "economy": 3
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.generic"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Economy, draw, install, or setup Function-Signals are sufficient; no direct strategy anchor was evidenced.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_293_netwatch-credit-voucher",
+      "title": "Netwatch Credit Voucher",
+      "side": "corp",
+      "cardType": "operation",
+      "ai009DeferredReason": "generic_economy_or_reserve_support_only",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "Generic economy / reserve support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish",
+          "economy_rez_reserve"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "tag_source",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1,
+            "finite": true
+          },
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_tagged"
+          }
+        ],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "economy": 3,
+          "threat": 3
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.generic",
+          "tag.source"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.tag_trace_punish"
+        ],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Tagged-runner condition plus additional tag source keeps tag/trace punish while removing generic economy reserve.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_295_night-shift",
+      "title": "Night Shift",
+      "side": "corp",
+      "cardType": "operation",
+      "ai009DeferredReason": "generic_economy_or_reserve_support_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Generic economy / reserve support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "economy_rez_reserve"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits",
+            "amount": 2,
+            "finite": true
+          },
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "valueHints": {
+          "economy": 3,
+          "cardFlow": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.generic",
+          "setup.draw"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Economy, draw, install, or setup Function-Signals are sufficient; no direct strategy anchor was evidenced.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_296_off-site-backups",
+      "title": "Off-Site Backups",
+      "side": "corp",
+      "cardType": "operation",
+      "ai009DeferredReason": "generic_economy_or_reserve_support_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Generic economy / reserve support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "economy_rez_reserve",
+          "central_stabilize"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "zone_shuffle",
+            "timing": "action",
+            "scope": "corp"
+          },
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 1,
+            "finite": true
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "perCardLongtailPriority": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "setup.draw"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Economy, draw, install, or setup Function-Signals are sufficient; no direct strategy anchor was evidenced.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_002_ai-boon",
+      "title": "AI Boon",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "deferred_requires_human_review",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "sentry"
+          ],
+          "pumpCost": 1,
+          "breakCost": 1,
+          "sideEffects": [
+            "random_failure"
+          ]
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 12,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "startRunStrengthPriority": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.sentry"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "deferred_requires_human_review",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": [
+          "deferred_requires_human_review"
+        ]
+      },
+      "rationale": "Old lineSupport was broad legacy support; card keeps its existing human-review warning because confidence or semantics remain too narrow/unclear for a new strategy anchor.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
+      "title": "Bartmoss Memorial Icebreaker",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "universal"
+          ],
+          "baseStrength": 0,
+          "pumpCost": 1,
+          "breakCost": 1,
+          "sideEffects": [
+            "random_failure",
+            "program_trash_risk"
+          ]
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 5,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "runPressure": 2,
+          "rigCoverage": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.universal"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "BreakerProfile and breaker Function-Signals are sufficient; normal breakers are not direct rig-first lineSupport anchors.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_006_black-dahlia",
+      "title": "Black Dahlia",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "sentry"
+          ],
+          "baseStrength": 5,
+          "pumpCost": 2,
+          "breakCost": 2
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 10,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "runPressure": 3,
+          "rigCoverage": 3
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.sentry"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "BreakerProfile and breaker Function-Signals are sufficient; normal breakers are not direct rig-first lineSupport anchors.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_007_blink",
+      "title": "Blink",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "deferred_requires_human_review",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "universal"
+          ],
+          "baseStrength": 5,
+          "breakCost": 0,
+          "sideEffects": [
+            "random_failure",
+            "once_per_subroutine"
+          ]
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 5,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "runPressure": 2,
+          "rigCoverage": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.universal"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "deferred_requires_human_review",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": [
+          "deferred_requires_human_review"
+        ]
+      },
+      "rationale": "Old lineSupport was broad legacy support; card keeps its existing human-review warning because confidence or semantics remain too narrow/unclear for a new strategy anchor.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_014_codecracker",
+      "title": "Codecracker",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "code_gate"
+          ],
+          "baseStrength": 0,
+          "pumpCost": 1,
+          "breakCost": 0
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 2,
+          "memory": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "rigCoverage": 2,
+          "runPressure": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.code_gate"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "BreakerProfile and breaker Function-Signals are sufficient; normal breakers are not direct rig-first lineSupport anchors.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_016_cyfermaster",
+      "title": "Cyfermaster™",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "code_gate"
+          ],
+          "baseStrength": 5,
+          "pumpCost": 1,
+          "breakCost": 2
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 4,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "runPressure": 2,
+          "rigCoverage": 3
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.code_gate"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "BreakerProfile and breaker Function-Signals are sufficient; normal breakers are not direct rig-first lineSupport anchors.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_019_dropp",
+      "title": "Dropp™",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "universal"
+          ],
+          "baseStrength": 4,
+          "pumpCost": 1,
+          "breakCost": 0,
+          "sideEffects": [
+            "ends_run_after_use"
+          ]
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 3,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "runPressure": 2,
+          "rigCoverage": 1
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.universal"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": [
+          "function_signal_descriptor_gap"
+        ]
+      },
+      "rationale": "BreakerProfile and breaker Function-Signals are sufficient; normal breakers are not direct rig-first lineSupport anchors.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "title": "Japanese Water Torture",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "wall"
+          ],
+          "baseStrength": 2,
+          "pumpCost": 0,
+          "breakCost": 0,
+          "sideEffects": [
+            "forgo_actions"
+          ]
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 7,
+          "memory": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "high"
+        },
+        "valueHints": {
+          "perCardLongtailPriority": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.wall"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "BreakerProfile and breaker Function-Signals are sufficient; normal breakers are not direct rig-first lineSupport anchors.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_039_krash",
+      "title": "Krash",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "universal"
+          ],
+          "baseStrength": 0,
+          "pumpCost": 2,
+          "breakCost": 2
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 0,
+          "memory": 1,
+          "reserveRisk": "high",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "rigCoverage": 3,
+          "runPressure": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.universal"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "BreakerProfile and breaker Function-Signals are sufficient; normal breakers are not direct rig-first lineSupport anchors.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_040_loony-goon",
+      "title": "Loony Goon",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "sentry"
+          ],
+          "baseStrength": 0,
+          "pumpCost": 1,
+          "breakCost": 1
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 4,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "runPressure": 2,
+          "rigCoverage": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.sentry"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "BreakerProfile and breaker Function-Signals are sufficient; normal breakers are not direct rig-first lineSupport anchors.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_047_pile-driver",
+      "title": "Pile Driver",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "wall"
+          ],
+          "baseStrength": 7,
+          "pumpCost": 1,
+          "breakCost": 3,
+          "sideEffects": [
+            "stealth_loss"
+          ]
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 1,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "rigCoverage": 2,
+          "runPressure": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.wall"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "BreakerProfile and breaker Function-Signals are sufficient; normal breakers are not direct rig-first lineSupport anchors.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_052_raffles",
+      "title": "Raffles",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "code_gate"
+          ],
+          "baseStrength": 4,
+          "pumpCost": 2,
+          "breakCost": 1
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 7,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "runPressure": 2,
+          "rigCoverage": 3
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.code_gate"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "BreakerProfile and breaker Function-Signals are sufficient; normal breakers are not direct rig-first lineSupport anchors.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_054_raptor",
+      "title": "Raptor",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "sentry"
+          ],
+          "baseStrength": 1,
+          "pumpCost": 1,
+          "breakCost": 2
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 1,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "runPressure": 2,
+          "rigCoverage": 2,
+          "tempo": 1
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.sentry"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "BreakerProfile and breaker Function-Signals are sufficient; normal breakers are not direct rig-first lineSupport anchors.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_055_reflector",
+      "title": "Reflector",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "deferred_requires_human_review",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "ap"
+          ],
+          "baseStrength": 4,
+          "breakCost": 0,
+          "restrictions": [
+            "stun_hellbolt_knockout_only"
+          ]
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 2,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "perCardLongtailPriority": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.ap"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "deferred_requires_human_review",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": [
+          "deferred_requires_human_review"
+        ]
+      },
+      "rationale": "Old lineSupport was broad legacy support; card keeps its existing human-review warning because confidence or semantics remain too narrow/unclear for a new strategy anchor.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_056_replicator",
+      "title": "Replicator",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "trace"
+          ],
+          "baseStrength": 2,
+          "pumpCost": 1,
+          "breakCost": 0
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 5,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "trace": 1,
+          "breaker": 1
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.trace"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "BreakerProfile and breaker Function-Signals are sufficient; normal breakers are not direct rig-first lineSupport anchors.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_060_shaka",
+      "title": "Shaka",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "sentry"
+          ],
+          "baseStrength": 2,
+          "pumpCost": 2,
+          "breakCost": 1
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 4,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "runPressure": 2,
+          "rigCoverage": 3
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.sentry"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "BreakerProfile and breaker Function-Signals are sufficient; normal breakers are not direct rig-first lineSupport anchors.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_070_tinweasel",
+      "title": "Tinweasel",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "deferred_requires_human_review",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "code_gate"
+          ],
+          "baseStrength": 3,
+          "breakCost": 0,
+          "restrictions": [
+            "no_pump_text"
+          ]
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 5,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "runPressure": 2,
+          "rigCoverage": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.code_gate"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "deferred_requires_human_review",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": [
+          "deferred_requires_human_review"
+        ]
+      },
+      "rationale": "Old lineSupport was broad legacy support; card keeps its existing human-review warning because confidence or semantics remain too narrow/unclear for a new strategy anchor.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_072_wild-card",
+      "title": "Wild Card",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "sentry"
+          ],
+          "baseStrength": 0,
+          "pumpCost": 3,
+          "breakCost": 0
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 0,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "runPressure": 2,
+          "rigCoverage": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.sentry"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "BreakerProfile and breaker Function-Signals are sufficient; normal breakers are not direct rig-first lineSupport anchors.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_073_wizards-book",
+      "title": "Wizard’s Book",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "code_gate"
+          ],
+          "baseStrength": 2,
+          "pumpCost": 2,
+          "breakCost": 0
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 5,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "runPressure": 2,
+          "rigCoverage": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.code_gate"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "BreakerProfile and breaker Function-Signals are sufficient; normal breakers are not direct rig-first lineSupport anchors.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_074_worm",
+      "title": "Worm",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_breaker_function_signal_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Normal breaker function-signal review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "breakerProfile",
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "breaker",
+            "timing": "persistent",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "breakerProfile": {
+          "coverage": [
+            "wall"
+          ],
+          "baseStrength": 2,
+          "pumpCost": 3,
+          "breakCost": 0
+        },
+        "costProfile": {
+          "clicks": 0,
+          "credits": 4,
+          "memory": 1,
+          "reserveRisk": "medium",
+          "opportunityCost": "medium"
+        },
+        "valueHints": {
+          "rigCoverage": 2,
+          "runPressure": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "breaker.wall"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "BreakerProfile and breaker Function-Signals are sufficient; normal breakers are not direct rig-first lineSupport anchors.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_075_zetatech-software-installer",
+      "title": "Zetatech Software Installer",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "normal_draw_or_setup_support_only",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Normal draw/setup support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first",
+          "breaker_search_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "install_discount",
+            "timing": "action",
+            "scope": "installed_card",
+            "resource": "credits",
+            "amount": 2,
+            "repeatable": true
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "memory": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "valueHints": {
+          "perCardLongtailPriority": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.trash_credit",
+          "setup.install_discount"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "runner.remote_trash"
+        ],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Economy, draw, install, or setup Function-Signals are sufficient; no direct strategy anchor was evidenced.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+      "title": "Bodyweight™ Synthetic Blood",
+      "side": "runner",
+      "cardType": "event",
+      "ai009DeferredReason": "normal_draw_or_setup_support_only",
+      "ai010Class": "deferred_requires_human_review",
+      "candidateGroup": "Normal draw/setup support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first",
+          "breaker_search_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "valueHints": {
+          "cardFlow": 4,
+          "setup": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "setup.draw"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "deferred_requires_human_review",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": [
+          "deferred_requires_human_review"
+        ]
+      },
+      "rationale": "Old lineSupport was broad legacy support; card keeps its existing human-review warning because confidence or semantics remain too narrow/unclear for a new strategy anchor.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_095_jack-n-joe",
+      "title": "Jack ’n’ Joe",
+      "side": "runner",
+      "cardType": "event",
+      "ai009DeferredReason": "normal_draw_or_setup_support_only",
+      "ai010Class": "deferred_requires_human_review",
+      "candidateGroup": "Normal draw/setup support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first",
+          "breaker_search_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "runner"
+          }
+        ],
+        "conditions": [],
+        "valueHints": {
+          "cardFlow": 3,
+          "setup": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "setup.draw"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "deferred_requires_human_review",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": [
+          "deferred_requires_human_review"
+        ]
+      },
+      "rationale": "Old lineSupport was broad legacy support; card keeps its existing human-review warning because confidence or semantics remain too narrow/unclear for a new strategy anchor.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_222_ball-and-chain",
+      "title": "Ball and Chain",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "ice_tax_glacier",
+          "central_stabilize"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 2,
+            "repeatable": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "valueHints": {
+          "defense": 3,
+          "threat": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "ice.future_pressure"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.ice_tax_glacier"
+        ],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Future-run effect plus repeatable credit tax is an ICE-tax anchor, not central-specific stabilization.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_223_banpei",
+      "title": "Banpei",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "ice_tax_glacier",
+          "central_stabilize"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner"
+          },
+          {
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [],
+        "valueHints": {
+          "defense": 4,
+          "threat": 4
+        },
+        "derivedFunctionSignalsBefore": [
+          "ice.etr"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.ice_tax_glacier"
+        ],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Program-trash/run-path protection is a taxing ICE tool, not a generic central/remote label.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_224_bolter-cluster",
+      "title": "Bolter Cluster",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "ice_tax_glacier",
+          "central_stabilize"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "encounter",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 4
+          },
+          {
+            "kind": "future_encounter_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "valueHints": {
+          "defense": 2,
+          "threat": 4
+        },
+        "derivedFunctionSignalsBefore": [
+          "damage.payoff",
+          "ice.future_pressure"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Encounter damage and future encounter pressure support damage-kill pressure and ICE-tax.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_225_canis-major",
+      "title": "Canis Major",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "ice_tax_glacier"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "strength",
+            "amount": 2,
+            "repeatable": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "valueHints": {
+          "defense": 2,
+          "threat": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "ice.future_pressure"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.ice_tax_glacier"
+        ],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Future-run strength tax is a direct ICE-tax tool.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_226_canis-minor",
+      "title": "Canis Minor",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "ice_tax_glacier"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "strength",
+            "amount": 1,
+            "repeatable": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "valueHints": {
+          "defense": 2,
+          "threat": 2
+        },
+        "derivedFunctionSignalsBefore": [],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Future-run strength tax is a direct ICE-tax tool.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_227_cerberus",
+      "title": "Cerberus",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish",
+          "ice_tax_glacier",
+          "central_stabilize"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish",
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "encounter",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 3
+          },
+          {
+            "kind": "trace",
+            "timing": "encounter",
+            "scope": "runner",
+            "amount": 5
+          },
+          {
+            "kind": "future_run_effect",
+            "timing": "trace_success",
+            "scope": "runner"
+          },
+          {
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          }
+        ],
+        "valueHints": {
+          "defense": 2,
+          "damage": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "damage.payoff",
+          "ice.etr",
+          "trace.source"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier",
+          "corp.tag_trace_punish"
+        ],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Trace source, damage, and run-path protection combine tag/trace punish, damage pressure, and ICE tax.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_228_cinderella",
+      "title": "Cinderella",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish",
+          "ice_tax_glacier",
+          "central_stabilize"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish",
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "trace",
+            "timing": "encounter",
+            "scope": "runner",
+            "amount": 6
+          },
+          {
+            "kind": "hardware_trash",
+            "timing": "trace_success",
+            "scope": "runner"
+          },
+          {
+            "kind": "damage",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 2
+          },
+          {
+            "kind": "remote_protection",
+            "timing": "trace_success",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          }
+        ],
+        "valueHints": {
+          "defense": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "damage.payoff",
+          "ice.etr",
+          "trace.source"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier",
+          "corp.tag_trace_punish"
+        ],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Trace success hardware trash, damage, and protection combine tag/trace punish, damage pressure, and ICE tax.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_231_cortical-scrub",
+      "title": "Cortical Scrub",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "deferred_requires_human_review",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "ice_tax_glacier",
+          "central_stabilize"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner"
+          },
+          {
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [],
+        "valueHints": {
+          "defense": 2,
+          "threat": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "damage.payoff",
+          "ice.etr"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "warningCategoriesBefore": [
+          "deferred_requires_human_review",
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": [
+          "deferred_requires_human_review"
+        ]
+      },
+      "rationale": "Old lineSupport was broad legacy support; card keeps its existing human-review warning because confidence or semantics remain too narrow/unclear for a new strategy anchor.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_236_data-raven",
+      "title": "Data Raven",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish",
+          "central_stabilize"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "trace",
+            "timing": "encounter",
+            "scope": "runner",
+            "amount": 5
+          },
+          {
+            "kind": "tag",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          },
+          {
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          }
+        ],
+        "valueHints": {
+          "defense": 4,
+          "threat": 4
+        },
+        "derivedFunctionSignalsBefore": [
+          "tag.source",
+          "trace.source"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.tag_trace_punish"
+        ],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Trace-to-tag source is a direct tag/trace punish engine anchor; central stabilization was legacy noise.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_237_data-wall",
+      "title": "Data Wall",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "central_stabilize",
+          "remote_scoring_build"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [],
+        "valueHints": {
+          "defense": 1
+        },
+        "derivedFunctionSignalsBefore": [
+          "ice.etr"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.ice_tax_glacier"
+        ],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Legacy lineSupport was removed because the card evidence supports tactical function only, not a direct strategy anchor.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_243_fetch-4-0-1",
+      "title": "Fetch 4.0.1",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish",
+          "central_stabilize"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "trace",
+            "timing": "encounter",
+            "scope": "runner",
+            "amount": 3
+          },
+          {
+            "kind": "tag",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          },
+          {
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          }
+        ],
+        "valueHints": {
+          "defense": 2,
+          "threat": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "tag.source",
+          "trace.source"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.tag_trace_punish"
+        ],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Trace-to-tag source is a direct tag/trace punish engine anchor; central stabilization was legacy noise.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_249_hunter",
+      "title": "Hunter",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish",
+          "central_stabilize"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "trace",
+            "timing": "encounter",
+            "scope": "runner",
+            "amount": 5
+          },
+          {
+            "kind": "tag",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          },
+          {
+            "kind": "tag_source",
+            "timing": "trace_success",
+            "scope": "runner",
+            "resource": "tags",
+            "amount": 1
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_trace_success"
+          }
+        ],
+        "valueHints": {
+          "defense": 2,
+          "threat": 3
+        },
+        "derivedFunctionSignalsBefore": [
+          "tag.source",
+          "trace.source"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.tag_trace_punish"
+        ],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Trace-to-tag source is a direct tag/trace punish engine anchor; central stabilization was legacy noise.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_258_neural-blade",
+      "title": "Neural Blade",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "ice_tax_glacier",
+          "central_stabilize"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "encounter",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 1
+          },
+          {
+            "kind": "future_encounter_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "valueHints": {
+          "defense": 2,
+          "threat": 3
+        },
+        "derivedFunctionSignalsBefore": [
+          "damage.payoff",
+          "ice.future_pressure"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Damage plus future encounter pressure is kept as ICE-tax pressure; low damage was not promoted to damage-kill lineSupport.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_267_sentinels-prime",
+      "title": "Sentinels Prime",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "ice_tax_glacier",
+          "central_stabilize"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner"
+          },
+          {
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [],
+        "valueHints": {
+          "defense": 3,
+          "threat": 3
+        },
+        "derivedFunctionSignalsBefore": [
+          "ice.etr"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.ice_tax_glacier"
+        ],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Program-trash/run-path protection is a taxing ICE tool.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_268_shock-r",
+      "title": "Shock.r",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "ice_tax_glacier",
+          "central_stabilize"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "future_encounter_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "valueHints": {
+          "defense": 2,
+          "threat": 4
+        },
+        "derivedFunctionSignalsBefore": [
+          "ice.future_pressure"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.ice_tax_glacier"
+        ],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Future encounter pressure is a direct ICE-tax tool.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "title": "Tutor",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "ice_tax_glacier",
+          "central_stabilize",
+          "remote_scoring_build"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "valueHints": {
+          "perCardLongtailPriority": 2
+        },
+        "derivedFunctionSignalsBefore": [],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Future-run effect plus run-path protection is a direct ICE-tax tool.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "title": "Viral 15",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "ice_tax_glacier",
+          "central_stabilize",
+          "remote_scoring_build"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true
+          },
+          {
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner",
+            "repeatable": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "valueHints": {
+          "perCardLongtailPriority": 2
+        },
+        "derivedFunctionSignalsBefore": [],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Future-run pressure, credit tax, and program-trash pressure are ICE-tax evidence.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "title": "Virizz",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "ice_tax_glacier",
+          "central_stabilize",
+          "remote_scoring_build"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "conditions",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "kind": "run_tax",
+            "timing": "encounter",
+            "scope": "run_path",
+            "resource": "credits",
+            "amount": 1,
+            "repeatable": true
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "valueHints": {
+          "perCardLongtailPriority": 2
+        },
+        "derivedFunctionSignalsBefore": [],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Future-run pressure plus repeatable credit tax is ICE-tax evidence.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_278_wall-of-ice",
+      "title": "Wall of Ice",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "safe_strategy_anchor",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "ice_tax_glacier",
+          "central_stabilize",
+          "remote_scoring_build"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "damage",
+            "timing": "encounter",
+            "scope": "runner",
+            "resource": "damage",
+            "amount": 4
+          },
+          {
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [],
+        "valueHints": {
+          "defense": 4
+        },
+        "derivedFunctionSignalsBefore": [
+          "damage.payoff",
+          "ice.etr"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "warningCategoriesBefore": [
+          "function_signal_descriptor_gap",
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "High encounter damage plus run-path protection supports damage pressure and ICE-tax.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_279_wall-of-static",
+      "title": "Wall of Static",
+      "side": "corp",
+      "cardType": "ice",
+      "ai009DeferredReason": "normal_or_ice_specific_review_needed",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "ICE tax / tag / damage / support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "central_stabilize",
+          "remote_scoring_build"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path"
+          }
+        ],
+        "conditions": [],
+        "valueHints": {
+          "defense": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "ice.etr"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "corp.ice_tax_glacier"
+        ],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Legacy lineSupport was removed because the card evidence supports tactical function only, not a direct strategy anchor.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_011_cloak",
+      "title": "Cloak",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "rig_support_requires_card_review",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Rig support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first",
+          "economy_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "during_run",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 3,
+            "repeatable": true
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "memory": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "valueHints": {
+          "runPressure": 2,
+          "economy": 2
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.generic",
+          "economy.trash_credit"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "runner.remote_trash"
+        ],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Economy, draw, install, or setup Function-Signals are sufficient; no direct strategy anchor was evidenced.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_071_vewy-vewy-quiet",
+      "title": "Vewy Vewy Quiet",
+      "side": "runner",
+      "cardType": "program",
+      "ai009DeferredReason": "rig_support_requires_card_review",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Rig support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "rig_first",
+          "economy_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "during_run",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 2,
+            "repeatable": true
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "memory": 1,
+          "reserveRisk": "low",
+          "opportunityCost": "low"
+        },
+        "valueHints": {
+          "run": 1
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.generic",
+          "economy.trash_credit"
+        ],
+        "derivedStrategyAnchorsBefore": [
+          "runner.remote_trash"
+        ],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Economy, draw, install, or setup Function-Signals are sufficient; no direct strategy anchor was evidenced.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_168_loan-from-chiba",
+      "title": "Loan from Chiba",
+      "side": "runner",
+      "cardType": "resource",
+      "ai009DeferredReason": "rig_support_requires_card_review",
+      "ai010Class": "support_function_only",
+      "candidateGroup": "Rig support review",
+      "changed": true,
+      "oldValues": {
+        "lineSupport": [
+          "economy_first",
+          "rig_first"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "evidence": {
+        "fields": [
+          "cardType",
+          "costProfile",
+          "effects",
+          "side",
+          "valueHints"
+        ],
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 12,
+            "finite": true
+          }
+        ],
+        "conditions": [],
+        "costProfile": {
+          "clicks": 0,
+          "reserveRisk": "medium",
+          "opportunityCost": "high"
+        },
+        "valueHints": {
+          "installCreditGain": 12,
+          "startOfTurnCreditLoss": 1,
+          "leavePlayPayCost": 10
+        },
+        "derivedFunctionSignalsBefore": [
+          "economy.counter",
+          "economy.generic"
+        ],
+        "derivedStrategyAnchorsBefore": [],
+        "warningCategoriesBefore": [
+          "legacy_lineSupport"
+        ],
+        "warningCategoriesAfter": []
+      },
+      "rationale": "Economy, draw, install, or setup Function-Signals are sufficient; no direct strategy anchor was evidenced.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    }
+  ],
+  "explicitNonScope": [
+    "keine Plannerwirkung",
+    "keine Action-Score-Aenderung",
+    "keine PlanWeight-Aenderung",
+    "keine Engine-/Legalitaetsaenderung",
+    "keine Profil-/Default-Umschaltung",
+    "keine Massenmigration",
+    "keine Hidden-Info-Nutzung",
+    "keine Catalog-/Proteus-Baseline-Korrektur",
+    "keine neuen Strategy IDs",
+    "keine Ableitung allein aus roles oder planRoles"
+  ],
+  "checks": [
+    {
+      "command": "corepack pnpm build:ai-compiled-hints",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm build:ai-hint-inspector-index",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-strategy-taxonomy",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-compiled-hints",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-inspector-index",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-quality",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-approval-consistency",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-deck-doctrine-strategy",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai test",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/web exec tsc -p tsconfig.json --noEmit",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --cached --check",
+      "status": "pass"
+    }
+  ]
+}

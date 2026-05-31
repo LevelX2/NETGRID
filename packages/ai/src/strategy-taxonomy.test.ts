@@ -301,15 +301,24 @@ describe("AI003 strategy goal taxonomy", () => {
     expect(corpDamagePayoff.anchorStrategyIds).toContain("corp.damage_kill");
   });
 
-  it("keeps AI004 legacy lineSupport allowlist warn-only but rejects new or wrong-side lineSupport", () => {
+  it("keeps legacy lineSupport cleared while retaining warn-only legacy and hard gates", () => {
     const report = loadStrategyTaxonomyReport();
     const legacyWarning = report.warnings.find(
       (warning) => warning.kind === "legacy_lineSupport_values_warn_only",
     );
-    expect(legacyWarning?.count).toBeGreaterThan(0);
+    expect(legacyWarning?.count ?? 0).toBe(0);
     expect(report.hardErrorCount).toBe(0);
     expect(report.gates.unknownLineSupportFail).toBe(true);
     expect(report.gates.lineSupportSideMismatchFail).toBe(true);
+
+    const legacyLineSupport = loadMutatedStrategyTaxonomyReport(
+      `setLineSupport("onr_v1_041_microtech-ai-interface", ["rig_first"]);`,
+    );
+    const mutatedLegacyWarning = legacyLineSupport.warnings.find(
+      (warning) => warning.kind === "legacy_lineSupport_values_warn_only",
+    );
+    expect(mutatedLegacyWarning?.count).toBeGreaterThan(0);
+    expect(legacyLineSupport.hardErrorCount).toBe(0);
 
     const unknownLineSupport = loadMutatedStrategyTaxonomyReport(
       `setLineSupport("onr_v1_041_microtech-ai-interface", ["not_a_strategy"]);`,

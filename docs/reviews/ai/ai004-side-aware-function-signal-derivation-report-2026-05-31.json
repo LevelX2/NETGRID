@@ -5,7 +5,7 @@
   "generatedAt": "2026-05-31",
   "status": "pass_with_warnings",
   "hardErrorCount": 0,
-  "warningCount": 66,
+  "warningCount": 55,
   "source": {
     "activeHintsPath": "data/ai/ai-card-hints-active.json",
     "compiledHintsPath": "data/ai/ai-card-hints-compiled.json",
@@ -201,7 +201,7 @@
       "effects[].resource": 532,
       "effects[].scope": 841,
       "effects[].timing": 841,
-      "lineSupport": 131,
+      "lineSupport": 88,
       "manualNotes": 3,
       "planRoles": 564,
       "quality": 380,
@@ -223,7 +223,7 @@
       "scenarioRefs": 564,
       "side": 564,
       "strategicNotes": 3,
-      "strategicRole": 47,
+      "strategicRole": 75,
       "targetProfiles": 3,
       "targetProfiles[].installCost": 3,
       "targetProfiles[].installsTarget": 3,
@@ -301,7 +301,7 @@
   "wildGrowth": {
     "roleValueCount": 251,
     "planRoleValueCount": 102,
-    "lineSupportValueCount": 23,
+    "lineSupportValueCount": 14,
     "lineSupportLegacyStatus": "legacy_warn_only_in_ai003"
   },
   "functionSignals": {
@@ -665,21 +665,21 @@
     "totals": {
       "roles": 251,
       "planRoles": 102,
-      "lineSupport": 23,
-      "allValues": 376
+      "lineSupport": 14,
+      "allValues": 367
     },
     "categoryCounts": {
-      "alias_to_strategy_goal": 83,
+      "alias_to_strategy_goal": 75,
       "deferred_requires_human_review": 1,
       "descriptor_gap": 10,
-      "exact_strategy_goal": 15,
+      "exact_strategy_goal": 14,
       "function_signal_only": 219,
       "legacy_role_only": 47,
       "remove_or_deprecate": 1
     },
     "mappedCounts": {
-      "exactStrategyGoal": 15,
-      "aliasToStrategyGoal": 83,
+      "exactStrategyGoal": 14,
+      "aliasToStrategyGoal": 75,
       "functionSignalOnly": 219,
       "legacyRoleOnly": 47,
       "unknownUnmapped": 0,
@@ -688,22 +688,14 @@
   },
   "ai004Triage": {
     "lineSupport": {
-      "totalOccurrences": 190,
-      "legacyOccurrences": 110,
+      "totalOccurrences": 110,
+      "legacyOccurrences": 0,
       "categoryCounts": {
-        "deferred_requires_human_review": 18,
-        "normalized_strategy_id": 80,
-        "safe_strategy_anchor_alias": 44,
-        "should_be_removed_from_lineSupport": 2,
-        "structure_or_support_goal_requires_card_review": 46
+        "normalized_strategy_id": 110
       },
       "valueCounts": [
         {
-          "value": "rig_first",
-          "count": 26
-        },
-        {
-          "value": "central_stabilize",
+          "value": "corp.ice_tax_glacier",
           "count": 20
         },
         {
@@ -711,19 +703,11 @@
           "count": 20
         },
         {
-          "value": "ice_tax_glacier",
-          "count": 18
-        },
-        {
-          "value": "economy_rez_reserve",
-          "count": 15
-        },
-        {
           "value": "corp.remote_scoring",
-          "count": 10
+          "count": 12
         },
         {
-          "value": "remote_scoring_build",
+          "value": "corp.damage_kill",
           "count": 9
         },
         {
@@ -735,20 +719,12 @@
           "count": 8
         },
         {
+          "value": "corp.economy_rez_reserve",
+          "count": 7
+        },
+        {
           "value": "corp.fast_advance",
           "count": 7
-        },
-        {
-          "value": "economy_first",
-          "count": 7
-        },
-        {
-          "value": "score_closeout",
-          "count": 6
-        },
-        {
-          "value": "corp.damage_kill",
-          "count": 5
         },
         {
           "value": "runner.rnd_pressure",
@@ -759,24 +735,8 @@
           "count": 5
         },
         {
-          "value": "corp.ice_tax_glacier",
-          "count": 4
-        },
-        {
           "value": "runner.interface_closeout",
           "count": 4
-        },
-        {
-          "value": "breaker_search_first",
-          "count": 3
-        },
-        {
-          "value": "remote_contest",
-          "count": 3
-        },
-        {
-          "value": "closeout_pressure",
-          "count": 2
         },
         {
           "value": "runner.hq_pressure",
@@ -787,364 +747,11 @@
           "count": 2
         },
         {
-          "value": "early_hq_pressure",
+          "value": "runner.remote_contest",
           "count": 1
         }
       ],
       "entries": [
-        {
-          "cardId": "onr_v1_002_ai-boon",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "breakCost": 1,
-              "coverage": [
-                "sentry"
-              ],
-              "pumpCost": 1,
-              "sideEffects": [
-                "random_failure"
-              ]
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
-          "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 0,
-              "breakCost": 1,
-              "coverage": [
-                "universal"
-              ],
-              "pumpCost": 1,
-              "sideEffects": [
-                "program_trash_risk",
-                "random_failure"
-              ]
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_006_black-dahlia",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 5,
-              "breakCost": 2,
-              "coverage": [
-                "sentry"
-              ],
-              "pumpCost": 2
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_007_blink",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 5,
-              "breakCost": 0,
-              "coverage": [
-                "universal"
-              ],
-              "sideEffects": [
-                "once_per_subroutine",
-                "random_failure"
-              ]
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
-          "cardId": "onr_v1_011_cloak",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first",
-              "economy_first"
-            ],
-            "effects": [
-              {
-                "kind": "economy",
-                "scope": "runner",
-                "timing": "during_run",
-                "resource": "credits"
-              },
-              {
-                "kind": "trash_credit",
-                "scope": "runner",
-                "timing": "persistent",
-                "resource": "trash_credits"
-              }
-            ],
-            "conditions": [],
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_011_cloak",
-          "side": "runner",
-          "cardType": "program",
-          "value": "economy_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first",
-              "economy_first"
-            ],
-            "effects": [
-              {
-                "kind": "economy",
-                "scope": "runner",
-                "timing": "during_run",
-                "resource": "credits"
-              },
-              {
-                "kind": "trash_credit",
-                "scope": "runner",
-                "timing": "persistent",
-                "resource": "trash_credits"
-              }
-            ],
-            "conditions": [],
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.economy_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_014_codecracker",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 0,
-              "breakCost": 0,
-              "coverage": [
-                "code_gate"
-              ],
-              "pumpCost": 1
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_016_cyfermaster",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 5,
-              "breakCost": 2,
-              "coverage": [
-                "code_gate"
-              ],
-              "pumpCost": 1
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
         {
           "cardId": "onr_v1_017_deep-thought",
           "side": "runner",
@@ -1186,52 +793,6 @@
             "runner.rnd_pressure"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_v1_019_dropp",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 4,
-              "breakCost": 0,
-              "coverage": [
-                "universal"
-              ],
-              "pumpCost": 1,
-              "sideEffects": [
-                "ends_run_after_use"
-              ]
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
         },
         {
           "cardId": "onr_v1_022_emergency-self-construct",
@@ -1297,135 +858,6 @@
             "runner.survival_defense"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_v1_037_japanese-water-torture",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 2,
-              "breakCost": 0,
-              "coverage": [
-                "wall"
-              ],
-              "pumpCost": 1,
-              "sideEffects": [
-                "forgo_actions"
-              ]
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "needsHumanReview": false,
-              "strategyCovered": false
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_039_krash",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 0,
-              "breakCost": 2,
-              "coverage": [
-                "universal"
-              ],
-              "pumpCost": 2
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_040_loony-goon",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 0,
-              "breakCost": 1,
-              "coverage": [
-                "sentry"
-              ],
-              "pumpCost": 1
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
         },
         {
           "cardId": "onr_v1_041_microtech-ai-interface",
@@ -1601,100 +1033,6 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "cardId": "onr_v1_045_newsgroup-filter",
-          "side": "runner",
-          "cardType": "program",
-          "value": "economy_first",
-          "evidence": {
-            "lineSupport": [
-              "economy_first"
-            ],
-            "effects": [
-              {
-                "kind": "economy",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "action_economy",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "economy",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [],
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.economy_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_047_pile-driver",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 7,
-              "breakCost": 3,
-              "coverage": [
-                "wall"
-              ],
-              "pumpCost": 1,
-              "sideEffects": [
-                "stealth_loss"
-              ]
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
           "cardId": "onr_v1_048_poltergeist",
           "side": "runner",
           "cardType": "program",
@@ -1837,180 +1175,6 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "cardId": "onr_v1_052_raffles",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 4,
-              "breakCost": 1,
-              "coverage": [
-                "code_gate"
-              ],
-              "pumpCost": 2
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_054_raptor",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 1,
-              "breakCost": 2,
-              "coverage": [
-                "sentry"
-              ],
-              "pumpCost": 1
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_055_reflector",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 4,
-              "breakCost": 0,
-              "coverage": [
-                "ap"
-              ],
-              "restrictions": [
-                "stun_hellbolt_knockout_only"
-              ]
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
-          "cardId": "onr_v1_056_replicator",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 2,
-              "breakCost": 0,
-              "coverage": [
-                "trace"
-              ],
-              "pumpCost": 1
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
           "cardId": "onr_v1_057_scatter-shot",
           "side": "runner",
           "cardType": "program",
@@ -2097,469 +1261,6 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "cardId": "onr_v1_060_shaka",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 2,
-              "breakCost": 1,
-              "coverage": [
-                "sentry"
-              ],
-              "pumpCost": 2
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_068_startup-immolator",
-          "side": "runner",
-          "cardType": "program",
-          "value": "remote_contest",
-          "evidence": {
-            "lineSupport": [
-              "remote_contest",
-              "closeout_pressure"
-            ],
-            "effects": [
-              {
-                "kind": "program_trash",
-                "scope": "ice",
-                "timing": "during_run"
-              }
-            ],
-            "conditions": [
-              "requires_during_run"
-            ],
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.remote_contest"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_068_startup-immolator",
-          "side": "runner",
-          "cardType": "program",
-          "value": "closeout_pressure",
-          "evidence": {
-            "lineSupport": [
-              "remote_contest",
-              "closeout_pressure"
-            ],
-            "effects": [
-              {
-                "kind": "program_trash",
-                "scope": "ice",
-                "timing": "during_run"
-              }
-            ],
-            "conditions": [
-              "requires_during_run"
-            ],
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "should_be_removed_from_lineSupport",
-          "mapsTo": [],
-          "rationale": "Closeout pressure without multiaccess/interface evidence is too broad for lineSupport."
-        },
-        {
-          "cardId": "onr_v1_070_tinweasel",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 3,
-              "breakCost": 0,
-              "coverage": [
-                "code_gate"
-              ],
-              "restrictions": [
-                "no_pump_text"
-              ]
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
-          "cardId": "onr_v1_071_vewy-vewy-quiet",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first",
-              "economy_first"
-            ],
-            "effects": [
-              {
-                "kind": "economy",
-                "scope": "runner",
-                "timing": "during_run",
-                "resource": "credits"
-              },
-              {
-                "kind": "trash_credit",
-                "scope": "runner",
-                "timing": "persistent",
-                "resource": "trash_credits"
-              }
-            ],
-            "conditions": [],
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_071_vewy-vewy-quiet",
-          "side": "runner",
-          "cardType": "program",
-          "value": "economy_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first",
-              "economy_first"
-            ],
-            "effects": [
-              {
-                "kind": "economy",
-                "scope": "runner",
-                "timing": "during_run",
-                "resource": "credits"
-              },
-              {
-                "kind": "trash_credit",
-                "scope": "runner",
-                "timing": "persistent",
-                "resource": "trash_credits"
-              }
-            ],
-            "conditions": [],
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.economy_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_072_wild-card",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 0,
-              "breakCost": 0,
-              "coverage": [
-                "sentry"
-              ],
-              "pumpCost": 3
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_073_wizards-book",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 2,
-              "breakCost": 0,
-              "coverage": [
-                "code_gate"
-              ],
-              "pumpCost": 2
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_074_worm",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "breaker",
-                "scope": "runner",
-                "timing": "persistent"
-              }
-            ],
-            "conditions": [],
-            "breakerProfile": {
-              "baseStrength": 2,
-              "breakCost": 0,
-              "coverage": [
-                "wall"
-              ],
-              "pumpCost": 3
-            },
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_075_zetatech-software-installer",
-          "side": "runner",
-          "cardType": "program",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first",
-              "breaker_search_first"
-            ],
-            "effects": [
-              {
-                "kind": "install_discount",
-                "scope": "installed_card",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "trash_credit",
-                "scope": "runner",
-                "timing": "persistent",
-                "resource": "trash_credits"
-              }
-            ],
-            "conditions": [],
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_075_zetatech-software-installer",
-          "side": "runner",
-          "cardType": "program",
-          "value": "breaker_search_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first",
-              "breaker_search_first"
-            ],
-            "effects": [
-              {
-                "kind": "install_discount",
-                "scope": "installed_card",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "trash_credit",
-                "scope": "runner",
-                "timing": "persistent",
-                "resource": "trash_credits"
-              }
-            ],
-            "conditions": [],
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "runner.breaker_search"
-          ],
-          "rationale": "Legacy setup/search line."
-        },
-        {
           "cardId": "onr_v1_078_arasaka-owns-you",
           "side": "runner",
           "cardType": "event",
@@ -2594,166 +1295,6 @@
             "runner.survival_defense"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
-          "side": "runner",
-          "cardType": "event",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first",
-              "breaker_search_first"
-            ],
-            "effects": [
-              {
-                "kind": "draw",
-                "scope": "runner",
-                "timing": "action"
-              },
-              {
-                "kind": "draw",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
-          "cardId": "onr_v1_079_bodyweight-synthetic-blood",
-          "side": "runner",
-          "cardType": "event",
-          "value": "breaker_search_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first",
-              "breaker_search_first"
-            ],
-            "effects": [
-              {
-                "kind": "draw",
-                "scope": "runner",
-                "timing": "action"
-              },
-              {
-                "kind": "draw",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "runner.breaker_search"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
-          "cardId": "onr_v1_080_core-command-jettison-ice",
-          "side": "runner",
-          "cardType": "event",
-          "value": "early_hq_pressure",
-          "evidence": {
-            "lineSupport": [
-              "early_hq_pressure",
-              "remote_contest"
-            ],
-            "effects": [
-              {
-                "kind": "program_trash",
-                "scope": "ice",
-                "timing": "action"
-              }
-            ],
-            "conditions": [
-              "requires_successful_run"
-            ],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "runner.hq_pressure"
-          ],
-          "rationale": "Early timing narrows to the normalized HQ pressure goal."
-        },
-        {
-          "cardId": "onr_v1_080_core-command-jettison-ice",
-          "side": "runner",
-          "cardType": "event",
-          "value": "remote_contest",
-          "evidence": {
-            "lineSupport": [
-              "early_hq_pressure",
-              "remote_contest"
-            ],
-            "effects": [
-              {
-                "kind": "program_trash",
-                "scope": "ice",
-                "timing": "action"
-              }
-            ],
-            "conditions": [
-              "requires_successful_run"
-            ],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.remote_contest"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
         },
         {
           "cardId": "onr_v1_081_custodial-position",
@@ -3143,90 +1684,6 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "cardId": "onr_v1_095_jack-n-joe",
-          "side": "runner",
-          "cardType": "event",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first",
-              "breaker_search_first"
-            ],
-            "effects": [
-              {
-                "kind": "draw",
-                "scope": "runner",
-                "timing": "action"
-              },
-              {
-                "kind": "draw",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
-          "cardId": "onr_v1_095_jack-n-joe",
-          "side": "runner",
-          "cardType": "event",
-          "value": "breaker_search_first",
-          "evidence": {
-            "lineSupport": [
-              "rig_first",
-              "breaker_search_first"
-            ],
-            "effects": [
-              {
-                "kind": "draw",
-                "scope": "runner",
-                "timing": "action"
-              },
-              {
-                "kind": "draw",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "runner.breaker_search"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
           "cardId": "onr_v1_096_kilroy-was-here",
           "side": "runner",
           "cardType": "event",
@@ -3268,47 +1725,6 @@
             "runner.rnd_pressure"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_v1_097_livewires-contacts",
-          "side": "runner",
-          "cardType": "event",
-          "value": "economy_first",
-          "evidence": {
-            "lineSupport": [
-              "economy_first"
-            ],
-            "effects": [
-              {
-                "kind": "economy",
-                "scope": "runner",
-                "timing": "action"
-              },
-              {
-                "kind": "economy",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "runner.economy_first"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
         },
         {
           "cardId": "onr_v1_099_mantis-fixer-at-large",
@@ -3358,90 +1774,6 @@
             "runner.breaker_search"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_v1_108_score",
-          "side": "runner",
-          "cardType": "event",
-          "value": "economy_first",
-          "evidence": {
-            "lineSupport": [
-              "economy_first",
-              "closeout_pressure"
-            ],
-            "effects": [
-              {
-                "kind": "economy",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "economy",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.economy_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_108_score",
-          "side": "runner",
-          "cardType": "event",
-          "value": "closeout_pressure",
-          "evidence": {
-            "lineSupport": [
-              "economy_first",
-              "closeout_pressure"
-            ],
-            "effects": [
-              {
-                "kind": "economy",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "economy",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "should_be_removed_from_lineSupport",
-          "mapsTo": [],
-          "rationale": "Closeout pressure without multiaccess/interface evidence is too broad for lineSupport."
         },
         {
           "cardId": "onr_v1_110_sneak-preview",
@@ -3613,139 +1945,13 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "cardId": "onr_v1_168_loan-from-chiba",
-          "side": "runner",
-          "cardType": "resource",
-          "value": "economy_first",
-          "evidence": {
-            "lineSupport": [
-              "economy_first",
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "economy",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "delayed_penalty",
-                "scope": "runner",
-                "timing": "start_of_turn",
-                "resource": "credits"
-              },
-              {
-                "kind": "delayed_penalty",
-                "scope": "runner",
-                "timing": "on_leave_play",
-                "resource": "credits"
-              },
-              {
-                "kind": "economy",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "counter_economy",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [
-              "requires_start_of_turn"
-            ],
-            "cardType": "resource",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.economy_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_168_loan-from-chiba",
-          "side": "runner",
-          "cardType": "resource",
-          "value": "rig_first",
-          "evidence": {
-            "lineSupport": [
-              "economy_first",
-              "rig_first"
-            ],
-            "effects": [
-              {
-                "kind": "economy",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "delayed_penalty",
-                "scope": "runner",
-                "timing": "start_of_turn",
-                "resource": "credits"
-              },
-              {
-                "kind": "delayed_penalty",
-                "scope": "runner",
-                "timing": "on_leave_play",
-                "resource": "credits"
-              },
-              {
-                "kind": "economy",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "counter_economy",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [
-              "requires_start_of_turn"
-            ],
-            "cardType": "resource",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
           "cardId": "onr_v1_173_restrictive-net-zoning",
           "side": "runner",
           "cardType": "resource",
-          "value": "remote_contest",
+          "value": "runner.remote_contest",
           "evidence": {
             "lineSupport": [
-              "remote_contest"
+              "runner.remote_contest"
             ],
             "effects": [
               {
@@ -3776,67 +1982,11 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "deferred_requires_human_review",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.remote_contest"
           ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
-          "cardId": "onr_v1_178_short-term-contract",
-          "side": "runner",
-          "cardType": "resource",
-          "value": "economy_first",
-          "evidence": {
-            "lineSupport": [
-              "economy_first"
-            ],
-            "effects": [
-              {
-                "kind": "counter_economy",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "finite_economy_pool",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "action_economy",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "counter_economy",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [
-              "requires_installed_resource"
-            ],
-            "cardType": "resource",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "runner.economy_first"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_185_trauma-team",
@@ -3877,148 +2027,14 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "cardId": "onr_v1_188_ai-chief-financial-officer",
-          "side": "corp",
-          "cardType": "agenda",
-          "value": "economy_rez_reserve",
-          "evidence": {
-            "lineSupport": [
-              "economy_rez_reserve",
-              "central_stabilize"
-            ],
-            "effects": [
-              {
-                "kind": "scored_agenda_action",
-                "scope": "score_area",
-                "timing": "scored_activated"
-              },
-              {
-                "kind": "zone_shuffle",
-                "scope": "corp",
-                "timing": "scored_activated"
-              },
-              {
-                "kind": "draw",
-                "scope": "corp",
-                "timing": "scored_activated",
-                "resource": "cards"
-              },
-              {
-                "kind": "draw",
-                "scope": "corp",
-                "timing": "scored_activated",
-                "resource": "cards"
-              },
-              {
-                "kind": "shuffle_draw",
-                "scope": "corp",
-                "timing": "scored_activated",
-                "resource": "cards"
-              },
-              {
-                "kind": "zone_shuffle",
-                "scope": "rnd",
-                "timing": "scored_activated",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_scored_agenda"
-            ],
-            "cardType": "agenda",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
-          "cardId": "onr_v1_188_ai-chief-financial-officer",
-          "side": "corp",
-          "cardType": "agenda",
-          "value": "central_stabilize",
-          "evidence": {
-            "lineSupport": [
-              "economy_rez_reserve",
-              "central_stabilize"
-            ],
-            "effects": [
-              {
-                "kind": "scored_agenda_action",
-                "scope": "score_area",
-                "timing": "scored_activated"
-              },
-              {
-                "kind": "zone_shuffle",
-                "scope": "corp",
-                "timing": "scored_activated"
-              },
-              {
-                "kind": "draw",
-                "scope": "corp",
-                "timing": "scored_activated",
-                "resource": "cards"
-              },
-              {
-                "kind": "draw",
-                "scope": "corp",
-                "timing": "scored_activated",
-                "resource": "cards"
-              },
-              {
-                "kind": "shuffle_draw",
-                "scope": "corp",
-                "timing": "scored_activated",
-                "resource": "cards"
-              },
-              {
-                "kind": "zone_shuffle",
-                "scope": "rnd",
-                "timing": "scored_activated",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_scored_agenda"
-            ],
-            "cardType": "agenda",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
           "cardId": "onr_v1_191_black-ice-quality-assurance",
           "side": "corp",
           "cardType": "agenda",
-          "value": "ice_tax_glacier",
+          "value": "corp.remote_scoring",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier",
-              "remote_scoring_build"
+              "corp.remote_scoring",
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -4053,60 +2069,60 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_191_black-ice-quality-assurance",
-          "side": "corp",
-          "cardType": "agenda",
-          "value": "remote_scoring_build",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "remote_scoring_build"
-            ],
-            "effects": [
-              {
-                "kind": "remote_protection",
-                "scope": "ice",
-                "timing": "persistent",
-                "resource": "strength"
-              },
-              {
-                "kind": "global_modifier",
-                "scope": "ice",
-                "timing": "persistent",
-                "resource": "strength"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "ice",
-                "timing": "persistent",
-                "resource": "strength"
-              }
-            ],
-            "conditions": [],
-            "cardType": "agenda",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_191_black-ice-quality-assurance",
+          "side": "corp",
+          "cardType": "agenda",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.remote_scoring",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "scope": "ice",
+                "timing": "persistent",
+                "resource": "strength"
+              },
+              {
+                "kind": "global_modifier",
+                "scope": "ice",
+                "timing": "persistent",
+                "resource": "strength"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "ice",
+                "timing": "persistent",
+                "resource": "strength"
+              }
+            ],
+            "conditions": [],
+            "cardType": "agenda",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-05-25",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_192_corporate-boon",
@@ -4162,11 +2178,10 @@
           "cardId": "onr_v1_193_corporate-coup",
           "side": "corp",
           "cardType": "agenda",
-          "value": "economy_rez_reserve",
+          "value": "corp.economy_rez_reserve",
           "evidence": {
             "lineSupport": [
-              "economy_rez_reserve",
-              "score_closeout"
+              "corp.economy_rez_reserve"
             ],
             "effects": [
               {
@@ -4202,71 +2217,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.economy_rez_reserve"
           ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_193_corporate-coup",
-          "side": "corp",
-          "cardType": "agenda",
-          "value": "score_closeout",
-          "evidence": {
-            "lineSupport": [
-              "economy_rez_reserve",
-              "score_closeout"
-            ],
-            "effects": [
-              {
-                "kind": "scored_agenda_action",
-                "scope": "score_area",
-                "timing": "scored_activated"
-              },
-              {
-                "kind": "counter_economy",
-                "scope": "corp",
-                "timing": "scored_activated",
-                "resource": "credits"
-              },
-              {
-                "kind": "counter_economy",
-                "scope": "corp",
-                "timing": "scored_activated",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [
-              "requires_scored_agenda"
-            ],
-            "cardType": "agenda",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.rush_score"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_196_corporate-war",
           "side": "corp",
           "cardType": "agenda",
-          "value": "score_closeout",
+          "value": "corp.economy_rez_reserve",
           "evidence": {
             "lineSupport": [
-              "score_closeout",
-              "economy_rez_reserve"
+              "corp.economy_rez_reserve"
             ],
             "effects": [
               {
@@ -4305,135 +2269,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "corp.rush_score"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
-          "cardId": "onr_v1_196_corporate-war",
-          "side": "corp",
-          "cardType": "agenda",
-          "value": "economy_rez_reserve",
-          "evidence": {
-            "lineSupport": [
-              "score_closeout",
-              "economy_rez_reserve"
-            ],
-            "effects": [
-              {
-                "kind": "economy",
-                "scope": "corp",
-                "timing": "when_scored",
-                "resource": "credits"
-              },
-              {
-                "kind": "economy",
-                "scope": "corp",
-                "timing": "when_scored",
-                "resource": "credits"
-              },
-              {
-                "kind": "counter_economy",
-                "scope": "corp",
-                "timing": "when_scored",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [
-              "requires_corp_credits_threshold",
-              "requires_score_window",
-              "requires_scored_agenda"
-            ],
-            "cardType": "agenda",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "deferred_requires_human_review",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.economy_rez_reserve"
           ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
-          "cardId": "onr_v1_199_employee-empowerment",
-          "side": "corp",
-          "cardType": "agenda",
-          "value": "economy_rez_reserve",
-          "evidence": {
-            "lineSupport": [
-              "economy_rez_reserve"
-            ],
-            "effects": [
-              {
-                "kind": "draw",
-                "scope": "corp",
-                "timing": "start_of_turn",
-                "resource": "cards"
-              },
-              {
-                "kind": "scored_agenda_action",
-                "scope": "score_area",
-                "timing": "scored_activated"
-              },
-              {
-                "kind": "draw",
-                "scope": "corp",
-                "timing": "scored_activated",
-                "resource": "cards"
-              },
-              {
-                "kind": "draw",
-                "scope": "corp",
-                "timing": "start_of_turn",
-                "resource": "cards"
-              },
-              {
-                "kind": "draw",
-                "scope": "corp",
-                "timing": "scored_activated",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_scored_agenda"
-            ],
-            "cardType": "agenda",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_203_hostile-takeover",
           "side": "corp",
           "cardType": "agenda",
-          "value": "score_closeout",
+          "value": "corp.economy_rez_reserve",
           "evidence": {
             "lineSupport": [
-              "score_closeout",
-              "economy_rez_reserve"
+              "corp.economy_rez_reserve"
             ],
             "effects": [
               {
@@ -4465,66 +2314,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.rush_score"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_203_hostile-takeover",
-          "side": "corp",
-          "cardType": "agenda",
-          "value": "economy_rez_reserve",
-          "evidence": {
-            "lineSupport": [
-              "score_closeout",
-              "economy_rez_reserve"
-            ],
-            "effects": [
-              {
-                "kind": "economy",
-                "scope": "corp",
-                "timing": "when_scored",
-                "resource": "credits"
-              },
-              {
-                "kind": "economy",
-                "scope": "corp",
-                "timing": "when_scored",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [
-              "requires_score_window",
-              "requires_scored_agenda"
-            ],
-            "cardType": "agenda",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.economy_rez_reserve"
           ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_206_marine-arcology",
           "side": "corp",
           "cardType": "agenda",
-          "value": "economy_rez_reserve",
+          "value": "corp.economy_rez_reserve",
           "evidence": {
             "lineSupport": [
-              "economy_rez_reserve"
+              "corp.economy_rez_reserve"
             ],
             "effects": [
               {
@@ -4560,11 +2363,11 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.economy_rez_reserve"
           ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_207_netwatch-operations-office",
@@ -4762,11 +2565,10 @@
           "cardId": "onr_v1_209_political-coup",
           "side": "corp",
           "cardType": "agenda",
-          "value": "economy_rez_reserve",
+          "value": "corp.economy_rez_reserve",
           "evidence": {
             "lineSupport": [
-              "economy_rez_reserve",
-              "score_closeout"
+              "corp.economy_rez_reserve"
             ],
             "effects": [
               {
@@ -4808,77 +2610,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.economy_rez_reserve"
           ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_209_political-coup",
-          "side": "corp",
-          "cardType": "agenda",
-          "value": "score_closeout",
-          "evidence": {
-            "lineSupport": [
-              "economy_rez_reserve",
-              "score_closeout"
-            ],
-            "effects": [
-              {
-                "kind": "scored_agenda_action",
-                "scope": "score_area",
-                "timing": "scored_activated"
-              },
-              {
-                "kind": "counter_economy",
-                "scope": "corp",
-                "timing": "scored_activated",
-                "resource": "credits"
-              },
-              {
-                "kind": "finite_economy_pool",
-                "scope": "score_area",
-                "timing": "when_scored",
-                "resource": "credits"
-              },
-              {
-                "kind": "counter_economy",
-                "scope": "corp",
-                "timing": "scored_activated",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [
-              "requires_scored_agenda"
-            ],
-            "cardType": "agenda",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.rush_score"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_210_political-overthrow",
           "side": "corp",
           "cardType": "agenda",
-          "value": "economy_rez_reserve",
+          "value": "corp.economy_rez_reserve",
           "evidence": {
             "lineSupport": [
-              "economy_rez_reserve",
-              "score_closeout"
+              "corp.economy_rez_reserve"
             ],
             "effects": [
               {
@@ -4915,73 +2660,20 @@
               "focusedDecisionTest": "packages/ai/src/index.test.ts::uses Political Overthrow scored-agenda economy before basic credit"
             }
           },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.economy_rez_reserve"
           ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_210_political-overthrow",
-          "side": "corp",
-          "cardType": "agenda",
-          "value": "score_closeout",
-          "evidence": {
-            "lineSupport": [
-              "economy_rez_reserve",
-              "score_closeout"
-            ],
-            "effects": [
-              {
-                "kind": "scored_agenda_action",
-                "scope": "score_area",
-                "timing": "scored_activated"
-              },
-              {
-                "kind": "economy",
-                "scope": "corp",
-                "timing": "scored_activated",
-                "resource": "credits"
-              },
-              {
-                "kind": "economy",
-                "scope": "corp",
-                "timing": "scored_activated",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [
-              "requires_scored_agenda"
-            ],
-            "cardType": "agenda",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex",
-              "focusedDecisionTest": "packages/ai/src/index.test.ts::uses Political Overthrow scored-agenda economy before basic credit"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.rush_score"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_212_priority-requisition",
           "side": "corp",
           "cardType": "agenda",
-          "value": "remote_scoring_build",
+          "value": "corp.economy_rez_reserve",
           "evidence": {
             "lineSupport": [
-              "remote_scoring_build",
-              "ice_tax_glacier",
-              "score_closeout"
+              "corp.economy_rez_reserve"
             ],
             "effects": [
               {
@@ -5023,125 +2715,11 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.remote_scoring"
+            "corp.economy_rez_reserve"
           ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
-        },
-        {
-          "cardId": "onr_v1_212_priority-requisition",
-          "side": "corp",
-          "cardType": "agenda",
-          "value": "ice_tax_glacier",
-          "evidence": {
-            "lineSupport": [
-              "remote_scoring_build",
-              "ice_tax_glacier",
-              "score_closeout"
-            ],
-            "effects": [
-              {
-                "kind": "rez_discount",
-                "scope": "ice",
-                "timing": "when_scored",
-                "resource": "credits"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "server",
-                "timing": "when_scored"
-              },
-              {
-                "kind": "rez_discount",
-                "scope": "ice",
-                "timing": "when_scored",
-                "resource": "credits"
-              },
-              {
-                "kind": "rez",
-                "scope": "ice",
-                "timing": "when_scored"
-              }
-            ],
-            "conditions": [
-              "requires_score_window",
-              "requires_scored_agenda"
-            ],
-            "cardType": "agenda",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_212_priority-requisition",
-          "side": "corp",
-          "cardType": "agenda",
-          "value": "score_closeout",
-          "evidence": {
-            "lineSupport": [
-              "remote_scoring_build",
-              "ice_tax_glacier",
-              "score_closeout"
-            ],
-            "effects": [
-              {
-                "kind": "rez_discount",
-                "scope": "ice",
-                "timing": "when_scored",
-                "resource": "credits"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "server",
-                "timing": "when_scored"
-              },
-              {
-                "kind": "rez_discount",
-                "scope": "ice",
-                "timing": "when_scored",
-                "resource": "credits"
-              },
-              {
-                "kind": "rez",
-                "scope": "ice",
-                "timing": "when_scored"
-              }
-            ],
-            "conditions": [
-              "requires_score_window",
-              "requires_scored_agenda"
-            ],
-            "cardType": "agenda",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.rush_score"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_213_private-cybernet-police",
@@ -5377,11 +2955,11 @@
           "cardId": "onr_v1_219_superior-net-barriers",
           "side": "corp",
           "cardType": "agenda",
-          "value": "ice_tax_glacier",
+          "value": "corp.remote_scoring",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier",
-              "remote_scoring_build"
+              "corp.remote_scoring",
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -5432,21 +3010,21 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "deferred_requires_human_review",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.ice_tax_glacier"
+            "corp.remote_scoring"
           ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_219_superior-net-barriers",
           "side": "corp",
           "cardType": "agenda",
-          "value": "remote_scoring_build",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier",
-              "remote_scoring_build"
+              "corp.remote_scoring",
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -5497,21 +3075,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "deferred_requires_human_review",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.remote_scoring"
+            "corp.ice_tax_glacier"
           ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_222_ball-and-chain",
           "side": "corp",
           "cardType": "ice",
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize"
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -5555,79 +3132,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_222_ball-and-chain",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "central_stabilize",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize"
-            ],
-            "effects": [
-              {
-                "kind": "future_run_effect",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "run_tax",
-                "scope": "run_path",
-                "timing": "encounter",
-                "resource": "credits"
-              },
-              {
-                "kind": "run_tax",
-                "scope": "run_path",
-                "timing": "encounter",
-                "resource": "credits"
-              },
-              {
-                "kind": "future_encounter_effect",
-                "scope": "run_path",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_during_run",
-              "requires_encounter",
-              "requires_remaining_ice",
-              "requires_unbroken_subroutine"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_223_banpei",
           "side": "corp",
           "cardType": "ice",
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize"
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -5662,70 +3180,21 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_223_banpei",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "central_stabilize",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize"
-            ],
-            "effects": [
-              {
-                "kind": "program_trash",
-                "scope": "runner",
-                "timing": "encounter"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "etr",
-                "scope": "run_path",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_encounter",
-              "requires_unbroken_subroutine"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_224_bolter-cluster",
           "side": "corp",
           "cardType": "ice",
-          "value": "ice_tax_glacier",
+          "value": "corp.damage_kill",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize"
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -5759,21 +3228,21 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.ice_tax_glacier"
+            "corp.damage_kill"
           ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_224_bolter-cluster",
           "side": "corp",
           "cardType": "ice",
-          "value": "central_stabilize",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize"
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -5807,20 +3276,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.central_stabilize"
+            "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_225_canis-major",
           "side": "corp",
           "cardType": "ice",
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier"
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -5864,20 +3333,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_226_canis-minor",
           "side": "corp",
           "cardType": "ice",
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier"
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -5915,11 +3384,11 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_227_cerberus",
@@ -5929,8 +3398,8 @@
           "evidence": {
             "lineSupport": [
               "corp.tag_trace_punish",
-              "ice_tax_glacier",
-              "central_stabilize"
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -5998,12 +3467,12 @@
           "cardId": "onr_v1_227_cerberus",
           "side": "corp",
           "cardType": "ice",
-          "value": "ice_tax_glacier",
+          "value": "corp.damage_kill",
           "evidence": {
             "lineSupport": [
               "corp.tag_trace_punish",
-              "ice_tax_glacier",
-              "central_stabilize"
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -6061,22 +3530,22 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.ice_tax_glacier"
+            "corp.damage_kill"
           ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_227_cerberus",
           "side": "corp",
           "cardType": "ice",
-          "value": "central_stabilize",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
               "corp.tag_trace_punish",
-              "ice_tax_glacier",
-              "central_stabilize"
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -6134,11 +3603,11 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.central_stabilize"
+            "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_228_cinderella",
@@ -6148,8 +3617,8 @@
           "evidence": {
             "lineSupport": [
               "corp.tag_trace_punish",
-              "ice_tax_glacier",
-              "central_stabilize"
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -6216,12 +3685,12 @@
           "cardId": "onr_v1_228_cinderella",
           "side": "corp",
           "cardType": "ice",
-          "value": "ice_tax_glacier",
+          "value": "corp.damage_kill",
           "evidence": {
             "lineSupport": [
               "corp.tag_trace_punish",
-              "ice_tax_glacier",
-              "central_stabilize"
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -6270,251 +3739,6 @@
             "side": "corp",
             "quality": {
               "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_228_cinderella",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "central_stabilize",
-          "evidence": {
-            "lineSupport": [
-              "corp.tag_trace_punish",
-              "ice_tax_glacier",
-              "central_stabilize"
-            ],
-            "effects": [
-              {
-                "kind": "trace",
-                "scope": "runner",
-                "timing": "encounter"
-              },
-              {
-                "kind": "hardware_trash",
-                "scope": "runner",
-                "timing": "trace_success"
-              },
-              {
-                "kind": "damage",
-                "scope": "runner",
-                "timing": "trace_success",
-                "resource": "damage"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "run_path",
-                "timing": "trace_success"
-              },
-              {
-                "kind": "etr",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "trace",
-                "scope": "corp",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_trace_success",
-              "requires_encounter",
-              "requires_unbroken_subroutine"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_231_cortical-scrub",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "ice_tax_glacier",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize"
-            ],
-            "effects": [
-              {
-                "kind": "program_trash",
-                "scope": "runner",
-                "timing": "encounter"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "damage",
-                "scope": "runner",
-                "timing": "encounter",
-                "resource": "damage"
-              },
-              {
-                "kind": "etr",
-                "scope": "run_path",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_encounter",
-              "requires_unbroken_subroutine"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
-          "cardId": "onr_v1_231_cortical-scrub",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "central_stabilize",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize"
-            ],
-            "effects": [
-              {
-                "kind": "program_trash",
-                "scope": "runner",
-                "timing": "encounter"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "damage",
-                "scope": "runner",
-                "timing": "encounter",
-                "resource": "damage"
-              },
-              {
-                "kind": "etr",
-                "scope": "run_path",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_encounter",
-              "requires_unbroken_subroutine"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "deferred_requires_human_review",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Card is already flagged for human review; do not batch-migrate."
-        },
-        {
-          "cardId": "onr_v1_236_data-raven",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "corp.tag_trace_punish",
-          "evidence": {
-            "lineSupport": [
-              "corp.tag_trace_punish",
-              "central_stabilize"
-            ],
-            "effects": [
-              {
-                "kind": "trace",
-                "scope": "runner",
-                "timing": "encounter"
-              },
-              {
-                "kind": "tag",
-                "scope": "runner",
-                "timing": "trace_success",
-                "resource": "tags"
-              },
-              {
-                "kind": "tag_source",
-                "scope": "runner",
-                "timing": "trace_success",
-                "resource": "tags"
-              },
-              {
-                "kind": "persistent_counter_effect",
-                "scope": "runner",
-                "timing": "persistent",
-                "resource": "counters"
-              },
-              {
-                "kind": "trace",
-                "scope": "corp",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_trace_success",
-              "requires_encounter",
-              "requires_unbroken_subroutine"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": false,
               "hintReviewed": true,
               "strategyCovered": false,
               "confidence": "high",
@@ -6525,7 +3749,79 @@
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.tag_trace_punish"
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_228_cinderella",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish",
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "trace",
+                "scope": "runner",
+                "timing": "encounter"
+              },
+              {
+                "kind": "hardware_trash",
+                "scope": "runner",
+                "timing": "trace_success"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "trace_success",
+                "resource": "damage"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "trace_success"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "trace",
+                "scope": "corp",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_trace_success",
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "high",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-05-25",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -6533,11 +3829,10 @@
           "cardId": "onr_v1_236_data-raven",
           "side": "corp",
           "cardType": "ice",
-          "value": "central_stabilize",
+          "value": "corp.tag_trace_punish",
           "evidence": {
             "lineSupport": [
-              "corp.tag_trace_punish",
-              "central_stabilize"
+              "corp.tag_trace_punish"
             ],
             "effects": [
               {
@@ -6578,153 +3873,6 @@
             "side": "corp",
             "quality": {
               "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_237_data-wall",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "central_stabilize",
-          "evidence": {
-            "lineSupport": [
-              "central_stabilize",
-              "remote_scoring_build"
-            ],
-            "effects": [
-              {
-                "kind": "remote_protection",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "etr",
-                "scope": "run_path",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_encounter",
-              "requires_unbroken_subroutine"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex",
-              "focusedDecisionTest": "packages/ai/src/index.test.ts::keeps the Data Wall versus Japanese Water Torture repro generic through visible break cost"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_237_data-wall",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "remote_scoring_build",
-          "evidence": {
-            "lineSupport": [
-              "central_stabilize",
-              "remote_scoring_build"
-            ],
-            "effects": [
-              {
-                "kind": "remote_protection",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "etr",
-                "scope": "run_path",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_encounter",
-              "requires_unbroken_subroutine"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex",
-              "focusedDecisionTest": "packages/ai/src/index.test.ts::keeps the Data Wall versus Japanese Water Torture repro generic through visible break cost"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.remote_scoring"
-          ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
-        },
-        {
-          "cardId": "onr_v1_243_fetch-4-0-1",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "corp.tag_trace_punish",
-          "evidence": {
-            "lineSupport": [
-              "corp.tag_trace_punish",
-              "central_stabilize"
-            ],
-            "effects": [
-              {
-                "kind": "trace",
-                "scope": "runner",
-                "timing": "encounter"
-              },
-              {
-                "kind": "tag",
-                "scope": "runner",
-                "timing": "trace_success",
-                "resource": "tags"
-              },
-              {
-                "kind": "tag_source",
-                "scope": "runner",
-                "timing": "trace_success",
-                "resource": "tags"
-              },
-              {
-                "kind": "trace",
-                "scope": "corp",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_trace_success",
-              "requires_encounter",
-              "requires_unbroken_subroutine"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
               "hintReviewed": true,
               "strategyCovered": false,
               "confidence": "high",
@@ -6743,68 +3891,10 @@
           "cardId": "onr_v1_243_fetch-4-0-1",
           "side": "corp",
           "cardType": "ice",
-          "value": "central_stabilize",
-          "evidence": {
-            "lineSupport": [
-              "corp.tag_trace_punish",
-              "central_stabilize"
-            ],
-            "effects": [
-              {
-                "kind": "trace",
-                "scope": "runner",
-                "timing": "encounter"
-              },
-              {
-                "kind": "tag",
-                "scope": "runner",
-                "timing": "trace_success",
-                "resource": "tags"
-              },
-              {
-                "kind": "tag_source",
-                "scope": "runner",
-                "timing": "trace_success",
-                "resource": "tags"
-              },
-              {
-                "kind": "trace",
-                "scope": "corp",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_trace_success",
-              "requires_encounter",
-              "requires_unbroken_subroutine"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_249_hunter",
-          "side": "corp",
-          "cardType": "ice",
           "value": "corp.tag_trace_punish",
           "evidence": {
             "lineSupport": [
-              "corp.tag_trace_punish",
-              "central_stabilize"
+              "corp.tag_trace_punish"
             ],
             "effects": [
               {
@@ -6857,11 +3947,10 @@
           "cardId": "onr_v1_249_hunter",
           "side": "corp",
           "cardType": "ice",
-          "value": "central_stabilize",
+          "value": "corp.tag_trace_punish",
           "evidence": {
             "lineSupport": [
-              "corp.tag_trace_punish",
-              "central_stabilize"
+              "corp.tag_trace_punish"
             ],
             "effects": [
               {
@@ -6904,21 +3993,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "corp.central_stabilize"
+            "corp.tag_trace_punish"
           ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_258_neural-blade",
           "side": "corp",
           "cardType": "ice",
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize"
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -6952,69 +4040,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_258_neural-blade",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "central_stabilize",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize"
-            ],
-            "effects": [
-              {
-                "kind": "damage",
-                "scope": "runner",
-                "timing": "encounter",
-                "resource": "damage"
-              },
-              {
-                "kind": "future_encounter_effect",
-                "scope": "run_path",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_during_run",
-              "requires_encounter",
-              "requires_later_encounter",
-              "requires_remaining_ice",
-              "requires_unbroken_subroutine"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_267_sentinels-prime",
           "side": "corp",
           "cardType": "ice",
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize"
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -7049,70 +4088,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_267_sentinels-prime",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "central_stabilize",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize"
-            ],
-            "effects": [
-              {
-                "kind": "program_trash",
-                "scope": "runner",
-                "timing": "encounter"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "etr",
-                "scope": "run_path",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_encounter",
-              "requires_unbroken_subroutine"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_268_shock-r",
           "side": "corp",
           "cardType": "ice",
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize"
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -7145,69 +4134,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_268_shock-r",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "central_stabilize",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize"
-            ],
-            "effects": [
-              {
-                "kind": "future_encounter_effect",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "no_jack_out",
-                "scope": "runner",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_during_run",
-              "requires_encounter",
-              "requires_later_encounter",
-              "requires_remaining_ice",
-              "requires_unbroken_subroutine"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_274_tutor",
           "side": "corp",
           "cardType": "ice",
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize",
-              "remote_scoring_build"
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -7236,110 +4176,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_274_tutor",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "central_stabilize",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize",
-              "remote_scoring_build"
-            ],
-            "effects": [
-              {
-                "kind": "future_run_effect",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "run_path",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_during_run"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_274_tutor",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "remote_scoring_build",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize",
-              "remote_scoring_build"
-            ],
-            "effects": [
-              {
-                "kind": "future_run_effect",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "run_path",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_during_run"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.remote_scoring"
-          ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_276_viral-15",
           "side": "corp",
           "cardType": "ice",
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize",
-              "remote_scoring_build"
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -7385,144 +4235,20 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_276_viral-15",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "central_stabilize",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize",
-              "remote_scoring_build"
-            ],
-            "effects": [
-              {
-                "kind": "future_run_effect",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "run_tax",
-                "scope": "run_path",
-                "timing": "encounter",
-                "resource": "credits"
-              },
-              {
-                "kind": "program_trash",
-                "scope": "runner",
-                "timing": "encounter"
-              },
-              {
-                "kind": "run_tax",
-                "scope": "run_path",
-                "timing": "encounter",
-                "resource": "credits"
-              },
-              {
-                "kind": "program_trash",
-                "scope": "runner",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_during_run"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_276_viral-15",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "remote_scoring_build",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize",
-              "remote_scoring_build"
-            ],
-            "effects": [
-              {
-                "kind": "future_run_effect",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "run_tax",
-                "scope": "run_path",
-                "timing": "encounter",
-                "resource": "credits"
-              },
-              {
-                "kind": "program_trash",
-                "scope": "runner",
-                "timing": "encounter"
-              },
-              {
-                "kind": "run_tax",
-                "scope": "run_path",
-                "timing": "encounter",
-                "resource": "credits"
-              },
-              {
-                "kind": "program_trash",
-                "scope": "runner",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_during_run"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.remote_scoring"
-          ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_277_virizz",
           "side": "corp",
           "cardType": "ice",
-          "value": "ice_tax_glacier",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize",
-              "remote_scoring_build"
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -7558,124 +4284,21 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_277_virizz",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "central_stabilize",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize",
-              "remote_scoring_build"
-            ],
-            "effects": [
-              {
-                "kind": "future_run_effect",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "run_tax",
-                "scope": "run_path",
-                "timing": "encounter",
-                "resource": "credits"
-              },
-              {
-                "kind": "run_tax",
-                "scope": "run_path",
-                "timing": "encounter",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [
-              "requires_during_run"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_277_virizz",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "remote_scoring_build",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize",
-              "remote_scoring_build"
-            ],
-            "effects": [
-              {
-                "kind": "future_run_effect",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "run_tax",
-                "scope": "run_path",
-                "timing": "encounter",
-                "resource": "credits"
-              },
-              {
-                "kind": "run_tax",
-                "scope": "run_path",
-                "timing": "encounter",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [
-              "requires_during_run"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.remote_scoring"
-          ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_278_wall-of-ice",
           "side": "corp",
           "cardType": "ice",
-          "value": "ice_tax_glacier",
+          "value": "corp.damage_kill",
           "evidence": {
             "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize",
-              "remote_scoring_build"
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
             ],
             "effects": [
               {
@@ -7717,297 +4340,67 @@
               "reviewedBy": "codex"
             }
           },
-          "triageCategory": "safe_strategy_anchor_alias",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_278_wall-of-ice",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "high",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-05-25",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
           ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_278_wall-of-ice",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "central_stabilize",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize",
-              "remote_scoring_build"
-            ],
-            "effects": [
-              {
-                "kind": "damage",
-                "scope": "runner",
-                "timing": "encounter",
-                "resource": "damage"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "damage",
-                "scope": "runner",
-                "timing": "encounter",
-                "resource": "damage"
-              },
-              {
-                "kind": "etr",
-                "scope": "run_path",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_encounter",
-              "requires_unbroken_subroutine"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_278_wall-of-ice",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "remote_scoring_build",
-          "evidence": {
-            "lineSupport": [
-              "ice_tax_glacier",
-              "central_stabilize",
-              "remote_scoring_build"
-            ],
-            "effects": [
-              {
-                "kind": "damage",
-                "scope": "runner",
-                "timing": "encounter",
-                "resource": "damage"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "damage",
-                "scope": "runner",
-                "timing": "encounter",
-                "resource": "damage"
-              },
-              {
-                "kind": "etr",
-                "scope": "run_path",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_encounter",
-              "requires_unbroken_subroutine"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.remote_scoring"
-          ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
-        },
-        {
-          "cardId": "onr_v1_279_wall-of-static",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "central_stabilize",
-          "evidence": {
-            "lineSupport": [
-              "central_stabilize",
-              "remote_scoring_build"
-            ],
-            "effects": [
-              {
-                "kind": "remote_protection",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "etr",
-                "scope": "run_path",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_encounter",
-              "requires_unbroken_subroutine"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
-        },
-        {
-          "cardId": "onr_v1_279_wall-of-static",
-          "side": "corp",
-          "cardType": "ice",
-          "value": "remote_scoring_build",
-          "evidence": {
-            "lineSupport": [
-              "central_stabilize",
-              "remote_scoring_build"
-            ],
-            "effects": [
-              {
-                "kind": "remote_protection",
-                "scope": "run_path",
-                "timing": "encounter"
-              },
-              {
-                "kind": "etr",
-                "scope": "run_path",
-                "timing": "encounter"
-              }
-            ],
-            "conditions": [
-              "requires_encounter",
-              "requires_unbroken_subroutine"
-            ],
-            "cardType": "ice",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.remote_scoring"
-          ],
-          "rationale": "Build remote scoring normalizes to the remote scoring goal."
-        },
-        {
-          "cardId": "onr_v1_281_accounts-receivable",
-          "side": "corp",
-          "cardType": "operation",
-          "value": "economy_rez_reserve",
-          "evidence": {
-            "lineSupport": [
-              "economy_rez_reserve"
-            ],
-            "effects": [
-              {
-                "kind": "economy",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "economy",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [],
-            "cardType": "operation",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_282_annual-reviews",
-          "side": "corp",
-          "cardType": "operation",
-          "value": "economy_rez_reserve",
-          "evidence": {
-            "lineSupport": [
-              "economy_rez_reserve"
-            ],
-            "effects": [
-              {
-                "kind": "draw",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "cards"
-              },
-              {
-                "kind": "draw",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [],
-            "cardType": "operation",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
           "cardId": "onr_v1_283_audit-of-call-records",
@@ -8270,102 +4663,6 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "cardId": "onr_v1_288_day-shift",
-          "side": "corp",
-          "cardType": "operation",
-          "value": "economy_rez_reserve",
-          "evidence": {
-            "lineSupport": [
-              "economy_rez_reserve"
-            ],
-            "effects": [
-              {
-                "kind": "draw",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "cards"
-              },
-              {
-                "kind": "economy",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "economy",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "draw",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [],
-            "cardType": "operation",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_290_efficiency-experts",
-          "side": "corp",
-          "cardType": "operation",
-          "value": "economy_rez_reserve",
-          "evidence": {
-            "lineSupport": [
-              "economy_rez_reserve"
-            ],
-            "effects": [
-              {
-                "kind": "economy",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "economy",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [],
-            "cardType": "operation",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
           "cardId": "onr_v1_292_management-shake-up",
           "side": "corp",
           "cardType": "operation",
@@ -8404,8 +4701,7 @@
           "value": "corp.tag_trace_punish",
           "evidence": {
             "lineSupport": [
-              "corp.tag_trace_punish",
-              "economy_rez_reserve"
+              "corp.tag_trace_punish"
             ],
             "effects": [
               {
@@ -8453,217 +4749,6 @@
             "corp.tag_trace_punish"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_v1_293_netwatch-credit-voucher",
-          "side": "corp",
-          "cardType": "operation",
-          "value": "economy_rez_reserve",
-          "evidence": {
-            "lineSupport": [
-              "corp.tag_trace_punish",
-              "economy_rez_reserve"
-            ],
-            "effects": [
-              {
-                "kind": "tag_source",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "tags"
-              },
-              {
-                "kind": "economy",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "economy",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "tag_source",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "tags"
-              }
-            ],
-            "conditions": [
-              "requires_runner_tagged"
-            ],
-            "cardType": "operation",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_295_night-shift",
-          "side": "corp",
-          "cardType": "operation",
-          "value": "economy_rez_reserve",
-          "evidence": {
-            "lineSupport": [
-              "economy_rez_reserve"
-            ],
-            "effects": [
-              {
-                "kind": "economy",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "credits"
-              },
-              {
-                "kind": "draw",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "cards"
-              },
-              {
-                "kind": "draw",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "cards"
-              },
-              {
-                "kind": "economy",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "credits"
-              }
-            ],
-            "conditions": [],
-            "cardType": "operation",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_296_off-site-backups",
-          "side": "corp",
-          "cardType": "operation",
-          "value": "economy_rez_reserve",
-          "evidence": {
-            "lineSupport": [
-              "economy_rez_reserve",
-              "central_stabilize"
-            ],
-            "effects": [
-              {
-                "kind": "zone_shuffle",
-                "scope": "corp",
-                "timing": "action"
-              },
-              {
-                "kind": "draw",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "cards"
-              },
-              {
-                "kind": "card_recovery",
-                "scope": "archives",
-                "timing": "action",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_archives_card"
-            ],
-            "cardType": "operation",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "structure_or_support_goal_requires_card_review",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ],
-          "rationale": "Broad structural/support lineSupport value; keep legacy until card-level review."
-        },
-        {
-          "cardId": "onr_v1_296_off-site-backups",
-          "side": "corp",
-          "cardType": "operation",
-          "value": "central_stabilize",
-          "evidence": {
-            "lineSupport": [
-              "economy_rez_reserve",
-              "central_stabilize"
-            ],
-            "effects": [
-              {
-                "kind": "zone_shuffle",
-                "scope": "corp",
-                "timing": "action"
-              },
-              {
-                "kind": "draw",
-                "scope": "corp",
-                "timing": "action",
-                "resource": "cards"
-              },
-              {
-                "kind": "card_recovery",
-                "scope": "archives",
-                "timing": "action",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_archives_card"
-            ],
-            "cardType": "operation",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "safe_strategy_anchor_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Same semantic goal with side prefix added."
         },
         {
           "cardId": "onr_v1_299_power-grid-overload",
@@ -15649,102 +11734,6 @@
   },
   "hardErrors": [],
   "warnings": [
-    {
-      "kind": "legacy_lineSupport_values_warn_only",
-      "count": 11,
-      "occurrences": 110,
-      "message": "Existing lineSupport values are known legacy aliases and remain warn-only when allowlisted and side-correct.",
-      "items": [
-        {
-          "value": "rig_first",
-          "count": 26,
-          "category": "alias_to_strategy_goal",
-          "mapsTo": [
-            "runner.rig_first"
-          ]
-        },
-        {
-          "value": "central_stabilize",
-          "count": 20,
-          "category": "exact_strategy_goal",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ]
-        },
-        {
-          "value": "ice_tax_glacier",
-          "count": 18,
-          "category": "exact_strategy_goal",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ]
-        },
-        {
-          "value": "economy_rez_reserve",
-          "count": 15,
-          "category": "alias_to_strategy_goal",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
-          ]
-        },
-        {
-          "value": "remote_scoring_build",
-          "count": 9,
-          "category": "alias_to_strategy_goal",
-          "mapsTo": [
-            "corp.remote_scoring"
-          ]
-        },
-        {
-          "value": "economy_first",
-          "count": 7,
-          "category": "alias_to_strategy_goal",
-          "mapsTo": [
-            "runner.economy_first"
-          ]
-        },
-        {
-          "value": "score_closeout",
-          "count": 6,
-          "category": "alias_to_strategy_goal",
-          "mapsTo": [
-            "corp.rush_score"
-          ]
-        },
-        {
-          "value": "breaker_search_first",
-          "count": 3,
-          "category": "alias_to_strategy_goal",
-          "mapsTo": [
-            "runner.breaker_search"
-          ]
-        },
-        {
-          "value": "remote_contest",
-          "count": 3,
-          "category": "exact_strategy_goal",
-          "mapsTo": [
-            "runner.remote_contest"
-          ]
-        },
-        {
-          "value": "closeout_pressure",
-          "count": 2,
-          "category": "alias_to_strategy_goal",
-          "mapsTo": [
-            "runner.interface_closeout"
-          ]
-        },
-        {
-          "value": "early_hq_pressure",
-          "count": 1,
-          "category": "alias_to_strategy_goal",
-          "mapsTo": [
-            "runner.hq_pressure"
-          ]
-        }
-      ]
-    },
     {
       "kind": "function_signal_only_role_or_planRole_values_warn_only",
       "count": 29,

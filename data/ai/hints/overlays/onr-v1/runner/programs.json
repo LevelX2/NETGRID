@@ -26,7 +26,6 @@
     {
       "cardId": "onr_v1_037_japanese-water-torture",
       "overlay": {
-        "lineSupport": ["rig_first"],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,

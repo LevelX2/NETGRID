@@ -50,14 +50,12 @@
       "sideMatches": true,
       "cardTypeMatches": true,
       "overlayFields": [
-        "lineSupport",
         "manualNotes",
         "quality"
       ],
       "generatedFactsOverlap": [],
       "mechanicalDuplicationWarnings": [],
       "strategicOverlayFields": [
-        "lineSupport",
         "manualNotes",
         "quality"
       ],

@@ -167,9 +167,6 @@
           "random_failure"
         ]
       },
-      "lineSupport": [
-        "rig_first"
-      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -362,10 +359,7 @@
           "program_trash_risk",
           "random_failure"
         ]
-      },
-      "lineSupport": [
-        "rig_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_006_black-dahlia",
@@ -427,10 +421,7 @@
           "sentry"
         ],
         "pumpCost": 2
-      },
-      "lineSupport": [
-        "rig_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_007_blink",
@@ -499,10 +490,7 @@
           "once_per_subroutine",
           "random_failure"
         ]
-      },
-      "lineSupport": [
-        "rig_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_008_boardwalk",
@@ -678,11 +666,7 @@
         "memory": 1,
         "reserveRisk": "low",
         "opportunityCost": "low"
-      },
-      "lineSupport": [
-        "rig_first",
-        "economy_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_012_clown",
@@ -834,10 +818,7 @@
           "code_gate"
         ],
         "pumpCost": 1
-      },
-      "lineSupport": [
-        "rig_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_015_codeslinger",
@@ -960,10 +941,7 @@
           "code_gate"
         ],
         "pumpCost": 1
-      },
-      "lineSupport": [
-        "rig_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_017_deep-thought",
@@ -1146,9 +1124,6 @@
           "ends_run_after_use"
         ]
       },
-      "lineSupport": [
-        "rig_first"
-      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -2052,9 +2027,6 @@
           "forgo_actions"
         ]
       },
-      "lineSupport": [
-        "rig_first"
-      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -2185,10 +2157,7 @@
           "universal"
         ],
         "pumpCost": 2
-      },
-      "lineSupport": [
-        "rig_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_040_loony-goon",
@@ -2249,10 +2218,7 @@
           "sentry"
         ],
         "pumpCost": 1
-      },
-      "lineSupport": [
-        "rig_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_041_microtech-ai-interface",
@@ -2561,10 +2527,7 @@
         "clicks": 1,
         "reserveRisk": "low",
         "opportunityCost": "medium"
-      },
-      "lineSupport": [
-        "economy_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_046_pattels-virus",
@@ -2669,10 +2632,7 @@
         "sideEffects": [
           "stealth_loss"
         ]
-      },
-      "lineSupport": [
-        "rig_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_048_poltergeist",
@@ -2960,10 +2920,7 @@
           "code_gate"
         ],
         "pumpCost": 2
-      },
-      "lineSupport": [
-        "rig_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_053_ramming-piston",
@@ -3082,10 +3039,7 @@
           "sentry"
         ],
         "pumpCost": 1
-      },
-      "lineSupport": [
-        "rig_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_055_reflector",
@@ -3141,9 +3095,6 @@
           "stun_hellbolt_knockout_only"
         ]
       },
-      "lineSupport": [
-        "rig_first"
-      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -3209,9 +3160,6 @@
         ],
         "pumpCost": 1
       },
-      "lineSupport": [
-        "rig_first"
-      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -3480,10 +3428,7 @@
           "sentry"
         ],
         "pumpCost": 2
-      },
-      "lineSupport": [
-        "rig_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_061_shield",
@@ -3858,10 +3803,6 @@
         "reserveRisk": "high",
         "opportunityCost": "medium"
       },
-      "lineSupport": [
-        "remote_contest",
-        "closeout_pressure"
-      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -3966,10 +3907,7 @@
         "restrictions": [
           "no_pump_text"
         ]
-      },
-      "lineSupport": [
-        "rig_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_071_vewy-vewy-quiet",
@@ -4026,11 +3964,7 @@
         "memory": 1,
         "reserveRisk": "low",
         "opportunityCost": "low"
-      },
-      "lineSupport": [
-        "rig_first",
-        "economy_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_072_wild-card",
@@ -4092,10 +4026,7 @@
           "sentry"
         ],
         "pumpCost": 3
-      },
-      "lineSupport": [
-        "rig_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_073_wizards-book",
@@ -4156,10 +4087,7 @@
           "code_gate"
         ],
         "pumpCost": 2
-      },
-      "lineSupport": [
-        "rig_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_074_worm",
@@ -4224,10 +4152,7 @@
           "wall"
         ],
         "pumpCost": 3
-      },
-      "lineSupport": [
-        "rig_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_075_zetatech-software-installer",
@@ -4288,11 +4213,7 @@
         "memory": 1,
         "reserveRisk": "low",
         "opportunityCost": "low"
-      },
-      "lineSupport": [
-        "rig_first",
-        "breaker_search_first"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_076_all-nighter",
@@ -4472,10 +4393,6 @@
           "scope": "runner",
           "timing": "action"
         }
-      ],
-      "lineSupport": [
-        "rig_first",
-        "breaker_search_first"
       ]
     },
     {
@@ -4520,10 +4437,6 @@
         {
           "kind": "requires_successful_run"
         }
-      ],
-      "lineSupport": [
-        "early_hq_pressure",
-        "remote_contest"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -5263,10 +5176,6 @@
           "scope": "runner",
           "timing": "action"
         }
-      ],
-      "lineSupport": [
-        "rig_first",
-        "breaker_search_first"
       ]
     },
     {
@@ -5384,9 +5293,6 @@
           "scope": "runner",
           "timing": "action"
         }
-      ],
-      "lineSupport": [
-        "economy_first"
       ]
     },
     {
@@ -5855,11 +5761,7 @@
         "clicks": 1,
         "reserveRisk": "low",
         "opportunityCost": "low"
-      },
-      "lineSupport": [
-        "economy_first",
-        "closeout_pressure"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_109_security-code-worm-chip",
@@ -8729,10 +8631,6 @@
         "reserveRisk": "medium",
         "opportunityCost": "high"
       },
-      "lineSupport": [
-        "economy_first",
-        "rig_first"
-      ],
       "conditions": [
         {
           "kind": "requires_start_of_turn"
@@ -8941,7 +8839,7 @@
         }
       ],
       "lineSupport": [
-        "remote_contest"
+        "runner.remote_contest"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -8951,7 +8849,10 @@
         "needsHumanReview": true,
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
-      }
+      },
+      "strategicRole": [
+        "tax_tool"
+      ]
     },
     {
       "cardId": "onr_v1_174_rigged-investments",
@@ -9233,9 +9134,6 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": [
-        "economy_first"
-      ],
       "conditions": [
         {
           "kind": "requires_installed_resource"
@@ -9810,11 +9708,7 @@
         "clicks": 1,
         "reserveRisk": "low",
         "opportunityCost": "medium"
-      },
-      "lineSupport": [
-        "economy_rez_reserve",
-        "central_stabilize"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_189_artificial-security-directors",
@@ -9970,8 +9864,11 @@
         }
       ],
       "lineSupport": [
-        "ice_tax_glacier",
-        "remote_scoring_build"
+        "corp.remote_scoring",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ]
     },
     {
@@ -10128,8 +10025,10 @@
         "opportunityCost": "low"
       },
       "lineSupport": [
-        "economy_rez_reserve",
-        "score_closeout"
+        "corp.economy_rez_reserve"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ]
     },
     {
@@ -10321,8 +10220,10 @@
         }
       ],
       "lineSupport": [
-        "score_closeout",
-        "economy_rez_reserve"
+        "corp.economy_rez_reserve"
+      ],
+      "strategicRole": [
+        "support_tool"
       ],
       "conditions": [
         {
@@ -10537,9 +10438,6 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": [
-        "economy_rez_reserve"
-      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -10771,8 +10669,10 @@
         }
       ],
       "lineSupport": [
-        "score_closeout",
-        "economy_rez_reserve"
+        "corp.economy_rez_reserve"
+      ],
+      "strategicRole": [
+        "support_tool"
       ],
       "conditions": [
         {
@@ -10944,7 +10844,7 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "economy_rez_reserve"
+        "corp.economy_rez_reserve"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -10954,7 +10854,10 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
-      }
+      },
+      "strategicRole": [
+        "engine_anchor"
+      ]
     },
     {
       "cardId": "onr_v1_207_netwatch-operations-office",
@@ -11242,8 +11145,10 @@
         "opportunityCost": "low"
       },
       "lineSupport": [
-        "economy_rez_reserve",
-        "score_closeout"
+        "corp.economy_rez_reserve"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ]
     },
     {
@@ -11309,8 +11214,7 @@
         "opportunityCost": "low"
       },
       "lineSupport": [
-        "economy_rez_reserve",
-        "score_closeout"
+        "corp.economy_rez_reserve"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -11321,7 +11225,10 @@
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex",
         "focusedDecisionTest": "packages/ai/src/index.test.ts::uses Political Overthrow scored-agenda economy before basic credit"
-      }
+      },
+      "strategicRole": [
+        "engine_anchor"
+      ]
     },
     {
       "cardId": "onr_v1_211_polymer-breakthrough",
@@ -11445,9 +11352,10 @@
         }
       ],
       "lineSupport": [
-        "remote_scoring_build",
-        "ice_tax_glacier",
-        "score_closeout"
+        "corp.economy_rez_reserve"
+      ],
+      "strategicRole": [
+        "support_tool"
       ],
       "conditions": [
         {
@@ -11978,8 +11886,11 @@
         }
       ],
       "lineSupport": [
-        "ice_tax_glacier",
-        "remote_scoring_build"
+        "corp.remote_scoring",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ],
       "conditions": [
         {
@@ -12180,8 +12091,10 @@
         }
       ],
       "lineSupport": [
-        "ice_tax_glacier",
-        "central_stabilize"
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ]
     },
     {
@@ -12246,8 +12159,10 @@
         }
       ],
       "lineSupport": [
-        "ice_tax_glacier",
-        "central_stabilize"
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ],
       "conditions": [
         {
@@ -12327,8 +12242,8 @@
         }
       ],
       "lineSupport": [
-        "ice_tax_glacier",
-        "central_stabilize"
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -12338,7 +12253,11 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
-      }
+      },
+      "strategicRole": [
+        "punish_payoff",
+        "tax_tool"
+      ]
     },
     {
       "cardId": "onr_v1_225_canis-major",
@@ -12413,7 +12332,7 @@
         }
       ],
       "lineSupport": [
-        "ice_tax_glacier"
+        "corp.ice_tax_glacier"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -12423,7 +12342,10 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
-      }
+      },
+      "strategicRole": [
+        "tax_tool"
+      ]
     },
     {
       "cardId": "onr_v1_226_canis-minor",
@@ -12490,7 +12412,7 @@
         }
       ],
       "lineSupport": [
-        "ice_tax_glacier"
+        "corp.ice_tax_glacier"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -12500,7 +12422,10 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
-      }
+      },
+      "strategicRole": [
+        "tax_tool"
+      ]
     },
     {
       "cardId": "onr_v1_227_cerberus",
@@ -12592,8 +12517,8 @@
       ],
       "lineSupport": [
         "corp.tag_trace_punish",
-        "ice_tax_glacier",
-        "central_stabilize"
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -12603,7 +12528,11 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
-      }
+      },
+      "strategicRole": [
+        "punish_payoff",
+        "tax_tool"
+      ]
     },
     {
       "cardId": "onr_v1_228_cinderella",
@@ -12702,8 +12631,12 @@
       ],
       "lineSupport": [
         "corp.tag_trace_punish",
-        "ice_tax_glacier",
-        "central_stabilize"
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "tax_tool"
       ]
     },
     {
@@ -12880,10 +12813,6 @@
           "scope": "run_path",
           "timing": "encounter"
         }
-      ],
-      "lineSupport": [
-        "ice_tax_glacier",
-        "central_stabilize"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -13219,8 +13148,7 @@
         }
       ],
       "lineSupport": [
-        "corp.tag_trace_punish",
-        "central_stabilize"
+        "corp.tag_trace_punish"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -13230,7 +13158,10 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
-      }
+      },
+      "strategicRole": [
+        "engine_anchor"
+      ]
     },
     {
       "cardId": "onr_v1_237_data-wall",
@@ -13282,10 +13213,6 @@
           "scope": "run_path",
           "timing": "encounter"
         }
-      ],
-      "lineSupport": [
-        "central_stabilize",
-        "remote_scoring_build"
       ],
       "conditions": [
         {
@@ -13686,8 +13613,10 @@
         }
       ],
       "lineSupport": [
-        "corp.tag_trace_punish",
-        "central_stabilize"
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ]
     },
     {
@@ -14095,8 +14024,10 @@
         }
       ],
       "lineSupport": [
-        "corp.tag_trace_punish",
-        "central_stabilize"
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ]
     },
     {
@@ -14688,8 +14619,10 @@
         }
       ],
       "lineSupport": [
-        "ice_tax_glacier",
-        "central_stabilize"
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ]
     },
     {
@@ -15208,8 +15141,7 @@
         }
       ],
       "lineSupport": [
-        "ice_tax_glacier",
-        "central_stabilize"
+        "corp.ice_tax_glacier"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -15220,6 +15152,9 @@
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
       },
+      "strategicRole": [
+        "tax_tool"
+      ],
       "conditions": [
         {
           "kind": "requires_encounter"
@@ -15301,8 +15236,10 @@
         }
       ],
       "lineSupport": [
-        "ice_tax_glacier",
-        "central_stabilize"
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ]
     },
     {
@@ -15621,9 +15558,7 @@
         }
       ],
       "lineSupport": [
-        "ice_tax_glacier",
-        "central_stabilize",
-        "remote_scoring_build"
+        "corp.ice_tax_glacier"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -15633,7 +15568,10 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
-      }
+      },
+      "strategicRole": [
+        "tax_tool"
+      ]
     },
     {
       "cardId": "onr_v1_275_vacuum-link",
@@ -15755,9 +15693,7 @@
         }
       ],
       "lineSupport": [
-        "ice_tax_glacier",
-        "central_stabilize",
-        "remote_scoring_build"
+        "corp.ice_tax_glacier"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -15767,7 +15703,10 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
-      }
+      },
+      "strategicRole": [
+        "tax_tool"
+      ]
     },
     {
       "cardId": "onr_v1_277_virizz",
@@ -15826,9 +15765,7 @@
         }
       ],
       "lineSupport": [
-        "ice_tax_glacier",
-        "central_stabilize",
-        "remote_scoring_build"
+        "corp.ice_tax_glacier"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -15838,7 +15775,10 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
-      }
+      },
+      "strategicRole": [
+        "tax_tool"
+      ]
     },
     {
       "cardId": "onr_v1_278_wall-of-ice",
@@ -15908,9 +15848,12 @@
         }
       ],
       "lineSupport": [
-        "ice_tax_glacier",
-        "central_stabilize",
-        "remote_scoring_build"
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "tax_tool"
       ],
       "conditions": [
         {
@@ -15970,10 +15913,6 @@
           "scope": "run_path",
           "timing": "encounter"
         }
-      ],
-      "lineSupport": [
-        "central_stabilize",
-        "remote_scoring_build"
       ],
       "conditions": [
         {
@@ -16096,10 +16035,7 @@
         "clicks": 1,
         "reserveRisk": "low",
         "opportunityCost": "low"
-      },
-      "lineSupport": [
-        "economy_rez_reserve"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_282_annual-reviews",
@@ -16154,10 +16090,7 @@
         "clicks": 1,
         "reserveRisk": "low",
         "opportunityCost": "medium"
-      },
-      "lineSupport": [
-        "economy_rez_reserve"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_283_audit-of-call-records",
@@ -16617,9 +16550,6 @@
         "reserveRisk": "low",
         "opportunityCost": "low"
       },
-      "lineSupport": [
-        "economy_rez_reserve"
-      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
@@ -16715,10 +16645,7 @@
         "clicks": 1,
         "reserveRisk": "low",
         "opportunityCost": "low"
-      },
-      "lineSupport": [
-        "economy_rez_reserve"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_291_falsified-transactions-expert",
@@ -16886,8 +16813,10 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "corp.tag_trace_punish",
-        "economy_rez_reserve"
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "punish_payoff"
       ]
     },
     {
@@ -16997,10 +16926,7 @@
         "clicks": 1,
         "reserveRisk": "low",
         "opportunityCost": "low"
-      },
-      "lineSupport": [
-        "economy_rez_reserve"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_296_off-site-backups",
@@ -17067,10 +16993,6 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": [
-        "economy_rez_reserve",
-        "central_stabilize"
-      ],
       "conditions": [
         {
           "kind": "requires_archives_card"

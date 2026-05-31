@@ -5317,9 +5317,7 @@
           ],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -5549,9 +5547,7 @@
           ],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -5652,9 +5648,7 @@
           "sideEffects": [],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -5764,9 +5758,7 @@
           ],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -5959,9 +5951,7 @@
           "sideEffects": [],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -6063,9 +6053,7 @@
           "sideEffects": [],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -6277,9 +6265,7 @@
           ],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -7142,9 +7128,7 @@
           ],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -7373,9 +7357,7 @@
           "sideEffects": [],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -7474,9 +7456,7 @@
           "sideEffects": [],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -7912,9 +7892,7 @@
           "reserveRisk": "low",
           "opportunityCost": "medium"
         },
-        "lineSupport": [
-          "economy_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -8038,9 +8016,7 @@
           ],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -8419,9 +8395,7 @@
           "sideEffects": [],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -8523,9 +8497,7 @@
           "sideEffects": [],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -8625,9 +8597,7 @@
             "stun_hellbolt_knockout_only"
           ]
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -8732,9 +8702,7 @@
           "sideEffects": [],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -9109,9 +9077,7 @@
           "sideEffects": [],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -9637,9 +9603,7 @@
             "no_pump_text"
           ]
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -9742,9 +9706,7 @@
           "sideEffects": [],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -9843,9 +9805,7 @@
           "sideEffects": [],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -9947,9 +9907,7 @@
           "sideEffects": [],
           "restrictions": []
         },
-        "lineSupport": [
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -10022,10 +9980,7 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "breaker_search_first",
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -10779,10 +10734,7 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "breaker_search_first",
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -10858,9 +10810,7 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "economy_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -11160,10 +11110,7 @@
           "reserveRisk": "low",
           "opportunityCost": "low"
         },
-        "lineSupport": [
-          "closeout_pressure",
-          "economy_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -12240,10 +12187,7 @@
           "reserveRisk": "medium",
           "opportunityCost": "high"
         },
-        "lineSupport": [
-          "economy_first",
-          "rig_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -12612,9 +12556,7 @@
           "reserveRisk": "low",
           "opportunityCost": "medium"
         },
-        "lineSupport": [
-          "economy_first"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -12765,10 +12707,7 @@
           "reserveRisk": "low",
           "opportunityCost": "medium"
         },
-        "lineSupport": [
-          "central_stabilize",
-          "economy_rez_reserve"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -13060,8 +12999,8 @@
         ],
         "conditions": [],
         "lineSupport": [
-          "ice_tax_glacier",
-          "remote_scoring_build"
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
         ],
         "quality": {
           "hintReviewed": true,
@@ -13296,8 +13235,7 @@
           "opportunityCost": "low"
         },
         "lineSupport": [
-          "economy_rez_reserve",
-          "score_closeout"
+          "corp.economy_rez_reserve"
         ],
         "quality": {
           "hintReviewed": true,
@@ -13670,8 +13608,7 @@
         ],
         "conditions": [],
         "lineSupport": [
-          "economy_rez_reserve",
-          "score_closeout"
+          "corp.economy_rez_reserve"
         ],
         "quality": {
           "hintReviewed": true,
@@ -14094,9 +14031,7 @@
           "reserveRisk": "low",
           "opportunityCost": "medium"
         },
-        "lineSupport": [
-          "economy_rez_reserve"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -14506,8 +14441,7 @@
         ],
         "conditions": [],
         "lineSupport": [
-          "economy_rez_reserve",
-          "score_closeout"
+          "corp.economy_rez_reserve"
         ],
         "quality": {
           "hintReviewed": true,
@@ -14756,7 +14690,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "economy_rez_reserve"
+          "corp.economy_rez_reserve"
         ],
         "quality": {
           "hintReviewed": true,
@@ -15158,8 +15092,7 @@
           "opportunityCost": "low"
         },
         "lineSupport": [
-          "economy_rez_reserve",
-          "score_closeout"
+          "corp.economy_rez_reserve"
         ],
         "quality": {
           "hintReviewed": true,
@@ -15282,8 +15215,7 @@
           "opportunityCost": "low"
         },
         "lineSupport": [
-          "economy_rez_reserve",
-          "score_closeout"
+          "corp.economy_rez_reserve"
         ],
         "quality": {
           "hintReviewed": true,
@@ -15478,9 +15410,7 @@
         ],
         "conditions": [],
         "lineSupport": [
-          "ice_tax_glacier",
-          "remote_scoring_build",
-          "score_closeout"
+          "corp.economy_rez_reserve"
         ],
         "quality": {
           "hintReviewed": true,
@@ -16274,8 +16204,8 @@
         ],
         "conditions": [],
         "lineSupport": [
-          "ice_tax_glacier",
-          "remote_scoring_build"
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
         ],
         "quality": {
           "hintReviewed": true,
@@ -16586,8 +16516,7 @@
           }
         ],
         "lineSupport": [
-          "central_stabilize",
-          "ice_tax_glacier"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
@@ -16739,8 +16668,7 @@
         ],
         "conditions": [],
         "lineSupport": [
-          "central_stabilize",
-          "ice_tax_glacier"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
@@ -16889,8 +16817,8 @@
           }
         ],
         "lineSupport": [
-          "central_stabilize",
-          "ice_tax_glacier"
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
@@ -17060,7 +16988,7 @@
           }
         ],
         "lineSupport": [
-          "ice_tax_glacier"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
@@ -17212,7 +17140,7 @@
           }
         ],
         "lineSupport": [
-          "ice_tax_glacier"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
@@ -17391,9 +17319,9 @@
           }
         ],
         "lineSupport": [
-          "central_stabilize",
-          "corp.tag_trace_punish",
-          "ice_tax_glacier"
+          "corp.damage_kill",
+          "corp.ice_tax_glacier",
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -17590,9 +17518,9 @@
           }
         ],
         "lineSupport": [
-          "central_stabilize",
-          "corp.tag_trace_punish",
-          "ice_tax_glacier"
+          "corp.damage_kill",
+          "corp.ice_tax_glacier",
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -17731,10 +17659,7 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "central_stabilize",
-          "ice_tax_glacier"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -18172,7 +18097,6 @@
           }
         ],
         "lineSupport": [
-          "central_stabilize",
           "corp.tag_trace_punish"
         ],
         "quality": {
@@ -18754,7 +18678,6 @@
           }
         ],
         "lineSupport": [
-          "central_stabilize",
           "corp.tag_trace_punish"
         ],
         "quality": {
@@ -19228,7 +19151,6 @@
           }
         ],
         "lineSupport": [
-          "central_stabilize",
           "corp.tag_trace_punish"
         ],
         "quality": {
@@ -19761,8 +19683,7 @@
           }
         ],
         "lineSupport": [
-          "central_stabilize",
-          "ice_tax_glacier"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
@@ -20056,8 +19977,7 @@
           }
         ],
         "lineSupport": [
-          "central_stabilize",
-          "ice_tax_glacier"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
@@ -20209,9 +20129,7 @@
           }
         ],
         "lineSupport": [
-          "central_stabilize",
-          "ice_tax_glacier",
-          "remote_scoring_build"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
@@ -20338,9 +20256,7 @@
           }
         ],
         "lineSupport": [
-          "central_stabilize",
-          "ice_tax_glacier",
-          "remote_scoring_build"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
@@ -20454,9 +20370,7 @@
           }
         ],
         "lineSupport": [
-          "central_stabilize",
-          "ice_tax_glacier",
-          "remote_scoring_build"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
@@ -21138,8 +21052,7 @@
           "opportunityCost": "medium"
         },
         "lineSupport": [
-          "corp.tag_trace_punish",
-          "economy_rez_reserve"
+          "corp.tag_trace_punish"
         ],
         "quality": {
           "hintReviewed": true,
@@ -21312,9 +21225,7 @@
           "reserveRisk": "low",
           "opportunityCost": "low"
         },
-        "lineSupport": [
-          "economy_rez_reserve"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -21409,10 +21320,7 @@
           "reserveRisk": "low",
           "opportunityCost": "medium"
         },
-        "lineSupport": [
-          "central_stabilize",
-          "economy_rez_reserve"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,

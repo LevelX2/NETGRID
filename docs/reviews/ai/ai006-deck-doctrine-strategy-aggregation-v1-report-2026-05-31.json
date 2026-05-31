@@ -1225,10 +1225,6 @@
         "setup.draw": 4
       },
       "legacySignalCounts": {
-        "lineSupport:breaker_search_first": 4,
-        "lineSupport:closeout_pressure": 2,
-        "lineSupport:economy_first": 4,
-        "lineSupport:rig_first": 14,
         "planRole:build_rig": 11,
         "planRole:draw_for_answers": 4,
         "planRole:pressure_rnd": 2,
@@ -1256,9 +1252,7 @@
       },
       "warnings": [
         "inspector:deferred_requires_human_review",
-        "inspector:function_signal_descriptor_gap",
-        "inspector:legacy_fallback_only",
-        "inspector:legacy_lineSupport"
+        "inspector:legacy_fallback_only"
       ],
       "runnerProfile": {
         "coverageProfile": {
@@ -2202,8 +2196,6 @@
         "setup.draw": 2
       },
       "legacySignalCounts": {
-        "lineSupport:breaker_search_first": 2,
-        "lineSupport:rig_first": 7,
         "lineSupport:runner.hq_pressure": 2,
         "lineSupport:runner.interface_closeout": 4,
         "lineSupport:runner.rnd_pressure": 2,
@@ -2234,8 +2226,7 @@
       },
       "warnings": [
         "inspector:deferred_requires_human_review",
-        "inspector:legacy_fallback_only",
-        "inspector:legacy_lineSupport"
+        "inspector:legacy_fallback_only"
       ],
       "runnerProfile": {
         "coverageProfile": {
@@ -3132,10 +3123,6 @@
         "setup.draw": 3
       },
       "legacySignalCounts": {
-        "lineSupport:breaker_search_first": 3,
-        "lineSupport:closeout_pressure": 2,
-        "lineSupport:economy_first": 4,
-        "lineSupport:rig_first": 7,
         "lineSupport:runner.hq_pressure": 1,
         "planRole:build_rig": 12,
         "planRole:contest_remote": 1,
@@ -3173,8 +3160,7 @@
       "warnings": [
         "inspector:deferred_requires_human_review",
         "inspector:function_signal_descriptor_gap",
-        "inspector:legacy_fallback_only",
-        "inspector:legacy_lineSupport"
+        "inspector:legacy_fallback_only"
       ],
       "runnerProfile": {
         "coverageProfile": {
@@ -3360,27 +3346,10 @@
           "confidence": "low"
         },
         "corp.central_stabilize": {
-          "anchorScore": 100,
+          "anchorScore": 0,
           "supportScore": 90,
-          "finalScore": 95,
-          "anchorEvidence": [
-            {
-              "cardId": "onr_v1_237_data-wall",
-              "quantity": 2,
-              "source": "lineSupport",
-              "signal": "central_stabilize",
-              "strategyId": "corp.central_stabilize",
-              "reason": "safe_lineSupport_strategy_alias_from_inspector_index"
-            },
-            {
-              "cardId": "onr_v1_279_wall-of-static",
-              "quantity": 2,
-              "source": "lineSupport",
-              "signal": "central_stabilize",
-              "strategyId": "corp.central_stabilize",
-              "reason": "safe_lineSupport_strategy_alias_from_inspector_index"
-            }
-          ],
+          "finalScore": 50,
+          "anchorEvidence": [],
           "supportEvidence": [
             {
               "cardId": "onr_v1_203_hostile-takeover",
@@ -3477,7 +3446,7 @@
           "supportGaps": [
             "weak_remote_protection"
           ],
-          "confidence": "high"
+          "confidence": "medium"
         },
         "corp.damage_kill": {
           "anchorScore": 100,
@@ -3567,10 +3536,18 @@
           "confidence": "high"
         },
         "corp.economy_rez_reserve": {
-          "anchorScore": 44,
+          "anchorScore": 100,
           "supportScore": 90,
-          "finalScore": 69,
+          "finalScore": 95,
           "anchorEvidence": [
+            {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "lineSupport",
+              "signal": "corp.economy_rez_reserve",
+              "strategyId": "corp.economy_rez_reserve",
+              "reason": "normalized_lineSupport_strategy_goal"
+            },
             {
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
@@ -4380,14 +4357,14 @@
         }
       },
       "primaryStrategies": [
-        "corp.central_stabilize",
+        "corp.economy_rez_reserve",
         "corp.ice_tax_glacier",
         "corp.remote_scoring"
       ],
       "secondaryStrategies": [
         "corp.tag_trace_punish",
         "corp.damage_kill",
-        "corp.economy_rez_reserve",
+        "corp.central_stabilize",
         "corp.fast_advance",
         "corp.rush_score"
       ],
@@ -4401,15 +4378,12 @@
         "tag.payoff": 2
       },
       "legacySignalCounts": {
-        "lineSupport:central_stabilize": 4,
         "lineSupport:corp.damage_kill": 1,
+        "lineSupport:corp.economy_rez_reserve": 3,
         "lineSupport:corp.fast_advance": 1,
         "lineSupport:corp.ice_tax_glacier": 2,
         "lineSupport:corp.remote_scoring": 2,
         "lineSupport:corp.tag_trace_punish": 2,
-        "lineSupport:economy_rez_reserve": 7,
-        "lineSupport:remote_scoring_build": 4,
-        "lineSupport:score_closeout": 3,
         "planRole:bait_runner": 3,
         "planRole:build_scoring_remote": 6,
         "planRole:protect_hq": 10,
@@ -4439,9 +4413,7 @@
       },
       "warnings": [
         "inspector:deferred_requires_human_review",
-        "inspector:function_signal_descriptor_gap",
-        "inspector:legacy_fallback_only",
-        "inspector:legacy_lineSupport"
+        "inspector:legacy_fallback_only"
       ],
       "corpProfile": {
         "iceProfile": {
@@ -4619,43 +4591,10 @@
           "confidence": "low"
         },
         "corp.central_stabilize": {
-          "anchorScore": 100,
+          "anchorScore": 0,
           "supportScore": 90,
-          "finalScore": 95,
-          "anchorEvidence": [
-            {
-              "cardId": "onr_v1_237_data-wall",
-              "quantity": 2,
-              "source": "lineSupport",
-              "signal": "central_stabilize",
-              "strategyId": "corp.central_stabilize",
-              "reason": "safe_lineSupport_strategy_alias_from_inspector_index"
-            },
-            {
-              "cardId": "onr_v1_243_fetch-4-0-1",
-              "quantity": 1,
-              "source": "lineSupport",
-              "signal": "central_stabilize",
-              "strategyId": "corp.central_stabilize",
-              "reason": "safe_lineSupport_strategy_alias_from_inspector_index"
-            },
-            {
-              "cardId": "onr_v1_249_hunter",
-              "quantity": 1,
-              "source": "lineSupport",
-              "signal": "central_stabilize",
-              "strategyId": "corp.central_stabilize",
-              "reason": "safe_lineSupport_strategy_alias_from_inspector_index"
-            },
-            {
-              "cardId": "onr_v1_279_wall-of-static",
-              "quantity": 2,
-              "source": "lineSupport",
-              "signal": "central_stabilize",
-              "strategyId": "corp.central_stabilize",
-              "reason": "safe_lineSupport_strategy_alias_from_inspector_index"
-            }
-          ],
+          "finalScore": 50,
+          "anchorEvidence": [],
           "supportEvidence": [
             {
               "cardId": "onr_v1_203_hostile-takeover",
@@ -4794,7 +4733,7 @@
           "supportGaps": [
             "weak_remote_protection"
           ],
-          "confidence": "high"
+          "confidence": "medium"
         },
         "corp.damage_kill": {
           "anchorScore": 100,
@@ -4910,10 +4849,18 @@
           "confidence": "high"
         },
         "corp.economy_rez_reserve": {
-          "anchorScore": 44,
+          "anchorScore": 100,
           "supportScore": 90,
-          "finalScore": 69,
+          "finalScore": 95,
           "anchorEvidence": [
+            {
+              "cardId": "onr_v1_203_hostile-takeover",
+              "quantity": 3,
+              "source": "lineSupport",
+              "signal": "corp.economy_rez_reserve",
+              "strategyId": "corp.economy_rez_reserve",
+              "reason": "normalized_lineSupport_strategy_goal"
+            },
             {
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
@@ -5798,6 +5745,14 @@
               "reason": "normalized_lineSupport_strategy_goal"
             },
             {
+              "cardId": "onr_v1_243_fetch-4-0-1",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "engine_anchor",
+              "strategyId": "corp.tag_trace_punish",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
+            },
+            {
               "cardId": "onr_v1_249_hunter",
               "quantity": 1,
               "source": "derivedStrategyAnchor",
@@ -5811,6 +5766,14 @@
               "signal": "corp.tag_trace_punish",
               "strategyId": "corp.tag_trace_punish",
               "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_249_hunter",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "engine_anchor",
+              "strategyId": "corp.tag_trace_punish",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
               "cardId": "onr_v1_285_closed-accounts",
@@ -5864,6 +5827,14 @@
               "signal": "corp.tag_trace_punish",
               "strategyId": "corp.tag_trace_punish",
               "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_293_netwatch-credit-voucher",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "punish_payoff",
+              "strategyId": "corp.tag_trace_punish",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -5965,13 +5936,13 @@
       },
       "primaryStrategies": [
         "corp.tag_trace_punish",
-        "corp.central_stabilize",
+        "corp.economy_rez_reserve",
         "corp.ice_tax_glacier"
       ],
       "secondaryStrategies": [
         "corp.remote_scoring",
         "corp.damage_kill",
-        "corp.economy_rez_reserve",
+        "corp.central_stabilize",
         "corp.rush_score"
       ],
       "functionSignalCounts": {
@@ -5985,13 +5956,10 @@
         "trace.source": 2
       },
       "legacySignalCounts": {
-        "lineSupport:central_stabilize": 6,
+        "lineSupport:corp.economy_rez_reserve": 3,
         "lineSupport:corp.ice_tax_glacier": 2,
         "lineSupport:corp.remote_scoring": 2,
         "lineSupport:corp.tag_trace_punish": 6,
-        "lineSupport:economy_rez_reserve": 8,
-        "lineSupport:remote_scoring_build": 4,
-        "lineSupport:score_closeout": 3,
         "planRole:bait_runner": 5,
         "planRole:build_scoring_remote": 5,
         "planRole:protect_hq": 10,
@@ -6022,9 +5990,7 @@
       },
       "warnings": [
         "inspector:deferred_requires_human_review",
-        "inspector:function_signal_descriptor_gap",
-        "inspector:legacy_fallback_only",
-        "inspector:legacy_lineSupport"
+        "inspector:legacy_fallback_only"
       ],
       "corpProfile": {
         "iceProfile": {
@@ -6090,7 +6056,7 @@
       "onr_origin_runner_ai_snapshot_v1"
     ],
     "primaryStrategyCounts": {
-      "corp.central_stabilize": 2,
+      "corp.economy_rez_reserve": 2,
       "corp.ice_tax_glacier": 2,
       "corp.remote_scoring": 1,
       "corp.tag_trace_punish": 1,
@@ -6102,10 +6068,9 @@
     },
     "warningCounts": {
       "inspector:deferred_requires_human_review": 5,
-      "inspector:function_signal_descriptor_gap": 4,
-      "inspector:legacy_fallback_only": 5,
-      "inspector:legacy_lineSupport": 5
+      "inspector:function_signal_descriptor_gap": 1,
+      "inspector:legacy_fallback_only": 5
     },
-    "contentSha256": "98ff6c23854b8dea79ea0d4bffe09995049e3de12ce7fea90d811d13e6c3cfb2"
+    "contentSha256": "5da3cfe56cda5f5bfe4676768254cac2e814c2f37705eb164694a402acf0c2c4"
   }
 }

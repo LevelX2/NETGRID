@@ -222,14 +222,10 @@
           "manualOverlay": {
             "overlayPath": "data/ai/hints/overlays/onr-v1/runner/programs.json",
             "fields": [
-              "lineSupport",
               "manualNotes",
               "quality"
             ],
             "value": {
-              "lineSupport": [
-                "rig_first"
-              ],
               "quality": {
                 "hintReviewed": true,
                 "strategyCovered": false,
@@ -326,14 +322,10 @@
           "manualOverlay": {
             "overlayPath": "data/ai/hints/overlays/onr-v1/runner/programs.json",
             "fields": [
-              "lineSupport",
               "manualNotes",
               "quality"
             ],
             "value": {
-              "lineSupport": [
-                "rig_first"
-              ],
               "quality": {
                 "hintReviewed": true,
                 "strategyCovered": false,
