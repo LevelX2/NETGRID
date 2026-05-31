@@ -69,6 +69,7 @@ export type AiInspectorEntry = {
 export type AiInspectorSection = {
   key: string;
   title: string;
+  description?: string;
   emptyText?: string;
   entries: AiInspectorEntry[];
 };
@@ -184,6 +185,8 @@ function supportStatusSection(inspector: CatalogAiInspector): AiInspectorSection
   return {
     key: "support",
     title: "Supportstatus",
+    description:
+      "Aktiver Diagnoseanschluss: zeigt KI-Supportstatus, compiled Hint, mechanische und generierte Facts sowie kompakte Hinweiszahlen ohne Freigabewirkung.",
     entries: [
       {
         label: "KI geeignet",
@@ -233,6 +236,8 @@ function activeSemanticsSection(inspector: CatalogAiInspector): AiInspectorSecti
   return {
     key: "activeSemantics",
     title: "Aktive KI-Semantik",
+    description:
+      "Aktive read-only Verbindung zu compiled Hint und Inspector-Index: mechanische Facts, Funktionssignale, gültige Strategic Roles und Quality ohne Runtime- oder Plannerwirkung.",
     emptyText: "Keine aktive KI-Semantik vorhanden.",
     entries,
   };
@@ -253,6 +258,8 @@ function strategyAnchorSection(inspector: CatalogAiInspector): AiInspectorSectio
   return {
     key: "strategyAnchors",
     title: "Strategieanker",
+    description:
+      "Diagnostischer Strategieanschluss: zeigt abgeleitete Strategy Anchors und nur normalisierten lineSupport als gültige Strategy-ID; Alias- und Review-Werte bleiben Legacy.",
     entries,
   };
 }
@@ -290,6 +297,8 @@ function noticeSection(inspector: CatalogAiInspector): AiInspectorSection {
   return {
     key: "notices",
     title: "Hinweise / Prüfpunkte",
+    description:
+      "Review-Anschluss: bündelt kritische, prüfpflichtige und Legacy-Hinweise kompakt; Detailursachen stehen im geschlossenen Entwicklerbereich.",
     emptyText: "Keine Hinweise oder Prüfpunkte.",
     entries,
   };
@@ -318,6 +327,8 @@ function legacyDeveloperSection(inspector: CatalogAiInspector): AiInspectorSecti
   return {
     key: "legacyDetails",
     title: "Legacy / Entwicklerdetails anzeigen",
+    description:
+      "Entwickler- und Migrationskontext: zeigt Legacy-Rollen, Legacy-Planrollen, Alias-Klassifikationen, compiled Quelle und Rohkategorien ohne aktive KI-Semantik.",
     emptyText: "Keine Legacy- oder Entwicklerdetails vorhanden.",
     entries,
   };

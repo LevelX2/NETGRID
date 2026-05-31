@@ -163,6 +163,13 @@ describe("AI hint inspector UI view model", () => {
       "Hinweise / Prüfpunkte",
       "Legacy / Entwicklerdetails anzeigen",
     ]);
+    expect(sections.map((section) => section.description)).toEqual([
+      expect.stringContaining("KI-Supportstatus"),
+      expect.stringContaining("compiled Hint und Inspector-Index"),
+      expect.stringContaining("normalisierten lineSupport"),
+      expect.stringContaining("Review-Anschluss"),
+      expect.stringContaining("Entwickler- und Migrationskontext"),
+    ]);
   });
 
   it("keeps only the legacy developer details collapsed by default", () => {

@@ -13420,7 +13420,8 @@ function CatalogAiHintInspectorPanel({ inspector }: { inspector: CatalogAiInspec
                       [section.key]: !current[section.key],
                     }))
                   }
-                  title={isCollapsed ? "Abschnitt öffnen" : "Abschnitt einklappen"}
+                  aria-label={section.description ? `${section.title}: ${section.description}` : section.title}
+                  title={section.description ?? (isCollapsed ? "Abschnitt öffnen" : "Abschnitt einklappen")}
                 >
                   <span>{section.title}</span>
                   {isCollapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
