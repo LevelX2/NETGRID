@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "ai-strategic-roles-v1",
+  "taskId": "AI003",
+  "generatedAt": "2026-05-31",
+  "description": "Controlled optional strategicRole target values for future hint normalization. Existing hints are not required to carry strategicRole in AI003.",
+  "lineSupportPolicy": {
+    "requiredForFutureLineSupport": "A future non-legacy lineSupport strategy anchor should normally carry at least one compatible strategicRole.",
+    "ai003Enforcement": "optional_warn_only",
+    "runtimeEffect": "none"
+  },
+  "strategicRoles": [
+    {
+      "roleId": "payoff_anchor",
+      "description": "A card directly turns a strategy into score, access, damage, tags, or another payoff."
+    },
+    {
+      "roleId": "engine_anchor",
+      "description": "A card provides repeatable or central machinery that makes a strategy work."
+    },
+    {
+      "roleId": "enabler",
+      "description": "A card enables a payoff or engine but is not itself the payoff."
+    },
+    {
+      "roleId": "support_tool",
+      "description": "A card supplies necessary support such as economy, draw, memory, or coverage."
+    },
+    {
+      "roleId": "utility",
+      "description": "A card provides flexible tactical value without being a strategy anchor."
+    },
+    {
+      "roleId": "defensive_tool",
+      "description": "A card protects against pressure, damage, tags, traces, or access."
+    },
+    {
+      "roleId": "emergency_tool",
+      "description": "A card primarily rescues a bad or urgent board state."
+    },
+    {
+      "roleId": "win_condition",
+      "description": "A card can directly close or materially define the win path."
+    },
+    {
+      "roleId": "tax_tool",
+      "description": "A card taxes credits, clicks, runs, accesses, or resources."
+    },
+    {
+      "roleId": "punish_payoff",
+      "description": "A card punishes a visible condition such as tags, access, or low grip."
+    },
+    {
+      "roleId": "scoring_tool",
+      "description": "A card directly improves agenda scoring, score windows, or remote scoring conversion."
+    }
+  ]
+}

@@ -14,6 +14,7 @@
 
 - `ai001-decision-architecture-inventory-2026-05-25.md`: Aufgabe AI001 dokumentiert die aktuelle AI-Entscheidungsarchitektur als reine Ist-Bestandsaufnahme mit Entscheidungsfluss, Runner-/Corp-Kontextverlusten, lokalen Fixes, Datenquellen und offenen Ist-Risiken. Keine Zielarchitektur, Roadmap, Folgepakete oder Codeänderung.
 - `ai002-runner-run-context-window-analysis-2026-05-25.md`: Aufgabe AI002 analysiert den aktuellen Runner-Run-Kontext über Run-Start, Encounter, Jack-out-Fenster, Continue-run, Access und Repeat-Bewertung hinweg. Reine Ist-Analyse ohne Zielstruktur, Folgepakete, Heuristik-Fixes oder Codeänderung.
+- `ai003-strategy-goal-taxonomy-and-hint-signal-normalization-2026-05-31.md` / `ai003-strategy-taxonomy-report-2026-05-31.json` / `ai003-strategy-taxonomy-alias-report-2026-05-31.json`: Aufgabe AI003 definiert 20 normierte Strategy Goals, 11 optionale StrategicRoles und 51 abgeleitete Function-Signals als read-only Vertrag. Das neue Gate `corepack pnpm check:ai-strategy-taxonomy` hard-failt Taxonomie-, Hidden-Info-, `functionTags`- und `opponentSignals`-Verstöße, behandelt bestehende Legacy-`lineSupport`-, Rollen- und Planrollen-Wildwuchs aber nur als Warning. Keine Hint-Migration, keine Plannerwirkung, keine DeckDoctrine-Runtime-Änderung.
 
 ## Enthaltene Artefakte
 

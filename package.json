@@ -21,6 +21,7 @@
     "check:ai-hint-compiled-index": "node scripts/check-ai-hint-compiled-index.mjs --check",
     "check:ai-manual-overlays": "node scripts/check-ai-manual-overlays.mjs --check",
     "check:ai-hint-quality": "node scripts/check-ai-hint-quality.mjs --write-report",
+    "check:ai-strategy-taxonomy": "node scripts/check-ai-strategy-taxonomy.mjs --write-reports",
     "storage:backup": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts backup",
     "storage:restore": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts restore",
     "storage:inspect": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts inspect",

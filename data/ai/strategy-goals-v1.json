@@ -1,0 +1,590 @@
+{
+  "schemaVersion": "ai-strategy-goals-v1",
+  "taskId": "AI003",
+  "generatedAt": "2026-05-31",
+  "description": "Controlled V1 strategy goal taxonomy for read-only hint normalization and later DeckDoctrine aggregation. Strategy goals do not create LegalActions, action scores, plan weights, or runtime legality.",
+  "strategyGoals": [
+    {
+      "strategyId": "runner.rig_first",
+      "side": "runner",
+      "description": "Build a playable rig before committing to high-value pressure lines. This is a structural setup goal, not a label for every breaker.",
+      "detectionMode": "structural_density",
+      "anchorSignals": [],
+      "requiredSupport": {
+        "breakerCoverage": "required",
+        "economy": "required",
+        "searchOrDraw": "recommended",
+        "memory": "recommended",
+        "defense": "conditional"
+      },
+      "supportWeights": {
+        "breakerCoverage": 0.35,
+        "economy": 0.25,
+        "searchOrDraw": 0.2,
+        "memory": 0.15,
+        "defense": 0.05
+      },
+      "tacticalGoalHints": [
+        "install_core_breakers",
+        "repair_missing_coverage",
+        "build_memory",
+        "build_economy"
+      ]
+    },
+    {
+      "strategyId": "runner.economy_first",
+      "side": "runner",
+      "description": "Prioritize credit stability and repeatable resource flow before pressure. Economy cards provide function signals; they are not direct pressure anchors by default.",
+      "detectionMode": "structural_density",
+      "anchorSignals": [],
+      "requiredSupport": {
+        "economy": "required",
+        "searchOrDraw": "recommended",
+        "breakerCoverage": "recommended",
+        "pressurePayoff": "conditional",
+        "defense": "conditional"
+      },
+      "supportWeights": {
+        "economy": 0.45,
+        "searchOrDraw": 0.2,
+        "breakerCoverage": 0.2,
+        "pressurePayoff": 0.1,
+        "defense": 0.05
+      },
+      "tacticalGoalHints": [
+        "build_run_economy",
+        "avoid_low_value_runs",
+        "install_repeatable_economy",
+        "convert_economy_into_pressure"
+      ]
+    },
+    {
+      "strategyId": "runner.breaker_search",
+      "side": "runner",
+      "description": "Use search, draw, recovery, or tutor-like support to assemble missing breaker coverage.",
+      "detectionMode": "engine_anchor",
+      "anchorSignals": [
+        "setup.search",
+        "setup.recovery"
+      ],
+      "requiredSupport": {
+        "breakerCoverage": "required",
+        "economy": "required",
+        "searchOrDraw": "required",
+        "memory": "recommended"
+      },
+      "supportWeights": {
+        "searchOrDraw": 0.35,
+        "breakerCoverage": 0.3,
+        "economy": 0.25,
+        "memory": 0.1
+      },
+      "tacticalGoalHints": [
+        "find_missing_breaker",
+        "recover_key_program",
+        "install_search_target",
+        "defer_pressure_until_coverage"
+      ]
+    },
+    {
+      "strategyId": "runner.rnd_pressure",
+      "side": "runner",
+      "description": "Pressure R&D with direct R&D access payoff, topdeck information, or repeatable R&D pressure anchors.",
+      "detectionMode": "payoff_anchor",
+      "anchorSignals": [
+        "access.rnd_multiaccess",
+        "pressure.rnd",
+        "info.rnd_topdeck"
+      ],
+      "requiredSupport": {
+        "breakerCoverage": "required",
+        "economy": "required",
+        "searchOrDraw": "recommended",
+        "memory": "conditional",
+        "defense": "meta_dependent"
+      },
+      "supportWeights": {
+        "breakerCoverage": 0.35,
+        "economy": 0.25,
+        "searchOrDraw": 0.2,
+        "memory": 0.1,
+        "defense": 0.1
+      },
+      "tacticalGoalHints": [
+        "run_rnd_if_reachable",
+        "repair_rnd_coverage",
+        "install_rnd_key_card",
+        "build_run_economy"
+      ]
+    },
+    {
+      "strategyId": "runner.hq_pressure",
+      "side": "runner",
+      "description": "Pressure HQ with direct HQ access payoff, HQ information, or repeatable HQ pressure anchors.",
+      "detectionMode": "payoff_anchor",
+      "anchorSignals": [
+        "access.hq_multiaccess",
+        "pressure.hq",
+        "info.hq"
+      ],
+      "requiredSupport": {
+        "breakerCoverage": "required",
+        "economy": "required",
+        "searchOrDraw": "recommended",
+        "defense": "conditional"
+      },
+      "supportWeights": {
+        "breakerCoverage": 0.35,
+        "economy": 0.3,
+        "searchOrDraw": 0.2,
+        "defense": 0.15
+      },
+      "tacticalGoalHints": [
+        "run_hq_if_reachable",
+        "repair_hq_coverage",
+        "install_hq_key_card",
+        "watch_agenda_flood"
+      ]
+    },
+    {
+      "strategyId": "runner.remote_contest",
+      "side": "runner",
+      "description": "Contest remote scoring servers and deny visible score windows. This is distinct from trashing economy assets.",
+      "detectionMode": "engine_anchor",
+      "anchorSignals": [
+        "pressure.remote",
+        "remote.scoring_pressure"
+      ],
+      "requiredSupport": {
+        "breakerCoverage": "required",
+        "economy": "required",
+        "threatAssessment": "required",
+        "searchOrDraw": "conditional",
+        "defense": "conditional"
+      },
+      "supportWeights": {
+        "breakerCoverage": 0.35,
+        "economy": 0.25,
+        "threatAssessment": 0.2,
+        "searchOrDraw": 0.1,
+        "defense": 0.1
+      },
+      "tacticalGoalHints": [
+        "contest_remote_agenda",
+        "check_score_window",
+        "reserve_breaker_credits",
+        "avoid_unpayable_remote"
+      ]
+    },
+    {
+      "strategyId": "runner.remote_trash",
+      "side": "runner",
+      "description": "Attack remote asset or upgrade value through trash access, dedicated trash credits, or repeatable trash pressure.",
+      "detectionMode": "payoff_anchor",
+      "anchorSignals": [
+        "remote.trash_support",
+        "economy.trash_credit",
+        "access.remote_trash"
+      ],
+      "requiredSupport": {
+        "economy": "required",
+        "breakerCoverage": "recommended",
+        "remoteAccess": "required",
+        "searchOrDraw": "conditional"
+      },
+      "supportWeights": {
+        "economy": 0.35,
+        "remoteAccess": 0.3,
+        "breakerCoverage": 0.25,
+        "searchOrDraw": 0.1
+      },
+      "tacticalGoalHints": [
+        "trash_visible_asset",
+        "budget_for_trash_cost",
+        "repeat_remote_when_value_remains",
+        "skip_low_value_trash"
+      ]
+    },
+    {
+      "strategyId": "runner.interface_closeout",
+      "side": "runner",
+      "description": "Use interface-like multiaccess density to convert repeated central access into a closing plan. It stays separate because it is a payoff package, not generic R&D or HQ pressure.",
+      "detectionMode": "payoff_anchor",
+      "anchorSignals": [
+        "access.rnd_multiaccess",
+        "access.hq_multiaccess",
+        "pressure.interface_closeout"
+      ],
+      "requiredSupport": {
+        "breakerCoverage": "required",
+        "economy": "required",
+        "centralAccess": "required",
+        "defense": "conditional"
+      },
+      "supportWeights": {
+        "centralAccess": 0.35,
+        "breakerCoverage": 0.3,
+        "economy": 0.25,
+        "defense": 0.1
+      },
+      "tacticalGoalHints": [
+        "install_interface_payoff",
+        "run_best_central",
+        "preserve_access_economy",
+        "close_with_multiaccess"
+      ]
+    },
+    {
+      "strategyId": "runner.survival_defense",
+      "side": "runner",
+      "description": "Survive damage, tags, traces, and lethal punishment long enough to execute the deck's pressure plan.",
+      "detectionMode": "support_requirement",
+      "anchorSignals": [
+        "defense.damage_prevention",
+        "defense.tag_prevention",
+        "defense.trace_defense"
+      ],
+      "requiredSupport": {
+        "defense": "required",
+        "economy": "recommended",
+        "searchOrDraw": "conditional",
+        "pressurePayoff": "conditional"
+      },
+      "supportWeights": {
+        "defense": 0.45,
+        "economy": 0.25,
+        "searchOrDraw": 0.15,
+        "pressurePayoff": 0.15
+      },
+      "tacticalGoalHints": [
+        "clear_tags_when_punished",
+        "install_survival_tool",
+        "avoid_lethal_run",
+        "preserve_hand_size"
+      ]
+    },
+    {
+      "strategyId": "runner.run_event_tempo",
+      "side": "runner",
+      "description": "Convert event, bonus-run, and run-start tempo into short-horizon access pressure.",
+      "detectionMode": "engine_anchor",
+      "anchorSignals": [
+        "run.event_tempo",
+        "run.extra_action",
+        "run.lock"
+      ],
+      "requiredSupport": {
+        "economy": "required",
+        "breakerCoverage": "recommended",
+        "eventDensity": "required",
+        "defense": "conditional"
+      },
+      "supportWeights": {
+        "eventDensity": 0.35,
+        "economy": 0.3,
+        "breakerCoverage": 0.25,
+        "defense": 0.1
+      },
+      "tacticalGoalHints": [
+        "play_run_event_when_path_open",
+        "convert_bonus_run",
+        "avoid_tempo_into_no_access",
+        "chain_event_pressure"
+      ]
+    },
+    {
+      "strategyId": "corp.remote_scoring",
+      "side": "corp",
+      "description": "Build and protect a remote server that can convert agendas through install, advance, and score windows.",
+      "detectionMode": "engine_anchor",
+      "anchorSignals": [
+        "remote.scoring_protection",
+        "score.remote_conversion",
+        "remote.server_development"
+      ],
+      "requiredSupport": {
+        "ice": "required",
+        "economy": "required",
+        "agendaDensity": "required",
+        "centralDefense": "recommended"
+      },
+      "supportWeights": {
+        "ice": 0.35,
+        "economy": 0.25,
+        "agendaDensity": 0.25,
+        "centralDefense": 0.15
+      },
+      "tacticalGoalHints": [
+        "build_scoring_remote",
+        "protect_remote_agenda",
+        "advance_when_safe",
+        "score_when_window_open"
+      ]
+    },
+    {
+      "strategyId": "corp.fast_advance",
+      "side": "corp",
+      "description": "Score through advancement acceleration, scored agenda actions, or operation tempo instead of relying only on remote safety.",
+      "detectionMode": "payoff_anchor",
+      "anchorSignals": [
+        "score.fast_advance",
+        "score.advance_burst",
+        "score.agenda_action"
+      ],
+      "requiredSupport": {
+        "agendaDensity": "required",
+        "economy": "required",
+        "scoreAcceleration": "required",
+        "centralDefense": "recommended"
+      },
+      "supportWeights": {
+        "scoreAcceleration": 0.4,
+        "economy": 0.25,
+        "agendaDensity": 0.25,
+        "centralDefense": 0.1
+      },
+      "tacticalGoalHints": [
+        "compress_score_window",
+        "hold_advancement_payoff",
+        "score_from_hand_when_legal",
+        "build_economy_for_fast_advance"
+      ]
+    },
+    {
+      "strategyId": "corp.ice_tax_glacier",
+      "side": "corp",
+      "description": "Use ICE density, end-the-run coverage, and taxing encounters to slow the Runner and preserve scoring windows.",
+      "detectionMode": "structural_density",
+      "anchorSignals": [
+        "tax.ice",
+        "ice.etr",
+        "ice.future_pressure"
+      ],
+      "requiredSupport": {
+        "ice": "required",
+        "economy": "required",
+        "rezReserve": "required",
+        "remoteScoring": "recommended",
+        "centralDefense": "recommended"
+      },
+      "supportWeights": {
+        "ice": 0.35,
+        "economy": 0.25,
+        "rezReserve": 0.2,
+        "remoteScoring": 0.1,
+        "centralDefense": 0.1
+      },
+      "tacticalGoalHints": [
+        "install_taxing_ice",
+        "keep_rez_reserve",
+        "layer_remote_ice",
+        "stabilize_weak_central"
+      ]
+    },
+    {
+      "strategyId": "corp.central_stabilize",
+      "side": "corp",
+      "description": "Protect HQ and R&D against central pressure. This remains separate from glacier because central defense can be a deck obligation even without remote glacier density.",
+      "detectionMode": "support_requirement",
+      "anchorSignals": [
+        "defense.central",
+        "ice.central",
+        "protection.hq",
+        "protection.rnd"
+      ],
+      "requiredSupport": {
+        "ice": "required",
+        "economy": "required",
+        "centralDefense": "required",
+        "remoteScoring": "conditional"
+      },
+      "supportWeights": {
+        "centralDefense": 0.45,
+        "ice": 0.25,
+        "economy": 0.2,
+        "remoteScoring": 0.1
+      },
+      "tacticalGoalHints": [
+        "protect_rnd",
+        "protect_hq",
+        "rez_central_ice_when_pressured",
+        "avoid_overcommitting_remote"
+      ]
+    },
+    {
+      "strategyId": "corp.asset_economy",
+      "side": "corp",
+      "description": "Build remote or asset-driven economy and force Runner trash decisions.",
+      "detectionMode": "engine_anchor",
+      "anchorSignals": [
+        "remote.asset_economy",
+        "economy.remote",
+        "remote.asset_pressure"
+      ],
+      "requiredSupport": {
+        "assetDensity": "required",
+        "economy": "required",
+        "remoteProtection": "recommended",
+        "bait": "conditional"
+      },
+      "supportWeights": {
+        "assetDensity": 0.35,
+        "economy": 0.3,
+        "remoteProtection": 0.25,
+        "bait": 0.1
+      },
+      "tacticalGoalHints": [
+        "install_asset_economy",
+        "protect_high_value_asset",
+        "tax_remote_trash",
+        "convert_asset_credit_flow"
+      ]
+    },
+    {
+      "strategyId": "corp.tag_trace_punish",
+      "side": "corp",
+      "description": "Pair visible tag or trace sources with payoff cards that punish tagged Runners.",
+      "detectionMode": "payoff_anchor",
+      "anchorSignals": [
+        "tag.source",
+        "tag.payoff",
+        "trace.source"
+      ],
+      "requiredSupport": {
+        "tagSource": "required",
+        "punishPayoff": "required",
+        "economy": "required",
+        "traceSupport": "recommended"
+      },
+      "supportWeights": {
+        "tagSource": 0.3,
+        "punishPayoff": 0.3,
+        "economy": 0.25,
+        "traceSupport": 0.15
+      },
+      "tacticalGoalHints": [
+        "create_visible_tag",
+        "hold_punish_payoff",
+        "fire_payoff_when_legal",
+        "budget_trace_and_damage"
+      ]
+    },
+    {
+      "strategyId": "corp.damage_kill",
+      "side": "corp",
+      "description": "Convert damage, hand-size pressure, or lethal payoff into a flatline threat.",
+      "detectionMode": "payoff_anchor",
+      "anchorSignals": [
+        "damage.payoff",
+        "damage.kill",
+        "harm.hand_size"
+      ],
+      "requiredSupport": {
+        "damagePayoff": "required",
+        "economy": "required",
+        "tagOrTrace": "conditional",
+        "ambush": "conditional"
+      },
+      "supportWeights": {
+        "damagePayoff": 0.4,
+        "economy": 0.25,
+        "tagOrTrace": 0.2,
+        "ambush": 0.15
+      },
+      "tacticalGoalHints": [
+        "threaten_flatline",
+        "wait_for_low_grip",
+        "sequence_tag_before_damage",
+        "avoid_wasted_damage"
+      ]
+    },
+    {
+      "strategyId": "corp.ambush_bluff",
+      "side": "corp",
+      "description": "Use ambush, access punishment, and remote bluff pressure to make remote access costly or uncertain.",
+      "detectionMode": "engine_anchor",
+      "anchorSignals": [
+        "remote.ambush",
+        "access.punish",
+        "remote.bait"
+      ],
+      "requiredSupport": {
+        "ambush": "required",
+        "remoteSlots": "recommended",
+        "economy": "required",
+        "damageOrTagPayoff": "conditional"
+      },
+      "supportWeights": {
+        "ambush": 0.35,
+        "economy": 0.25,
+        "remoteSlots": 0.2,
+        "damageOrTagPayoff": 0.2
+      },
+      "tacticalGoalHints": [
+        "install_bait_remote",
+        "protect_bluff_when_profitable",
+        "punish_access",
+        "convert_runner_respect"
+      ]
+    },
+    {
+      "strategyId": "corp.economy_rez_reserve",
+      "side": "corp",
+      "description": "Maintain credit reserves for rez, traces, and score windows. Generic economy is a function signal; this goal is aggregated from reserve-sensitive deck structure.",
+      "detectionMode": "support_requirement",
+      "anchorSignals": [
+        "economy.generic",
+        "economy.recurring",
+        "economy.rez_discount",
+        "economy.advanceable"
+      ],
+      "requiredSupport": {
+        "economy": "required",
+        "rezReserve": "required",
+        "ice": "recommended",
+        "scorePlan": "conditional"
+      },
+      "supportWeights": {
+        "economy": 0.45,
+        "rezReserve": 0.3,
+        "ice": 0.15,
+        "scorePlan": 0.1
+      },
+      "tacticalGoalHints": [
+        "recover_economy_before_rez",
+        "keep_rez_reserve",
+        "avoid_over_icing_when_broke",
+        "fund_score_window"
+      ]
+    },
+    {
+      "strategyId": "corp.rush_score",
+      "side": "corp",
+      "description": "Score quickly behind cheap or early ICE before Runner setup stabilizes.",
+      "detectionMode": "structural_density",
+      "anchorSignals": [
+        "score.rush",
+        "ice.cheap_etr",
+        "score.remote_conversion"
+      ],
+      "requiredSupport": {
+        "earlyIce": "required",
+        "agendaDensity": "required",
+        "economy": "required",
+        "centralDefense": "conditional"
+      },
+      "supportWeights": {
+        "earlyIce": 0.35,
+        "agendaDensity": 0.25,
+        "economy": 0.25,
+        "centralDefense": 0.15
+      },
+      "tacticalGoalHints": [
+        "install_agenda_early",
+        "advance_before_runner_rig",
+        "score_now_if_safe",
+        "avoid_slow_glacier_setup"
+      ]
+    }
+  ]
+}

@@ -1,0 +1,948 @@
+{
+  "schemaVersion": "ai-strategy-taxonomy-check-report-v1",
+  "taskId": "AI003",
+  "generatedAt": "2026-05-31",
+  "status": "pass_with_warnings",
+  "hardErrorCount": 0,
+  "warningCount": 70,
+  "source": {
+    "activeHintsPath": "data/ai/ai-card-hints-active.json",
+    "compiledHintsPath": "data/ai/ai-card-hints-compiled.json",
+    "strategyGoalsPath": "data/ai/strategy-goals-v1.json",
+    "strategicRolesPath": "data/ai/strategic-roles-v1.json",
+    "functionSignalDerivationPath": "data/ai/function-signal-derivation-v1.json",
+    "runtimeEffect": "none; AI003 adds contract artifacts, a validator, reports, and tests only"
+  },
+  "hintCounts": {
+    "active": 564,
+    "compiled": 564,
+    "sameCardIdSet": true,
+    "allCompiledAiSupported": true
+  },
+  "taxonomy": {
+    "strategyGoalCount": 20,
+    "runnerStrategyGoalCount": 10,
+    "corpStrategyGoalCount": 10,
+    "strategyIds": [
+      "corp.ambush_bluff",
+      "corp.asset_economy",
+      "corp.central_stabilize",
+      "corp.damage_kill",
+      "corp.economy_rez_reserve",
+      "corp.fast_advance",
+      "corp.ice_tax_glacier",
+      "corp.remote_scoring",
+      "corp.rush_score",
+      "corp.tag_trace_punish",
+      "runner.breaker_search",
+      "runner.economy_first",
+      "runner.hq_pressure",
+      "runner.interface_closeout",
+      "runner.remote_contest",
+      "runner.remote_trash",
+      "runner.rig_first",
+      "runner.rnd_pressure",
+      "runner.run_event_tempo",
+      "runner.survival_defense"
+    ],
+    "strategicRoleCount": 11,
+    "strategicRoleIds": [
+      "defensive_tool",
+      "emergency_tool",
+      "enabler",
+      "engine_anchor",
+      "payoff_anchor",
+      "punish_payoff",
+      "scoring_tool",
+      "support_tool",
+      "tax_tool",
+      "utility",
+      "win_condition"
+    ],
+    "functionSignalRuleCount": 57,
+    "functionSignalCount": 51,
+    "functionSignalIds": [
+      "access.hq_multiaccess",
+      "access.punish",
+      "access.rnd_multiaccess",
+      "breaker.ap",
+      "breaker.black_ice",
+      "breaker.code_gate",
+      "breaker.sentry",
+      "breaker.trace",
+      "breaker.universal",
+      "breaker.unknown_special",
+      "breaker.wall",
+      "breaker.watchdog",
+      "damage.payoff",
+      "defense.damage_prevention",
+      "defense.tag_prevention",
+      "defense.trace_defense",
+      "economy.action",
+      "economy.advanceable",
+      "economy.burst",
+      "economy.counter",
+      "economy.finite_pool",
+      "economy.generic",
+      "economy.recurring",
+      "economy.rez_discount",
+      "economy.start_of_turn",
+      "economy.trace_credit",
+      "economy.trash_credit",
+      "ice.etr",
+      "ice.future_pressure",
+      "info.expose",
+      "info.hq",
+      "info.rnd_topdeck",
+      "remote.agenda_steal_tax",
+      "remote.ambush",
+      "remote.asset_economy",
+      "remote.bait",
+      "remote.scoring_protection",
+      "run.event_tempo",
+      "run.extra_action",
+      "run.lock",
+      "score.advance_burst",
+      "score.agenda_action",
+      "setup.draw",
+      "setup.install_discount",
+      "setup.recovery",
+      "setup.search",
+      "tag.payoff",
+      "tag.source",
+      "tax.ice",
+      "tax.remote",
+      "trace.source"
+    ]
+  },
+  "structuredHintInventory": {
+    "structuredFieldsAlreadyPresent": [
+      "effects",
+      "conditions",
+      "costProfile",
+      "breakerProfile",
+      "remoteRole",
+      "targetProfiles",
+      "lineSupport",
+      "opponentSignals",
+      "quality",
+      "valueHints",
+      "roles",
+      "planRoles",
+      "requiredMechanics",
+      "riskTags",
+      "scenarioRefs"
+    ],
+    "mechanicalFactFields": [
+      "effects",
+      "conditions",
+      "costProfile",
+      "breakerProfile",
+      "remoteRole",
+      "targetProfiles"
+    ],
+    "strategicHintFields": [
+      "lineSupport",
+      "strategicRole",
+      "roles",
+      "planRoles",
+      "strategicNotes",
+      "quality.strategyCovered",
+      "opponentSignals"
+    ],
+    "runtimeEffectiveFields": [
+      "roles",
+      "planRoles",
+      "valueHints",
+      "effects",
+      "conditions",
+      "breakerProfile",
+      "remoteRole",
+      "targetProfiles"
+    ],
+    "reviewOnlyOrLegacyContextFields": [
+      "lineSupport",
+      "quality",
+      "manualNotes",
+      "strategicNotes",
+      "descriptorGaps",
+      "riskTags",
+      "requiredMechanics",
+      "scenarioRefs"
+    ],
+    "compiledFieldCounts": {
+      "aiSupportStatus": 564,
+      "breakerProfile": 42,
+      "breakerProfile.baseStrength": 19,
+      "breakerProfile.breakCost": 42,
+      "breakerProfile.coverage": 42,
+      "breakerProfile.pumpCost": 37,
+      "breakerProfile.restrictions": 2,
+      "breakerProfile.sideEffects": 14,
+      "cardId": 564,
+      "cardType": 564,
+      "conditions": 271,
+      "conditions[].kind": 489,
+      "costProfile": 73,
+      "costProfile.clicks": 59,
+      "costProfile.counters": 1,
+      "costProfile.credits": 23,
+      "costProfile.memory": 25,
+      "costProfile.opportunityCost": 69,
+      "costProfile.reserveRisk": 69,
+      "effects": 376,
+      "effects[].amount": 417,
+      "effects[].damageTypes": 19,
+      "effects[].finite": 44,
+      "effects[].kind": 841,
+      "effects[].perTurnLimit": 36,
+      "effects[].repeatable": 51,
+      "effects[].resource": 532,
+      "effects[].scope": 841,
+      "effects[].timing": 841,
+      "lineSupport": 118,
+      "manualNotes": 3,
+      "planRoles": 564,
+      "quality": 380,
+      "quality.benchmarkCovered": 380,
+      "quality.confidence": 374,
+      "quality.focusedDecisionTest": 3,
+      "quality.hintReviewed": 380,
+      "quality.needsHumanReview": 380,
+      "quality.reviewedBy": 112,
+      "quality.reviewedDate": 112,
+      "quality.strategyCovered": 380,
+      "remoteRole": 53,
+      "remoteRole.kind": 53,
+      "remoteRole.serverScope": 53,
+      "remoteRole.threatLevel": 53,
+      "requiredMechanics": 564,
+      "riskTags": 564,
+      "roles": 564,
+      "scenarioRefs": 564,
+      "side": 564,
+      "strategicNotes": 3,
+      "targetProfiles": 3,
+      "targetProfiles[].installCost": 3,
+      "targetProfiles[].installsTarget": 3,
+      "targetProfiles[].lookCount": 1,
+      "targetProfiles[].oncePerRun": 1,
+      "targetProfiles[].showToOpponent": 1,
+      "targetProfiles[].shuffleAfter": 3,
+      "targetProfiles[].targetCardType": 3,
+      "targetProfiles[].zone": 3,
+      "valueHints": 564,
+      "valueHints.access": 8,
+      "valueHints.accessEconomy": 1,
+      "valueHints.advance": 1,
+      "valueHints.afterPassIcePriority": 1,
+      "valueHints.agenda": 12,
+      "valueHints.agendaPointCost": 1,
+      "valueHints.board_pressure": 1,
+      "valueHints.breaker": 1,
+      "valueHints.cardFlow": 14,
+      "valueHints.consistency": 8,
+      "valueHints.counter_control": 1,
+      "valueHints.damage": 10,
+      "valueHints.defense": 112,
+      "valueHints.draw": 1,
+      "valueHints.economy": 77,
+      "valueHints.hidden_zone": 1,
+      "valueHints.hqRunCounterPriority": 1,
+      "valueHints.information": 16,
+      "valueHints.installCost": 1,
+      "valueHints.installCreditGain": 1,
+      "valueHints.killerRunCreditPriority": 1,
+      "valueHints.leavePlayPayCost": 1,
+      "valueHints.link": 9,
+      "valueHints.memory": 7,
+      "valueHints.memoryLimitBonus": 1,
+      "valueHints.modifier": 23,
+      "valueHints.perCardLongtailPriority": 44,
+      "valueHints.playfulAiGainAllPriority": 1,
+      "valueHints.postBidLink": 2,
+      "valueHints.pressure": 1,
+      "valueHints.recurringCredits": 2,
+      "valueHints.recursion": 1,
+      "valueHints.remote": 11,
+      "valueHints.rezBeforeRunnerRunPriority": 1,
+      "valueHints.rig": 2,
+      "valueHints.rigCoverage": 42,
+      "valueHints.risk": 1,
+      "valueHints.run": 7,
+      "valueHints.run_safety": 1,
+      "valueHints.runPressure": 70,
+      "valueHints.runStartTaxCredits": 1,
+      "valueHints.scoring": 33,
+      "valueHints.setup": 5,
+      "valueHints.startOfTurnCreditLoss": 1,
+      "valueHints.startRunStrengthPriority": 1,
+      "valueHints.startTurnRandomPriority": 1,
+      "valueHints.survivability": 4,
+      "valueHints.survival": 14,
+      "valueHints.tag": 1,
+      "valueHints.tagDamagePriority": 1,
+      "valueHints.tagPunish": 1,
+      "valueHints.tagRelief": 2,
+      "valueHints.tax": 6,
+      "valueHints.tempo": 21,
+      "valueHints.threat": 40,
+      "valueHints.trace": 6,
+      "valueHints.traceBidCredit": 1,
+      "valueHints.traceBidSupport": 1,
+      "valueHints.traceDefense": 1,
+      "valueHints.trashEconomy": 1,
+      "valueHints.utility": 78,
+      "valueHints.virus": 1
+    }
+  },
+  "wildGrowth": {
+    "roleValueCount": 251,
+    "planRoleValueCount": 102,
+    "lineSupportValueCount": 15,
+    "lineSupportLegacyStatus": "legacy_warn_only_in_ai003"
+  },
+  "functionSignals": {
+    "derivedSignalCounts": {
+      "access.hq_multiaccess": 2,
+      "access.punish": 5,
+      "access.rnd_multiaccess": 2,
+      "breaker.ap": 2,
+      "breaker.code_gate": 7,
+      "breaker.sentry": 13,
+      "breaker.trace": 1,
+      "breaker.universal": 4,
+      "breaker.unknown_special": 2,
+      "breaker.wall": 12,
+      "breaker.watchdog": 1,
+      "damage.payoff": 39,
+      "defense.damage_prevention": 22,
+      "defense.tag_prevention": 7,
+      "defense.trace_defense": 15,
+      "economy.action": 7,
+      "economy.advanceable": 5,
+      "economy.burst": 3,
+      "economy.counter": 18,
+      "economy.finite_pool": 10,
+      "economy.generic": 44,
+      "economy.recurring": 4,
+      "economy.rez_discount": 7,
+      "economy.start_of_turn": 3,
+      "economy.trace_credit": 2,
+      "economy.trash_credit": 23,
+      "ice.etr": 54,
+      "ice.future_pressure": 13,
+      "info.expose": 5,
+      "info.hq": 2,
+      "info.rnd_topdeck": 6,
+      "remote.agenda_steal_tax": 1,
+      "remote.ambush": 5,
+      "remote.asset_economy": 20,
+      "remote.scoring_protection": 6,
+      "run.event_tempo": 10,
+      "run.extra_action": 6,
+      "run.lock": 5,
+      "score.advance_burst": 3,
+      "score.agenda_action": 12,
+      "setup.draw": 19,
+      "setup.install_discount": 7,
+      "setup.recovery": 4,
+      "setup.search": 10,
+      "tag.payoff": 17,
+      "tag.source": 21,
+      "tax.remote": 7,
+      "trace.source": 24
+    },
+    "cardsWithDerivedSignals": 343,
+    "descriptorGaps": [
+      {
+        "gapId": "remote_contest_pressure_not_first_class",
+        "description": "Current structured hints can describe some remoteRole and access costs, but direct Runner remote-contest intent remains mostly planner context."
+      },
+      {
+        "gapId": "cheap_ice_and_rush_shape_partial",
+        "description": "Cheap early ICE and rush-score shape can be inferred only partially from current effects and roles; it remains a later ontology extension candidate."
+      },
+      {
+        "gapId": "interface_closeout_density_requires_aggregation",
+        "description": "Interface closeout is a DeckDoctrine aggregation over multiaccess density and central reach, not a per-card generic function tag."
+      }
+    ],
+    "unsafeDerivationsSkipped": [
+      "valueHints",
+      "roles",
+      "planRoles",
+      "lineSupport",
+      "opponent hidden state"
+    ]
+  },
+  "derivationSmokeTests": {
+    "runnerEconomy": {
+      "cardId": "ai003_smoke_runner_economy",
+      "signals": [
+        "economy.generic"
+      ],
+      "anchorStrategyIds": []
+    },
+    "rndMultiaccess": {
+      "cardId": "ai003_smoke_rnd_multiaccess",
+      "signals": [
+        "access.rnd_multiaccess"
+      ],
+      "anchorStrategyIds": [
+        "runner.interface_closeout",
+        "runner.rnd_pressure"
+      ]
+    },
+    "normalBreaker": {
+      "cardId": "ai003_smoke_normal_wall_breaker",
+      "signals": [
+        "breaker.wall"
+      ],
+      "anchorStrategyIds": []
+    },
+    "corpTagPunishPayoff": {
+      "cardId": "ai003_smoke_tag_punish_payoff",
+      "signals": [
+        "tag.payoff"
+      ],
+      "anchorStrategyIds": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ]
+    }
+  },
+  "aliasSummary": {
+    "totals": {
+      "roles": 251,
+      "planRoles": 102,
+      "lineSupport": 15,
+      "allValues": 368
+    },
+    "categoryCounts": {
+      "alias_to_strategy_goal": 86,
+      "exact_strategy_goal": 4,
+      "function_signal_only": 190,
+      "legacy_role_only": 36,
+      "unknown_unmapped": 52
+    },
+    "mappedCounts": {
+      "exactStrategyGoal": 4,
+      "aliasToStrategyGoal": 86,
+      "functionSignalOnly": 190,
+      "legacyRoleOnly": 36,
+      "unknownUnmapped": 52,
+      "shouldBeRemovedFromLineSupport": 0
+    }
+  },
+  "hardErrors": [],
+  "warnings": [
+    {
+      "kind": "legacy_lineSupport_values_warn_only",
+      "count": 15,
+      "message": "Existing lineSupport values are legacy AI003 inputs and are not hard-gated yet.",
+      "items": [
+        {
+          "value": "rig_first",
+          "count": 34,
+          "category": "alias_to_strategy_goal",
+          "mapsTo": [
+            "runner.rig_first"
+          ]
+        },
+        {
+          "value": "ice_tax_glacier",
+          "count": 26,
+          "category": "exact_strategy_goal",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ]
+        },
+        {
+          "value": "central_stabilize",
+          "count": 20,
+          "category": "exact_strategy_goal",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ]
+        },
+        {
+          "value": "tag_trace_punish",
+          "count": 20,
+          "category": "exact_strategy_goal",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ]
+        },
+        {
+          "value": "economy_rez_reserve",
+          "count": 19,
+          "category": "alias_to_strategy_goal",
+          "mapsTo": [
+            "corp.economy_rez_reserve"
+          ]
+        },
+        {
+          "value": "remote_scoring_build",
+          "count": 19,
+          "category": "alias_to_strategy_goal",
+          "mapsTo": [
+            "corp.remote_scoring"
+          ]
+        },
+        {
+          "value": "breaker_search_first",
+          "count": 11,
+          "category": "alias_to_strategy_goal",
+          "mapsTo": [
+            "runner.breaker_search"
+          ]
+        },
+        {
+          "value": "score_closeout",
+          "count": 10,
+          "category": "alias_to_strategy_goal",
+          "mapsTo": [
+            "corp.rush_score"
+          ]
+        },
+        {
+          "value": "economy_first",
+          "count": 8,
+          "category": "alias_to_strategy_goal",
+          "mapsTo": [
+            "runner.economy_first"
+          ]
+        },
+        {
+          "value": "closeout_pressure",
+          "count": 7,
+          "category": "alias_to_strategy_goal",
+          "mapsTo": [
+            "runner.interface_closeout"
+          ]
+        },
+        {
+          "value": "interface_pressure",
+          "count": 6,
+          "category": "alias_to_strategy_goal",
+          "mapsTo": [
+            "runner.interface_closeout"
+          ]
+        },
+        {
+          "value": "early_rnd_pressure",
+          "count": 5,
+          "category": "alias_to_strategy_goal",
+          "mapsTo": [
+            "runner.rnd_pressure"
+          ]
+        },
+        {
+          "value": "remote_contest",
+          "count": 5,
+          "category": "exact_strategy_goal",
+          "mapsTo": [
+            "runner.remote_contest"
+          ]
+        },
+        {
+          "value": "early_hq_pressure",
+          "count": 3,
+          "category": "alias_to_strategy_goal",
+          "mapsTo": [
+            "runner.hq_pressure"
+          ]
+        },
+        {
+          "value": "fast_advance_or_counter_ops",
+          "count": 3,
+          "category": "alias_to_strategy_goal",
+          "mapsTo": [
+            "corp.fast_advance"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "unknown_role_or_planRole_values_warn_only",
+      "count": 52,
+      "message": "Some existing roles or planRoles are unmapped in the AI003 contract report.",
+      "examples": [
+        {
+          "value": "hidden_zone_tool",
+          "count": 20,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_017_deep-thought",
+            "onr_v1_042_mouse",
+            "onr_v1_043_mystery-box",
+            "onr_v1_050_r-and-d-protocol-files",
+            "onr_v1_058_seeya",
+            "onr_v1_059_self-modifying-code",
+            "onr_v1_087_forgotten-backup-chip",
+            "onr_v1_088_fortress-respecification"
+          ]
+        },
+        {
+          "value": "hidden_zone",
+          "count": 9,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_043_mystery-box",
+            "onr_v1_065_smarteye",
+            "onr_v1_189_artificial-security-directors",
+            "onr_v1_190_bioweapons-engineering",
+            "onr_v1_200_encryption-breakthrough",
+            "onr_v1_202_genetics-visionary-acquisition",
+            "onr_v1_314_corporate-negotiating-center",
+            "onr_v1_336_rescheduler"
+          ]
+        },
+        {
+          "value": "virus",
+          "count": 8,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_008_boardwalk",
+            "onr_v1_009_butcher-boy",
+            "onr_v1_010_cascade",
+            "onr_v1_017_deep-thought",
+            "onr_v1_046_pattels-virus",
+            "onr_v1_049_pox",
+            "onr_v1_064_skivviss",
+            "onr_v1_319_disinfectant-inc"
+          ]
+        },
+        {
+          "value": "ice_modifier",
+          "count": 7,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_012_clown",
+            "onr_v1_046_pattels-virus",
+            "onr_v1_215_security-net-optimization",
+            "onr_v1_317_data-masons",
+            "onr_v1_320_encoder-inc",
+            "onr_v1_341_skalderviken-sa-beta-test-site",
+            "onr_v1_350_antiquated-interface-routines"
+          ]
+        },
+        {
+          "value": "action",
+          "count": 6,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_171_preying-mantis",
+            "onr_v1_192_corporate-boon",
+            "onr_v1_218_subsidiary-branch",
+            "onr_v1_331_nevinyrral",
+            "onr_v1_334_pacifica-regional-ai",
+            "onr_v1_335_remote-facility"
+          ]
+        },
+        {
+          "value": "city_grid",
+          "count": 6,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_355_crystal-palace-station-grid",
+            "onr_v1_362_new-galveston-city-grid",
+            "onr_v1_365_paris-city-grid",
+            "onr_v1_367_rio-de-janeiro-city-grid",
+            "onr_v1_369_singapore-city-grid",
+            "onr_v1_374_washington-d-c-city-grid"
+          ]
+        },
+        {
+          "value": "hosting",
+          "count": 6,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_001_afreet",
+            "onr_v1_004_bakdoor",
+            "onr_v1_069_succubus",
+            "onr_v1_309_bbs-whispering-campaign",
+            "onr_v1_318_department-of-truth-enhancement",
+            "onr_v1_337_rockerboy-promotion"
+          ]
+        },
+        {
+          "value": "region",
+          "count": 6,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_355_crystal-palace-station-grid",
+            "onr_v1_362_new-galveston-city-grid",
+            "onr_v1_365_paris-city-grid",
+            "onr_v1_369_singapore-city-grid",
+            "onr_v1_371_tokyo-chiba-infighting",
+            "onr_v1_374_washington-d-c-city-grid"
+          ]
+        },
+        {
+          "value": "modifier",
+          "count": 5,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_190_bioweapons-engineering",
+            "onr_v1_200_encryption-breakthrough",
+            "onr_v1_313_city-surveillance",
+            "onr_v1_324_fortress-architects",
+            "onr_v1_360_jerusalem-city-grid"
+          ]
+        },
+        {
+          "value": "expose_helper",
+          "count": 4,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_042_mouse",
+            "onr_v1_058_seeya",
+            "onr_v1_088_fortress-respecification",
+            "onr_v1_092_ice-and-datas-guide-to-the-net"
+          ]
+        },
+        {
+          "value": "handlimit",
+          "count": 4,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_022_emergency-self-construct",
+            "onr_v1_205_main-office-relocation",
+            "onr_v1_322_euromarket-consortium",
+            "onr_v1_338_rustbelt-hq-branch"
+          ]
+        },
+        {
+          "value": "stealth",
+          "count": 4,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_011_cloak",
+            "onr_v1_035_invisibility",
+            "onr_v1_071_vewy-vewy-quiet",
+            "onr_v1_373_twenty-four-hour-surveillance"
+          ]
+        },
+        {
+          "value": "transactions",
+          "count": 4,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_321_esa-contract",
+            "onr_v1_328_information-laundering",
+            "onr_v1_329_investment-firm",
+            "onr_v1_344_spinn-public-relations"
+          ]
+        },
+        {
+          "value": "connection",
+          "count": 3,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_099_mantis-fixer-at-large",
+            "onr_v1_156_corporate-ally",
+            "onr_v1_159_databroker"
+          ]
+        },
+        {
+          "value": "gray_ops",
+          "count": 3,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_202_genetics-visionary-acquisition",
+            "onr_v1_318_department-of-truth-enhancement",
+            "onr_v1_333_omniscience-foundation"
+          ]
+        },
+        {
+          "value": "rig_defense",
+          "count": 3,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_023_evil-twin",
+            "onr_v1_028_force-shield",
+            "onr_v1_125_dermatech-bodyplating"
+          ]
+        },
+        {
+          "value": "tempo",
+          "count": 3,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_097_livewires-contacts",
+            "v08_burst_credit_event",
+            "v08_credit_surge_operation"
+          ]
+        },
+        {
+          "value": "code_gate",
+          "count": 2,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_190_bioweapons-engineering",
+            "onr_v1_200_encryption-breakthrough"
+          ]
+        },
+        {
+          "value": "daemon",
+          "count": 2,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_004_bakdoor",
+            "onr_v1_069_succubus"
+          ]
+        },
+        {
+          "value": "expose",
+          "count": 2,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_032_i-spy",
+            "onr_v1_091_hunt-club-bbs"
+          ]
+        },
+        {
+          "value": "information",
+          "count": 2,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_162_field-reporter-for-ice-and-data",
+            "onr_v1_183_technician-lover"
+          ]
+        },
+        {
+          "value": "persistent",
+          "count": 2,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_168_loan-from-chiba",
+            "onr_v1_172_quest-for-cattekin"
+          ]
+        },
+        {
+          "value": "sentry",
+          "count": 2,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_250_ice-pick-willie",
+            "onr_v1_272_too-many-doors"
+          ]
+        },
+        {
+          "value": "server_defense",
+          "count": 2,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_349_aardvark",
+            "onr_v1_351_bizarre-encryption-scheme"
+          ]
+        },
+        {
+          "value": "start_of_turn",
+          "count": 2,
+          "mappingCategory": "unknown_unmapped",
+          "mapsTo": [],
+          "rationale": "No AI003 mapping rule matched this value; later migration should review it explicitly.",
+          "examples": [
+            "onr_v1_163_floating-runner-bbs",
+            "onr_v1_180_smiths-pawnshop"
+          ]
+        }
+      ]
+    },
+    {
+      "kind": "function_signal_descriptor_gaps_warn_only",
+      "count": 3,
+      "message": "Some strategy-relevant functions are intentionally not derived because the structured descriptor is not stable yet.",
+      "items": [
+        {
+          "gapId": "remote_contest_pressure_not_first_class",
+          "description": "Current structured hints can describe some remoteRole and access costs, but direct Runner remote-contest intent remains mostly planner context."
+        },
+        {
+          "gapId": "cheap_ice_and_rush_shape_partial",
+          "description": "Cheap early ICE and rush-score shape can be inferred only partially from current effects and roles; it remains a later ontology extension candidate."
+        },
+        {
+          "gapId": "interface_closeout_density_requires_aggregation",
+          "description": "Interface closeout is a DeckDoctrine aggregation over multiaccess density and central reach, not a per-card generic function tag."
+        }
+      ]
+    }
+  ],
+  "gates": {
+    "invalidStrategyGoalsFail": true,
+    "duplicateStrategyIdsFail": true,
+    "sidePrefixMismatchFail": true,
+    "invalidStrategicRolesFail": true,
+    "hiddenInfoFieldsFail": true,
+    "manualFunctionTagsFail": true,
+    "opponentSignalsVisibleEvidenceOnlyFail": true,
+    "legacyLineSupportWarnOnly": true,
+    "unmappedRolesWarnOnly": true,
+    "descriptorGapsWarnOnly": true
+  },
+  "explicitNonScope": [
+    "no Engine rule change",
+    "no LegalAction change",
+    "no planner effect",
+    "no action score change",
+    "no plan weight change",
+    "no profile/default switch",
+    "no deck change",
+    "no hint migration",
+    "no ai-card-hints-active.json change",
+    "no ai-card-hints-compiled.json change",
+    "no Catalog or Proteus baseline change"
+  ]
+}
