@@ -22,7 +22,7 @@ type RunnerTurnFlags = NonNullable<GameState["runnerTurnFlags"]>;
 
 const CORP_PURGEABLE_SUCCESSFUL_RUN_COUNTERS = new Set<
   PurgeableRunnerVirusCounterType
->(["crumble", "garbage", "highlighter", "scaldan", "tax", "vienna"]);
+>(["cascade", "crumble", "garbage", "highlighter", "scaldan", "tax", "vienna"]);
 
 export type RunEndDamageSummary = {
   damageType: DamageType;
@@ -862,6 +862,7 @@ function applyV181SuccessfulRunCounterTriggers(
         trigger.amount,
       );
       if (legalAction) {
+        const serverLabel = host.servers.publicServerLabel(run.attackedServerId);
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           proteusRunnerVirusCounter: true,
@@ -887,6 +888,7 @@ function applyV181SuccessfulRunCounterTriggers(
             host.state.purgeableRunnerVirusCounters?.corp,
             counterType,
           ),
+          ...(serverLabel ? { serverLabel } : {}),
         });
       }
       continue;

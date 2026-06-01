@@ -23,7 +23,7 @@ import {
 } from "../../ability-engine/effective-values";
 import { iceStrengthModifierBonusFor } from "../../ability-engine/ice-strength-modifiers";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
-import { SKIVVISS_ID } from "../../compatibility/runtime-compatibility";
+import { CASCADE_ID, SKIVVISS_ID } from "../../compatibility/runtime-compatibility";
 import type { RestrictedHostedCreditUse } from "../../ability-engine/definition-types";
 import { SERVER_DIFFICULTY_UPGRADE_CARD_IDS } from "../../mechanics/agenda-scoring";
 import { serverChoiceDisplayLabel } from "./server-view";
@@ -32,6 +32,10 @@ const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
 const SUPERIOR_NET_BARRIERS_ID = "onr_v1_219_superior-net-barriers";
 const SECURITY_NET_OPTIMIZATION_ID = "onr_v1_215_security-net-optimization";
 const COCKROACH_ID = "onr_v1_013_cockroach";
+const CORP_PROJECTED_VIRUS_PROGRAM_IDS = new Set<string>([
+  CASCADE_ID,
+  SKIVVISS_ID,
+]);
 
 const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   definitionFor,
@@ -177,6 +181,7 @@ export function visibleCorpIdentityCard(state: GameState): VisibleCard {
     ...card,
     ...counterDisplaysField([
       ...(card.counterDisplays ?? []),
+      ...(cascadeCorpCounterDisplays(state) ?? []),
       ...(skivvissCorpCounterDisplays(state) ?? []),
       ...(badPublicityCounterDisplays(state) ?? []),
       ...(purgeableRunnerVirusCounterDisplaysForBucket(
@@ -221,7 +226,7 @@ function visibleCountersForKnownCard(
 ): Partial<Record<CounterType, number>> | undefined {
   if (!instance.counters) return undefined;
   const counters = cloneCounters(instance.counters);
-  if (definition.id === SKIVVISS_ID) delete counters.virus;
+  if (CORP_PROJECTED_VIRUS_PROGRAM_IDS.has(definition.id)) delete counters.virus;
   return counters;
 }
 
@@ -375,7 +380,7 @@ function specialCounterDisplays(
       counterType: "trauma",
       usageHint: "status_marker",
     }),
-    ...(definition.id === SKIVVISS_ID
+    ...(CORP_PROJECTED_VIRUS_PROGRAM_IDS.has(definition.id)
       ? []
       : singleCounterDisplay(counters.virus, {
           id: definition.id === COCKROACH_ID ? "cockroach" : "virus",
@@ -483,6 +488,37 @@ function skivvissCorpCounterDisplays(state: GameState): VisibleCard["counterDisp
   ];
 }
 
+function cascadeCorpCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
+  const amount = cascadeCounterTotal(state);
+  if (amount <= 0) return undefined;
+  return [
+    {
+      id: "runner_virus_corp_cascade",
+      amount,
+      displayKind: "virus",
+      label: "Cascade-Counter",
+      ariaLabel: `${amount} Cascade-Counter auf der Korp`,
+      counterType: "cascade",
+      usageHint: "status_marker",
+    },
+  ];
+}
+
+function cascadeCounterTotal(state: GameState): number {
+  const corpCounterAmount = Math.max(
+    0,
+    Math.floor(Number(state.purgeableRunnerVirusCounters?.corp?.cascade ?? 0)),
+  );
+  const legacyCardCounterAmount = Object.keys(state.cardInstances).reduce(
+    (sum, cardId) => {
+      if (definitionFor(state, cardId).id !== CASCADE_ID) return sum;
+      return sum + cardCounter(state, cardId, "virus");
+    },
+    0,
+  );
+  return corpCounterAmount + legacyCardCounterAmount;
+}
+
 function skivvissCounterTotal(state: GameState): number {
   return Object.keys(state.cardInstances).reduce((sum, cardId) => {
     if (definitionFor(state, cardId).id !== SKIVVISS_ID) return sum;
@@ -580,6 +616,8 @@ function purgeableRunnerVirusCounterLabel(
   counterType: PurgeableRunnerVirusCounterType,
 ): string {
   switch (counterType) {
+    case "cascade":
+      return "Cascade-Counter";
     case "socket_archives":
       return "Socket-Counter Archives";
     case "socket_hq":

@@ -1895,6 +1895,10 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
         } else {
           title = phrase(subject, `${added} ${counterText} durch ${source} erhalten`);
         }
+        if (effect.counterType === "cascade") {
+          const serverText = server ? ` auf ${server}` : "";
+          description = `Nach einem erfolgreichen Run${serverText} hat die Korp ${added} ${counterText} erhalten. Je 2 Cascade-Counter zwingen die Korp zu Beginn ihres Zugs, 1 offene Karte aus R&D ins Archiv zu legen.`;
+        }
         chips.push(
           source,
           `+${added} ${counterText}`,
@@ -2805,6 +2809,7 @@ function counterLabel(counterType: unknown): string {
   if (counterType === "doppelganger_antibody") return "Doppelganger-Counter";
   if (counterType === "pattel_antibody") return "Pattel-Counter";
   if (counterType === "cockroach") return "Cockroach-Counter";
+  if (counterType === "cascade") return "Cascade-Counter";
   if (counterType === "highlighter") return "Highlighter-Counter";
   if (counterType === "garbage") return "Garbage-Counter";
   if (counterType === "scaldan") return "Scaldan-Counter";

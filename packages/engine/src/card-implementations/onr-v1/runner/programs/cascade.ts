@@ -8,7 +8,7 @@ export const cascadeImplementation: CardImplementationDefinition = {
     counterKind: "cascade",
     addOnSuccessfulRun: {
       server: "rd",
-      target: "source",
+      target: "corp_purgeable_runner_virus_counter",
       amount: 1,
       visibility: "public",
     },

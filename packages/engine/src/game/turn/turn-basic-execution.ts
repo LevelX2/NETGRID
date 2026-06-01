@@ -266,6 +266,7 @@ export function consumeCorpActionDebt(
 
 const PURGEABLE_RUNNER_VIRUS_COUNTER_TYPES: readonly PurgeableRunnerVirusCounterType[] =
   [
+    "cascade",
     "doom",
     "crumble",
     "garbage",

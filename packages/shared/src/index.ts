@@ -146,6 +146,7 @@ export type CounterType =
   | "advancement"
   | "virus"
   | "cockroach"
+  | "cascade"
   | "doom"
   | "crumble"
   | "garbage"
@@ -250,6 +251,7 @@ export type EventVisibilityClass =
   | "replay_only";
 
 export type PurgeableRunnerVirusCounterType =
+  | "cascade"
   | "doom"
   | "crumble"
   | "garbage"

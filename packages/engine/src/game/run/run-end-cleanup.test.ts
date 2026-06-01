@@ -498,6 +498,66 @@ describe("run end cleanup", () => {
     });
   });
 
+  it("adds Cascade as a Corp-bucket counter after successful R&D runs", () => {
+    const fixture = makeHost({
+      run: {
+        runId: "run_cascade",
+        attackedServerId: "rd",
+        phase: "movement",
+        position: { kind: "server", serverId: "rd" },
+      } as unknown as NonNullable<GameState["run"]>,
+      runnerPrograms: ["cascade"],
+      instances: {
+        cascade: instance(
+          "cascade",
+          "onr_v1_010_cascade",
+          { side: "runner", zone: "rig" },
+          { faceup: true, rezzed: true },
+        ),
+      },
+      definitions: {
+        onr_v1_010_cascade: definition("onr_v1_010_cascade", "program"),
+      },
+      virusImplementations: {
+        cascade: {
+          counterKind: "cascade",
+          addOnSuccessfulRun: {
+            server: "rd",
+            target: "corp_purgeable_runner_virus_counter",
+            amount: 1,
+            visibility: "public",
+          },
+        },
+      },
+    });
+
+    handleRunEndCleanup(fixture.host, true, fixture.legalAction);
+
+    expect(fixture.state.cardInstances.cascade?.counters?.virus).toBeUndefined();
+    expect(fixture.state.purgeableRunnerVirusCounters?.corp).toMatchObject({
+      cascade: 1,
+    });
+    expect(fixture.legalAction.payload).toMatchObject({
+      proteusRunnerVirusCounter: true,
+      runId: "run_cascade",
+      serverId: "rd",
+      counterType: "cascade",
+      counterDelta: 1,
+      counterTotalAfter: 1,
+      sourceCardDefinitionId: "onr_v1_010_cascade",
+    });
+    expect(fixture.legalAction.resolvedEffects).toContainEqual(
+      expect.objectContaining({
+        kind: "counter_change",
+        side: "corp",
+        counterType: "cascade",
+        addedCounterAmount: 1,
+        remainingCounters: 1,
+        sourceDefinitionId: "onr_v1_010_cascade",
+      }),
+    );
+  });
+
   it("adds Proteus access-trash counters after matching successful runs", () => {
     const fixture = makeHost({
       run: {

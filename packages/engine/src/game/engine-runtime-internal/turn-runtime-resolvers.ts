@@ -639,6 +639,7 @@ import {
   BLINK_ID,
   BODYWEIGHT_DATA_CRECHE_ID,
   BUTCHER_BOY_ID,
+  CASCADE_ID,
   CHIMERA_ID,
   COCKROACH_ID,
   CODE_VIRAL_CACHE_ID,
@@ -2550,6 +2551,11 @@ function virusCounterCascadeTrashAtCorpStart(state: GameState): {
   amount: number;
   sourceDefinitionId?: CardDefinitionId;
 } {
+  const corpCascadeCounters = purgeableRunnerVirusCounterAmount(
+    state.purgeableRunnerVirusCounters?.corp,
+    "cascade",
+  );
+  const corpCascadeTrash = Math.floor(corpCascadeCounters / 2);
   return Object.keys(state.cardInstances).reduce((result, cardId) => {
     const implementation = virusCounterImplementationForCard(state, cardId);
     const start = implementation?.startOfCorpTurn;
@@ -2562,7 +2568,10 @@ function virusCounterCascadeTrashAtCorpStart(state: GameState): {
       sourceDefinitionId:
         result.sourceDefinitionId ?? definitionFor(state, cardId).id,
     };
-  }, { amount: 0 } as { amount: number; sourceDefinitionId?: CardDefinitionId });
+  }, {
+    amount: corpCascadeTrash,
+    sourceDefinitionId: corpCascadeCounters > 0 ? CASCADE_ID : undefined,
+  } as { amount: number; sourceDefinitionId?: CardDefinitionId });
 }
 
 function trashFaceupRdCardsForCascade(

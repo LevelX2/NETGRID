@@ -5,6 +5,7 @@
 export const BARTMOSS_ID = "onr_v1_005_bartmoss-memorial-icebreaker";
 export const BLINK_ID = "onr_v1_007_blink";
 export const BUTCHER_BOY_ID = "onr_v1_009_butcher-boy";
+export const CASCADE_ID = "onr_v1_010_cascade";
 export const COCKROACH_ID = "onr_v1_013_cockroach";
 export const GRUBB_ID = "onr_v1_030_grubb";
 export const INCUBATOR_ID = "onr_v1_034_incubator";

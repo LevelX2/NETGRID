@@ -423,6 +423,76 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     );
   });
 
+  it("adds Cascade counters to the Corp on successful R&D runs and hides them from the source program", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.counterRecurring("spotcheck-cascade-rd"),
+    );
+    state.runner.credits = 20;
+    moveRunnerCardToGrip(state, "onr_v1_010_cascade");
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        sourceDefinition(state, action) === "onr_v1_010_cascade",
+    );
+    const cascadeId = state.runner.rig.programs.find(
+      (id) => state.cardInstances[id]?.definitionId === "onr_v1_010_cascade",
+    );
+    expect(cascadeId).toBeDefined();
+    if (!cascadeId) throw new Error("Missing Cascade");
+    expect(cardCounterAmount(state, cascadeId, "virus")).toBe(0);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(cardCounterAmount(state, cascadeId, "virus")).toBe(0);
+    expect(state.purgeableRunnerVirusCounters?.corp?.cascade).toBe(1);
+    const runnerView = getPlayerView(state, "runner");
+    const corpView = getPlayerView(state, "corp");
+    const visibleCascade = runnerView.own.rig?.find(
+      (card) => card.instanceId === cascadeId,
+    );
+    expect(visibleCascade?.counters?.virus).toBeUndefined();
+    expect(
+      visibleCascade?.counterDisplays?.some(
+        (display) => display.id === "virus" || display.id === "runner_virus_corp_cascade",
+      ),
+    ).not.toBe(true);
+    expect(
+      runnerView.opponent.identity.counterDisplays?.find(
+        (display) => display.id === "runner_virus_corp_cascade",
+      ),
+    ).toMatchObject({
+      amount: 1,
+      label: "Cascade-Counter",
+      ariaLabel: "1 Cascade-Counter auf der Korp",
+      counterType: "cascade",
+    });
+    expect(
+      corpView.own.identity.counterDisplays?.find(
+        (display) => display.id === "runner_virus_corp_cascade",
+      ),
+    ).toMatchObject({
+      amount: 1,
+      label: "Cascade-Counter",
+    });
+    expect(state.eventLog.at(-1)?.publicPayload.resolvedEffects).toContainEqual(
+      expect.objectContaining({
+        kind: "counter_change",
+        side: "corp",
+        counterType: "cascade",
+        addedCounterAmount: 1,
+        sourceDefinitionId: "onr_v1_010_cascade",
+      }),
+    );
+  });
+
   it("uses P3.49 virus CardImplementations for hidden looks, Cascade trash and Gremlins hand size", () => {
     const p349VirusCards = [
       "onr_v1_008_boardwalk",
@@ -524,7 +594,8 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       ...cascade.cardInstances[rdFaceupId]!,
       faceup: true,
     };
-    setCardCounterForTest(cascade, cascadeId, "virus", 2);
+    expect(cardCounterAmount(cascade, cascadeId, "virus")).toBe(0);
+    cascade.purgeableRunnerVirusCounters = { corp: { cascade: 2 } };
     cascade = apply(cascade, "runner", (action) => action.type === "end_turn");
     expect(cascade.corp.archives).toContain(rdFaceupId);
     expect(cascade.eventLog.at(-1)?.publicPayload).not.toHaveProperty(

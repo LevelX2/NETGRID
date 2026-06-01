@@ -1281,6 +1281,17 @@ describe("V1.0.6 resource and card-display helpers", () => {
     ).toBe("Highlighter: 3 Highlighter geben dem Runner 2 zusätzliche R&D-Karten beim Zugriff auf R&D. Purgefähig: Die Korp kann alle Runner-Virus-Counter entfernen; danach muss sie ihre nächsten 3 Aktionen aussetzen.");
     expect(
       counterDisplayTooltipText({
+        id: "runner_virus_corp_cascade",
+        amount: 2,
+        displayKind: "virus",
+        label: "Cascade-Counter",
+        ariaLabel: "2 Cascade-Counter auf der Korp",
+        counterType: "cascade",
+        usageHint: "status_marker"
+      })
+    ).toBe("Cascade: Je 2 Cascade-Counter zwingen die Korp zu Beginn ihres Zugs, 1 offene Karte aus R&D ins Archiv zu legen. Aktuell sind das 1 Karte. Purgefähig: Die Korp kann alle Runner-Virus-Counter entfernen; danach muss sie ihre nächsten 3 Aktionen aussetzen.");
+    expect(
+      counterDisplayTooltipText({
         id: "runner_virus_corp_vienna",
         amount: 2,
         displayKind: "virus",

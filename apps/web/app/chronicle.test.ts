@@ -3895,6 +3895,20 @@ describe("formatChronicleEvent", () => {
             sourceDefinitionId: "onr_proteus_099_viral-pipeline",
             sourceTitle: "Viral Pipeline",
             serverLabel: "R&D"
+          },
+          {
+            effectId: "run_rd.cascade.successful_run.cascade",
+            kind: "counter_change",
+            visibility: "public",
+            side: "corp",
+            amount: 1,
+            counterType: "cascade",
+            addedCounterAmount: 1,
+            remainingCounters: 1,
+            reason: "proteus_runner_virus_successful_run",
+            sourceDefinitionId: "onr_v1_010_cascade",
+            sourceTitle: "Cascade",
+            serverLabel: "R&D"
           }
         ]
       }),
@@ -3903,8 +3917,12 @@ describe("formatChronicleEvent", () => {
 
     expect(items.map((item) => item.title)).toEqual([
       "Die Korp hat 1 Highlighter-Counter durch Highlighter erhalten.",
-      "R&D hat 1 Socket-Counter durch Viral Pipeline erhalten."
+      "R&D hat 1 Socket-Counter durch Viral Pipeline erhalten.",
+      "Die Korp hat 1 Cascade-Counter durch Cascade erhalten."
     ]);
+    expect(items.at(2)?.description).toBe(
+      "Nach einem erfolgreichen Run auf R&D hat die Korp 1 Cascade-Counter erhalten. Je 2 Cascade-Counter zwingen die Korp zu Beginn ihres Zugs, 1 offene Karte aus R&D ins Archiv zu legen."
+    );
   });
 
   it("describes Pattel access counters by affected icebreakers or absence", () => {

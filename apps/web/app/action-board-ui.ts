@@ -248,6 +248,10 @@ export function counterDisplayTooltipText(display: NonNullable<VisibleCard["coun
       return amount >= 2
         ? `Cockroach: ${amount} Cockroach-Counter machen HQ-Discards zufällig. Diese Cockroach-Counter zählen als Virus-Counter, weil Cockroach ein Programm-Virus ist, und werden durch Virus-Purge entfernt.`
         : `Cockroach: Ab 2 Cockroach-Countern werden HQ-Discards zufällig. Diese Cockroach-Counter zählen als Virus-Counter, weil Cockroach ein Programm-Virus ist, und werden durch Virus-Purge entfernt.`;
+    case "cascade":
+      return amount >= 2
+        ? `Cascade: Je 2 Cascade-Counter zwingen die Korp zu Beginn ihres Zugs, 1 offene Karte aus R&D ins Archiv zu legen. Aktuell sind das ${Math.floor(amount / 2)} ${Math.floor(amount / 2) === 1 ? "Karte" : "Karten"}. ${PURGEABLE_RUNNER_VIRUS_HELP}`
+        : `Cascade: Ab 2 Cascade-Countern muss die Korp zu Beginn ihres Zugs 1 offene Karte aus R&D ins Archiv legen. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
     case "doom":
       return `Armageddon: Bei jeder Korp-Installation wird pro Doom-Counter ein Würfel geworfen. Jede 6 trasht die installierte Karte und entfernt 1 Doom-Counter. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
     case "crumble":
