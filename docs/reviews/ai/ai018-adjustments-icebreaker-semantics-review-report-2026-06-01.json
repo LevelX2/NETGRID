@@ -702,7 +702,11 @@
       "title": "Dogcatcher",
       "category": "icebreaker_coverage_or_breaker_special",
       "tacticSignals": [
-        "breaker.watchdog"
+        "breaker.sentry_subtype_limited",
+        "breaker.subtype.bloodhound",
+        "breaker.subtype.hellhound",
+        "breaker.subtype.pit_bull",
+        "breaker.subtype.watchdog"
       ],
       "strategyAnchors": [],
       "strategicRole": [],
@@ -710,7 +714,7 @@
       "targetProfileKinds": [],
       "needsHumanReview": false,
       "confidence": "not_set",
-      "postReviewStatus": "confirmed_after_post_review"
+      "postReviewStatus": "subtype_coverage_fixed_ai018c"
     },
     {
       "cardId": "onr_v1_019_dropp",
@@ -1034,7 +1038,10 @@
       "title": "Reflector",
       "category": "icebreaker_coverage_or_breaker_special",
       "tacticSignals": [
-        "breaker.ap"
+        "breaker.ap_subtype_limited",
+        "breaker.subtype.hellbolt",
+        "breaker.subtype.knockout",
+        "breaker.subtype.stun"
       ],
       "strategyAnchors": [],
       "strategicRole": [],
@@ -1042,7 +1049,7 @@
       "targetProfileKinds": [],
       "needsHumanReview": true,
       "confidence": "low",
-      "postReviewStatus": "confirmed_after_post_review"
+      "postReviewStatus": "subtype_coverage_fixed_ai018c"
     },
     {
       "cardId": "onr_v1_056_replicator",

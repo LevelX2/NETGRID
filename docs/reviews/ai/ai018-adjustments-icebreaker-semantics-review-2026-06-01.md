@@ -101,7 +101,7 @@ Post-Review-Stand aus aktuellem compiled Hint und Inspector Index. Gezählt werd
 | `onr_v1_014_codecracker`<br>Codecracker | `icebreaker_coverage_or_breaker_special` | breaker.code_gate | - | - | not_required | `confirmed_after_post_review` |
 | `onr_v1_015_codeslinger`<br>Codeslinger | `icebreaker_coverage_or_breaker_special` | breaker.sentry | - | - | not_required | `confirmed_after_post_review` |
 | `onr_v1_016_cyfermaster`<br>Cyfermaster™ | `icebreaker_coverage_or_breaker_special` | breaker.code_gate | - | - | not_required | `confirmed_after_post_review` |
-| `onr_v1_018_dogcatcher`<br>Dogcatcher | `icebreaker_coverage_or_breaker_special` | breaker.watchdog | - | - | not_required | `confirmed_after_post_review` |
+| `onr_v1_018_dogcatcher`<br>Dogcatcher | `icebreaker_coverage_or_breaker_special` | breaker.sentry_subtype_limited<br>breaker.subtype.bloodhound<br>breaker.subtype.hellhound<br>breaker.subtype.pit_bull<br>breaker.subtype.watchdog | - | - | not_required | `subtype_coverage_fixed_ai018c` |
 | `onr_v1_019_dropp`<br>Dropp™ | `icebreaker_coverage_or_breaker_special` | breaker.ends_run_after_use<br>breaker.universal | - | - | not_required | `signals_enriched_after_post_review` |
 | `onr_v1_020_dupre`<br>Dupré | `icebreaker_coverage_or_breaker_special` | breaker.code_gate<br>breaker.scaling_strength | - | - | not_required | `signals_enriched_after_post_review` |
 | `onr_v1_021_dwarf`<br>Dwarf | `icebreaker_coverage_or_breaker_special` | breaker.wall | - | - | not_required | `confirmed_after_post_review` |
@@ -121,7 +121,7 @@ Post-Review-Stand aus aktuellem compiled Hint und Inspector Index. Gezählt werd
 | `onr_v1_052_raffles`<br>Raffles | `icebreaker_coverage_or_breaker_special` | breaker.code_gate | - | - | not_required | `confirmed_after_post_review` |
 | `onr_v1_053_ramming-piston`<br>Ramming Piston | `icebreaker_coverage_or_breaker_special` | breaker.stealth_payment_loss<br>breaker.wall | - | - | not_required | `signals_enriched_after_post_review` |
 | `onr_v1_054_raptor`<br>Raptor | `icebreaker_coverage_or_breaker_special` | breaker.sentry | - | - | not_required | `confirmed_after_post_review` |
-| `onr_v1_055_reflector`<br>Reflector | `icebreaker_coverage_or_breaker_special` | breaker.ap | - | - | not_required | `confirmed_after_post_review` |
+| `onr_v1_055_reflector`<br>Reflector | `icebreaker_coverage_or_breaker_special` | breaker.ap_subtype_limited<br>breaker.subtype.hellbolt<br>breaker.subtype.knockout<br>breaker.subtype.stun | - | - | not_required | `subtype_coverage_fixed_ai018c` |
 | `onr_v1_056_replicator`<br>Replicator | `icebreaker_coverage_or_breaker_special` | breaker.trace | - | - | not_required | `confirmed_after_post_review` |
 | `onr_v1_059_self-modifying-code`<br>Self-Modifying Code | `breaker_search_or_recovery_support` | setup.search | runner.search.breaker | engine_anchor | legacy:stack:program:install | `confirmed_after_post_review` |
 | `onr_v1_060_shaka`<br>Shaka | `icebreaker_coverage_or_breaker_special` | breaker.sentry | - | - | not_required | `confirmed_after_post_review` |

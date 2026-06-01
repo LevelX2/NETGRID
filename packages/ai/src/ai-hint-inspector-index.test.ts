@@ -194,10 +194,13 @@ describe("AI005 hint inspector index", () => {
     const bartmoss = card(index, "onr_v1_005_bartmoss-memorial-icebreaker");
     const morphingTool = card(index, "onr_proteus_092_morphing-tool");
     const fubar = card(index, "onr_proteus_088_fubar");
+    const dogcatcher = card(index, "onr_v1_018_dogcatcher");
     const dropp = card(index, "onr_v1_019_dropp");
+    const flak = card(index, "onr_v1_027_flak");
     const japaneseWaterTorture = card(index, "onr_v1_037_japanese-water-torture");
     const bigFrackinGun = card(index, "onr_proteus_079_big-frackin-gun");
     const clown = card(index, "onr_v1_012_clown");
+    const reflector = card(index, "onr_v1_055_reflector");
     const airportLocker = card(index, "onr_proteus_128_airport-locker");
     const cloak = card(index, "onr_v1_011_cloak");
     const lockjaw = card(index, "onr_proteus_091_lockjaw");
@@ -258,6 +261,21 @@ describe("AI005 hint inspector index", () => {
     expect(fubar.derivedFunctionSignals).not.toContain("breaker.unknown_special");
     expect(fubar.derivedStrategyAnchors).toEqual([]);
 
+    expect(dogcatcher.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "breaker.sentry_subtype_limited",
+        "breaker.subtype.bloodhound",
+        "breaker.subtype.hellhound",
+        "breaker.subtype.pit_bull",
+        "breaker.subtype.watchdog",
+      ]),
+    );
+    expect(dogcatcher.derivedFunctionSignals).not.toContain(
+      "breaker.watchdog",
+    );
+    expect(dogcatcher.derivedFunctionSignals).not.toContain("breaker.sentry");
+    expect(dogcatcher.derivedStrategyAnchors).toEqual([]);
+
     expect(dropp.derivedFunctionSignals).toEqual(
       expect.arrayContaining([
         "breaker.ends_run_after_use",
@@ -265,6 +283,14 @@ describe("AI005 hint inspector index", () => {
       ]),
     );
     expect(dropp.derivedStrategyAnchors).toEqual([]);
+
+    expect(flak.derivedFunctionSignals).toContain("breaker.ap");
+    expect(flak.derivedFunctionSignals).not.toContain(
+      "breaker.ap_subtype_limited",
+    );
+    expect(flak.derivedFunctionSignals).not.toContain("breaker.subtype.stun");
+    expect(flak.derivedStrategyAnchors).toEqual([]);
+
     expect(japaneseWaterTorture.derivedFunctionSignals).toEqual(
       expect.arrayContaining(["breaker.delayed_action_cost", "breaker.wall"]),
     );
@@ -286,6 +312,18 @@ describe("AI005 hint inspector index", () => {
     );
     expect(clown.derivedStrategyAnchors).toEqual([]);
     expect(clown.strategicRoleStatus.values).toContain("support_tool");
+
+    expect(reflector.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "breaker.ap_subtype_limited",
+        "breaker.subtype.hellbolt",
+        "breaker.subtype.knockout",
+        "breaker.subtype.stun",
+      ]),
+    );
+    expect(reflector.derivedFunctionSignals).not.toContain("breaker.ap");
+    expect(reflector.derivedFunctionSignals).not.toContain("breaker.sentry");
+    expect(reflector.derivedStrategyAnchors).toEqual([]);
 
     expect(cloak.derivedFunctionSignals).toEqual(
       expect.arrayContaining([

@@ -45,6 +45,7 @@ const VALID_RULE_SOURCES = new Set([
   "conditions",
   "breakerProfile",
   "breakerProfile.coverage",
+  "breakerProfile.restrictions",
   "breakerProfile.sideEffects",
   "remoteRole",
 ]);
@@ -57,6 +58,7 @@ const VALID_RULE_GATE_FIELDS = new Set([
   "beneficiary",
   "remoteRole",
   "breakerProfileCoverage",
+  "breakerProfileRestrictionAbsent",
 ]);
 const VALID_TACTIC_SIGNAL_SIDE_SCOPES = new Set([
   "runner",
@@ -1425,6 +1427,15 @@ function ruleMatchesHint(rule, hint) {
       ruleGatesMatch(rule, hint, undefined)
     );
   }
+  if (rule.source === "breakerProfile.restrictions") {
+    const restriction = rule.match?.restriction;
+    return (
+      typeof restriction === "string" &&
+      Array.isArray(hint.breakerProfile?.restrictions) &&
+      hint.breakerProfile.restrictions.includes(restriction) &&
+      ruleGatesMatch(rule, hint, undefined)
+    );
+  }
   if (rule.source === "breakerProfile.sideEffects") {
     const sideEffect = rule.match?.sideEffect;
     return (
@@ -1461,6 +1472,14 @@ function ruleBaseMatchesHint(rule, hint) {
       hint.breakerProfile.coverage.includes(coverage)
     );
   }
+  if (rule.source === "breakerProfile.restrictions") {
+    const restriction = rule.match?.restriction;
+    return (
+      typeof restriction === "string" &&
+      Array.isArray(hint.breakerProfile?.restrictions) &&
+      hint.breakerProfile.restrictions.includes(restriction)
+    );
+  }
   if (rule.source === "breakerProfile.sideEffects") {
     const sideEffect = rule.match?.sideEffect;
     return (
@@ -1491,6 +1510,17 @@ function ruleGatesMatch(rule, hint, effect) {
       !hint.breakerProfile.coverage.some((coverage) =>
         expected.includes(coverage),
       )
+    ) {
+      return false;
+    }
+  }
+  if (gates.breakerProfileRestrictionAbsent !== undefined) {
+    const forbidden = normalizeGateValues(gates.breakerProfileRestrictionAbsent);
+    const restrictions = hint.breakerProfile?.restrictions;
+    if (
+      forbidden.length === 0 ||
+      (Array.isArray(restrictions) &&
+        restrictions.some((restriction) => forbidden.includes(restriction)))
     ) {
       return false;
     }
@@ -1601,6 +1631,32 @@ function buildDerivationSmokeTests(rules) {
         coverage: ["sentry"],
         targetedIceBonus: true,
         strengthBonusVsChosenIce: true,
+      },
+    },
+    runnerGeneralApBreaker: {
+      cardId: "ai018c_smoke_general_ap_breaker",
+      side: "runner",
+      cardType: "program",
+      breakerProfile: {
+        coverage: ["ap"],
+      },
+    },
+    runnerSubtypeLimitedApBreaker: {
+      cardId: "ai018c_smoke_ap_subtype_limited_breaker",
+      side: "runner",
+      cardType: "program",
+      breakerProfile: {
+        coverage: ["ap"],
+        restrictions: ["stun_hellbolt_knockout_only"],
+      },
+    },
+    runnerSubtypeLimitedSentryBreaker: {
+      cardId: "ai018c_smoke_sentry_subtype_limited_breaker",
+      side: "runner",
+      cardType: "program",
+      breakerProfile: {
+        coverage: ["watchdog"],
+        restrictions: ["pit_bull_hellhound_bloodhound_watchdog_only"],
       },
     },
     runnerDelayedActionCostBreaker: {

@@ -1,0 +1,205 @@
+{
+  "schemaVersion": "ai-review-report-v1",
+  "taskId": "AI018c",
+  "generatedAt": "2026-06-01",
+  "status": "completed",
+  "scope": {
+    "summary": "Fix subtype-limited Icebreaker coverage semantics for Dogcatcher and Reflector using flat support-only tactic signals.",
+    "includedCardIds": [
+      "onr_v1_018_dogcatcher",
+      "onr_v1_055_reflector",
+      "onr_v1_027_flak"
+    ],
+    "outOfScope": [
+      "planner_effects",
+      "action_scores",
+      "plan_weights",
+      "engine_rules",
+      "legality",
+      "targeting_ai",
+      "profile_or_default_switches",
+      "ui_derivation_logic",
+      "search_recovery_changes",
+      "hardware_changes"
+    ]
+  },
+  "catalogSummary": {
+    "tacticSignalCount": 88,
+    "functionSignalDerivationRuleCount": 107,
+    "uniqueDerivedSignalCount": 88,
+    "newSignalIds": [
+      "breaker.ap_subtype_limited",
+      "breaker.sentry_subtype_limited",
+      "breaker.subtype.bloodhound",
+      "breaker.subtype.hellbolt",
+      "breaker.subtype.hellhound",
+      "breaker.subtype.knockout",
+      "breaker.subtype.pit_bull",
+      "breaker.subtype.stun",
+      "breaker.subtype.watchdog"
+    ],
+    "newSignalPolicy": {
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "targetProfileRelevant": false
+    }
+  },
+  "changedAssignments": [
+    {
+      "cardId": "onr_v1_018_dogcatcher",
+      "title": "Dogcatcher",
+      "before": {
+        "tacticSignals": [
+          "breaker.watchdog"
+        ]
+      },
+      "after": {
+        "tacticSignals": [
+          "breaker.sentry_subtype_limited",
+          "breaker.subtype.bloodhound",
+          "breaker.subtype.hellhound",
+          "breaker.subtype.pit_bull",
+          "breaker.subtype.watchdog"
+        ],
+        "strategyAnchors": [],
+        "targetProfileStatus": "not_required",
+        "breakerProfile": {
+          "coverage": [
+            "watchdog"
+          ],
+          "restrictions": [
+            "pit_bull_hellhound_bloodhound_watchdog_only"
+          ],
+          "breakCost": 1,
+          "pumpCost": 1
+        }
+      },
+      "removedSignals": [
+        "breaker.watchdog"
+      ],
+      "forbiddenSignalsVerifiedAbsent": [
+        "breaker.watchdog",
+        "breaker.sentry"
+      ]
+    },
+    {
+      "cardId": "onr_v1_055_reflector",
+      "title": "Reflector",
+      "before": {
+        "tacticSignals": [
+          "breaker.ap"
+        ]
+      },
+      "after": {
+        "tacticSignals": [
+          "breaker.ap_subtype_limited",
+          "breaker.subtype.hellbolt",
+          "breaker.subtype.knockout",
+          "breaker.subtype.stun"
+        ],
+        "strategyAnchors": [],
+        "targetProfileStatus": "not_required",
+        "breakerProfile": {
+          "coverage": [
+            "ap"
+          ],
+          "restrictions": [
+            "stun_hellbolt_knockout_only"
+          ],
+          "baseStrength": 4,
+          "breakCost": 0
+        }
+      },
+      "removedSignals": [
+        "breaker.ap"
+      ],
+      "forbiddenSignalsVerifiedAbsent": [
+        "breaker.ap",
+        "breaker.sentry"
+      ]
+    }
+  ],
+  "unchangedControls": [
+    {
+      "cardId": "onr_v1_027_flak",
+      "title": "Flak",
+      "tacticSignals": [
+        "breaker.ap"
+      ],
+      "forbiddenSignalsVerifiedAbsent": [
+        "breaker.ap_subtype_limited",
+        "breaker.subtype.stun"
+      ],
+      "strategyAnchors": [],
+      "targetProfileStatus": "not_required"
+    },
+    {
+      "title": "Bulldozer",
+      "status": "deferred_unchanged",
+      "rationale": "AI018c intentionally avoids hardware or speculative subtype-support changes."
+    }
+  ],
+  "postReviewListReference": {
+    "markdownPath": "docs/reviews/ai/ai018-adjustments-icebreaker-semantics-review-2026-06-01.md",
+    "jsonPath": "docs/reviews/ai/ai018-adjustments-icebreaker-semantics-review-report-2026-06-01.json",
+    "activeCheckedAssignmentCount": 85,
+    "inactiveClassicCheckedCount": 7,
+    "updatedRows": [
+      "onr_v1_018_dogcatcher",
+      "onr_v1_055_reflector"
+    ]
+  },
+  "searchRecoveryReference": {
+    "reviewedCount": 10,
+    "anchorsRetained": 6,
+    "genericAnchorsRemoved": 4,
+    "changedByAI018c": false
+  },
+  "verification": [
+    {
+      "command": "node scripts/check-ai-derived-facts.mjs --write",
+      "status": "passed",
+      "summary": "AI_DERIVED_FACTS OK errors=0"
+    },
+    {
+      "command": "node scripts/check-ai-derived-facts-full.mjs --write",
+      "status": "passed",
+      "summary": "AI_DERIVED_FACTS_FULL OK errors=0"
+    },
+    {
+      "command": "corepack pnpm build:ai-compiled-hints",
+      "status": "passed",
+      "summary": "AI_COMPILED_HINTS OK errors=0"
+    },
+    {
+      "command": "corepack pnpm build:ai-hint-inspector-index",
+      "status": "passed",
+      "summary": "AI_HINT_INSPECTOR_INDEX OK cards=564"
+    },
+    {
+      "command": "node scripts/check-ai-hint-compiled-index.mjs --write",
+      "status": "passed",
+      "summary": "AI_HINT_COMPILED_INDEX OK errors=0"
+    },
+    {
+      "command": "corepack pnpm check:ai-strategy-taxonomy",
+      "status": "passed",
+      "summary": "AI_STRATEGY_TAXONOMY OK functionSignals=88 errors=0"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-inspector-index",
+      "status": "passed",
+      "summary": "AI_HINT_INSPECTOR_INDEX OK"
+    },
+    {
+      "command": "corepack pnpm vitest run packages/ai/src/strategy-taxonomy.test.ts packages/ai/src/ai-hint-inspector-index.test.ts",
+      "status": "passed",
+      "summary": "2 files, 17 tests passed"
+    },
+    {
+      "command": "corepack pnpm check:ai:full",
+      "status": "passed",
+      "summary": "AI checks and full derived facts passed with 0 errors"
+    }
+  ]
+}

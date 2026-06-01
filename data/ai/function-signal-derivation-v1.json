@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI018-adjustments",
-  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017",
+  "taskId": "AI018c",
+  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018",
   "generatedAt": "2026-06-01",
-  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI018 adjustments introduce diagnostic TargetProfile V1, remove avoidable breaker.unknown_special coverage, add breaker drawback and multi-break signals, and separate setup memory/hosting signals without planner, targeting-AI, action-score, plan-weight, engine, legality, profile, default, UI, or baseline effects.",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI018c adds flat subtype-limited breaker tactic signals for Dogcatcher and Reflector and suppresses broad AP/Watchdog coverage signals when the breakerProfile restriction proves subtype-limited coverage. No planner, targeting-AI, action-score, plan-weight, engine, legality, profile, default, UI, or baseline effects.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -27,7 +27,8 @@
     "controller",
     "beneficiary",
     "remoteRole",
-    "breakerProfileCoverage"
+    "breakerProfileCoverage",
+    "breakerProfileRestrictionAbsent"
   ],
   "derivationRules": [
     {
@@ -131,6 +132,27 @@
       "source": "breakerProfile.coverage",
       "match": {
         "coverage": "ap"
+      },
+      "gates": {
+        "breakerProfileRestrictionAbsent": [
+          "stun_hellbolt_knockout_only"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.ap_subtype_limited",
+      "source": "breakerProfile.restrictions",
+      "match": {
+        "restriction": "stun_hellbolt_knockout_only"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
       },
       "strategyAnchorFor": []
     },
@@ -411,6 +433,22 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "breaker.sentry_subtype_limited",
+      "source": "breakerProfile.restrictions",
+      "match": {
+        "restriction": "pit_bull_hellhound_bloodhound_watchdog_only"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "breaker.stealth_payment_loss",
       "source": "breakerProfile.sideEffects",
       "match": {
@@ -431,6 +469,118 @@
       "source": "breakerProfile",
       "match": {
         "strengthBonusVsChosenIce": true
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.subtype.bloodhound",
+      "source": "breakerProfile.restrictions",
+      "match": {
+        "restriction": "pit_bull_hellhound_bloodhound_watchdog_only"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.subtype.hellbolt",
+      "source": "breakerProfile.restrictions",
+      "match": {
+        "restriction": "stun_hellbolt_knockout_only"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.subtype.hellhound",
+      "source": "breakerProfile.restrictions",
+      "match": {
+        "restriction": "pit_bull_hellhound_bloodhound_watchdog_only"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.subtype.knockout",
+      "source": "breakerProfile.restrictions",
+      "match": {
+        "restriction": "stun_hellbolt_knockout_only"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.subtype.pit_bull",
+      "source": "breakerProfile.restrictions",
+      "match": {
+        "restriction": "pit_bull_hellhound_bloodhound_watchdog_only"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.subtype.stun",
+      "source": "breakerProfile.restrictions",
+      "match": {
+        "restriction": "stun_hellbolt_knockout_only"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.subtype.watchdog",
+      "source": "breakerProfile.restrictions",
+      "match": {
+        "restriction": "pit_bull_hellhound_bloodhound_watchdog_only"
       },
       "gates": {
         "side": [
@@ -563,6 +713,11 @@
       "source": "breakerProfile.coverage",
       "match": {
         "coverage": "watchdog"
+      },
+      "gates": {
+        "breakerProfileRestrictionAbsent": [
+          "pit_bull_hellhound_bloodhound_watchdog_only"
+        ]
       },
       "strategyAnchorFor": []
     },

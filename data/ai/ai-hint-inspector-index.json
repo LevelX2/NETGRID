@@ -13391,7 +13391,11 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "breaker.watchdog"
+        "breaker.sentry_subtype_limited",
+        "breaker.subtype.bloodhound",
+        "breaker.subtype.hellhound",
+        "breaker.subtype.pit_bull",
+        "breaker.subtype.watchdog"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -16896,7 +16900,10 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "breaker.ap"
+        "breaker.ap_subtype_limited",
+        "breaker.subtype.hellbolt",
+        "breaker.subtype.knockout",
+        "breaker.subtype.stun"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],

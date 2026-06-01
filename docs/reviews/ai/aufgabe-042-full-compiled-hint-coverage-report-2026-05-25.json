@@ -23788,6 +23788,9 @@
           "source": "implementation.icebreakerAbilities",
           "coverage": [
             "watchdog"
+          ],
+          "restrictions": [
+            "pit_bull_hellhound_bloodhound_watchdog_only"
           ]
         }
       },

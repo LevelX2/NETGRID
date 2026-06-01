@@ -1482,6 +1482,14 @@ function deriveFromImplementation(card, implementationText, hint) {
     if (/subtypes:\s*\[[\s\S]{0,160}?"watchdog"/.test(implementationText)) {
       coverage.push("watchdog");
     }
+    const restrictions = [];
+    if (
+      /subtypes:\s*\[[\s\S]{0,220}?"pit_bull"[\s\S]{0,220}?"hellhound"[\s\S]{0,220}?"bloodhound"[\s\S]{0,220}?"watchdog"/.test(
+        implementationText,
+      )
+    ) {
+      restrictions.push("pit_bull_hellhound_bloodhound_watchdog_only");
+    }
     if (/matches:\s*\{\s*kind:\s*"any"/.test(implementationText)) {
       coverage.push("universal");
     }
@@ -1517,6 +1525,9 @@ function deriveFromImplementation(card, implementationText, hint) {
       facts.breakerProfile.coverage = coverage;
     } else if (!configurableCoverage) {
       facts.breakerProfile.coverage = ["unknown_special"];
+    }
+    if (restrictions.length > 0) {
+      facts.breakerProfile.restrictions = restrictions;
     }
     if (configurableCoverage) {
       facts.breakerProfile.configurableCoverage = true;

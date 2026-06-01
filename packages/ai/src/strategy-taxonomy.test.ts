@@ -250,7 +250,7 @@ describe("AI003 strategy goal taxonomy", () => {
 
     expect(report.hardErrorCount).toBe(0);
     expect(tacticSignalCatalogData.schemaVersion).toBe("ai-tactic-signals-v1");
-    expect(report.taxonomy.tacticSignalCatalogCount).toBe(79);
+    expect(report.taxonomy.tacticSignalCatalogCount).toBe(88);
     expect(new Set(signalIds).size).toBe(signalIds.length);
     expect([...signalIds].sort()).toEqual(derivationSignalIds);
     expect(signalIds.some((signalId) => signalId.startsWith("anti.ice."))).toBe(
@@ -282,6 +282,24 @@ describe("AI003 strategy goal taxonomy", () => {
       expect.arrayContaining([
         expect.objectContaining({
           signalId: "economy.recurring_breaker_credit",
+          supportOnly: true,
+          mayAnchorStrategy: false,
+          targetProfileRelevant: false,
+        }),
+        expect.objectContaining({
+          signalId: "breaker.ap_subtype_limited",
+          supportOnly: true,
+          mayAnchorStrategy: false,
+          targetProfileRelevant: false,
+        }),
+        expect.objectContaining({
+          signalId: "breaker.sentry_subtype_limited",
+          supportOnly: true,
+          mayAnchorStrategy: false,
+          targetProfileRelevant: false,
+        }),
+        expect.objectContaining({
+          signalId: "breaker.subtype.watchdog",
           supportOnly: true,
           mayAnchorStrategy: false,
           targetProfileRelevant: false,
@@ -438,6 +456,15 @@ describe("AI003 strategy goal taxonomy", () => {
     const riskyBreaker = smokeTest(report, "runnerRiskyBreaker");
     const configurableBreaker = smokeTest(report, "runnerConfigurableBreaker");
     const targetedBreaker = smokeTest(report, "runnerTargetedBreaker");
+    const generalApBreaker = smokeTest(report, "runnerGeneralApBreaker");
+    const subtypeLimitedApBreaker = smokeTest(
+      report,
+      "runnerSubtypeLimitedApBreaker",
+    );
+    const subtypeLimitedSentryBreaker = smokeTest(
+      report,
+      "runnerSubtypeLimitedSentryBreaker",
+    );
     const strengthReduction = smokeTest(report, "runnerIceStrengthReduction");
     const delayedActionCost = smokeTest(
       report,
@@ -500,6 +527,39 @@ describe("AI003 strategy goal taxonomy", () => {
       ]),
     );
     expect(targetedBreaker.anchorStrategyIds).toEqual([]);
+
+    expect(generalApBreaker.signals).toContain("breaker.ap");
+    expect(generalApBreaker.signals).not.toContain(
+      "breaker.ap_subtype_limited",
+    );
+    expect(generalApBreaker.anchorStrategyIds).toEqual([]);
+
+    expect(subtypeLimitedApBreaker.signals).toEqual(
+      expect.arrayContaining([
+        "breaker.ap_subtype_limited",
+        "breaker.subtype.hellbolt",
+        "breaker.subtype.knockout",
+        "breaker.subtype.stun",
+      ]),
+    );
+    expect(subtypeLimitedApBreaker.signals).not.toContain("breaker.ap");
+    expect(subtypeLimitedApBreaker.signals).not.toContain("breaker.sentry");
+    expect(subtypeLimitedApBreaker.anchorStrategyIds).toEqual([]);
+
+    expect(subtypeLimitedSentryBreaker.signals).toEqual(
+      expect.arrayContaining([
+        "breaker.sentry_subtype_limited",
+        "breaker.subtype.bloodhound",
+        "breaker.subtype.hellhound",
+        "breaker.subtype.pit_bull",
+        "breaker.subtype.watchdog",
+      ]),
+    );
+    expect(subtypeLimitedSentryBreaker.signals).not.toContain(
+      "breaker.watchdog",
+    );
+    expect(subtypeLimitedSentryBreaker.signals).not.toContain("breaker.sentry");
+    expect(subtypeLimitedSentryBreaker.anchorStrategyIds).toEqual([]);
 
     expect(strengthReduction.signals).toEqual(
       expect.arrayContaining([

@@ -1,8 +1,8 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI018-adjustments",
+  "taskId": "AI018c",
   "generatedAt": "2026-06-01",
-  "description": "Controlled V1 catalog for read-only tactic signals derived from structured AI hints. AI018 keeps tactic signals separate from strategy anchors and adds the complete Icebreaker/Breaker-support sweep.",
+  "description": "Controlled V1 tactic-signal catalog. AI018c adds support-only flat subtype-limited breaker signals for Dogcatcher and Reflector without planner, engine, targeting, action-score, plan-weight, or legality effects.",
   "signalPolicy": {
     "tacticSignal": "Functional card utility: what the AI can use the card for.",
     "strategyAnchor": "Large deck line: which strategy the card can anchor or materially support.",
@@ -82,13 +82,30 @@
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
       "sourceKinds": [
-        "breakerProfile.coverage=ap"
+        "breakerProfile.coverage=ap without breakerProfile.restrictions=stun_hellbolt_knockout_only"
       ],
       "examples": [
         "Flak"
       ],
       "targetProfileRelevant": false,
-      "notes": "Coverage signal only; it must not anchor a deck strategy by itself."
+      "notes": "General AP coverage signal only; subtype-limited AP breakers use breaker.ap_subtype_limited plus breaker.subtype.* signals instead."
+    },
+    {
+      "signalId": "breaker.ap_subtype_limited",
+      "group": "breaker_subtype_limited",
+      "sideScope": "runner",
+      "description": "Breaks only a named subset of AP subroutines rather than all AP ICE subroutines.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "breakerProfile.restrictions=stun_hellbolt_knockout_only"
+      ],
+      "examples": [
+        "Reflector"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Subtype-limited breaker support signal only; it does not anchor strategy or imply target selection."
     },
     {
       "signalId": "breaker.black_ice",
@@ -366,6 +383,23 @@
       "notes": "Coverage signal only; not a synonym for anti.ice.sentry."
     },
     {
+      "signalId": "breaker.sentry_subtype_limited",
+      "group": "breaker_subtype_limited",
+      "sideScope": "runner",
+      "description": "Breaks only a named subset of Sentry subroutines rather than all Sentry ICE subroutines.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "breakerProfile.restrictions=pit_bull_hellhound_bloodhound_watchdog_only"
+      ],
+      "examples": [
+        "Dogcatcher"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Subtype-limited breaker support signal only; it does not anchor strategy or imply target selection."
+    },
+    {
       "signalId": "breaker.stealth_payment_loss",
       "group": "breaker_risk",
       "sideScope": "runner",
@@ -400,6 +434,125 @@
       ],
       "targetProfileRelevant": true,
       "notes": "The chosen ICE preference belongs in TargetProfile."
+    },
+    {
+      "signalId": "breaker.subtype.bloodhound",
+      "group": "breaker_subtype_limited",
+      "sideScope": "runner",
+      "description": "Breaker can break Bloodhound subroutines.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "breakerProfile.restrictions=pit_bull_hellhound_bloodhound_watchdog_only"
+      ],
+      "examples": [
+        "Dogcatcher"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Subtype-limited breaker support signal only; it does not anchor strategy or imply target selection."
+    },
+    {
+      "signalId": "breaker.subtype.hellbolt",
+      "group": "breaker_subtype_limited",
+      "sideScope": "runner",
+      "description": "Breaker can break Hellbolt subroutines.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "breakerProfile.restrictions=stun_hellbolt_knockout_only"
+      ],
+      "examples": [
+        "Reflector"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Subtype-limited breaker support signal only; it does not anchor strategy or imply target selection."
+    },
+    {
+      "signalId": "breaker.subtype.hellhound",
+      "group": "breaker_subtype_limited",
+      "sideScope": "runner",
+      "description": "Breaker can break Hellhound subroutines.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "breakerProfile.restrictions=pit_bull_hellhound_bloodhound_watchdog_only"
+      ],
+      "examples": [
+        "Dogcatcher"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Subtype-limited breaker support signal only; it does not anchor strategy or imply target selection."
+    },
+    {
+      "signalId": "breaker.subtype.knockout",
+      "group": "breaker_subtype_limited",
+      "sideScope": "runner",
+      "description": "Breaker can break Knockout subroutines.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "breakerProfile.restrictions=stun_hellbolt_knockout_only"
+      ],
+      "examples": [
+        "Reflector"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Subtype-limited breaker support signal only; it does not anchor strategy or imply target selection."
+    },
+    {
+      "signalId": "breaker.subtype.pit_bull",
+      "group": "breaker_subtype_limited",
+      "sideScope": "runner",
+      "description": "Breaker can break Pit Bull subroutines.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "breakerProfile.restrictions=pit_bull_hellhound_bloodhound_watchdog_only"
+      ],
+      "examples": [
+        "Dogcatcher"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Subtype-limited breaker support signal only; it does not anchor strategy or imply target selection."
+    },
+    {
+      "signalId": "breaker.subtype.stun",
+      "group": "breaker_subtype_limited",
+      "sideScope": "runner",
+      "description": "Breaker can break Stun subroutines.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "breakerProfile.restrictions=stun_hellbolt_knockout_only"
+      ],
+      "examples": [
+        "Reflector"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Subtype-limited breaker support signal only; it does not anchor strategy or imply target selection."
+    },
+    {
+      "signalId": "breaker.subtype.watchdog",
+      "group": "breaker_subtype_limited",
+      "sideScope": "runner",
+      "description": "Breaker can break Watchdog subroutines as part of a subtype-limited profile.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "breakerProfile.restrictions=pit_bull_hellhound_bloodhound_watchdog_only"
+      ],
+      "examples": [
+        "Dogcatcher"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Subtype-limited breaker support signal only; it does not anchor strategy or imply target selection."
     },
     {
       "signalId": "breaker.support",
@@ -520,13 +673,11 @@
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
       "sourceKinds": [
-        "breakerProfile.coverage=watchdog"
+        "breakerProfile.coverage=watchdog without breakerProfile.restrictions=pit_bull_hellhound_bloodhound_watchdog_only"
       ],
-      "examples": [
-        "Dogcatcher"
-      ],
+      "examples": [],
       "targetProfileRelevant": false,
-      "notes": "Coverage signal only."
+      "notes": "General Watchdog coverage signal only; Dogcatcher uses subtype-limited Sentry signals instead."
     },
     {
       "signalId": "damage.payoff",

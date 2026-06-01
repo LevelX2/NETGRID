@@ -1127,7 +1127,10 @@
         "coverage": [
           "watchdog"
         ],
-        "pumpCost": 1
+        "pumpCost": 1,
+        "restrictions": [
+          "pit_bull_hellhound_bloodhound_watchdog_only"
+        ]
       }
     },
     {
