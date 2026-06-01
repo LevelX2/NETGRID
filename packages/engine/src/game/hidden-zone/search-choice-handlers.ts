@@ -444,6 +444,9 @@ export function handleLookTopStackShowInstallChoice(
     topCardsAtReveal.some((cardId, index) => currentTopCards[index] !== cardId)
   )
     throw new Error("Die Stack-Spitze hat sich seit dem Reveal veraendert.");
+  const revealedCardDefinitionIds = topCardsAtReveal.map(
+    (cardId) => host.cards.definitionFor(cardId).id,
+  );
   const selectedId = selectedChoiceCardIds(choice, host.playerAction)[0];
   if (
     !selectedId ||
@@ -469,9 +472,17 @@ export function handleLookTopStackShowInstallChoice(
     hiddenZoneBarrier: true,
     hiddenZoneAction: "p3_38_look_top_stack_show_to_corp_then_install_matching",
     sourceDefinitionId,
+    revealCount: topCardsAtReveal.length,
+    shownCardDefinitionIds: revealedCardDefinitionIds.join(","),
+    revealedCardDefinitionIds: revealedCardDefinitionIds.join(","),
+    revealedProgramCount: topCardsAtReveal.filter(
+      (cardId) => host.cards.definitionFor(cardId).type === "program",
+    ).length,
+    programFound: true,
     publicRevealKind: "reveal",
     publicRevealDefinitionId: selectedDefinition.id,
     installed: true,
+    installedProgramDefinitionId: selectedDefinition.id,
     installedProgramCount: 1,
     selfTrashed: true,
     shufflePerformed: true,

@@ -492,6 +492,41 @@ describe("hidden-zone search choice handlers", () => {
     });
   });
 
+  it("resolves p3_38 Mystery Box install choices with revealed stack context", () => {
+    const testHost = host(
+      choice({
+        source: `p3_38.look_top_stack_show_to_corp_then_install_matching:${sourceCardId}:${sourceDefinitionId}:${programId},${hardwareId}:2`,
+        options: [
+          { id: `card_${programId}`, label: "Program", value: programId },
+        ],
+      }),
+      playerAction(`card_${programId}`),
+      { stack: [programId, hardwareId] },
+    );
+
+    const result = handleHiddenZoneSearchChoice(testHost);
+
+    expect(result).toMatchObject({
+      handled: true,
+      deletePendingChoice: true,
+      shufflePerformed: true,
+      installedCardId: programId,
+      sourceTrashCardIds: [sourceCardId],
+    });
+    expect(testHost.legalAction.payload).toMatchObject({
+      hiddenZoneAction: "p3_38_look_top_stack_show_to_corp_then_install_matching",
+      revealCount: 2,
+      revealedCardDefinitionIds: "program_definition,hardware_definition",
+      revealedProgramCount: 1,
+      programFound: true,
+      publicRevealDefinitionId: "program_definition",
+      installedProgramDefinitionId: "program_definition",
+      installedProgramCount: 1,
+      selfTrashed: true,
+      shufflePerformed: true,
+    });
+  });
+
   it("resolves p3_38 Mystery Box Corp review no-program path after confirmation", () => {
     const testHost = host(
       choice({

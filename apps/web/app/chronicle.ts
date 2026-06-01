@@ -641,6 +641,50 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push(source, "Stack", "Vorgezeigt", "Hand", ...(payload.shuffled === true ? ["Shuffle"] : []));
         break;
       }
+      if (hiddenZoneAction === "p3_38_look_top_stack_show_to_corp_then_install_matching") {
+        const source = titleForDefinitionId(sourceDefinitionId) ?? sourceTitle ?? "Mystery Box";
+        const revealCount = numberValue(payload.revealCount);
+        const revealedText = mysteryBoxRevealedStackText(revealCount);
+        const shuffled = payload.shufflePerformed === true || payload.shuffled === true;
+        const selfTrashed = payload.selfTrashed === true;
+        const installed =
+          payload.installed === true ||
+          (numberValue(payload.installedProgramCount) ?? 0) > 0 ||
+          Boolean(stringValue(payload.installedProgramDefinitionId));
+        category = "run";
+        importance = "important";
+        visibility = "public";
+        if (installed) {
+          const programTitle =
+            titleForDefinitionId(stringValue(payload.installedProgramDefinitionId)) ??
+            publicRevealTitleFromPayload(payload) ??
+            cardTitle ??
+            "ein Programm";
+          cardDefinitionId = stringValue(payload.installedProgramDefinitionId) ?? stringValue(payload.publicRevealDefinitionId) ?? cardDefinitionId;
+          title = phrase(subject, `${programTitle} mit ${source} gewählt und im Rig installiert`);
+          description = `${revealedText} der Korp gezeigt; ${source} wurde getrasht${shuffled ? "; der Stack wurde danach gemischt" : ""}.`;
+          chips.push(source, mysteryBoxTopChip(revealCount), "Korp-Reveal", "Installiert", "Source-Trash", ...(shuffled ? ["Shuffle"] : []));
+          break;
+        }
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        title =
+          payload.programFound === false
+            ? phrase(subject, `${source} bestätigt; kein installierbares Programm wurde gefunden`)
+            : phrase(subject, `${source} bestätigt; Runner-Programmauswahl geöffnet`);
+        description =
+          payload.programFound === false
+            ? `${revealedText} der Korp gezeigt; ${source} bleibt installiert${shuffled ? "; der Stack wurde danach gemischt" : ""}.`
+            : `${revealedText} der Korp gezeigt; anschließend wählt der Runner ein installierbares Programm.`;
+        chips.push(
+          source,
+          mysteryBoxTopChip(revealCount),
+          "Korp-Reveal",
+          payload.programFound === false ? "Keine Installation" : "Programmauswahl",
+          selfTrashed ? "Source-Trash" : "Bleibt installiert",
+          ...(shuffled ? ["Shuffle"] : []),
+        );
+        break;
+      }
       if (hiddenZoneAction === "self_modifying_code_install_program") {
         const programTitle = publicRevealTitleFromPayload(payload) ?? cardTitle ?? "ein Programm";
         const installed = payload.installed === true || searchDestination === "runner_rig";
@@ -2671,6 +2715,16 @@ function installBlockedReasonLabel(reason: string | undefined): string | undefin
   if (reason === "insufficient_credits") return "nicht genug Credits";
   if (reason === "unique_already_installed") return "Unique bereits installiert";
   return undefined;
+}
+
+function mysteryBoxRevealedStackText(revealCount: number | undefined): string {
+  if (revealCount === 1) return "Die oberste Stack-Karte wurde";
+  if (revealCount && revealCount > 1) return `Die obersten ${revealCount} Stack-Karten wurden`;
+  return "Die gezeigten Stack-Karten wurden";
+}
+
+function mysteryBoxTopChip(revealCount: number | undefined): string {
+  return revealCount && revealCount > 0 ? `Top ${revealCount}` : "Top 5";
 }
 
 function abilityTextFromLabel(label: string | undefined, cardTitle: string | undefined): string {

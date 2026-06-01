@@ -1,14 +1,14 @@
 ---
 activityId: act-2026-06-01-mystery-box-chronicle-run-choice
-status: inbox
+status: done
 kind: fix
 area: web
 priority: high
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-06-01
-startedAt:
-completedAt:
+startedAt: 2026-06-01
+completedAt: 2026-06-01
 branch:
 releaseTarget:
 blockedBy:
@@ -16,8 +16,18 @@ blockedBy:
 relatedActivities:
   - act-2026-05-19-self-modifying-code-choice-chronicle
   - act-2026-05-23-synchronized-attack-hq-chronicle-summary
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+  - packages/engine/src/game/hidden-zone/search-choice-handlers.ts
+  - packages/engine/src/game/hidden-zone/search-choice-handlers.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/hidden-zone/search-choice-handlers.test.ts -t "p3_38 Mystery Box"
+  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts -t "Mystery Box"
+  - corepack pnpm --filter @netgrid/server exec vitest run src/multiplayer.test.ts -t "Mystery Box review"
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - git diff --check
 ---
 
 # Mystery Box: Chronik zeigt Run-Kontext und konkrete Programmauswahl
@@ -58,13 +68,13 @@ Die Chronik soll `Mystery Box` während eines Runs korrekt unter dem laufenden R
 
 ## Akzeptanzkriterien
 
-- [ ] Die Mystery-Box-Programmauswahl rendert nicht mehr als `Die Runner KI hat eine Entscheidung beantwortet.`
-- [ ] Bei erfolgreicher Installation nennt die Chronik das gewählte Programm und die Installation im Rig.
-- [ ] Die Meldung enthält side-sichere Hinweise auf Korp-Reveal, Source-Trash und Stack-Shuffle.
-- [ ] Bei No-Program-Fall erscheint eine konkrete Meldung ohne generischen Choice-Fallback.
-- [ ] Der Mystery-Box-Choice-Eintrag bleibt während eines Runs auf R&D in der Run-Gruppe beziehungsweise Run-Einrückung.
-- [ ] Existing-Chroniktests für generische Fallbacks bleiben erhalten; nur Mystery-Box-spezifische Payloads werden konkret formatiert.
-- [ ] Fokussierte Web-Tests decken Runner-KI-Programmauswahl und No-Program-Fall ab.
+- [x] Die Mystery-Box-Programmauswahl rendert nicht mehr als `Die Runner KI hat eine Entscheidung beantwortet.`
+- [x] Bei erfolgreicher Installation nennt die Chronik das gewählte Programm und die Installation im Rig.
+- [x] Die Meldung enthält side-sichere Hinweise auf Korp-Reveal, Source-Trash und Stack-Shuffle.
+- [x] Bei No-Program-Fall erscheint eine konkrete Meldung ohne generischen Choice-Fallback.
+- [x] Der Mystery-Box-Choice-Eintrag bleibt während eines Runs auf R&D in der Run-Gruppe beziehungsweise Run-Einrückung.
+- [x] Existing-Chroniktests für generische Fallbacks bleiben erhalten; nur Mystery-Box-spezifische Payloads werden konkret formatiert.
+- [x] Fokussierte Web-Tests decken Runner-KI-Programmauswahl und No-Program-Fall ab.
 
 ## Umsetzungshinweise
 
@@ -77,4 +87,8 @@ Die Chronik soll `Mystery Box` während eines Runs korrekt unter dem laufenden R
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt: Die Web-Chronik formatiert `p3_38_look_top_stack_show_to_corp_then_install_matching` jetzt Mystery-Box-spezifisch. Die Runner-KI-Programmauswahl nennt das installierte Programm, Installation im Rig, Korp-Reveal, Source-Trash und Stack-Shuffle. Der No-Program-Pfad zeigt eine konkrete Korp-Bestätigung mit Korp-Reveal, weiterhin installierter `Mystery Box` und Stack-Shuffle statt des generischen Choice-Fallbacks. Beide Mystery-Box-Choice-Einträge werden als `run` kategorisiert und bleiben damit während eines aktiven Runs in der Run-Gruppe.
+
+Ergänzt wurde außerdem ein side-sicherer finaler Engine-Payload für den p3_38-Mystery-Box-Install-Choice (`revealCount`, gezeigte Definitionen, `installedProgramDefinitionId`), damit die Chronik ohne Textheuristik formatieren kann.
+
+Checks: fokussierte Engine-, Web- und Server-Regressionen sowie `@netgrid/web` typecheck und `git diff --check` bestanden. `corepack pnpm --filter @netgrid/engine typecheck` wurde ausgeführt und scheitert weiterhin an einem bestehenden, nicht paketbezogenen Fixture-Typfehler in `packages/engine/src/game/card-implementation/trace-runtime-deps.test.ts` (`addHackerTrackerTraceCounters`/`resolveTraceTrashRunnerResourceSuccess` fehlen im Test-Stub).

@@ -534,6 +534,62 @@ describe("formatChronicleEvent", () => {
     expect(resolved.title).not.toContain("Entscheidung beantwortet");
   });
 
+  it("shows Mystery Box Runner-AI install choices with selected program and run context", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        hiddenZoneAction: "p3_38_look_top_stack_show_to_corp_then_install_matching",
+        sourceDefinitionId: "onr_v1_043_mystery-box",
+        revealCount: 5,
+        revealedCardDefinitionIds: "simple_decoder,simple_fracter",
+        publicRevealDefinitionId: "simple_decoder",
+        installedProgramDefinitionId: "simple_decoder",
+        installed: true,
+        installedProgramCount: 1,
+        selfTrashed: true,
+        shufflePerformed: true,
+        shuffled: true,
+        aiReasonCode: "runner_stack_top_program_install"
+      }),
+      "corp"
+    );
+
+    expect(item.title).toBe("Die Runner-KI hat Simple Decoder mit Mystery Box gewählt und im Rig installiert.");
+    expect(item.description).toBe("Die obersten 5 Stack-Karten wurden der Korp gezeigt; Mystery Box wurde getrasht; der Stack wurde danach gemischt.");
+    expect(item.category).toBe("run");
+    expect(item.groupLabel).toBe("Run");
+    expect(item.cardDefinitionId).toBe("simple_decoder");
+    expect(item.chips).toEqual(expect.arrayContaining(["Runner", "KI", "Mystery Box", "Top 5", "Korp-Reveal", "Installiert", "Source-Trash", "Shuffle"]));
+    expect(item.title).not.toContain("Entscheidung beantwortet");
+  });
+
+  it("shows Mystery Box no-program reviews without the generic choice fallback", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        hiddenZoneAction: "p3_38_look_top_stack_show_to_corp_then_install_matching",
+        sourceDefinitionId: "onr_v1_043_mystery-box",
+        revealCount: 5,
+        revealedCardDefinitionIds: "simple_barrier_ice,simple_economy_event",
+        revealedProgramCount: 0,
+        programFound: false,
+        installedProgramCount: 0,
+        selfTrashed: false,
+        shufflePerformed: true,
+        shuffled: true
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Die Korp hat Mystery Box bestätigt; kein installierbares Programm wurde gefunden.");
+    expect(item.description).toBe("Die obersten 5 Stack-Karten wurden der Korp gezeigt; Mystery Box bleibt installiert; der Stack wurde danach gemischt.");
+    expect(item.category).toBe("run");
+    expect(item.groupLabel).toBe("Run");
+    expect(item.cardDefinitionId).toBe("onr_v1_043_mystery-box");
+    expect(item.chips).toEqual(expect.arrayContaining(["Korp", "Mystery Box", "Top 5", "Korp-Reveal", "Keine Installation", "Bleibt installiert", "Shuffle"]));
+    expect(item.title).not.toContain("Entscheidung beantwortet");
+  });
+
   it("shows Systematic Layoffs advancement choices with target context", () => {
     const resolved = formatChronicleEvent(
       makeEvent("resolve_choice", {
