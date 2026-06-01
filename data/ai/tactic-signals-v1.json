@@ -1,14 +1,16 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI017",
+  "taskId": "AI018",
   "generatedAt": "2026-06-01",
-  "description": "Controlled V1 catalog for read-only tactic signals derived from structured AI hints. Tactic signals describe functional card utility; strategy anchors and target/choice preferences stay separate.",
+  "description": "Controlled V1 catalog for read-only tactic signals derived from structured AI hints. AI018 keeps tactic signals separate from strategy anchors and adds the complete Icebreaker/Breaker-support sweep.",
   "signalPolicy": {
     "tacticSignal": "Functional card utility: what the AI can use the card for.",
     "strategyAnchor": "Large deck line: which strategy the card can anchor or materially support.",
     "targetProfile": "Side-safe target or choice preference metadata; not a tactic signal.",
     "runtimeEffect": "none",
-    "forbiddenStaticSignals": ["anti.ice.*"]
+    "forbiddenStaticSignals": [
+      "anti.ice.*"
+    ]
   },
   "signals": [
     {
@@ -18,9 +20,16 @@
       "description": "Provides extra HQ access or HQ multiaccess pressure.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["runner.hq_pressure", "runner.interface_closeout"],
-      "sourceKinds": ["effects.kind=multiaccess scope=hq"],
-      "examples": ["Executive Wiretaps"],
+      "allowedStrategyAnchors": [
+        "runner.hq_pressure",
+        "runner.interface_closeout"
+      ],
+      "sourceKinds": [
+        "effects.kind=multiaccess scope=hq"
+      ],
+      "examples": [
+        "Executive Wiretaps"
+      ],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable because it directly changes central access payoff."
     },
@@ -31,9 +40,16 @@
       "description": "Punishes access through an ambush or persistent access-triggered burden.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.ambush_bluff"],
-      "sourceKinds": ["effects.kind=access_punish", "effects.kind=persistent_counter_effect timing=on_access"],
-      "examples": ["Doppelganger Antibody"],
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "sourceKinds": [
+        "effects.kind=access_punish",
+        "effects.kind=persistent_counter_effect timing=on_access"
+      ],
+      "examples": [
+        "Doppelganger Antibody"
+      ],
       "targetProfileRelevant": false,
       "notes": "Persistent runner tax is represented by separate tax.runner_* support signals."
     },
@@ -44,9 +60,16 @@
       "description": "Provides extra R&D access or R&D multiaccess pressure.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["runner.interface_closeout", "runner.rnd_pressure"],
-      "sourceKinds": ["effects.kind=multiaccess scope=rnd"],
-      "examples": ["Rush Hour"],
+      "allowedStrategyAnchors": [
+        "runner.interface_closeout",
+        "runner.rnd_pressure"
+      ],
+      "sourceKinds": [
+        "effects.kind=multiaccess scope=rnd"
+      ],
+      "examples": [
+        "Rush Hour"
+      ],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable because it directly changes central access payoff."
     },
@@ -58,8 +81,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["breakerProfile.coverage=ap"],
-      "examples": ["Flak"],
+      "sourceKinds": [
+        "breakerProfile.coverage=ap"
+      ],
+      "examples": [
+        "Flak"
+      ],
       "targetProfileRelevant": false,
       "notes": "Coverage signal only; it must not anchor a deck strategy by itself."
     },
@@ -71,7 +98,9 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["breakerProfile.coverage=black_ice"],
+      "sourceKinds": [
+        "breakerProfile.coverage=black_ice"
+      ],
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "Reserved coverage signal; no current strategy anchor."
@@ -84,8 +113,13 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["breakerProfile.coverage=code_gate"],
-      "examples": ["Codecracker", "Skeleton Passkeys"],
+      "sourceKinds": [
+        "breakerProfile.coverage=code_gate"
+      ],
+      "examples": [
+        "Codecracker",
+        "Skeleton Passkeys"
+      ],
       "targetProfileRelevant": false,
       "notes": "Coverage signal only; not a synonym for anti.ice.code_gate."
     },
@@ -97,8 +131,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["breakerProfile.configurableCoverage"],
-      "examples": ["Morphing Tool"],
+      "sourceKinds": [
+        "breakerProfile.configurableCoverage"
+      ],
+      "examples": [
+        "Morphing Tool"
+      ],
       "targetProfileRelevant": true,
       "notes": "Choice details belong in a TargetProfile or ChoiceProfile, not in more signal names."
     },
@@ -110,7 +148,9 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["breakerProfile.emergencyCoverage"],
+      "sourceKinds": [
+        "breakerProfile.emergencyCoverage"
+      ],
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "Reserved controlled signal; AI017 does not use it for generic universal breakers."
@@ -123,8 +163,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=search timing=during_ice_encounter target=program"],
-      "examples": ["Airport Locker"],
+      "sourceKinds": [
+        "effects.kind=search timing=during_ice_encounter target=program"
+      ],
+      "examples": [
+        "Airport Locker"
+      ],
       "targetProfileRelevant": true,
       "notes": "Search target quality remains a TargetProfile concern."
     },
@@ -136,8 +180,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["breakerProfile.reconfigurableType"],
-      "examples": ["Morphing Tool"],
+      "sourceKinds": [
+        "breakerProfile.reconfigurableType"
+      ],
+      "examples": [
+        "Morphing Tool"
+      ],
       "targetProfileRelevant": true,
       "notes": "Mode-choice preference stays outside tactic-signal derivation."
     },
@@ -149,8 +197,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["breakerProfile.sideEffects=random_failure"],
-      "examples": ["Bartmoss Memorial Icebreaker"],
+      "sourceKinds": [
+        "breakerProfile.sideEffects=random_failure"
+      ],
+      "examples": [
+        "Bartmoss Memorial Icebreaker"
+      ],
       "targetProfileRelevant": false,
       "notes": "Risk is diagnostic support and does not anchor a strategy."
     },
@@ -162,8 +214,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=search timing=during_ice_encounter target=program"],
-      "examples": ["Airport Locker"],
+      "sourceKinds": [
+        "effects.kind=search timing=during_ice_encounter target=program"
+      ],
+      "examples": [
+        "Airport Locker"
+      ],
       "targetProfileRelevant": true,
       "notes": "This is narrower than generic setup.search."
     },
@@ -175,8 +231,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["breakerProfile.sideEffects=program_trash_risk"],
-      "examples": ["Bartmoss Memorial Icebreaker"],
+      "sourceKinds": [
+        "breakerProfile.sideEffects=program_trash_risk"
+      ],
+      "examples": [
+        "Bartmoss Memorial Icebreaker"
+      ],
       "targetProfileRelevant": false,
       "notes": "Self-trash risk stays separate from coverage."
     },
@@ -188,8 +248,13 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["breakerProfile.coverage=sentry"],
-      "examples": ["Black Widow", "Big Frackin' Gun"],
+      "sourceKinds": [
+        "breakerProfile.coverage=sentry"
+      ],
+      "examples": [
+        "Black Widow",
+        "Big Frackin' Gun"
+      ],
       "targetProfileRelevant": false,
       "notes": "Coverage signal only; not a synonym for anti.ice.sentry."
     },
@@ -201,8 +266,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["breakerProfile.strengthBonusVsChosenIce"],
-      "examples": ["Black Widow"],
+      "sourceKinds": [
+        "breakerProfile.strengthBonusVsChosenIce"
+      ],
+      "examples": [
+        "Black Widow"
+      ],
       "targetProfileRelevant": true,
       "notes": "The chosen ICE preference belongs in TargetProfile."
     },
@@ -210,14 +279,23 @@
       "signalId": "breaker.support",
       "group": "breaker_support",
       "sideScope": "runner",
-      "description": "Supports other breakers by changing ICE or encounter efficiency.",
+      "description": "Supports breaker use by changing icebreaker strength, ICE strength, or encounter break-cost efficiency.",
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=remote_protection resource=strength scope=ice"],
-      "examples": ["Clown"],
+      "sourceKinds": [
+        "effects.kind=remote_protection resource=strength scope=ice",
+        "effects.kind=global_modifier resource=strength scope=ice",
+        "effects.kind=global_modifier resource=strength scope=installed_program target=icebreaker"
+      ],
+      "examples": [
+        "Clown",
+        "Lockjaw",
+        "Personal Touch, The",
+        "Pattel's Virus"
+      ],
       "targetProfileRelevant": false,
-      "notes": "Support-only helper signal; it does not imply breaker coverage."
+      "notes": "Support-only helper signal; it does not imply breaker coverage or a breaker-search strategy anchor."
     },
     {
       "signalId": "breaker.targeted_ice_bonus",
@@ -227,8 +305,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["breakerProfile.targetedIceBonus"],
-      "examples": ["Black Widow"],
+      "sourceKinds": [
+        "breakerProfile.targetedIceBonus"
+      ],
+      "examples": [
+        "Black Widow"
+      ],
       "targetProfileRelevant": true,
       "notes": "The targeting preference is not encoded as a signal."
     },
@@ -240,8 +322,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["breakerProfile.coverage=trace"],
-      "examples": ["Replicator"],
+      "sourceKinds": [
+        "breakerProfile.coverage=trace"
+      ],
+      "examples": [
+        "Replicator"
+      ],
       "targetProfileRelevant": false,
       "notes": "Coverage signal only."
     },
@@ -253,8 +339,13 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["breakerProfile.coverage=universal"],
-      "examples": ["Bartmoss Memorial Icebreaker", "Krash"],
+      "sourceKinds": [
+        "breakerProfile.coverage=universal"
+      ],
+      "examples": [
+        "Bartmoss Memorial Icebreaker",
+        "Krash"
+      ],
       "targetProfileRelevant": false,
       "notes": "Use configurable coverage for one-at-a-time type choice instead of universal."
     },
@@ -266,8 +357,13 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["breakerProfile.coverage=unknown_special"],
-      "examples": ["Morphing Tool", "Fubar"],
+      "sourceKinds": [
+        "breakerProfile.coverage=unknown_special"
+      ],
+      "examples": [
+        "Morphing Tool",
+        "Fubar"
+      ],
       "targetProfileRelevant": true,
       "notes": "AI017 keeps it controlled but prefers configurable/reconfigurable signals where evidence exists."
     },
@@ -279,8 +375,13 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["breakerProfile.coverage=wall"],
-      "examples": ["Dwarf", "Corrosion"],
+      "sourceKinds": [
+        "breakerProfile.coverage=wall"
+      ],
+      "examples": [
+        "Dwarf",
+        "Corrosion"
+      ],
       "targetProfileRelevant": false,
       "notes": "Coverage signal only; not a synonym for anti.ice.wall."
     },
@@ -292,8 +393,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["breakerProfile.coverage=watchdog"],
-      "examples": ["Dogcatcher"],
+      "sourceKinds": [
+        "breakerProfile.coverage=watchdog"
+      ],
+      "examples": [
+        "Dogcatcher"
+      ],
       "targetProfileRelevant": false,
       "notes": "Coverage signal only."
     },
@@ -304,9 +409,16 @@
       "description": "Deals or converts into Runner damage as a payoff.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.damage_kill"],
-      "sourceKinds": ["effects.kind=damage", "effects.kind=tag_punish_payoff resource=damage"],
-      "examples": ["Scorched Earth"],
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "sourceKinds": [
+        "effects.kind=damage",
+        "effects.kind=tag_punish_payoff resource=damage"
+      ],
+      "examples": [
+        "Scorched Earth"
+      ],
       "targetProfileRelevant": false,
       "notes": "Damage anchor requires Corp side and Runner scope."
     },
@@ -317,9 +429,17 @@
       "description": "Prevents damage or flatline risk.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["runner.survival_defense"],
-      "sourceKinds": ["effects.kind=damage_prevention", "effects.kind=flatline_prevention"],
-      "examples": ["Skullcap", "Bolt-Hole"],
+      "allowedStrategyAnchors": [
+        "runner.survival_defense"
+      ],
+      "sourceKinds": [
+        "effects.kind=damage_prevention",
+        "effects.kind=flatline_prevention"
+      ],
+      "examples": [
+        "Skullcap",
+        "Bolt-Hole"
+      ],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable as survival defense."
     },
@@ -330,9 +450,15 @@
       "description": "Prevents or avoids tags.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["runner.survival_defense"],
-      "sourceKinds": ["effects.kind=tag_prevention"],
-      "examples": ["Fall Guy"],
+      "allowedStrategyAnchors": [
+        "runner.survival_defense"
+      ],
+      "sourceKinds": [
+        "effects.kind=tag_prevention"
+      ],
+      "examples": [
+        "Fall Guy"
+      ],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable as survival defense."
     },
@@ -343,9 +469,17 @@
       "description": "Improves trace defense or link.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["runner.survival_defense"],
-      "sourceKinds": ["effects.kind=trace_defense", "effects.kind=link"],
-      "examples": ["The Deck", "Runner Sensei"],
+      "allowedStrategyAnchors": [
+        "runner.survival_defense"
+      ],
+      "sourceKinds": [
+        "effects.kind=trace_defense",
+        "effects.kind=link"
+      ],
+      "examples": [
+        "The Deck",
+        "Runner Sensei"
+      ],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable as survival defense."
     },
@@ -357,8 +491,13 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=action_economy"],
-      "examples": ["Broker", "Short-Term Contract"],
+      "sourceKinds": [
+        "effects.kind=action_economy"
+      ],
+      "examples": [
+        "Broker",
+        "Short-Term Contract"
+      ],
       "targetProfileRelevant": false,
       "notes": "Economy support signal only."
     },
@@ -369,8 +508,12 @@
       "description": "Advanceable economy or reserve support.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.economy_rez_reserve"],
-      "sourceKinds": ["effects.kind=advanceable_economy"],
+      "allowedStrategyAnchors": [
+        "corp.economy_rez_reserve"
+      ],
+      "sourceKinds": [
+        "effects.kind=advanceable_economy"
+      ],
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable only through Corp reserve/economy scope."
@@ -383,8 +526,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=advance_burst"],
-      "examples": ["Project Consultants"],
+      "sourceKinds": [
+        "effects.kind=advance_burst"
+      ],
+      "examples": [
+        "Project Consultants"
+      ],
       "targetProfileRelevant": false,
       "notes": "Burst economy is not by itself fast advance."
     },
@@ -396,8 +543,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=counter_economy"],
-      "examples": ["Loan from Chiba"],
+      "sourceKinds": [
+        "effects.kind=counter_economy"
+      ],
+      "examples": [
+        "Loan from Chiba"
+      ],
       "targetProfileRelevant": false,
       "notes": "Counter economy is broad support; opposing tax uses separate tax signals."
     },
@@ -409,8 +560,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=finite_economy_pool"],
-      "examples": ["Detroit Police Contract"],
+      "sourceKinds": [
+        "effects.kind=finite_economy_pool"
+      ],
+      "examples": [
+        "Detroit Police Contract"
+      ],
       "targetProfileRelevant": false,
       "notes": "Pool size remains a mechanical detail."
     },
@@ -422,8 +577,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=economy"],
-      "examples": ["ACME Savings and Loan"],
+      "sourceKinds": [
+        "effects.kind=economy"
+      ],
+      "examples": [
+        "ACME Savings and Loan"
+      ],
       "targetProfileRelevant": false,
       "notes": "Generic economy deliberately does not create a strategy anchor."
     },
@@ -435,10 +594,35 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=recurring_economy"],
-      "examples": ["Investment Firm"],
+      "sourceKinds": [
+        "effects.kind=recurring_economy"
+      ],
+      "examples": [
+        "Investment Firm"
+      ],
       "targetProfileRelevant": false,
       "notes": "Recurring economy stays support-only."
+    },
+    {
+      "signalId": "economy.recurring_breaker_credit",
+      "group": "breaker_support",
+      "sideScope": "runner",
+      "description": "Provides recurring credits restricted to using icebreakers or killer icebreakers during runs.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=recurring_economy resource=credits scope=runner target=icebreaker",
+        "effects.kind=recurring_economy resource=credits scope=runner target=killer"
+      ],
+      "examples": [
+        "Cloak",
+        "Artemis 2020",
+        "Raven Microcyb Owl",
+        "Eurocorpse (TM) Spin Chip"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Credit-source availability is public support metadata; actual payment-source choice remains LegalAction/runtime context."
     },
     {
       "signalId": "economy.rez_discount",
@@ -447,9 +631,15 @@
       "description": "Discounts or supports rez costs.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.economy_rez_reserve"],
-      "sourceKinds": ["effects.kind=rez_discount"],
-      "examples": ["Priority Requisition"],
+      "allowedStrategyAnchors": [
+        "corp.economy_rez_reserve"
+      ],
+      "sourceKinds": [
+        "effects.kind=rez_discount"
+      ],
+      "examples": [
+        "Priority Requisition"
+      ],
       "targetProfileRelevant": true,
       "notes": "Target choice for what to rez is not encoded as a signal."
     },
@@ -461,8 +651,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=start_of_turn_economy"],
-      "examples": ["Campaign assets"],
+      "sourceKinds": [
+        "effects.kind=start_of_turn_economy"
+      ],
+      "examples": [
+        "Campaign assets"
+      ],
       "targetProfileRelevant": false,
       "notes": "Timing detail stays mechanical."
     },
@@ -474,8 +668,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=trace_credit"],
-      "examples": ["Pocket Virtual Reality"],
+      "sourceKinds": [
+        "effects.kind=trace_credit"
+      ],
+      "examples": [
+        "Pocket Virtual Reality"
+      ],
       "targetProfileRelevant": false,
       "notes": "Trace payment preference remains a tactical choice."
     },
@@ -486,11 +684,18 @@
       "description": "Credits dedicated to trashing accessed cards.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["runner.remote_trash"],
-      "sourceKinds": ["effects.kind=trash_credit"],
-      "examples": ["Cloak", "Invisibility"],
+      "allowedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "sourceKinds": [
+        "effects.kind=trash_credit"
+      ],
+      "examples": [
+        "Poltergeist",
+        "Scatter Shot"
+      ],
       "targetProfileRelevant": false,
-      "notes": "Anchor-capable because it directly supports remote trash conversion."
+      "notes": "Runner remote-trash credit support only. Icebreaker-use credits are economy.recurring_breaker_credit, not trash-credit economy."
     },
     {
       "signalId": "ice.etr",
@@ -499,9 +704,15 @@
       "description": "End-the-run ICE or ETR encounter effect.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.ice_tax_glacier"],
-      "sourceKinds": ["effects.kind=etr"],
-      "examples": ["Walls with ETR"],
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "effects.kind=etr"
+      ],
+      "examples": [
+        "Walls with ETR"
+      ],
       "targetProfileRelevant": false,
       "notes": "Broad but side- and scope-gated."
     },
@@ -512,9 +723,15 @@
       "description": "ICE creates pressure in a later encounter or future run window.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.ice_tax_glacier"],
-      "sourceKinds": ["effects.kind=future_encounter_effect"],
-      "examples": ["Canis Major"],
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "effects.kind=future_encounter_effect"
+      ],
+      "examples": [
+        "Canis Major"
+      ],
       "targetProfileRelevant": false,
       "notes": "Does not imply Runner run-event tempo."
     },
@@ -525,9 +742,16 @@
       "description": "Modifies ICE strength for Corp defense or tax.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.ice_tax_glacier"],
-      "sourceKinds": ["effects.kind=global_modifier resource=strength scope=ice", "effects.kind=remote_protection resource=strength scope=ice"],
-      "examples": ["Black Ice Quality Assurance"],
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "effects.kind=global_modifier resource=strength scope=ice",
+        "effects.kind=remote_protection resource=strength scope=ice"
+      ],
+      "examples": [
+        "Black Ice Quality Assurance"
+      ],
       "targetProfileRelevant": false,
       "notes": "Corp-side modifier anchor only; Runner-side reductions use ice.strength_reduction."
     },
@@ -535,14 +759,20 @@
       "signalId": "ice.strength_reduction",
       "group": "runner_ice_efficiency_support",
       "sideScope": "runner",
-      "description": "Reduces encountered ICE strength for the Runner.",
+      "description": "Reduces ICE strength for Runner-side break-cost support.",
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=remote_protection resource=strength scope=ice"],
-      "examples": ["Clown"],
+      "sourceKinds": [
+        "effects.kind=remote_protection resource=strength scope=ice",
+        "effects.kind=global_modifier resource=strength scope=ice"
+      ],
+      "examples": [
+        "Clown",
+        "Pattel's Virus"
+      ],
       "targetProfileRelevant": false,
-      "notes": "Support-only run efficiency signal."
+      "notes": "Runner-side ICE-strength reduction support; it does not create anti.ice.* signals."
     },
     {
       "signalId": "ice.subroutine_modifier",
@@ -551,9 +781,15 @@
       "description": "Modifies ICE subroutine count or subroutine behavior.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.ice_tax_glacier"],
-      "sourceKinds": ["effects.kind=global_modifier resource=subroutines scope=ice"],
-      "examples": ["Ice Transmutation"],
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "effects.kind=global_modifier resource=subroutines scope=ice"
+      ],
+      "examples": [
+        "Ice Transmutation"
+      ],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable only with Corp side/scope gates."
     },
@@ -565,8 +801,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=expose_info"],
-      "examples": ["I Spy"],
+      "sourceKinds": [
+        "effects.kind=expose_info"
+      ],
+      "examples": [
+        "I Spy"
+      ],
       "targetProfileRelevant": true,
       "notes": "Information target choice remains outside tactic signals."
     },
@@ -577,9 +817,15 @@
       "description": "Provides HQ information to support HQ pressure.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["runner.hq_pressure"],
-      "sourceKinds": ["effects.kind=hq_info scope=hq"],
-      "examples": ["Boardwalk"],
+      "allowedStrategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "sourceKinds": [
+        "effects.kind=hq_info scope=hq"
+      ],
+      "examples": [
+        "Boardwalk"
+      ],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable when side- and scope-gated."
     },
@@ -590,9 +836,15 @@
       "description": "Provides R&D topdeck information.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["runner.rnd_pressure"],
-      "sourceKinds": ["effects.kind=topdeck_info scope=rnd"],
-      "examples": ["Deep Thought"],
+      "allowedStrategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "sourceKinds": [
+        "effects.kind=topdeck_info scope=rnd"
+      ],
+      "examples": [
+        "Deep Thought"
+      ],
       "targetProfileRelevant": false,
       "notes": "Does not expose hidden order in the signal."
     },
@@ -603,9 +855,15 @@
       "description": "Taxes or punishes agenda steals from a remote.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.remote_scoring"],
-      "sourceKinds": ["remoteRole.kind=agenda_steal_tax"],
-      "examples": ["Red Herrings"],
+      "allowedStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "remoteRole.kind=agenda_steal_tax"
+      ],
+      "examples": [
+        "Red Herrings"
+      ],
       "targetProfileRelevant": false,
       "notes": "Remote strategy anchor is side-gated."
     },
@@ -616,9 +874,15 @@
       "description": "Remote ambush or trap role.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.ambush_bluff"],
-      "sourceKinds": ["remoteRole.kind=ambush"],
-      "examples": ["Setup!"],
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "sourceKinds": [
+        "remoteRole.kind=ambush"
+      ],
+      "examples": [
+        "Setup!"
+      ],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable through Corp remote-role gate."
     },
@@ -629,9 +893,15 @@
       "description": "Remote asset or upgrade provides economy.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.asset_economy"],
-      "sourceKinds": ["remoteRole.kind=asset_economy"],
-      "examples": ["ACME Savings and Loan"],
+      "allowedStrategyAnchors": [
+        "corp.asset_economy"
+      ],
+      "sourceKinds": [
+        "remoteRole.kind=asset_economy"
+      ],
+      "examples": [
+        "ACME Savings and Loan"
+      ],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable only for Corp asset-economy role."
     },
@@ -642,8 +912,12 @@
       "description": "Remote bait role that can support ambush/bluff lines.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.ambush_bluff"],
-      "sourceKinds": ["remoteRole.kind=bait"],
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "sourceKinds": [
+        "remoteRole.kind=bait"
+      ],
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "Reserved but controlled remote-role signal."
@@ -655,9 +929,15 @@
       "description": "Protects a scoring remote or improves agenda conversion safety.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.remote_scoring"],
-      "sourceKinds": ["remoteRole.kind=scoring_protection"],
-      "examples": ["Encoder, Inc."],
+      "allowedStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "remoteRole.kind=scoring_protection"
+      ],
+      "examples": [
+        "Encoder, Inc."
+      ],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable through Corp remote-role gate."
     },
@@ -665,14 +945,23 @@
       "signalId": "run.break_cost_support",
       "group": "runner_ice_efficiency_support",
       "sideScope": "runner",
-      "description": "Improves run efficiency by lowering practical break costs.",
+      "description": "Reduces or offsets the practical cost of breaking ICE during runs.",
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=remote_protection resource=strength scope=ice"],
-      "examples": ["Clown"],
+      "sourceKinds": [
+        "effects.kind=remote_protection resource=strength scope=ice",
+        "effects.kind=global_modifier resource=strength scope=ice",
+        "effects.kind=global_modifier resource=strength scope=installed_program target=icebreaker"
+      ],
+      "examples": [
+        "Clown",
+        "Lockjaw",
+        "Personal Touch, The",
+        "Pattel's Virus"
+      ],
       "targetProfileRelevant": false,
-      "notes": "The signal describes functional support, not a planner scoring change."
+      "notes": "Break-cost support only; normal breaker coverage remains separate and support-only."
     },
     {
       "signalId": "run.event_tempo",
@@ -681,8 +970,12 @@
       "description": "Creates short-horizon run-event tempo or future run pressure.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["runner.run_event_tempo"],
-      "sourceKinds": ["effects.kind=future_run_effect"],
+      "allowedStrategyAnchors": [
+        "runner.run_event_tempo"
+      ],
+      "sourceKinds": [
+        "effects.kind=future_run_effect"
+      ],
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable but currently rare."
@@ -694,8 +987,12 @@
       "description": "Provides extra Runner actions for run tempo.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["runner.run_event_tempo"],
-      "sourceKinds": ["effects.kind=extra_action"],
+      "allowedStrategyAnchors": [
+        "runner.run_event_tempo"
+      ],
+      "sourceKinds": [
+        "effects.kind=extra_action"
+      ],
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "Side-gated to prevent Corp extra-action wrong-side anchors."
@@ -707,8 +1004,12 @@
       "description": "Locks or shapes a run path/server for tempo pressure.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["runner.run_event_tempo"],
-      "sourceKinds": ["effects.kind=run_lock"],
+      "allowedStrategyAnchors": [
+        "runner.run_event_tempo"
+      ],
+      "sourceKinds": [
+        "effects.kind=run_lock"
+      ],
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "Target server details belong in structured descriptors."
@@ -720,9 +1021,16 @@
       "description": "Provides true advancement-counter or score-window acceleration.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.fast_advance"],
-      "sourceKinds": ["effects.kind=advance_burst", "effects.kind=score_acceleration resource=advancement_counters"],
-      "examples": ["Networked Center"],
+      "allowedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "sourceKinds": [
+        "effects.kind=advance_burst",
+        "effects.kind=score_acceleration resource=advancement_counters"
+      ],
+      "examples": [
+        "Networked Center"
+      ],
       "targetProfileRelevant": true,
       "notes": "This is the fast-advance anchor, not generic scored agenda utility."
     },
@@ -734,8 +1042,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=scored_agenda_action"],
-      "examples": ["On-Call Solo Team"],
+      "sourceKinds": [
+        "effects.kind=scored_agenda_action"
+      ],
+      "examples": [
+        "On-Call Solo Team"
+      ],
       "targetProfileRelevant": false,
       "notes": "AI016 intentionally removed automatic fast-advance anchoring."
     },
@@ -747,7 +1059,10 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=draw", "effects.kind=shuffle_draw"],
+      "sourceKinds": [
+        "effects.kind=draw",
+        "effects.kind=shuffle_draw"
+      ],
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "Draw is support-only in this catalog."
@@ -760,7 +1075,9 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=install_discount"],
+      "sourceKinds": [
+        "effects.kind=install_discount"
+      ],
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "Install target and timing are target-profile concerns."
@@ -773,8 +1090,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=install target=program"],
-      "examples": ["Airport Locker"],
+      "sourceKinds": [
+        "effects.kind=install target=program"
+      ],
+      "examples": [
+        "Airport Locker"
+      ],
       "targetProfileRelevant": true,
       "notes": "This signal does not choose the installed program."
     },
@@ -785,9 +1106,15 @@
       "description": "Recovers cards or programs that can rebuild Runner setup.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["runner.breaker_search"],
-      "sourceKinds": ["effects.kind=card_recovery"],
-      "examples": ["Forgotten Backup Chip"],
+      "allowedStrategyAnchors": [
+        "runner.search.breaker"
+      ],
+      "sourceKinds": [
+        "effects.kind=card_recovery"
+      ],
+      "examples": [
+        "Forgotten Backup Chip"
+      ],
       "targetProfileRelevant": true,
       "notes": "Anchor-capable only in Runner recovery/search context."
     },
@@ -798,9 +1125,16 @@
       "description": "Searches or tutors cards for Runner setup.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["runner.breaker_search"],
-      "sourceKinds": ["effects.kind=search"],
-      "examples": ["Self-Modifying Code", "Airport Locker"],
+      "allowedStrategyAnchors": [
+        "runner.search.breaker"
+      ],
+      "sourceKinds": [
+        "effects.kind=search"
+      ],
+      "examples": [
+        "Self-Modifying Code",
+        "Airport Locker"
+      ],
       "targetProfileRelevant": true,
       "notes": "Generic search can anchor breaker-search strategy; target preferences remain separate."
     },
@@ -811,9 +1145,16 @@
       "description": "Payoff that punishes tagged Runner state.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.tag_trace_punish"],
-      "sourceKinds": ["effects.kind=tag_punish_payoff", "remoteRole.kind=tag_punish_asset"],
-      "examples": ["Closed Accounts"],
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "effects.kind=tag_punish_payoff",
+        "remoteRole.kind=tag_punish_asset"
+      ],
+      "examples": [
+        "Closed Accounts"
+      ],
       "targetProfileRelevant": false,
       "notes": "Damage-kill anchoring requires separate damage.payoff evidence."
     },
@@ -824,9 +1165,15 @@
       "description": "Creates tags on the Runner.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.tag_trace_punish"],
-      "sourceKinds": ["effects.kind=tag_source"],
-      "examples": ["Data Raven"],
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "effects.kind=tag_source"
+      ],
+      "examples": [
+        "Data Raven"
+      ],
       "targetProfileRelevant": false,
       "notes": "Side- and scope-gated tag source."
     },
@@ -837,9 +1184,17 @@
       "description": "Taxes Runner credits or effort through ICE/run-path costs.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.ice_tax_glacier"],
-      "sourceKinds": ["effects.kind=run_tax scope=ice", "effects.kind=run_tax scope=run_path"],
-      "examples": ["Canis Minor", "Viral 15"],
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "effects.kind=run_tax scope=ice",
+        "effects.kind=run_tax scope=run_path"
+      ],
+      "examples": [
+        "Canis Minor",
+        "Viral 15"
+      ],
       "targetProfileRelevant": false,
       "notes": "Corp-side ICE tax only."
     },
@@ -851,8 +1206,14 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["remoteRole.kind=run_tax", "remoteRole.kind=remote_tax", "remoteRole.kind=tax_fort"],
-      "examples": ["City Grid tax effects"],
+      "sourceKinds": [
+        "remoteRole.kind=run_tax",
+        "remoteRole.kind=remote_tax",
+        "remoteRole.kind=tax_fort"
+      ],
+      "examples": [
+        "City Grid tax effects"
+      ],
       "targetProfileRelevant": false,
       "notes": "Currently support-only because remote tax meaning is broad."
     },
@@ -864,8 +1225,13 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=counter_economy resource=credits scope=runner"],
-      "examples": ["Closed Accounts", "Doppelganger Antibody"],
+      "sourceKinds": [
+        "effects.kind=counter_economy resource=credits scope=runner"
+      ],
+      "examples": [
+        "Closed Accounts",
+        "Doppelganger Antibody"
+      ],
       "targetProfileRelevant": false,
       "notes": "Support-only tax detail."
     },
@@ -877,8 +1243,12 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
-      "sourceKinds": ["effects.kind=persistent_counter_effect scope=runner"],
-      "examples": ["Doppelganger Antibody"],
+      "sourceKinds": [
+        "effects.kind=persistent_counter_effect scope=runner"
+      ],
+      "examples": [
+        "Doppelganger Antibody"
+      ],
       "targetProfileRelevant": false,
       "notes": "Support-only; access.punish carries the ambush/bluff anchor."
     },
@@ -889,9 +1259,15 @@
       "description": "Creates a trace pressure window.",
       "supportOnly": false,
       "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": ["corp.tag_trace_punish"],
-      "sourceKinds": ["effects.kind=trace"],
-      "examples": ["Trace ICE"],
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "effects.kind=trace"
+      ],
+      "examples": [
+        "Trace ICE"
+      ],
       "targetProfileRelevant": false,
       "notes": "Side- and scope-gated trace source."
     }

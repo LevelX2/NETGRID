@@ -36,7 +36,6 @@
       "corp.remote_scoring",
       "corp.rush_score",
       "corp.tag_trace_punish",
-      "runner.breaker_search",
       "runner.economy_first",
       "runner.hq_pressure",
       "runner.interface_closeout",
@@ -45,6 +44,7 @@
       "runner.rig_first",
       "runner.rnd_pressure",
       "runner.run_event_tempo",
+      "runner.search.breaker",
       "runner.survival_defense"
     ],
     "strategicRoleCount": 11,
@@ -61,8 +61,8 @@
       "utility",
       "win_condition"
     ],
-    "functionSignalRuleCount": 79,
-    "functionSignalCount": 68,
+    "functionSignalRuleCount": 86,
+    "functionSignalCount": 69,
     "functionSignalIds": [
       "access.hq_multiaccess",
       "access.punish",
@@ -97,6 +97,7 @@
       "economy.finite_pool",
       "economy.generic",
       "economy.recurring",
+      "economy.recurring_breaker_credit",
       "economy.rez_discount",
       "economy.start_of_turn",
       "economy.trace_credit",
@@ -133,7 +134,7 @@
       "tax.runner_persistent",
       "trace.source"
     ],
-    "tacticSignalCatalogCount": 68,
+    "tacticSignalCatalogCount": 69,
     "tacticSignalCatalogIds": [
       "access.hq_multiaccess",
       "access.punish",
@@ -168,6 +169,7 @@
       "economy.finite_pool",
       "economy.generic",
       "economy.recurring",
+      "economy.recurring_breaker_credit",
       "economy.rez_discount",
       "economy.start_of_turn",
       "economy.trace_credit",
@@ -262,13 +264,13 @@
     ],
     "compiledFieldCounts": {
       "aiSupportStatus": 564,
-      "breakerProfile": 42,
-      "breakerProfile.baseStrength": 19,
-      "breakerProfile.breakCost": 42,
+      "breakerProfile": 49,
+      "breakerProfile.baseStrength": 26,
+      "breakerProfile.breakCost": 49,
       "breakerProfile.configurableCoverage": 1,
-      "breakerProfile.coverage": 42,
+      "breakerProfile.coverage": 49,
       "breakerProfile.coverageCandidates": 1,
-      "breakerProfile.pumpCost": 37,
+      "breakerProfile.pumpCost": 44,
       "breakerProfile.reconfigurableType": 1,
       "breakerProfile.restrictions": 2,
       "breakerProfile.sideEffects": 14,
@@ -276,8 +278,8 @@
       "breakerProfile.targetedIceBonus": 1,
       "cardId": 564,
       "cardType": 564,
-      "conditions": 271,
-      "conditions[].kind": 490,
+      "conditions": 275,
+      "conditions[].kind": 494,
       "costProfile": 73,
       "costProfile.clicks": 59,
       "costProfile.counters": 1,
@@ -285,29 +287,29 @@
       "costProfile.memory": 25,
       "costProfile.opportunityCost": 69,
       "costProfile.reserveRisk": 69,
-      "effects": 376,
-      "effects[].amount": 417,
+      "effects": 380,
+      "effects[].amount": 432,
       "effects[].damageTypes": 19,
       "effects[].finite": 44,
-      "effects[].kind": 843,
+      "effects[].kind": 845,
       "effects[].perTurnLimit": 36,
-      "effects[].repeatable": 51,
-      "effects[].resource": 532,
-      "effects[].scope": 843,
-      "effects[].target": 2,
-      "effects[].timing": 843,
+      "effects[].repeatable": 62,
+      "effects[].resource": 534,
+      "effects[].scope": 845,
+      "effects[].target": 18,
+      "effects[].timing": 845,
       "lineSupport": 189,
       "manualNotes": 3,
       "planRoles": 564,
-      "quality": 380,
-      "quality.benchmarkCovered": 380,
-      "quality.confidence": 374,
+      "quality": 382,
+      "quality.benchmarkCovered": 382,
+      "quality.confidence": 376,
       "quality.focusedDecisionTest": 3,
-      "quality.hintReviewed": 380,
-      "quality.needsHumanReview": 380,
-      "quality.reviewedBy": 112,
-      "quality.reviewedDate": 112,
-      "quality.strategyCovered": 380,
+      "quality.hintReviewed": 382,
+      "quality.needsHumanReview": 382,
+      "quality.reviewedBy": 116,
+      "quality.reviewedDate": 116,
+      "quality.strategyCovered": 382,
       "remoteRole": 53,
       "remoteRole.kind": 53,
       "remoteRole.serverScope": 53,
@@ -318,7 +320,7 @@
       "scenarioRefs": 564,
       "side": 564,
       "strategicNotes": 3,
-      "strategicRole": 191,
+      "strategicRole": 207,
       "targetProfiles": 3,
       "targetProfiles[].installCost": 3,
       "targetProfiles[].installsTarget": 3,
@@ -405,21 +407,21 @@
       "access.punish": 6,
       "access.rnd_multiaccess": 2,
       "breaker.ap": 2,
-      "breaker.code_gate": 7,
+      "breaker.code_gate": 9,
       "breaker.configurable_coverage": 1,
       "breaker.emergency_search": 1,
       "breaker.reconfigurable_type": 1,
       "breaker.risky": 4,
       "breaker.search_during_encounter": 1,
       "breaker.self_trash_risk": 1,
-      "breaker.sentry": 13,
+      "breaker.sentry": 15,
       "breaker.strength_bonus_vs_chosen_ice": 1,
-      "breaker.support": 1,
+      "breaker.support": 5,
       "breaker.targeted_ice_bonus": 1,
       "breaker.trace": 1,
       "breaker.universal": 4,
       "breaker.unknown_special": 2,
-      "breaker.wall": 12,
+      "breaker.wall": 15,
       "breaker.watchdog": 1,
       "damage.payoff": 38,
       "defense.damage_prevention": 22,
@@ -429,16 +431,17 @@
       "economy.burst": 3,
       "economy.counter": 18,
       "economy.finite_pool": 10,
-      "economy.generic": 44,
-      "economy.recurring": 4,
+      "economy.generic": 42,
+      "economy.recurring": 17,
+      "economy.recurring_breaker_credit": 13,
       "economy.rez_discount": 7,
       "economy.start_of_turn": 3,
       "economy.trace_credit": 2,
-      "economy.trash_credit": 23,
+      "economy.trash_credit": 10,
       "ice.etr": 54,
       "ice.future_pressure": 8,
       "ice.strength_modifier": 5,
-      "ice.strength_reduction": 1,
+      "ice.strength_reduction": 2,
       "ice.subroutine_modifier": 1,
       "info.expose": 5,
       "info.hq": 2,
@@ -447,7 +450,7 @@
       "remote.ambush": 5,
       "remote.asset_economy": 16,
       "remote.scoring_protection": 5,
-      "run.break_cost_support": 1,
+      "run.break_cost_support": 5,
       "score.advance_burst": 13,
       "score.agenda_action": 12,
       "setup.draw": 19,
@@ -472,16 +475,16 @@
       "corp.ice_tax_glacier": 71,
       "corp.remote_scoring": 6,
       "corp.tag_trace_punish": 35,
-      "runner.breaker_search": 11,
       "runner.hq_pressure": 4,
       "runner.interface_closeout": 4,
-      "runner.remote_trash": 23,
+      "runner.remote_trash": 10,
       "runner.rnd_pressure": 5,
+      "runner.search.breaker": 11,
       "runner.survival_defense": 42
     },
-    "totalDerivedStrategyAnchors": 281,
-    "cardsWithDerivedSignals": 345,
-    "cardsWithStrategyAnchors": 236,
+    "totalDerivedStrategyAnchors": 268,
+    "cardsWithDerivedSignals": 356,
+    "cardsWithStrategyAnchors": 224,
     "descriptorGaps": [
       {
         "gapId": "remote_contest_pressure_not_first_class",
@@ -505,10 +508,17 @@
     ]
   },
   "sideAwareDerivation": {
-    "preventedWrongSideAnchorCount": 28,
+    "preventedWrongSideAnchorCount": 29,
     "preventedWrongSideAnchorExamples": [
       {
         "cardId": "onr_v1_012_clown",
+        "side": "runner",
+        "cardType": "program",
+        "signalId": "ice.strength_modifier",
+        "strategyId": "corp.ice_tax_glacier"
+      },
+      {
+        "cardId": "onr_v1_046_pattels-virus",
         "side": "runner",
         "cardType": "program",
         "signalId": "ice.strength_modifier",
@@ -645,7 +655,7 @@
         "side": "corp",
         "cardType": "operation",
         "signalId": "setup.recovery",
-        "strategyId": "runner.breaker_search"
+        "strategyId": "runner.search.breaker"
       },
       {
         "cardId": "onr_v1_297_overtime-incentives",
@@ -778,6 +788,31 @@
       ],
       "anchorStrategyIds": []
     },
+    "runnerRecurringBreakerCredit": {
+      "cardId": "ai018_smoke_recurring_breaker_credit",
+      "signals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit"
+      ],
+      "anchorStrategyIds": []
+    },
+    "runnerInstalledBreakerStrengthSupport": {
+      "cardId": "ai018_smoke_installed_breaker_strength_support",
+      "signals": [
+        "breaker.support",
+        "run.break_cost_support"
+      ],
+      "anchorStrategyIds": []
+    },
+    "runnerVirusIceStrengthReduction": {
+      "cardId": "ai018_smoke_virus_ice_strength_reduction",
+      "signals": [
+        "breaker.support",
+        "ice.strength_reduction",
+        "run.break_cost_support"
+      ],
+      "anchorStrategyIds": []
+    },
     "runnerEncounterSearchInstall": {
       "cardId": "ai017_smoke_encounter_search_install",
       "signals": [
@@ -787,7 +822,7 @@
         "setup.search"
       ],
       "anchorStrategyIds": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ]
     },
     "corpTagPunishPayoff": {
@@ -962,7 +997,7 @@
           "count": 11
         },
         {
-          "value": "runner.breaker_search",
+          "value": "runner.search.breaker",
           "count": 10
         },
         {
@@ -1465,10 +1500,10 @@
           "cardId": "onr_v1_043_mystery-box",
           "side": "runner",
           "cardType": "program",
-          "value": "runner.breaker_search",
+          "value": "runner.search.breaker",
           "evidence": {
             "lineSupport": [
-              "runner.breaker_search"
+              "runner.search.breaker"
             ],
             "effects": [
               {
@@ -1520,7 +1555,7 @@
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "runner.breaker_search"
+            "runner.search.breaker"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -1741,10 +1776,10 @@
           "cardId": "onr_v1_059_self-modifying-code",
           "side": "runner",
           "cardType": "program",
-          "value": "runner.breaker_search",
+          "value": "runner.search.breaker",
           "evidence": {
             "lineSupport": [
-              "runner.breaker_search"
+              "runner.search.breaker"
             ],
             "effects": [
               {
@@ -1777,7 +1812,7 @@
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "runner.breaker_search"
+            "runner.search.breaker"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -2142,10 +2177,10 @@
           "cardId": "onr_v1_087_forgotten-backup-chip",
           "side": "runner",
           "cardType": "event",
-          "value": "runner.breaker_search",
+          "value": "runner.search.breaker",
           "evidence": {
             "lineSupport": [
-              "runner.breaker_search"
+              "runner.search.breaker"
             ],
             "effects": [
               {
@@ -2188,7 +2223,7 @@
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "runner.breaker_search"
+            "runner.search.breaker"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -2196,10 +2231,10 @@
           "cardId": "onr_v1_089_gideons-pawnshop",
           "side": "runner",
           "cardType": "event",
-          "value": "runner.breaker_search",
+          "value": "runner.search.breaker",
           "evidence": {
             "lineSupport": [
-              "runner.breaker_search"
+              "runner.search.breaker"
             ],
             "effects": [
               {
@@ -2237,7 +2272,7 @@
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "runner.breaker_search"
+            "runner.search.breaker"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -2245,10 +2280,10 @@
           "cardId": "onr_v1_093_if-you-want-it-done-right",
           "side": "runner",
           "cardType": "event",
-          "value": "runner.breaker_search",
+          "value": "runner.search.breaker",
           "evidence": {
             "lineSupport": [
-              "runner.breaker_search"
+              "runner.search.breaker"
             ],
             "effects": [
               {
@@ -2280,7 +2315,7 @@
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "runner.breaker_search"
+            "runner.search.breaker"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -2331,10 +2366,10 @@
           "cardId": "onr_v1_099_mantis-fixer-at-large",
           "side": "runner",
           "cardType": "event",
-          "value": "runner.breaker_search",
+          "value": "runner.search.breaker",
           "evidence": {
             "lineSupport": [
-              "runner.breaker_search"
+              "runner.search.breaker"
             ],
             "effects": [
               {
@@ -2372,7 +2407,7 @@
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "runner.breaker_search"
+            "runner.search.breaker"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -2380,10 +2415,10 @@
           "cardId": "onr_v1_110_sneak-preview",
           "side": "runner",
           "cardType": "event",
-          "value": "runner.breaker_search",
+          "value": "runner.search.breaker",
           "evidence": {
             "lineSupport": [
-              "runner.breaker_search"
+              "runner.search.breaker"
             ],
             "effects": [
               {
@@ -2412,7 +2447,7 @@
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "runner.breaker_search"
+            "runner.search.breaker"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -2420,10 +2455,10 @@
           "cardId": "onr_v1_114_temple-microcode-outlet",
           "side": "runner",
           "cardType": "event",
-          "value": "runner.breaker_search",
+          "value": "runner.search.breaker",
           "evidence": {
             "lineSupport": [
-              "runner.breaker_search"
+              "runner.search.breaker"
             ],
             "effects": [
               {
@@ -2461,7 +2496,7 @@
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "runner.breaker_search"
+            "runner.search.breaker"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -2766,10 +2801,10 @@
           "cardId": "onr_v1_131_microtech-backup-drive",
           "side": "runner",
           "cardType": "hardware",
-          "value": "runner.breaker_search",
+          "value": "runner.search.breaker",
           "evidence": {
             "lineSupport": [
-              "runner.breaker_search"
+              "runner.search.breaker"
             ],
             "effects": [
               {
@@ -2801,7 +2836,7 @@
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "runner.breaker_search"
+            "runner.search.breaker"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -2845,6 +2880,12 @@
             ],
             "effects": [
               {
+                "kind": "recurring_economy",
+                "scope": "runner",
+                "timing": "persistent",
+                "resource": "credits"
+              },
+              {
                 "kind": "damage_prevention",
                 "scope": "runner",
                 "timing": "prevention_window",
@@ -2855,12 +2896,6 @@
                 "scope": "runner",
                 "timing": "prevention_window",
                 "resource": "net_damage"
-              },
-              {
-                "kind": "trash_credit",
-                "scope": "runner",
-                "timing": "persistent",
-                "resource": "trash_credits"
               }
             ],
             "conditions": [
@@ -11766,10 +11801,10 @@
           "cardId": "onr_proteus_128_airport-locker",
           "side": "runner",
           "cardType": "resource",
-          "value": "runner.breaker_search",
+          "value": "runner.search.breaker",
           "evidence": {
             "lineSupport": [
-              "runner.breaker_search"
+              "runner.search.breaker"
             ],
             "effects": [
               {
@@ -11813,7 +11848,7 @@
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "runner.breaker_search"
+            "runner.search.breaker"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -13029,7 +13064,7 @@
         "triageCategory": "strategy_alias",
         "triageSource": "classifier",
         "mapsTo": [
-          "runner.breaker_search"
+          "runner.search.breaker"
         ],
         "rationale": "Legacy role or planRole aliases to a normalized strategy.",
         "examples": [
@@ -15030,7 +15065,7 @@
         "triageCategory": "strategy_alias",
         "triageSource": "classifier",
         "mapsTo": [
-          "runner.breaker_search"
+          "runner.search.breaker"
         ],
         "rationale": "Legacy role or planRole aliases to a normalized strategy.",
         "examples": [
@@ -16905,7 +16940,7 @@
         "triageCategory": "strategy_alias",
         "triageSource": "classifier",
         "mapsTo": [
-          "runner.breaker_search"
+          "runner.search.breaker"
         ],
         "rationale": "Legacy role or planRole aliases to a normalized strategy.",
         "examples": [
@@ -16919,7 +16954,7 @@
         "triageCategory": "strategy_alias",
         "triageSource": "classifier",
         "mapsTo": [
-          "runner.breaker_search"
+          "runner.search.breaker"
         ],
         "rationale": "Legacy role or planRole aliases to a normalized strategy.",
         "examples": [

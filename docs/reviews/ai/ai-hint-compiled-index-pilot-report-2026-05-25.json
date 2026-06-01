@@ -10972,7 +10972,7 @@
             "zone": "stack_top"
           }
         ],
-        "lineSupport": ["runner.breaker_search"],
+        "lineSupport": ["runner.search.breaker"],
         "quality": {
           "benchmarkCovered": false,
           "confidence": "high",
@@ -11995,7 +11995,7 @@
             "zone": "stack"
           }
         ],
-        "lineSupport": ["runner.breaker_search"],
+        "lineSupport": ["runner.search.breaker"],
         "quality": {
           "benchmarkCovered": true,
           "confidence": "high",

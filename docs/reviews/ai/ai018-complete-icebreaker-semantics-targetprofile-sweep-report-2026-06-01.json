@@ -1,0 +1,2010 @@
+{
+  "schemaVersion": "ai018-complete-icebreaker-semantics-targetprofile-sweep-report-v1",
+  "taskId": "AI018",
+  "generatedAt": "2026-06-01",
+  "status": "complete",
+  "summary": {
+    "conclusion": "AI018 completes the active Icebreaker and close Breaker-support sweep without planner, action-score, plan-weight, engine, legality, profile, default, targeting-AI, UI-derivation, or baseline changes.",
+    "activeCheckedAssignmentCount": 85,
+    "inactiveClassicCheckedCount": 7,
+    "changedActiveCardCount": 34,
+    "unchangedCheckedActiveCardCount": 51,
+    "tacticSignalCatalogCount": 69,
+    "tacticSignalGroupCount": 29,
+    "supportOnlySignalCount": 38,
+    "mayAnchorStrategySignalCount": 31,
+    "functionSignalRuleCount": 86,
+    "strategyRename": {
+      "from": "runner.breaker_search",
+      "to": "runner.search.breaker"
+    },
+    "antiIceSignalsPresent": false,
+    "plannerEffect": false,
+    "actionScoreEffect": false,
+    "planWeightEffect": false,
+    "engineEffect": false,
+    "legalEffect": false,
+    "profileOrDefaultSwitch": false,
+    "targetingAiEffect": false,
+    "uiDerivationEffect": false,
+    "catalogOrProteusBaselineFix": false
+  },
+  "verification": [
+    {
+      "command": "node scripts/check-ai-derived-facts.mjs --write",
+      "status": "passed"
+    },
+    {
+      "command": "node scripts/check-ai-derived-facts-full.mjs --write",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm build:ai-compiled-hints",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm build:ai-hint-inspector-index",
+      "status": "passed"
+    },
+    {
+      "command": "node scripts/check-ai-hint-compiled-index.mjs --write",
+      "status": "passed"
+    },
+    {
+      "command": "node scripts/check-ai-generated-fact-batch2-diff-review.mjs --write",
+      "status": "passed"
+    },
+    {
+      "command": "node scripts/check-ai-generated-fact-batch2-normalization-dry-run.mjs --write",
+      "status": "passed"
+    },
+    {
+      "command": "node scripts/check-ai-generated-fact-batch2-rollup.mjs --write",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-strategy-taxonomy",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-compiled-hints",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-inspector-index",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-compiled-index",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-derived-facts",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-derived-facts-full",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-manual-overlays",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-quality",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-approval-consistency",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-deck-doctrine-strategy",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai test",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/web exec tsc -p tsconfig.json --noEmit",
+      "status": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed"
+    }
+  ],
+  "categoryCounts": {
+    "icebreaker_coverage_or_breaker_special": 50,
+    "breaker_strength_or_break_cost_support": 4,
+    "checked_related_no_breaker_change": 8,
+    "breaker_search_or_recovery_support": 10,
+    "recurring_breaker_credit_support": 13
+  },
+  "changedCategoryCounts": {
+    "icebreaker_coverage_or_breaker_special": 7,
+    "breaker_strength_or_break_cost_support": 4,
+    "breaker_search_or_recovery_support": 10,
+    "recurring_breaker_credit_support": 13
+  },
+  "changedSets": {
+    "recurringBreakerCreditIds": [
+      "onr_proteus_134_cortical-cybermodem",
+      "onr_proteus_139_eurocorpse-tm-spin-chip",
+      "onr_proteus_151_sunburst-cranial-interface",
+      "onr_v1_011_cloak",
+      "onr_v1_035_invisibility",
+      "onr_v1_071_vewy-vewy-quiet",
+      "onr_v1_119_arasaka-portable-prototype",
+      "onr_v1_122_artemis-2020",
+      "onr_v1_124_corolla-speed-chip",
+      "onr_v1_137_parraline-5750",
+      "onr_v1_140_raven-microcyb-eagle",
+      "onr_v1_141_raven-microcyb-owl",
+      "onr_v1_147_zz22-speed-chip"
+    ],
+    "strengthSupportIds": [
+      "onr_proteus_091_lockjaw",
+      "onr_proteus_115_personal-touch-the",
+      "onr_v1_046_pattels-virus",
+      "onr_v1_082_deal-with-militech"
+    ],
+    "testBreakerProfileIds": [
+      "efficient_fracter",
+      "simple_decoder",
+      "simple_fracter",
+      "simple_killer",
+      "v08_adaptive_killer",
+      "v08_precise_decoder",
+      "v08_steady_fracter"
+    ],
+    "renamedSearchSupportIds": [
+      "onr_proteus_128_airport-locker",
+      "onr_v1_043_mystery-box",
+      "onr_v1_059_self-modifying-code",
+      "onr_v1_087_forgotten-backup-chip",
+      "onr_v1_089_gideons-pawnshop",
+      "onr_v1_093_if-you-want-it-done-right",
+      "onr_v1_099_mantis-fixer-at-large",
+      "onr_v1_110_sneak-preview",
+      "onr_v1_114_temple-microcode-outlet",
+      "onr_v1_131_microtech-backup-drive"
+    ]
+  },
+  "targetProfileAssessment": {
+    "existingSchemaCards": [
+      "onr_proteus_128_airport-locker",
+      "onr_v1_043_mystery-box",
+      "onr_v1_059_self-modifying-code"
+    ],
+    "proposalOnlyCards": [
+      "onr_proteus_080_black-widow",
+      "onr_proteus_091_lockjaw",
+      "onr_proteus_092_morphing-tool",
+      "onr_proteus_115_personal-touch-the",
+      "onr_v1_046_pattels-virus"
+    ],
+    "schemaGapCards": [
+      "onr_v1_001_afreet",
+      "onr_v1_004_bakdoor",
+      "onr_v1_033_imp",
+      "onr_v1_069_succubus"
+    ],
+    "note": "No new TargetProfile runtime structure was forced. Existing stack/stack_top program search profiles remain; installed ICE, installed icebreaker, mode-choice and hosting targets are documented as proposals only."
+  },
+  "generatedArtifactReadouts": {
+    "compiledHints": {
+      "cards": 564,
+      "generated": 388,
+      "overlays": 6,
+      "fallback": 139,
+      "errors": 0,
+      "warnings": 1740
+    },
+    "inspectorIndex": {
+      "cards": 564,
+      "mechanical": 403,
+      "signals": 356,
+      "anchors": 224,
+      "warnings": 349
+    },
+    "strategyTaxonomy": {
+      "strategyGoalCount": 20,
+      "functionSignalCount": 69,
+      "tacticSignalCatalogCount": 69,
+      "hardErrors": 0,
+      "warnings": 55
+    }
+  },
+  "checkedAssignments": [
+    {
+      "cardId": "efficient_fracter",
+      "title": "Efficient Fracter",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "breaker.wall"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "wall"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Testset-BreakerProfile ergänzt; reine Coverage, kein Strategieanker."
+    },
+    {
+      "cardId": "onr_proteus_079_big-frackin-gun",
+      "title": "Big Frackin' Gun",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.sentry"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "sentry"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_proteus_080_black-widow",
+      "title": "Black Widow",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.sentry",
+        "breaker.strength_bonus_vs_chosen_ice",
+        "breaker.targeted_ice_bonus"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "sentry"
+      ],
+      "targetProfileStatus": "proposal_only_installed_ice_target",
+      "targetProfiles": [],
+      "decision": "Geprüft; TargetProfile-Vorschlag dokumentiert, keine unsichere Runtime-Struktur."
+    },
+    {
+      "cardId": "onr_proteus_081_boring-bit",
+      "title": "Boring Bit",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.wall"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "wall"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_proteus_082_bulldozer",
+      "title": "Bulldozer",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.wall"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "wall"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_proteus_083_corrosion",
+      "title": "Corrosion",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.wall"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "wall"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_proteus_087_forwards-legacy",
+      "title": "Forward's Legacy",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.risky",
+        "breaker.sentry"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "sentry"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_proteus_088_fubar",
+      "title": "Fubar",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.unknown_special"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "unknown_special"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_proteus_091_lockjaw",
+      "title": "Lockjaw",
+      "cardType": "program",
+      "category": "breaker_strength_or_break_cost_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "breaker.support",
+        "run.break_cost_support"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "proposal_only_installed_icebreaker_target",
+      "targetProfiles": [],
+      "decision": "Breaker-Support-Fakt ergänzt; support-only, kein Strategieanker."
+    },
+    {
+      "cardId": "onr_proteus_092_morphing-tool",
+      "title": "Morphing Tool",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.configurable_coverage",
+        "breaker.reconfigurable_type",
+        "breaker.unknown_special"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "unknown_special"
+      ],
+      "targetProfileStatus": "proposal_only_mode_choice",
+      "targetProfiles": [],
+      "decision": "Geprüft; TargetProfile-Vorschlag dokumentiert, keine unsichere Runtime-Struktur."
+    },
+    {
+      "cardId": "onr_proteus_093_redecorator",
+      "title": "Redecorator",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.sentry"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "sentry"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_proteus_095_skeleton-passkeys",
+      "title": "Skeleton Passkeys",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.code_gate"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "code_gate"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_proteus_100_wrecking-ball",
+      "title": "Wrecking Ball",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.wall"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "wall"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_proteus_101_all-hands",
+      "title": "All-Hands",
+      "cardType": "event",
+      "category": "checked_related_no_breaker_change",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "access.hq_multiaccess"
+      ],
+      "strategyAnchors": [
+        "runner.hq_pressure",
+        "runner.interface_closeout"
+      ],
+      "lineSupport": [
+        "runner.hq_pressure",
+        "runner.interface_closeout"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; keine Breaker-Support-Zuordnung fachlich gerechtfertigt."
+    },
+    {
+      "cardId": "onr_proteus_115_personal-touch-the",
+      "title": "Personal Touch, The",
+      "cardType": "event",
+      "category": "breaker_strength_or_break_cost_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "breaker.support",
+        "run.break_cost_support"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "proposal_only_installed_icebreaker_target",
+      "targetProfiles": [],
+      "decision": "Breaker-Support-Fakt ergänzt; support-only, kein Strategieanker."
+    },
+    {
+      "cardId": "onr_proteus_122_rush-hour",
+      "title": "Rush Hour",
+      "cardType": "event",
+      "category": "checked_related_no_breaker_change",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "access.rnd_multiaccess"
+      ],
+      "strategyAnchors": [
+        "runner.interface_closeout",
+        "runner.rnd_pressure"
+      ],
+      "lineSupport": [
+        "runner.rnd_pressure",
+        "runner.interface_closeout"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; keine Breaker-Support-Zuordnung fachlich gerechtfertigt."
+    },
+    {
+      "cardId": "onr_proteus_128_airport-locker",
+      "title": "Airport Locker",
+      "cardType": "resource",
+      "category": "breaker_search_or_recovery_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "breaker.emergency_search",
+        "breaker.search_during_encounter",
+        "setup.install_support",
+        "setup.search"
+      ],
+      "strategyAnchors": [
+        "runner.search.breaker"
+      ],
+      "lineSupport": [
+        "runner.search.breaker"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "existing_schema",
+      "targetProfiles": [
+        {
+          "installCost": "normal",
+          "installsTarget": true,
+          "shuffleAfter": true,
+          "targetCardType": "program",
+          "zone": "stack"
+        }
+      ],
+      "decision": "Strategy-ID auf runner.search.breaker normalisiert; bestehende Search-/Recovery-Semantik beibehalten."
+    },
+    {
+      "cardId": "onr_proteus_134_cortical-cybermodem",
+      "title": "Cortical Cybermodem",
+      "cardType": "hardware",
+      "category": "recurring_breaker_credit_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Trash-Credit-Semantik zu recurring breaker credit korrigiert; kein Strategieanker."
+    },
+    {
+      "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
+      "title": "Eurocorpse (TM) Spin Chip",
+      "cardType": "hardware",
+      "category": "recurring_breaker_credit_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Trash-Credit-Semantik zu recurring breaker credit korrigiert; kein Strategieanker."
+    },
+    {
+      "cardId": "onr_proteus_151_sunburst-cranial-interface",
+      "title": "Sunburst Cranial Interface",
+      "cardType": "hardware",
+      "category": "recurring_breaker_credit_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Trash-Credit-Semantik zu recurring breaker credit korrigiert; kein Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_001_afreet",
+      "title": "Afreet",
+      "cardType": "program",
+      "category": "checked_related_no_breaker_change",
+      "changedInAI018": false,
+      "tacticSignals": [],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [],
+      "targetProfileStatus": "schema_gap_hosted_program_target",
+      "targetProfiles": [],
+      "decision": "Geprüft; TargetProfile-Vorschlag dokumentiert, keine unsichere Runtime-Struktur."
+    },
+    {
+      "cardId": "onr_v1_002_ai-boon",
+      "title": "AI Boon",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.risky",
+        "breaker.sentry"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "sentry"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_004_bakdoor",
+      "title": "Bakdoor™",
+      "cardType": "program",
+      "category": "checked_related_no_breaker_change",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "defense.trace_defense"
+      ],
+      "strategyAnchors": [
+        "runner.survival_defense"
+      ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "schema_gap_hosted_program_target",
+      "targetProfiles": [],
+      "decision": "Geprüft; TargetProfile-Vorschlag dokumentiert, keine unsichere Runtime-Struktur."
+    },
+    {
+      "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
+      "title": "Bartmoss Memorial Icebreaker",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.risky",
+        "breaker.self_trash_risk",
+        "breaker.universal"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "emergency_tool"
+      ],
+      "breakerCoverage": [
+        "universal"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_006_black-dahlia",
+      "title": "Black Dahlia",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.sentry"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "sentry"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_007_blink",
+      "title": "Blink",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.risky",
+        "breaker.universal"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "universal"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_011_cloak",
+      "title": "Cloak",
+      "cardType": "program",
+      "category": "recurring_breaker_credit_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Trash-Credit-Semantik zu recurring breaker credit korrigiert; kein Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_012_clown",
+      "title": "Clown",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.support",
+        "ice.strength_reduction",
+        "run.break_cost_support"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_013_cockroach",
+      "title": "Cockroach",
+      "cardType": "program",
+      "category": "checked_related_no_breaker_change",
+      "changedInAI018": false,
+      "tacticSignals": [],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; keine Breaker-Support-Zuordnung fachlich gerechtfertigt."
+    },
+    {
+      "cardId": "onr_v1_014_codecracker",
+      "title": "Codecracker",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.code_gate"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "code_gate"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_015_codeslinger",
+      "title": "Codeslinger",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.sentry"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "sentry"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_016_cyfermaster",
+      "title": "Cyfermaster™",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.code_gate"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "code_gate"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_018_dogcatcher",
+      "title": "Dogcatcher",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.watchdog"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "watchdog"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_019_dropp",
+      "title": "Dropp™",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.universal"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "universal"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_020_dupre",
+      "title": "Dupré",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.code_gate"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "code_gate"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_021_dwarf",
+      "title": "Dwarf",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.wall"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "wall"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_023_evil-twin",
+      "title": "Evil Twin",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.sentry",
+        "defense.damage_prevention"
+      ],
+      "strategyAnchors": [
+        "runner.survival_defense"
+      ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
+      "breakerCoverage": [
+        "sentry"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_027_flak",
+      "title": "Flak",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.ap"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "ap"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_030_grubb",
+      "title": "Grubb",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.wall"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "wall"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_031_hammer",
+      "title": "Hammer",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.wall"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "wall"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_033_imp",
+      "title": "Imp",
+      "cardType": "program",
+      "category": "checked_related_no_breaker_change",
+      "changedInAI018": false,
+      "tacticSignals": [],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [],
+      "targetProfileStatus": "schema_gap_hosted_program_target",
+      "targetProfiles": [],
+      "decision": "Geprüft; TargetProfile-Vorschlag dokumentiert, keine unsichere Runtime-Struktur."
+    },
+    {
+      "cardId": "onr_v1_035_invisibility",
+      "title": "Invisibility",
+      "cardType": "program",
+      "category": "recurring_breaker_credit_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Trash-Credit-Semantik zu recurring breaker credit korrigiert; kein Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_036_jackhammer",
+      "title": "Jackhammer",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.wall"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "wall"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_037_japanese-water-torture",
+      "title": "Japanese Water Torture",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.wall"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "wall"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_039_krash",
+      "title": "Krash",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.universal"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "universal"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_040_loony-goon",
+      "title": "Loony Goon",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.sentry"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "sentry"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "title": "Mystery Box",
+      "cardType": "program",
+      "category": "breaker_search_or_recovery_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "setup.install_discount",
+        "setup.search"
+      ],
+      "strategyAnchors": [
+        "runner.search.breaker"
+      ],
+      "lineSupport": [
+        "runner.search.breaker"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "existing_schema",
+      "targetProfiles": [
+        {
+          "installCost": "free",
+          "installsTarget": true,
+          "lookCount": 5,
+          "oncePerRun": true,
+          "showToOpponent": true,
+          "shuffleAfter": true,
+          "targetCardType": "program",
+          "zone": "stack_top"
+        }
+      ],
+      "decision": "Strategy-ID auf runner.search.breaker normalisiert; bestehende Search-/Recovery-Semantik beibehalten."
+    },
+    {
+      "cardId": "onr_v1_046_pattels-virus",
+      "title": "Pattel’s Virus",
+      "cardType": "program",
+      "category": "breaker_strength_or_break_cost_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "breaker.support",
+        "ice.strength_reduction",
+        "run.break_cost_support"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "proposal_only_installed_ice_target",
+      "targetProfiles": [],
+      "decision": "Breaker-Support-Fakt ergänzt; support-only, kein Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_047_pile-driver",
+      "title": "Pile Driver",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.wall"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "wall"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_052_raffles",
+      "title": "Raffles",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.code_gate"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "code_gate"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_053_ramming-piston",
+      "title": "Ramming Piston",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.wall"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "wall"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_054_raptor",
+      "title": "Raptor",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.sentry"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "sentry"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_055_reflector",
+      "title": "Reflector",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.ap"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "ap"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_056_replicator",
+      "title": "Replicator",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.trace"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "trace"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "title": "Self-Modifying Code",
+      "cardType": "program",
+      "category": "breaker_search_or_recovery_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "setup.search"
+      ],
+      "strategyAnchors": [
+        "runner.search.breaker"
+      ],
+      "lineSupport": [
+        "runner.search.breaker"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "existing_schema",
+      "targetProfiles": [
+        {
+          "installCost": "normal",
+          "installsTarget": true,
+          "shuffleAfter": true,
+          "targetCardType": "program",
+          "zone": "stack"
+        }
+      ],
+      "decision": "Strategy-ID auf runner.search.breaker normalisiert; bestehende Search-/Recovery-Semantik beibehalten."
+    },
+    {
+      "cardId": "onr_v1_060_shaka",
+      "title": "Shaka",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.sentry"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "sentry"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_066_snowball",
+      "title": "Snowball",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.sentry"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "sentry"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_069_succubus",
+      "title": "Succubus",
+      "cardType": "program",
+      "category": "checked_related_no_breaker_change",
+      "changedInAI018": false,
+      "tacticSignals": [],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [],
+      "targetProfileStatus": "schema_gap_hosted_program_target",
+      "targetProfiles": [],
+      "decision": "Geprüft; TargetProfile-Vorschlag dokumentiert, keine unsichere Runtime-Struktur."
+    },
+    {
+      "cardId": "onr_v1_070_tinweasel",
+      "title": "Tinweasel",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.code_gate"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "code_gate"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_071_vewy-vewy-quiet",
+      "title": "Vewy Vewy Quiet",
+      "cardType": "program",
+      "category": "recurring_breaker_credit_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Trash-Credit-Semantik zu recurring breaker credit korrigiert; kein Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_072_wild-card",
+      "title": "Wild Card",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.sentry"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "sentry"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_073_wizards-book",
+      "title": "Wizard’s Book",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.code_gate"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "code_gate"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_074_worm",
+      "title": "Worm",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "breaker.wall"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "wall"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; bestehende Coverage-/Spezialsignale bleiben support-only."
+    },
+    {
+      "cardId": "onr_v1_082_deal-with-militech",
+      "title": "Deal with Militech",
+      "cardType": "event",
+      "category": "breaker_strength_or_break_cost_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "breaker.support",
+        "run.break_cost_support"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Breaker-Support-Fakt ergänzt; support-only, kein Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_087_forgotten-backup-chip",
+      "title": "Forgotten Backup Chip",
+      "cardType": "event",
+      "category": "breaker_search_or_recovery_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "setup.recovery",
+        "setup.search"
+      ],
+      "strategyAnchors": [
+        "runner.search.breaker"
+      ],
+      "lineSupport": [
+        "runner.search.breaker"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Strategy-ID auf runner.search.breaker normalisiert; bestehende Search-/Recovery-Semantik beibehalten."
+    },
+    {
+      "cardId": "onr_v1_089_gideons-pawnshop",
+      "title": "Gideon’s Pawnshop",
+      "cardType": "event",
+      "category": "breaker_search_or_recovery_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "setup.recovery",
+        "setup.search"
+      ],
+      "strategyAnchors": [
+        "runner.search.breaker"
+      ],
+      "lineSupport": [
+        "runner.search.breaker"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Strategy-ID auf runner.search.breaker normalisiert; bestehende Search-/Recovery-Semantik beibehalten."
+    },
+    {
+      "cardId": "onr_v1_093_if-you-want-it-done-right",
+      "title": "If You Want It Done Right...",
+      "cardType": "event",
+      "category": "breaker_search_or_recovery_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "setup.search"
+      ],
+      "strategyAnchors": [
+        "runner.search.breaker"
+      ],
+      "lineSupport": [
+        "runner.search.breaker"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Strategy-ID auf runner.search.breaker normalisiert; bestehende Search-/Recovery-Semantik beibehalten."
+    },
+    {
+      "cardId": "onr_v1_099_mantis-fixer-at-large",
+      "title": "Mantis, Fixer-at-Large",
+      "cardType": "event",
+      "category": "breaker_search_or_recovery_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "setup.draw",
+        "setup.search"
+      ],
+      "strategyAnchors": [
+        "runner.search.breaker"
+      ],
+      "lineSupport": [
+        "runner.search.breaker"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Strategy-ID auf runner.search.breaker normalisiert; bestehende Search-/Recovery-Semantik beibehalten."
+    },
+    {
+      "cardId": "onr_v1_110_sneak-preview",
+      "title": "Sneak Preview",
+      "cardType": "event",
+      "category": "breaker_search_or_recovery_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "setup.install_discount",
+        "setup.search"
+      ],
+      "strategyAnchors": [
+        "runner.search.breaker"
+      ],
+      "lineSupport": [
+        "runner.search.breaker"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Strategy-ID auf runner.search.breaker normalisiert; bestehende Search-/Recovery-Semantik beibehalten."
+    },
+    {
+      "cardId": "onr_v1_114_temple-microcode-outlet",
+      "title": "Temple Microcode Outlet",
+      "cardType": "event",
+      "category": "breaker_search_or_recovery_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "setup.draw",
+        "setup.search"
+      ],
+      "strategyAnchors": [
+        "runner.search.breaker"
+      ],
+      "lineSupport": [
+        "runner.search.breaker"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Strategy-ID auf runner.search.breaker normalisiert; bestehende Search-/Recovery-Semantik beibehalten."
+    },
+    {
+      "cardId": "onr_v1_119_arasaka-portable-prototype",
+      "title": "Arasaka Portable Prototype",
+      "cardType": "hardware",
+      "category": "recurring_breaker_credit_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Trash-Credit-Semantik zu recurring breaker credit korrigiert; kein Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_122_artemis-2020",
+      "title": "Artemis 2020",
+      "cardType": "hardware",
+      "category": "recurring_breaker_credit_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Trash-Credit-Semantik zu recurring breaker credit korrigiert; kein Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_124_corolla-speed-chip",
+      "title": "Corolla Speed Chip",
+      "cardType": "hardware",
+      "category": "recurring_breaker_credit_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Trash-Credit-Semantik zu recurring breaker credit korrigiert; kein Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "title": "Microtech Backup Drive",
+      "cardType": "hardware",
+      "category": "breaker_search_or_recovery_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "setup.recovery"
+      ],
+      "strategyAnchors": [
+        "runner.search.breaker"
+      ],
+      "lineSupport": [
+        "runner.search.breaker"
+      ],
+      "strategicRole": [
+        "emergency_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Strategy-ID auf runner.search.breaker normalisiert; bestehende Search-/Recovery-Semantik beibehalten."
+    },
+    {
+      "cardId": "onr_v1_137_parraline-5750",
+      "title": "Parraline 5750",
+      "cardType": "hardware",
+      "category": "recurring_breaker_credit_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Trash-Credit-Semantik zu recurring breaker credit korrigiert; kein Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_140_raven-microcyb-eagle",
+      "title": "Raven Microcyb Eagle",
+      "cardType": "hardware",
+      "category": "recurring_breaker_credit_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "defense.damage_prevention",
+        "economy.recurring",
+        "economy.recurring_breaker_credit"
+      ],
+      "strategyAnchors": [
+        "runner.survival_defense"
+      ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool",
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Trash-Credit-Semantik zu recurring breaker credit korrigiert; kein Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_141_raven-microcyb-owl",
+      "title": "Raven Microcyb Owl",
+      "cardType": "hardware",
+      "category": "recurring_breaker_credit_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Trash-Credit-Semantik zu recurring breaker credit korrigiert; kein Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_147_zz22-speed-chip",
+      "title": "ZZ22 Speed Chip",
+      "cardType": "hardware",
+      "category": "recurring_breaker_credit_support",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Trash-Credit-Semantik zu recurring breaker credit korrigiert; kein Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_187_wilson-weeflerunner-apprentice",
+      "title": "Wilson, Weeflerunner Apprentice",
+      "cardType": "resource",
+      "category": "checked_related_no_breaker_change",
+      "changedInAI018": false,
+      "tacticSignals": [
+        "defense.damage_prevention",
+        "defense.tag_prevention"
+      ],
+      "strategyAnchors": [
+        "runner.survival_defense"
+      ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
+      "breakerCoverage": [],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Geprüft; keine Breaker-Support-Zuordnung fachlich gerechtfertigt."
+    },
+    {
+      "cardId": "simple_decoder",
+      "title": "Simple Decoder",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "breaker.code_gate"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "code_gate"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Testset-BreakerProfile ergänzt; reine Coverage, kein Strategieanker."
+    },
+    {
+      "cardId": "simple_fracter",
+      "title": "Simple Fracter",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "breaker.wall"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "wall"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Testset-BreakerProfile ergänzt; reine Coverage, kein Strategieanker."
+    },
+    {
+      "cardId": "simple_killer",
+      "title": "Simple Killer",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "breaker.sentry"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "sentry"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Testset-BreakerProfile ergänzt; reine Coverage, kein Strategieanker."
+    },
+    {
+      "cardId": "v08_adaptive_killer",
+      "title": "Adaptive Killer",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "breaker.sentry"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "sentry"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Testset-BreakerProfile ergänzt; reine Coverage, kein Strategieanker."
+    },
+    {
+      "cardId": "v08_precise_decoder",
+      "title": "Precise Decoder",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "breaker.code_gate"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "code_gate"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Testset-BreakerProfile ergänzt; reine Coverage, kein Strategieanker."
+    },
+    {
+      "cardId": "v08_steady_fracter",
+      "title": "Steady Fracter",
+      "cardType": "program",
+      "category": "icebreaker_coverage_or_breaker_special",
+      "changedInAI018": true,
+      "tacticSignals": [
+        "breaker.wall"
+      ],
+      "strategyAnchors": [],
+      "lineSupport": [],
+      "strategicRole": [],
+      "breakerCoverage": [
+        "wall"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfiles": [],
+      "decision": "Testset-BreakerProfile ergänzt; reine Coverage, kein Strategieanker."
+    }
+  ],
+  "inactiveClassicChecked": [
+    {
+      "cardId": "onr_classic_027_early-worm",
+      "title": "Early Worm",
+      "status": "inactive_classic_outside_active_ai_hint_scope",
+      "decision": "Geprüft, aber nicht in aktiven/compiled AI-Hints enthalten; keine AI018-Hintänderung."
+    },
+    {
+      "cardId": "onr_classic_028_matador",
+      "title": "Matador",
+      "status": "inactive_classic_outside_active_ai_hint_scope",
+      "decision": "Geprüft, aber nicht in aktiven/compiled AI-Hints enthalten; keine AI018-Hintänderung."
+    },
+    {
+      "cardId": "onr_classic_029_ms-todon",
+      "title": "MS-todon",
+      "status": "inactive_classic_outside_active_ai_hint_scope",
+      "decision": "Geprüft, aber nicht in aktiven/compiled AI-Hints enthalten; keine AI018-Hintänderung."
+    },
+    {
+      "cardId": "onr_classic_030_psychic-friend",
+      "title": "Psychic Friend",
+      "status": "inactive_classic_outside_active_ai_hint_scope",
+      "decision": "Geprüft, aber nicht in aktiven/compiled AI-Hints enthalten; keine AI018-Hintänderung."
+    },
+    {
+      "cardId": "onr_classic_031_rent-i-con",
+      "title": "Rent-I-Con",
+      "status": "inactive_classic_outside_active_ai_hint_scope",
+      "decision": "Geprüft, aber nicht in aktiven/compiled AI-Hints enthalten; keine AI018-Hintänderung."
+    },
+    {
+      "cardId": "onr_classic_039_library-search",
+      "title": "Library Search",
+      "status": "inactive_classic_outside_active_ai_hint_scope",
+      "decision": "Geprüft, aber nicht in aktiven/compiled AI-Hints enthalten; keine AI018-Hintänderung."
+    },
+    {
+      "cardId": "onr_classic_048_omnitech-spinal-tap-cybermodem",
+      "title": "Omnitech \"Spinal Tap\" Cybermodem",
+      "status": "inactive_classic_outside_active_ai_hint_scope",
+      "decision": "Geprüft, aber nicht in aktiven/compiled AI-Hints enthalten; keine AI018-Hintänderung."
+    }
+  ]
+}

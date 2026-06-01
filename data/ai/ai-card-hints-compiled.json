@@ -70,6 +70,14 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
+      },
+      "breakerProfile": {
+        "coverage": [
+          "wall"
+        ],
+        "baseStrength": 1,
+        "pumpCost": 1,
+        "breakCost": 1
       }
     },
     {
@@ -670,16 +678,11 @@
       "effects": [
         {
           "amount": 3,
-          "kind": "economy",
+          "kind": "recurring_economy",
           "repeatable": true,
           "resource": "credits",
           "scope": "runner",
-          "timing": "during_run"
-        },
-        {
-          "kind": "trash_credit",
-          "resource": "trash_credits",
-          "scope": "runner",
+          "target": "icebreaker",
           "timing": "persistent"
         }
       ],
@@ -687,7 +690,10 @@
         "memory": 1,
         "reserveRisk": "low",
         "opportunityCost": "low"
-      }
+      },
+      "strategicRole": [
+        "support_tool"
+      ]
     },
     {
       "cardId": "onr_v1_012_clown",
@@ -1954,11 +1960,17 @@
       ],
       "effects": [
         {
-          "kind": "trash_credit",
-          "resource": "trash_credits",
+          "amount": 1,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
           "scope": "runner",
+          "target": "icebreaker",
           "timing": "persistent"
         }
+      ],
+      "strategicRole": [
+        "support_tool"
       ]
     },
     {
@@ -2447,7 +2459,7 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ],
       "strategicRole": [
         "engine_anchor"
@@ -2606,7 +2618,33 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_program_pressure_modifiers"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "successful_run",
+          "scope": "ice",
+          "resource": "strength",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_047_pile-driver",
@@ -3404,7 +3442,7 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ],
       "strategicRole": [
         "engine_anchor"
@@ -4019,16 +4057,11 @@
       "effects": [
         {
           "amount": 2,
-          "kind": "economy",
+          "kind": "recurring_economy",
           "repeatable": true,
           "resource": "credits",
           "scope": "runner",
-          "timing": "during_run"
-        },
-        {
-          "kind": "trash_credit",
-          "resource": "trash_credits",
-          "scope": "runner",
+          "target": "icebreaker",
           "timing": "persistent"
         }
       ],
@@ -4036,7 +4069,10 @@
         "memory": 1,
         "reserveRisk": "low",
         "opportunityCost": "low"
-      }
+      },
+      "strategicRole": [
+        "support_tool"
+      ]
     },
     {
       "cardId": "onr_v1_072_wild-card",
@@ -4612,7 +4648,34 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1912-smokes.json#runner_v1912_hidden_zone_counter"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "action",
+          "scope": "installed_program",
+          "resource": "strength",
+          "amount": 1,
+          "target": "icebreaker"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_stolen_agenda_last_turn"
+        }
+      ],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_083_desperate-competitor",
@@ -4905,7 +4968,7 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ],
       "strategicRole": [
         "enabler"
@@ -5005,7 +5068,7 @@
         }
       ],
       "lineSupport": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ],
       "strategicRole": [
         "enabler"
@@ -5159,7 +5222,7 @@
         }
       ],
       "lineSupport": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ],
       "strategicRole": [
         "enabler"
@@ -5471,7 +5534,7 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ],
       "strategicRole": [
         "enabler"
@@ -5939,7 +6002,7 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ],
       "strategicRole": [
         "enabler"
@@ -6106,7 +6169,7 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ],
       "strategicRole": [
         "enabler"
@@ -6325,11 +6388,17 @@
       ],
       "effects": [
         {
-          "kind": "trash_credit",
-          "resource": "trash_credits",
+          "amount": 3,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
           "scope": "runner",
+          "target": "icebreaker",
           "timing": "persistent"
         }
+      ],
+      "strategicRole": [
+        "support_tool"
       ]
     },
     {
@@ -6531,11 +6600,17 @@
       ],
       "effects": [
         {
-          "kind": "trash_credit",
-          "resource": "trash_credits",
+          "amount": 2,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
           "scope": "runner",
+          "target": "icebreaker",
           "timing": "persistent"
         }
+      ],
+      "strategicRole": [
+        "support_tool"
       ]
     },
     {
@@ -6599,11 +6674,17 @@
       ],
       "effects": [
         {
-          "kind": "trash_credit",
-          "resource": "trash_credits",
+          "amount": 1,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
           "scope": "runner",
+          "target": "killer",
           "timing": "persistent"
         }
+      ],
+      "strategicRole": [
+        "support_tool"
       ]
     },
     {
@@ -7006,7 +7087,7 @@
         "needsHumanReview": true
       },
       "lineSupport": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ],
       "strategicRole": [
         "emergency_tool"
@@ -7277,11 +7358,17 @@
       ],
       "effects": [
         {
-          "kind": "trash_credit",
-          "resource": "trash_credits",
+          "amount": 1,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
           "scope": "runner",
+          "target": "icebreaker",
           "timing": "persistent"
         }
+      ],
+      "strategicRole": [
+        "support_tool"
       ]
     },
     {
@@ -7396,9 +7483,19 @@
         "runner.survival_defense"
       ],
       "strategicRole": [
-        "defensive_tool"
+        "defensive_tool",
+        "support_tool"
       ],
       "effects": [
+        {
+          "amount": 1,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
+          "scope": "runner",
+          "target": "icebreaker",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "damageTypes": [
@@ -7417,12 +7514,6 @@
           "resource": "net_damage",
           "scope": "runner",
           "timing": "prevention_window"
-        },
-        {
-          "kind": "trash_credit",
-          "resource": "trash_credits",
-          "scope": "runner",
-          "timing": "persistent"
         }
       ],
       "conditions": [
@@ -7473,11 +7564,17 @@
       },
       "effects": [
         {
-          "kind": "trash_credit",
-          "resource": "trash_credits",
+          "amount": 3,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
           "scope": "runner",
+          "target": "icebreaker",
           "timing": "persistent"
         }
+      ],
+      "strategicRole": [
+        "support_tool"
       ]
     },
     {
@@ -7750,11 +7847,17 @@
       ],
       "effects": [
         {
-          "kind": "trash_credit",
-          "resource": "trash_credits",
+          "amount": 2,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
           "scope": "runner",
+          "target": "killer",
           "timing": "persistent"
         }
+      ],
+      "strategicRole": [
+        "support_tool"
       ]
     },
     {
@@ -25920,11 +26023,31 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "during_ice_encounter",
+          "scope": "installed_program",
+          "resource": "strength",
+          "amount": 2,
+          "target": "icebreaker"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        }
+      ],
+      "strategicRole": [
+        "support_tool"
+      ]
     },
     {
       "cardId": "onr_proteus_092_morphing-tool",
@@ -26852,11 +26975,31 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "action",
+          "scope": "installed_program",
+          "resource": "strength",
+          "amount": 1,
+          "target": "icebreaker"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_installed_program"
+        }
+      ],
+      "strategicRole": [
+        "support_tool"
+      ]
     },
     {
       "cardId": "onr_proteus_116_pirate-broadcast",
@@ -27294,7 +27437,7 @@
         }
       ],
       "lineSupport": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ],
       "strategicRole": [
         "engine_anchor"
@@ -27581,9 +27724,12 @@
           "timing": "persistent"
         },
         {
-          "kind": "trash_credit",
-          "resource": "trash_credits",
+          "amount": 2,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
           "scope": "runner",
+          "target": "icebreaker",
           "timing": "persistent"
         }
       ],
@@ -27591,6 +27737,9 @@
         {
           "kind": "requires_installed_card"
         }
+      ],
+      "strategicRole": [
+        "support_tool"
       ]
     },
     {
@@ -27831,11 +27980,17 @@
       },
       "effects": [
         {
-          "kind": "trash_credit",
-          "resource": "trash_credits",
+          "amount": 2,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
           "scope": "runner",
+          "target": "icebreaker",
           "timing": "persistent"
         }
+      ],
+      "strategicRole": [
+        "support_tool"
       ]
     },
     {
@@ -28275,9 +28430,12 @@
           "timing": "persistent"
         },
         {
-          "kind": "trash_credit",
-          "resource": "trash_credits",
+          "amount": 1,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
           "scope": "runner",
+          "target": "icebreaker",
           "timing": "persistent"
         }
       ],
@@ -28285,6 +28443,9 @@
         {
           "kind": "requires_installed_card"
         }
+      ],
+      "strategicRole": [
+        "support_tool"
       ]
     },
     {
@@ -28592,6 +28753,14 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
+      },
+      "breakerProfile": {
+        "coverage": [
+          "code_gate"
+        ],
+        "baseStrength": 1,
+        "pumpCost": 1,
+        "breakCost": 1
       }
     },
     {
@@ -28789,6 +28958,14 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
+      },
+      "breakerProfile": {
+        "coverage": [
+          "wall"
+        ],
+        "baseStrength": 1,
+        "pumpCost": 1,
+        "breakCost": 1
       }
     },
     {
@@ -28823,6 +29000,14 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
+      },
+      "breakerProfile": {
+        "coverage": [
+          "sentry"
+        ],
+        "baseStrength": 1,
+        "pumpCost": 1,
+        "breakCost": 1
       }
     },
     {
@@ -29137,6 +29322,14 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
+      },
+      "breakerProfile": {
+        "coverage": [
+          "sentry"
+        ],
+        "baseStrength": 1,
+        "pumpCost": 1,
+        "breakCost": 1
       }
     },
     {
@@ -29437,6 +29630,14 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
+      },
+      "breakerProfile": {
+        "coverage": [
+          "code_gate"
+        ],
+        "baseStrength": 1,
+        "pumpCost": 1,
+        "breakCost": 1
       }
     },
     {
@@ -29508,6 +29709,14 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
+      },
+      "breakerProfile": {
+        "coverage": [
+          "wall"
+        ],
+        "baseStrength": 1,
+        "pumpCost": 1,
+        "breakCost": 1
       }
     },
     {

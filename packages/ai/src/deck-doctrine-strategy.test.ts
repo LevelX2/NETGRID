@@ -49,8 +49,8 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
       ],
     });
 
-    expect(profile.strategyScores["runner.breaker_search"]?.anchorScore).toBeGreaterThan(0);
-    expect(profile.strategyScores["runner.breaker_search"]?.supportScore).toBeGreaterThan(70);
+    expect(profile.strategyScores["runner.search.breaker"]?.anchorScore).toBeGreaterThan(0);
+    expect(profile.strategyScores["runner.search.breaker"]?.supportScore).toBeGreaterThan(70);
     expect(profile.strategyScores["runner.rig_first"]?.supportScore).toBeGreaterThan(60);
     expect(profile.strategyScores["runner.rnd_pressure"]?.anchorScore).toBe(0);
   });

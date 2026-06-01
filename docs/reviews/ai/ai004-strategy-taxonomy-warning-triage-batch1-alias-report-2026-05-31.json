@@ -952,7 +952,7 @@
       "triageCategory": "strategy_alias",
       "triageSource": "classifier",
       "mapsTo": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ],
       "rationale": "Legacy role or planRole aliases to a normalized strategy.",
       "examples": [
@@ -2953,7 +2953,7 @@
       "triageCategory": "strategy_alias",
       "triageSource": "classifier",
       "mapsTo": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ],
       "rationale": "Legacy role or planRole aliases to a normalized strategy.",
       "examples": [
@@ -4828,7 +4828,7 @@
       "triageCategory": "strategy_alias",
       "triageSource": "classifier",
       "mapsTo": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ],
       "rationale": "Legacy role or planRole aliases to a normalized strategy.",
       "examples": [
@@ -4842,7 +4842,7 @@
       "triageCategory": "strategy_alias",
       "triageSource": "classifier",
       "mapsTo": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ],
       "rationale": "Legacy role or planRole aliases to a normalized strategy.",
       "examples": [
@@ -5379,13 +5379,13 @@
       ]
     },
     {
-      "value": "runner.breaker_search",
+      "value": "runner.search.breaker",
       "count": 10,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
       "mapsTo": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ],
       "rationale": "Already uses a normalized strategy ID.",
       "examples": [

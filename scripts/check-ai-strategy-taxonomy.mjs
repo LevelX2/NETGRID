@@ -100,7 +100,7 @@ const LINE_SUPPORT_MAPPINGS = {
   },
   breaker_search_first: {
     category: "alias_to_strategy_goal",
-    mapsTo: ["runner.breaker_search"],
+    mapsTo: ["runner.search.breaker"],
     rationale: "Legacy setup/search line.",
   },
   early_rnd_pressure: {
@@ -191,10 +191,10 @@ const ROLE_ALIASES = {
   build_rig: ["runner.rig_first"],
   runner_install_program: ["runner.rig_first"],
   recover_rig: ["runner.rig_first"],
-  stack_search: ["runner.breaker_search"],
-  program_search: ["runner.breaker_search"],
-  recover_key_card: ["runner.breaker_search"],
-  recover_cards: ["runner.breaker_search"],
+  stack_search: ["runner.search.breaker"],
+  program_search: ["runner.search.breaker"],
+  recover_key_card: ["runner.search.breaker"],
+  recover_cards: ["runner.search.breaker"],
   safe_probe_run: ["runner.run_event_tempo"],
   run_pressure: ["runner.run_event_tempo"],
   runner_play_event: ["runner.run_event_tempo"],
@@ -1611,6 +1611,49 @@ function buildDerivationSmokeTests(rules) {
         {
           kind: "remote_protection",
           timing: "persistent",
+          scope: "ice",
+          resource: "strength",
+        },
+      ],
+    },
+    runnerRecurringBreakerCredit: {
+      cardId: "ai018_smoke_recurring_breaker_credit",
+      side: "runner",
+      cardType: "hardware",
+      effects: [
+        {
+          kind: "recurring_economy",
+          timing: "persistent",
+          scope: "runner",
+          resource: "credits",
+          amount: 2,
+          repeatable: true,
+          target: "icebreaker",
+        },
+      ],
+    },
+    runnerInstalledBreakerStrengthSupport: {
+      cardId: "ai018_smoke_installed_breaker_strength_support",
+      side: "runner",
+      cardType: "event",
+      effects: [
+        {
+          kind: "global_modifier",
+          timing: "action",
+          scope: "installed_program",
+          resource: "strength",
+          target: "icebreaker",
+        },
+      ],
+    },
+    runnerVirusIceStrengthReduction: {
+      cardId: "ai018_smoke_virus_ice_strength_reduction",
+      side: "runner",
+      cardType: "program",
+      effects: [
+        {
+          kind: "global_modifier",
+          timing: "successful_run",
           scope: "ice",
           resource: "strength",
         },

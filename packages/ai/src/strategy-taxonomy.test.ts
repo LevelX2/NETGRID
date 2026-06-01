@@ -147,6 +147,9 @@ function smokeTest(
     | "runnerConfigurableBreaker"
     | "runnerTargetedBreaker"
     | "runnerIceStrengthReduction"
+    | "runnerRecurringBreakerCredit"
+    | "runnerInstalledBreakerStrengthSupport"
+    | "runnerVirusIceStrengthReduction"
     | "runnerEncounterSearchInstall"
     | "corpTagPunishPayoff"
     | "corpCreditTagPunishPayoff"
@@ -238,7 +241,7 @@ describe("AI003 strategy goal taxonomy", () => {
 
     expect(report.hardErrorCount).toBe(0);
     expect(tacticSignalCatalogData.schemaVersion).toBe("ai-tactic-signals-v1");
-    expect(report.taxonomy.tacticSignalCatalogCount).toBe(68);
+    expect(report.taxonomy.tacticSignalCatalogCount).toBe(69);
     expect(new Set(signalIds).size).toBe(signalIds.length);
     expect([...signalIds].sort()).toEqual(derivationSignalIds);
     expect(signalIds.some((signalId) => signalId.startsWith("anti.ice."))).toBe(
@@ -262,6 +265,16 @@ describe("AI003 strategy goal taxonomy", () => {
       expect.arrayContaining([
         expect.objectContaining({ signalId: "breaker.targeted_ice_bonus" }),
         expect.objectContaining({ signalId: "breaker.search_during_encounter" }),
+      ]),
+    );
+    expect(tacticSignalCatalogData.signals).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          signalId: "economy.recurring_breaker_credit",
+          supportOnly: true,
+          mayAnchorStrategy: false,
+          targetProfileRelevant: false,
+        }),
       ]),
     );
   });
@@ -415,6 +428,18 @@ describe("AI003 strategy goal taxonomy", () => {
     const configurableBreaker = smokeTest(report, "runnerConfigurableBreaker");
     const targetedBreaker = smokeTest(report, "runnerTargetedBreaker");
     const strengthReduction = smokeTest(report, "runnerIceStrengthReduction");
+    const recurringBreakerCredit = smokeTest(
+      report,
+      "runnerRecurringBreakerCredit",
+    );
+    const installedBreakerStrengthSupport = smokeTest(
+      report,
+      "runnerInstalledBreakerStrengthSupport",
+    );
+    const virusStrengthReduction = smokeTest(
+      report,
+      "runnerVirusIceStrengthReduction",
+    );
     const encounterSearchInstall = smokeTest(
       report,
       "runnerEncounterSearchInstall",
@@ -456,6 +481,34 @@ describe("AI003 strategy goal taxonomy", () => {
     );
     expect(strengthReduction.anchorStrategyIds).toEqual([]);
 
+    expect(recurringBreakerCredit.signals).toEqual(
+      expect.arrayContaining([
+        "economy.recurring",
+        "economy.recurring_breaker_credit",
+      ]),
+    );
+    expect(recurringBreakerCredit.signals).not.toContain(
+      "economy.trash_credit",
+    );
+    expect(recurringBreakerCredit.anchorStrategyIds).toEqual([]);
+
+    expect(installedBreakerStrengthSupport.signals).toEqual(
+      expect.arrayContaining(["breaker.support", "run.break_cost_support"]),
+    );
+    expect(installedBreakerStrengthSupport.signals).not.toContain(
+      "ice.strength_reduction",
+    );
+    expect(installedBreakerStrengthSupport.anchorStrategyIds).toEqual([]);
+
+    expect(virusStrengthReduction.signals).toEqual(
+      expect.arrayContaining([
+        "breaker.support",
+        "ice.strength_reduction",
+        "run.break_cost_support",
+      ]),
+    );
+    expect(virusStrengthReduction.anchorStrategyIds).toEqual([]);
+
     expect(encounterSearchInstall.signals).toEqual(
       expect.arrayContaining([
         "breaker.emergency_search",
@@ -465,7 +518,7 @@ describe("AI003 strategy goal taxonomy", () => {
       ]),
     );
     expect(encounterSearchInstall.anchorStrategyIds).toContain(
-      "runner.breaker_search",
+      "runner.search.breaker",
     );
     expect(encounterSearchInstall.anchorStrategyIds).not.toContain(
       "runner.rig_first",

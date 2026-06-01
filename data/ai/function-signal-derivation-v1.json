@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI017",
-  "updatesTaskId": "AI003/AI003-1/AI015/AI016",
+  "taskId": "AI018",
+  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017",
   "generatedAt": "2026-06-01",
-  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI017 adds the controlled Taktiksignal-Katalog V1 and a narrow Icebreaker/Runner-program pilot for targeted breaker bonuses, risky breakers, configurable coverage, Runner ICE-strength support and encounter search/install. Function signals are derived analysis inputs and are not manual hint truth.",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI018 completes the Icebreaker/Breaker-support sweep, renames runner.breaker_search to runner.search.breaker, separates recurring breaker-use credits from trash credits, and adds support derivation for Runner-side breaker strength support.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -201,7 +201,7 @@
         ]
       },
       "strategyAnchorFor": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ]
     },
     {
@@ -221,7 +221,7 @@
         ]
       },
       "strategyAnchorFor": [
-        "runner.breaker_search"
+        "runner.search.breaker"
       ]
     },
     {
@@ -1442,6 +1442,173 @@
       "strategyAnchorFor": [
         "runner.run_event_tempo"
       ]
+    },
+    {
+      "signalId": "economy.recurring_breaker_credit",
+      "source": "effects",
+      "match": {
+        "kind": "recurring_economy",
+        "resource": "credits",
+        "scope": "runner",
+        "target": "icebreaker"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware",
+          "program"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "icebreaker"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.recurring_breaker_credit",
+      "source": "effects",
+      "match": {
+        "kind": "recurring_economy",
+        "resource": "credits",
+        "scope": "runner",
+        "target": "killer"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware",
+          "program"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "killer"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.support",
+      "source": "effects",
+      "match": {
+        "kind": "global_modifier",
+        "resource": "strength",
+        "scope": "installed_program",
+        "target": "icebreaker"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event",
+          "program"
+        ],
+        "effectScope": [
+          "installed_program"
+        ],
+        "target": [
+          "icebreaker"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "run.break_cost_support",
+      "source": "effects",
+      "match": {
+        "kind": "global_modifier",
+        "resource": "strength",
+        "scope": "installed_program",
+        "target": "icebreaker"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event",
+          "program"
+        ],
+        "effectScope": [
+          "installed_program"
+        ],
+        "target": [
+          "icebreaker"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "ice.strength_reduction",
+      "source": "effects",
+      "match": {
+        "kind": "global_modifier",
+        "resource": "strength",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "ice"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.support",
+      "source": "effects",
+      "match": {
+        "kind": "global_modifier",
+        "resource": "strength",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "ice"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "run.break_cost_support",
+      "source": "effects",
+      "match": {
+        "kind": "global_modifier",
+        "resource": "strength",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "ice"
+        ]
+      },
+      "strategyAnchorFor": []
     }
   ],
   "descriptorGaps": [

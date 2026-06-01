@@ -18,179 +18,6 @@
       "side": "runner",
       "cardCount": 19,
       "strategyScores": {
-        "runner.breaker_search": {
-          "anchorScore": 0,
-          "supportScore": 92,
-          "finalScore": 37,
-          "anchorEvidence": [],
-          "supportEvidence": [
-            {
-              "cardId": "onr_v1_006_black-dahlia",
-              "quantity": 1,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_006_black-dahlia",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "breaker.sentry",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_016_cyfermaster",
-              "quantity": 1,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_016_cyfermaster",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "breaker.code_gate",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_040_loony-goon",
-              "quantity": 1,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_040_loony-goon",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "breaker.sentry",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_052_raffles",
-              "quantity": 1,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_052_raffles",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "breaker.code_gate",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_054_raptor",
-              "quantity": 1,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_054_raptor",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "breaker.sentry",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_060_shaka",
-              "quantity": 1,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_060_shaka",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "breaker.sentry",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_070_tinweasel",
-              "quantity": 1,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_070_tinweasel",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "breaker.code_gate",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_072_wild-card",
-              "quantity": 1,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_072_wild-card",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "breaker.sentry",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_073_wizards-book",
-              "quantity": 2,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_073_wizards-book",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "breaker.code_gate",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_079_bodyweight-synthetic-blood",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "setup.draw",
-              "reason": "support:searchOrDraw"
-            },
-            {
-              "cardId": "onr_v1_095_jack-n-joe",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "setup.draw",
-              "reason": "support:searchOrDraw"
-            },
-            {
-              "cardId": "onr_v1_097_livewires-contacts",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "economy.generic",
-              "reason": "support:economy"
-            },
-            {
-              "cardId": "onr_v1_108_score",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "economy.generic",
-              "reason": "support:economy"
-            },
-            {
-              "cardId": "onr_v1_145_wutech-mem-chip",
-              "quantity": 1,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            }
-          ],
-          "supportGaps": [
-            "missing_wall_coverage"
-          ],
-          "confidence": "medium"
-        },
         "runner.economy_first": {
           "anchorScore": 0,
           "supportScore": 79,
@@ -1166,6 +993,179 @@
           ],
           "confidence": "low"
         },
+        "runner.search.breaker": {
+          "anchorScore": 0,
+          "supportScore": 92,
+          "finalScore": 37,
+          "anchorEvidence": [],
+          "supportEvidence": [
+            {
+              "cardId": "onr_v1_006_black-dahlia",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_006_black-dahlia",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "breaker.sentry",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_016_cyfermaster",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_016_cyfermaster",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "breaker.code_gate",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_040_loony-goon",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_040_loony-goon",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "breaker.sentry",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_052_raffles",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_052_raffles",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "breaker.code_gate",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_054_raptor",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_054_raptor",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "breaker.sentry",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_060_shaka",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_060_shaka",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "breaker.sentry",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_070_tinweasel",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_070_tinweasel",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "breaker.code_gate",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_072_wild-card",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_072_wild-card",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "breaker.sentry",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_073_wizards-book",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_073_wizards-book",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "breaker.code_gate",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_079_bodyweight-synthetic-blood",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
+            },
+            {
+              "cardId": "onr_v1_095_jack-n-joe",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
+            },
+            {
+              "cardId": "onr_v1_097_livewires-contacts",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_108_score",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_145_wutech-mem-chip",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            }
+          ],
+          "supportGaps": [
+            "missing_wall_coverage"
+          ],
+          "confidence": "medium"
+        },
         "runner.survival_defense": {
           "anchorScore": 0,
           "supportScore": 40,
@@ -1213,7 +1213,7 @@
         "runner.economy_first"
       ],
       "secondaryStrategies": [
-        "runner.breaker_search",
+        "runner.search.breaker",
         "runner.run_event_tempo",
         "runner.rnd_pressure",
         "runner.hq_pressure"
@@ -1320,116 +1320,6 @@
       "side": "runner",
       "cardCount": 20,
       "strategyScores": {
-        "runner.breaker_search": {
-          "anchorScore": 0,
-          "supportScore": 63,
-          "finalScore": 25,
-          "anchorEvidence": [],
-          "supportEvidence": [
-            {
-              "cardId": "onr_v1_014_codecracker",
-              "quantity": 1,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_014_codecracker",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "breaker.code_gate",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_015_codeslinger",
-              "quantity": 1,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_015_codeslinger",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "breaker.sentry",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_021_dwarf",
-              "quantity": 2,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_021_dwarf",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "breaker.wall",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_039_krash",
-              "quantity": 2,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_039_krash",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "breaker.universal",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "breaker.sentry",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_074_worm",
-              "quantity": 2,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_074_worm",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "breaker.wall",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_095_jack-n-joe",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "setup.draw",
-              "reason": "support:searchOrDraw"
-            },
-            {
-              "cardId": "onr_v1_145_wutech-mem-chip",
-              "quantity": 1,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            }
-          ],
-          "supportGaps": [
-            "low_economy_support"
-          ],
-          "confidence": "low"
-        },
         "runner.economy_first": {
           "anchorScore": 0,
           "supportScore": 43,
@@ -2175,6 +2065,116 @@
           ],
           "confidence": "low"
         },
+        "runner.search.breaker": {
+          "anchorScore": 0,
+          "supportScore": 63,
+          "finalScore": 25,
+          "anchorEvidence": [],
+          "supportEvidence": [
+            {
+              "cardId": "onr_v1_014_codecracker",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_014_codecracker",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "breaker.code_gate",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_015_codeslinger",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_015_codeslinger",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "breaker.sentry",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_021_dwarf",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_021_dwarf",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "breaker.wall",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_039_krash",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_039_krash",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "breaker.universal",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "breaker.sentry",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_074_worm",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_074_worm",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "breaker.wall",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_095_jack-n-joe",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
+            },
+            {
+              "cardId": "onr_v1_145_wutech-mem-chip",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            }
+          ],
+          "supportGaps": [
+            "low_economy_support"
+          ],
+          "confidence": "low"
+        },
         "runner.survival_defense": {
           "anchorScore": 0,
           "supportScore": 25,
@@ -2326,114 +2326,6 @@
       "side": "runner",
       "cardCount": 21,
       "strategyScores": {
-        "runner.breaker_search": {
-          "anchorScore": 0,
-          "supportScore": 100,
-          "finalScore": 40,
-          "anchorEvidence": [],
-          "supportEvidence": [
-            {
-              "cardId": "onr_v1_021_dwarf",
-              "quantity": 2,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_021_dwarf",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "breaker.wall",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_039_krash",
-              "quantity": 2,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_039_krash",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "breaker.universal",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_066_snowball",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "breaker.sentry",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_074_worm",
-              "quantity": 2,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_074_worm",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "breaker.wall",
-              "reason": "support:breakerCoverage"
-            },
-            {
-              "cardId": "onr_v1_084_edited-shipping-manifests",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "economy.generic",
-              "reason": "support:economy"
-            },
-            {
-              "cardId": "onr_v1_095_jack-n-joe",
-              "quantity": 3,
-              "source": "functionSignal",
-              "signal": "setup.draw",
-              "reason": "support:searchOrDraw"
-            },
-            {
-              "cardId": "onr_v1_097_livewires-contacts",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "economy.generic",
-              "reason": "support:economy"
-            },
-            {
-              "cardId": "onr_v1_108_score",
-              "quantity": 2,
-              "source": "functionSignal",
-              "signal": "economy.generic",
-              "reason": "support:economy"
-            },
-            {
-              "cardId": "onr_v1_144_tycho-mem-chip",
-              "quantity": 1,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            },
-            {
-              "cardId": "onr_v1_145_wutech-mem-chip",
-              "quantity": 1,
-              "source": "compiledHint",
-              "signal": "memory_or_hand_size",
-              "reason": "support:memory"
-            }
-          ],
-          "supportGaps": [],
-          "confidence": "medium"
-        },
         "runner.economy_first": {
           "anchorScore": 0,
           "supportScore": 85,
@@ -3103,6 +2995,114 @@
           ],
           "confidence": "medium"
         },
+        "runner.search.breaker": {
+          "anchorScore": 0,
+          "supportScore": 100,
+          "finalScore": 40,
+          "anchorEvidence": [],
+          "supportEvidence": [
+            {
+              "cardId": "onr_v1_021_dwarf",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_021_dwarf",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "breaker.wall",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_039_krash",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_039_krash",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "breaker.universal",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "breaker.sentry",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_074_worm",
+              "quantity": 2,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_074_worm",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "breaker.wall",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_084_edited-shipping-manifests",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_095_jack-n-joe",
+              "quantity": 3,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
+            },
+            {
+              "cardId": "onr_v1_097_livewires-contacts",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_108_score",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "economy.generic",
+              "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_144_tycho-mem-chip",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_145_wutech-mem-chip",
+              "quantity": 1,
+              "source": "compiledHint",
+              "signal": "memory_or_hand_size",
+              "reason": "support:memory"
+            }
+          ],
+          "supportGaps": [],
+          "confidence": "medium"
+        },
         "runner.survival_defense": {
           "anchorScore": 0,
           "supportScore": 40,
@@ -3151,7 +3151,7 @@
         "runner.economy_first"
       ],
       "secondaryStrategies": [
-        "runner.breaker_search",
+        "runner.search.breaker",
         "runner.rnd_pressure",
         "runner.run_event_tempo"
       ],
@@ -6116,6 +6116,6 @@
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 5
     },
-    "contentSha256": "fc35ffe0f8ba4ec198879b79ddbf296ba3fb8d9b38b214feea7e675c6e98e6b8"
+    "contentSha256": "049fc1803117aa7434ace5c4b496d61bb704133cf350b38e32babba1431d184e"
   }
 }

@@ -1471,13 +1471,41 @@ function deriveFromImplementation(card, implementationText, hint) {
   }
 
   if (/restrictedHostedCreditSource/.test(implementationText)) {
-    addEffect(facts, {
-      kind: "trash_credit",
-      timing: "persistent",
-      scope: "runner",
-      resource: "trash_credits",
-      source: "implementation.restrictedHostedCreditSource",
-    });
+    let restrictedHostedCreditTarget;
+    if (
+      /usableFor:\s*\[[\s\S]*?"using_killer_during_run"/.test(
+        implementationText,
+      )
+    ) {
+      restrictedHostedCreditTarget = "killer";
+    } else if (
+      /usableFor:\s*\[[\s\S]*?"using_icebreaker_during_run(?:_non_noisy)?"/.test(
+        implementationText,
+      )
+    ) {
+      restrictedHostedCreditTarget = "icebreaker";
+    }
+
+    if (restrictedHostedCreditTarget) {
+      addEffect(facts, {
+        kind: "recurring_economy",
+        timing: "persistent",
+        scope: "runner",
+        resource: "credits",
+        amount: propertyNumber(implementationText, "capacity"),
+        repeatable: true,
+        target: restrictedHostedCreditTarget,
+        source: "implementation.restrictedHostedCreditSource",
+      });
+    } else {
+      addEffect(facts, {
+        kind: "trash_credit",
+        timing: "persistent",
+        scope: "runner",
+        resource: "trash_credits",
+        source: "implementation.restrictedHostedCreditSource",
+      });
+    }
   }
 
   if (/damagePreventionSources:\s*\[/.test(implementationText)) {

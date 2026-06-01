@@ -41,7 +41,7 @@
     {
       "cardId": "onr_v1_043_mystery-box",
       "overlay": {
-        "lineSupport": ["runner.breaker_search"],
+        "lineSupport": ["runner.search.breaker"],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -57,7 +57,7 @@
     {
       "cardId": "onr_v1_059_self-modifying-code",
       "overlay": {
-        "lineSupport": ["runner.breaker_search"],
+        "lineSupport": ["runner.search.breaker"],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,

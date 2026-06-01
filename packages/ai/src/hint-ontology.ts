@@ -269,7 +269,7 @@ export const KNOWN_HINT_LINE_SUPPORT = [
   "score_closeout",
   "runner.rig_first",
   "runner.economy_first",
-  "runner.breaker_search",
+  "runner.search.breaker",
   "runner.rnd_pressure",
   "runner.hq_pressure",
   "runner.remote_contest",

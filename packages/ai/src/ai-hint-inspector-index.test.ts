@@ -187,13 +187,18 @@ describe("AI005 hint inspector index", () => {
     );
   });
 
-  it("exposes AI017 icebreaker pilot signals without planner-facing anchors", () => {
+  it("exposes AI018 icebreaker sweep signals without planner-facing anchors", () => {
     const index = readIndex();
     const blackWidow = card(index, "onr_proteus_080_black-widow");
     const bartmoss = card(index, "onr_v1_005_bartmoss-memorial-icebreaker");
     const morphingTool = card(index, "onr_proteus_092_morphing-tool");
     const clown = card(index, "onr_v1_012_clown");
     const airportLocker = card(index, "onr_proteus_128_airport-locker");
+    const cloak = card(index, "onr_v1_011_cloak");
+    const lockjaw = card(index, "onr_proteus_091_lockjaw");
+    const personalTouch = card(index, "onr_proteus_115_personal-touch-the");
+    const dealWithMilitech = card(index, "onr_v1_082_deal-with-militech");
+    const pattelsVirus = card(index, "onr_v1_046_pattels-virus");
 
     expect(blackWidow.derivedFunctionSignals).toEqual(
       expect.arrayContaining([
@@ -235,6 +240,43 @@ describe("AI005 hint inspector index", () => {
     expect(clown.derivedStrategyAnchors).toEqual([]);
     expect(clown.strategicRoleStatus.values).toContain("support_tool");
 
+    expect(cloak.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "economy.recurring",
+        "economy.recurring_breaker_credit",
+      ]),
+    );
+    expect(cloak.derivedFunctionSignals).not.toContain("economy.trash_credit");
+    expect(cloak.derivedStrategyAnchors).toEqual([]);
+    expect(cloak.strategicRoleStatus.values).toContain("support_tool");
+
+    for (const supportCard of [
+      lockjaw,
+      personalTouch,
+      dealWithMilitech,
+    ]) {
+      expect(supportCard.derivedFunctionSignals).toEqual(
+        expect.arrayContaining([
+          "breaker.support",
+          "run.break_cost_support",
+        ]),
+      );
+      expect(supportCard.derivedFunctionSignals).not.toContain(
+        "ice.strength_reduction",
+      );
+      expect(supportCard.derivedStrategyAnchors).toEqual([]);
+      expect(supportCard.strategicRoleStatus.values).toContain("support_tool");
+    }
+
+    expect(pattelsVirus.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "breaker.support",
+        "ice.strength_reduction",
+        "run.break_cost_support",
+      ]),
+    );
+    expect(pattelsVirus.derivedStrategyAnchors).toEqual([]);
+
     expect(airportLocker.derivedFunctionSignals).toEqual(
       expect.arrayContaining([
         "breaker.emergency_search",
@@ -244,7 +286,7 @@ describe("AI005 hint inspector index", () => {
       ]),
     );
     expect(airportLocker.derivedStrategyAnchors).toEqual([
-      "runner.breaker_search",
+      "runner.search.breaker",
     ]);
     expect(JSON.stringify(airportLocker)).not.toMatch(
       /actualStackOrder|hiddenCards|privatePayload|cardInstances/,

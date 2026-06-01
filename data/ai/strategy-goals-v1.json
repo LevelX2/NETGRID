@@ -1,6 +1,6 @@
 {
   "schemaVersion": "ai-strategy-goals-v1",
-  "taskId": "AI003",
+  "taskId": "AI018",
   "generatedAt": "2026-05-31",
   "description": "Controlled V1 strategy goal taxonomy for read-only hint normalization and later DeckDoctrine aggregation. Strategy goals do not create LegalActions, action scores, plan weights, or runtime legality.",
   "strategyGoals": [
@@ -59,9 +59,9 @@
       ]
     },
     {
-      "strategyId": "runner.breaker_search",
+      "strategyId": "runner.search.breaker",
       "side": "runner",
-      "description": "Use search, draw, recovery, or tutor-like support to assemble missing breaker coverage.",
+      "description": "Use search, draw, recovery, or tutor-like support to assemble missing breaker coverage. Renamed in AI018 from runner.breaker_search to keep the search family action-based and extensible.",
       "detectionMode": "engine_anchor",
       "anchorSignals": [
         "setup.search",
