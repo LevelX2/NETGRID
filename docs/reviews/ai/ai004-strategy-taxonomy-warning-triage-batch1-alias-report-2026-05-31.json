@@ -5379,27 +5379,6 @@
       ]
     },
     {
-      "value": "runner.search.breaker",
-      "count": 10,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.search.breaker"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_043_mystery-box",
-        "onr_v1_059_self-modifying-code",
-        "onr_v1_087_forgotten-backup-chip",
-        "onr_v1_089_gideons-pawnshop",
-        "onr_v1_093_if-you-want-it-done-right",
-        "onr_v1_099_mantis-fixer-at-large",
-        "onr_v1_110_sneak-preview",
-        "onr_v1_114_temple-microcode-outlet"
-      ]
-    },
-    {
       "value": "corp.fast_advance",
       "count": 7,
       "mappingCategory": "exact_strategy_goal",
@@ -5474,6 +5453,25 @@
         "onr_v1_081_custodial-position",
         "onr_v1_096_kilroy-was-here",
         "onr_proteus_122_rush-hour"
+      ]
+    },
+    {
+      "value": "runner.search.breaker",
+      "count": 6,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "runner.search.breaker"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_043_mystery-box",
+        "onr_v1_059_self-modifying-code",
+        "onr_v1_087_forgotten-backup-chip",
+        "onr_v1_110_sneak-preview",
+        "onr_v1_114_temple-microcode-outlet",
+        "onr_proteus_128_airport-locker"
       ]
     },
     {

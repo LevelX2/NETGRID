@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI018",
+  "taskId": "AI018-adjustments",
   "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017",
   "generatedAt": "2026-06-01",
-  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI018 completes the Icebreaker/Breaker-support sweep, renames runner.breaker_search to runner.search.breaker, separates recurring breaker-use credits from trash credits, and adds support derivation for Runner-side breaker strength support.",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI018 adjustments introduce diagnostic TargetProfile V1, remove avoidable breaker.unknown_special coverage, add breaker drawback and multi-break signals, and separate setup memory/hosting signals without planner, targeting-AI, action-score, plan-weight, engine, legality, profile, default, UI, or baseline effects.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -31,157 +31,11 @@
   ],
   "derivationRules": [
     {
-      "signalId": "economy.generic",
+      "signalId": "access.hq_multiaccess",
       "source": "effects",
       "match": {
-        "kind": "economy"
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "economy.burst",
-      "source": "effects",
-      "match": {
-        "kind": "advance_burst"
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "economy.action",
-      "source": "effects",
-      "match": {
-        "kind": "action_economy"
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "economy.recurring",
-      "source": "effects",
-      "match": {
-        "kind": "recurring_economy"
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "economy.start_of_turn",
-      "source": "effects",
-      "match": {
-        "kind": "start_of_turn_economy"
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "economy.counter",
-      "source": "effects",
-      "match": {
-        "kind": "counter_economy"
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "tax.runner_credit",
-      "source": "effects",
-      "match": {
-        "kind": "counter_economy",
-        "resource": "credits",
-        "scope": "runner"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "asset",
-          "operation",
-          "upgrade"
-        ],
-        "effectScope": [
-          "runner"
-        ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "economy.finite_pool",
-      "source": "effects",
-      "match": {
-        "kind": "finite_economy_pool"
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "economy.advanceable",
-      "source": "effects",
-      "match": {
-        "kind": "advanceable_economy"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "effectScope": [
-          "corp",
-          "installed_card",
-          "score_area"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.economy_rez_reserve"
-      ]
-    },
-    {
-      "signalId": "economy.trace_credit",
-      "source": "effects",
-      "match": {
-        "kind": "trace_credit"
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "economy.rez_discount",
-      "source": "effects",
-      "match": {
-        "kind": "rez_discount"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "effectScope": [
-          "corp",
-          "ice",
-          "installed_card"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.economy_rez_reserve"
-      ]
-    },
-    {
-      "signalId": "economy.trash_credit",
-      "source": "effects",
-      "match": {
-        "kind": "trash_credit"
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "effectScope": [
-          "runner",
-          "remote",
-          "accessed_card"
-        ]
-      },
-      "strategyAnchorFor": [
-        "runner.remote_trash"
-      ]
-    },
-    {
-      "signalId": "setup.search",
-      "source": "effects",
-      "match": {
-        "kind": "search"
+        "kind": "multiaccess",
+        "scope": "hq"
       },
       "gates": {
         "side": [
@@ -189,72 +43,170 @@
         ],
         "cardType": [
           "event",
-          "hardware",
           "program",
           "resource"
         ],
         "effectScope": [
-          "runner",
-          "stack",
-          "stack_top",
-          "heap"
+          "hq"
         ]
       },
       "strategyAnchorFor": [
-        "runner.search.breaker"
+        "runner.hq_pressure",
+        "runner.interface_closeout"
       ]
     },
     {
-      "signalId": "setup.recovery",
+      "signalId": "access.punish",
       "source": "effects",
       "match": {
-        "kind": "card_recovery"
+        "kind": "access_punish"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "upgrade"
+        ],
+        "effectScope": [
+          "accessed_card"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "access.punish",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "scope": "runner",
+        "timing": "on_access"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "upgrade"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "access.rnd_multiaccess",
+      "source": "effects",
+      "match": {
+        "kind": "multiaccess",
+        "scope": "rnd"
       },
       "gates": {
         "side": [
           "runner"
         ],
+        "cardType": [
+          "event",
+          "program",
+          "resource"
+        ],
         "effectScope": [
-          "runner",
-          "heap",
-          "stack"
+          "rnd"
         ]
       },
       "strategyAnchorFor": [
-        "runner.search.breaker"
+        "runner.rnd_pressure",
+        "runner.interface_closeout"
       ]
     },
     {
-      "signalId": "setup.draw",
-      "source": "effects",
+      "signalId": "breaker.ap",
+      "source": "breakerProfile.coverage",
       "match": {
-        "kind": "draw"
+        "coverage": "ap"
       },
       "strategyAnchorFor": []
     },
     {
-      "signalId": "setup.draw",
-      "source": "effects",
+      "signalId": "breaker.black_ice",
+      "source": "breakerProfile.coverage",
       "match": {
-        "kind": "shuffle_draw"
+        "coverage": "black_ice"
       },
       "strategyAnchorFor": []
     },
     {
-      "signalId": "setup.install_discount",
-      "source": "effects",
+      "signalId": "breaker.code_gate",
+      "source": "breakerProfile.coverage",
       "match": {
-        "kind": "install_discount"
+        "coverage": "code_gate"
       },
       "strategyAnchorFor": []
     },
     {
-      "signalId": "setup.install_support",
+      "signalId": "breaker.configurable_coverage",
+      "source": "breakerProfile",
+      "match": {
+        "configurableCoverage": true
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.delayed_action_cost",
+      "source": "breakerProfile.sideEffects",
+      "match": {
+        "sideEffect": "forgo_actions"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.emergency_coverage",
+      "source": "breakerProfile",
+      "match": {
+        "emergencyCoverage": true
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program",
+          "resource"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.emergency_search",
       "source": "effects",
       "match": {
-        "kind": "install",
+        "kind": "search",
         "scope": "runner",
-        "target": "program"
+        "target": "program",
+        "timing": "during_ice_encounter"
       },
       "gates": {
         "side": [
@@ -269,6 +221,139 @@
           "runner"
         ],
         "target": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.ends_run_after_use",
+      "source": "breakerProfile.sideEffects",
+      "match": {
+        "sideEffect": "ends_run_after_use"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.hosted_strength_penalty",
+      "source": "effects",
+      "match": {
+        "kind": "global_modifier",
+        "resource": "strength",
+        "target": "hosted_icebreaker"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "installed_program"
+        ],
+        "target": [
+          "hosted_icebreaker"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.multi_subroutine_break",
+      "source": "breakerProfile",
+      "match": {
+        "multiSubroutineBreak": true
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.one_time_mode_choice",
+      "source": "breakerProfile",
+      "match": {
+        "oneTimeModeChoice": true
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.reconfigurable_type",
+      "source": "breakerProfile",
+      "match": {
+        "reconfigurableType": true
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.risky",
+      "source": "breakerProfile.sideEffects",
+      "match": {
+        "sideEffect": "random_failure"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.scaling_strength",
+      "source": "breakerProfile",
+      "match": {
+        "scalingStrength": true
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.scaling_strength",
+      "source": "breakerProfile.sideEffects",
+      "match": {
+        "sideEffect": "temporary_strength"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
           "program"
         ]
       },
@@ -302,37 +387,18 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "breaker.emergency_search",
-      "source": "effects",
+      "signalId": "breaker.self_trash_risk",
+      "source": "breakerProfile.sideEffects",
       "match": {
-        "kind": "search",
-        "scope": "runner",
-        "target": "program",
-        "timing": "during_ice_encounter"
+        "sideEffect": "program_trash_risk"
       },
       "gates": {
         "side": [
           "runner"
         ],
         "cardType": [
-          "event",
-          "program",
-          "resource"
-        ],
-        "effectScope": [
-          "runner"
-        ],
-        "target": [
           "program"
         ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "breaker.wall",
-      "source": "breakerProfile.coverage",
-      "match": {
-        "coverage": "wall"
       },
       "strategyAnchorFor": []
     },
@@ -345,115 +411,10 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "breaker.code_gate",
-      "source": "breakerProfile.coverage",
+      "signalId": "breaker.stealth_payment_loss",
+      "source": "breakerProfile.sideEffects",
       "match": {
-        "coverage": "code_gate"
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "breaker.universal",
-      "source": "breakerProfile.coverage",
-      "match": {
-        "coverage": "universal"
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "breaker.ap",
-      "source": "breakerProfile.coverage",
-      "match": {
-        "coverage": "ap"
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "breaker.trace",
-      "source": "breakerProfile.coverage",
-      "match": {
-        "coverage": "trace"
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "breaker.watchdog",
-      "source": "breakerProfile.coverage",
-      "match": {
-        "coverage": "watchdog"
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "breaker.black_ice",
-      "source": "breakerProfile.coverage",
-      "match": {
-        "coverage": "black_ice"
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "breaker.unknown_special",
-      "source": "breakerProfile.coverage",
-      "match": {
-        "coverage": "unknown_special"
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "breaker.configurable_coverage",
-      "source": "breakerProfile",
-      "match": {
-        "configurableCoverage": true
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "program"
-        ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "breaker.reconfigurable_type",
-      "source": "breakerProfile",
-      "match": {
-        "reconfigurableType": true
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "program"
-        ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "breaker.emergency_coverage",
-      "source": "breakerProfile",
-      "match": {
-        "emergencyCoverage": true
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "program",
-          "resource"
-        ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "breaker.targeted_ice_bonus",
-      "source": "breakerProfile",
-      "match": {
-        "targetedIceBonus": true
+        "sideEffect": "stealth_loss"
       },
       "gates": {
         "side": [
@@ -482,10 +443,78 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "breaker.risky",
-      "source": "breakerProfile.sideEffects",
+      "signalId": "breaker.support",
+      "source": "effects",
       "match": {
-        "sideEffect": "random_failure"
+        "kind": "global_modifier",
+        "resource": "strength",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "ice"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.support",
+      "source": "effects",
+      "match": {
+        "kind": "global_modifier",
+        "resource": "strength",
+        "scope": "installed_program",
+        "target": "icebreaker"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event",
+          "program"
+        ],
+        "effectScope": [
+          "installed_program"
+        ],
+        "target": [
+          "icebreaker"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.support",
+      "source": "effects",
+      "match": {
+        "kind": "remote_protection",
+        "resource": "strength",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "ice"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.targeted_ice_bonus",
+      "source": "breakerProfile",
+      "match": {
+        "targetedIceBonus": true
       },
       "gates": {
         "side": [
@@ -498,353 +527,44 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "breaker.self_trash_risk",
-      "source": "breakerProfile.sideEffects",
+      "signalId": "breaker.trace",
+      "source": "breakerProfile.coverage",
       "match": {
-        "sideEffect": "program_trash_risk"
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "program"
-        ]
+        "coverage": "trace"
       },
       "strategyAnchorFor": []
     },
     {
-      "signalId": "access.rnd_multiaccess",
-      "source": "effects",
+      "signalId": "breaker.universal",
+      "source": "breakerProfile.coverage",
       "match": {
-        "kind": "multiaccess",
-        "scope": "rnd"
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "event",
-          "program",
-          "resource"
-        ],
-        "effectScope": [
-          "rnd"
-        ]
-      },
-      "strategyAnchorFor": [
-        "runner.rnd_pressure",
-        "runner.interface_closeout"
-      ]
-    },
-    {
-      "signalId": "access.hq_multiaccess",
-      "source": "effects",
-      "match": {
-        "kind": "multiaccess",
-        "scope": "hq"
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "event",
-          "program",
-          "resource"
-        ],
-        "effectScope": [
-          "hq"
-        ]
-      },
-      "strategyAnchorFor": [
-        "runner.hq_pressure",
-        "runner.interface_closeout"
-      ]
-    },
-    {
-      "signalId": "info.rnd_topdeck",
-      "source": "effects",
-      "match": {
-        "kind": "topdeck_info",
-        "scope": "rnd"
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "event",
-          "program",
-          "resource"
-        ],
-        "effectScope": [
-          "rnd"
-        ]
-      },
-      "strategyAnchorFor": [
-        "runner.rnd_pressure"
-      ]
-    },
-    {
-      "signalId": "info.hq",
-      "source": "effects",
-      "match": {
-        "kind": "hq_info",
-        "scope": "hq"
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "effectScope": [
-          "hq"
-        ]
-      },
-      "strategyAnchorFor": [
-        "runner.hq_pressure"
-      ]
-    },
-    {
-      "signalId": "info.expose",
-      "source": "effects",
-      "match": {
-        "kind": "expose_info"
+        "coverage": "universal"
       },
       "strategyAnchorFor": []
     },
     {
-      "signalId": "remote.asset_economy",
-      "source": "remoteRole",
+      "signalId": "breaker.unknown_special",
+      "source": "breakerProfile.coverage",
       "match": {
-        "kind": "asset_economy"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "asset",
-          "agenda",
-          "upgrade"
-        ],
-        "remoteRole": [
-          "asset_economy"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.asset_economy"
-      ]
-    },
-    {
-      "signalId": "remote.scoring_protection",
-      "source": "remoteRole",
-      "match": {
-        "kind": "scoring_protection"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "asset",
-          "agenda",
-          "upgrade"
-        ],
-        "remoteRole": [
-          "scoring_protection"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.remote_scoring"
-      ]
-    },
-    {
-      "signalId": "remote.bait",
-      "source": "remoteRole",
-      "match": {
-        "kind": "bait"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "asset",
-          "upgrade"
-        ],
-        "remoteRole": [
-          "bait"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.ambush_bluff"
-      ]
-    },
-    {
-      "signalId": "remote.ambush",
-      "source": "remoteRole",
-      "match": {
-        "kind": "ambush"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "asset",
-          "upgrade"
-        ],
-        "remoteRole": [
-          "ambush"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.ambush_bluff"
-      ]
-    },
-    {
-      "signalId": "remote.agenda_steal_tax",
-      "source": "remoteRole",
-      "match": {
-        "kind": "agenda_steal_tax"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "asset",
-          "upgrade"
-        ],
-        "remoteRole": [
-          "agenda_steal_tax"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.remote_scoring"
-      ]
-    },
-    {
-      "signalId": "tax.remote",
-      "source": "remoteRole",
-      "match": {
-        "kind": "run_tax"
+        "coverage": "unknown_special"
       },
       "strategyAnchorFor": []
     },
     {
-      "signalId": "tax.remote",
-      "source": "remoteRole",
+      "signalId": "breaker.wall",
+      "source": "breakerProfile.coverage",
       "match": {
-        "kind": "remote_tax"
+        "coverage": "wall"
       },
       "strategyAnchorFor": []
     },
     {
-      "signalId": "tax.remote",
-      "source": "remoteRole",
+      "signalId": "breaker.watchdog",
+      "source": "breakerProfile.coverage",
       "match": {
-        "kind": "tax_fort"
+        "coverage": "watchdog"
       },
       "strategyAnchorFor": []
-    },
-    {
-      "signalId": "tag.source",
-      "source": "effects",
-      "match": {
-        "kind": "tag_source"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "agenda",
-          "asset",
-          "ice",
-          "operation",
-          "upgrade"
-        ],
-        "effectScope": [
-          "runner"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.tag_trace_punish"
-      ]
-    },
-    {
-      "signalId": "tag.payoff",
-      "source": "effects",
-      "match": {
-        "kind": "tag_punish_payoff"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "agenda",
-          "asset",
-          "operation",
-          "upgrade"
-        ],
-        "effectScope": [
-          "runner"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.tag_trace_punish"
-      ]
-    },
-    {
-      "signalId": "tag.payoff",
-      "source": "remoteRole",
-      "match": {
-        "kind": "tag_punish_asset"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "asset",
-          "upgrade"
-        ],
-        "remoteRole": [
-          "tag_punish_asset"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.tag_trace_punish"
-      ]
-    },
-    {
-      "signalId": "trace.source",
-      "source": "effects",
-      "match": {
-        "kind": "trace"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "agenda",
-          "asset",
-          "ice",
-          "operation",
-          "upgrade"
-        ],
-        "effectScope": [
-          "runner"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.tag_trace_punish"
-      ]
     },
     {
       "signalId": "damage.payoff",
@@ -895,74 +615,6 @@
       "strategyAnchorFor": [
         "corp.damage_kill"
       ]
-    },
-    {
-      "signalId": "access.punish",
-      "source": "effects",
-      "match": {
-        "kind": "access_punish"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "asset",
-          "upgrade"
-        ],
-        "effectScope": [
-          "accessed_card"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.ambush_bluff"
-      ]
-    },
-    {
-      "signalId": "access.punish",
-      "source": "effects",
-      "match": {
-        "kind": "persistent_counter_effect",
-        "scope": "runner",
-        "timing": "on_access"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "asset",
-          "upgrade"
-        ],
-        "effectScope": [
-          "runner"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.ambush_bluff"
-      ]
-    },
-    {
-      "signalId": "tax.runner_persistent",
-      "source": "effects",
-      "match": {
-        "kind": "persistent_counter_effect",
-        "scope": "runner"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "asset",
-          "ice",
-          "upgrade"
-        ],
-        "effectScope": [
-          "runner"
-        ]
-      },
-      "strategyAnchorFor": []
     },
     {
       "signalId": "defense.damage_prevention",
@@ -1024,7 +676,7 @@
       "signalId": "defense.trace_defense",
       "source": "effects",
       "match": {
-        "kind": "trace_defense"
+        "kind": "link"
       },
       "gates": {
         "side": [
@@ -1043,7 +695,7 @@
       "signalId": "defense.trace_defense",
       "source": "effects",
       "match": {
-        "kind": "link"
+        "kind": "trace_defense"
       },
       "gates": {
         "side": [
@@ -1059,263 +711,179 @@
       ]
     },
     {
-      "signalId": "score.advance_burst",
+      "signalId": "economy.action",
       "source": "effects",
       "match": {
-        "kind": "advance_burst"
+        "kind": "action_economy"
       },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "operation",
-          "agenda"
-        ],
-        "effectScope": [
-          "installed_card",
-          "score_area",
-          "corp"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.fast_advance"
-      ]
+      "strategyAnchorFor": []
     },
     {
-      "signalId": "score.advance_burst",
+      "signalId": "economy.advanceable",
       "source": "effects",
       "match": {
-        "kind": "score_acceleration",
-        "resource": "advancement_counters"
+        "kind": "advanceable_economy"
       },
       "gates": {
         "side": [
           "corp"
-        ],
-        "cardType": [
-          "agenda",
-          "asset",
-          "operation",
-          "upgrade"
         ],
         "effectScope": [
           "corp",
           "installed_card",
+          "score_area"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.economy_rez_reserve"
+      ]
+    },
+    {
+      "signalId": "economy.burst",
+      "source": "effects",
+      "match": {
+        "kind": "advance_burst"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.counter",
+      "source": "effects",
+      "match": {
+        "kind": "counter_economy"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.finite_pool",
+      "source": "effects",
+      "match": {
+        "kind": "finite_economy_pool"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.generic",
+      "source": "effects",
+      "match": {
+        "kind": "economy"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.recurring",
+      "source": "effects",
+      "match": {
+        "kind": "recurring_economy"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.recurring_breaker_credit",
+      "source": "effects",
+      "match": {
+        "kind": "recurring_economy",
+        "resource": "credits",
+        "scope": "runner",
+        "target": "icebreaker"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware",
+          "program"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "icebreaker"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.recurring_breaker_credit",
+      "source": "effects",
+      "match": {
+        "kind": "recurring_economy",
+        "resource": "credits",
+        "scope": "runner",
+        "target": "killer"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware",
+          "program"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "killer"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.rez_discount",
+      "source": "effects",
+      "match": {
+        "kind": "rez_discount"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "effectScope": [
+          "corp",
+          "ice",
+          "installed_card"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.economy_rez_reserve"
+      ]
+    },
+    {
+      "signalId": "economy.start_of_turn",
+      "source": "effects",
+      "match": {
+        "kind": "start_of_turn_economy"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.trace_credit",
+      "source": "effects",
+      "match": {
+        "kind": "trace_credit"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.trash_credit",
+      "source": "effects",
+      "match": {
+        "kind": "trash_credit"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "runner",
           "remote",
-          "score_area"
+          "accessed_card"
         ]
       },
       "strategyAnchorFor": [
-        "corp.fast_advance"
-      ]
-    },
-    {
-      "signalId": "score.agenda_action",
-      "source": "effects",
-      "match": {
-        "kind": "scored_agenda_action"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "agenda"
-        ],
-        "effectScope": [
-          "score_area"
-        ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "tax.ice",
-      "source": "effects",
-      "match": {
-        "kind": "run_tax",
-        "scope": "ice"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "ice"
-        ],
-        "effectScope": [
-          "ice",
-          "run_path"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.ice_tax_glacier"
-      ]
-    },
-    {
-      "signalId": "tax.ice",
-      "source": "effects",
-      "match": {
-        "kind": "run_tax",
-        "scope": "run_path"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "ice"
-        ],
-        "effectScope": [
-          "run_path"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.ice_tax_glacier"
-      ]
-    },
-    {
-      "signalId": "ice.strength_reduction",
-      "source": "effects",
-      "match": {
-        "kind": "remote_protection",
-        "resource": "strength",
-        "scope": "ice"
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "program"
-        ],
-        "effectScope": [
-          "ice"
-        ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "run.break_cost_support",
-      "source": "effects",
-      "match": {
-        "kind": "remote_protection",
-        "resource": "strength",
-        "scope": "ice"
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "program"
-        ],
-        "effectScope": [
-          "ice"
-        ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "breaker.support",
-      "source": "effects",
-      "match": {
-        "kind": "remote_protection",
-        "resource": "strength",
-        "scope": "ice"
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "program"
-        ],
-        "effectScope": [
-          "ice"
-        ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "ice.strength_modifier",
-      "source": "effects",
-      "match": {
-        "kind": "global_modifier",
-        "resource": "strength",
-        "scope": "ice"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "agenda",
-          "asset",
-          "ice",
-          "operation",
-          "upgrade"
-        ],
-        "effectScope": [
-          "ice"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.ice_tax_glacier"
-      ]
-    },
-    {
-      "signalId": "ice.strength_modifier",
-      "source": "effects",
-      "match": {
-        "kind": "remote_protection",
-        "resource": "strength",
-        "scope": "ice"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "agenda",
-          "asset",
-          "ice",
-          "operation",
-          "upgrade"
-        ],
-        "effectScope": [
-          "ice"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.ice_tax_glacier"
-      ]
-    },
-    {
-      "signalId": "ice.subroutine_modifier",
-      "source": "effects",
-      "match": {
-        "kind": "global_modifier",
-        "resource": "subroutines",
-        "scope": "ice"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "agenda",
-          "asset",
-          "ice",
-          "operation",
-          "upgrade"
-        ],
-        "effectScope": [
-          "ice"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.ice_tax_glacier"
+        "runner.remote_trash"
       ]
     },
     {
@@ -1360,6 +928,360 @@
       "strategyAnchorFor": [
         "corp.ice_tax_glacier"
       ]
+    },
+    {
+      "signalId": "ice.strength_modifier",
+      "source": "effects",
+      "match": {
+        "kind": "global_modifier",
+        "resource": "strength",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "agenda",
+          "asset",
+          "ice",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "ice"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "ice.strength_modifier",
+      "source": "effects",
+      "match": {
+        "kind": "remote_protection",
+        "resource": "strength",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "agenda",
+          "asset",
+          "ice",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "ice"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "ice.strength_reduction",
+      "source": "effects",
+      "match": {
+        "kind": "global_modifier",
+        "resource": "strength",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "ice"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "ice.strength_reduction",
+      "source": "effects",
+      "match": {
+        "kind": "remote_protection",
+        "resource": "strength",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "ice"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "ice.subroutine_modifier",
+      "source": "effects",
+      "match": {
+        "kind": "global_modifier",
+        "resource": "subroutines",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "agenda",
+          "asset",
+          "ice",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "ice"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "info.expose",
+      "source": "effects",
+      "match": {
+        "kind": "expose_info"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "info.hq",
+      "source": "effects",
+      "match": {
+        "kind": "hq_info",
+        "scope": "hq"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "hq"
+        ]
+      },
+      "strategyAnchorFor": [
+        "runner.hq_pressure"
+      ]
+    },
+    {
+      "signalId": "info.rnd_topdeck",
+      "source": "effects",
+      "match": {
+        "kind": "topdeck_info",
+        "scope": "rnd"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event",
+          "program",
+          "resource"
+        ],
+        "effectScope": [
+          "rnd"
+        ]
+      },
+      "strategyAnchorFor": [
+        "runner.rnd_pressure"
+      ]
+    },
+    {
+      "signalId": "remote.agenda_steal_tax",
+      "source": "remoteRole",
+      "match": {
+        "kind": "agenda_steal_tax"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "upgrade"
+        ],
+        "remoteRole": [
+          "agenda_steal_tax"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "signalId": "remote.ambush",
+      "source": "remoteRole",
+      "match": {
+        "kind": "ambush"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "upgrade"
+        ],
+        "remoteRole": [
+          "ambush"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "remote.asset_economy",
+      "source": "remoteRole",
+      "match": {
+        "kind": "asset_economy"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "agenda",
+          "upgrade"
+        ],
+        "remoteRole": [
+          "asset_economy"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.asset_economy"
+      ]
+    },
+    {
+      "signalId": "remote.bait",
+      "source": "remoteRole",
+      "match": {
+        "kind": "bait"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "upgrade"
+        ],
+        "remoteRole": [
+          "bait"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "remote.scoring_protection",
+      "source": "remoteRole",
+      "match": {
+        "kind": "scoring_protection"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "agenda",
+          "upgrade"
+        ],
+        "remoteRole": [
+          "scoring_protection"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "signalId": "run.break_cost_support",
+      "source": "effects",
+      "match": {
+        "kind": "global_modifier",
+        "resource": "strength",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "ice"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "run.break_cost_support",
+      "source": "effects",
+      "match": {
+        "kind": "global_modifier",
+        "resource": "strength",
+        "scope": "installed_program",
+        "target": "icebreaker"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event",
+          "program"
+        ],
+        "effectScope": [
+          "installed_program"
+        ],
+        "target": [
+          "icebreaker"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "run.break_cost_support",
+      "source": "effects",
+      "match": {
+        "kind": "remote_protection",
+        "resource": "strength",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "ice"
+        ]
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "run.event_tempo",
@@ -1444,65 +1366,124 @@
       ]
     },
     {
-      "signalId": "economy.recurring_breaker_credit",
+      "signalId": "score.advance_burst",
       "source": "effects",
       "match": {
-        "kind": "recurring_economy",
-        "resource": "credits",
-        "scope": "runner",
-        "target": "icebreaker"
+        "kind": "advance_burst"
       },
       "gates": {
         "side": [
-          "runner"
+          "corp"
         ],
         "cardType": [
-          "hardware",
-          "program"
+          "operation",
+          "agenda"
         ],
         "effectScope": [
-          "runner"
+          "installed_card",
+          "score_area",
+          "corp"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.fast_advance"
+      ]
+    },
+    {
+      "signalId": "score.advance_burst",
+      "source": "effects",
+      "match": {
+        "kind": "score_acceleration",
+        "resource": "advancement_counters"
+      },
+      "gates": {
+        "side": [
+          "corp"
         ],
-        "target": [
-          "icebreaker"
+        "cardType": [
+          "agenda",
+          "asset",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "corp",
+          "installed_card",
+          "remote",
+          "score_area"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.fast_advance"
+      ]
+    },
+    {
+      "signalId": "score.agenda_action",
+      "source": "effects",
+      "match": {
+        "kind": "scored_agenda_action"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "agenda"
+        ],
+        "effectScope": [
+          "score_area"
         ]
       },
       "strategyAnchorFor": []
     },
     {
-      "signalId": "economy.recurring_breaker_credit",
+      "signalId": "setup.draw",
       "source": "effects",
       "match": {
-        "kind": "recurring_economy",
-        "resource": "credits",
-        "scope": "runner",
-        "target": "killer"
+        "kind": "draw"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.draw",
+      "source": "effects",
+      "match": {
+        "kind": "shuffle_draw"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.hand_size",
+      "source": "effects",
+      "match": {
+        "kind": "hand_size_modifier",
+        "resource": "hand_size"
       },
       "gates": {
         "side": [
           "runner"
         ],
-        "cardType": [
-          "hardware",
-          "program"
-        ],
         "effectScope": [
           "runner"
-        ],
-        "target": [
-          "killer"
         ]
       },
       "strategyAnchorFor": []
     },
     {
-      "signalId": "breaker.support",
+      "signalId": "setup.install_discount",
       "source": "effects",
       "match": {
-        "kind": "global_modifier",
-        "resource": "strength",
-        "scope": "installed_program",
-        "target": "icebreaker"
+        "kind": "install_discount"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.install_support",
+      "source": "effects",
+      "match": {
+        "kind": "install",
+        "scope": "runner",
+        "target": "program"
       },
       "gates": {
         "side": [
@@ -1510,25 +1491,76 @@
         ],
         "cardType": [
           "event",
-          "program"
+          "program",
+          "resource"
         ],
         "effectScope": [
-          "installed_program"
+          "runner"
         ],
         "target": [
-          "icebreaker"
+          "program"
         ]
       },
       "strategyAnchorFor": []
     },
     {
-      "signalId": "run.break_cost_support",
+      "signalId": "setup.memory",
       "source": "effects",
       "match": {
         "kind": "global_modifier",
-        "resource": "strength",
-        "scope": "installed_program",
-        "target": "icebreaker"
+        "resource": "memory"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.program_host",
+      "source": "effects",
+      "match": {
+        "kind": "program_host",
+        "resource": "memory"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.recovery",
+      "source": "effects",
+      "match": {
+        "kind": "card_recovery"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "runner",
+          "heap",
+          "stack"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.search",
+      "source": "effects",
+      "match": {
+        "kind": "search",
+        "target": "program"
       },
       "gates": {
         "side": [
@@ -1536,79 +1568,254 @@
         ],
         "cardType": [
           "event",
-          "program"
+          "program",
+          "resource"
         ],
         "effectScope": [
-          "installed_program"
+          "runner"
         ],
         "target": [
-          "icebreaker"
+          "program"
         ]
       },
-      "strategyAnchorFor": []
+      "strategyAnchorFor": [
+        "runner.search.breaker"
+      ]
     },
     {
-      "signalId": "ice.strength_reduction",
+      "signalId": "setup.search",
       "source": "effects",
       "match": {
-        "kind": "global_modifier",
-        "resource": "strength",
-        "scope": "ice"
+        "kind": "search"
       },
       "gates": {
         "side": [
           "runner"
         ],
         "cardType": [
-          "program"
+          "event",
+          "hardware",
+          "program",
+          "resource"
         ],
         "effectScope": [
-          "ice"
+          "runner",
+          "stack",
+          "stack_top",
+          "heap"
         ]
       },
       "strategyAnchorFor": []
     },
     {
-      "signalId": "breaker.support",
+      "signalId": "tag.payoff",
       "source": "effects",
       "match": {
-        "kind": "global_modifier",
-        "resource": "strength",
+        "kind": "tag_punish_payoff"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "agenda",
+          "asset",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "signalId": "tag.payoff",
+      "source": "remoteRole",
+      "match": {
+        "kind": "tag_punish_asset"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "upgrade"
+        ],
+        "remoteRole": [
+          "tag_punish_asset"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "signalId": "tag.source",
+      "source": "effects",
+      "match": {
+        "kind": "tag_source"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "agenda",
+          "asset",
+          "ice",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "signalId": "tax.ice",
+      "source": "effects",
+      "match": {
+        "kind": "run_tax",
         "scope": "ice"
       },
       "gates": {
         "side": [
-          "runner"
+          "corp"
         ],
         "cardType": [
-          "program"
+          "ice"
         ],
         "effectScope": [
+          "ice",
+          "run_path"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "tax.ice",
+      "source": "effects",
+      "match": {
+        "kind": "run_tax",
+        "scope": "run_path"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
           "ice"
+        ],
+        "effectScope": [
+          "run_path"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "tax.remote",
+      "source": "remoteRole",
+      "match": {
+        "kind": "remote_tax"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "tax.remote",
+      "source": "remoteRole",
+      "match": {
+        "kind": "run_tax"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "tax.remote",
+      "source": "remoteRole",
+      "match": {
+        "kind": "tax_fort"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "tax.runner_credit",
+      "source": "effects",
+      "match": {
+        "kind": "counter_economy",
+        "resource": "credits",
+        "scope": "runner"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "runner"
         ]
       },
       "strategyAnchorFor": []
     },
     {
-      "signalId": "run.break_cost_support",
+      "signalId": "tax.runner_persistent",
       "source": "effects",
       "match": {
-        "kind": "global_modifier",
-        "resource": "strength",
-        "scope": "ice"
+        "kind": "persistent_counter_effect",
+        "scope": "runner"
       },
       "gates": {
         "side": [
-          "runner"
+          "corp"
         ],
         "cardType": [
-          "program"
+          "asset",
+          "ice",
+          "upgrade"
         ],
         "effectScope": [
-          "ice"
+          "runner"
         ]
       },
       "strategyAnchorFor": []
+    },
+    {
+      "signalId": "trace.source",
+      "source": "effects",
+      "match": {
+        "kind": "trace"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "agenda",
+          "asset",
+          "ice",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
     }
   ],
   "descriptorGaps": [

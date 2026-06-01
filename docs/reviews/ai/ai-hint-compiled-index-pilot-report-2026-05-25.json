@@ -11180,6 +11180,8 @@
           "breakCost": 3,
           "confidence": "high",
           "coverage": ["wall"],
+          "maxSubroutinesPerBreak": 4,
+          "multiSubroutineBreak": true,
           "pumpCost": 1,
           "sideEffects": ["stealth_loss"],
           "source": "implementation.icebreakerAbilities"
@@ -13365,7 +13367,7 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
-        "lineSupport",
+        "manualNotes",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -13457,7 +13459,7 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
-        "lineSupport",
+        "manualNotes",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -13682,7 +13684,7 @@
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
+        "manualNotes",
         "quality",
         "requiredMechanics",
         "riskTags",
@@ -14141,12 +14143,13 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
-        "lineSupport",
+        "manualNotes",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],

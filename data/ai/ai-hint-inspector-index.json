@@ -14,17 +14,17 @@
   },
   "summary": {
     "cardCount": 564,
-    "cardsWithMechanicalFacts": 403,
-    "cardsWithGeneratedFacts": 314,
+    "cardsWithMechanicalFacts": 406,
+    "cardsWithGeneratedFacts": 319,
     "cardsWithOverlays": 6,
-    "cardsWithFunctionSignals": 356,
-    "cardsWithStrategyAnchors": 224,
-    "cardsWithWarnings": 349,
+    "cardsWithFunctionSignals": 361,
+    "cardsWithStrategyAnchors": 214,
+    "cardsWithWarnings": 345,
     "warningCategoryCounts": {
-      "deferred_requires_human_review": 280,
+      "deferred_requires_human_review": 278,
       "descriptor_gap": 33,
       "function_signal_descriptor_gap": 28,
-      "legacy_fallback_only": 161
+      "legacy_fallback_only": 158
     }
   },
   "cards": [
@@ -6176,6 +6176,7 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "breaker.multi_subroutine_break",
         "breaker.sentry"
       ],
       "derivedStrategyAnchors": [],
@@ -6259,7 +6260,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "breaker.sentry",
@@ -6311,20 +6312,20 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
-          "breakerProfile"
+          "breakerProfile",
+          "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
           "effects",
-          "breakerProfile"
+          "breakerProfile",
+          "targetProfiles"
         ],
         "generatedFactFields": [
           "effects",
@@ -6438,6 +6439,7 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "breaker.stealth_payment_loss",
         "breaker.wall"
       ],
       "derivedStrategyAnchors": [],
@@ -6919,10 +6921,12 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "breaker.unknown_special"
+        "breaker.configurable_coverage",
+        "breaker.one_time_mode_choice",
+        "breaker.stealth_payment_loss"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -6976,22 +6980,23 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "breakerProfile",
+          "targetProfiles"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
-          "breakerProfile"
+          "breakerProfile",
+          "targetProfiles"
         ],
         "generatedFactFields": [
-          "effects",
-          "breakerProfile"
+          "effects"
         ],
         "overlayFields": []
       },
@@ -7194,11 +7199,13 @@
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
-          "conditions"
+          "conditions",
+          "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
           "effects",
-          "conditions"
+          "conditions",
+          "targetProfiles"
         ],
         "generatedFactFields": [],
         "overlayFields": []
@@ -7224,12 +7231,11 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "breaker.configurable_coverage",
-        "breaker.reconfigurable_type",
-        "breaker.unknown_special"
+        "breaker.reconfigurable_type"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -7283,20 +7289,20 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
-          "breakerProfile"
+          "breakerProfile",
+          "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
           "effects",
-          "breakerProfile"
+          "breakerProfile",
+          "targetProfiles"
         ],
         "generatedFactFields": [
           "effects",
@@ -7324,6 +7330,7 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "breaker.multi_subroutine_break",
         "breaker.sentry"
       ],
       "derivedStrategyAnchors": [],
@@ -7844,6 +7851,7 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "breaker.stealth_payment_loss",
         "breaker.wall"
       ],
       "derivedStrategyAnchors": [],
@@ -8925,11 +8933,13 @@
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
-          "conditions"
+          "conditions",
+          "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
           "effects",
-          "conditions"
+          "conditions",
+          "targetProfiles"
         ],
         "generatedFactFields": [],
         "overlayFields": []
@@ -9757,7 +9767,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "breaker.emergency_search",
@@ -9808,9 +9818,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -9818,7 +9826,8 @@
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
-          "conditions"
+          "conditions",
+          "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
           "effects",
@@ -10227,7 +10236,9 @@
       },
       "derivedFunctionSignals": [
         "economy.recurring",
-        "economy.recurring_breaker_credit"
+        "economy.recurring_breaker_credit",
+        "setup.hand_size",
+        "setup.memory"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -10617,14 +10628,15 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
       "derivedFunctionSignals": [
         "economy.recurring",
-        "economy.recurring_breaker_credit"
+        "economy.recurring_breaker_credit",
+        "setup.program_host"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -10676,9 +10688,13 @@
           "effects"
         ],
         "compiledMechanicalFactFields": [
-          "effects"
+          "effects",
+          "targetProfiles"
         ],
-        "generatedFactFields": [],
+        "generatedFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -11471,7 +11487,9 @@
       },
       "derivedFunctionSignals": [
         "economy.recurring",
-        "economy.recurring_breaker_credit"
+        "economy.recurring_breaker_credit",
+        "setup.hand_size",
+        "setup.memory"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -11771,13 +11789,16 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
-        "generatedFactsFound": false,
+        "mechanicalFactsFound": true,
+        "generatedFactsFound": true,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "breaker.hosted_strength_penalty",
+        "setup.program_host"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -11831,8 +11852,7 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
+        "deferred_requires_human_review"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
@@ -11840,8 +11860,14 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
-        "generatedFactFields": [],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
+        "generatedFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -13481,6 +13507,7 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "breaker.ends_run_after_use",
         "breaker.universal"
       ],
       "derivedStrategyAnchors": [],
@@ -13599,7 +13626,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "breaker.code_gate"
+        "breaker.code_gate",
+        "breaker.scaling_strength"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -13769,7 +13797,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.damage_prevention"
+        "defense.damage_prevention",
+        "setup.hand_size"
       ],
       "derivedStrategyAnchors": [
         "runner.survival_defense"
@@ -14553,6 +14582,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "breaker.stealth_payment_loss",
         "breaker.wall"
       ],
       "derivedStrategyAnchors": [],
@@ -14733,13 +14763,16 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
-        "generatedFactsFound": false,
+        "mechanicalFactsFound": true,
+        "generatedFactsFound": true,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "breaker.hosted_strength_penalty",
+        "setup.program_host"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -14763,8 +14796,7 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
+        "deferred_requires_human_review"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
@@ -14772,8 +14804,14 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
-        "generatedFactFields": [],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
+        "generatedFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -14959,6 +14997,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "breaker.stealth_payment_loss",
         "breaker.wall"
       ],
       "derivedStrategyAnchors": [],
@@ -15060,6 +15099,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "breaker.delayed_action_cost",
         "breaker.wall"
       ],
       "derivedStrategyAnchors": [],
@@ -15626,9 +15666,7 @@
         "setup.install_discount",
         "setup.search"
       ],
-      "derivedStrategyAnchors": [
-        "runner.search.breaker"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.search.breaker",
@@ -15991,11 +16029,13 @@
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
-          "conditions"
+          "conditions",
+          "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
           "effects",
-          "conditions"
+          "conditions",
+          "targetProfiles"
         ],
         "generatedFactFields": [],
         "overlayFields": []
@@ -16018,12 +16058,14 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "breaker.multi_subroutine_break",
+        "breaker.stealth_payment_loss",
         "breaker.wall"
       ],
       "derivedStrategyAnchors": [],
@@ -16106,7 +16148,9 @@
           "costProfile",
           "breakerProfile"
         ],
-        "generatedFactFields": [],
+        "generatedFactFields": [
+          "breakerProfile"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -16662,6 +16706,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "breaker.stealth_payment_loss",
         "breaker.wall"
       ],
       "derivedStrategyAnchors": [],
@@ -17255,9 +17300,7 @@
       "derivedFunctionSignals": [
         "setup.search"
       ],
-      "derivedStrategyAnchors": [
-        "runner.search.breaker"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.search.breaker",
@@ -17922,6 +17965,7 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "breaker.scaling_strength",
         "breaker.sentry"
       ],
       "derivedStrategyAnchors": [],
@@ -18166,13 +18210,15 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
-        "generatedFactsFound": false,
+        "mechanicalFactsFound": true,
+        "generatedFactsFound": true,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
+        "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "setup.program_host"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -18219,7 +18265,7 @@
         }
       ],
       "warningCategories": [
-        "legacy_fallback_only"
+        "deferred_requires_human_review"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
@@ -18227,8 +18273,14 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
-        "generatedFactFields": [],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
+        "generatedFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -19798,9 +19850,7 @@
         "setup.recovery",
         "setup.search"
       ],
-      "derivedStrategyAnchors": [
-        "runner.search.breaker"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.search.breaker",
@@ -19999,20 +20049,8 @@
         "setup.recovery",
         "setup.search"
       ],
-      "derivedStrategyAnchors": [
-        "runner.search.breaker"
-      ],
-      "lineSupportClassification": [
-        {
-          "value": "runner.search.breaker",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.search.breaker"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "event",
@@ -20346,20 +20384,8 @@
       "derivedFunctionSignals": [
         "setup.search"
       ],
-      "derivedStrategyAnchors": [
-        "runner.search.breaker"
-      ],
-      "lineSupportClassification": [
-        {
-          "value": "runner.search.breaker",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.search.breaker"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "event",
@@ -20869,26 +20895,14 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 2
       },
       "derivedFunctionSignals": [
         "setup.draw",
         "setup.search"
       ],
-      "derivedStrategyAnchors": [
-        "runner.search.breaker"
-      ],
-      "lineSupportClassification": [
-        {
-          "value": "runner.search.breaker",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.search.breaker"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "connection",
@@ -20942,6 +20956,7 @@
         }
       ],
       "warningCategories": [
+        "deferred_requires_human_review",
         "descriptor_gap"
       ],
       "descriptorGaps": [],
@@ -21796,9 +21811,7 @@
         "setup.install_discount",
         "setup.search"
       ],
-      "derivedStrategyAnchors": [
-        "runner.search.breaker"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.search.breaker",
@@ -22116,9 +22129,7 @@
         "setup.draw",
         "setup.search"
       ],
-      "derivedStrategyAnchors": [
-        "runner.search.breaker"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.search.breaker",
@@ -22575,7 +22586,8 @@
       },
       "derivedFunctionSignals": [
         "economy.recurring",
-        "economy.recurring_breaker_credit"
+        "economy.recurring_breaker_credit",
+        "setup.memory"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -22648,10 +22660,12 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
-          "effects"
+          "effects",
+          "costProfile"
         ],
         "compiledMechanicalFactFields": [
-          "effects"
+          "effects",
+          "costProfile"
         ],
         "generatedFactFields": [],
         "overlayFields": []
@@ -22880,7 +22894,8 @@
       },
       "derivedFunctionSignals": [
         "economy.recurring",
-        "economy.recurring_breaker_credit"
+        "economy.recurring_breaker_credit",
+        "setup.memory"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -23686,20 +23701,8 @@
       "derivedFunctionSignals": [
         "setup.recovery"
       ],
-      "derivedStrategyAnchors": [
-        "runner.search.breaker"
-      ],
-      "lineSupportClassification": [
-        {
-          "value": "runner.search.breaker",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.search.breaker"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "hardware",
@@ -23740,10 +23743,13 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "targetProfiles"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
-          "conditions"
+          "conditions",
+          "targetProfiles"
         ],
         "generatedFactFields": [
           "effects",
@@ -23843,7 +23849,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "setup.hand_size"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -23916,7 +23924,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "setup.hand_size"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -24157,7 +24167,8 @@
       },
       "derivedFunctionSignals": [
         "economy.recurring",
-        "economy.recurring_breaker_credit"
+        "economy.recurring_breaker_credit",
+        "setup.memory"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -24395,7 +24406,8 @@
       "derivedFunctionSignals": [
         "defense.damage_prevention",
         "economy.recurring",
-        "economy.recurring_breaker_credit"
+        "economy.recurring_breaker_credit",
+        "setup.memory"
       ],
       "derivedStrategyAnchors": [
         "runner.survival_defense"
@@ -24493,7 +24505,8 @@
       },
       "derivedFunctionSignals": [
         "economy.recurring",
-        "economy.recurring_breaker_credit"
+        "economy.recurring_breaker_credit",
+        "setup.memory"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -27616,9 +27629,7 @@
       "derivedFunctionSignals": [
         "setup.search"
       ],
-      "derivedStrategyAnchors": [
-        "runner.search.breaker"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
         {

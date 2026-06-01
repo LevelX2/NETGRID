@@ -115,11 +115,47 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": true,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "amount": -1,
+          "kind": "global_modifier",
+          "resource": "strength",
+          "scope": "installed_program",
+          "target": "hosted_icebreaker",
+          "timing": "persistent"
+        },
+        {
+          "amount": 3,
+          "kind": "program_host",
+          "resource": "memory",
+          "scope": "runner",
+          "target": "program",
+          "timing": "persistent"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "avoid": [
+            "target_would_break_host_limit"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "kind": "hosted_install_target",
+          "preferences": [
+            "low_mu_program"
+          ],
+          "purpose": "choose_hosted_program",
+          "schemaVersion": "target-profile-v1",
+          "targetType": "program",
+          "timing": "on_install"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_002_ai-boon",
@@ -1200,7 +1236,11 @@
         "coverage": [
           "code_gate"
         ],
-        "pumpCost": 2
+        "pumpCost": 2,
+        "scalingStrength": true,
+        "sideEffects": [
+          "temporary_strength"
+        ]
       }
     },
     {
@@ -1890,11 +1930,47 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": true,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "amount": -1,
+          "kind": "global_modifier",
+          "resource": "strength",
+          "scope": "installed_program",
+          "target": "hosted_icebreaker",
+          "timing": "persistent"
+        },
+        {
+          "amount": 2,
+          "kind": "program_host",
+          "resource": "memory",
+          "scope": "runner",
+          "target": "program",
+          "timing": "persistent"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "avoid": [
+            "target_would_break_host_limit"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "kind": "hosted_install_target",
+          "preferences": [
+            "low_mu_program"
+          ],
+          "purpose": "choose_hosted_program",
+          "schemaVersion": "target-profile-v1",
+          "targetType": "program",
+          "timing": "on_install"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_034_incubator",
@@ -2644,7 +2720,26 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
-      }
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "hiddenInfoPolicy": "visible_or_known_only",
+          "kind": "use_target",
+          "timing": "after_successful_run",
+          "targetType": "installed_ice",
+          "purpose": "place_strength_reduction_counter",
+          "preferences": [
+            "current_encounter_ice",
+            "high_strength_ice",
+            "relevant_server_ice"
+          ],
+          "avoid": [
+            "irrelevant_server_ice",
+            "already_cheap_to_break"
+          ]
+        }
+      ]
     },
     {
       "cardId": "onr_v1_047_pile-driver",
@@ -2711,6 +2806,8 @@
         "coverage": [
           "wall"
         ],
+        "maxSubroutinesPerBreak": 4,
+        "multiSubroutineBreak": true,
         "pumpCost": 1,
         "sideEffects": [
           "stealth_loss"
@@ -3830,6 +3927,7 @@
           "sentry"
         ],
         "pumpCost": 1,
+        "scalingStrength": true,
         "sideEffects": [
           "temporary_strength"
         ]
@@ -3954,6 +4052,40 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#runner_daemon_hosting_lifecycle"
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": true,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "amount": 3,
+          "kind": "program_host",
+          "resource": "memory",
+          "scope": "runner",
+          "target": "program",
+          "timing": "persistent"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "avoid": [
+            "target_would_break_host_limit"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "kind": "hosted_install_target",
+          "preferences": [
+            "low_mu_program"
+          ],
+          "purpose": "choose_hosted_program",
+          "schemaVersion": "target-profile-v1",
+          "targetType": "program",
+          "timing": "on_install"
+        }
       ]
     },
     {
@@ -5043,9 +5175,9 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
+        "confidence": "medium",
         "needsHumanReview": true,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -5067,11 +5199,11 @@
           "timing": "action"
         }
       ],
-      "lineSupport": [
-        "runner.search.breaker"
-      ],
       "strategicRole": [
         "enabler"
+      ],
+      "manualNotes": [
+        "AI018 review adjustment: generic any-card search/recovery is deferred until a non-breaker search/recovery strategy exists."
       ],
       "conditions": [
         {
@@ -5204,7 +5336,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": true,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -5221,11 +5353,11 @@
           "timing": "action"
         }
       ],
-      "lineSupport": [
-        "runner.search.breaker"
-      ],
       "strategicRole": [
         "enabler"
+      ],
+      "manualNotes": [
+        "AI018 review adjustment: generic any-card search/recovery is deferred until a non-breaker search/recovery strategy exists."
       ],
       "conditions": [
         {
@@ -5502,9 +5634,9 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
-        "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "confidence": "medium",
+        "needsHumanReview": true,
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -5533,11 +5665,11 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": [
-        "runner.search.breaker"
-      ],
       "strategicRole": [
         "enabler"
+      ],
+      "manualNotes": [
+        "AI018 review adjustment: generic any-card search/recovery is deferred until a non-breaker search/recovery strategy exists."
       ],
       "conditions": [
         {
@@ -6395,10 +6527,25 @@
           "scope": "runner",
           "target": "icebreaker",
           "timing": "persistent"
+        },
+        {
+          "amount": 3,
+          "kind": "global_modifier",
+          "resource": "memory",
+          "scope": "runner",
+          "timing": "persistent"
         }
       ],
       "strategicRole": [
         "support_tool"
+      ],
+      "costProfile": {
+        "agendaPoints": 1,
+        "reserveRisk": "high",
+        "opportunityCost": "high"
+      },
+      "manualNotes": [
+        "AI018 review adjustment: install agenda-point cost is recorded diagnostically in costProfile; no runtime or planner consumption is implied."
       ]
     },
     {
@@ -6606,6 +6753,13 @@
           "resource": "credits",
           "scope": "runner",
           "target": "icebreaker",
+          "timing": "persistent"
+        },
+        {
+          "amount": 2,
+          "kind": "global_modifier",
+          "resource": "memory",
+          "scope": "runner",
           "timing": "persistent"
         }
       ],
@@ -7081,16 +7235,35 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": true,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.search.breaker"
-      ],
       "strategicRole": [
         "emergency_tool"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "replacement_target",
+          "timing": "replacement_window",
+          "targetType": "program",
+          "purpose": "preserve_trashed_program_for_recovery",
+          "preferences": [
+            "trash_prevention_high_value_program",
+            "program_repairs_missing_coverage"
+          ],
+          "avoid": [
+            "low_value_program"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ],
+      "manualNotes": [
+        "AI018 review adjustment: not treated as a pure breaker-search anchor; retained as program-trash recovery/resilience until a dedicated recovery strategy exists."
       ],
       "effects": [
         {
@@ -7365,6 +7538,13 @@
           "scope": "runner",
           "target": "icebreaker",
           "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "global_modifier",
+          "resource": "memory",
+          "scope": "runner",
+          "timing": "persistent"
         }
       ],
       "strategicRole": [
@@ -7498,6 +7678,13 @@
         },
         {
           "amount": 1,
+          "kind": "global_modifier",
+          "resource": "memory",
+          "scope": "runner",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
           "damageTypes": [
             "net"
           ],
@@ -7570,6 +7757,13 @@
           "resource": "credits",
           "scope": "runner",
           "target": "icebreaker",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "global_modifier",
+          "resource": "memory",
+          "scope": "runner",
           "timing": "persistent"
         }
       ],
@@ -25512,6 +25706,8 @@
         "coverage": [
           "sentry"
         ],
+        "maxSubroutinesPerBreak": 5,
+        "multiSubroutineBreak": true,
         "pumpCost": 1
       }
     },
@@ -25541,10 +25737,12 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       },
       "breakerProfile": {
         "breakCost": 1,
@@ -25555,6 +25753,28 @@
         "strengthBonusVsChosenIce": true,
         "targetedIceBonus": true
       },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "hiddenInfoPolicy": "visible_or_known_only",
+          "kind": "install_target",
+          "timing": "on_install",
+          "targetType": "installed_ice",
+          "purpose": "strength_bonus_vs_chosen_ice",
+          "preferences": [
+            "known_or_rezzed_ice",
+            "known_sentry",
+            "high_strength_ice",
+            "high_break_cost_without_bonus",
+            "relevant_server_ice"
+          ],
+          "avoid": [
+            "unknown_low_information_target",
+            "irrelevant_server_ice",
+            "already_cheap_to_break"
+          ]
+        }
+      ],
       "effects": [
         {
           "kind": "breaker",
@@ -25919,28 +26139,52 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       },
+      "breakerProfile": {
+        "breakCost": 1,
+        "configurableCoverage": true,
+        "coverageCandidates": [
+          "code_gate",
+          "sentry",
+          "wall"
+        ],
+        "oneTimeModeChoice": true,
+        "pumpCost": 2,
+        "sideEffects": [
+          "stealth_loss"
+        ]
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "hiddenInfoPolicy": "visible_or_known_only",
+          "kind": "mode_choice",
+          "timing": "paid_action",
+          "targetType": "ice_type",
+          "purpose": "choose_fixed_breaker_coverage",
+          "preferences": [
+            "type_missing_in_current_rig",
+            "type_blocking_relevant_run_path"
+          ],
+          "avoid": [
+            "unknown_low_information_target",
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
       "effects": [
         {
           "kind": "breaker",
           "scope": "runner",
           "timing": "persistent"
         }
-      ],
-      "breakerProfile": {
-        "breakCost": 1,
-        "coverage": [
-          "unknown_special"
-        ],
-        "pumpCost": 2,
-        "sideEffects": [
-          "stealth_loss"
-        ]
-      }
+      ]
     },
     {
       "cardId": "onr_proteus_089_garbage-in",
@@ -26047,6 +26291,25 @@
       ],
       "strategicRole": [
         "support_tool"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "during_ice_encounter",
+          "targetType": "icebreaker",
+          "purpose": "temporary_strength_bonus",
+          "preferences": [
+            "installed_icebreaker",
+            "currently_used_breaker",
+            "breaker_matching_current_ice"
+          ],
+          "avoid": [
+            "low_value_program",
+            "already_cheap_to_break"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ]
     },
     {
@@ -26076,17 +26339,16 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       },
       "breakerProfile": {
         "breakCost": 2,
         "configurableCoverage": true,
-        "coverage": [
-          "unknown_special"
-        ],
         "coverageCandidates": [
           "code_gate",
           "sentry",
@@ -26095,6 +26357,42 @@
         "pumpCost": 1,
         "reconfigurableType": true
       },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "hiddenInfoPolicy": "visible_or_known_only",
+          "kind": "mode_choice",
+          "timing": "on_install",
+          "targetType": "ice_type",
+          "purpose": "choose_current_breaker_coverage",
+          "preferences": [
+            "type_blocking_relevant_run_path",
+            "type_with_known_problem_ice",
+            "type_missing_in_current_rig"
+          ],
+          "avoid": [
+            "unknown_low_information_target",
+            "hidden_info_dependent_choice"
+          ]
+        },
+        {
+          "schemaVersion": "target-profile-v1",
+          "hiddenInfoPolicy": "visible_or_known_only",
+          "kind": "mode_choice",
+          "timing": "paid_action",
+          "targetType": "ice_type",
+          "purpose": "choose_current_breaker_coverage",
+          "preferences": [
+            "type_blocking_relevant_run_path",
+            "type_with_known_problem_ice",
+            "type_missing_in_current_rig"
+          ],
+          "avoid": [
+            "unknown_low_information_target",
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
       "effects": [
         {
           "kind": "breaker",
@@ -26146,6 +26444,8 @@
         "coverage": [
           "sentry"
         ],
+        "maxSubroutinesPerBreak": 2,
+        "multiSubroutineBreak": true,
         "pumpCost": 3
       }
     },
@@ -26220,7 +26520,8 @@
         "coverage": [
           "code_gate"
         ],
-        "pumpCost": 3
+        "pumpCost": 3,
+        "pumpStrengthAmount": 4
       }
     },
     {
@@ -26999,6 +27300,24 @@
       ],
       "strategicRole": [
         "support_tool"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "icebreaker",
+          "purpose": "permanent_strength_counter",
+          "preferences": [
+            "installed_icebreaker",
+            "high_break_cost_without_bonus",
+            "breaker_matching_common_problem_ice"
+          ],
+          "avoid": [
+            "already_cheap_to_break"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ]
     },
     {
@@ -27404,10 +27723,12 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       },
       "effects": [
         {
@@ -27443,6 +27764,24 @@
         "engine_anchor"
       ],
       "targetProfiles": [
+        {
+          "avoid": [
+            "hidden_info_dependent_choice",
+            "unaffordable_after_install"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only",
+          "kind": "search_install_target",
+          "preferences": [
+            "program_affordable_after_install",
+            "program_breaks_current_ice",
+            "program_preserves_run_goal",
+            "program_repairs_missing_coverage"
+          ],
+          "purpose": "install_answer_to_current_ice",
+          "schemaVersion": "target-profile-v1",
+          "targetType": "program",
+          "timing": "during_ice_encounter"
+        },
         {
           "installCost": "normal",
           "installsTarget": true,
@@ -27731,6 +28070,13 @@
           "scope": "runner",
           "target": "icebreaker",
           "timing": "persistent"
+        },
+        {
+          "amount": 2,
+          "kind": "global_modifier",
+          "resource": "memory",
+          "scope": "runner",
+          "timing": "persistent"
         }
       ],
       "conditions": [
@@ -27973,10 +28319,12 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": true,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       },
       "effects": [
         {
@@ -27987,10 +28335,34 @@
           "scope": "runner",
           "target": "icebreaker",
           "timing": "persistent"
+        },
+        {
+          "kind": "program_host",
+          "resource": "memory",
+          "scope": "runner",
+          "target": "icebreaker",
+          "timing": "persistent"
         }
       ],
       "strategicRole": [
         "support_tool"
+      ],
+      "targetProfiles": [
+        {
+          "avoid": [
+            "target_would_break_host_limit"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "kind": "hosted_install_target",
+          "preferences": [
+            "hosted_icebreaker_eligible",
+            "low_mu_program"
+          ],
+          "purpose": "choose_hosted_program",
+          "schemaVersion": "target-profile-v1",
+          "targetType": "icebreaker",
+          "timing": "on_install"
+        }
       ]
     },
     {
@@ -28436,6 +28808,13 @@
           "resource": "credits",
           "scope": "runner",
           "target": "icebreaker",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "global_modifier",
+          "resource": "memory",
+          "scope": "runner",
           "timing": "persistent"
         }
       ],

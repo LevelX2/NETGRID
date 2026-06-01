@@ -194,9 +194,9 @@ function profileCoversCoverage(
   coverage: KnownHintBreakerCoverage | undefined,
 ): boolean {
   if (!profile || !coverage) return false;
+  const profileCoverage = profile.coverage ?? [];
   return (
-    profile.coverage.includes("universal") ||
-    profile.coverage.includes(coverage)
+    profileCoverage.includes("universal") || profileCoverage.includes(coverage)
   );
 }
 
@@ -206,8 +206,9 @@ function breakerProfileQualityScore(
   if (!profile) return -1000;
   const breakCost = finiteNumber(profile.breakCost) ? profile.breakCost : 3;
   const pumpCost = finiteNumber(profile.pumpCost) ? profile.pumpCost : 2;
+  const coverageCount = profile.coverage?.length ?? 0;
   return (
-    profile.coverage.length * 20 +
+    coverageCount * 20 +
     Math.max(0, profile.baseStrength ?? 0) * 3 -
     breakCost * 8 -
     pumpCost * 4 -

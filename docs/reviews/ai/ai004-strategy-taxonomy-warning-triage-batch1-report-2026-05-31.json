@@ -61,8 +61,8 @@
       "utility",
       "win_condition"
     ],
-    "functionSignalRuleCount": 86,
-    "functionSignalCount": 69,
+    "functionSignalRuleCount": 98,
+    "functionSignalCount": 79,
     "functionSignalIds": [
       "access.hq_multiaccess",
       "access.punish",
@@ -71,13 +71,20 @@
       "breaker.black_ice",
       "breaker.code_gate",
       "breaker.configurable_coverage",
+      "breaker.delayed_action_cost",
       "breaker.emergency_coverage",
       "breaker.emergency_search",
+      "breaker.ends_run_after_use",
+      "breaker.hosted_strength_penalty",
+      "breaker.multi_subroutine_break",
+      "breaker.one_time_mode_choice",
       "breaker.reconfigurable_type",
       "breaker.risky",
+      "breaker.scaling_strength",
       "breaker.search_during_encounter",
       "breaker.self_trash_risk",
       "breaker.sentry",
+      "breaker.stealth_payment_loss",
       "breaker.strength_bonus_vs_chosen_ice",
       "breaker.support",
       "breaker.targeted_ice_bonus",
@@ -122,8 +129,11 @@
       "score.advance_burst",
       "score.agenda_action",
       "setup.draw",
+      "setup.hand_size",
       "setup.install_discount",
       "setup.install_support",
+      "setup.memory",
+      "setup.program_host",
       "setup.recovery",
       "setup.search",
       "tag.payoff",
@@ -134,7 +144,7 @@
       "tax.runner_persistent",
       "trace.source"
     ],
-    "tacticSignalCatalogCount": 69,
+    "tacticSignalCatalogCount": 79,
     "tacticSignalCatalogIds": [
       "access.hq_multiaccess",
       "access.punish",
@@ -143,13 +153,20 @@
       "breaker.black_ice",
       "breaker.code_gate",
       "breaker.configurable_coverage",
+      "breaker.delayed_action_cost",
       "breaker.emergency_coverage",
       "breaker.emergency_search",
+      "breaker.ends_run_after_use",
+      "breaker.hosted_strength_penalty",
+      "breaker.multi_subroutine_break",
+      "breaker.one_time_mode_choice",
       "breaker.reconfigurable_type",
       "breaker.risky",
+      "breaker.scaling_strength",
       "breaker.search_during_encounter",
       "breaker.self_trash_risk",
       "breaker.sentry",
+      "breaker.stealth_payment_loss",
       "breaker.strength_bonus_vs_chosen_ice",
       "breaker.support",
       "breaker.targeted_ice_bonus",
@@ -194,8 +211,11 @@
       "score.advance_burst",
       "score.agenda_action",
       "setup.draw",
+      "setup.hand_size",
       "setup.install_discount",
       "setup.install_support",
+      "setup.memory",
+      "setup.program_host",
       "setup.recovery",
       "setup.search",
       "tag.payoff",
@@ -267,49 +287,55 @@
       "breakerProfile": 49,
       "breakerProfile.baseStrength": 26,
       "breakerProfile.breakCost": 49,
-      "breakerProfile.configurableCoverage": 1,
-      "breakerProfile.coverage": 49,
-      "breakerProfile.coverageCandidates": 1,
+      "breakerProfile.configurableCoverage": 2,
+      "breakerProfile.coverage": 47,
+      "breakerProfile.coverageCandidates": 2,
+      "breakerProfile.maxSubroutinesPerBreak": 3,
+      "breakerProfile.multiSubroutineBreak": 3,
+      "breakerProfile.oneTimeModeChoice": 1,
       "breakerProfile.pumpCost": 44,
+      "breakerProfile.pumpStrengthAmount": 1,
       "breakerProfile.reconfigurableType": 1,
       "breakerProfile.restrictions": 2,
-      "breakerProfile.sideEffects": 14,
+      "breakerProfile.scalingStrength": 2,
+      "breakerProfile.sideEffects": 15,
       "breakerProfile.strengthBonusVsChosenIce": 1,
       "breakerProfile.targetedIceBonus": 1,
       "cardId": 564,
       "cardType": 564,
       "conditions": 275,
       "conditions[].kind": 494,
-      "costProfile": 73,
+      "costProfile": 74,
+      "costProfile.agendaPoints": 1,
       "costProfile.clicks": 59,
       "costProfile.counters": 1,
       "costProfile.credits": 23,
       "costProfile.memory": 25,
-      "costProfile.opportunityCost": 69,
-      "costProfile.reserveRisk": 69,
-      "effects": 380,
-      "effects[].amount": 432,
+      "costProfile.opportunityCost": 70,
+      "costProfile.reserveRisk": 70,
+      "effects": 383,
+      "effects[].amount": 444,
       "effects[].damageTypes": 19,
       "effects[].finite": 44,
-      "effects[].kind": 845,
+      "effects[].kind": 858,
       "effects[].perTurnLimit": 36,
       "effects[].repeatable": 62,
-      "effects[].resource": 534,
-      "effects[].scope": 845,
-      "effects[].target": 18,
-      "effects[].timing": 845,
-      "lineSupport": 189,
-      "manualNotes": 3,
+      "effects[].resource": 547,
+      "effects[].scope": 858,
+      "effects[].target": 24,
+      "effects[].timing": 858,
+      "lineSupport": 185,
+      "manualNotes": 8,
       "planRoles": 564,
-      "quality": 382,
+      "quality": 383,
       "quality.benchmarkCovered": 382,
-      "quality.confidence": 376,
+      "quality.confidence": 377,
       "quality.focusedDecisionTest": 3,
-      "quality.hintReviewed": 382,
-      "quality.needsHumanReview": 382,
-      "quality.reviewedBy": 116,
-      "quality.reviewedDate": 116,
-      "quality.strategyCovered": 382,
+      "quality.hintReviewed": 383,
+      "quality.needsHumanReview": 383,
+      "quality.reviewedBy": 125,
+      "quality.reviewedDate": 125,
+      "quality.strategyCovered": 383,
       "remoteRole": 53,
       "remoteRole.kind": 53,
       "remoteRole.serverScope": 53,
@@ -321,14 +347,22 @@
       "side": 564,
       "strategicNotes": 3,
       "strategicRole": 207,
-      "targetProfiles": 3,
+      "targetProfiles": 14,
+      "targetProfiles[].avoid": 13,
+      "targetProfiles[].hiddenInfoPolicy": 13,
       "targetProfiles[].installCost": 3,
       "targetProfiles[].installsTarget": 3,
+      "targetProfiles[].kind": 13,
       "targetProfiles[].lookCount": 1,
       "targetProfiles[].oncePerRun": 1,
+      "targetProfiles[].preferences": 13,
+      "targetProfiles[].purpose": 13,
+      "targetProfiles[].schemaVersion": 13,
       "targetProfiles[].showToOpponent": 1,
       "targetProfiles[].shuffleAfter": 3,
       "targetProfiles[].targetCardType": 3,
+      "targetProfiles[].targetType": 13,
+      "targetProfiles[].timing": 13,
       "targetProfiles[].zone": 3,
       "valueHints": 564,
       "valueHints.access": 8,
@@ -408,19 +442,25 @@
       "access.rnd_multiaccess": 2,
       "breaker.ap": 2,
       "breaker.code_gate": 9,
-      "breaker.configurable_coverage": 1,
+      "breaker.configurable_coverage": 2,
+      "breaker.delayed_action_cost": 1,
       "breaker.emergency_search": 1,
+      "breaker.ends_run_after_use": 1,
+      "breaker.hosted_strength_penalty": 2,
+      "breaker.multi_subroutine_break": 3,
+      "breaker.one_time_mode_choice": 1,
       "breaker.reconfigurable_type": 1,
       "breaker.risky": 4,
+      "breaker.scaling_strength": 2,
       "breaker.search_during_encounter": 1,
       "breaker.self_trash_risk": 1,
       "breaker.sentry": 15,
+      "breaker.stealth_payment_loss": 7,
       "breaker.strength_bonus_vs_chosen_ice": 1,
       "breaker.support": 5,
       "breaker.targeted_ice_bonus": 1,
       "breaker.trace": 1,
       "breaker.universal": 4,
-      "breaker.unknown_special": 2,
       "breaker.wall": 15,
       "breaker.watchdog": 1,
       "damage.payoff": 38,
@@ -454,8 +494,11 @@
       "score.advance_burst": 13,
       "score.agenda_action": 12,
       "setup.draw": 19,
+      "setup.hand_size": 5,
       "setup.install_discount": 7,
       "setup.install_support": 1,
+      "setup.memory": 7,
+      "setup.program_host": 4,
       "setup.recovery": 3,
       "setup.search": 10,
       "tag.payoff": 17,
@@ -479,12 +522,12 @@
       "runner.interface_closeout": 4,
       "runner.remote_trash": 10,
       "runner.rnd_pressure": 5,
-      "runner.search.breaker": 11,
+      "runner.search.breaker": 1,
       "runner.survival_defense": 42
     },
-    "totalDerivedStrategyAnchors": 268,
-    "cardsWithDerivedSignals": 356,
-    "cardsWithStrategyAnchors": 224,
+    "totalDerivedStrategyAnchors": 258,
+    "cardsWithDerivedSignals": 361,
+    "cardsWithStrategyAnchors": 214,
     "descriptorGaps": [
       {
         "gapId": "remote_contest_pressure_not_first_class",
@@ -508,7 +551,7 @@
     ]
   },
   "sideAwareDerivation": {
-    "preventedWrongSideAnchorCount": 29,
+    "preventedWrongSideAnchorCount": 28,
     "preventedWrongSideAnchorExamples": [
       {
         "cardId": "onr_v1_012_clown",
@@ -651,13 +694,6 @@
         "strategyId": "runner.run_event_tempo"
       },
       {
-        "cardId": "onr_v1_296_off-site-backups",
-        "side": "corp",
-        "cardType": "operation",
-        "signalId": "setup.recovery",
-        "strategyId": "runner.search.breaker"
-      },
-      {
         "cardId": "onr_v1_297_overtime-incentives",
         "side": "corp",
         "cardType": "operation",
@@ -779,6 +815,38 @@
       ],
       "anchorStrategyIds": []
     },
+    "runnerDelayedActionCostBreaker": {
+      "cardId": "ai018_smoke_delayed_action_cost_breaker",
+      "signals": [
+        "breaker.delayed_action_cost",
+        "breaker.wall"
+      ],
+      "anchorStrategyIds": []
+    },
+    "runnerEndRunBreaker": {
+      "cardId": "ai018_smoke_end_run_breaker",
+      "signals": [
+        "breaker.ends_run_after_use",
+        "breaker.universal"
+      ],
+      "anchorStrategyIds": []
+    },
+    "runnerMultiSubroutineBreaker": {
+      "cardId": "ai018_smoke_multi_subroutine_breaker",
+      "signals": [
+        "breaker.multi_subroutine_break",
+        "breaker.sentry"
+      ],
+      "anchorStrategyIds": []
+    },
+    "runnerOneTimeModeBreaker": {
+      "cardId": "ai018_smoke_one_time_mode_breaker",
+      "signals": [
+        "breaker.configurable_coverage",
+        "breaker.one_time_mode_choice"
+      ],
+      "anchorStrategyIds": []
+    },
     "runnerIceStrengthReduction": {
       "cardId": "ai017_smoke_ice_strength_reduction",
       "signals": [
@@ -788,11 +856,48 @@
       ],
       "anchorStrategyIds": []
     },
+    "runnerScalingStrengthBreaker": {
+      "cardId": "ai018_smoke_scaling_strength_breaker",
+      "signals": [
+        "breaker.scaling_strength",
+        "breaker.sentry"
+      ],
+      "anchorStrategyIds": []
+    },
+    "runnerStealthLossBreaker": {
+      "cardId": "ai018_smoke_stealth_loss_breaker",
+      "signals": [
+        "breaker.stealth_payment_loss",
+        "breaker.wall"
+      ],
+      "anchorStrategyIds": []
+    },
     "runnerRecurringBreakerCredit": {
       "cardId": "ai018_smoke_recurring_breaker_credit",
       "signals": [
         "economy.recurring",
         "economy.recurring_breaker_credit"
+      ],
+      "anchorStrategyIds": []
+    },
+    "runnerMemorySetup": {
+      "cardId": "ai018_smoke_memory_setup",
+      "signals": [
+        "setup.memory"
+      ],
+      "anchorStrategyIds": []
+    },
+    "runnerHandSizeSetup": {
+      "cardId": "ai018_smoke_hand_size_setup",
+      "signals": [
+        "setup.hand_size"
+      ],
+      "anchorStrategyIds": []
+    },
+    "runnerProgramHost": {
+      "cardId": "ai018_smoke_program_host",
+      "signals": [
+        "setup.program_host"
       ],
       "anchorStrategyIds": []
     },
@@ -962,10 +1067,10 @@
   },
   "ai004Triage": {
     "lineSupport": {
-      "totalOccurrences": 234,
+      "totalOccurrences": 230,
       "legacyOccurrences": 0,
       "categoryCounts": {
-        "normalized_strategy_id": 234
+        "normalized_strategy_id": 230
       },
       "valueCounts": [
         {
@@ -997,10 +1102,6 @@
           "count": 11
         },
         {
-          "value": "runner.search.breaker",
-          "count": 10
-        },
-        {
           "value": "corp.fast_advance",
           "count": 7
         },
@@ -1014,6 +1115,10 @@
         },
         {
           "value": "runner.rnd_pressure",
+          "count": 6
+        },
+        {
+          "value": "runner.search.breaker",
           "count": 6
         },
         {
@@ -2228,98 +2333,6 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "cardId": "onr_v1_089_gideons-pawnshop",
-          "side": "runner",
-          "cardType": "event",
-          "value": "runner.search.breaker",
-          "evidence": {
-            "lineSupport": [
-              "runner.search.breaker"
-            ],
-            "effects": [
-              {
-                "kind": "search",
-                "scope": "runner",
-                "timing": "action"
-              },
-              {
-                "kind": "card_recovery",
-                "scope": "heap",
-                "timing": "action",
-                "resource": "cards"
-              },
-              {
-                "kind": "search",
-                "scope": "heap",
-                "timing": "action",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_heap_card"
-            ],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.search.breaker"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_v1_093_if-you-want-it-done-right",
-          "side": "runner",
-          "cardType": "event",
-          "value": "runner.search.breaker",
-          "evidence": {
-            "lineSupport": [
-              "runner.search.breaker"
-            ],
-            "effects": [
-              {
-                "kind": "search",
-                "scope": "runner",
-                "timing": "action"
-              },
-              {
-                "kind": "search",
-                "scope": "stack",
-                "timing": "action",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_stack_search"
-            ],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "medium",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.search.breaker"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
           "cardId": "onr_v1_096_kilroy-was-here",
           "side": "runner",
           "cardType": "event",
@@ -2359,55 +2372,6 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.rnd_pressure"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_v1_099_mantis-fixer-at-large",
-          "side": "runner",
-          "cardType": "event",
-          "value": "runner.search.breaker",
-          "evidence": {
-            "lineSupport": [
-              "runner.search.breaker"
-            ],
-            "effects": [
-              {
-                "kind": "search",
-                "scope": "runner",
-                "timing": "action"
-              },
-              {
-                "kind": "draw",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "cards"
-              },
-              {
-                "kind": "search",
-                "scope": "stack",
-                "timing": "action",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_stack_search"
-            ],
-            "cardType": "event",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.search.breaker"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -2798,49 +2762,6 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "cardId": "onr_v1_131_microtech-backup-drive",
-          "side": "runner",
-          "cardType": "hardware",
-          "value": "runner.search.breaker",
-          "evidence": {
-            "lineSupport": [
-              "runner.search.breaker"
-            ],
-            "effects": [
-              {
-                "kind": "card_recovery",
-                "scope": "runner",
-                "timing": "persistent",
-                "resource": "cards"
-              },
-              {
-                "kind": "program_trash_prevention",
-                "scope": "installed_program",
-                "timing": "prevention_window",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_installed_hardware",
-              "requires_program_trash"
-            ],
-            "cardType": "hardware",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": false,
-              "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true
-            }
-          },
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.search.breaker"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
           "cardId": "onr_v1_135_nasuko-cycle",
           "side": "runner",
           "cardType": "hardware",
@@ -2884,6 +2805,12 @@
                 "scope": "runner",
                 "timing": "persistent",
                 "resource": "credits"
+              },
+              {
+                "kind": "global_modifier",
+                "scope": "runner",
+                "timing": "persistent",
+                "resource": "memory"
               },
               {
                 "kind": "damage_prevention",
@@ -11829,6 +11756,24 @@
             ],
             "targetProfiles": [
               {
+                "avoid": [
+                  "hidden_info_dependent_choice",
+                  "unaffordable_after_install"
+                ],
+                "hiddenInfoPolicy": "legal_targets_only",
+                "kind": "search_install_target",
+                "preferences": [
+                  "program_affordable_after_install",
+                  "program_breaks_current_ice",
+                  "program_preserves_run_goal",
+                  "program_repairs_missing_coverage"
+                ],
+                "purpose": "install_answer_to_current_ice",
+                "schemaVersion": "target-profile-v1",
+                "targetType": "program",
+                "timing": "during_ice_encounter"
+              },
+              {
                 "installCost": "normal",
                 "installsTarget": true,
                 "shuffleAfter": true,
@@ -11840,10 +11785,12 @@
             "side": "runner",
             "quality": {
               "benchmarkCovered": false,
-              "hintReviewed": false,
+              "hintReviewed": true,
               "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-01",
+              "reviewedBy": "codex"
             }
           },
           "triageCategory": "normalized_strategy_id",

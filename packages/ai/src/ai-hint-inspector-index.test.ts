@@ -6,6 +6,7 @@ import { describe, expect, it } from "vitest";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 const inspectorIndexPath = path.join(repoRoot, "data/ai/ai-hint-inspector-index.json");
+const compiledHintsPath = path.join(repoRoot, "data/ai/ai-card-hints-compiled.json");
 
 type AiHintInspectorIndex = {
   schemaVersion: string;
@@ -192,6 +193,10 @@ describe("AI005 hint inspector index", () => {
     const blackWidow = card(index, "onr_proteus_080_black-widow");
     const bartmoss = card(index, "onr_v1_005_bartmoss-memorial-icebreaker");
     const morphingTool = card(index, "onr_proteus_092_morphing-tool");
+    const fubar = card(index, "onr_proteus_088_fubar");
+    const dropp = card(index, "onr_v1_019_dropp");
+    const japaneseWaterTorture = card(index, "onr_v1_037_japanese-water-torture");
+    const bigFrackinGun = card(index, "onr_proteus_079_big-frackin-gun");
     const clown = card(index, "onr_v1_012_clown");
     const airportLocker = card(index, "onr_proteus_128_airport-locker");
     const cloak = card(index, "onr_v1_011_cloak");
@@ -199,6 +204,16 @@ describe("AI005 hint inspector index", () => {
     const personalTouch = card(index, "onr_proteus_115_personal-touch-the");
     const dealWithMilitech = card(index, "onr_v1_082_deal-with-militech");
     const pattelsVirus = card(index, "onr_v1_046_pattels-virus");
+    const afreet = card(index, "onr_v1_001_afreet");
+    const microtechBackupDrive = card(index, "onr_v1_131_microtech-backup-drive");
+    const gideonsPawnshop = card(index, "onr_v1_089_gideons-pawnshop");
+    const ifYouWantItDoneRight = card(
+      index,
+      "onr_v1_093_if-you-want-it-done-right",
+    );
+    const mantis = card(index, "onr_v1_099_mantis-fixer-at-large");
+    const compiledBlackWidow = compiledCard("onr_proteus_080_black-widow");
+    const compiledMorphingTool = compiledCard("onr_proteus_092_morphing-tool");
 
     expect(blackWidow.derivedFunctionSignals).toEqual(
       expect.arrayContaining([
@@ -228,7 +243,39 @@ describe("AI005 hint inspector index", () => {
     expect(morphingTool.derivedFunctionSignals).not.toContain(
       "breaker.universal",
     );
+    expect(morphingTool.derivedFunctionSignals).not.toContain(
+      "breaker.unknown_special",
+    );
     expect(morphingTool.derivedStrategyAnchors).toEqual([]);
+
+    expect(fubar.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "breaker.configurable_coverage",
+        "breaker.one_time_mode_choice",
+        "breaker.stealth_payment_loss",
+      ]),
+    );
+    expect(fubar.derivedFunctionSignals).not.toContain("breaker.unknown_special");
+    expect(fubar.derivedStrategyAnchors).toEqual([]);
+
+    expect(dropp.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "breaker.ends_run_after_use",
+        "breaker.universal",
+      ]),
+    );
+    expect(dropp.derivedStrategyAnchors).toEqual([]);
+    expect(japaneseWaterTorture.derivedFunctionSignals).toEqual(
+      expect.arrayContaining(["breaker.delayed_action_cost", "breaker.wall"]),
+    );
+    expect(japaneseWaterTorture.derivedStrategyAnchors).toEqual([]);
+    expect(bigFrackinGun.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "breaker.multi_subroutine_break",
+        "breaker.sentry",
+      ]),
+    );
+    expect(bigFrackinGun.derivedStrategyAnchors).toEqual([]);
 
     expect(clown.derivedFunctionSignals).toEqual(
       expect.arrayContaining([
@@ -277,6 +324,14 @@ describe("AI005 hint inspector index", () => {
     );
     expect(pattelsVirus.derivedStrategyAnchors).toEqual([]);
 
+    expect(afreet.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "breaker.hosted_strength_penalty",
+        "setup.program_host",
+      ]),
+    );
+    expect(afreet.derivedStrategyAnchors).toEqual([]);
+
     expect(airportLocker.derivedFunctionSignals).toEqual(
       expect.arrayContaining([
         "breaker.emergency_search",
@@ -288,6 +343,32 @@ describe("AI005 hint inspector index", () => {
     expect(airportLocker.derivedStrategyAnchors).toEqual([
       "runner.search.breaker",
     ]);
+    for (const genericSearchOrRecovery of [
+      microtechBackupDrive,
+      gideonsPawnshop,
+      ifYouWantItDoneRight,
+      mantis,
+    ]) {
+      expect(genericSearchOrRecovery.derivedStrategyAnchors).toEqual([]);
+    }
+    expect(compiledBlackWidow.targetProfiles).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          schemaVersion: "target-profile-v1",
+          kind: "install_target",
+          targetType: "installed_ice",
+        }),
+      ]),
+    );
+    expect(compiledMorphingTool.targetProfiles).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          schemaVersion: "target-profile-v1",
+          kind: "mode_choice",
+          targetType: "ice_type",
+        }),
+      ]),
+    );
     expect(JSON.stringify(airportLocker)).not.toMatch(
       /actualStackOrder|hiddenCards|privatePayload|cardInstances/,
     );
@@ -301,5 +382,14 @@ function readIndex(): AiHintInspectorIndex {
 function card(index: AiHintInspectorIndex, cardId: string) {
   const found = index.cards.find((entry) => entry.cardId === cardId);
   if (!found) throw new Error(`Missing inspector card ${cardId}`);
+  return found;
+}
+
+function compiledCard(cardId: string): { targetProfiles?: unknown[] } {
+  const compiled = JSON.parse(fs.readFileSync(compiledHintsPath, "utf8")) as {
+    cards: Array<{ cardId: string; targetProfiles?: unknown[] }>;
+  };
+  const found = compiled.cards.find((entry) => entry.cardId === cardId);
+  if (!found) throw new Error(`Missing compiled card ${cardId}`);
   return found;
 }

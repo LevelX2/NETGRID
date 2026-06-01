@@ -1358,6 +1358,13 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -1452,6 +1459,13 @@
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.universal",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
               "reason": "support:breakerCoverage"
             },
             {
@@ -1567,6 +1581,13 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -1636,6 +1657,13 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -1693,6 +1721,13 @@
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.universal",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
               "reason": "support:breakerCoverage"
             },
             {
@@ -1804,6 +1839,13 @@
               "source": "compiledHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
+              "reason": "support:breakerCoverage"
             },
             {
               "cardId": "onr_v1_066_snowball",
@@ -1944,6 +1986,13 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -2014,6 +2063,13 @@
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.universal",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
               "reason": "support:breakerCoverage"
             },
             {
@@ -2138,6 +2194,13 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -2222,6 +2285,7 @@
         "access.hq_multiaccess": 2,
         "access.rnd_multiaccess": 2,
         "breaker.code_gate": 1,
+        "breaker.scaling_strength": 2,
         "breaker.sentry": 3,
         "breaker.universal": 2,
         "breaker.wall": 4,
@@ -2350,6 +2414,13 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -2436,6 +2507,13 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -2504,6 +2582,13 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -2560,6 +2645,13 @@
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.universal",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
               "reason": "support:breakerCoverage"
             },
             {
@@ -2629,6 +2721,13 @@
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.universal",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
               "reason": "support:breakerCoverage"
             },
             {
@@ -2719,6 +2818,13 @@
               "source": "compiledHint",
               "signal": "memory_or_hand_size",
               "reason": "support:memory"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
+              "reason": "support:breakerCoverage"
             },
             {
               "cardId": "onr_v1_066_snowball",
@@ -2834,6 +2940,13 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -2917,6 +3030,13 @@
               "quantity": 2,
               "source": "functionSignal",
               "signal": "breaker.universal",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
               "reason": "support:breakerCoverage"
             },
             {
@@ -3040,6 +3160,13 @@
               "cardId": "onr_v1_066_snowball",
               "quantity": 2,
               "source": "functionSignal",
+              "signal": "breaker.scaling_strength",
+              "reason": "support:breakerCoverage"
+            },
+            {
+              "cardId": "onr_v1_066_snowball",
+              "quantity": 2,
+              "source": "functionSignal",
               "signal": "breaker.sentry",
               "reason": "support:breakerCoverage"
             },
@@ -3156,6 +3283,7 @@
         "runner.run_event_tempo"
       ],
       "functionSignalCounts": {
+        "breaker.scaling_strength": 2,
         "breaker.sentry": 2,
         "breaker.universal": 2,
         "breaker.wall": 4,
@@ -6116,6 +6244,6 @@
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 5
     },
-    "contentSha256": "049fc1803117aa7434ace5c4b496d61bb704133cf350b38e32babba1431d184e"
+    "contentSha256": "6f936e0f6335de8493c0e19eeb7ad9c67fcf59f138636d9dd444bee2be06ab9b"
   }
 }

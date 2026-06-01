@@ -128,7 +128,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 983,
+  "warningCount": 984,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -957,7 +957,7 @@
     },
     {
       "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence low.",
+      "message": "Generated confidence high differs from manual confidence medium.",
       "cardId": "onr_v1_089_gideons-pawnshop"
     },
     {
@@ -1039,6 +1039,11 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_097_livewires-contacts"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_099_mantis-fixer-at-large"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -1177,7 +1182,7 @@
     },
     {
       "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence low.",
+      "message": "Generated confidence high differs from manual confidence medium.",
       "cardId": "onr_v1_131_microtech-backup-drive"
     },
     {
@@ -5076,13 +5081,13 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 1,
           "breakCost": 1,
           "confidence": "medium",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ],
           "sideEffects": [
             "random_failure"
           ]
@@ -5304,13 +5309,13 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "universal"
-          ],
           "pumpCost": 1,
           "breakCost": 1,
           "confidence": "medium",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "universal"
+          ],
           "sideEffects": [
             "program_trash_risk",
             "random_failure"
@@ -5414,13 +5419,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 2,
           "breakCost": 2,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -5517,12 +5522,12 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "universal"
-          ],
           "breakCost": 0,
           "confidence": "medium",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "universal"
+          ],
           "sideEffects": [
             "once_per_subroutine",
             "random_failure"
@@ -5716,13 +5721,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "code_gate"
-          ],
           "pumpCost": 1,
           "breakCost": 0,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "code_gate"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -5818,13 +5823,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "code_gate"
-          ],
           "pumpCost": 1,
           "breakCost": 2,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "code_gate"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -6025,13 +6030,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "universal"
-          ],
           "pumpCost": 1,
           "breakCost": 0,
           "confidence": "high",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "universal"
+          ],
           "sideEffects": [
             "ends_run_after_use"
           ]
@@ -6396,13 +6401,13 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 1,
           "breakCost": 3,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -6896,13 +6901,13 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "wall"
-          ],
           "pumpCost": 1,
           "breakCost": 0,
           "confidence": "medium",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "wall"
+          ],
           "sideEffects": [
             "forgo_actions"
           ]
@@ -7126,13 +7131,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "universal"
-          ],
           "pumpCost": 2,
           "breakCost": 2,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "universal"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -7230,13 +7235,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 1,
           "breakCost": 1,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -7781,13 +7786,15 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "wall"
-          ],
           "pumpCost": 1,
           "breakCost": 3,
           "confidence": "high",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "wall"
+          ],
+          "maxSubroutinesPerBreak": 4,
+          "multiSubroutineBreak": true,
           "sideEffects": [
             "stealth_loss"
           ]
@@ -8167,13 +8174,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "code_gate"
-          ],
           "pumpCost": 2,
           "breakCost": 1,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "code_gate"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -8270,13 +8277,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 1,
           "breakCost": 2,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -8372,12 +8379,12 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "ap"
-          ],
           "breakCost": 0,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "ap"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -8476,13 +8483,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "trace"
-          ],
           "pumpCost": 1,
           "breakCost": 0,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "trace"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -8850,13 +8857,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 2,
           "breakCost": 1,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -9383,12 +9390,12 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "code_gate"
-          ],
           "breakCost": 0,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "code_gate"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -9486,13 +9493,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 3,
           "breakCost": 0,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -9585,13 +9592,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "code_gate"
-          ],
           "pumpCost": 2,
           "breakCost": 0,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "code_gate"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -9684,13 +9691,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "wall"
-          ],
           "pumpCost": 3,
           "breakCost": 0,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "wall"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -10349,14 +10356,12 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "runner.search.breaker"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
+          "confidence": "medium",
           "needsHumanReview": true
         }
       },
@@ -10382,7 +10387,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -10463,9 +10468,7 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "runner.search.breaker"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -10735,15 +10738,13 @@
           "reserveRisk": "low",
           "opportunityCost": "medium"
         },
-        "lineSupport": [
-          "runner.search.breaker"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "high",
-          "needsHumanReview": false
+          "confidence": "medium",
+          "needsHumanReview": true
         }
       },
       "overlap": {
@@ -10768,6 +10769,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -11266,14 +11271,12 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "runner.search.breaker"
-        ],
+        "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
+          "confidence": "medium",
           "needsHumanReview": true
         }
       },
@@ -11300,7 +11303,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",

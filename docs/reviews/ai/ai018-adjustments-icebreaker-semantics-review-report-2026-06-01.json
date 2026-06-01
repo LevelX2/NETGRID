@@ -1,0 +1,122 @@
+{
+  "schemaVersion": "ai018-adjustments-icebreaker-semantics-review-report-v1",
+  "taskId": "AI018",
+  "generatedAt": "2026-06-01",
+  "status": "complete",
+  "summary": {
+    "conclusion": "AI018 review adjustments introduce diagnostic TargetProfile V1, narrow Icebreaker special-case signals, remove avoidable breaker.unknown_special usage, add setup memory/hosting semantics, and stop generic search/recovery from deriving runner.search.breaker anchors.",
+    "tacticSignalCatalogCount": 79,
+    "functionSignalRuleCount": 98,
+    "newSupportOnlySignals": [
+      "breaker.delayed_action_cost",
+      "breaker.ends_run_after_use",
+      "breaker.hosted_strength_penalty",
+      "breaker.multi_subroutine_break",
+      "breaker.one_time_mode_choice",
+      "breaker.scaling_strength",
+      "breaker.stealth_payment_loss",
+      "setup.hand_size",
+      "setup.memory",
+      "setup.program_host"
+    ],
+    "newStrategyIds": [],
+    "plannerEffect": false,
+    "actionScoreEffect": false,
+    "planWeightEffect": false,
+    "targetingAiEffect": false,
+    "engineEffect": false,
+    "legalEffect": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivationEffect": false
+  },
+  "targetProfileV1Cards": [
+    "onr_proteus_080_black-widow",
+    "onr_proteus_092_morphing-tool",
+    "onr_proteus_088_fubar",
+    "onr_proteus_128_airport-locker",
+    "onr_proteus_091_lockjaw",
+    "onr_proteus_115_personal-touch-the",
+    "onr_v1_046_pattels-virus",
+    "onr_v1_131_microtech-backup-drive",
+    "onr_v1_001_afreet",
+    "onr_v1_033_imp",
+    "onr_v1_069_succubus",
+    "onr_proteus_139_eurocorpse-tm-spin-chip"
+  ],
+  "genericSearchAnchorRemoved": [
+    "onr_v1_089_gideons-pawnshop",
+    "onr_v1_093_if-you-want-it-done-right",
+    "onr_v1_099_mantis-fixer-at-large",
+    "onr_v1_131_microtech-backup-drive"
+  ],
+  "verification": [
+    {
+      "command": "node scripts/check-ai-derived-facts.mjs --write",
+      "status": "passed"
+    },
+    {
+      "command": "node scripts/check-ai-derived-facts-full.mjs --write",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm build:ai-compiled-hints",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm build:ai-hint-inspector-index",
+      "status": "passed"
+    },
+    {
+      "command": "node scripts/check-ai-hint-compiled-index.mjs --write",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-strategy-taxonomy",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-compiled-hints",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-inspector-index",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-compiled-index",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-manual-overlays",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-quality",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-approval-consistency",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-deck-doctrine-strategy",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai test",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/web exec tsc -p tsconfig.json --noEmit",
+      "status": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed"
+    }
+  ]
+}

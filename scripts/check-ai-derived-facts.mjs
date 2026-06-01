@@ -82,6 +82,7 @@ const KNOWN_EFFECT_KINDS = new Set([
   "net_damage_prevention",
   "brain_damage_prevention",
   "hand_size_modifier",
+  "program_host",
   "action_penalty",
   "persistent_survival_modifier",
   "prevention_replacement",
@@ -256,6 +257,77 @@ const KNOWN_TARGET_CARD_TYPES = new Set([
 ]);
 
 const KNOWN_TARGET_INSTALL_COSTS = new Set(["free", "normal"]);
+
+const KNOWN_TARGET_PROFILE_SCHEMA_VERSIONS = new Set(["target-profile-v1"]);
+const KNOWN_TARGET_PROFILE_KINDS = new Set([
+  "install_target",
+  "mode_choice",
+  "search_install_target",
+  "hosted_install_target",
+  "use_target",
+  "replacement_target",
+]);
+const KNOWN_TARGET_PROFILE_TIMINGS = new Set([
+  "on_install",
+  "on_play",
+  "paid_action",
+  "during_ice_encounter",
+  "on_use",
+  "after_successful_run",
+  "prevention_window",
+  "replacement_window",
+]);
+const KNOWN_TARGET_PROFILE_TARGET_TYPES = new Set([
+  "installed_ice",
+  "ice_type",
+  "program",
+  "icebreaker",
+  "hosted_program",
+  "server",
+  "card",
+]);
+const KNOWN_TARGET_PROFILE_PREFERENCES = new Set([
+  "known_or_rezzed_ice",
+  "known_sentry",
+  "known_wall",
+  "known_code_gate",
+  "current_encounter_ice",
+  "blocks_relevant_run_path",
+  "high_strength_ice",
+  "high_break_cost_without_bonus",
+  "multi_subroutine_ice",
+  "relevant_server_ice",
+  "missing_current_coverage",
+  "type_blocking_relevant_run_path",
+  "type_with_known_problem_ice",
+  "type_missing_in_current_rig",
+  "program_breaks_current_ice",
+  "program_repairs_missing_coverage",
+  "program_affordable_after_install",
+  "program_preserves_run_goal",
+  "low_mu_program",
+  "installed_icebreaker",
+  "hosted_icebreaker_eligible",
+  "trash_prevention_high_value_program",
+  "currently_used_breaker",
+  "breaker_matching_current_ice",
+  "breaker_matching_common_problem_ice",
+]);
+const KNOWN_TARGET_PROFILE_AVOIDS = new Set([
+  "unknown_low_information_target",
+  "irrelevant_server_ice",
+  "already_cheap_to_break",
+  "non_matching_ice_type",
+  "unaffordable_after_install",
+  "hidden_info_dependent_choice",
+  "low_value_program",
+  "target_would_break_host_limit",
+]);
+const KNOWN_TARGET_PROFILE_HIDDEN_INFO_POLICIES = new Set([
+  "visible_or_known_only",
+  "legal_targets_only",
+  "public_or_controller_known_only",
+]);
 
 const HIDDEN_INFO_RISK_FIELDS = new Set([
   "opponentDeckList",
@@ -1413,15 +1485,52 @@ function deriveFromImplementation(card, implementationText, hint) {
     if (/matches:\s*\{\s*kind:\s*"any"/.test(implementationText)) {
       coverage.push("universal");
     }
+    const coverageCandidates = subtypeChoiceValues(implementationText);
+    const configurableCoverage =
+      coverageCandidates.length > 0 &&
+      /matches:\s*\{\s*kind:\s*"selected_ice_subtype"/.test(
+        implementationText,
+      );
+    const oneTimeModeChoice =
+      configurableCoverage && /limit:\s*"once_until_selected"/.test(implementationText);
+    const reconfigurableType =
+      configurableCoverage &&
+      /icebreakerSubtypeChange:\s*\{/.test(implementationText) &&
+      !oneTimeModeChoice;
     const breakCost = amountNear(implementationText, "break_subroutine");
     const pumpCost = amountNear(implementationText, "increase_strength");
+    const pumpStrengthAmount = secondAmountNear(
+      implementationText,
+      "increase_strength",
+    );
+    const maxSubroutinesPerBreak = countNear(
+      implementationText,
+      "break_subroutine",
+    );
     facts.breakerProfile = {
-      coverage: coverage.length > 0 ? coverage : ["unknown_special"],
       pumpCost,
       breakCost,
-      confidence: coverage.length > 0 ? "high" : "medium",
+      confidence: coverage.length > 0 || configurableCoverage ? "high" : "medium",
       source: "implementation.icebreakerAbilities",
     };
+    if (coverage.length > 0) {
+      facts.breakerProfile.coverage = coverage;
+    } else if (!configurableCoverage) {
+      facts.breakerProfile.coverage = ["unknown_special"];
+    }
+    if (configurableCoverage) {
+      facts.breakerProfile.configurableCoverage = true;
+      facts.breakerProfile.coverageCandidates = coverageCandidates;
+      if (reconfigurableType) facts.breakerProfile.reconfigurableType = true;
+      if (oneTimeModeChoice) facts.breakerProfile.oneTimeModeChoice = true;
+    }
+    if (pumpStrengthAmount !== undefined && pumpStrengthAmount !== 1) {
+      facts.breakerProfile.pumpStrengthAmount = pumpStrengthAmount;
+    }
+    if (maxSubroutinesPerBreak && maxSubroutinesPerBreak > 1) {
+      facts.breakerProfile.maxSubroutinesPerBreak = maxSubroutinesPerBreak;
+      facts.breakerProfile.multiSubroutineBreak = true;
+    }
     addEffect(facts, {
       kind: "breaker",
       timing: "persistent",
@@ -1462,11 +1571,59 @@ function deriveFromImplementation(card, implementationText, hint) {
     if (/kind:\s*"end_run"/.test(implementationText)) {
       sideEffects.add("ends_run_after_use");
     }
-    if (/snowball_run_strength_per_successful_break/.test(implementationText)) {
+    if (
+      /snowball_run_strength_per_successful_break|dupre_strength_counter_and_last_fort/.test(
+        implementationText,
+      )
+    ) {
       sideEffects.add("temporary_strength");
+      facts.breakerProfile.scalingStrength = true;
     }
     if (sideEffects.size > 0) {
       facts.breakerProfile.sideEffects = [...sideEffects];
+    }
+  }
+
+  if (/hostedProgramCapacity:\s*\{/.test(implementationText)) {
+    const rawHostedCapacity = propertyNumber(implementationText, "capacityMu");
+    const hostedCapacity = rawHostedCapacity === 99 ? undefined : rawHostedCapacity;
+    const hostTarget = /allowedProgramSubtypes:\s*\[[\s\S]{0,120}?"icebreaker"/.test(
+      implementationText,
+    )
+      ? "icebreaker"
+      : "program";
+    addEffect(facts, {
+      kind: "program_host",
+      timing: "persistent",
+      scope: "runner",
+      resource: "memory",
+      amount: hostedCapacity,
+      target: hostTarget,
+      source: "implementation.hostedProgramCapacity",
+    });
+    addTargetProfile(facts, {
+      schemaVersion: "target-profile-v1",
+      kind: "hosted_install_target",
+      timing: "on_install",
+      targetType: hostTarget === "icebreaker" ? "icebreaker" : "program",
+      purpose: "choose_hosted_program",
+      preferences:
+        hostTarget === "icebreaker"
+          ? ["low_mu_program", "hosted_icebreaker_eligible"]
+          : ["low_mu_program"],
+      avoid: ["target_would_break_host_limit"],
+      hiddenInfoPolicy: "public_or_controller_known_only",
+    });
+    if (/hostedProgramModifiers:\s*\[[\s\S]*?icebreaker_strength[\s\S]*?reduce/.test(implementationText)) {
+      addEffect(facts, {
+        kind: "global_modifier",
+        timing: "persistent",
+        scope: "installed_program",
+        resource: "strength",
+        amount: -1,
+        target: "hosted_icebreaker",
+        source: "implementation.hostedProgramModifiers.icebreaker_strength",
+      });
     }
   }
 
@@ -3392,6 +3549,9 @@ function deriveFromImplementation(card, implementationText, hint) {
     facts.targetProfiles = uniqueBy(
       facts.targetProfiles,
       (targetProfile) =>
+        targetProfile.schemaVersion === "target-profile-v1"
+          ? JSON.stringify(targetProfile)
+          :
         `${targetProfile.zone ?? ""}:${targetProfile.targetCardType ?? ""}:${
           targetProfile.installsTarget ?? ""
         }:${targetProfile.lookCount ?? ""}`,
@@ -3817,6 +3977,72 @@ function validateDerivedFacts(derivedFacts) {
   for (const [index, targetProfile] of (
     derivedFacts.targetProfiles ?? []
   ).entries()) {
+    if (isTargetProfileV1(targetProfile)) {
+      validateKnown(
+        targetProfile.schemaVersion,
+        KNOWN_TARGET_PROFILE_SCHEMA_VERSIONS,
+        `targetProfiles[${index}].schemaVersion`,
+        "unknown_target_profile_schema_version",
+        issues,
+      );
+      validateKnown(
+        targetProfile.kind,
+        KNOWN_TARGET_PROFILE_KINDS,
+        `targetProfiles[${index}].kind`,
+        "unknown_target_profile_kind",
+        issues,
+      );
+      validateKnown(
+        targetProfile.timing,
+        KNOWN_TARGET_PROFILE_TIMINGS,
+        `targetProfiles[${index}].timing`,
+        "unknown_target_profile_timing",
+        issues,
+      );
+      validateKnown(
+        targetProfile.targetType,
+        KNOWN_TARGET_PROFILE_TARGET_TYPES,
+        `targetProfiles[${index}].targetType`,
+        "unknown_target_profile_target_type",
+        issues,
+      );
+      if (typeof targetProfile.purpose !== "string" || targetProfile.purpose === "") {
+        issues.push({
+          kind: "invalid_target_profile_shape",
+          message: `Expected non-empty string at targetProfiles[${index}].purpose.`,
+        });
+      }
+      for (const [preferenceIndex, preference] of (
+        targetProfile.preferences ?? []
+      ).entries()) {
+        validateKnown(
+          preference,
+          KNOWN_TARGET_PROFILE_PREFERENCES,
+          `targetProfiles[${index}].preferences[${preferenceIndex}]`,
+          "unknown_target_profile_preference",
+          issues,
+        );
+      }
+      for (const [avoidIndex, avoid] of (
+        targetProfile.avoid ?? []
+      ).entries()) {
+        validateKnown(
+          avoid,
+          KNOWN_TARGET_PROFILE_AVOIDS,
+          `targetProfiles[${index}].avoid[${avoidIndex}]`,
+          "unknown_target_profile_avoid",
+          issues,
+        );
+      }
+      validateKnown(
+        targetProfile.hiddenInfoPolicy,
+        KNOWN_TARGET_PROFILE_HIDDEN_INFO_POLICIES,
+        `targetProfiles[${index}].hiddenInfoPolicy`,
+        "unknown_target_profile_hidden_info_policy",
+        issues,
+      );
+      continue;
+    }
     validateKnown(
       targetProfile.zone,
       KNOWN_TARGET_ZONES,
@@ -3869,6 +4095,16 @@ function validateDerivedFacts(derivedFacts) {
     }
   }
   return issues;
+}
+
+function isTargetProfileV1(targetProfile) {
+  return (
+    targetProfile?.schemaVersion === "target-profile-v1" ||
+    targetProfile?.kind !== undefined ||
+    targetProfile?.targetType !== undefined ||
+    targetProfile?.preferences !== undefined ||
+    targetProfile?.hiddenInfoPolicy !== undefined
+  );
 }
 
 function validateKnown(value, knownValues, fieldPath, kind, issues) {
@@ -3953,6 +4189,26 @@ function amountNear(text, kind) {
     new RegExp(`kind:\\s*"${kind}"[\\s\\S]{0,240}?amount:\\s*(\\d+)`),
   );
   return match ? Number(match[1]) : undefined;
+}
+
+function secondAmountNear(text, kind) {
+  const match = text.match(
+    new RegExp(`kind:\\s*"${kind}"[\\s\\S]{0,360}?duration`),
+  );
+  if (!match) return undefined;
+  const amounts = [...match[0].matchAll(/amount:\s*(\d+)/g)].map((item) =>
+    Number(item[1]),
+  );
+  return amounts[1];
+}
+
+function subtypeChoiceValues(text) {
+  const match = text.match(/choices:\s*\[([\s\S]*?)\]/);
+  if (!match) return [];
+  const choices = [...match[1].matchAll(/"([^"]+)"/g)].map((item) => item[1]);
+  return choices.filter((choice) =>
+    ["code_gate", "sentry", "wall"].includes(choice),
+  );
 }
 
 function propertyNumber(text, field) {

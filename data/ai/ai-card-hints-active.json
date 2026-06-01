@@ -109,10 +109,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": true,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -1511,10 +1513,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": true,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -2175,7 +2179,26 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
-      }
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "hiddenInfoPolicy": "visible_or_known_only",
+          "kind": "use_target",
+          "timing": "after_successful_run",
+          "targetType": "installed_ice",
+          "purpose": "place_strength_reduction_counter",
+          "preferences": [
+            "current_encounter_ice",
+            "high_strength_ice",
+            "relevant_server_ice"
+          ],
+          "avoid": [
+            "irrelevant_server_ice",
+            "already_cheap_to_break"
+          ]
+        }
+      ]
     },
     {
       "cardId": "onr_v1_047_pile-driver",
@@ -3323,7 +3346,15 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#runner_daemon_hosting_lifecycle"
-      ]
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": true,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_070_tinweasel",
@@ -4338,9 +4369,9 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
+        "confidence": "medium",
         "needsHumanReview": true,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -4350,11 +4381,11 @@
           "scope": "runner"
         }
       ],
-      "lineSupport": [
-        "runner.search.breaker"
-      ],
       "strategicRole": [
         "enabler"
+      ],
+      "manualNotes": [
+        "AI018 review adjustment: generic any-card search/recovery is deferred until a non-breaker search/recovery strategy exists."
       ]
     },
     {
@@ -4482,7 +4513,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": true,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -4492,11 +4523,11 @@
           "scope": "runner"
         }
       ],
-      "lineSupport": [
-        "runner.search.breaker"
-      ],
       "strategicRole": [
         "enabler"
+      ],
+      "manualNotes": [
+        "AI018 review adjustment: generic any-card search/recovery is deferred until a non-breaker search/recovery strategy exists."
       ]
     },
     {
@@ -4754,9 +4785,9 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
-        "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "confidence": "medium",
+        "needsHumanReview": true,
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -4779,11 +4810,11 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": [
-        "runner.search.breaker"
-      ],
       "strategicRole": [
         "enabler"
+      ],
+      "manualNotes": [
+        "AI018 review adjustment: generic any-card search/recovery is deferred until a non-breaker search/recovery strategy exists."
       ]
     },
     {
@@ -5544,10 +5575,25 @@
           "amount": 3,
           "repeatable": true,
           "target": "icebreaker"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 3
         }
       ],
       "strategicRole": [
         "support_tool"
+      ],
+      "costProfile": {
+        "agendaPoints": 1,
+        "reserveRisk": "high",
+        "opportunityCost": "high"
+      },
+      "manualNotes": [
+        "AI018 review adjustment: install agenda-point cost is recorded diagnostically in costProfile; no runtime or planner consumption is implied."
       ]
     },
     {
@@ -5680,6 +5726,13 @@
           "amount": 2,
           "repeatable": true,
           "target": "icebreaker"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 2
         }
       ],
       "strategicRole": [
@@ -6011,16 +6064,35 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": true,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.search.breaker"
-      ],
       "strategicRole": [
         "emergency_tool"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "replacement_target",
+          "timing": "replacement_window",
+          "targetType": "program",
+          "purpose": "preserve_trashed_program_for_recovery",
+          "preferences": [
+            "trash_prevention_high_value_program",
+            "program_repairs_missing_coverage"
+          ],
+          "avoid": [
+            "low_value_program"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ],
+      "manualNotes": [
+        "AI018 review adjustment: not treated as a pure breaker-search anchor; retained as program-trash recovery/resilience until a dedicated recovery strategy exists."
       ]
     },
     {
@@ -6231,6 +6303,13 @@
           "amount": 1,
           "repeatable": true,
           "target": "icebreaker"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 1
         }
       ],
       "strategicRole": [
@@ -6361,6 +6440,13 @@
           "amount": 1,
           "repeatable": true,
           "target": "icebreaker"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 1
         }
       ]
     },
@@ -6404,6 +6490,13 @@
           "amount": 3,
           "repeatable": true,
           "target": "icebreaker"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 1
         }
       ],
       "strategicRole": [
@@ -20264,10 +20357,12 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       },
       "breakerProfile": {
         "coverage": [
@@ -20275,7 +20370,29 @@
         ],
         "targetedIceBonus": true,
         "strengthBonusVsChosenIce": true
-      }
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "hiddenInfoPolicy": "visible_or_known_only",
+          "kind": "install_target",
+          "timing": "on_install",
+          "targetType": "installed_ice",
+          "purpose": "strength_bonus_vs_chosen_ice",
+          "preferences": [
+            "known_or_rezzed_ice",
+            "known_sentry",
+            "high_strength_ice",
+            "high_break_cost_without_bonus",
+            "relevant_server_ice"
+          ],
+          "avoid": [
+            "unknown_low_information_target",
+            "irrelevant_server_ice",
+            "already_cheap_to_break"
+          ]
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_081_boring-bit",
@@ -20525,11 +20642,45 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "breakerProfile": {
+        "configurableCoverage": true,
+        "oneTimeModeChoice": true,
+        "coverageCandidates": [
+          "code_gate",
+          "sentry",
+          "wall"
+        ],
+        "pumpCost": 2,
+        "breakCost": 1,
+        "sideEffects": [
+          "stealth_loss"
+        ]
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "hiddenInfoPolicy": "visible_or_known_only",
+          "kind": "mode_choice",
+          "timing": "paid_action",
+          "targetType": "ice_type",
+          "purpose": "choose_fixed_breaker_coverage",
+          "preferences": [
+            "type_missing_in_current_rig",
+            "type_blocking_relevant_run_path"
+          ],
+          "avoid": [
+            "unknown_low_information_target",
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_089_garbage-in",
@@ -20636,6 +20787,25 @@
       ],
       "strategicRole": [
         "support_tool"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "during_ice_encounter",
+          "targetType": "icebreaker",
+          "purpose": "temporary_strength_bonus",
+          "preferences": [
+            "installed_icebreaker",
+            "currently_used_breaker",
+            "breaker_matching_current_ice"
+          ],
+          "avoid": [
+            "low_value_program",
+            "already_cheap_to_break"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ]
     },
     {
@@ -20665,15 +20835,14 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       },
       "breakerProfile": {
-        "coverage": [
-          "unknown_special"
-        ],
         "configurableCoverage": true,
         "reconfigurableType": true,
         "coverageCandidates": [
@@ -20681,7 +20850,43 @@
           "sentry",
           "wall"
         ]
-      }
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "hiddenInfoPolicy": "visible_or_known_only",
+          "kind": "mode_choice",
+          "timing": "on_install",
+          "targetType": "ice_type",
+          "purpose": "choose_current_breaker_coverage",
+          "preferences": [
+            "type_blocking_relevant_run_path",
+            "type_with_known_problem_ice",
+            "type_missing_in_current_rig"
+          ],
+          "avoid": [
+            "unknown_low_information_target",
+            "hidden_info_dependent_choice"
+          ]
+        },
+        {
+          "schemaVersion": "target-profile-v1",
+          "hiddenInfoPolicy": "visible_or_known_only",
+          "kind": "mode_choice",
+          "timing": "paid_action",
+          "targetType": "ice_type",
+          "purpose": "choose_current_breaker_coverage",
+          "preferences": [
+            "type_blocking_relevant_run_path",
+            "type_with_known_problem_ice",
+            "type_missing_in_current_rig"
+          ],
+          "avoid": [
+            "unknown_low_information_target",
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_093_redecorator",
@@ -21385,6 +21590,24 @@
       ],
       "strategicRole": [
         "support_tool"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "icebreaker",
+          "purpose": "permanent_strength_counter",
+          "preferences": [
+            "installed_icebreaker",
+            "high_break_cost_without_bonus",
+            "breaker_matching_common_problem_ice"
+          ],
+          "avoid": [
+            "already_cheap_to_break"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ]
     },
     {
@@ -21760,10 +21983,12 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       },
       "effects": [
         {
@@ -21789,6 +22014,26 @@
       ],
       "strategicRole": [
         "engine_anchor"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "search_install_target",
+          "timing": "during_ice_encounter",
+          "targetType": "program",
+          "purpose": "install_answer_to_current_ice",
+          "preferences": [
+            "program_breaks_current_ice",
+            "program_repairs_missing_coverage",
+            "program_affordable_after_install",
+            "program_preserves_run_goal"
+          ],
+          "avoid": [
+            "unaffordable_after_install",
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "legal_targets_only"
+        }
       ]
     },
     {
@@ -21998,6 +22243,13 @@
           "amount": 2,
           "repeatable": true,
           "target": "icebreaker"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 2
         }
       ],
       "conditions": [
@@ -22165,10 +22417,12 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": true,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       },
       "effects": [
         {
@@ -22569,6 +22823,13 @@
           "amount": 1,
           "repeatable": true,
           "target": "icebreaker"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 1
         }
       ],
       "conditions": [

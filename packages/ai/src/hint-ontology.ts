@@ -66,6 +66,7 @@ export const KNOWN_HINT_EFFECT_KINDS = [
   "net_damage_prevention",
   "brain_damage_prevention",
   "hand_size_modifier",
+  "program_host",
   "action_penalty",
   "persistent_survival_modifier",
   "prevention_replacement",
@@ -250,6 +251,85 @@ export const KNOWN_HINT_TARGET_CARD_TYPES = [
 
 export const KNOWN_HINT_TARGET_INSTALL_COSTS = ["free", "normal"] as const;
 
+export const KNOWN_HINT_TARGET_PROFILE_SCHEMA_VERSIONS = [
+  "target-profile-v1",
+] as const;
+
+export const KNOWN_HINT_TARGET_PROFILE_KINDS = [
+  "install_target",
+  "mode_choice",
+  "search_install_target",
+  "hosted_install_target",
+  "use_target",
+  "replacement_target",
+] as const;
+
+export const KNOWN_HINT_TARGET_PROFILE_TIMINGS = [
+  "on_install",
+  "on_play",
+  "paid_action",
+  "during_ice_encounter",
+  "on_use",
+  "after_successful_run",
+  "prevention_window",
+  "replacement_window",
+] as const;
+
+export const KNOWN_HINT_TARGET_PROFILE_TARGET_TYPES = [
+  "installed_ice",
+  "ice_type",
+  "program",
+  "icebreaker",
+  "hosted_program",
+  "server",
+  "card",
+] as const;
+
+export const KNOWN_HINT_TARGET_PROFILE_PREFERENCES = [
+  "known_or_rezzed_ice",
+  "known_sentry",
+  "known_wall",
+  "known_code_gate",
+  "current_encounter_ice",
+  "blocks_relevant_run_path",
+  "high_strength_ice",
+  "high_break_cost_without_bonus",
+  "multi_subroutine_ice",
+  "relevant_server_ice",
+  "missing_current_coverage",
+  "type_blocking_relevant_run_path",
+  "type_with_known_problem_ice",
+  "type_missing_in_current_rig",
+  "program_breaks_current_ice",
+  "program_repairs_missing_coverage",
+  "program_affordable_after_install",
+  "program_preserves_run_goal",
+  "low_mu_program",
+  "installed_icebreaker",
+  "hosted_icebreaker_eligible",
+  "trash_prevention_high_value_program",
+  "currently_used_breaker",
+  "breaker_matching_current_ice",
+  "breaker_matching_common_problem_ice",
+] as const;
+
+export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
+  "unknown_low_information_target",
+  "irrelevant_server_ice",
+  "already_cheap_to_break",
+  "non_matching_ice_type",
+  "unaffordable_after_install",
+  "hidden_info_dependent_choice",
+  "low_value_program",
+  "target_would_break_host_limit",
+] as const;
+
+export const KNOWN_HINT_TARGET_PROFILE_HIDDEN_INFO_POLICIES = [
+  "visible_or_known_only",
+  "legal_targets_only",
+  "public_or_controller_known_only",
+] as const;
+
 export const KNOWN_HINT_LINE_SUPPORT = [
   "rig_first",
   "economy_first",
@@ -339,6 +419,20 @@ export type KnownHintTargetCardType =
   (typeof KNOWN_HINT_TARGET_CARD_TYPES)[number];
 export type KnownHintTargetInstallCost =
   (typeof KNOWN_HINT_TARGET_INSTALL_COSTS)[number];
+export type KnownHintTargetProfileSchemaVersion =
+  (typeof KNOWN_HINT_TARGET_PROFILE_SCHEMA_VERSIONS)[number];
+export type KnownHintTargetProfileKind =
+  (typeof KNOWN_HINT_TARGET_PROFILE_KINDS)[number];
+export type KnownHintTargetProfileTiming =
+  (typeof KNOWN_HINT_TARGET_PROFILE_TIMINGS)[number];
+export type KnownHintTargetProfileTargetType =
+  (typeof KNOWN_HINT_TARGET_PROFILE_TARGET_TYPES)[number];
+export type KnownHintTargetProfilePreference =
+  (typeof KNOWN_HINT_TARGET_PROFILE_PREFERENCES)[number];
+export type KnownHintTargetProfileAvoid =
+  (typeof KNOWN_HINT_TARGET_PROFILE_AVOIDS)[number];
+export type KnownHintTargetProfileHiddenInfoPolicy =
+  (typeof KNOWN_HINT_TARGET_PROFILE_HIDDEN_INFO_POLICIES)[number];
 export type KnownHintLineSupport = (typeof KNOWN_HINT_LINE_SUPPORT)[number];
 export type KnownHintOpponentSignalKind =
   (typeof KNOWN_HINT_OPPONENT_SIGNAL_KINDS)[number];
@@ -364,15 +458,27 @@ export type AiHintCostProfile = {
   credits?: number;
   memory?: number;
   counters?: number;
+  agendaPoints?: number;
   reserveRisk?: KnownHintCostRisk;
   opportunityCost?: KnownHintCostRisk;
 };
 
 export type AiHintBreakerProfile = {
-  coverage: KnownHintBreakerCoverage[];
+  coverage?: KnownHintBreakerCoverage[];
+  coverageCandidates?: KnownHintBreakerCoverage[];
   baseStrength?: number;
   pumpCost?: number;
+  pumpStrengthAmount?: number;
   breakCost?: number;
+  maxSubroutinesPerBreak?: number;
+  configurableCoverage?: boolean;
+  reconfigurableType?: boolean;
+  oneTimeModeChoice?: boolean;
+  multiSubroutineBreak?: boolean;
+  targetedIceBonus?: boolean;
+  strengthBonusVsChosenIce?: boolean;
+  scalingStrength?: boolean;
+  hostedStrengthPenalty?: boolean;
   sideEffects?: KnownHintBreakerSideEffect[];
   restrictions?: string[];
 };
@@ -392,6 +498,17 @@ export type AiHintEffectTargetProfile = {
   showToOpponent?: boolean;
   oncePerRun?: boolean;
   lookCount?: number;
+};
+
+export type AiHintTargetProfileV1 = {
+  schemaVersion: KnownHintTargetProfileSchemaVersion;
+  kind: KnownHintTargetProfileKind;
+  timing: KnownHintTargetProfileTiming;
+  targetType: KnownHintTargetProfileTargetType;
+  purpose: string;
+  preferences?: KnownHintTargetProfilePreference[];
+  avoid?: KnownHintTargetProfileAvoid[];
+  hiddenInfoPolicy: KnownHintTargetProfileHiddenInfoPolicy;
 };
 
 export type AiHintOpponentSignal = {
@@ -416,7 +533,7 @@ export type AiHintOntologyExtension = {
   costProfile?: AiHintCostProfile;
   breakerProfile?: AiHintBreakerProfile;
   remoteRole?: AiHintRemoteRole;
-  targetProfiles?: AiHintEffectTargetProfile[];
+  targetProfiles?: Array<AiHintEffectTargetProfile | AiHintTargetProfileV1>;
   lineSupport?: KnownHintLineSupport[];
   opponentSignals?: AiHintOpponentSignal[];
   quality?: AiHintQuality;
@@ -436,6 +553,13 @@ export type AiHintOntologyIssueKind =
   | "unknown_target_zone"
   | "unknown_target_card_type"
   | "unknown_target_install_cost"
+  | "unknown_target_profile_schema_version"
+  | "unknown_target_profile_kind"
+  | "unknown_target_profile_timing"
+  | "unknown_target_profile_target_type"
+  | "unknown_target_profile_preference"
+  | "unknown_target_profile_avoid"
+  | "unknown_target_profile_hidden_info_policy"
   | "unknown_line_support"
   | "hidden_info_risk"
   | "invalid_shape"
@@ -611,7 +735,7 @@ function validateCostProfile(
     addIssue(issues, "error", "invalid_shape", path, "Expected object.");
     return;
   }
-  for (const key of ["clicks", "credits", "memory", "counters"]) {
+  for (const key of ["clicks", "credits", "memory", "counters", "agendaPoints"]) {
     validateOptionalNumber(costProfile[key], `${path}.${key}`, issues);
   }
   validateOptionalKnown(
@@ -640,13 +764,24 @@ function validateBreakerProfile(
     addIssue(issues, "error", "invalid_shape", path, "Expected object.");
     return;
   }
+  const hasConfigurableCoverage =
+    breakerProfile.configurableCoverage === true ||
+    Array.isArray(breakerProfile.coverageCandidates);
   validateKnownArray(
     breakerProfile.coverage,
     KNOWN_HINT_BREAKER_COVERAGES,
     `${path}.coverage`,
     "unknown_breaker_coverage",
     issues,
-    true,
+    !hasConfigurableCoverage,
+  );
+  validateKnownArray(
+    breakerProfile.coverageCandidates,
+    KNOWN_HINT_BREAKER_COVERAGES,
+    `${path}.coverageCandidates`,
+    "unknown_breaker_coverage",
+    issues,
+    false,
   );
   validateKnownArray(
     breakerProfile.sideEffects,
@@ -656,8 +791,26 @@ function validateBreakerProfile(
     issues,
     false,
   );
-  for (const key of ["baseStrength", "pumpCost", "breakCost"]) {
+  for (const key of [
+    "baseStrength",
+    "pumpCost",
+    "pumpStrengthAmount",
+    "breakCost",
+    "maxSubroutinesPerBreak",
+  ]) {
     validateOptionalNumber(breakerProfile[key], `${path}.${key}`, issues);
+  }
+  for (const key of [
+    "configurableCoverage",
+    "reconfigurableType",
+    "oneTimeModeChoice",
+    "multiSubroutineBreak",
+    "targetedIceBonus",
+    "strengthBonusVsChosenIce",
+    "scalingStrength",
+    "hostedStrengthPenalty",
+  ]) {
+    validateOptionalBoolean(breakerProfile[key], `${path}.${key}`, issues);
   }
   if (
     breakerProfile.restrictions !== undefined &&
@@ -721,6 +874,10 @@ function validateTargetProfiles(
       );
       return;
     }
+    if (isTargetProfileV1(targetProfile)) {
+      validateTargetProfileV1(targetProfile, targetPath, issues);
+      return;
+    }
     requireKnownField(
       targetProfile.zone,
       KNOWN_HINT_TARGET_ZONES,
@@ -761,6 +918,87 @@ function validateTargetProfiles(
       issues,
     );
   });
+}
+
+function isTargetProfileV1(targetProfile: Record<string, unknown>): boolean {
+  return (
+    targetProfile.schemaVersion === "target-profile-v1" ||
+    targetProfile.kind !== undefined ||
+    targetProfile.targetType !== undefined ||
+    targetProfile.preferences !== undefined ||
+    targetProfile.hiddenInfoPolicy !== undefined
+  );
+}
+
+function validateTargetProfileV1(
+  targetProfile: Record<string, unknown>,
+  path: string,
+  issues: AiHintOntologyIssue[],
+): void {
+  requireKnownField(
+    targetProfile.schemaVersion,
+    KNOWN_HINT_TARGET_PROFILE_SCHEMA_VERSIONS,
+    `${path}.schemaVersion`,
+    "unknown_target_profile_schema_version",
+    issues,
+    true,
+  );
+  requireKnownField(
+    targetProfile.kind,
+    KNOWN_HINT_TARGET_PROFILE_KINDS,
+    `${path}.kind`,
+    "unknown_target_profile_kind",
+    issues,
+    true,
+  );
+  requireKnownField(
+    targetProfile.timing,
+    KNOWN_HINT_TARGET_PROFILE_TIMINGS,
+    `${path}.timing`,
+    "unknown_target_profile_timing",
+    issues,
+    true,
+  );
+  requireKnownField(
+    targetProfile.targetType,
+    KNOWN_HINT_TARGET_PROFILE_TARGET_TYPES,
+    `${path}.targetType`,
+    "unknown_target_profile_target_type",
+    issues,
+    true,
+  );
+  if (typeof targetProfile.purpose !== "string" || targetProfile.purpose === "")
+    addIssue(
+      issues,
+      "error",
+      "invalid_shape",
+      `${path}.purpose`,
+      "Expected non-empty string.",
+    );
+  validateKnownArray(
+    targetProfile.preferences,
+    KNOWN_HINT_TARGET_PROFILE_PREFERENCES,
+    `${path}.preferences`,
+    "unknown_target_profile_preference",
+    issues,
+    false,
+  );
+  validateKnownArray(
+    targetProfile.avoid,
+    KNOWN_HINT_TARGET_PROFILE_AVOIDS,
+    `${path}.avoid`,
+    "unknown_target_profile_avoid",
+    issues,
+    false,
+  );
+  requireKnownField(
+    targetProfile.hiddenInfoPolicy,
+    KNOWN_HINT_TARGET_PROFILE_HIDDEN_INFO_POLICIES,
+    `${path}.hiddenInfoPolicy`,
+    "unknown_target_profile_hidden_info_policy",
+    issues,
+    true,
+  );
 }
 
 function validateLineSupport(

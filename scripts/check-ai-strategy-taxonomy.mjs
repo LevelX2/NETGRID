@@ -1603,6 +1603,44 @@ function buildDerivationSmokeTests(rules) {
         strengthBonusVsChosenIce: true,
       },
     },
+    runnerDelayedActionCostBreaker: {
+      cardId: "ai018_smoke_delayed_action_cost_breaker",
+      side: "runner",
+      cardType: "program",
+      breakerProfile: {
+        coverage: ["wall"],
+        sideEffects: ["forgo_actions"],
+      },
+    },
+    runnerEndRunBreaker: {
+      cardId: "ai018_smoke_end_run_breaker",
+      side: "runner",
+      cardType: "program",
+      breakerProfile: {
+        coverage: ["universal"],
+        sideEffects: ["ends_run_after_use"],
+      },
+    },
+    runnerMultiSubroutineBreaker: {
+      cardId: "ai018_smoke_multi_subroutine_breaker",
+      side: "runner",
+      cardType: "program",
+      breakerProfile: {
+        coverage: ["sentry"],
+        multiSubroutineBreak: true,
+        maxSubroutinesPerBreak: 5,
+      },
+    },
+    runnerOneTimeModeBreaker: {
+      cardId: "ai018_smoke_one_time_mode_breaker",
+      side: "runner",
+      cardType: "program",
+      breakerProfile: {
+        configurableCoverage: true,
+        oneTimeModeChoice: true,
+        coverageCandidates: ["code_gate", "sentry", "wall"],
+      },
+    },
     runnerIceStrengthReduction: {
       cardId: "ai017_smoke_ice_strength_reduction",
       side: "runner",
@@ -1615,6 +1653,24 @@ function buildDerivationSmokeTests(rules) {
           resource: "strength",
         },
       ],
+    },
+    runnerScalingStrengthBreaker: {
+      cardId: "ai018_smoke_scaling_strength_breaker",
+      side: "runner",
+      cardType: "program",
+      breakerProfile: {
+        coverage: ["sentry"],
+        scalingStrength: true,
+      },
+    },
+    runnerStealthLossBreaker: {
+      cardId: "ai018_smoke_stealth_loss_breaker",
+      side: "runner",
+      cardType: "program",
+      breakerProfile: {
+        coverage: ["wall"],
+        sideEffects: ["stealth_loss"],
+      },
     },
     runnerRecurringBreakerCredit: {
       cardId: "ai018_smoke_recurring_breaker_credit",
@@ -1629,6 +1685,49 @@ function buildDerivationSmokeTests(rules) {
           amount: 2,
           repeatable: true,
           target: "icebreaker",
+        },
+      ],
+    },
+    runnerMemorySetup: {
+      cardId: "ai018_smoke_memory_setup",
+      side: "runner",
+      cardType: "hardware",
+      effects: [
+        {
+          kind: "global_modifier",
+          timing: "persistent",
+          scope: "runner",
+          resource: "memory",
+          amount: 2,
+        },
+      ],
+    },
+    runnerHandSizeSetup: {
+      cardId: "ai018_smoke_hand_size_setup",
+      side: "runner",
+      cardType: "hardware",
+      effects: [
+        {
+          kind: "hand_size_modifier",
+          timing: "persistent",
+          scope: "runner",
+          resource: "hand_size",
+          amount: 2,
+        },
+      ],
+    },
+    runnerProgramHost: {
+      cardId: "ai018_smoke_program_host",
+      side: "runner",
+      cardType: "program",
+      effects: [
+        {
+          kind: "program_host",
+          timing: "persistent",
+          scope: "runner",
+          resource: "memory",
+          amount: 3,
+          target: "program",
         },
       ],
     },

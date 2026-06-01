@@ -2597,7 +2597,7 @@
         "effect:card_recovery",
         "effect:program_trash_prevention"
       ],
-      "monolithFields": [],
+      "monolithFields": ["targetProfiles"],
       "duplicatedActiveMechanicalFields": [],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],

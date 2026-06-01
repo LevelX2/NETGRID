@@ -6344,7 +6344,9 @@ function isRunnerInstallableRelevantBreaker(
         getStructuredBreakerProfileForCard(card.definitionId)?.coverage ?? [],
     ),
   );
-  return profile.coverage.some((coverage) => !installedCoverage.has(coverage));
+  return (profile.coverage ?? []).some(
+    (coverage) => !installedCoverage.has(coverage),
+  );
 }
 
 function isStructuredBreakerInstallAction(

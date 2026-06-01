@@ -11,18 +11,18 @@
   "activeHintCount": 564,
   "compiledTargetHintCount": 564,
   "implementationFoundCount": 527,
-  "generatedFactsCardCount": 388,
+  "generatedFactsCardCount": 391,
   "manualOverlayCardCount": 6,
-  "legacyFallbackOnlyCount": 139,
-  "descriptorOrSchemaGapCount": 274,
+  "legacyFallbackOnlyCount": 136,
+  "descriptorOrSchemaGapCount": 284,
   "manualOverlayRequiredCount": 0,
   "blockedMissingImplementationCount": 37,
   "coverageClassCounts": {
     "blocked_missing_implementation": 37,
-    "descriptor_or_schema_gap": 274,
-    "generated_mechanical_clean": 108,
+    "descriptor_or_schema_gap": 284,
+    "generated_mechanical_clean": 101,
     "generated_plus_overlay": 6,
-    "legacy_fallback_only": 139
+    "legacy_fallback_only": 136
   },
   "coverageBySideCardType": {
     "corp:agenda": 46,
@@ -63,7 +63,7 @@
     "flatline_prevention": 3,
     "future_encounter_effect": 13,
     "future_run_effect": 9,
-    "global_modifier": 14,
+    "global_modifier": 16,
     "hand_size_modifier": 5,
     "hardware_trash": 4,
     "hq_info": 2,
@@ -78,6 +78,7 @@
     "persistent_counter_effect": 7,
     "persistent_survival_modifier": 1,
     "prevention_replacement": 3,
+    "program_host": 4,
     "program_trash": 11,
     "program_trash_prevention": 3,
     "recurring_economy": 17,
@@ -154,7 +155,7 @@
   },
   "hardErrorCount": 0,
   "hardErrors": [],
-  "warningCount": 1740,
+  "warningCount": 1762,
   "warnings": [
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -1404,16 +1405,6 @@
     {
       "kind": "generated_fact_absent_from_active_monolith",
       "cardId": "onr_proteus_088_fubar",
-      "message": "Generated breakerCoverage:unknown_special is absent from the active monolith."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_proteus_088_fubar",
-      "message": "Generated breakerSideEffect:stealth_loss is absent from the active monolith."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_proteus_088_fubar",
       "message": "Generated effect:breaker is absent from the active monolith."
     },
     {
@@ -2007,6 +1998,16 @@
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
     },
     {
+      "kind": "descriptor_or_schema_gap",
+      "cardId": "onr_proteus_134_cortical-cybermodem",
+      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_134_cortical-cybermodem",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_proteus_134_cortical-cybermodem",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
@@ -2100,6 +2101,16 @@
       "kind": "text_pattern_derivation",
       "cardId": "onr_proteus_138_deck-the",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
+    },
+    {
+      "kind": "descriptor_or_schema_gap",
+      "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
+      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
+    },
+    {
+      "kind": "generated_fact_absent_from_active_monolith",
+      "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
+      "message": "Generated effect:program_host is absent from the active monolith."
     },
     {
       "kind": "text_pattern_derivation",
@@ -2222,6 +2233,16 @@
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
     },
     {
+      "kind": "descriptor_or_schema_gap",
+      "cardId": "onr_proteus_151_sunburst-cranial-interface",
+      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_151_sunburst-cranial-interface",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_proteus_151_sunburst-cranial-interface",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
@@ -2287,9 +2308,24 @@
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
     },
     {
-      "kind": "legacy_fallback_only",
+      "kind": "descriptor_or_schema_gap",
       "cardId": "onr_v1_001_afreet",
-      "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
+      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
+    },
+    {
+      "kind": "generated_fact_absent_from_active_monolith",
+      "cardId": "onr_v1_001_afreet",
+      "message": "Generated effect:global_modifier is absent from the active monolith."
+    },
+    {
+      "kind": "generated_fact_absent_from_active_monolith",
+      "cardId": "onr_v1_001_afreet",
+      "message": "Generated effect:program_host is absent from the active monolith."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "cardId": "onr_v1_001_afreet",
+      "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
     },
     {
       "kind": "text_pattern_derivation",
@@ -2510,6 +2546,11 @@
       "kind": "generated_fact_absent_from_active_monolith",
       "cardId": "onr_v1_020_dupre",
       "message": "Generated breakerCoverage:code_gate is absent from the active monolith."
+    },
+    {
+      "kind": "generated_fact_absent_from_active_monolith",
+      "cardId": "onr_v1_020_dupre",
+      "message": "Generated breakerSideEffect:temporary_strength is absent from the active monolith."
     },
     {
       "kind": "generated_fact_absent_from_active_monolith",
@@ -2827,9 +2868,24 @@
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
     },
     {
-      "kind": "legacy_fallback_only",
+      "kind": "descriptor_or_schema_gap",
       "cardId": "onr_v1_033_imp",
-      "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
+      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
+    },
+    {
+      "kind": "generated_fact_absent_from_active_monolith",
+      "cardId": "onr_v1_033_imp",
+      "message": "Generated effect:global_modifier is absent from the active monolith."
+    },
+    {
+      "kind": "generated_fact_absent_from_active_monolith",
+      "cardId": "onr_v1_033_imp",
+      "message": "Generated effect:program_host is absent from the active monolith."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "cardId": "onr_v1_033_imp",
+      "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
     },
     {
       "kind": "legacy_fallback_only",
@@ -3257,9 +3313,19 @@
       "message": "Active monolith has effect:program_trash that the current deriver does not reproduce."
     },
     {
-      "kind": "legacy_fallback_only",
+      "kind": "descriptor_or_schema_gap",
       "cardId": "onr_v1_069_succubus",
-      "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
+      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
+    },
+    {
+      "kind": "generated_fact_absent_from_active_monolith",
+      "cardId": "onr_v1_069_succubus",
+      "message": "Generated effect:program_host is absent from the active monolith."
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "cardId": "onr_v1_069_succubus",
+      "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
     },
     {
       "kind": "text_pattern_derivation",
@@ -3747,6 +3813,16 @@
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
     },
     {
+      "kind": "descriptor_or_schema_gap",
+      "cardId": "onr_v1_119_arasaka-portable-prototype",
+      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_119_arasaka-portable-prototype",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_v1_119_arasaka-portable-prototype",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
@@ -3835,6 +3911,16 @@
       "kind": "text_pattern_derivation",
       "cardId": "onr_v1_121_armored-fridge",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
+    },
+    {
+      "kind": "descriptor_or_schema_gap",
+      "cardId": "onr_v1_122_artemis-2020",
+      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_122_artemis-2020",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -4127,6 +4213,16 @@
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
     },
     {
+      "kind": "descriptor_or_schema_gap",
+      "cardId": "onr_v1_137_parraline-5750",
+      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_137_parraline-5750",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_v1_137_parraline-5750",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
@@ -4177,9 +4273,24 @@
       "message": "Generated effect:net_damage_prevention is absent from the active monolith."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_140_raven-microcyb-eagle",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_v1_140_raven-microcyb-eagle",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
+    },
+    {
+      "kind": "descriptor_or_schema_gap",
+      "cardId": "onr_v1_141_raven-microcyb-owl",
+      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_141_raven-microcyb-owl",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -15576,13 +15687,15 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 1,
           "breakCost": 6,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ],
+          "maxSubroutinesPerBreak": 5,
+          "multiSubroutineBreak": true
         }
       },
       "manualOntologySummary": {
@@ -15656,7 +15769,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/black-widow.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -15673,13 +15786,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 2,
           "breakCost": 1,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -15706,11 +15819,11 @@
         },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -15732,7 +15845,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -15773,13 +15886,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "wall"
-          ],
           "pumpCost": 1,
           "breakCost": 2,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "wall"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -15872,13 +15985,13 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "wall"
-          ],
           "pumpCost": 2,
           "breakCost": 1,
           "confidence": "high",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "wall"
+          ],
           "sideEffects": [
             "stealth_loss"
           ]
@@ -15979,13 +16092,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "wall"
-          ],
           "pumpCost": 1,
           "breakCost": 0,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "wall"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -16373,12 +16486,12 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "breakCost": 0,
           "confidence": "medium",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ],
           "sideEffects": [
             "random_failure"
           ]
@@ -16461,7 +16574,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/fubar.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -16480,13 +16593,17 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "unknown_special"
-          ],
           "pumpCost": 2,
           "breakCost": 1,
-          "confidence": "medium",
+          "confidence": "high",
           "source": "implementation.icebreakerAbilities",
+          "configurableCoverage": true,
+          "coverageCandidates": [
+            "code_gate",
+            "sentry",
+            "wall"
+          ],
+          "oneTimeModeChoice": true,
           "sideEffects": [
             "stealth_loss"
           ]
@@ -16508,49 +16625,48 @@
         ],
         "effects": [],
         "conditions": [],
+        "breakerProfile": {
+          "coverage": [],
+          "pumpCost": 2,
+          "breakCost": 1,
+          "sideEffects": [
+            "stealth_loss"
+          ],
+          "restrictions": []
+        },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
+        "matches": [
+          "breakerSideEffect:stealth_loss"
+        ],
         "generatedOnly": [
-          "breakerCoverage:unknown_special",
-          "breakerSideEffect:stealth_loss",
           "effect:breaker"
         ],
         "manualOnly": []
       },
       "missingManualOverlay": [
-        "breakerCoverage:unknown_special",
-        "breakerSideEffect:stealth_loss",
         "effect:breaker"
       ],
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually."
       ],
-      "confidence": "medium",
+      "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence medium differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated breakerCoverage:unknown_special has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated breakerSideEffect:stealth_loss has no manual ontology match."
         },
         {
           "kind": "generated_fact_without_manual_match",
@@ -16773,7 +16889,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/programs/morphing-tool.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -16790,13 +16906,17 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "unknown_special"
-          ],
           "pumpCost": 1,
           "breakCost": 2,
-          "confidence": "medium",
-          "source": "implementation.icebreakerAbilities"
+          "confidence": "high",
+          "source": "implementation.icebreakerAbilities",
+          "configurableCoverage": true,
+          "coverageCandidates": [
+            "code_gate",
+            "sentry",
+            "wall"
+          ],
+          "reconfigurableType": true
         }
       },
       "manualOntologySummary": {
@@ -16816,25 +16936,21 @@
         "effects": [],
         "conditions": [],
         "breakerProfile": {
-          "coverage": [
-            "unknown_special"
-          ],
+          "coverage": [],
           "sideEffects": [],
           "restrictions": []
         },
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [
-          "breakerCoverage:unknown_special"
-        ],
+        "matches": [],
         "generatedOnly": [
           "effect:breaker"
         ],
@@ -16846,11 +16962,11 @@
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually."
       ],
-      "confidence": "medium",
+      "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence medium differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -16891,13 +17007,15 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 3,
           "breakCost": 1,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ],
+          "maxSubroutinesPerBreak": 2,
+          "multiSubroutineBreak": true
         }
       },
       "manualOntologySummary": {
@@ -17046,13 +17164,14 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "code_gate"
-          ],
           "pumpCost": 3,
           "breakCost": 0,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "code_gate"
+          ],
+          "pumpStrengthAmount": 4
         }
       },
       "manualOntologySummary": {
@@ -17492,13 +17611,13 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "wall"
-          ],
           "pumpCost": 2,
           "breakCost": 0,
           "confidence": "high",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "wall"
+          ],
           "sideEffects": [
             "stealth_loss"
           ]
@@ -19537,7 +19656,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/resources/airport-locker.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -19602,11 +19721,11 @@
           "runner.search.breaker"
         ],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -19634,7 +19753,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -20195,6 +20314,13 @@
         ],
         "effects": [
           {
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 2
+          },
+          {
             "kind": "hand_size_modifier",
             "timing": "persistent",
             "scope": "runner",
@@ -20230,19 +20356,29 @@
           "effect:recurring_economy"
         ],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:global_modifier"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
           "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -20250,7 +20386,7 @@
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "generated_mechanical_clean"
+      "coverageClass": "descriptor_or_schema_gap"
     },
     {
       "cardId": "onr_proteus_135_cortical-stimulators",
@@ -20686,6 +20822,15 @@
         "effects": [
           {
             "confidence": "high",
+            "kind": "program_host",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "memory",
+            "target": "icebreaker",
+            "source": "implementation.hostedProgramCapacity"
+          },
+          {
+            "confidence": "high",
             "kind": "recurring_economy",
             "timing": "persistent",
             "scope": "runner",
@@ -20699,7 +20844,24 @@
         "conditions": [],
         "costProfile": {},
         "derivationNotes": [],
-        "needsManualOverlayReasons": []
+        "needsManualOverlayReasons": [],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "kind": "hosted_install_target",
+            "timing": "on_install",
+            "targetType": "icebreaker",
+            "purpose": "choose_hosted_program",
+            "preferences": [
+              "low_mu_program",
+              "hosted_icebreaker_eligible"
+            ],
+            "avoid": [
+              "target_would_break_host_limit"
+            ],
+            "hiddenInfoPolicy": "public_or_controller_known_only"
+          }
+        ]
       },
       "manualOntologySummary": {
         "hintPresent": true,
@@ -20725,10 +20887,10 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
+          "confidence": "medium",
           "needsHumanReview": true
         }
       },
@@ -20736,20 +20898,30 @@
         "matches": [
           "effect:recurring_economy"
         ],
-        "generatedOnly": [],
+        "generatedOnly": [
+          "effect:program_host"
+        ],
         "manualOnly": []
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:program_host"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:program_host has no manual ontology match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -20757,7 +20929,7 @@
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "generated_mechanical_clean"
+      "coverageClass": "descriptor_or_schema_gap"
     },
     {
       "cardId": "onr_proteus_140_expendable-family-member",
@@ -21609,6 +21781,13 @@
         ],
         "effects": [
           {
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 1
+          },
+          {
             "kind": "hand_size_modifier",
             "timing": "persistent",
             "scope": "runner",
@@ -21644,19 +21823,29 @@
           "effect:recurring_economy"
         ],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:global_modifier"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
           "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -21664,7 +21853,7 @@
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "generated_mechanical_clean"
+      "coverageClass": "descriptor_or_schema_gap"
     },
     {
       "cardId": "onr_proteus_152_swiss-bank-account",
@@ -21959,11 +22148,48 @@
       "expectedManualOverlayNeeded": true,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
-        "effects": [],
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "installed_program",
+            "resource": "strength",
+            "amount": -1,
+            "target": "hosted_icebreaker",
+            "source": "implementation.hostedProgramModifiers.icebreaker_strength"
+          },
+          {
+            "confidence": "high",
+            "kind": "program_host",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 3,
+            "target": "program",
+            "source": "implementation.hostedProgramCapacity"
+          }
+        ],
         "conditions": [],
         "costProfile": {},
         "derivationNotes": [],
-        "needsManualOverlayReasons": []
+        "needsManualOverlayReasons": [],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "kind": "hosted_install_target",
+            "timing": "on_install",
+            "targetType": "program",
+            "purpose": "choose_hosted_program",
+            "preferences": [
+              "low_mu_program"
+            ],
+            "avoid": [
+              "target_would_break_host_limit"
+            ],
+            "hiddenInfoPolicy": "public_or_controller_known_only"
+          }
+        ]
       },
       "manualOntologySummary": {
         "hintPresent": true,
@@ -21983,33 +22209,53 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
+          "confidence": "medium",
           "needsHumanReview": true
         }
       },
       "overlap": {
         "matches": [],
-        "generatedOnly": [],
+        "generatedOnly": [
+          "effect:global_modifier",
+          "effect:program_host"
+        ],
         "manualOnly": []
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:global_modifier",
+        "effect:program_host"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:global_modifier has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:program_host has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "legacy_fallback_only"
+      "coverageClass": "descriptor_or_schema_gap"
     },
     {
       "cardId": "onr_v1_002_ai-boon",
@@ -22040,13 +22286,13 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 1,
           "breakCost": 1,
           "confidence": "medium",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ],
           "sideEffects": [
             "random_failure"
           ]
@@ -22389,13 +22635,13 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "universal"
-          ],
           "pumpCost": 1,
           "breakCost": 1,
           "confidence": "medium",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "universal"
+          ],
           "sideEffects": [
             "program_trash_risk",
             "random_failure"
@@ -22501,13 +22747,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 2,
           "breakCost": 2,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -22606,12 +22852,12 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "universal"
-          ],
           "breakCost": 0,
           "confidence": "medium",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "universal"
+          ],
           "sideEffects": [
             "once_per_subroutine",
             "random_failure"
@@ -23128,13 +23374,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "code_gate"
-          ],
           "pumpCost": 1,
           "breakCost": 0,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "code_gate"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -23229,12 +23475,12 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "breakCost": 1,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -23329,13 +23575,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "code_gate"
-          ],
           "pumpCost": 1,
           "breakCost": 2,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "code_gate"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -23536,13 +23782,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "watchdog"
-          ],
           "pumpCost": 1,
           "breakCost": 1,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "watchdog"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -23628,13 +23874,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "universal"
-          ],
           "pumpCost": 1,
           "breakCost": 0,
           "confidence": "high",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "universal"
+          ],
           "sideEffects": [
             "ends_run_after_use"
           ]
@@ -23739,13 +23985,17 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "code_gate"
-          ],
           "pumpCost": 2,
           "breakCost": 1,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "code_gate"
+          ],
+          "scalingStrength": true,
+          "sideEffects": [
+            "temporary_strength"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -23768,12 +24018,14 @@
         "matches": [],
         "generatedOnly": [
           "breakerCoverage:code_gate",
+          "breakerSideEffect:temporary_strength",
           "effect:breaker"
         ],
         "manualOnly": []
       },
       "missingManualOverlay": [
         "breakerCoverage:code_gate",
+        "breakerSideEffect:temporary_strength",
         "effect:breaker"
       ],
       "descriptorGaps": [
@@ -23788,6 +24040,10 @@
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated breakerCoverage:code_gate has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated breakerSideEffect:temporary_strength has no manual ontology match."
         },
         {
           "kind": "generated_fact_without_manual_match",
@@ -23824,13 +24080,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "wall"
-          ],
           "pumpCost": 1,
           "breakCost": 1,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "wall"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -24186,13 +24442,13 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 1,
           "breakCost": 3,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -24501,13 +24757,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "ap"
-          ],
           "pumpCost": 1,
           "breakCost": 1,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "ap"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -24818,13 +25074,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "wall"
-          ],
           "pumpCost": 2,
           "breakCost": 1,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "wall"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -24907,13 +25163,13 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "wall"
-          ],
           "pumpCost": 1,
           "breakCost": 1,
           "confidence": "high",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "wall"
+          ],
           "sideEffects": [
             "stealth_loss"
           ]
@@ -25075,11 +25331,48 @@
       "expectedManualOverlayNeeded": true,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
-        "effects": [],
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "installed_program",
+            "resource": "strength",
+            "amount": -1,
+            "target": "hosted_icebreaker",
+            "source": "implementation.hostedProgramModifiers.icebreaker_strength"
+          },
+          {
+            "confidence": "high",
+            "kind": "program_host",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 2,
+            "target": "program",
+            "source": "implementation.hostedProgramCapacity"
+          }
+        ],
         "conditions": [],
         "costProfile": {},
         "derivationNotes": [],
-        "needsManualOverlayReasons": []
+        "needsManualOverlayReasons": [],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "kind": "hosted_install_target",
+            "timing": "on_install",
+            "targetType": "program",
+            "purpose": "choose_hosted_program",
+            "preferences": [
+              "low_mu_program"
+            ],
+            "avoid": [
+              "target_would_break_host_limit"
+            ],
+            "hiddenInfoPolicy": "public_or_controller_known_only"
+          }
+        ]
       },
       "manualOntologySummary": {
         "hintPresent": true,
@@ -25095,33 +25388,53 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
+          "confidence": "medium",
           "needsHumanReview": true
         }
       },
       "overlap": {
         "matches": [],
-        "generatedOnly": [],
+        "generatedOnly": [
+          "effect:global_modifier",
+          "effect:program_host"
+        ],
         "manualOnly": []
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:global_modifier",
+        "effect:program_host"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:global_modifier has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:program_host has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "legacy_fallback_only"
+      "coverageClass": "descriptor_or_schema_gap"
     },
     {
       "cardId": "onr_v1_034_incubator",
@@ -25263,13 +25576,13 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "wall"
-          ],
           "pumpCost": 1,
           "breakCost": 0,
           "confidence": "high",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "wall"
+          ],
           "sideEffects": [
             "stealth_loss"
           ]
@@ -25365,13 +25678,13 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "wall"
-          ],
           "pumpCost": 1,
           "breakCost": 0,
           "confidence": "medium",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "wall"
+          ],
           "sideEffects": [
             "forgo_actions"
           ]
@@ -25599,13 +25912,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "universal"
-          ],
           "pumpCost": 2,
           "breakCost": 2,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "universal"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -25705,13 +26018,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 1,
           "breakCost": 1,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -26404,13 +26717,15 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "wall"
-          ],
           "pumpCost": 1,
           "breakCost": 3,
           "confidence": "high",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "wall"
+          ],
+          "maxSubroutinesPerBreak": 4,
+          "multiSubroutineBreak": true,
           "sideEffects": [
             "stealth_loss"
           ]
@@ -26843,13 +27158,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "code_gate"
-          ],
           "pumpCost": 2,
           "breakCost": 1,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "code_gate"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -26947,13 +27262,13 @@
         ],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "wall"
-          ],
           "pumpCost": 1,
           "breakCost": 2,
           "confidence": "high",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "wall"
+          ],
           "sideEffects": [
             "stealth_loss"
           ]
@@ -27046,13 +27361,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 1,
           "breakCost": 2,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -27150,12 +27465,12 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "ap"
-          ],
           "breakCost": 0,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "ap"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -27256,13 +27571,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "trace"
-          ],
           "pumpCost": 1,
           "breakCost": 0,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "trace"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -27638,13 +27953,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 2,
           "breakCost": 1,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -28223,13 +28538,14 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 1,
           "breakCost": 1,
           "confidence": "high",
           "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ],
+          "scalingStrength": true,
           "sideEffects": [
             "temporary_strength"
           ]
@@ -28448,14 +28764,41 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/succubus.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": false,
+      "expectedManualOverlayNeeded": true,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
-        "effects": [],
+        "effects": [
+          {
+            "confidence": "high",
+            "kind": "program_host",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 3,
+            "target": "program",
+            "source": "implementation.hostedProgramCapacity"
+          }
+        ],
         "conditions": [],
         "costProfile": {},
         "derivationNotes": [],
-        "needsManualOverlayReasons": []
+        "needsManualOverlayReasons": [],
+        "targetProfiles": [
+          {
+            "schemaVersion": "target-profile-v1",
+            "kind": "hosted_install_target",
+            "timing": "on_install",
+            "targetType": "program",
+            "purpose": "choose_hosted_program",
+            "preferences": [
+              "low_mu_program"
+            ],
+            "avoid": [
+              "target_would_break_host_limit"
+            ],
+            "hiddenInfoPolicy": "public_or_controller_known_only"
+          }
+        ]
       },
       "manualOntologySummary": {
         "hintPresent": true,
@@ -28472,19 +28815,48 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": true
+        }
       },
       "overlap": {
         "matches": [],
-        "generatedOnly": [],
+        "generatedOnly": [
+          "effect:program_host"
+        ],
         "manualOnly": []
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:program_host"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
       "confidence": "high",
-      "warnings": [],
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:program_host has no manual ontology match."
+        },
+        {
+          "kind": "text_pattern_derivation",
+          "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
+        }
+      ],
       "fullCoverageScope": true,
-      "coverageClass": "legacy_fallback_only"
+      "coverageClass": "descriptor_or_schema_gap"
     },
     {
       "cardId": "onr_v1_070_tinweasel",
@@ -28512,12 +28884,12 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "code_gate"
-          ],
           "breakCost": 0,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "code_gate"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -28703,13 +29075,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "sentry"
-          ],
           "pumpCost": 3,
           "breakCost": 0,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "sentry"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -28804,13 +29176,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "code_gate"
-          ],
           "pumpCost": 2,
           "breakCost": 0,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "code_gate"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -28905,13 +29277,13 @@
         "derivationNotes": [],
         "needsManualOverlayReasons": [],
         "breakerProfile": {
-          "coverage": [
-            "wall"
-          ],
           "pumpCost": 3,
           "breakCost": 0,
           "confidence": "high",
-          "source": "implementation.icebreakerAbilities"
+          "source": "implementation.icebreakerAbilities",
+          "coverage": [
+            "wall"
+          ]
         }
       },
       "manualOntologySummary": {
@@ -30212,14 +30584,12 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "runner.search.breaker"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
+          "confidence": "medium",
           "needsHumanReview": true
         }
       },
@@ -30245,7 +30615,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -30460,9 +30830,7 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "runner.search.breaker"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -30943,15 +31311,13 @@
           "reserveRisk": "low",
           "opportunityCost": "medium"
         },
-        "lineSupport": [
-          "runner.search.breaker"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "high",
-          "needsHumanReview": false
+          "confidence": "medium",
+          "needsHumanReview": true
         }
       },
       "overlap": {
@@ -30976,6 +31342,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -32368,6 +32738,13 @@
         ],
         "effects": [
           {
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 3
+          },
+          {
             "kind": "recurring_economy",
             "timing": "persistent",
             "scope": "runner",
@@ -32376,6 +32753,11 @@
           }
         ],
         "conditions": [],
+        "costProfile": {
+          "agendaPoints": 1,
+          "reserveRisk": "high",
+          "opportunityCost": "high"
+        },
         "lineSupport": []
       },
       "overlap": {
@@ -32383,19 +32765,33 @@
           "effect:recurring_economy"
         ],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:global_modifier"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "generated_mechanical_clean"
+      "coverageClass": "descriptor_or_schema_gap"
     },
     {
       "cardId": "onr_v1_120_armadillo-armored-road-home",
@@ -32760,6 +33156,13 @@
         ],
         "effects": [
           {
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 2
+          },
+          {
             "kind": "recurring_economy",
             "timing": "persistent",
             "scope": "runner",
@@ -32775,19 +33178,33 @@
           "effect:recurring_economy"
         ],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:global_modifier"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "generated_mechanical_clean"
+      "coverageClass": "descriptor_or_schema_gap"
     },
     {
       "cardId": "onr_v1_123_bodyweight-data-creche",
@@ -33682,14 +34099,12 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "runner.search.breaker"
-        ],
+        "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
+          "confidence": "medium",
           "needsHumanReview": true
         }
       },
@@ -33716,7 +34131,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -34183,6 +34598,13 @@
         ],
         "effects": [
           {
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 1
+          },
+          {
             "kind": "recurring_economy",
             "timing": "persistent",
             "scope": "runner",
@@ -34198,19 +34620,33 @@
           "effect:recurring_economy"
         ],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:global_modifier"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "generated_mechanical_clean"
+      "coverageClass": "descriptor_or_schema_gap"
     },
     {
       "cardId": "onr_v1_138_pk-6089a",
@@ -34426,6 +34862,13 @@
         ],
         "effects": [
           {
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 1
+          },
+          {
             "kind": "recurring_economy",
             "timing": "persistent",
             "scope": "runner",
@@ -34457,7 +34900,9 @@
           "effect:damage_prevention",
           "effect:net_damage_prevention"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:global_modifier"
+        ]
       },
       "missingManualOverlay": [
         "condition:requires_damage",
@@ -34465,10 +34910,12 @@
         "condition:requires_prevention_window",
         "condition:requires_turn_limit_available",
         "effect:damage_prevention",
+        "effect:global_modifier",
         "effect:net_damage_prevention"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
@@ -34479,6 +34926,10 @@
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "generated_fact_without_manual_match",
@@ -34503,6 +34954,10 @@
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated effect:net_damage_prevention has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -34553,6 +35008,13 @@
         ],
         "effects": [
           {
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 1
+          },
+          {
             "kind": "recurring_economy",
             "timing": "persistent",
             "scope": "runner",
@@ -34575,19 +35037,29 @@
           "effect:recurring_economy"
         ],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:global_modifier"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:global_modifier"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
           "message": "Generated confidence high differs from manual confidence low."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -34595,7 +35067,7 @@
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "generated_mechanical_clean"
+      "coverageClass": "descriptor_or_schema_gap"
     },
     {
       "cardId": "onr_v1_142_record-reconstructor",

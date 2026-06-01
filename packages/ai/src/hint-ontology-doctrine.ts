@@ -335,13 +335,14 @@ function aggregateBreakerProfile(
   summary: AiDeckOntologyBreakerCoverageSummary,
 ): void {
   if (!breakerProfile) return;
-  for (const coverage of breakerProfile.coverage) {
+  const coverageProfile = breakerProfile.coverage ?? [];
+  for (const coverage of coverageProfile) {
     increment(summary.coverageCounts, coverage, quantity);
   }
   summary.breakerCards.push({
     cardId,
     quantity,
-    coverage: breakerProfile.coverage.slice(),
+    coverage: coverageProfile.slice(),
     ...(breakerProfile.baseStrength !== undefined
       ? { baseStrength: breakerProfile.baseStrength }
       : {}),

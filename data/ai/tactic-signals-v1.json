@@ -1,6 +1,6 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI018",
+  "taskId": "AI018-adjustments",
   "generatedAt": "2026-06-01",
   "description": "Controlled V1 catalog for read-only tactic signals derived from structured AI hints. AI018 keeps tactic signals separate from strategy anchors and adds the complete Icebreaker/Breaker-support sweep.",
   "signalPolicy": {
@@ -141,6 +141,23 @@
       "notes": "Choice details belong in a TargetProfile or ChoiceProfile, not in more signal names."
     },
     {
+      "signalId": "breaker.delayed_action_cost",
+      "group": "breaker_risk",
+      "sideScope": "runner",
+      "description": "Breaker use creates a future action debt or delayed action cost.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "breakerProfile.sideEffects=forgo_actions"
+      ],
+      "examples": [
+        "Japanese Water Torture"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Diagnostic drawback only; no planner or cost-selection weighting consumes this signal."
+    },
+    {
       "signalId": "breaker.emergency_coverage",
       "group": "breaker_flexible_coverage",
       "sideScope": "runner",
@@ -171,6 +188,77 @@
       ],
       "targetProfileRelevant": true,
       "notes": "Search target quality remains a TargetProfile concern."
+    },
+    {
+      "signalId": "breaker.ends_run_after_use",
+      "group": "breaker_risk",
+      "sideScope": "runner",
+      "description": "Breaker use ends the current run after its use window.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "breakerProfile.sideEffects=ends_run_after_use"
+      ],
+      "examples": [
+        "Dropp"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Hard run-continuation drawback; support-only and not a strategy anchor."
+    },
+    {
+      "signalId": "breaker.hosted_strength_penalty",
+      "group": "breaker_support",
+      "sideScope": "runner",
+      "description": "Hosted icebreakers receive a strength penalty from their host.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=global_modifier resource=strength target=hosted_icebreaker"
+      ],
+      "examples": [
+        "Afreet",
+        "Imp"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Negative hosted-breaker support fact; target choice stays diagnostic TargetProfile data only."
+    },
+    {
+      "signalId": "breaker.multi_subroutine_break",
+      "group": "breaker_efficiency",
+      "sideScope": "runner",
+      "description": "Breaker can break multiple matching subroutines with one break payment.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "breakerProfile.multiSubroutineBreak"
+      ],
+      "examples": [
+        "Big Frackin' Gun",
+        "Pile Driver",
+        "Redecorator"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Cost-efficiency descriptor only; no action scoring or break-cost planner change."
+    },
+    {
+      "signalId": "breaker.one_time_mode_choice",
+      "group": "breaker_flexible_coverage",
+      "sideScope": "runner",
+      "description": "Breaker chooses a coverage type once and then keeps that type.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "breakerProfile.oneTimeModeChoice"
+      ],
+      "examples": [
+        "Fubar"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Different from breaker.reconfigurable_type; choice preference belongs in TargetProfile."
     },
     {
       "signalId": "breaker.reconfigurable_type",
@@ -205,6 +293,25 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Risk is diagnostic support and does not anchor a strategy."
+    },
+    {
+      "signalId": "breaker.scaling_strength",
+      "group": "breaker_efficiency",
+      "sideScope": "runner",
+      "description": "Breaker strength can grow through prior use or stored strength counters.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "breakerProfile.scalingStrength",
+        "breakerProfile.sideEffects=temporary_strength"
+      ],
+      "examples": [
+        "Dupré",
+        "Snowball"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Diagnostic efficiency/scaling descriptor; same-fort or current-run choices remain outside runtime targeting."
     },
     {
       "signalId": "breaker.search_during_encounter",
@@ -257,6 +364,25 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Coverage signal only; not a synonym for anti.ice.sentry."
+    },
+    {
+      "signalId": "breaker.stealth_payment_loss",
+      "group": "breaker_risk",
+      "sideScope": "runner",
+      "description": "Breaker use spends or removes stealth credits/bits as a side cost.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "breakerProfile.sideEffects=stealth_loss"
+      ],
+      "examples": [
+        "Fubar",
+        "Pile Driver",
+        "Wrecking Ball"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Noisy/stealth payment loss is a diagnostic cost flag only."
     },
     {
       "signalId": "breaker.strength_bonus_vs_chosen_ice",
@@ -1068,6 +1194,24 @@
       "notes": "Draw is support-only in this catalog."
     },
     {
+      "signalId": "setup.hand_size",
+      "group": "runner_setup",
+      "sideScope": "runner",
+      "description": "Increases or modifies Runner hand size as part of setup.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=hand_size_modifier resource=hand_size"
+      ],
+      "examples": [
+        "Cortical Cybermodem",
+        "Sunburst Cranial Interface"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Setup support only; not a rig or survival strategy anchor by itself."
+    },
+    {
       "signalId": "setup.install_discount",
       "group": "setup_install",
       "sideScope": "neutral",
@@ -1100,15 +1244,51 @@
       "notes": "This signal does not choose the installed program."
     },
     {
+      "signalId": "setup.memory",
+      "group": "runner_setup",
+      "sideScope": "runner",
+      "description": "Provides or modifies Runner memory units for installed programs.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=global_modifier resource=memory scope=runner"
+      ],
+      "examples": [
+        "Artemis 2020",
+        "Parraline 5750"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Memory support is diagnostic setup information and does not alter deck profile defaults."
+    },
+    {
+      "signalId": "setup.program_host",
+      "group": "runner_setup",
+      "sideScope": "runner",
+      "description": "Provides hosted program capacity or hosted icebreaker capacity.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=program_host resource=memory"
+      ],
+      "examples": [
+        "Afreet",
+        "Imp",
+        "Succubus",
+        "Eurocorpse (TM) Spin Chip"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Hosting capacity is diagnostic setup data; hosted target selection remains TargetProfile-only."
+    },
+    {
       "signalId": "setup.recovery",
       "group": "setup_draw_search",
       "sideScope": "runner",
       "description": "Recovers cards or programs that can rebuild Runner setup.",
-      "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "runner.search.breaker"
-      ],
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "effects.kind=card_recovery"
       ],
@@ -1116,7 +1296,7 @@
         "Forgotten Backup Chip"
       ],
       "targetProfileRelevant": true,
-      "notes": "Anchor-capable only in Runner recovery/search context."
+      "notes": "Generic recovery is support-only until a dedicated program-recovery or generic recovery strategy exists."
     },
     {
       "signalId": "setup.search",
@@ -1129,14 +1309,15 @@
         "runner.search.breaker"
       ],
       "sourceKinds": [
-        "effects.kind=search"
+        "effects.kind=search",
+        "effects.kind=search target=program"
       ],
       "examples": [
         "Self-Modifying Code",
         "Airport Locker"
       ],
       "targetProfileRelevant": true,
-      "notes": "Generic search can anchor breaker-search strategy; target preferences remain separate."
+      "notes": "Anchor-capable only when the structured effect is narrowed to program search for breaker/toolbox setup; generic any-card search remains support-only."
     },
     {
       "signalId": "tag.payoff",

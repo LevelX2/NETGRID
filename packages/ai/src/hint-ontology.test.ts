@@ -390,4 +390,38 @@ describe("AI hint ontology validation", () => {
     });
     expect(result.errors).toEqual([]);
   });
+
+  it("accepts diagnostic TargetProfile V1 and hosting setup fields", () => {
+    const result = validateAiHintOntologyFields({
+      effects: [
+        {
+          kind: "program_host",
+          timing: "persistent",
+          scope: "runner",
+          resource: "memory",
+          target: "program",
+          amount: 3,
+        },
+      ],
+      breakerProfile: {
+        configurableCoverage: true,
+        coverageCandidates: ["code_gate", "sentry", "wall"],
+        oneTimeModeChoice: true,
+      },
+      targetProfiles: [
+        {
+          schemaVersion: "target-profile-v1",
+          kind: "mode_choice",
+          timing: "paid_action",
+          targetType: "ice_type",
+          purpose: "choose_fixed_breaker_coverage",
+          preferences: ["type_missing_in_current_rig"],
+          avoid: ["hidden_info_dependent_choice"],
+          hiddenInfoPolicy: "visible_or_known_only",
+        },
+      ],
+    });
+
+    expect(result.errors).toEqual([]);
+  });
 });
