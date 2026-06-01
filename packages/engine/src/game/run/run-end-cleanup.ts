@@ -966,6 +966,19 @@ function applyV181SuccessfulRunCounterTriggers(
         legalAction,
       );
       if (legalAction) {
+        if (implementation.counterKind === "cockroach" && added > 0) {
+          appendRunnerVirusCounterEffect(legalAction, {
+            run,
+            sourceCardId: cardId,
+            sourceDefinitionId: definition.id,
+            sourceTitle: definition.title,
+            side: "runner",
+            counterType: "cockroach",
+            added,
+            remainingCounters: host.counters.cardCounter(cardId, "virus"),
+            reason: "cockroach_successful_hq_run",
+          });
+        }
         legalAction.payload = {
           ...(legalAction.payload ?? {}),
           virusCounterAdded: added,
@@ -1037,10 +1050,11 @@ function appendRunnerVirusCounterEffect(
     sourceCardId: CardInstanceId;
     sourceDefinitionId: CardDefinitionId;
     sourceTitle: string;
-    side: "corp";
+    side: "corp" | "runner";
     counterType: CounterType;
     added: number;
     remainingCounters: number;
+    reason?: "proteus_runner_virus_successful_run" | "cockroach_successful_hq_run";
     serverId?: Exclude<ServerId, "new_remote">;
     serverLabel?: string;
   },
@@ -1055,7 +1069,7 @@ function appendRunnerVirusCounterEffect(
     counterType: input.counterType,
     addedCounterAmount: input.added,
     remainingCounters: input.remainingCounters,
-    reason: "proteus_runner_virus_successful_run",
+    reason: input.reason ?? "proteus_runner_virus_successful_run",
     sourceDefinitionId: input.sourceDefinitionId,
     sourceTitle: input.sourceTitle,
     ...(input.serverId ? { serverId: input.serverId } : {}),

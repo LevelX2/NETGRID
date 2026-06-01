@@ -5959,6 +5959,41 @@ describe("V1.9.1 Mechanikpaket J", () => {
       expect(
         cockroachId ? cardCounterAmount(state, cockroachId, "virus") : 0,
       ).toBeGreaterThanOrEqual(2);
+      const lastCockroachCounterEvent = [...state.eventLog]
+        .reverse()
+        .find((event) => {
+          const effects = event.publicPayload.resolvedEffects;
+          return (
+            Array.isArray(effects) &&
+            effects.some(
+              (effect) =>
+              effect.kind === "counter_change" &&
+              effect.reason === "cockroach_successful_hq_run",
+            )
+          );
+        });
+      expect(lastCockroachCounterEvent?.publicPayload.resolvedEffects).toContainEqual(
+        expect.objectContaining({
+          kind: "counter_change",
+          counterType: "cockroach",
+          addedCounterAmount: 1,
+          remainingCounters: 2,
+          reason: "cockroach_successful_hq_run",
+          sourceDefinitionId: "onr_v1_013_cockroach",
+          sourceTitle: "Cockroach",
+        }),
+      );
+      const cockroachView = getPlayerView(state, "runner").own.rig?.find(
+        (card) => card.definitionId === "onr_v1_013_cockroach",
+      );
+      expect(cockroachView?.counterDisplays).toContainEqual(
+        expect.objectContaining({
+          id: "cockroach",
+          amount: 2,
+          label: "Cockroach-Counter",
+          counterType: "cockroach",
+        }),
+      );
 
       state = apply(state, "runner", (action) => action.type === "end_turn");
       state = apply(

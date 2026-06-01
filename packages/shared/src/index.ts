@@ -145,6 +145,7 @@ export type DamageType = "net" | "meat" | "core";
 export type CounterType =
   | "advancement"
   | "virus"
+  | "cockroach"
   | "doom"
   | "crumble"
   | "garbage"

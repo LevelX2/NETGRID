@@ -1211,6 +1211,27 @@ describe("V1.0.6 resource and card-display helpers", () => {
 
   it("explains Proteus counter effects for badge and identity tooltips", () => {
     expect(
+      counterDisplayBadgeView(
+        {
+          id: "cockroach",
+          amount: 2,
+          displayKind: "virus",
+          label: "Cockroach-Counter",
+          ariaLabel: "2 Cockroach-Counter",
+          counterType: "cockroach",
+          usageHint: "status_marker"
+        },
+        "cockroach-counter-badge"
+      )
+    ).toEqual({
+      amount: 2,
+      label: "2 Cockroach-Counter",
+      ariaLabel: "2 Cockroach-Counter",
+      shortLabel: "2 Cockroach",
+      testId: "cockroach-counter-badge",
+      tooltip: "Cockroach: 2 Cockroach-Counter machen HQ-Discards zufällig. Diese Cockroach-Counter zählen als Virus-Counter, weil Cockroach ein Programm-Virus ist, und werden durch Virus-Purge entfernt."
+    });
+    expect(
       counterDisplayTooltipText({
         id: "runner_virus_corp_highlighter",
         amount: 3,

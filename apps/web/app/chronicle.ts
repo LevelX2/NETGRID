@@ -1812,6 +1812,21 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
       const counterText = counterLabel(effect.counterType);
       const added = numberValue(effect.addedCounterAmount) ?? 0;
       const removed = numberValue(effect.removedCounterAmount) ?? 0;
+      if (effect.reason === "cockroach_successful_hq_run" && added > 0) {
+        const source = sourceTitle ?? "Cockroach";
+        category = "run";
+        importance = "important";
+        title = `${source} erhält ${added} ${counterText}`;
+        description = `Diese Cockroach-Counter zählen als Virus-Counter, weil Cockroach ein Programm-Virus ist, und werden durch Virus-Purge entfernt.`;
+        chips.push(
+          source,
+          `+${added} ${counterText}`,
+          ...(effect.remainingCounters !== undefined ? [`${effect.remainingCounters} gesamt`] : []),
+          "Virus/Purge",
+          "Erfolgreicher HQ-Run",
+        );
+        break;
+      }
       const pattelAccessCounter = pattelAccessCounterChronicleText(event, effect);
       if (pattelAccessCounter) {
         category = "run";
@@ -2735,6 +2750,7 @@ function counterLabel(counterType: unknown): string {
   if (counterType === "crying") return "Crying-Counter";
   if (counterType === "doppelganger_antibody") return "Doppelganger-Counter";
   if (counterType === "pattel_antibody") return "Pattel-Counter";
+  if (counterType === "cockroach") return "Cockroach-Counter";
   if (counterType === "highlighter") return "Highlighter-Counter";
   if (counterType === "garbage") return "Garbage-Counter";
   if (counterType === "scaldan") return "Scaldan-Counter";

@@ -244,6 +244,10 @@ export function counterDisplayTooltipText(display: NonNullable<VisibleCard["coun
   const amount = safeCounterDisplayAmount(display.amount);
   const countLabel = `${amount} ${counterDisplayShortLabel(display.label)}`;
   switch (display.counterType) {
+    case "cockroach":
+      return amount >= 2
+        ? `Cockroach: ${amount} Cockroach-Counter machen HQ-Discards zufällig. Diese Cockroach-Counter zählen als Virus-Counter, weil Cockroach ein Programm-Virus ist, und werden durch Virus-Purge entfernt.`
+        : `Cockroach: Ab 2 Cockroach-Countern werden HQ-Discards zufällig. Diese Cockroach-Counter zählen als Virus-Counter, weil Cockroach ein Programm-Virus ist, und werden durch Virus-Purge entfernt.`;
     case "doom":
       return `Armageddon: Bei jeder Korp-Installation wird pro Doom-Counter ein Würfel geworfen. Jede 6 trasht die installierte Karte und entfernt 1 Doom-Counter. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
     case "crumble":

@@ -31,6 +31,7 @@ import { serverChoiceDisplayLabel } from "./server-view";
 const ENCRYPTION_BREAKTHROUGH_ID = "onr_v1_200_encryption-breakthrough";
 const SUPERIOR_NET_BARRIERS_ID = "onr_v1_219_superior-net-barriers";
 const SECURITY_NET_OPTIMIZATION_ID = "onr_v1_215_security-net-optimization";
+const COCKROACH_ID = "onr_v1_013_cockroach";
 
 const effectiveAgendaDifficultyDeps: EffectiveAgendaDifficultyDependencies = {
   definitionFor,
@@ -377,11 +378,17 @@ function specialCounterDisplays(
     ...(definition.id === SKIVVISS_ID
       ? []
       : singleCounterDisplay(counters.virus, {
-          id: "virus",
+          id: definition.id === COCKROACH_ID ? "cockroach" : "virus",
           displayKind: "virus",
-          label: "Virus-Counter",
-          ariaLabelName: "Virus-Counter",
-          counterType: "virus",
+          label:
+            definition.id === COCKROACH_ID
+              ? "Cockroach-Counter"
+              : "Virus-Counter",
+          ariaLabelName:
+            definition.id === COCKROACH_ID
+              ? "Cockroach-Counter"
+              : "Virus-Counter",
+          counterType: definition.id === COCKROACH_ID ? "cockroach" : "virus",
           usageHint: "status_marker",
         })),
     ...singleCounterDisplay(counters.data_raven, {
