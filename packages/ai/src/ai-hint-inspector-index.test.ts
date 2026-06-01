@@ -311,7 +311,7 @@ describe("AI005 hint inspector index", () => {
       ]),
     );
     expect(clown.derivedStrategyAnchors).toEqual([]);
-    expect(clown.strategicRoleStatus.values).toContain("support_tool");
+    expect(clown.strategicRoleStatus.values).not.toContain("support_tool");
 
     expect(reflector.derivedFunctionSignals).toEqual(
       expect.arrayContaining([
@@ -333,13 +333,9 @@ describe("AI005 hint inspector index", () => {
     );
     expect(cloak.derivedFunctionSignals).not.toContain("economy.trash_credit");
     expect(cloak.derivedStrategyAnchors).toEqual([]);
-    expect(cloak.strategicRoleStatus.values).toContain("support_tool");
+    expect(cloak.strategicRoleStatus.values).not.toContain("support_tool");
 
-    for (const supportCard of [
-      lockjaw,
-      personalTouch,
-      dealWithMilitech,
-    ]) {
+    for (const supportCard of [lockjaw, personalTouch, dealWithMilitech]) {
       expect(supportCard.derivedFunctionSignals).toEqual(
         expect.arrayContaining([
           "breaker.support",
@@ -350,6 +346,9 @@ describe("AI005 hint inspector index", () => {
         "ice.strength_reduction",
       );
       expect(supportCard.derivedStrategyAnchors).toEqual([]);
+    }
+    expect(lockjaw.strategicRoleStatus.values).not.toContain("support_tool");
+    for (const supportCard of [personalTouch, dealWithMilitech]) {
       expect(supportCard.strategicRoleStatus.values).toContain("support_tool");
     }
 

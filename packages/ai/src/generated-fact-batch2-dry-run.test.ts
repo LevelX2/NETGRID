@@ -107,8 +107,8 @@ describe("generated fact Batch-2 migration dry-run", () => {
       card(report, "onr_v1_057_scatter-shot").expectedTrashCreditTarget,
     ).toBe("upgrade");
     expect(
-      report.warningCountsByKind.trash_credit_target_shape_difference,
-    ).toBe(2);
+      report.warningCountsByKind.trash_credit_target_shape_difference ?? 0,
+    ).toBe(0);
   });
 
   it("keeps the dry-run preview read-only and free of runtime/manual fields", () => {

@@ -112,10 +112,28 @@
         "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "medium",
-        "needsHumanReview": true,
+        "needsHumanReview": false,
         "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
-      }
+      },
+      "effects": [
+        {
+          "kind": "program_host",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 3,
+          "target": "program"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "installed_program",
+          "resource": "strength",
+          "amount": -1,
+          "target": "hosted_icebreaker"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_002_ai-boon",
@@ -184,9 +202,9 @@
     {
       "cardId": "onr_v1_003_baedekers-net-map",
       "side": "runner",
-      "cardType": "hardware",
+      "cardType": "program",
       "roles": [
-        "hardware",
+        "program",
         "link",
         "recurring"
       ],
@@ -195,7 +213,7 @@
         "trace_bid_support"
       ],
       "requiredMechanics": [
-        "install_hardware",
+        "install_program",
         "base_link",
         "recurring_credit"
       ],
@@ -209,12 +227,41 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
       ],
-      "lineSupport": [
-        "runner.survival_defense"
+      "effects": [
+        {
+          "kind": "base_link",
+          "timing": "trace_window",
+          "scope": "trace",
+          "resource": "link",
+          "amount": 1
+        },
+        {
+          "kind": "link",
+          "timing": "trace_window",
+          "scope": "trace",
+          "resource": "link",
+          "amount": 1
+        },
+        {
+          "kind": "trace_defense",
+          "timing": "trace_window",
+          "scope": "trace",
+          "resource": "link",
+          "amount": 1
+        }
       ],
-      "strategicRole": [
-        "defensive_tool"
-      ]
+      "conditions": [
+        {
+          "kind": "requires_trace_attempt"
+        }
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_004_bakdoor",
@@ -242,12 +289,31 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_program_hosting_tools"
       ],
-      "lineSupport": [
-        "runner.survival_defense"
+      "effects": [
+        {
+          "kind": "base_link",
+          "timing": "trace_window",
+          "scope": "trace",
+          "resource": "link",
+          "amount": 3
+        },
+        {
+          "kind": "link",
+          "timing": "trace_window",
+          "scope": "trace",
+          "resource": "link",
+          "amount": 1,
+          "target": "trace_boost"
+        }
       ],
-      "strategicRole": [
-        "defensive_tool"
-      ]
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex",
+        "strategyCovered": false
+      }
     },
     {
       "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
@@ -493,7 +559,44 @@
       ],
       "strategicRole": [
         "engine_anchor"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "hq",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "hq_info",
+          "timing": "start_of_turn",
+          "scope": "hq",
+          "resource": "cards",
+          "target": "random_reveal",
+          "repeatable": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_009_butcher-boy",
@@ -524,7 +627,45 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1912-smokes.json#runner_v1912_counter_recurring"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "hq",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "recurring_economy",
+          "timing": "start_of_turn",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 1,
+          "repeatable": true,
+          "target": "virus_counter"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_010_cascade",
@@ -556,7 +697,43 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1912-smokes.json#runner_v1912_counter_recurring"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "rnd",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "start_of_turn",
+          "scope": "rnd",
+          "resource": "cards",
+          "target": "rnd_trash"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_011_cloak",
@@ -597,9 +774,9 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -617,10 +794,7 @@
         "memory": 1,
         "reserveRisk": "low",
         "opportunityCost": "low"
-      },
-      "strategicRole": [
-        "support_tool"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_012_clown",
@@ -654,13 +828,21 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       },
-      "strategicRole": [
-        "support_tool"
+      "effects": [
+        {
+          "kind": "remote_protection",
+          "timing": "persistent",
+          "scope": "ice",
+          "resource": "strength",
+          "amount": -1
+        }
       ]
     },
     {
@@ -696,7 +878,43 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v191-v194-smokes.json#runner_v191_counter_random_and_scaling_programs"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "hq",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "persistent",
+          "scope": "hq",
+          "resource": "cards",
+          "target": "random_discard"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_014_codecracker",
@@ -912,6 +1130,30 @@
           "resource": "cards",
           "amount": 1,
           "repeatable": true
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "rnd",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "topdeck_info",
+          "timing": "start_of_turn",
+          "scope": "rnd",
+          "resource": "cards",
+          "amount": 1,
+          "target": "top_card",
+          "repeatable": true
         }
       ],
       "conditions": [
@@ -934,7 +1176,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
       }
     },
@@ -1145,7 +1387,55 @@
       ],
       "strategicRole": [
         "emergency_tool"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "flatline_prevention",
+          "timing": "flatline_replacement",
+          "scope": "runner",
+          "resource": "damage"
+        },
+        {
+          "kind": "remove_brain_damage",
+          "timing": "flatline_replacement",
+          "scope": "runner",
+          "resource": "brain_damage"
+        },
+        {
+          "kind": "meat_damage_prevention",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "meat_damage"
+        },
+        {
+          "kind": "persistent_survival_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "meat_damage",
+          "target": "meat_damage_immunity"
+        },
+        {
+          "kind": "hand_size_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "hand_size",
+          "amount": -1
+        },
+        {
+          "kind": "action_penalty",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "actions",
+          "amount": -1
+        }
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_023_evil-twin",
@@ -1220,7 +1510,23 @@
       ],
       "strategicRole": [
         "payoff_anchor"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "hq_info",
+          "timing": "on_access",
+          "scope": "hq",
+          "resource": "cards",
+          "target": "full_reveal"
+        }
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_025_fait-accompli",
@@ -1249,7 +1555,43 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#runner_v1919_agenda_counter"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "remote",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "remote_tax",
+          "timing": "persistent",
+          "scope": "remote",
+          "resource": "counters",
+          "target": "agenda_difficulty"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_026_false-echo",
@@ -1284,7 +1626,35 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "rez",
+          "timing": "successful_run",
+          "scope": "ice",
+          "target": "force_rez"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "after_successful_run",
+          "targetType": "server",
+          "purpose": "force_rez_fort_ice",
+          "hiddenInfoPolicy": "legal_targets_only",
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_027_flak",
@@ -1348,16 +1718,35 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
+      "effects": [
+        {
+          "kind": "damage_prevention",
+          "timing": "prevention_window",
+          "scope": "runner",
+          "resource": "damage",
+          "amount": 2
+        },
+        {
+          "kind": "net_damage_prevention",
+          "timing": "prevention_window",
+          "scope": "runner",
+          "resource": "net_damage",
+          "amount": 2
+        },
+        {
+          "kind": "brain_damage_prevention",
+          "timing": "prevention_window",
+          "scope": "runner",
+          "resource": "brain_damage",
+          "amount": 2
+        }
       ]
     },
     {
@@ -1387,7 +1776,43 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_root_modifier_upgrade"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "hq",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "hand_size_modifier",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "hand_size",
+          "amount": -1
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_030_grubb",
@@ -1488,7 +1913,37 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1912-smokes.json#runner_v1912_hidden_zone_counter"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "expose_info",
+          "timing": "successful_run",
+          "scope": "server",
+          "resource": "cards",
+          "target": "persistent_expose",
+          "repeatable": true
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "after_successful_run",
+          "targetType": "server",
+          "purpose": "place_persistent_fort_expose",
+          "hiddenInfoPolicy": "legal_targets_only",
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_033_imp",
@@ -1516,10 +1971,28 @@
         "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "medium",
-        "needsHumanReview": true,
+        "needsHumanReview": false,
         "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
-      }
+      },
+      "effects": [
+        {
+          "kind": "program_host",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 2,
+          "target": "program"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "installed_program",
+          "resource": "strength",
+          "amount": -1,
+          "target": "hosted_icebreaker"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_034_incubator",
@@ -1553,7 +2026,50 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v191-v194-smokes.json#runner_v191_counter_random_and_scaling_programs"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "server",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "start_of_turn",
+          "scope": "corp",
+          "resource": "counters",
+          "target": "counter_amplification"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "start_of_turn",
+          "scope": "corp",
+          "resource": "counters",
+          "target": "random_payload"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_035_invisibility",
@@ -1594,9 +2110,13 @@
           "target": "icebreaker"
         }
       ],
-      "strategicRole": [
-        "support_tool"
-      ]
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_036_jackhammer",
@@ -1730,11 +2250,43 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "program_trash_prevention",
+          "timing": "prevention_window",
+          "scope": "installed_program",
+          "target": "program"
+        },
+        {
+          "kind": "program_trash_prevention",
+          "timing": "prevention_window",
+          "scope": "installed_program",
+          "target": "self_bounce"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "replacement_target",
+          "timing": "prevention_window",
+          "targetType": "program",
+          "purpose": "prevent_program_trash",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [
+            "trash_prevention_high_value_program"
+          ],
+          "avoid": [
+            "low_value_program"
+          ]
+        }
+      ]
     },
     {
       "cardId": "onr_v1_039_krash",
@@ -1901,6 +2453,14 @@
           "timing": "on_access",
           "scope": "rnd",
           "repeatable": true
+        },
+        {
+          "kind": "topdeck_info",
+          "timing": "on_access",
+          "scope": "rnd",
+          "resource": "cards",
+          "target": "reorder",
+          "repeatable": true
         }
       ],
       "conditions": [
@@ -1918,7 +2478,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
       },
       "strategicRole": [
@@ -1958,11 +2518,35 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "expose_info",
+          "timing": "action",
+          "scope": "installed_card",
+          "resource": "cards",
+          "target": "installed_card"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "paid_action",
+          "targetType": "card",
+          "purpose": "expose_installed_card",
+          "hiddenInfoPolicy": "legal_targets_only",
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ]
     },
     {
       "cardId": "onr_v1_043_mystery-box",
@@ -1998,12 +2582,21 @@
         {
           "kind": "search",
           "timing": "during_run",
-          "scope": "runner"
+          "scope": "runner",
+          "target": "program"
+        },
+        {
+          "kind": "install",
+          "timing": "during_run",
+          "scope": "stack",
+          "target": "stack_top_program"
         },
         {
           "kind": "install_discount",
           "timing": "during_run",
-          "scope": "installed_card"
+          "scope": "runner",
+          "resource": "credits",
+          "target": "program_install"
         }
       ],
       "conditions": [
@@ -2031,7 +2624,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
       }
     },
@@ -2064,7 +2657,41 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "successful_run",
+          "scope": "server",
+          "target": "reverse_fort"
+        },
+        {
+          "kind": "future_run_effect",
+          "timing": "successful_run",
+          "scope": "server",
+          "target": "reorder_fort"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "after_successful_run",
+          "targetType": "server",
+          "purpose": "reverse_fort_ice_order",
+          "hiddenInfoPolicy": "legal_targets_only",
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_045_newsgroup-filter",
@@ -2102,7 +2729,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -2113,6 +2740,13 @@
           "resource": "credits",
           "amount": 2,
           "repeatable": true
+        },
+        {
+          "kind": "action_economy",
+          "timing": "action",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 2
         }
       ],
       "costProfile": {
@@ -2161,6 +2795,29 @@
           "scope": "ice",
           "resource": "strength",
           "amount": 1
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "server",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "successful_run",
+          "scope": "ice",
+          "resource": "strength",
+          "amount": -1,
+          "target": "virus_counter"
         }
       ],
       "conditions": [
@@ -2168,14 +2825,11 @@
           "kind": "requires_successful_run"
         }
       ],
-      "strategicRole": [
-        "support_tool"
-      ],
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
@@ -2196,6 +2850,20 @@
           "avoid": [
             "irrelevant_server_ice",
             "already_cheap_to_break"
+          ]
+        },
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "after_successful_run",
+          "targetType": "installed_ice",
+          "purpose": "place_strength_reduction_counter_on_fully_broken_ice",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [
+            "current_encounter_ice"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
           ]
         }
       ]
@@ -2304,12 +2972,21 @@
       ],
       "effects": [
         {
-          "kind": "trash_credit",
+          "kind": "recurring_economy",
           "timing": "persistent",
           "scope": "runner",
+          "resource": "credits",
+          "amount": 2,
+          "repeatable": true,
+          "target": "trash_cost"
+        },
+        {
+          "kind": "trash_credit",
+          "timing": "on_access",
+          "scope": "accessed_card",
           "resource": "trash_credits",
           "amount": 2,
-          "repeatable": true
+          "target": "node"
         }
       ],
       "costProfile": {
@@ -2318,21 +2995,15 @@
         "reserveRisk": "low",
         "opportunityCost": "low"
       },
-      "lineSupport": [
-        "runner.remote_trash"
-      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
-      },
-      "strategicRole": [
-        "support_tool"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_049_pox",
@@ -2366,7 +3037,44 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_program_pressure_modifiers"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "server",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "remote_tax",
+          "timing": "persistent",
+          "scope": "server",
+          "resource": "credits",
+          "amount": 1,
+          "target": "install_tax"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_050_r-and-d-protocol-files",
@@ -2406,7 +3114,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -2422,6 +3130,20 @@
           "resource": "cards",
           "amount": 5,
           "repeatable": true
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "action",
+          "scope": "rnd",
+          "target": "rnd_scout_run"
+        },
+        {
+          "kind": "topdeck_info",
+          "timing": "action",
+          "scope": "rnd",
+          "resource": "cards",
+          "amount": 5,
+          "target": "top_cards"
         }
       ],
       "conditions": [
@@ -2467,12 +3189,23 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
       ],
-      "lineSupport": [
-        "runner.survival_defense"
+      "effects": [
+        {
+          "kind": "link_penalty",
+          "timing": "trace_window",
+          "scope": "trace",
+          "resource": "link",
+          "amount": -1
+        }
       ],
-      "strategicRole": [
-        "defensive_tool"
-      ]
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex",
+        "strategyCovered": false
+      }
     },
     {
       "cardId": "onr_v1_052_raffles",
@@ -2811,12 +3544,21 @@
       ],
       "effects": [
         {
-          "kind": "trash_credit",
+          "kind": "recurring_economy",
           "timing": "persistent",
           "scope": "runner",
+          "resource": "credits",
+          "amount": 2,
+          "repeatable": true,
+          "target": "trash_cost"
+        },
+        {
+          "kind": "trash_credit",
+          "timing": "on_access",
+          "scope": "accessed_card",
           "resource": "trash_credits",
           "amount": 2,
-          "repeatable": true
+          "target": "upgrade"
         }
       ],
       "costProfile": {
@@ -2825,21 +3567,15 @@
         "reserveRisk": "low",
         "opportunityCost": "low"
       },
-      "lineSupport": [
-        "runner.remote_trash"
-      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
-      },
-      "strategicRole": [
-        "support_tool"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_058_seeya",
@@ -2874,11 +3610,35 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "expose_info",
+          "timing": "action",
+          "scope": "installed_card",
+          "resource": "cards",
+          "target": "installed_card"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "paid_action",
+          "targetType": "card",
+          "purpose": "expose_installed_card",
+          "hiddenInfoPolicy": "legal_targets_only",
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ]
     },
     {
       "cardId": "onr_v1_059_self-modifying-code",
@@ -2919,14 +3679,21 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
       },
       "effects": [
         {
           "kind": "search",
           "timing": "during_run",
-          "scope": "runner"
+          "scope": "runner",
+          "target": "program"
+        },
+        {
+          "kind": "install",
+          "timing": "during_run",
+          "scope": "runner",
+          "target": "program"
         }
       ],
       "conditions": [
@@ -3049,16 +3816,28 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
+      "effects": [
+        {
+          "kind": "damage_prevention",
+          "timing": "prevention_window",
+          "scope": "runner",
+          "resource": "damage",
+          "amount": 2
+        },
+        {
+          "kind": "net_damage_prevention",
+          "timing": "prevention_window",
+          "scope": "runner",
+          "resource": "net_damage",
+          "amount": 2
+        }
       ]
     },
     {
@@ -3085,7 +3864,34 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1915-smokes.json#runner_v1915_run_access_tools"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "access_replacement",
+          "timing": "successful_run",
+          "scope": "archives",
+          "target": "hq_via_archives"
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "successful_run",
+          "scope": "archives",
+          "target": "central_access_conversion"
+        }
+      ],
+      "lineSupport": [
+        "runner.hq_pressure"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_063_signpost",
@@ -3116,12 +3922,24 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_trace_link_tools"
       ],
-      "lineSupport": [
-        "runner.survival_defense"
+      "effects": [
+        {
+          "kind": "link",
+          "timing": "trace_window",
+          "scope": "trace",
+          "resource": "link",
+          "amount": 2,
+          "target": "trace_boost"
+        }
       ],
-      "strategicRole": [
-        "defensive_tool"
-      ]
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex",
+        "strategyCovered": false
+      }
     },
     {
       "cardId": "onr_v1_064_skivviss",
@@ -3153,7 +3971,43 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1912-smokes.json#runner_v1912_counter_recurring"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "rnd",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "draw",
+          "timing": "start_of_turn",
+          "scope": "corp",
+          "resource": "cards",
+          "target": "draw_pressure"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_065_smarteye",
@@ -3181,7 +4035,45 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1915-smokes.json#runner_v1915_run_access_tools"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "expose_info",
+          "timing": "during_ice_encounter",
+          "scope": "ice",
+          "resource": "cards",
+          "target": "approach_ice"
+        },
+        {
+          "kind": "future_run_effect",
+          "timing": "during_ice_encounter",
+          "scope": "run_path",
+          "target": "safe_jackout"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "during_ice_encounter",
+          "targetType": "installed_ice",
+          "purpose": "expose_approached_unrezzed_ice",
+          "hiddenInfoPolicy": "legal_targets_only",
+          "preferences": [
+            "current_encounter_ice"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_066_snowball",
@@ -3256,7 +4148,22 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
-      ]
+      ],
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "on_rez",
+          "scope": "run_path",
+          "target": "jackout_vs_node_upgrade"
+        }
+      ],
+      "quality": {
+        "hintReviewed": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_068_startup-immolator",
@@ -3293,6 +4200,12 @@
           "kind": "program_trash",
           "timing": "during_run",
           "scope": "ice"
+        },
+        {
+          "kind": "ice_trash",
+          "timing": "encounter",
+          "scope": "ice",
+          "target": "post_full_break"
         }
       ],
       "conditions": [
@@ -3311,9 +4224,25 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
-      }
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "during_ice_encounter",
+          "targetType": "installed_ice",
+          "purpose": "trash_fully_broken_ice",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [
+            "current_encounter_ice"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ]
     },
     {
       "cardId": "onr_v1_069_succubus",
@@ -3351,10 +4280,20 @@
         "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "medium",
-        "needsHumanReview": true,
+        "needsHumanReview": false,
         "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
-      }
+      },
+      "effects": [
+        {
+          "kind": "program_host",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 3,
+          "target": "program"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_070_tinweasel",
@@ -3449,9 +4388,9 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -3469,10 +4408,7 @@
         "memory": 1,
         "reserveRisk": "low",
         "opportunityCost": "low"
-      },
-      "strategicRole": [
-        "support_tool"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_072_wild-card",
@@ -3698,7 +4634,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-01",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -3711,10 +4647,21 @@
           "repeatable": true
         },
         {
-          "kind": "trash_credit",
-          "resource": "trash_credits",
+          "kind": "recurring_economy",
+          "timing": "persistent",
           "scope": "runner",
-          "timing": "persistent"
+          "resource": "credits",
+          "amount": 2,
+          "repeatable": true,
+          "target": "program_install"
+        },
+        {
+          "kind": "install_discount",
+          "timing": "install",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 2,
+          "target": "program_install"
         }
       ],
       "costProfile": {
@@ -20293,11 +21240,49 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "rnd",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "counters",
+          "target": "install_punish"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "counters",
+          "target": "random_payload"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_079_big-frackin-gun",
@@ -20513,11 +21498,62 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "hq",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "on_access",
+          "scope": "hq",
+          "resource": "cards",
+          "target": "free_trash"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "on_access",
+          "scope": "hq",
+          "resource": "cards",
+          "target": "trash_untrashable"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "on_access",
+          "scope": "hq",
+          "resource": "cards",
+          "target": "access_trash_pressure"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ],
+      "lineSupport": [
+        "runner.hq_pressure"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ]
     },
     {
       "cardId": "onr_proteus_085_disintegrator",
@@ -20541,11 +21577,43 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "rez",
+          "timing": "encounter",
+          "scope": "ice",
+          "target": "derez"
+        },
+        {
+          "kind": "future_run_effect",
+          "timing": "encounter",
+          "scope": "run_path",
+          "target": "ends_run_after_effect"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "during_ice_encounter",
+          "targetType": "installed_ice",
+          "purpose": "derez_fully_broken_ice",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [
+            "current_encounter_ice"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_086_enterprise-inc-shields",
@@ -20571,16 +21639,35 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
+      "effects": [
+        {
+          "kind": "damage_prevention",
+          "timing": "prevention_window",
+          "scope": "runner",
+          "resource": "damage",
+          "amount": 2
+        },
+        {
+          "kind": "net_damage_prevention",
+          "timing": "prevention_window",
+          "scope": "runner",
+          "resource": "net_damage",
+          "amount": 2
+        },
+        {
+          "kind": "brain_damage_prevention",
+          "timing": "prevention_window",
+          "scope": "runner",
+          "resource": "brain_damage",
+          "amount": 1
+        }
       ]
     },
     {
@@ -20704,11 +21791,62 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "rnd",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "on_access",
+          "scope": "rnd",
+          "resource": "cards",
+          "target": "free_trash"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "on_access",
+          "scope": "rnd",
+          "resource": "cards",
+          "target": "trash_untrashable"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "on_access",
+          "scope": "rnd",
+          "resource": "cards",
+          "target": "access_trash_pressure"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ],
+      "lineSupport": [
+        "runner.rnd_pressure"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ]
     },
     {
       "cardId": "onr_proteus_090_highlighter",
@@ -20732,11 +21870,49 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "rnd",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "multiaccess",
+          "timing": "on_access",
+          "scope": "rnd",
+          "resource": "cards",
+          "amount": 1,
+          "repeatable": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ],
+      "lineSupport": [
+        "runner.rnd_pressure"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ]
     },
     {
       "cardId": "onr_proteus_091_lockjaw",
@@ -20784,9 +21960,6 @@
         {
           "kind": "requires_encounter"
         }
-      ],
-      "strategicRole": [
-        "support_tool"
       ],
       "targetProfiles": [
         {
@@ -20942,11 +22115,49 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "hq",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "start_of_turn",
+          "scope": "corp",
+          "resource": "counters",
+          "target": "bad_publicity_pressure"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "start_of_turn",
+          "scope": "corp",
+          "resource": "counters",
+          "target": "random_payload"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_095_skeleton-passkeys",
@@ -21004,16 +22215,32 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
+      "effects": [
+        {
+          "kind": "damage_prevention",
+          "timing": "prevention_window",
+          "scope": "runner",
+          "resource": "damage"
+        },
+        {
+          "kind": "net_damage_prevention",
+          "timing": "prevention_window",
+          "scope": "runner",
+          "resource": "net_damage"
+        },
+        {
+          "kind": "brain_damage_prevention",
+          "timing": "prevention_window",
+          "scope": "runner",
+          "resource": "brain_damage"
+        }
       ]
     },
     {
@@ -21038,11 +22265,43 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "hq",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "counter_economy",
+          "timing": "start_of_turn",
+          "scope": "corp",
+          "resource": "credits",
+          "amount": -1,
+          "target": "corp_credit_loss"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_098_vienna-22",
@@ -21066,11 +22325,49 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "hq",
+          "resource": "counters",
+          "target": "virus"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "multiaccess",
+          "timing": "on_access",
+          "scope": "hq",
+          "resource": "cards",
+          "amount": 1,
+          "repeatable": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ],
+      "lineSupport": [
+        "runner.hq_pressure"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ]
     },
     {
       "cardId": "onr_proteus_099_viral-pipeline",
@@ -21094,11 +22391,43 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-01",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "successful_run",
+          "scope": "server",
+          "resource": "counters",
+          "target": "virus_multi_central"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": 3,
+          "target": "virus_purge"
+        },
+        {
+          "kind": "action_penalty",
+          "timing": "start_of_turn",
+          "scope": "corp",
+          "resource": "actions",
+          "amount": -1,
+          "target": "action_denial"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_100_wrecking-ball",

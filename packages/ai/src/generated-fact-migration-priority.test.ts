@@ -96,7 +96,7 @@ describe("generated fact migration priority report", () => {
     expect(
       report.cards
         .filter((card) => card.recommendedMigrationBatch === 6)
-        .some((card) => card.monolithFields.length === 0),
+        .every((card) => card.monolithFields.length > 0),
     ).toBe(true);
     expect(
       report.cards

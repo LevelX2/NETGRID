@@ -71,8 +71,8 @@ describe("derived basic facts gate report", () => {
     expect(report.pilotCardCount).toBe(193);
     expect(report.implementationFoundCount).toBe(193);
     expect(report.cardsWithDerivedFacts).toBe(193);
-    expect(report.cardsWithManualOntologyOverlap).toBe(106);
-    expect(report.cardsNeedingManualOverlay).toBe(125);
+    expect(report.cardsWithManualOntologyOverlap).toBe(119);
+    expect(report.cardsNeedingManualOverlay).toBe(126);
     expect(report.cards.every((card) => card.implementationFound)).toBe(true);
     expect(
       report.cards.every(
@@ -115,8 +115,10 @@ describe("derived basic facts gate report", () => {
         shuffleAfter: true,
       }),
     );
-    expect(selfModifyingCode.missingManualOverlay).toEqual([]);
-    expect(selfModifyingCode.descriptorGaps).toEqual([]);
+    expect(selfModifyingCode.missingManualOverlay).toEqual(["effect:install"]);
+    expect(selfModifyingCode.descriptorGaps).toEqual([
+      "Manual ontology contains fields not currently derivable.",
+    ]);
 
     const mysteryBox = cardById(report, "onr_v1_043_mystery-box");
     expect(mysteryBox.derivedFacts.targetProfiles).toContainEqual(
@@ -142,7 +144,9 @@ describe("derived basic facts gate report", () => {
       }),
     );
     expect(japaneseWaterTorture.descriptorGaps).toEqual([]);
-    expect(mysteryBox.descriptorGaps).toEqual([]);
+    expect(mysteryBox.descriptorGaps).toEqual([
+      "Manual ontology contains fields not currently derivable.",
+    ]);
 
     const viral15 = cardById(report, "onr_v1_276_viral-15");
     expect(viral15.derivedFacts.effects).toContainEqual(

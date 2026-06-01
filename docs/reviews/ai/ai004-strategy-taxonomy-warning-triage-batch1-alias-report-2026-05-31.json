@@ -12,20 +12,20 @@
     "totals": {
       "roles": 251,
       "planRoles": 102,
-      "lineSupport": 15,
-      "allValues": 368
+      "lineSupport": 14,
+      "allValues": 367
     },
     "categoryCounts": {
       "alias_to_strategy_goal": 75,
       "deferred_requires_human_review": 1,
       "descriptor_gap": 10,
-      "exact_strategy_goal": 15,
+      "exact_strategy_goal": 14,
       "function_signal_only": 219,
       "legacy_role_only": 47,
       "remove_or_deprecate": 1
     },
     "mappedCounts": {
-      "exactStrategyGoal": 15,
+      "exactStrategyGoal": 14,
       "aliasToStrategyGoal": 75,
       "functionSignalOnly": 219,
       "legacyRoleOnly": 47,
@@ -36,20 +36,20 @@
   "totals": {
     "roles": 251,
     "planRoles": 102,
-    "lineSupport": 15,
-    "allValues": 368
+    "lineSupport": 14,
+    "allValues": 367
   },
   "categoryCounts": {
     "alias_to_strategy_goal": 75,
     "deferred_requires_human_review": 1,
     "descriptor_gap": 10,
-    "exact_strategy_goal": 15,
+    "exact_strategy_goal": 14,
     "function_signal_only": 219,
     "legacy_role_only": 47,
     "remove_or_deprecate": 1
   },
   "mappedCounts": {
-    "exactStrategyGoal": 15,
+    "exactStrategyGoal": 14,
     "aliasToStrategyGoal": 75,
     "functionSignalOnly": 219,
     "legacyRoleOnly": 47,
@@ -83,7 +83,7 @@
     },
     {
       "value": "program",
-      "count": 92,
+      "count": 93,
       "mappingCategory": "legacy_role_only",
       "triageCategory": "legacy_role_only",
       "triageSource": "classifier",
@@ -92,12 +92,12 @@
       "examples": [
         "onr_v1_001_afreet",
         "onr_v1_002_ai-boon",
+        "onr_v1_003_baedekers-net-map",
         "onr_v1_004_bakdoor",
         "onr_v1_005_bartmoss-memorial-icebreaker",
         "onr_v1_007_blink",
         "onr_v1_008_boardwalk",
-        "onr_v1_009_butcher-boy",
-        "onr_v1_010_cascade"
+        "onr_v1_009_butcher-boy"
       ]
     },
     {
@@ -313,21 +313,21 @@
     },
     {
       "value": "hardware",
-      "count": 35,
+      "count": 34,
       "mappingCategory": "legacy_role_only",
       "triageCategory": "legacy_role_only",
       "triageSource": "classifier",
       "mapsTo": [],
       "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal.",
       "examples": [
-        "onr_v1_003_baedekers-net-map",
         "onr_v1_119_arasaka-portable-prototype",
         "onr_v1_120_armadillo-armored-road-home",
         "onr_v1_121_armored-fridge",
         "onr_v1_122_artemis-2020",
         "onr_v1_123_bodyweight-data-creche",
         "onr_v1_124_corolla-speed-chip",
-        "onr_v1_125_dermatech-bodyplating"
+        "onr_v1_125_dermatech-bodyplating",
+        "onr_v1_126_drifter-mobile-environment"
       ]
     },
     {
@@ -5253,27 +5253,6 @@
       ]
     },
     {
-      "value": "runner.survival_defense",
-      "count": 42,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.survival_defense"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_003_baedekers-net-map",
-        "onr_v1_004_bakdoor",
-        "onr_v1_022_emergency-self-construct",
-        "onr_v1_023_evil-twin",
-        "onr_v1_028_force-shield",
-        "onr_v1_051_rabbit",
-        "onr_v1_061_shield",
-        "onr_v1_063_signpost"
-      ]
-    },
-    {
       "value": "corp.tag_trace_punish",
       "count": 35,
       "mappingCategory": "exact_strategy_goal",
@@ -5292,6 +5271,27 @@
         "onr_v1_228_cinderella",
         "onr_v1_236_data-raven",
         "onr_v1_243_fetch-4-0-1"
+      ]
+    },
+    {
+      "value": "runner.survival_defense",
+      "count": 34,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "runner.survival_defense"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_022_emergency-self-construct",
+        "onr_v1_023_evil-twin",
+        "onr_v1_078_arasaka-owns-you",
+        "onr_v1_116_total-genetic-retrofit",
+        "onr_v1_120_armadillo-armored-road-home",
+        "onr_v1_121_armored-fridge",
+        "onr_v1_125_dermatech-bodyplating",
+        "onr_v1_127_full-body-conversion"
       ]
     },
     {
@@ -5379,6 +5379,48 @@
       ]
     },
     {
+      "value": "runner.hq_pressure",
+      "count": 8,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "runner.hq_pressure"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_008_boardwalk",
+        "onr_v1_024_expert-schedule-analyzer",
+        "onr_v1_062_shredder-uplink-protocol",
+        "onr_v1_084_edited-shipping-manifests",
+        "onr_v1_085_executive-wiretaps",
+        "onr_proteus_084_crumble",
+        "onr_proteus_098_vienna-22",
+        "onr_proteus_101_all-hands"
+      ]
+    },
+    {
+      "value": "runner.rnd_pressure",
+      "count": 8,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "runner.rnd_pressure"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_017_deep-thought",
+        "onr_v1_041_microtech-ai-interface",
+        "onr_v1_050_r-and-d-protocol-files",
+        "onr_v1_081_custodial-position",
+        "onr_v1_096_kilroy-was-here",
+        "onr_proteus_089_garbage-in",
+        "onr_proteus_090_highlighter",
+        "onr_proteus_122_rush-hour"
+      ]
+    },
+    {
       "value": "corp.fast_advance",
       "count": 7,
       "mappingCategory": "exact_strategy_goal",
@@ -5437,25 +5479,6 @@
       ]
     },
     {
-      "value": "runner.rnd_pressure",
-      "count": 6,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.rnd_pressure"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_017_deep-thought",
-        "onr_v1_041_microtech-ai-interface",
-        "onr_v1_050_r-and-d-protocol-files",
-        "onr_v1_081_custodial-position",
-        "onr_v1_096_kilroy-was-here",
-        "onr_proteus_122_rush-hour"
-      ]
-    },
-    {
       "value": "runner.search.breaker",
       "count": 6,
       "mappingCategory": "exact_strategy_goal",
@@ -5472,39 +5495,6 @@
         "onr_v1_110_sneak-preview",
         "onr_v1_114_temple-microcode-outlet",
         "onr_proteus_128_airport-locker"
-      ]
-    },
-    {
-      "value": "runner.hq_pressure",
-      "count": 5,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.hq_pressure"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_008_boardwalk",
-        "onr_v1_024_expert-schedule-analyzer",
-        "onr_v1_084_edited-shipping-manifests",
-        "onr_v1_085_executive-wiretaps",
-        "onr_proteus_101_all-hands"
-      ]
-    },
-    {
-      "value": "runner.remote_trash",
-      "count": 2,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.remote_trash"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_048_poltergeist",
-        "onr_v1_057_scatter-shot"
       ]
     },
     {

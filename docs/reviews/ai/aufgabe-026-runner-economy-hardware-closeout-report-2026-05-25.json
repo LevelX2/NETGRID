@@ -17,11 +17,11 @@
   "includedCardCount": 18,
   "excludedCardCount": 17,
   "confirmedGeneratedFactCount": 45,
-  "previewAddedFactCount": 31,
+  "previewAddedFactCount": 30,
   "hardErrorCount": 0,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 34,
+  "normalizedDifferenceCount": 33,
   "remainingDifferenceCount": 0,
   "paymentContextInfoCount": 3,
   "actionContextInfoCount": 1,
@@ -29,7 +29,7 @@
   "handSizeContextInfoCount": 2,
   "hiddenZoneContextInfoCount": 8,
   "delayedPenaltyContextInfoCount": 1,
-  "descriptorFollowupCount": 22,
+  "descriptorFollowupCount": 21,
   "readiness": "ready_read_only_split_subbatches",
   "subBatchReadiness": {
     "runner_action_economy": {
@@ -71,7 +71,7 @@
   },
   "normalizationRuleCounts": {
     "hidden_zone_context_normalization": 4,
-    "runner_action_economy_normalization": 3,
+    "runner_action_economy_normalization": 2,
     "runner_economy_strategy_overlay_split": 12,
     "runner_finite_pool_economy_normalization": 2,
     "runner_hand_size_normalization": 2,
@@ -120,14 +120,8 @@
       "cardType": "program",
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/programs/newsgroup-filter.ts",
       "generatedFactsConfirmed": ["effect:action_economy", "effect:economy"],
-      "previewAdds": ["effect:action_economy"],
-      "normalizedDifferences": [
-        {
-          "kind": "effect:action_economy",
-          "rule": "runner_action_economy_normalization",
-          "status": "normalized"
-        }
-      ],
+      "previewAdds": [],
+      "normalizedDifferences": [],
       "paymentContextInfos": [
         {
           "kind": "payment_context_info",
@@ -140,11 +134,9 @@
       "handSizeContextInfos": [],
       "hiddenZoneContextInfos": [],
       "delayedPenaltyContextInfos": [],
-      "descriptorFollowups": [
-        "Generated facts contain fields not currently mirrored manually."
-      ],
+      "descriptorFollowups": [],
       "remainingIssues": [],
-      "readiness": "ready_read_only_with_context_followup"
+      "readiness": "ready_read_only_with_payment_memory_context"
     },
     {
       "cardId": "onr_v1_087_forgotten-backup-chip",

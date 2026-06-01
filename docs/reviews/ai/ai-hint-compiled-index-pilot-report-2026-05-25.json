@@ -15,17 +15,17 @@
   "overlayCardCount": 6,
   "cardsWithoutOverlay": 187,
   "hardErrorCount": 0,
-  "warningCount": 643,
+  "warningCount": 657,
   "warningCountsByKind": {
-    "active_monolith_mechanical_duplication": 197,
+    "active_monolith_mechanical_duplication": 212,
     "generated_fact_missing_from_active_monolith": 318,
     "manual_overlay_strategy_field_missing_from_active": 6,
-    "overlay_missing_for_manual_gap": 122
+    "overlay_missing_for_manual_gap": 121
   },
   "warningClassificationCounts": {
     "generated_fact_absent_from_monolith": 318,
-    "manual_review_candidate": 122,
-    "monolith_mechanical_duplication_candidate": 197,
+    "manual_review_candidate": 121,
+    "monolith_mechanical_duplication_candidate": 212,
     "overlay_strategy_field_not_in_monolith": 6
   },
   "warningClassificationByCard": [
@@ -46,7 +46,8 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
       "info": []
     },
@@ -89,8 +90,9 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 2
       },
       "info": []
     },
@@ -119,8 +121,8 @@
     {
       "cardId": "onr_v1_017_deep-thought",
       "title": "Deep Thought",
-      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 1,
         "monolith_mechanical_duplication_candidate": 1,
@@ -146,7 +148,8 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
       "info": []
     },
@@ -168,7 +171,8 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
       "info": []
     },
@@ -179,20 +183,22 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
       "info": []
     },
     {
       "cardId": "onr_v1_032_i-spy",
       "title": "I Spy",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
-      "info": []
+      "info": ["info_no_overlay_needed"]
     },
     {
       "cardId": "onr_v1_037_japanese-water-torture",
@@ -213,7 +219,8 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
       "info": []
     },
@@ -254,19 +261,19 @@
     {
       "cardId": "onr_v1_042_mouse",
       "title": "Mouse",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 1,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 1
       },
-      "info": []
+      "info": ["info_no_overlay_needed"]
     },
     {
       "cardId": "onr_v1_043_mystery-box",
       "title": "Mystery Box",
-      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 3,
         "monolith_mechanical_duplication_candidate": 2,
@@ -277,14 +284,13 @@
     {
       "cardId": "onr_v1_045_newsgroup-filter",
       "title": "Newsgroup Filter",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 1,
-        "manual_review_candidate": 1,
         "monolith_mechanical_duplication_candidate": 1
       },
-      "info": []
+      "info": ["info_no_overlay_needed"]
     },
     {
       "cardId": "onr_v1_047_pile-driver",
@@ -300,13 +306,14 @@
     {
       "cardId": "onr_v1_048_poltergeist",
       "title": "Poltergeist",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1,
         "monolith_mechanical_duplication_candidate": 1
       },
-      "info": ["info_no_overlay_needed"]
+      "info": []
     },
     {
       "cardId": "onr_v1_050_r-and-d-protocol-files",
@@ -326,7 +333,8 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
       "info": []
     },
@@ -377,6 +385,18 @@
     {
       "cardId": "onr_v1_057_scatter-shot",
       "title": "Scatter Shot",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "warningClassificationCounts": {
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
+      },
+      "info": []
+    },
+    {
+      "cardId": "onr_v1_058_seeya",
+      "title": "SeeYa",
       "recommendedNextAction": "ready_for_generated_mechanical_fields",
       "migrationReadiness": "ready",
       "warningClassificationCounts": {
@@ -386,23 +406,12 @@
       "info": ["info_no_overlay_needed"]
     },
     {
-      "cardId": "onr_v1_058_seeya",
-      "title": "SeeYa",
+      "cardId": "onr_v1_059_self-modifying-code",
+      "title": "Self-Modifying Code",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 1,
-        "manual_review_candidate": 1
-      },
-      "info": []
-    },
-    {
-      "cardId": "onr_v1_059_self-modifying-code",
-      "title": "Self-Modifying Code",
-      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
-      "migrationReadiness": "ready",
-      "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 2,
+        "generated_fact_absent_from_monolith": 3,
         "monolith_mechanical_duplication_candidate": 2,
         "overlay_strategy_field_not_in_monolith": 1
       },
@@ -426,20 +435,22 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
       "info": []
     },
     {
       "cardId": "onr_v1_062_shredder-uplink-protocol",
       "title": "Shredder Uplink Protocol",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
-      "info": []
+      "info": ["info_no_overlay_needed"]
     },
     {
       "cardId": "onr_v1_063_signpost",
@@ -448,7 +459,8 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
       "info": []
     },
@@ -459,7 +471,8 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
       "info": []
     },
@@ -2200,7 +2213,7 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
@@ -2235,8 +2248,8 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "generatedOnlyFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
       "cardId": "onr_v1_014_codecracker",
@@ -2259,8 +2272,8 @@
     {
       "cardId": "onr_v1_017_deep-thought",
       "title": "Deep Thought",
-      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "generatedFields": ["effects"],
       "generatedOnlyFields": ["effects"],
       "duplicatedActiveMechanicalFields": ["effects"]
@@ -2281,7 +2294,7 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_023_evil-twin",
@@ -2299,7 +2312,7 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_028_force-shield",
@@ -2308,16 +2321,16 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_032_i-spy",
       "title": "I Spy",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_037_japanese-water-torture",
@@ -2335,7 +2348,7 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_039_krash",
@@ -2367,17 +2380,17 @@
     {
       "cardId": "onr_v1_042_mouse",
       "title": "Mouse",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "generatedFields": ["effects"],
       "generatedOnlyFields": ["effects"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_043_mystery-box",
       "title": "Mystery Box",
-      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects", "targetProfiles"],
       "generatedOnlyFields": ["effects", "conditions", "targetProfiles"],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"]
@@ -2385,8 +2398,8 @@
     {
       "cardId": "onr_v1_045_newsgroup-filter",
       "title": "Newsgroup Filter",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "generatedFields": ["effects"],
       "generatedOnlyFields": ["effects"],
       "duplicatedActiveMechanicalFields": ["effects"]
@@ -2403,8 +2416,8 @@
     {
       "cardId": "onr_v1_048_poltergeist",
       "title": "Poltergeist",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "generatedFields": ["effects"],
       "generatedOnlyFields": ["effects"],
       "duplicatedActiveMechanicalFields": ["effects"]
@@ -2425,7 +2438,7 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_052_raffles",
@@ -2466,8 +2479,8 @@
     {
       "cardId": "onr_v1_057_scatter-shot",
       "title": "Scatter Shot",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "generatedFields": ["effects"],
       "generatedOnlyFields": ["effects"],
       "duplicatedActiveMechanicalFields": ["effects"]
@@ -2475,19 +2488,19 @@
     {
       "cardId": "onr_v1_058_seeya",
       "title": "SeeYa",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "generatedFields": ["effects"],
       "generatedOnlyFields": ["effects"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_059_self-modifying-code",
       "title": "Self-Modifying Code",
-      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects", "targetProfiles"],
-      "generatedOnlyFields": ["conditions", "targetProfiles"],
+      "generatedOnlyFields": ["effects", "conditions", "targetProfiles"],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
@@ -2506,16 +2519,16 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_062_shredder-uplink-protocol",
       "title": "Shredder Uplink Protocol",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_063_signpost",
@@ -2524,7 +2537,7 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_065_smarteye",
@@ -2533,7 +2546,7 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_070_tinweasel",
@@ -3981,8 +3994,6 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_trace_attempt",
-        "effect:base_link",
-        "effect:link",
         "effect:trace_defense"
       ]
     },
@@ -3992,8 +4003,8 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
-        "condition:requires_successful_run",
-        "effect:hq_info"
+        "effect:delayed_penalty",
+        "effect:persistent_counter_effect"
       ]
     },
     {
@@ -4004,13 +4015,7 @@
       "missingManualOverlay": [
         "condition:requires_flatline",
         "condition:requires_prevention_window",
-        "effect:action_penalty",
-        "effect:flatline_prevention",
-        "effect:hand_size_modifier",
-        "effect:meat_damage_prevention",
-        "effect:persistent_survival_modifier",
-        "effect:prevention_replacement",
-        "effect:remove_brain_damage"
+        "effect:prevention_replacement"
       ]
     },
     {
@@ -4036,10 +4041,7 @@
       "title": "Expert Schedule Analyzer",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_accessed_card",
-        "effect:hq_info"
-      ]
+      "missingManualOverlay": ["condition:requires_accessed_card"]
     },
     {
       "cardId": "onr_v1_028_force-shield",
@@ -4051,20 +4053,7 @@
         "condition:requires_damage",
         "condition:requires_net_damage",
         "condition:requires_prevention_window",
-        "condition:requires_turn_limit_available",
-        "effect:brain_damage_prevention",
-        "effect:damage_prevention",
-        "effect:net_damage_prevention"
-      ]
-    },
-    {
-      "cardId": "onr_v1_032_i-spy",
-      "title": "I Spy",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_successful_run",
-        "effect:expose_info"
+        "condition:requires_turn_limit_available"
       ]
     },
     {
@@ -4075,8 +4064,7 @@
       "missingManualOverlay": [
         "condition:requires_installed_program",
         "condition:requires_prevention_window",
-        "condition:requires_program_trash",
-        "effect:program_trash_prevention"
+        "condition:requires_program_trash"
       ]
     },
     {
@@ -4090,18 +4078,11 @@
       ]
     },
     {
-      "cardId": "onr_v1_042_mouse",
-      "title": "Mouse",
+      "cardId": "onr_v1_048_poltergeist",
+      "title": "Poltergeist",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["effect:expose_info"]
-    },
-    {
-      "cardId": "onr_v1_045_newsgroup-filter",
-      "title": "Newsgroup Filter",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["effect:action_economy"]
+      "missingManualOverlay": ["effect:recurring_economy"]
     },
     {
       "cardId": "onr_v1_051_rabbit",
@@ -4110,15 +4091,16 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_trace_attempt",
+        "effect:link_penalty",
         "effect:trace_defense"
       ]
     },
     {
-      "cardId": "onr_v1_058_seeya",
-      "title": "SeeYa",
+      "cardId": "onr_v1_057_scatter-shot",
+      "title": "Scatter Shot",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["effect:expose_info"]
+      "missingManualOverlay": ["effect:recurring_economy"]
     },
     {
       "cardId": "onr_v1_061_shield",
@@ -4129,19 +4111,7 @@
         "condition:requires_damage",
         "condition:requires_net_damage",
         "condition:requires_prevention_window",
-        "condition:requires_turn_limit_available",
-        "effect:damage_prevention",
-        "effect:net_damage_prevention"
-      ]
-    },
-    {
-      "cardId": "onr_v1_062_shredder-uplink-protocol",
-      "title": "Shredder Uplink Protocol",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_successful_run",
-        "effect:access_replacement"
+        "condition:requires_turn_limit_available"
       ]
     },
     {
@@ -4151,7 +4121,6 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_trace_attempt",
-        "effect:link",
         "effect:trace_defense"
       ]
     },
@@ -4162,7 +4131,7 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_during_run",
-        "effect:expose_info"
+        "effect:future_run_effect"
       ]
     },
     {
@@ -5429,8 +5398,8 @@
     {
       "cardId": "onr_v1_017_deep-thought",
       "title": "Deep Thought",
-      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "mechanicalFactsFromGenerated": ["effect:topdeck_info"]
     },
     {
@@ -5504,8 +5473,8 @@
     {
       "cardId": "onr_v1_032_i-spy",
       "title": "I Spy",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "mechanicalFactsFromGenerated": [
         "condition:requires_successful_run",
         "effect:expose_info"
@@ -5558,15 +5527,15 @@
     {
       "cardId": "onr_v1_042_mouse",
       "title": "Mouse",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "mechanicalFactsFromGenerated": ["effect:expose_info"]
     },
     {
       "cardId": "onr_v1_043_mystery-box",
       "title": "Mystery Box",
-      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "mechanicalFactsFromGenerated": [
         "condition:requires_during_run",
         "effect:install_discount",
@@ -5578,8 +5547,8 @@
     {
       "cardId": "onr_v1_045_newsgroup-filter",
       "title": "Newsgroup Filter",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "mechanicalFactsFromGenerated": [
         "effect:action_economy",
         "effect:economy"
@@ -5595,8 +5564,8 @@
     {
       "cardId": "onr_v1_048_poltergeist",
       "title": "Poltergeist",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "mechanicalFactsFromGenerated": ["effect:trash_credit"]
     },
     {
@@ -5651,22 +5620,22 @@
     {
       "cardId": "onr_v1_057_scatter-shot",
       "title": "Scatter Shot",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "mechanicalFactsFromGenerated": ["effect:trash_credit"]
     },
     {
       "cardId": "onr_v1_058_seeya",
       "title": "SeeYa",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "mechanicalFactsFromGenerated": ["effect:expose_info"]
     },
     {
       "cardId": "onr_v1_059_self-modifying-code",
       "title": "Self-Modifying Code",
-      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "mechanicalFactsFromGenerated": [
         "condition:requires_during_run",
         "effect:search",
@@ -5697,8 +5666,8 @@
     {
       "cardId": "onr_v1_062_shredder-uplink-protocol",
       "title": "Shredder Uplink Protocol",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "mechanicalFactsFromGenerated": [
         "condition:requires_successful_run",
         "effect:access_replacement"
@@ -7519,8 +7488,6 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_trace_attempt",
-        "effect:base_link",
-        "effect:link",
         "effect:trace_defense"
       ]
     },
@@ -7530,8 +7497,20 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
+        "effect:delayed_penalty",
+        "effect:persistent_counter_effect"
+      ]
+    },
+    {
+      "cardId": "onr_v1_017_deep-thought",
+      "title": "Deep Thought",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_rnd_pressure",
         "condition:requires_successful_run",
-        "effect:hq_info"
+        "effect:delayed_penalty",
+        "effect:persistent_counter_effect"
       ]
     },
     {
@@ -7542,13 +7521,7 @@
       "missingManualOverlay": [
         "condition:requires_flatline",
         "condition:requires_prevention_window",
-        "effect:action_penalty",
-        "effect:flatline_prevention",
-        "effect:hand_size_modifier",
-        "effect:meat_damage_prevention",
-        "effect:persistent_survival_modifier",
-        "effect:prevention_replacement",
-        "effect:remove_brain_damage"
+        "effect:prevention_replacement"
       ]
     },
     {
@@ -7574,10 +7547,7 @@
       "title": "Expert Schedule Analyzer",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_accessed_card",
-        "effect:hq_info"
-      ]
+      "missingManualOverlay": ["condition:requires_accessed_card"]
     },
     {
       "cardId": "onr_v1_028_force-shield",
@@ -7589,20 +7559,7 @@
         "condition:requires_damage",
         "condition:requires_net_damage",
         "condition:requires_prevention_window",
-        "condition:requires_turn_limit_available",
-        "effect:brain_damage_prevention",
-        "effect:damage_prevention",
-        "effect:net_damage_prevention"
-      ]
-    },
-    {
-      "cardId": "onr_v1_032_i-spy",
-      "title": "I Spy",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_successful_run",
-        "effect:expose_info"
+        "condition:requires_turn_limit_available"
       ]
     },
     {
@@ -7613,8 +7570,7 @@
       "missingManualOverlay": [
         "condition:requires_installed_program",
         "condition:requires_prevention_window",
-        "condition:requires_program_trash",
-        "effect:program_trash_prevention"
+        "condition:requires_program_trash"
       ]
     },
     {
@@ -7628,18 +7584,18 @@
       ]
     },
     {
-      "cardId": "onr_v1_042_mouse",
-      "title": "Mouse",
+      "cardId": "onr_v1_043_mystery-box",
+      "title": "Mystery Box",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["effect:expose_info"]
+      "missingManualOverlay": ["effect:install"]
     },
     {
-      "cardId": "onr_v1_045_newsgroup-filter",
-      "title": "Newsgroup Filter",
+      "cardId": "onr_v1_048_poltergeist",
+      "title": "Poltergeist",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["effect:action_economy"]
+      "missingManualOverlay": ["effect:recurring_economy"]
     },
     {
       "cardId": "onr_v1_051_rabbit",
@@ -7648,15 +7604,23 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_trace_attempt",
+        "effect:link_penalty",
         "effect:trace_defense"
       ]
     },
     {
-      "cardId": "onr_v1_058_seeya",
-      "title": "SeeYa",
+      "cardId": "onr_v1_057_scatter-shot",
+      "title": "Scatter Shot",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["effect:expose_info"]
+      "missingManualOverlay": ["effect:recurring_economy"]
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "title": "Self-Modifying Code",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["effect:install"]
     },
     {
       "cardId": "onr_v1_061_shield",
@@ -7667,19 +7631,7 @@
         "condition:requires_damage",
         "condition:requires_net_damage",
         "condition:requires_prevention_window",
-        "condition:requires_turn_limit_available",
-        "effect:damage_prevention",
-        "effect:net_damage_prevention"
-      ]
-    },
-    {
-      "cardId": "onr_v1_062_shredder-uplink-protocol",
-      "title": "Shredder Uplink Protocol",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_successful_run",
-        "effect:access_replacement"
+        "condition:requires_turn_limit_available"
       ]
     },
     {
@@ -7689,7 +7641,6 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_trace_attempt",
-        "effect:link",
         "effect:trace_defense"
       ]
     },
@@ -7700,7 +7651,7 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_during_run",
-        "effect:expose_info"
+        "effect:future_run_effect"
       ]
     },
     {
@@ -8900,7 +8851,7 @@
     }
   ],
   "infoCounts": {
-    "info_no_overlay_needed": 65,
+    "info_no_overlay_needed": 68,
     "info_overlay_present": 6
   },
   "cards": [
@@ -8991,8 +8942,6 @@
       "needsManualReview": true,
       "missingManualOverlay": [
         "condition:requires_trace_attempt",
-        "effect:base_link",
-        "effect:link",
         "effect:trace_defense"
       ],
       "compiledPreview": {
@@ -9047,19 +8996,26 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
-        "lineSupport",
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_004_bakdoor",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -9337,8 +9293,8 @@
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
       "missingManualOverlay": [
-        "condition:requires_successful_run",
-        "effect:hq_info"
+        "effect:delayed_penalty",
+        "effect:persistent_counter_effect"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_008_boardwalk",
@@ -9375,26 +9331,35 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
         "lineSupport",
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
         "strategicRole",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects", "conditions"],
+      "generatedOnlyFields": ["effects"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
           "cardId": "onr_v1_008_boardwalk",
           "field": "conditions"
+        },
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_008_boardwalk",
+          "field": "effects"
         },
         {
           "classification": "generated_fact_absent_from_monolith",
@@ -9594,10 +9559,12 @@
       "derivedFactsFound": true,
       "manualOverlayFound": true,
       "expectedManualOverlayNeeded": true,
-      "needsManualReview": false,
+      "needsManualReview": true,
       "missingManualOverlay": [
         "condition:requires_rnd_pressure",
-        "condition:requires_successful_run"
+        "condition:requires_successful_run",
+        "effect:delayed_penalty",
+        "effect:persistent_counter_effect"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_017_deep-thought",
@@ -9669,8 +9636,8 @@
           "field": "strategicNotes"
         }
       ],
-      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
-      "migrationReadiness": "ready"
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
     },
     {
       "cardId": "onr_v1_019_dropp",
@@ -9765,13 +9732,7 @@
       "missingManualOverlay": [
         "condition:requires_flatline",
         "condition:requires_prevention_window",
-        "effect:action_penalty",
-        "effect:flatline_prevention",
-        "effect:hand_size_modifier",
-        "effect:meat_damage_prevention",
-        "effect:persistent_survival_modifier",
-        "effect:prevention_replacement",
-        "effect:remove_brain_damage"
+        "effect:prevention_replacement"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_022_emergency-self-construct",
@@ -9865,9 +9826,10 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
         "lineSupport",
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
@@ -9878,6 +9840,14 @@
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_022_emergency-self-construct",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -10087,10 +10057,7 @@
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
-      "missingManualOverlay": [
-        "condition:requires_accessed_card",
-        "effect:hq_info"
-      ],
+      "missingManualOverlay": ["condition:requires_accessed_card"],
       "compiledPreview": {
         "cardId": "onr_v1_024_expert-schedule-analyzer",
         "side": "runner",
@@ -10122,9 +10089,10 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
         "lineSupport",
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
@@ -10135,6 +10103,14 @@
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_024_expert-schedule-analyzer",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -10177,10 +10153,7 @@
         "condition:requires_damage",
         "condition:requires_net_damage",
         "condition:requires_prevention_window",
-        "condition:requires_turn_limit_available",
-        "effect:brain_damage_prevention",
-        "effect:damage_prevention",
-        "effect:net_damage_prevention"
+        "condition:requires_turn_limit_available"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_028_force-shield",
@@ -10262,20 +10235,26 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_028_force-shield",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -10312,11 +10291,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": true,
-      "missingManualOverlay": [
-        "condition:requires_successful_run",
-        "effect:expose_info"
-      ],
+      "needsManualReview": false,
+      "missingManualOverlay": ["condition:requires_successful_run"],
       "compiledPreview": {
         "cardId": "onr_v1_032_i-spy",
         "side": "runner",
@@ -10347,17 +10323,27 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_032_i-spy",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -10382,8 +10368,8 @@
           "cardId": "onr_v1_032_i-spy"
         }
       ],
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review"
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
     },
     {
       "cardId": "onr_v1_037_japanese-water-torture",
@@ -10495,8 +10481,7 @@
       "missingManualOverlay": [
         "condition:requires_installed_program",
         "condition:requires_prevention_window",
-        "condition:requires_program_trash",
-        "effect:program_trash_prevention"
+        "condition:requires_program_trash"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_038_joan-of-arc",
@@ -10540,18 +10525,27 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_038_joan-of-arc",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -10857,8 +10851,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": true,
-      "missingManualOverlay": ["effect:expose_info"],
+      "needsManualReview": false,
+      "missingManualOverlay": [],
       "compiledPreview": {
         "cardId": "onr_v1_042_mouse",
         "side": "runner",
@@ -10879,12 +10873,13 @@
       "mechanicalFactsFromGenerated": ["effect:expose_info"],
       "generatedFields": ["effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -10892,23 +10887,24 @@
       "conflicts": [],
       "warnings": [
         {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_042_mouse",
+          "field": "effects"
+        },
+        {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
           "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_042_mouse",
           "field": "effects"
-        },
-        {
-          "classification": "manual_review_candidate",
-          "blocking": false,
-          "kind": "overlay_missing_for_manual_gap",
-          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-          "cardId": "onr_v1_042_mouse"
         }
       ],
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review"
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
     },
     {
       "cardId": "onr_v1_043_mystery-box",
@@ -10919,8 +10915,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": true,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": false,
-      "missingManualOverlay": [],
+      "needsManualReview": true,
+      "missingManualOverlay": ["effect:install"],
       "compiledPreview": {
         "cardId": "onr_v1_043_mystery-box",
         "side": "runner",
@@ -11055,8 +11051,8 @@
           "field": "manualNotes"
         }
       ],
-      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
-      "migrationReadiness": "ready"
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
     },
     {
       "cardId": "onr_v1_045_newsgroup-filter",
@@ -11067,8 +11063,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": true,
-      "missingManualOverlay": ["effect:action_economy"],
+      "needsManualReview": false,
+      "missingManualOverlay": [],
       "compiledPreview": {
         "cardId": "onr_v1_045_newsgroup-filter",
         "side": "runner",
@@ -11131,17 +11127,10 @@
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_045_newsgroup-filter",
           "field": "effects"
-        },
-        {
-          "classification": "manual_review_candidate",
-          "blocking": false,
-          "kind": "overlay_missing_for_manual_gap",
-          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-          "cardId": "onr_v1_045_newsgroup-filter"
         }
       ],
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review"
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
     },
     {
       "cardId": "onr_v1_047_pile-driver",
@@ -11240,8 +11229,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": false,
-      "missingManualOverlay": [],
+      "needsManualReview": true,
+      "missingManualOverlay": ["effect:recurring_economy"],
       "compiledPreview": {
         "cardId": "onr_v1_048_poltergeist",
         "side": "runner",
@@ -11271,12 +11260,10 @@
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -11298,10 +11285,17 @@
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_048_poltergeist",
           "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_048_poltergeist"
         }
       ],
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready"
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
     },
     {
       "cardId": "onr_v1_050_r-and-d-protocol-files",
@@ -11412,6 +11406,7 @@
       "needsManualReview": true,
       "missingManualOverlay": [
         "condition:requires_trace_attempt",
+        "effect:link_penalty",
         "effect:trace_defense"
       ],
       "compiledPreview": {
@@ -11446,19 +11441,26 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
-        "lineSupport",
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_051_rabbit",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -11823,8 +11825,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": false,
-      "missingManualOverlay": [],
+      "needsManualReview": true,
+      "missingManualOverlay": ["effect:recurring_economy"],
       "compiledPreview": {
         "cardId": "onr_v1_057_scatter-shot",
         "side": "runner",
@@ -11859,12 +11861,10 @@
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -11886,10 +11886,17 @@
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_057_scatter-shot",
           "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_057_scatter-shot"
         }
       ],
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready"
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
     },
     {
       "cardId": "onr_v1_058_seeya",
@@ -11900,8 +11907,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": true,
-      "missingManualOverlay": ["effect:expose_info"],
+      "needsManualReview": false,
+      "missingManualOverlay": [],
       "compiledPreview": {
         "cardId": "onr_v1_058_seeya",
         "side": "runner",
@@ -11922,12 +11929,13 @@
       "mechanicalFactsFromGenerated": ["effect:expose_info"],
       "generatedFields": ["effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -11935,23 +11943,24 @@
       "conflicts": [],
       "warnings": [
         {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_058_seeya",
+          "field": "effects"
+        },
+        {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
           "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_058_seeya",
           "field": "effects"
-        },
-        {
-          "classification": "manual_review_candidate",
-          "blocking": false,
-          "kind": "overlay_missing_for_manual_gap",
-          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-          "cardId": "onr_v1_058_seeya"
         }
       ],
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review"
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
     },
     {
       "cardId": "onr_v1_059_self-modifying-code",
@@ -11962,8 +11971,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": true,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": false,
-      "missingManualOverlay": [],
+      "needsManualReview": true,
+      "missingManualOverlay": ["effect:install"],
       "compiledPreview": {
         "cardId": "onr_v1_059_self-modifying-code",
         "side": "runner",
@@ -12025,7 +12034,7 @@
         "strategicRole",
         "valueHints"
       ],
-      "generatedOnlyFields": ["conditions", "targetProfiles"],
+      "generatedOnlyFields": ["effects", "conditions", "targetProfiles"],
       "overlayOnlyFields": ["manualNotes"],
       "conflicts": [],
       "warnings": [
@@ -12057,6 +12066,14 @@
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
           "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "cardId": "onr_v1_059_self-modifying-code",
+          "field": "effects"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field targetProfiles is absent from or differs from active monolith.",
           "cardId": "onr_v1_059_self-modifying-code",
           "field": "targetProfiles"
@@ -12070,8 +12087,8 @@
           "field": "manualNotes"
         }
       ],
-      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
-      "migrationReadiness": "ready"
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
     },
     {
       "cardId": "onr_v1_060_shaka",
@@ -12172,9 +12189,7 @@
         "condition:requires_damage",
         "condition:requires_net_damage",
         "condition:requires_prevention_window",
-        "condition:requires_turn_limit_available",
-        "effect:damage_prevention",
-        "effect:net_damage_prevention"
+        "condition:requires_turn_limit_available"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_061_shield",
@@ -12239,20 +12254,26 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_061_shield",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -12289,11 +12310,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": true,
-      "missingManualOverlay": [
-        "condition:requires_successful_run",
-        "effect:access_replacement"
-      ],
+      "needsManualReview": false,
+      "missingManualOverlay": ["condition:requires_successful_run"],
       "compiledPreview": {
         "cardId": "onr_v1_062_shredder-uplink-protocol",
         "side": "runner",
@@ -12324,17 +12342,28 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
+        "lineSupport",
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_062_shredder-uplink-protocol",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -12359,8 +12388,8 @@
           "cardId": "onr_v1_062_shredder-uplink-protocol"
         }
       ],
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review"
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
     },
     {
       "cardId": "onr_v1_063_signpost",
@@ -12374,7 +12403,6 @@
       "needsManualReview": true,
       "missingManualOverlay": [
         "condition:requires_trace_attempt",
-        "effect:link",
         "effect:trace_defense"
       ],
       "compiledPreview": {
@@ -12419,19 +12447,26 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
-        "lineSupport",
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_063_signpost",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -12471,7 +12506,7 @@
       "needsManualReview": true,
       "missingManualOverlay": [
         "condition:requires_during_run",
-        "effect:expose_info"
+        "effect:future_run_effect"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_065_smarteye",
@@ -12503,17 +12538,27 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_065_smarteye",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -28792,6 +28837,14 @@
       "field": "effects"
     },
     {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_004_bakdoor",
+      "field": "effects"
+    },
+    {
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
@@ -28887,12 +28940,20 @@
       "field": "breakerProfile"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
       "cardId": "onr_v1_008_boardwalk",
       "field": "conditions"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_008_boardwalk",
+      "field": "effects"
     },
     {
       "classification": "generated_fact_absent_from_monolith",
@@ -29006,6 +29067,14 @@
       "field": "breakerProfile"
     },
     {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_022_emergency-self-construct",
+      "field": "effects"
+    },
+    {
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
@@ -29060,6 +29129,14 @@
       "cardId": "onr_v1_023_evil-twin"
     },
     {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_024_expert-schedule-analyzer",
+      "field": "effects"
+    },
+    {
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
@@ -29083,6 +29160,14 @@
       "cardId": "onr_v1_024_expert-schedule-analyzer"
     },
     {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_028_force-shield",
+      "field": "effects"
+    },
+    {
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
@@ -29104,6 +29189,14 @@
       "kind": "overlay_missing_for_manual_gap",
       "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
       "cardId": "onr_v1_028_force-shield"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_032_i-spy",
+      "field": "effects"
     },
     {
       "classification": "generated_fact_absent_from_monolith",
@@ -29159,6 +29252,14 @@
       "message": "Overlay field manualNotes is absent from or differs from active monolith.",
       "cardId": "onr_v1_037_japanese-water-torture",
       "field": "manualNotes"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_038_joan-of-arc",
+      "field": "effects"
     },
     {
       "classification": "generated_fact_absent_from_monolith",
@@ -29263,19 +29364,20 @@
       "cardId": "onr_v1_041_microtech-ai-interface"
     },
     {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_042_mouse",
+      "field": "effects"
+    },
+    {
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_042_mouse",
       "field": "effects"
-    },
-    {
-      "classification": "manual_review_candidate",
-      "blocking": false,
-      "kind": "overlay_missing_for_manual_gap",
-      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-      "cardId": "onr_v1_042_mouse"
     },
     {
       "classification": "monolith_mechanical_duplication_candidate",
@@ -29342,13 +29444,6 @@
       "field": "effects"
     },
     {
-      "classification": "manual_review_candidate",
-      "blocking": false,
-      "kind": "overlay_missing_for_manual_gap",
-      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-      "cardId": "onr_v1_045_newsgroup-filter"
-    },
-    {
       "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
       "kind": "active_monolith_mechanical_duplication",
@@ -29389,6 +29484,13 @@
       "field": "effects"
     },
     {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_048_poltergeist"
+    },
+    {
       "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
       "kind": "active_monolith_mechanical_duplication",
@@ -29410,6 +29512,14 @@
       "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_050_r-and-d-protocol-files",
+      "field": "effects"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_051_rabbit",
       "field": "effects"
     },
     {
@@ -29548,19 +29658,27 @@
       "field": "effects"
     },
     {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_057_scatter-shot"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_058_seeya",
+      "field": "effects"
+    },
+    {
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_058_seeya",
       "field": "effects"
-    },
-    {
-      "classification": "manual_review_candidate",
-      "blocking": false,
-      "kind": "overlay_missing_for_manual_gap",
-      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-      "cardId": "onr_v1_058_seeya"
     },
     {
       "classification": "monolith_mechanical_duplication_candidate",
@@ -29585,6 +29703,14 @@
       "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
       "cardId": "onr_v1_059_self-modifying-code",
       "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_059_self-modifying-code",
+      "field": "effects"
     },
     {
       "classification": "generated_fact_absent_from_monolith",
@@ -29627,6 +29753,14 @@
       "field": "breakerProfile"
     },
     {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_061_shield",
+      "field": "effects"
+    },
+    {
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
@@ -29648,6 +29782,14 @@
       "kind": "overlay_missing_for_manual_gap",
       "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
       "cardId": "onr_v1_061_shield"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_062_shredder-uplink-protocol",
+      "field": "effects"
     },
     {
       "classification": "generated_fact_absent_from_monolith",
@@ -29673,6 +29815,14 @@
       "cardId": "onr_v1_062_shredder-uplink-protocol"
     },
     {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_063_signpost",
+      "field": "effects"
+    },
+    {
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
@@ -29694,6 +29844,14 @@
       "kind": "overlay_missing_for_manual_gap",
       "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
       "cardId": "onr_v1_063_signpost"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_065_smarteye",
+      "field": "effects"
     },
     {
       "classification": "generated_fact_absent_from_monolith",

@@ -93,16 +93,16 @@ describe("generated fact Batch-10 Runner prevention/survival closeout", () => {
     expect(
       report.excludedCards.find((item) => item.title === "Baedeker’s Net Map")
         ?.excludedReason,
-    ).toContain("type mismatch");
+    ).toContain("Trace/base-link support");
   });
 
   it("keeps included cards ready read-only with no conflicts or gaps", () => {
     const report = readReport();
     expect(report.confirmedGeneratedFactCount).toBe(62);
-    expect(report.previewAddedFactCount).toBe(59);
+    expect(report.previewAddedFactCount).toBe(44);
     expect(report.hardErrorCount).toBe(0);
     expect(report.realSemanticConflictCount).toBe(0);
-    expect(report.normalizedDifferenceCount).toBe(104);
+    expect(report.normalizedDifferenceCount).toBe(111);
     expect(report.remainingDifferenceCount).toBe(0);
     expect(report.descriptorFollowupCount).toBe(0);
     expect(report.readiness).toBe("ready_read_only_split_subbatches");

@@ -17,9 +17,9 @@ const DEFAULT_REPORT_PATH =
 const OVERLAY_PATHS = ["data/ai/hints/overlays/onr-v1/runner/programs.json"];
 
 const EXPECTED_WARNING_COUNTS = {
-  shape_difference: 5,
+  shape_difference: 2,
   target_profile_shape_difference: 2,
-  trash_credit_target_shape_difference: 2,
+  trash_credit_target_shape_difference: 0,
   cost_profile_shape_difference: 6,
   board_context_required: 7,
 };

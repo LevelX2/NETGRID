@@ -1,0 +1,3023 @@
+{
+  "schemaVersion": "ai019-runner-programs-semantics-review-report-v1",
+  "taskId": "AI019",
+  "generatedAt": "2026-06-01",
+  "status": "complete",
+  "scope": "runner_programs",
+  "sourceCommit": "86fd613f07caa45b828c7ff9e0767cdd0f8234b7",
+  "summary": {
+    "activeRunnerProgramCount": 98,
+    "reviewedProgramCount": 98,
+    "reviewedNonIcebreakerProgramCount": 56,
+    "excludedFrozenIcebreakerCount": 42,
+    "changedProgramCount": 56,
+    "unchangedCheckedProgramCount": 0,
+    "newTacticSignalCount": 73,
+    "changedExistingTacticSignalCount": 1,
+    "newStrategyIdCount": 0,
+    "plannerEffect": false,
+    "actionScoreEffect": false,
+    "planWeightEffect": false,
+    "targetingAiEffect": false,
+    "engineEffect": false,
+    "legalEffect": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivationEffect": false
+  },
+  "inventory": {
+    "activeCompiledScopeCardIds": [
+      "onr_proteus_078_armageddon",
+      "onr_proteus_079_big-frackin-gun",
+      "onr_proteus_080_black-widow",
+      "onr_proteus_081_boring-bit",
+      "onr_proteus_082_bulldozer",
+      "onr_proteus_083_corrosion",
+      "onr_proteus_084_crumble",
+      "onr_proteus_085_disintegrator",
+      "onr_proteus_086_enterprise-inc-shields",
+      "onr_proteus_087_forwards-legacy",
+      "onr_proteus_088_fubar",
+      "onr_proteus_089_garbage-in",
+      "onr_proteus_090_highlighter",
+      "onr_proteus_091_lockjaw",
+      "onr_proteus_092_morphing-tool",
+      "onr_proteus_093_redecorator",
+      "onr_proteus_094_scaldan",
+      "onr_proteus_095_skeleton-passkeys",
+      "onr_proteus_096_skullcap",
+      "onr_proteus_097_taxman",
+      "onr_proteus_098_vienna-22",
+      "onr_proteus_099_viral-pipeline",
+      "onr_proteus_100_wrecking-ball",
+      "onr_v1_001_afreet",
+      "onr_v1_002_ai-boon",
+      "onr_v1_003_baedekers-net-map",
+      "onr_v1_004_bakdoor",
+      "onr_v1_005_bartmoss-memorial-icebreaker",
+      "onr_v1_006_black-dahlia",
+      "onr_v1_007_blink",
+      "onr_v1_008_boardwalk",
+      "onr_v1_009_butcher-boy",
+      "onr_v1_010_cascade",
+      "onr_v1_011_cloak",
+      "onr_v1_012_clown",
+      "onr_v1_013_cockroach",
+      "onr_v1_014_codecracker",
+      "onr_v1_015_codeslinger",
+      "onr_v1_016_cyfermaster",
+      "onr_v1_017_deep-thought",
+      "onr_v1_018_dogcatcher",
+      "onr_v1_019_dropp",
+      "onr_v1_020_dupre",
+      "onr_v1_021_dwarf",
+      "onr_v1_022_emergency-self-construct",
+      "onr_v1_023_evil-twin",
+      "onr_v1_024_expert-schedule-analyzer",
+      "onr_v1_025_fait-accompli",
+      "onr_v1_026_false-echo",
+      "onr_v1_027_flak",
+      "onr_v1_028_force-shield",
+      "onr_v1_029_gremlins",
+      "onr_v1_030_grubb",
+      "onr_v1_031_hammer",
+      "onr_v1_032_i-spy",
+      "onr_v1_033_imp",
+      "onr_v1_034_incubator",
+      "onr_v1_035_invisibility",
+      "onr_v1_036_jackhammer",
+      "onr_v1_037_japanese-water-torture",
+      "onr_v1_038_joan-of-arc",
+      "onr_v1_039_krash",
+      "onr_v1_040_loony-goon",
+      "onr_v1_041_microtech-ai-interface",
+      "onr_v1_042_mouse",
+      "onr_v1_043_mystery-box",
+      "onr_v1_044_netspace-inverter",
+      "onr_v1_045_newsgroup-filter",
+      "onr_v1_046_pattels-virus",
+      "onr_v1_047_pile-driver",
+      "onr_v1_048_poltergeist",
+      "onr_v1_049_pox",
+      "onr_v1_050_r-and-d-protocol-files",
+      "onr_v1_051_rabbit",
+      "onr_v1_052_raffles",
+      "onr_v1_053_ramming-piston",
+      "onr_v1_054_raptor",
+      "onr_v1_055_reflector",
+      "onr_v1_056_replicator",
+      "onr_v1_057_scatter-shot",
+      "onr_v1_058_seeya",
+      "onr_v1_059_self-modifying-code",
+      "onr_v1_060_shaka",
+      "onr_v1_061_shield",
+      "onr_v1_062_shredder-uplink-protocol",
+      "onr_v1_063_signpost",
+      "onr_v1_064_skivviss",
+      "onr_v1_065_smarteye",
+      "onr_v1_066_snowball",
+      "onr_v1_067_speed-trap",
+      "onr_v1_068_startup-immolator",
+      "onr_v1_069_succubus",
+      "onr_v1_070_tinweasel",
+      "onr_v1_071_vewy-vewy-quiet",
+      "onr_v1_072_wild-card",
+      "onr_v1_073_wizards-book",
+      "onr_v1_074_worm",
+      "onr_v1_075_zetatech-software-installer"
+    ],
+    "frozenIcebreakerCardIds": [
+      "onr_proteus_079_big-frackin-gun",
+      "onr_proteus_080_black-widow",
+      "onr_proteus_081_boring-bit",
+      "onr_proteus_082_bulldozer",
+      "onr_proteus_083_corrosion",
+      "onr_proteus_087_forwards-legacy",
+      "onr_proteus_088_fubar",
+      "onr_proteus_092_morphing-tool",
+      "onr_proteus_093_redecorator",
+      "onr_proteus_095_skeleton-passkeys",
+      "onr_proteus_100_wrecking-ball",
+      "onr_v1_002_ai-boon",
+      "onr_v1_005_bartmoss-memorial-icebreaker",
+      "onr_v1_006_black-dahlia",
+      "onr_v1_007_blink",
+      "onr_v1_014_codecracker",
+      "onr_v1_015_codeslinger",
+      "onr_v1_016_cyfermaster",
+      "onr_v1_018_dogcatcher",
+      "onr_v1_019_dropp",
+      "onr_v1_020_dupre",
+      "onr_v1_021_dwarf",
+      "onr_v1_023_evil-twin",
+      "onr_v1_027_flak",
+      "onr_v1_030_grubb",
+      "onr_v1_031_hammer",
+      "onr_v1_036_jackhammer",
+      "onr_v1_037_japanese-water-torture",
+      "onr_v1_039_krash",
+      "onr_v1_040_loony-goon",
+      "onr_v1_047_pile-driver",
+      "onr_v1_052_raffles",
+      "onr_v1_053_ramming-piston",
+      "onr_v1_054_raptor",
+      "onr_v1_055_reflector",
+      "onr_v1_056_replicator",
+      "onr_v1_060_shaka",
+      "onr_v1_066_snowball",
+      "onr_v1_070_tinweasel",
+      "onr_v1_072_wild-card",
+      "onr_v1_073_wizards-book",
+      "onr_v1_074_worm"
+    ],
+    "reviewedNonIcebreakerProgramCardIds": [
+      "onr_proteus_078_armageddon",
+      "onr_proteus_084_crumble",
+      "onr_proteus_085_disintegrator",
+      "onr_proteus_086_enterprise-inc-shields",
+      "onr_proteus_089_garbage-in",
+      "onr_proteus_090_highlighter",
+      "onr_proteus_091_lockjaw",
+      "onr_proteus_094_scaldan",
+      "onr_proteus_096_skullcap",
+      "onr_proteus_097_taxman",
+      "onr_proteus_098_vienna-22",
+      "onr_proteus_099_viral-pipeline",
+      "onr_v1_001_afreet",
+      "onr_v1_003_baedekers-net-map",
+      "onr_v1_004_bakdoor",
+      "onr_v1_008_boardwalk",
+      "onr_v1_009_butcher-boy",
+      "onr_v1_010_cascade",
+      "onr_v1_011_cloak",
+      "onr_v1_012_clown",
+      "onr_v1_013_cockroach",
+      "onr_v1_017_deep-thought",
+      "onr_v1_022_emergency-self-construct",
+      "onr_v1_024_expert-schedule-analyzer",
+      "onr_v1_025_fait-accompli",
+      "onr_v1_026_false-echo",
+      "onr_v1_028_force-shield",
+      "onr_v1_029_gremlins",
+      "onr_v1_032_i-spy",
+      "onr_v1_033_imp",
+      "onr_v1_034_incubator",
+      "onr_v1_035_invisibility",
+      "onr_v1_038_joan-of-arc",
+      "onr_v1_041_microtech-ai-interface",
+      "onr_v1_042_mouse",
+      "onr_v1_043_mystery-box",
+      "onr_v1_044_netspace-inverter",
+      "onr_v1_045_newsgroup-filter",
+      "onr_v1_046_pattels-virus",
+      "onr_v1_048_poltergeist",
+      "onr_v1_049_pox",
+      "onr_v1_050_r-and-d-protocol-files",
+      "onr_v1_051_rabbit",
+      "onr_v1_057_scatter-shot",
+      "onr_v1_058_seeya",
+      "onr_v1_059_self-modifying-code",
+      "onr_v1_061_shield",
+      "onr_v1_062_shredder-uplink-protocol",
+      "onr_v1_063_signpost",
+      "onr_v1_064_skivviss",
+      "onr_v1_065_smarteye",
+      "onr_v1_067_speed-trap",
+      "onr_v1_068_startup-immolator",
+      "onr_v1_069_succubus",
+      "onr_v1_071_vewy-vewy-quiet",
+      "onr_v1_075_zetatech-software-installer"
+    ]
+  },
+  "clusterOverview": [
+    {
+      "mechanicalFamily": "access_hq_rnd_information",
+      "label": "Access / HQ / R&D / Information",
+      "count": 4,
+      "changedCount": 4,
+      "strategyAnchorCount": 4,
+      "supportOnlyCount": 0
+    },
+    {
+      "mechanicalFamily": "daemon_hosting",
+      "label": "Daemon / Hosting",
+      "count": 3,
+      "changedCount": 3,
+      "strategyAnchorCount": 0,
+      "supportOnlyCount": 3
+    },
+    {
+      "mechanicalFamily": "damage_prevention_survival",
+      "label": "Damage Prevention / Survival",
+      "count": 5,
+      "changedCount": 5,
+      "strategyAnchorCount": 1,
+      "supportOnlyCount": 4
+    },
+    {
+      "mechanicalFamily": "detection_expose_scouting",
+      "label": "Detection / Expose / Scouting",
+      "count": 5,
+      "changedCount": 5,
+      "strategyAnchorCount": 0,
+      "supportOnlyCount": 5
+    },
+    {
+      "mechanicalFamily": "economy_setup",
+      "label": "Economy / Setup",
+      "count": 4,
+      "changedCount": 4,
+      "strategyAnchorCount": 0,
+      "supportOnlyCount": 4
+    },
+    {
+      "mechanicalFamily": "ice_control_or_server_manipulation",
+      "label": "ICE- / Server-Manipulation",
+      "count": 6,
+      "changedCount": 6,
+      "strategyAnchorCount": 0,
+      "supportOnlyCount": 6
+    },
+    {
+      "mechanicalFamily": "icebreaker_frozen",
+      "label": "Frozen Icebreaker / BreakerProfile",
+      "count": 42,
+      "changedCount": 0,
+      "strategyAnchorCount": 0,
+      "supportOnlyCount": 0
+    },
+    {
+      "mechanicalFamily": "program_search_install_protection",
+      "label": "Programmsuche / Installation / Schutz",
+      "count": 3,
+      "changedCount": 3,
+      "strategyAnchorCount": 2,
+      "supportOnlyCount": 1
+    },
+    {
+      "mechanicalFamily": "stealth_or_recurring_credit",
+      "label": "Stealth / Recurring Credit",
+      "count": 3,
+      "changedCount": 3,
+      "strategyAnchorCount": 0,
+      "supportOnlyCount": 3
+    },
+    {
+      "mechanicalFamily": "trace_link_defense",
+      "label": "Trace / Link",
+      "count": 4,
+      "changedCount": 4,
+      "strategyAnchorCount": 0,
+      "supportOnlyCount": 4
+    },
+    {
+      "mechanicalFamily": "virus_program",
+      "label": "Virus-Programme",
+      "count": 19,
+      "changedCount": 19,
+      "strategyAnchorCount": 6,
+      "supportOnlyCount": 13
+    }
+  ],
+  "newTacticSignals": [
+    {
+      "signalId": "access.free_trash",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "access.hq_full_reveal",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "access.hq_random_reveal",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "access.hq_trash_pressure",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "access.hq_via_archives",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "access.rnd_top_card",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "access.rnd_top_cards",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "access.rnd_top_reorder",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "access.rnd_trash_pressure",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "access.trash_untrashable",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "action.turn_limit_penalty",
+      "group": "ai019_action",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "corp.action_denial",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "corp.bad_publicity_pressure",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "corp.draw_pressure",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "corp.economy_pressure",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "corp.hand_size_pressure",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "corp.install_punish",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "corp.random_discard_pressure",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "corp.rez_tax_pressure",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "corp.rnd_trash_pressure",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "defense.base_link",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "defense.brain_damage_prevention",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "defense.brain_damage_reset",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "defense.flatline_prevention",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.survival_defense"
+      ],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "defense.meat_damage_immunity",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "defense.meat_damage_prevention",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "defense.net_damage_prevention",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "defense.trace_boost",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "defense.trace_limit_reduction",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "economy.action_credit",
+      "group": "ai019_economy",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "economy.node_trash_credit",
+      "group": "ai019_economy",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "economy.recurring_install_credit",
+      "group": "ai019_economy",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "economy.recurring_trash_credit",
+      "group": "ai019_economy",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "economy.upgrade_trash_credit",
+      "group": "ai019_economy",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "ice.derez",
+      "group": "ai019_ice",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "ice.force_rez",
+      "group": "ai019_ice",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "ice.reorder_fort",
+      "group": "ai019_ice",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "ice.reverse_fort",
+      "group": "ai019_ice",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "ice.trash_after_full_break",
+      "group": "ai019_ice",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "info.expose_fort",
+      "group": "ai019_info",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "info.expose_installed_card",
+      "group": "ai019_info",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "info.hq_information",
+      "group": "ai019_info",
+      "sideScope": "runner",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "info.ice_approach_expose",
+      "group": "ai019_info",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "info.persistent_expose",
+      "group": "ai019_info",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "info.rnd_information",
+      "group": "ai019_info",
+      "sideScope": "runner",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "info.rnd_manipulation",
+      "group": "ai019_info",
+      "sideScope": "runner",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "remote.agenda_difficulty_tax",
+      "group": "ai019_remote",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "remote.install_tax",
+      "group": "ai019_remote",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "run.central_access_conversion",
+      "group": "ai019_run",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "run.ends_run_after_effect",
+      "group": "ai019_run",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "run.jackout_vs_node_upgrade",
+      "group": "ai019_run",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "run.replacement_access",
+      "group": "ai019_run",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "run.rnd_scout_run",
+      "group": "ai019_run",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "run.safe_jackout_window",
+      "group": "ai019_run",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "setup.hand_size_penalty",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "setup.hosted_program_loss_risk",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "setup.install_during_run",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "setup.program_install",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "setup.program_install_credit",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "setup.program_protection",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "setup.program_search",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "setup.program_trash_prevention",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "setup.self_bounce",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "setup.stack_top_program_install",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": true
+    },
+    {
+      "signalId": "virus.counter_amplification",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "virus.counter_engine",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "virus.purge_tax",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "virus.random_payload",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "virus.trigger_any_successful_run",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "virus.trigger_hq",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "virus.trigger_multi_central",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "virus.trigger_remote",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    },
+    {
+      "signalId": "virus.trigger_rnd",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "targetProfileRelevant": false
+    }
+  ],
+  "changedExistingTacticSignals": [
+    {
+      "signalId": "defense.trace_defense",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "rationale": "AI019 removes automatic runner.survival_defense anchoring from trace/link support cards such as Baedeker, Bakdoor, Signpost and Rabbit."
+    }
+  ],
+  "newStrategyIds": [],
+  "strategySupportPairs": [
+    {
+      "cardId": "onr_proteus_084_crumble",
+      "title": "Crumble",
+      "strategyId": "runner.hq_pressure",
+      "role": "payoff_anchor",
+      "evidence": [
+        "access.free_trash",
+        "access.trash_untrashable",
+        "access.hq_trash_pressure"
+      ],
+      "confidence": "high",
+      "schemaStatus": "report_only_pairs_not_active_schema"
+    },
+    {
+      "cardId": "onr_proteus_089_garbage-in",
+      "title": "Garbage In",
+      "strategyId": "runner.rnd_pressure",
+      "role": "payoff_anchor",
+      "evidence": [
+        "access.free_trash",
+        "access.trash_untrashable",
+        "access.rnd_trash_pressure"
+      ],
+      "confidence": "high",
+      "schemaStatus": "report_only_pairs_not_active_schema"
+    },
+    {
+      "cardId": "onr_proteus_090_highlighter",
+      "title": "Highlighter",
+      "strategyId": "runner.rnd_pressure",
+      "role": "payoff_anchor",
+      "evidence": [
+        "access.rnd_multiaccess"
+      ],
+      "confidence": "high",
+      "schemaStatus": "report_only_pairs_not_active_schema"
+    },
+    {
+      "cardId": "onr_proteus_098_vienna-22",
+      "title": "Vienna 22",
+      "strategyId": "runner.hq_pressure",
+      "role": "payoff_anchor",
+      "evidence": [
+        "access.hq_multiaccess"
+      ],
+      "confidence": "high",
+      "schemaStatus": "report_only_pairs_not_active_schema"
+    },
+    {
+      "cardId": "onr_v1_008_boardwalk",
+      "title": "Boardwalk",
+      "strategyId": "runner.hq_pressure",
+      "role": "engine_anchor",
+      "evidence": [
+        "access.hq_random_reveal",
+        "info.hq_information",
+        "virus.counter_engine"
+      ],
+      "confidence": "high",
+      "schemaStatus": "report_only_pairs_not_active_schema"
+    },
+    {
+      "cardId": "onr_v1_017_deep-thought",
+      "title": "Deep Thought",
+      "strategyId": "runner.rnd_pressure",
+      "role": "engine_anchor",
+      "evidence": [
+        "access.rnd_top_card",
+        "info.rnd_information",
+        "virus.counter_engine"
+      ],
+      "confidence": "high",
+      "schemaStatus": "report_only_pairs_not_active_schema"
+    },
+    {
+      "cardId": "onr_v1_022_emergency-self-construct",
+      "title": "Emergency Self-Construct",
+      "strategyId": "runner.survival_defense",
+      "role": "emergency_tool",
+      "evidence": [
+        "defense.flatline_prevention",
+        "defense.brain_damage_reset",
+        "defense.meat_damage_immunity"
+      ],
+      "confidence": "high",
+      "schemaStatus": "report_only_pairs_not_active_schema"
+    },
+    {
+      "cardId": "onr_v1_024_expert-schedule-analyzer",
+      "title": "Expert Schedule Analyzer",
+      "strategyId": "runner.hq_pressure",
+      "role": "payoff_anchor",
+      "evidence": [
+        "access.hq_full_reveal",
+        "info.hq_information"
+      ],
+      "confidence": "high",
+      "schemaStatus": "report_only_pairs_not_active_schema"
+    },
+    {
+      "cardId": "onr_v1_041_microtech-ai-interface",
+      "title": "Microtech AI Interface",
+      "strategyId": "runner.interface_closeout",
+      "role": "payoff_anchor",
+      "evidence": [
+        "access.rnd_top_reorder",
+        "info.rnd_manipulation"
+      ],
+      "confidence": "medium",
+      "schemaStatus": "report_only_pairs_not_active_schema"
+    },
+    {
+      "cardId": "onr_v1_041_microtech-ai-interface",
+      "title": "Microtech AI Interface",
+      "strategyId": "runner.rnd_pressure",
+      "role": "payoff_anchor",
+      "evidence": [
+        "access.rnd_top_reorder",
+        "info.rnd_manipulation"
+      ],
+      "confidence": "high",
+      "schemaStatus": "report_only_pairs_not_active_schema"
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "title": "Mystery Box",
+      "strategyId": "runner.search.breaker",
+      "role": "engine_anchor",
+      "evidence": [
+        "setup.search",
+        "setup.program_search",
+        "setup.stack_top_program_install"
+      ],
+      "confidence": "high",
+      "schemaStatus": "report_only_pairs_not_active_schema"
+    },
+    {
+      "cardId": "onr_v1_050_r-and-d-protocol-files",
+      "title": "R&D-Protocol Files",
+      "strategyId": "runner.interface_closeout",
+      "role": "payoff_anchor",
+      "evidence": [
+        "access.rnd_top_cards",
+        "run.rnd_scout_run"
+      ],
+      "confidence": "medium",
+      "schemaStatus": "report_only_pairs_not_active_schema"
+    },
+    {
+      "cardId": "onr_v1_050_r-and-d-protocol-files",
+      "title": "R&D-Protocol Files",
+      "strategyId": "runner.rnd_pressure",
+      "role": "payoff_anchor",
+      "evidence": [
+        "access.rnd_top_cards",
+        "run.rnd_scout_run"
+      ],
+      "confidence": "high",
+      "schemaStatus": "report_only_pairs_not_active_schema"
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "title": "Self-Modifying Code",
+      "strategyId": "runner.search.breaker",
+      "role": "engine_anchor",
+      "evidence": [
+        "setup.search",
+        "setup.program_search",
+        "setup.program_install"
+      ],
+      "confidence": "high",
+      "schemaStatus": "report_only_pairs_not_active_schema"
+    },
+    {
+      "cardId": "onr_v1_062_shredder-uplink-protocol",
+      "title": "Shredder Uplink Protocol",
+      "strategyId": "runner.hq_pressure",
+      "role": "enabler",
+      "evidence": [
+        "access.hq_via_archives",
+        "run.central_access_conversion"
+      ],
+      "confidence": "medium",
+      "schemaStatus": "report_only_pairs_not_active_schema"
+    }
+  ],
+  "targetProfileCandidates": [
+    {
+      "cardId": "onr_proteus_085_disintegrator",
+      "title": "Disintegrator",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "notes": "ICE-Ziel ist abbildbar; die Voraussetzung all_subroutines_broken bleibt Schema-Gap."
+    },
+    {
+      "cardId": "onr_proteus_091_lockjaw",
+      "title": "Lockjaw",
+      "status": "target-profile-v1",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "notes": "Icebreaker-Ziel ist abbildbar; Karte bleibt Support ohne Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_001_afreet",
+      "title": "Afreet",
+      "status": "target-profile-v1",
+      "targetProfileKinds": [
+        "hosted_install_target"
+      ],
+      "notes": "Afreet can host up to 3 MU of programs."
+    },
+    {
+      "cardId": "onr_v1_026_false-echo",
+      "title": "False Echo",
+      "status": "target-profile-v1",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "notes": "Run-End-Effekt braucht Server-Ziel, bleibt aber read-only."
+    },
+    {
+      "cardId": "onr_v1_032_i-spy",
+      "title": "I Spy",
+      "status": "target-profile-v1",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "notes": "Expose-Ziel ist ein Fort/Server nach erfolgreichem Run."
+    },
+    {
+      "cardId": "onr_v1_033_imp",
+      "title": "Imp",
+      "status": "target-profile-v1",
+      "targetProfileKinds": [
+        "hosted_install_target"
+      ],
+      "notes": "Imp can have up to 2 MU of programs installed in it."
+    },
+    {
+      "cardId": "onr_v1_038_joan-of-arc",
+      "title": "Joan of Arc",
+      "status": "target-profile-v1",
+      "targetProfileKinds": [
+        "replacement_target"
+      ],
+      "notes": "TargetProfile V1 beschreibt Programmschutz- beziehungsweise Ersatzfenster, ohne Targeting-AI zu aktivieren."
+    },
+    {
+      "cardId": "onr_v1_042_mouse",
+      "title": "Mouse",
+      "status": "target-profile-v1",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "notes": "Expose-Ziel ist eine installierte Karte; nur oeffentliche oder runnerbekannte Informationen werden beschrieben."
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "title": "Mystery Box",
+      "status": "target-profile-v1",
+      "targetProfileKinds": [
+        "stack_top"
+      ],
+      "notes": "Generated/active Profile beschreiben Programmsuche und Run-Install; keine Targeting-AI."
+    },
+    {
+      "cardId": "onr_v1_044_netspace-inverter",
+      "title": "Netspace Inverter",
+      "status": "target-profile-v1",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "notes": "Fort-Reorder braucht Server-Ziel, bleibt aber read-only."
+    },
+    {
+      "cardId": "onr_v1_046_pattels-virus",
+      "title": "Pattel’s Virus",
+      "status": "target-profile-v1",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "notes": "ICE-Ziel ist abbildbar; Virus bleibt Support ohne generischen Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_058_seeya",
+      "title": "SeeYa",
+      "status": "target-profile-v1",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "notes": "Expose-Ziel ist eine installierte Karte; nur oeffentliche oder runnerbekannte Informationen werden beschrieben."
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "title": "Self-Modifying Code",
+      "status": "target-profile-v1",
+      "targetProfileKinds": [
+        "stack"
+      ],
+      "notes": "Generated/active Profile beschreiben Programmsuche und Run-Install; keine Targeting-AI."
+    },
+    {
+      "cardId": "onr_v1_065_smarteye",
+      "title": "Smarteye",
+      "status": "target-profile-v1",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "notes": "Expose-Ziel ist das naechste ICE im Approach-Fenster."
+    },
+    {
+      "cardId": "onr_v1_068_startup-immolator",
+      "title": "Startup Immolator",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "notes": "ICE-Ziel ist abbildbar; die Voraussetzung all_subroutines_broken bleibt Schema-Gap."
+    },
+    {
+      "cardId": "onr_v1_069_succubus",
+      "title": "Succubus",
+      "status": "target-profile-v1",
+      "targetProfileKinds": [
+        "hosted_install_target"
+      ],
+      "notes": "Succubus can host up to 3 MU of programs."
+    }
+  ],
+  "deferredItems": [
+    {
+      "id": "strategy-support-pairs-schema",
+      "status": "report_only",
+      "cards": [
+        "onr_proteus_084_crumble",
+        "onr_proteus_089_garbage-in",
+        "onr_proteus_090_highlighter",
+        "onr_proteus_098_vienna-22",
+        "onr_v1_008_boardwalk",
+        "onr_v1_017_deep-thought",
+        "onr_v1_022_emergency-self-construct",
+        "onr_v1_024_expert-schedule-analyzer",
+        "onr_v1_041_microtech-ai-interface",
+        "onr_v1_043_mystery-box",
+        "onr_v1_050_r-and-d-protocol-files",
+        "onr_v1_059_self-modifying-code",
+        "onr_v1_062_shredder-uplink-protocol"
+      ],
+      "rationale": "Aktive Hints speichern lineSupport und strategicRole getrennt; AI019 dokumentiert die fachliche Paarung im Review-Report."
+    },
+    {
+      "id": "all-subroutines-broken-condition",
+      "status": "schema_gap",
+      "cards": [
+        "onr_v1_068_startup-immolator",
+        "onr_proteus_085_disintegrator"
+      ],
+      "rationale": "TargetProfile V1 kann das ICE-Ziel beschreiben, aber die Voraussetzung alle Subroutinen gebrochen wird nicht als Condition modelliert."
+    },
+    {
+      "id": "runner-search-program-strategy",
+      "status": "deferred_taxonomy_question",
+      "cards": [
+        "onr_v1_043_mystery-box",
+        "onr_v1_059_self-modifying-code"
+      ],
+      "rationale": "Es gibt weiterhin nur runner.search.breaker als Strategy-ID. Allgemeine Programmsuche bleibt Taktiksignal und wird nicht als neue Strategy-ID eingefuehrt."
+    },
+    {
+      "id": "runner-virus-strategy",
+      "status": "deferred_taxonomy_question",
+      "cards": [
+        "onr_proteus_078_armageddon",
+        "onr_proteus_084_crumble",
+        "onr_proteus_089_garbage-in",
+        "onr_proteus_090_highlighter",
+        "onr_proteus_094_scaldan",
+        "onr_proteus_097_taxman",
+        "onr_proteus_098_vienna-22",
+        "onr_proteus_099_viral-pipeline",
+        "onr_v1_008_boardwalk",
+        "onr_v1_009_butcher-boy",
+        "onr_v1_010_cascade",
+        "onr_v1_013_cockroach",
+        "onr_v1_017_deep-thought",
+        "onr_v1_025_fait-accompli",
+        "onr_v1_029_gremlins",
+        "onr_v1_034_incubator",
+        "onr_v1_046_pattels-virus",
+        "onr_v1_049_pox",
+        "onr_v1_064_skivviss"
+      ],
+      "rationale": "Viruskarten erhalten Mechanik- und Payload-Signale; Strategy-Anker ergeben sich nur aus konkretem HQ-/R&D-/Access-Payload, nicht aus Virus als Mechanik."
+    }
+  ],
+  "postReviewAssignments": [
+    {
+      "cardId": "onr_proteus_078_armageddon",
+      "title": "Armageddon",
+      "cardType": "program",
+      "subtypes": [
+        "random",
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "corp.install_punish",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.random_payload",
+        "virus.trigger_rnd"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "After each successful run on R&D, you may choose to give the Corp a Doom counter instead of accessing cards from R&D."
+    },
+    {
+      "cardId": "onr_proteus_084_crumble",
+      "title": "Crumble",
+      "cardType": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "access.free_trash",
+        "access.hq_trash_pressure",
+        "access.trash_untrashable",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.trigger_hq"
+      ],
+      "strategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "legacyStrategicRole": [
+        "payoff_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.hq_pressure",
+          "role": "payoff_anchor",
+          "evidence": [
+            "access.free_trash",
+            "access.trash_untrashable",
+            "access.hq_trash_pressure"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "After each successful run on HQ, give the Corp a Crumble counter."
+    },
+    {
+      "cardId": "onr_proteus_085_disintegrator",
+      "title": "Disintegrator",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "ice_control_or_server_manipulation",
+      "tacticSignals": [
+        "ice.derez",
+        "run.ends_run_after_effect",
+        "run.event_tempo"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "ICE-Ziel ist abbildbar; die Voraussetzung all_subroutines_broken bleibt Schema-Gap."
+    },
+    {
+      "cardId": "onr_proteus_086_enterprise-inc-shields",
+      "title": "Enterprise, Inc., Shields",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "damage_prevention_survival",
+      "tacticSignals": [
+        "defense.brain_damage_prevention",
+        "defense.damage_prevention",
+        "defense.net_damage_prevention"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "[1]: Prevent up to 2 Net damage."
+    },
+    {
+      "cardId": "onr_proteus_089_garbage-in",
+      "title": "Garbage In",
+      "cardType": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "access.free_trash",
+        "access.rnd_trash_pressure",
+        "access.trash_untrashable",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.trigger_rnd"
+      ],
+      "strategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "legacyStrategicRole": [
+        "payoff_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.rnd_pressure",
+          "role": "payoff_anchor",
+          "evidence": [
+            "access.free_trash",
+            "access.trash_untrashable",
+            "access.rnd_trash_pressure"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "After each successful run on R&D, give the Corp a Garbage counter."
+    },
+    {
+      "cardId": "onr_proteus_090_highlighter",
+      "title": "Highlighter",
+      "cardType": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "access.rnd_multiaccess",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.trigger_rnd"
+      ],
+      "strategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "legacyStrategicRole": [
+        "payoff_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.rnd_pressure",
+          "role": "payoff_anchor",
+          "evidence": [
+            "access.rnd_multiaccess"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "After each successful run on R&D, give the Corp a Highlighter counter."
+    },
+    {
+      "cardId": "onr_proteus_091_lockjaw",
+      "title": "Lockjaw",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "ice_control_or_server_manipulation",
+      "tacticSignals": [
+        "breaker.support",
+        "run.break_cost_support"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "target-profile-v1",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Icebreaker-Ziel ist abbildbar; Karte bleibt Support ohne Strategieanker."
+    },
+    {
+      "cardId": "onr_proteus_094_scaldan",
+      "title": "Scaldan",
+      "cardType": "program",
+      "subtypes": [
+        "bad_publicity",
+        "random",
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "corp.bad_publicity_pressure",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.random_payload",
+        "virus.trigger_hq"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "After each successful run on HQ, give the Corp a Scaldan counter."
+    },
+    {
+      "cardId": "onr_proteus_096_skullcap",
+      "title": "Skullcap",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "damage_prevention_survival",
+      "tacticSignals": [
+        "defense.brain_damage_prevention",
+        "defense.damage_prevention",
+        "defense.net_damage_prevention"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "T: Prevent any amount of Net or brain damage."
+    },
+    {
+      "cardId": "onr_proteus_097_taxman",
+      "title": "Taxman",
+      "cardType": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "corp.economy_pressure",
+        "economy.counter",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.trigger_hq"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "After each successful run on HQ, give the Corp a Tax counter."
+    },
+    {
+      "cardId": "onr_proteus_098_vienna-22",
+      "title": "Vienna 22",
+      "cardType": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "access.hq_multiaccess",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.trigger_hq"
+      ],
+      "strategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "legacyStrategicRole": [
+        "payoff_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.hq_pressure",
+          "role": "payoff_anchor",
+          "evidence": [
+            "access.hq_multiaccess"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "After each successful run on HQ, give the Corp a Vienna counter."
+    },
+    {
+      "cardId": "onr_proteus_099_viral-pipeline",
+      "title": "Viral Pipeline",
+      "cardType": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "corp.action_denial",
+        "virus.purge_tax",
+        "virus.trigger_multi_central"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "After each successful run on Archives, HQ, or R&D, put a Socket counter in that data fort."
+    },
+    {
+      "cardId": "onr_v1_001_afreet",
+      "title": "Afreet",
+      "cardType": "program",
+      "subtypes": [
+        "daemon"
+      ],
+      "mechanicalFamily": "daemon_hosting",
+      "tacticSignals": [
+        "breaker.hosted_strength_penalty",
+        "setup.hosted_program_loss_risk",
+        "setup.program_host"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "target-profile-v1",
+      "targetProfileKinds": [
+        "hosted_install_target"
+      ],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Afreet can host up to 3 MU of programs."
+    },
+    {
+      "cardId": "onr_v1_003_baedekers-net-map",
+      "title": "Baedeker’s Net Map",
+      "cardType": "program",
+      "subtypes": [
+        "base link"
+      ],
+      "mechanicalFamily": "trace_link_defense",
+      "tacticSignals": [
+        "defense.base_link",
+        "defense.trace_defense"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "0: Base link 1."
+    },
+    {
+      "cardId": "onr_v1_004_bakdoor",
+      "title": "Bakdoor™",
+      "cardType": "program",
+      "subtypes": [
+        "base link"
+      ],
+      "mechanicalFamily": "trace_link_defense",
+      "tacticSignals": [
+        "defense.base_link",
+        "defense.trace_boost",
+        "defense.trace_defense"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "0: Base link 3."
+    },
+    {
+      "cardId": "onr_v1_008_boardwalk",
+      "title": "Boardwalk",
+      "cardType": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "access.hq_random_reveal",
+        "info.hq",
+        "info.hq_information",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.trigger_hq"
+      ],
+      "strategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "legacyStrategicRole": [
+        "engine_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.hq_pressure",
+          "role": "engine_anchor",
+          "evidence": [
+            "access.hq_random_reveal",
+            "info.hq_information",
+            "virus.counter_engine"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Whenever you make a successful run on HQ, give the Corp a Boardwalk counter."
+    },
+    {
+      "cardId": "onr_v1_009_butcher-boy",
+      "title": "Butcher Boy",
+      "cardType": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "economy.recurring",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.trigger_hq"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Whenever you make a successful run on HQ, give the Corp a Butcher Boy counter."
+    },
+    {
+      "cardId": "onr_v1_010_cascade",
+      "title": "Cascade",
+      "cardType": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "corp.rnd_trash_pressure",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.trigger_rnd"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Whenever you make a successful run on R&D, give the Corp a Cascade counter."
+    },
+    {
+      "cardId": "onr_v1_011_cloak",
+      "title": "Cloak",
+      "cardType": "program",
+      "subtypes": [
+        "stealth"
+      ],
+      "mechanicalFamily": "stealth_or_recurring_credit",
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Put 3 credits on Cloak when it is installed."
+    },
+    {
+      "cardId": "onr_v1_012_clown",
+      "title": "Clown",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "ice_control_or_server_manipulation",
+      "tacticSignals": [
+        "breaker.support",
+        "ice.strength_reduction",
+        "run.break_cost_support"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "All ice is encountered with its strength reduced by 1."
+    },
+    {
+      "cardId": "onr_v1_013_cockroach",
+      "title": "Cockroach",
+      "cardType": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "corp.random_discard_pressure",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.trigger_hq"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Whenever you make a successful run on HQ, give the Corp a Cockroach counter."
+    },
+    {
+      "cardId": "onr_v1_017_deep-thought",
+      "title": "Deep Thought",
+      "cardType": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "access.rnd_top_card",
+        "info.rnd_information",
+        "info.rnd_topdeck",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.trigger_rnd"
+      ],
+      "strategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "legacyStrategicRole": [
+        "engine_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.rnd_pressure",
+          "role": "engine_anchor",
+          "evidence": [
+            "access.rnd_top_card",
+            "info.rnd_information",
+            "virus.counter_engine"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Whenever you make a successful run on R&D, give the Corp a Thought counter."
+    },
+    {
+      "cardId": "onr_v1_022_emergency-self-construct",
+      "title": "Emergency Self-Construct",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "damage_prevention_survival",
+      "tacticSignals": [
+        "action.turn_limit_penalty",
+        "defense.brain_damage_reset",
+        "defense.damage_prevention",
+        "defense.flatline_prevention",
+        "defense.meat_damage_immunity",
+        "defense.meat_damage_prevention",
+        "setup.hand_size",
+        "setup.hand_size_penalty"
+      ],
+      "strategyAnchors": [
+        "runner.survival_defense"
+      ],
+      "legacyStrategicRole": [
+        "emergency_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.survival_defense",
+          "role": "emergency_tool",
+          "evidence": [
+            "defense.flatline_prevention",
+            "defense.brain_damage_reset",
+            "defense.meat_damage_immunity"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "T: Prevent yourself from being flatlined, though you still lose all cards in your hand."
+    },
+    {
+      "cardId": "onr_v1_024_expert-schedule-analyzer",
+      "title": "Expert Schedule Analyzer",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "access_hq_rnd_information",
+      "tacticSignals": [
+        "access.hq_full_reveal",
+        "info.hq",
+        "info.hq_information"
+      ],
+      "strategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "legacyStrategicRole": [
+        "payoff_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.hq_pressure",
+          "role": "payoff_anchor",
+          "evidence": [
+            "access.hq_full_reveal",
+            "info.hq_information"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "After you access cards from HQ, look at all cards stored in HQ."
+    },
+    {
+      "cardId": "onr_v1_025_fait-accompli",
+      "title": "Fait Accompli",
+      "cardType": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "remote.agenda_difficulty_tax",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.trigger_remote"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Whenever you make a successful run on a subsidiary data fort, put a Fait counter in that fort."
+    },
+    {
+      "cardId": "onr_v1_026_false-echo",
+      "title": "False Echo",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "ice_control_or_server_manipulation",
+      "tacticSignals": [
+        "corp.rez_tax_pressure",
+        "ice.force_rez"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "target-profile-v1",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Run-End-Effekt braucht Server-Ziel, bleibt aber read-only."
+    },
+    {
+      "cardId": "onr_v1_028_force-shield",
+      "title": "Force Shield",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "damage_prevention_survival",
+      "tacticSignals": [
+        "defense.brain_damage_prevention",
+        "defense.damage_prevention",
+        "defense.net_damage_prevention"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Prevents up to 2 net and/or core damage total each turn."
+    },
+    {
+      "cardId": "onr_v1_029_gremlins",
+      "title": "Gremlins",
+      "cardType": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "corp.hand_size_pressure",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.trigger_hq"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Whenever you make a successful run on HQ, give the Corp a Gremlin counter."
+    },
+    {
+      "cardId": "onr_v1_032_i-spy",
+      "title": "I Spy",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "detection_expose_scouting",
+      "tacticSignals": [
+        "info.expose",
+        "info.expose_fort",
+        "info.persistent_expose"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "target-profile-v1",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Expose-Ziel ist ein Fort/Server nach erfolgreichem Run."
+    },
+    {
+      "cardId": "onr_v1_033_imp",
+      "title": "Imp",
+      "cardType": "program",
+      "subtypes": [
+        "daemon"
+      ],
+      "mechanicalFamily": "daemon_hosting",
+      "tacticSignals": [
+        "breaker.hosted_strength_penalty",
+        "setup.hosted_program_loss_risk",
+        "setup.program_host"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "target-profile-v1",
+      "targetProfileKinds": [
+        "hosted_install_target"
+      ],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Imp can have up to 2 MU of programs installed in it."
+    },
+    {
+      "cardId": "onr_v1_034_incubator",
+      "title": "Incubator",
+      "cardType": "program",
+      "subtypes": [
+        "random",
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "virus.counter_amplification",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.random_payload",
+        "virus.trigger_any_successful_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Whenever you make a successful run, give the Corp an Incubate counter."
+    },
+    {
+      "cardId": "onr_v1_035_invisibility",
+      "title": "Invisibility",
+      "cardType": "program",
+      "subtypes": [
+        "stealth"
+      ],
+      "mechanicalFamily": "stealth_or_recurring_credit",
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Put 1 from the bank on Invisibility when it is installed."
+    },
+    {
+      "cardId": "onr_v1_038_joan-of-arc",
+      "title": "Joan of Arc",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "program_search_install_protection",
+      "tacticSignals": [
+        "setup.program_protection",
+        "setup.program_trash_prevention",
+        "setup.self_bounce"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "target-profile-v1",
+      "targetProfileKinds": [
+        "replacement_target"
+      ],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "TargetProfile V1 beschreibt Programmschutz- beziehungsweise Ersatzfenster, ohne Targeting-AI zu aktivieren."
+    },
+    {
+      "cardId": "onr_v1_041_microtech-ai-interface",
+      "title": "Microtech AI Interface",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "access_hq_rnd_information",
+      "tacticSignals": [
+        "access.rnd_top_reorder",
+        "info.rnd_information",
+        "info.rnd_manipulation",
+        "info.rnd_topdeck",
+        "run.replacement_access"
+      ],
+      "strategyAnchors": [
+        "runner.interface_closeout",
+        "runner.rnd_pressure"
+      ],
+      "legacyStrategicRole": [
+        "payoff_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.rnd_pressure",
+          "role": "payoff_anchor",
+          "evidence": [
+            "access.rnd_top_reorder",
+            "info.rnd_manipulation"
+          ],
+          "confidence": "high"
+        },
+        {
+          "strategyId": "runner.interface_closeout",
+          "role": "payoff_anchor",
+          "evidence": [
+            "access.rnd_top_reorder",
+            "info.rnd_manipulation"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Whenever you are about to access cards from R&D, you may first choose to cut any number of cards from the top of R&D to the bottom of R&D."
+    },
+    {
+      "cardId": "onr_v1_042_mouse",
+      "title": "Mouse",
+      "cardType": "program",
+      "subtypes": [
+        "detection"
+      ],
+      "mechanicalFamily": "detection_expose_scouting",
+      "tacticSignals": [
+        "info.expose",
+        "info.expose_installed_card"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "target-profile-v1",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Expose-Ziel ist eine installierte Karte; nur oeffentliche oder runnerbekannte Informationen werden beschrieben."
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "title": "Mystery Box",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "program_search_install_protection",
+      "tacticSignals": [
+        "setup.install_discount",
+        "setup.install_during_run",
+        "setup.program_search",
+        "setup.search",
+        "setup.stack_top_program_install"
+      ],
+      "strategyAnchors": [
+        "runner.search.breaker"
+      ],
+      "legacyStrategicRole": [
+        "engine_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.search.breaker",
+          "role": "engine_anchor",
+          "evidence": [
+            "setup.search",
+            "setup.program_search",
+            "setup.stack_top_program_install"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "target-profile-v1",
+      "targetProfileKinds": [
+        "stack_top"
+      ],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Generated/active Profile beschreiben Programmsuche und Run-Install; keine Targeting-AI."
+    },
+    {
+      "cardId": "onr_v1_044_netspace-inverter",
+      "title": "Netspace Inverter",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "ice_control_or_server_manipulation",
+      "tacticSignals": [
+        "ice.reorder_fort",
+        "ice.reverse_fort",
+        "run.event_tempo"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "target-profile-v1",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Fort-Reorder braucht Server-Ziel, bleibt aber read-only."
+    },
+    {
+      "cardId": "onr_v1_045_newsgroup-filter",
+      "title": "Newsgroup Filter",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "economy_setup",
+      "tacticSignals": [
+        "economy.action",
+        "economy.action_credit",
+        "economy.generic"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "A: Gain [2]."
+    },
+    {
+      "cardId": "onr_v1_046_pattels-virus",
+      "title": "Pattel’s Virus",
+      "cardType": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "breaker.support",
+        "ice.strength_reduction",
+        "run.break_cost_support",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.trigger_any_successful_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "target-profile-v1",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "ICE-Ziel ist abbildbar; Virus bleibt Support ohne generischen Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_048_poltergeist",
+      "title": "Poltergeist",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "economy_setup",
+      "tacticSignals": [
+        "economy.node_trash_credit",
+        "economy.recurring",
+        "economy.recurring_trash_credit",
+        "economy.trash_credit"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Put [2] on Poltergeist when it is installed."
+    },
+    {
+      "cardId": "onr_v1_049_pox",
+      "title": "Pox",
+      "cardType": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "remote.install_tax",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.trigger_any_successful_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Whenever you make a successful run, put a Pox counter in the fort that was run."
+    },
+    {
+      "cardId": "onr_v1_050_r-and-d-protocol-files",
+      "title": "R&D-Protocol Files",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "access_hq_rnd_information",
+      "tacticSignals": [
+        "access.rnd_top_cards",
+        "info.rnd_information",
+        "info.rnd_topdeck",
+        "run.replacement_access",
+        "run.rnd_scout_run"
+      ],
+      "strategyAnchors": [
+        "runner.interface_closeout",
+        "runner.rnd_pressure"
+      ],
+      "legacyStrategicRole": [
+        "payoff_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.rnd_pressure",
+          "role": "payoff_anchor",
+          "evidence": [
+            "access.rnd_top_cards",
+            "run.rnd_scout_run"
+          ],
+          "confidence": "high"
+        },
+        {
+          "strategyId": "runner.interface_closeout",
+          "role": "payoff_anchor",
+          "evidence": [
+            "access.rnd_top_cards",
+            "run.rnd_scout_run"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "A: Make a run on R&D, but instead of accessing cards, look at the top five cards of R&D."
+    },
+    {
+      "cardId": "onr_v1_051_rabbit",
+      "title": "Rabbit",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "trace_link_defense",
+      "tacticSignals": [
+        "defense.trace_defense",
+        "defense.trace_limit_reduction"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Ice that attempts to trace you has its trace limit reduced by 1."
+    },
+    {
+      "cardId": "onr_v1_057_scatter-shot",
+      "title": "Scatter Shot",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "economy_setup",
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_trash_credit",
+        "economy.trash_credit",
+        "economy.upgrade_trash_credit"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Put [2] from the bank on Scatter Shot when it is installed."
+    },
+    {
+      "cardId": "onr_v1_058_seeya",
+      "title": "SeeYa",
+      "cardType": "program",
+      "subtypes": [
+        "detection"
+      ],
+      "mechanicalFamily": "detection_expose_scouting",
+      "tacticSignals": [
+        "info.expose",
+        "info.expose_installed_card"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "target-profile-v1",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Expose-Ziel ist eine installierte Karte; nur oeffentliche oder runnerbekannte Informationen werden beschrieben."
+    },
+    {
+      "cardId": "onr_v1_059_self-modifying-code",
+      "title": "Self-Modifying Code",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "program_search_install_protection",
+      "tacticSignals": [
+        "setup.install_during_run",
+        "setup.install_support",
+        "setup.program_install",
+        "setup.program_search",
+        "setup.search"
+      ],
+      "strategyAnchors": [
+        "runner.search.breaker"
+      ],
+      "legacyStrategicRole": [
+        "engine_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.search.breaker",
+          "role": "engine_anchor",
+          "evidence": [
+            "setup.search",
+            "setup.program_search",
+            "setup.program_install"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "target-profile-v1",
+      "targetProfileKinds": [
+        "stack"
+      ],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Generated/active Profile beschreiben Programmsuche und Run-Install; keine Targeting-AI."
+    },
+    {
+      "cardId": "onr_v1_061_shield",
+      "title": "Shield",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "damage_prevention_survival",
+      "tacticSignals": [
+        "defense.damage_prevention",
+        "defense.net_damage_prevention"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Prevents up to 2 Net damage each turn."
+    },
+    {
+      "cardId": "onr_v1_062_shredder-uplink-protocol",
+      "title": "Shredder Uplink Protocol",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "access_hq_rnd_information",
+      "tacticSignals": [
+        "access.hq_via_archives",
+        "run.central_access_conversion",
+        "run.replacement_access"
+      ],
+      "strategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "legacyStrategicRole": [
+        "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.hq_pressure",
+          "role": "enabler",
+          "evidence": [
+            "access.hq_via_archives",
+            "run.central_access_conversion"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "A: Make a run on the Archives."
+    },
+    {
+      "cardId": "onr_v1_063_signpost",
+      "title": "Signpost",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "trace_link_defense",
+      "tacticSignals": [
+        "defense.trace_boost",
+        "defense.trace_defense"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "1: +2 link."
+    },
+    {
+      "cardId": "onr_v1_064_skivviss",
+      "title": "Skivviss",
+      "cardType": "program",
+      "subtypes": [
+        "virus"
+      ],
+      "mechanicalFamily": "virus_program",
+      "tacticSignals": [
+        "corp.draw_pressure",
+        "setup.draw",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.trigger_rnd"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Whenever you make a successful run on R&D, give the Corp a Skivviss counter."
+    },
+    {
+      "cardId": "onr_v1_065_smarteye",
+      "title": "Smarteye",
+      "cardType": "program",
+      "subtypes": [
+        "detection"
+      ],
+      "mechanicalFamily": "detection_expose_scouting",
+      "tacticSignals": [
+        "info.expose",
+        "info.ice_approach_expose",
+        "run.event_tempo",
+        "run.safe_jackout_window"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "target-profile-v1",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Expose-Ziel ist das naechste ICE im Approach-Fenster."
+    },
+    {
+      "cardId": "onr_v1_067_speed-trap",
+      "title": "Speed Trap",
+      "cardType": "program",
+      "subtypes": [
+        "detection"
+      ],
+      "mechanicalFamily": "detection_expose_scouting",
+      "tacticSignals": [
+        "run.event_tempo",
+        "run.jackout_vs_node_upgrade"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "0: Jack out before an upgrade or node takes effect."
+    },
+    {
+      "cardId": "onr_v1_068_startup-immolator",
+      "title": "Startup Immolator",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "ice_control_or_server_manipulation",
+      "tacticSignals": [
+        "ice.trash_after_full_break"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "use_target"
+      ],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "ICE-Ziel ist abbildbar; die Voraussetzung all_subroutines_broken bleibt Schema-Gap."
+    },
+    {
+      "cardId": "onr_v1_069_succubus",
+      "title": "Succubus",
+      "cardType": "program",
+      "subtypes": [
+        "daemon"
+      ],
+      "mechanicalFamily": "daemon_hosting",
+      "tacticSignals": [
+        "setup.hosted_program_loss_risk",
+        "setup.program_host"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "target-profile-v1",
+      "targetProfileKinds": [
+        "hosted_install_target"
+      ],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "changed",
+      "rationale": "Succubus can host up to 3 MU of programs."
+    },
+    {
+      "cardId": "onr_v1_071_vewy-vewy-quiet",
+      "title": "Vewy Vewy Quiet",
+      "cardType": "program",
+      "subtypes": [
+        "stealth"
+      ],
+      "mechanicalFamily": "stealth_or_recurring_credit",
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Put 2 from the bank on Vewy Vewy Quiet when it is installed."
+    },
+    {
+      "cardId": "onr_v1_075_zetatech-software-installer",
+      "title": "Zetatech Software Installer",
+      "cardType": "program",
+      "subtypes": [],
+      "mechanicalFamily": "economy_setup",
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_install_credit",
+        "setup.install_discount",
+        "setup.program_install_credit"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Put 2 bits on Software Installer when it is installed."
+    }
+  ],
+  "verification": [
+    {
+      "command": "node scripts/check-ai-derived-facts.mjs --write",
+      "status": "passed",
+      "result": "AI_DERIVED_FACTS OK pilotCards=193 implementations=193 derivedFacts=193 overlaps=119 manualOverlay=126 errors=0 warnings=978"
+    },
+    {
+      "command": "node scripts/check-ai-derived-facts-full.mjs --write",
+      "status": "passed",
+      "result": "AI_DERIVED_FACTS_FULL OK active=564 implementations=527 generated=391 overlays=6 fallback=136 errors=0 warnings=1792"
+    },
+    {
+      "command": "corepack pnpm build:ai-compiled-hints",
+      "status": "passed",
+      "result": "AI_COMPILED_HINTS OK cards=564 generated=391 overlays=6 fallback=136 errors=0 warnings=1792"
+    },
+    {
+      "command": "corepack pnpm build:ai-hint-inspector-index",
+      "status": "passed",
+      "result": "AI_HINT_INSPECTOR_INDEX OK cards=564 mechanical=426 generated=318 overlays=6 signals=384 anchors=202 warnings=316"
+    },
+    {
+      "command": "node scripts/check-ai-hint-compiled-index.mjs --write",
+      "status": "passed",
+      "result": "AI_HINT_COMPILED_INDEX OK cards=193 errors=0 warnings=657"
+    },
+    {
+      "command": "corepack pnpm check:ai-strategy-taxonomy",
+      "status": "passed",
+      "result": "AI_STRATEGY_TAXONOMY OK strategies=20 strategicRoles=11 functionSignals=161 lineSupport=14 errors=0 warnings=63"
+    },
+    {
+      "command": "corepack pnpm check:ai-compiled-hints",
+      "status": "passed",
+      "result": "AI_COMPILED_HINTS OK cards=564 generated=391 overlays=6 fallback=136 errors=0 warnings=1792"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-inspector-index",
+      "status": "passed",
+      "result": "AI_HINT_INSPECTOR_INDEX OK cards=564 mechanical=426 generated=318 overlays=6 signals=384 anchors=202 warnings=316"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-compiled-index",
+      "status": "passed",
+      "result": "AI_HINT_COMPILED_INDEX OK cards=193 errors=0 warnings=657"
+    },
+    {
+      "command": "corepack pnpm check:ai-manual-overlays",
+      "status": "passed",
+      "result": "AI_MANUAL_OVERLAYS OK overlayFiles=2 overlayCards=6 errors=0 warnings=24"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-quality",
+      "status": "passed",
+      "result": "AI_HINT_QUALITY OK hints=564 roles=251 planRoles=102 errors=0 warnings=150 benchmarkCards=308"
+    },
+    {
+      "command": "corepack pnpm check:ai-approval-consistency",
+      "status": "passed",
+      "result": "CONSISTENCY_OK 564 ai_supported cards"
+    },
+    {
+      "command": "corepack pnpm check:ai-deck-doctrine-strategy",
+      "status": "passed",
+      "result": "AI006 DeckDoctrine strategy aggregation check passed: 5 deck profiles"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai test",
+      "status": "passed",
+      "result": "32 files, 624 tests passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit",
+      "status": "passed",
+      "result": "passed with no diagnostics"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/web exec tsc -p tsconfig.json --noEmit",
+      "status": "passed",
+      "result": "passed with no diagnostics"
+    },
+    {
+      "command": "node <ai019 custom report invariant check>",
+      "status": "passed",
+      "result": "status=ok scope=98 frozen=42 reviewed=56 postReviewAssignments=56 newTacticSignals=73 strategySupportPairs=15"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "result": "passed with no whitespace errors"
+    }
+  ]
+}

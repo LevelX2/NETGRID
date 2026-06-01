@@ -358,11 +358,12 @@
         "effect:link",
         "effect:trace_defense"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -512,12 +513,13 @@
         "condition:requires_successful_run",
         "effect:hq_info"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects"],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 2,
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",
@@ -632,8 +634,8 @@
         "generated_fact_absent_from_monolith": 1,
         "overlay_strategy_field_not_in_monolith": 1
       },
-      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 6,
       "rationale": "Topdeck information is mechanically derivable, but the strategic R&D pressure value stays overlay-only.",
       "doNotMigrateFields": [
@@ -713,11 +715,12 @@
         "effect:prevention_replacement",
         "effect:remove_brain_damage"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -803,11 +806,12 @@
         "condition:requires_accessed_card",
         "effect:hq_info"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -850,11 +854,12 @@
         "effect:damage_prevention",
         "effect:net_damage_prevention"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -891,16 +896,17 @@
         "condition:requires_successful_run",
         "effect:expose_info"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects", "targetProfiles"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 6,
       "rationale": "Successful-run expose counter is derivable as remote information; target choice and board visibility remain context.",
       "doNotMigrateFields": [
@@ -974,11 +980,12 @@
         "condition:requires_program_trash",
         "effect:program_trash_prevention"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects", "targetProfiles"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -1124,16 +1131,16 @@
       ],
       "generatedFields": ["effects"],
       "generatedMechanicalFacts": ["effect:expose_info"],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects", "targetProfiles"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 1,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 1
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 6,
       "rationale": "Activated installed-card expose is a stable mechanical information fact.",
       "doNotMigrateFields": [
@@ -1177,8 +1184,8 @@
         "generated_fact_absent_from_monolith": 3,
         "overlay_strategy_field_not_in_monolith": 1
       },
-      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 2,
       "rationale": "Search, top-five target profile, free install and once-per-run are derivable, but install legality still belongs to LegalActions.",
       "doNotMigrateFields": [
@@ -1216,11 +1223,10 @@
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 1,
-        "generated_fact_absent_from_monolith": 1,
-        "manual_review_candidate": 1
+        "generated_fact_absent_from_monolith": 1
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 12,
       "rationale": "Activated Runner credit gain is derivable action economy, but click availability and action choice remain LegalAction/consumer context.",
       "doNotMigrateFields": [
@@ -1288,10 +1294,11 @@
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 1,
-        "generated_fact_absent_from_monolith": 1
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 2,
       "rationale": "Dedicated trash-credit facts are mechanical and stable, but currently less critical than active consumer-facing effect classes.",
       "doNotMigrateFields": [
@@ -1364,11 +1371,12 @@
         "condition:requires_trace_attempt",
         "effect:trace_defense"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -1552,10 +1560,11 @@
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 1,
-        "generated_fact_absent_from_monolith": 1
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 2,
       "rationale": "Dedicated trash-credit facts are mechanical and stable, but currently less critical than active consumer-facing effect classes.",
       "doNotMigrateFields": [
@@ -1583,16 +1592,16 @@
       ],
       "generatedFields": ["effects"],
       "generatedMechanicalFacts": ["effect:expose_info"],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects", "targetProfiles"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 1,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 1
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 6,
       "rationale": "Activated installed-card expose is a stable mechanical information fact with payment context.",
       "doNotMigrateFields": [
@@ -1627,15 +1636,15 @@
       ],
       "monolithFields": ["effects", "conditions", "costProfile"],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["conditions", "targetProfiles"],
+      "generatedOnlyFields": ["conditions", "effects", "targetProfiles"],
       "overlayFields": ["lineSupport", "manualNotes", "quality"],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
-        "generated_fact_absent_from_monolith": 2,
+        "generated_fact_absent_from_monolith": 3,
         "overlay_strategy_field_not_in_monolith": 1
       },
-      "recommendedNextAction": "ready_for_overlay_only_strategy_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 2,
       "rationale": "Search and targetProfiles.installCost=normal are now aligned; actual installation still remains LegalAction-gated.",
       "doNotMigrateFields": [
@@ -1711,11 +1720,12 @@
         "effect:damage_prevention",
         "effect:net_damage_prevention"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -1752,16 +1762,17 @@
         "condition:requires_successful_run",
         "effect:access_replacement"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 6,
       "rationale": "Archive-run to HQ-success access replacement is derivable and must stay distinct from normal Archives access.",
       "doNotMigrateFields": [
@@ -1794,11 +1805,12 @@
         "effect:link",
         "effect:trace_defense"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -1835,11 +1847,12 @@
         "condition:requires_during_run",
         "effect:expose_info"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects", "targetProfiles"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },

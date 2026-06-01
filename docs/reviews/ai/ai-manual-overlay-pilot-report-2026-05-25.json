@@ -152,7 +152,7 @@
     }
   ],
   "hardErrorCount": 0,
-  "warningCount": 25,
+  "warningCount": 24,
   "errors": [],
   "warnings": [
     {
@@ -212,14 +212,8 @@
     {
       "kind": "missing_manual_overlay_pilot_card",
       "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
-      "cardId": "onr_v1_042_mouse",
-      "title": "Mouse"
-    },
-    {
-      "kind": "missing_manual_overlay_pilot_card",
-      "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
-      "cardId": "onr_v1_045_newsgroup-filter",
-      "title": "Newsgroup Filter"
+      "cardId": "onr_v1_048_poltergeist",
+      "title": "Poltergeist"
     },
     {
       "kind": "missing_manual_overlay_pilot_card",
@@ -230,8 +224,8 @@
     {
       "kind": "missing_manual_overlay_pilot_card",
       "message": "Card is marked as needing manual overlay in a chosen pilot segment but is absent from overlay files.",
-      "cardId": "onr_v1_058_seeya",
-      "title": "SeeYa"
+      "cardId": "onr_v1_057_scatter-shot",
+      "title": "Scatter Shot"
     },
     {
       "kind": "missing_manual_overlay_pilot_card",

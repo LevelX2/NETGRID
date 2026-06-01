@@ -14,10 +14,10 @@
   "includedCardCount": 13,
   "excludedCardCount": 4,
   "confirmedGeneratedFactCount": 27,
-  "previewAddedFactCount": 12,
+  "previewAddedFactCount": 4,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 29,
+  "normalizedDifferenceCount": 36,
   "remainingDifferenceCount": 0,
   "successfulRunContextInfoCount": 7,
   "accessContextInfoCount": 7,
@@ -37,12 +37,12 @@
   },
   "normalizationRuleCounts": {
     "rd_topdeck_info_normalization": 2,
-    "hq_info_normalization": 4,
-    "central_access_replacement_normalization": 8,
+    "hq_info_normalization": 6,
+    "central_access_replacement_normalization": 9,
     "central_multiaccess_or_interface_normalization": 6,
     "successful_run_context_normalization": 7,
     "access_context_normalization": 7,
-    "expose_or_remote_info_context_normalization": 6,
+    "expose_or_remote_info_context_normalization": 10,
     "zone_shuffle_or_topdeck_manipulation_normalization": 3,
     "central_pressure_overlay_split_normalization": 9,
     "board_context_required_classification": 0,
@@ -69,14 +69,18 @@
         "condition:requires_successful_run",
         "effect:hq_info"
       ],
-      "previewAdds": [
-        "condition:requires_successful_run",
-        "effect:hq_info"
-      ],
+      "previewAdds": [],
       "normalizedDifferences": [
         {
           "field": "conditions",
-          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "hq_info_context_normalized",
+          "rule": "hq_info_normalization",
+          "rationale": "HQ information effects are normalized as legal access/start-turn context, not static knowledge of the Corp hand."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "classification": "hq_info_context_normalized",
           "rule": "hq_info_normalization",
           "rationale": "HQ information effects are normalized as legal access/start-turn context, not static knowledge of the Corp hand."
@@ -200,13 +204,19 @@
         "effect:hq_info"
       ],
       "previewAdds": [
-        "condition:requires_accessed_card",
-        "effect:hq_info"
+        "condition:requires_accessed_card"
       ],
       "normalizedDifferences": [
         {
           "field": "conditions",
           "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "hq_info_context_normalized",
+          "rule": "hq_info_normalization",
+          "rationale": "HQ information effects are normalized as legal access/start-turn context, not static knowledge of the Corp hand."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "classification": "hq_info_context_normalized",
           "rule": "hq_info_normalization",
           "rationale": "HQ information effects are normalized as legal access/start-turn context, not static knowledge of the Corp hand."
@@ -270,13 +280,19 @@
         "effect:expose_info"
       ],
       "previewAdds": [
-        "condition:requires_successful_run",
-        "effect:expose_info"
+        "condition:requires_successful_run"
       ],
       "normalizedDifferences": [
         {
           "field": "conditions",
           "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "expose_info_context_normalized",
+          "rule": "expose_or_remote_info_context_normalization",
+          "rationale": "Expose effects are normalized as legal installed-card information effects and do not reveal hidden cards before the effect resolves."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "classification": "expose_info_context_normalized",
           "rule": "expose_or_remote_info_context_normalization",
           "rationale": "Expose effects are normalized as legal installed-card information effects and do not reveal hidden cards before the effect resolves."
@@ -407,10 +423,15 @@
       "generatedFactsConfirmed": [
         "effect:expose_info"
       ],
-      "previewAdds": [
-        "effect:expose_info"
-      ],
+      "previewAdds": [],
       "normalizedDifferences": [
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "expose_info_context_normalized",
+          "rule": "expose_or_remote_info_context_normalization",
+          "rationale": "Expose effects are normalized as legal installed-card information effects and do not reveal hidden cards before the effect resolves."
+        },
         {
           "field": "effects",
           "sourceWarningKind": "generated_fact_missing_from_active_monolith",
@@ -537,10 +558,15 @@
       "generatedFactsConfirmed": [
         "effect:expose_info"
       ],
-      "previewAdds": [
-        "effect:expose_info"
-      ],
+      "previewAdds": [],
       "normalizedDifferences": [
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "expose_info_context_normalized",
+          "rule": "expose_or_remote_info_context_normalization",
+          "rationale": "Expose effects are normalized as legal installed-card information effects and do not reveal hidden cards before the effect resolves."
+        },
         {
           "field": "effects",
           "sourceWarningKind": "generated_fact_missing_from_active_monolith",
@@ -588,13 +614,19 @@
         "effect:access_replacement"
       ],
       "previewAdds": [
-        "condition:requires_successful_run",
-        "effect:access_replacement"
+        "condition:requires_successful_run"
       ],
       "normalizedDifferences": [
         {
           "field": "conditions",
           "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "central_access_replacement_context_normalized",
+          "rule": "central_access_replacement_normalization",
+          "rationale": "Access replacement is normalized as a distinct mechanical fact and is not treated as normal access or automatic steal/trash value."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "classification": "central_access_replacement_context_normalized",
           "rule": "central_access_replacement_normalization",
           "rationale": "Access replacement is normalized as a distinct mechanical fact and is not treated as normal access or automatic steal/trash value."
@@ -658,13 +690,19 @@
         "effect:expose_info"
       ],
       "previewAdds": [
-        "condition:requires_during_run",
-        "effect:expose_info"
+        "condition:requires_during_run"
       ],
       "normalizedDifferences": [
         {
           "field": "conditions",
           "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "expose_info_context_normalized",
+          "rule": "expose_or_remote_info_context_normalization",
+          "rationale": "Expose effects are normalized as legal installed-card information effects and do not reveal hidden cards before the effect resolves."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "classification": "expose_info_context_normalized",
           "rule": "expose_or_remote_info_context_normalization",
           "rationale": "Expose effects are normalized as legal installed-card information effects and do not reveal hidden cards before the effect resolves."

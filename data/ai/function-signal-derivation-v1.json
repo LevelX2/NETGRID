@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI018c",
-  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018",
+  "taskId": "AI019",
+  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c",
   "generatedAt": "2026-06-01",
-  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI018c adds flat subtype-limited breaker tactic signals for Dogcatcher and Reflector and suppresses broad AP/Watchdog coverage signals when the breakerProfile restriction proves subtype-limited coverage. No planner, targeting-AI, action-score, plan-weight, engine, legality, profile, default, UI, or baseline effects.",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI019 adds controlled Runner-program semantics for non-Icebreaker programs without planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default or UI-derivation effects.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -32,6 +32,48 @@
   ],
   "derivationRules": [
     {
+      "signalId": "access.free_trash",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "target": "free_trash"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "free_trash"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "access.hq_full_reveal",
+      "source": "effects",
+      "match": {
+        "kind": "hq_info",
+        "target": "full_reveal"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "full_reveal"
+        ]
+      },
+      "strategyAnchorFor": [
+        "runner.hq_pressure"
+      ]
+    },
+    {
       "signalId": "access.hq_multiaccess",
       "source": "effects",
       "match": {
@@ -54,6 +96,76 @@
       "strategyAnchorFor": [
         "runner.hq_pressure",
         "runner.interface_closeout"
+      ]
+    },
+    {
+      "signalId": "access.hq_random_reveal",
+      "source": "effects",
+      "match": {
+        "kind": "hq_info",
+        "target": "random_reveal"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "random_reveal"
+        ]
+      },
+      "strategyAnchorFor": [
+        "runner.hq_pressure"
+      ]
+    },
+    {
+      "signalId": "access.hq_trash_pressure",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "scope": "hq",
+        "target": "access_trash_pressure"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "hq"
+        ],
+        "target": [
+          "access_trash_pressure"
+        ]
+      },
+      "strategyAnchorFor": [
+        "runner.hq_pressure"
+      ]
+    },
+    {
+      "signalId": "access.hq_via_archives",
+      "source": "effects",
+      "match": {
+        "kind": "access_replacement",
+        "target": "hq_via_archives"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "hq_via_archives"
+        ]
+      },
+      "strategyAnchorFor": [
+        "runner.hq_pressure"
       ]
     },
     {
@@ -128,14 +240,133 @@
       ]
     },
     {
-      "signalId": "breaker.ap",
-      "source": "breakerProfile.coverage",
+      "signalId": "access.rnd_top_card",
+      "source": "effects",
       "match": {
-        "coverage": "ap"
+        "kind": "topdeck_info",
+        "target": "top_card"
       },
       "gates": {
-        "breakerProfileRestrictionAbsent": [
-          "stun_hellbolt_knockout_only"
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "top_card"
+        ]
+      },
+      "strategyAnchorFor": [
+        "runner.rnd_pressure"
+      ]
+    },
+    {
+      "signalId": "access.rnd_top_cards",
+      "source": "effects",
+      "match": {
+        "kind": "topdeck_info",
+        "target": "top_cards"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "top_cards"
+        ]
+      },
+      "strategyAnchorFor": [
+        "runner.rnd_pressure"
+      ]
+    },
+    {
+      "signalId": "access.rnd_top_reorder",
+      "source": "effects",
+      "match": {
+        "kind": "topdeck_info",
+        "target": "reorder"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "reorder"
+        ]
+      },
+      "strategyAnchorFor": [
+        "runner.rnd_pressure"
+      ]
+    },
+    {
+      "signalId": "access.rnd_trash_pressure",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "scope": "rnd",
+        "target": "access_trash_pressure"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "rnd"
+        ],
+        "target": [
+          "access_trash_pressure"
+        ]
+      },
+      "strategyAnchorFor": [
+        "runner.rnd_pressure"
+      ]
+    },
+    {
+      "signalId": "access.trash_untrashable",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "target": "trash_untrashable"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "trash_untrashable"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "action.turn_limit_penalty",
+      "source": "effects",
+      "match": {
+        "kind": "action_penalty",
+        "scope": "runner"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "runner"
         ]
       },
       "strategyAnchorFor": []
@@ -152,6 +383,19 @@
         ],
         "cardType": [
           "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.ap",
+      "source": "breakerProfile.coverage",
+      "match": {
+        "coverage": "ap"
+      },
+      "gates": {
+        "breakerProfileRestrictionAbsent": [
+          "stun_hellbolt_knockout_only"
         ]
       },
       "strategyAnchorFor": []
@@ -425,14 +669,6 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "breaker.sentry",
-      "source": "breakerProfile.coverage",
-      "match": {
-        "coverage": "sentry"
-      },
-      "strategyAnchorFor": []
-    },
-    {
       "signalId": "breaker.sentry_subtype_limited",
       "source": "breakerProfile.restrictions",
       "match": {
@@ -445,6 +681,14 @@
         "cardType": [
           "program"
         ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.sentry",
+      "source": "breakerProfile.coverage",
+      "match": {
+        "coverage": "sentry"
       },
       "strategyAnchorFor": []
     },
@@ -722,6 +966,190 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "corp.action_denial",
+      "source": "effects",
+      "match": {
+        "kind": "action_penalty",
+        "scope": "corp"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "corp"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp.bad_publicity_pressure",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "target": "bad_publicity_pressure"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "bad_publicity_pressure"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp.draw_pressure",
+      "source": "effects",
+      "match": {
+        "kind": "draw",
+        "scope": "corp",
+        "target": "draw_pressure"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "corp"
+        ],
+        "target": [
+          "draw_pressure"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp.economy_pressure",
+      "source": "effects",
+      "match": {
+        "kind": "counter_economy",
+        "scope": "corp"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "corp"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp.hand_size_pressure",
+      "source": "effects",
+      "match": {
+        "kind": "hand_size_modifier",
+        "scope": "corp"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "corp"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp.install_punish",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "target": "install_punish"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "install_punish"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp.random_discard_pressure",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "target": "random_discard"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "random_discard"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp.rez_tax_pressure",
+      "source": "effects",
+      "match": {
+        "kind": "rez",
+        "target": "force_rez"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "force_rez"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp.rnd_trash_pressure",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "target": "rnd_trash"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "rnd_trash"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "damage.payoff",
       "source": "effects",
       "match": {
@@ -772,6 +1200,57 @@
       ]
     },
     {
+      "signalId": "defense.base_link",
+      "source": "effects",
+      "match": {
+        "kind": "base_link"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "trace"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "defense.brain_damage_prevention",
+      "source": "effects",
+      "match": {
+        "kind": "brain_damage_prevention"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "defense.brain_damage_reset",
+      "source": "effects",
+      "match": {
+        "kind": "remove_brain_damage"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "defense.damage_prevention",
       "source": "effects",
       "match": {
@@ -810,6 +1289,79 @@
       ]
     },
     {
+      "signalId": "defense.flatline_prevention",
+      "source": "effects",
+      "match": {
+        "kind": "flatline_prevention"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
+      "strategyAnchorFor": [
+        "runner.survival_defense"
+      ]
+    },
+    {
+      "signalId": "defense.meat_damage_immunity",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_survival_modifier",
+        "target": "meat_damage_immunity"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "meat_damage_immunity"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "defense.meat_damage_prevention",
+      "source": "effects",
+      "match": {
+        "kind": "meat_damage_prevention"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "defense.net_damage_prevention",
+      "source": "effects",
+      "match": {
+        "kind": "net_damage_prevention"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "defense.tag_prevention",
       "source": "effects",
       "match": {
@@ -828,6 +1380,26 @@
       ]
     },
     {
+      "signalId": "defense.trace_boost",
+      "source": "effects",
+      "match": {
+        "kind": "link",
+        "target": "trace_boost"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "trace_boost"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "defense.trace_defense",
       "source": "effects",
       "match": {
@@ -842,9 +1414,7 @@
           "trace"
         ]
       },
-      "strategyAnchorFor": [
-        "runner.survival_defense"
-      ]
+      "strategyAnchorFor": []
     },
     {
       "signalId": "defense.trace_defense",
@@ -861,9 +1431,46 @@
           "trace"
         ]
       },
-      "strategyAnchorFor": [
-        "runner.survival_defense"
-      ]
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "defense.trace_limit_reduction",
+      "source": "effects",
+      "match": {
+        "kind": "link_penalty"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "trace"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.action_credit",
+      "source": "effects",
+      "match": {
+        "kind": "action_economy",
+        "resource": "credits"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "economy.action",
@@ -926,10 +1533,22 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "economy.recurring",
+      "signalId": "economy.node_trash_credit",
       "source": "effects",
       "match": {
-        "kind": "recurring_economy"
+        "kind": "trash_credit",
+        "target": "node"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "node"
+        ]
       },
       "strategyAnchorFor": []
     },
@@ -986,6 +1605,54 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "economy.recurring_install_credit",
+      "source": "effects",
+      "match": {
+        "kind": "recurring_economy",
+        "target": "program_install"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "program_install"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.recurring_trash_credit",
+      "source": "effects",
+      "match": {
+        "kind": "recurring_economy",
+        "target": "trash_cost"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "trash_cost"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.recurring",
+      "source": "effects",
+      "match": {
+        "kind": "recurring_economy"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "economy.rez_discount",
       "source": "effects",
       "match": {
@@ -1037,9 +1704,47 @@
           "accessed_card"
         ]
       },
-      "strategyAnchorFor": [
-        "runner.remote_trash"
-      ]
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.upgrade_trash_credit",
+      "source": "effects",
+      "match": {
+        "kind": "trash_credit",
+        "target": "upgrade"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "upgrade"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "ice.derez",
+      "source": "effects",
+      "match": {
+        "kind": "rez",
+        "target": "derez"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "derez"
+        ]
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "ice.etr",
@@ -1063,6 +1768,26 @@
       ]
     },
     {
+      "signalId": "ice.force_rez",
+      "source": "effects",
+      "match": {
+        "kind": "rez",
+        "target": "force_rez"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "force_rez"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "ice.future_pressure",
       "source": "effects",
       "match": {
@@ -1083,6 +1808,46 @@
       "strategyAnchorFor": [
         "corp.ice_tax_glacier"
       ]
+    },
+    {
+      "signalId": "ice.reorder_fort",
+      "source": "effects",
+      "match": {
+        "kind": "future_run_effect",
+        "target": "reorder_fort"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "reorder_fort"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "ice.reverse_fort",
+      "source": "effects",
+      "match": {
+        "kind": "future_run_effect",
+        "target": "reverse_fort"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "reverse_fort"
+        ]
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "ice.strength_modifier",
@@ -1208,12 +1973,94 @@
       ]
     },
     {
+      "signalId": "ice.trash_after_full_break",
+      "source": "effects",
+      "match": {
+        "kind": "ice_trash",
+        "target": "post_full_break"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "post_full_break"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "info.expose_fort",
+      "source": "effects",
+      "match": {
+        "kind": "expose_info",
+        "scope": "server"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "server"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "info.expose_installed_card",
+      "source": "effects",
+      "match": {
+        "kind": "expose_info",
+        "scope": "installed_card"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "installed_card"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "info.expose",
       "source": "effects",
       "match": {
         "kind": "expose_info"
       },
       "strategyAnchorFor": []
+    },
+    {
+      "signalId": "info.hq_information",
+      "source": "effects",
+      "match": {
+        "kind": "hq_info",
+        "scope": "hq"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "hq"
+        ]
+      },
+      "strategyAnchorFor": [
+        "runner.hq_pressure"
+      ]
     },
     {
       "signalId": "info.hq",
@@ -1232,6 +2079,90 @@
       },
       "strategyAnchorFor": [
         "runner.hq_pressure"
+      ]
+    },
+    {
+      "signalId": "info.ice_approach_expose",
+      "source": "effects",
+      "match": {
+        "kind": "expose_info",
+        "target": "approach_ice"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "approach_ice"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "info.persistent_expose",
+      "source": "effects",
+      "match": {
+        "kind": "expose_info",
+        "target": "persistent_expose"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "persistent_expose"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "info.rnd_information",
+      "source": "effects",
+      "match": {
+        "kind": "topdeck_info",
+        "scope": "rnd"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "rnd"
+        ]
+      },
+      "strategyAnchorFor": [
+        "runner.rnd_pressure"
+      ]
+    },
+    {
+      "signalId": "info.rnd_manipulation",
+      "source": "effects",
+      "match": {
+        "kind": "topdeck_info",
+        "target": "reorder"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "reorder"
+        ]
+      },
+      "strategyAnchorFor": [
+        "runner.rnd_pressure"
       ]
     },
     {
@@ -1257,6 +2188,26 @@
       "strategyAnchorFor": [
         "runner.rnd_pressure"
       ]
+    },
+    {
+      "signalId": "remote.agenda_difficulty_tax",
+      "source": "effects",
+      "match": {
+        "kind": "remote_tax",
+        "target": "agenda_difficulty"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "agenda_difficulty"
+        ]
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "remote.agenda_steal_tax",
@@ -1346,6 +2297,26 @@
       "strategyAnchorFor": [
         "corp.ambush_bluff"
       ]
+    },
+    {
+      "signalId": "remote.install_tax",
+      "source": "effects",
+      "match": {
+        "kind": "remote_tax",
+        "target": "install_tax"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "install_tax"
+        ]
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "remote.scoring_protection",
@@ -1439,6 +2410,46 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "run.central_access_conversion",
+      "source": "effects",
+      "match": {
+        "kind": "access_replacement",
+        "target": "central_access_conversion"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "central_access_conversion"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "run.ends_run_after_effect",
+      "source": "effects",
+      "match": {
+        "kind": "future_run_effect",
+        "target": "ends_run_after_effect"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "ends_run_after_effect"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "run.event_tempo",
       "source": "effects",
       "match": {
@@ -1493,6 +2504,26 @@
       ]
     },
     {
+      "signalId": "run.jackout_vs_node_upgrade",
+      "source": "effects",
+      "match": {
+        "kind": "future_run_effect",
+        "target": "jackout_vs_node_upgrade"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "jackout_vs_node_upgrade"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "run.lock",
       "source": "effects",
       "match": {
@@ -1519,6 +2550,62 @@
       "strategyAnchorFor": [
         "runner.run_event_tempo"
       ]
+    },
+    {
+      "signalId": "run.replacement_access",
+      "source": "effects",
+      "match": {
+        "kind": "access_replacement"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "run.rnd_scout_run",
+      "source": "effects",
+      "match": {
+        "kind": "access_replacement",
+        "target": "rnd_scout_run"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "rnd_scout_run"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "run.safe_jackout_window",
+      "source": "effects",
+      "match": {
+        "kind": "future_run_effect",
+        "target": "safe_jackout"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "safe_jackout"
+        ]
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "score.advance_burst",
@@ -1608,6 +2695,27 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "setup.hand_size_penalty",
+      "source": "effects",
+      "match": {
+        "kind": "hand_size_modifier",
+        "scope": "runner",
+        "amount": -1
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "setup.hand_size",
       "source": "effects",
       "match": {
@@ -1625,10 +2733,47 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "setup.hosted_program_loss_risk",
+      "source": "effects",
+      "match": {
+        "kind": "program_host",
+        "target": "program"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "setup.install_discount",
       "source": "effects",
       "match": {
         "kind": "install_discount"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.install_during_run",
+      "source": "effects",
+      "match": {
+        "kind": "install",
+        "timing": "during_run"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
       },
       "strategyAnchorFor": []
     },
@@ -1688,6 +2833,102 @@
         ],
         "effectScope": [
           "runner"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.program_install_credit",
+      "source": "effects",
+      "match": {
+        "kind": "recurring_economy",
+        "target": "program_install"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "program_install"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.program_install",
+      "source": "effects",
+      "match": {
+        "kind": "install",
+        "target": "program"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.program_protection",
+      "source": "effects",
+      "match": {
+        "kind": "program_trash_prevention"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.program_search",
+      "source": "effects",
+      "match": {
+        "kind": "search",
+        "target": "program"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.program_trash_prevention",
+      "source": "effects",
+      "match": {
+        "kind": "program_trash_prevention",
+        "target": "program"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "program"
         ]
       },
       "strategyAnchorFor": []
@@ -1758,6 +2999,46 @@
           "stack",
           "stack_top",
           "heap"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.self_bounce",
+      "source": "effects",
+      "match": {
+        "kind": "program_trash_prevention",
+        "target": "self_bounce"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "self_bounce"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.stack_top_program_install",
+      "source": "effects",
+      "match": {
+        "kind": "install",
+        "target": "stack_top_program"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "stack_top_program"
         ]
       },
       "strategyAnchorFor": []
@@ -1971,6 +3252,202 @@
       "strategyAnchorFor": [
         "corp.tag_trace_punish"
       ]
+    },
+    {
+      "signalId": "virus.counter_amplification",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "target": "counter_amplification"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "counter_amplification"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "virus.counter_engine",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "target": "virus"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "virus"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "virus.purge_tax",
+      "source": "effects",
+      "match": {
+        "kind": "delayed_penalty",
+        "target": "virus_purge"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "virus_purge"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "virus.random_payload",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "target": "random_payload"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "random_payload"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "virus.trigger_any_successful_run",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "scope": "server",
+        "target": "virus"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "server"
+        ],
+        "target": [
+          "virus"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "virus.trigger_hq",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "scope": "hq",
+        "target": "virus"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "hq"
+        ],
+        "target": [
+          "virus"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "virus.trigger_multi_central",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "target": "virus_multi_central"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "virus_multi_central"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "virus.trigger_remote",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "scope": "remote",
+        "target": "virus"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "remote"
+        ],
+        "target": [
+          "virus"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "virus.trigger_rnd",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "scope": "rnd",
+        "target": "virus"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "rnd"
+        ],
+        "target": [
+          "virus"
+        ]
+      },
+      "strategyAnchorFor": []
     }
   ],
   "descriptorGaps": [
@@ -1985,6 +3462,10 @@
     {
       "gapId": "interface_closeout_density_requires_aggregation",
       "description": "Interface closeout is a DeckDoctrine aggregation over multiaccess density and central reach, not a per-card generic function tag."
+    },
+    {
+      "gapId": "ai019_strategy_role_pairs_report_only",
+      "description": "AI019 records strategySupportPairs in the review report because the active hint schema still has independent lineSupport and strategicRole arrays."
     }
   ]
 }

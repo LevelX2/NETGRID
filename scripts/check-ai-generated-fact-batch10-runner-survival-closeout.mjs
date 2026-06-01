@@ -197,7 +197,7 @@ const OPTIONAL_EXCLUDES = [
     implementationPath:
       "packages/engine/src/card-implementations/onr-v1/runner/programs/baedekers-net-map.ts",
     excludedReason:
-      "Catalog and implementation identify this as a Runner program, but the active monolith hint currently says hardware; excluded from Batch 10 rather than normalizing across a type mismatch.",
+      "Trace/base-link support is not prevention/survival; keep for Runner trace/link support review rather than Batch 10.",
   },
   {
     cardId: "onr_v1_045_newsgroup-filter",

@@ -140,9 +140,9 @@ describe("compiled hint index pilot report", () => {
   it("keeps missing overlays non-fatal when the pilot card does not need one", () => {
     const report = readReport();
     expect(report.warningCountsByKind.overlay_missing_for_manual_gap ?? 0).toBe(
-      122,
+      121,
     );
-    expect(report.infoCounts.info_no_overlay_needed).toBe(65);
+    expect(report.infoCounts.info_no_overlay_needed).toBe(68);
     expect(
       report.cards
         .filter((card) => !card.manualOverlayFound)
@@ -164,11 +164,11 @@ describe("compiled hint index pilot report", () => {
 
   it("classifies compiled-index warnings into non-blocking comparison groups", () => {
     const report = readReport();
-    expect(report.warningCount).toBe(643);
+    expect(report.warningCount).toBe(657);
     expect(report.warningClassificationCounts).toEqual({
       generated_fact_absent_from_monolith: 318,
-      manual_review_candidate: 122,
-      monolith_mechanical_duplication_candidate: 197,
+      manual_review_candidate: 121,
+      monolith_mechanical_duplication_candidate: 212,
       overlay_strategy_field_not_in_monolith: 6,
     });
     expect(
@@ -199,7 +199,7 @@ describe("compiled hint index pilot report", () => {
     );
     expect(report.migrationCandidates.length).toBe(193);
     expect(report.generatedFactCandidates.length).toBe(193);
-    expect(report.overlayCandidates.length).toBe(122);
+    expect(report.overlayCandidates.length).toBe(119);
     expect(
       report.overlayCandidates.map((candidate) => candidate.cardId),
     ).toEqual(
@@ -218,21 +218,21 @@ describe("compiled hint index pilot report", () => {
     );
   });
 
-  it("keeps Self-Modifying Code out of semantic review after install-discount cleanup", () => {
+  it("keeps Self-Modifying Code in semantic review after AI019 program-search expansion", () => {
     const report = readReport();
     expect(
       report.reviewCandidates.some(
         (candidate) => candidate.cardId === "onr_v1_059_self-modifying-code",
       ),
-    ).toBe(false);
+    ).toBe(true);
     const selfModifyingCode = report.cards.find(
       (card) => card.cardId === "onr_v1_059_self-modifying-code",
     );
     expect(selfModifyingCode?.recommendedNextAction).toBe(
-      "ready_for_overlay_only_strategy_fields",
+      "manual_review_candidate",
     );
-    expect(selfModifyingCode?.migrationReadiness).toBe("ready");
-    expect(selfModifyingCode?.needsManualReview).toBe(false);
+    expect(selfModifyingCode?.migrationReadiness).toBe("needs_review");
+    expect(selfModifyingCode?.needsManualReview).toBe(true);
     expect(report.hardErrorCount).toBe(0);
   });
 

@@ -1,8 +1,8 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI018c",
+  "taskId": "AI019",
   "generatedAt": "2026-06-01",
-  "description": "Controlled V1 tactic-signal catalog. AI018c adds support-only flat subtype-limited breaker signals for Dogcatcher and Reflector without planner, engine, targeting, action-score, plan-weight, or legality effects.",
+  "description": "Controlled V1 tactic-signal catalog. AI019 adds read-only Runner-program semantic signals for non-Icebreaker programs, viruses, access payoffs, trace/damage support, program search/install/protection and ICE/server manipulation without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
   "signalPolicy": {
     "tacticSignal": "Functional card utility: what the AI can use the card for.",
     "strategyAnchor": "Large deck line: which strategy the card can anchor or materially support.",
@@ -13,6 +13,38 @@
     ]
   },
   "signals": [
+    {
+      "signalId": "access.free_trash",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for access.free_trash.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "access.hq_full_reveal",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for access.hq_full_reveal.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
+    },
     {
       "signalId": "access.hq_multiaccess",
       "group": "access_multiaccess",
@@ -32,6 +64,59 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable because it directly changes central access payoff."
+    },
+    {
+      "signalId": "access.hq_random_reveal",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for access.hq_random_reveal.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
+    },
+    {
+      "signalId": "access.hq_trash_pressure",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for access.hq_trash_pressure.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [
+        "Crumble"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
+    },
+    {
+      "signalId": "access.hq_via_archives",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for access.hq_via_archives.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
     },
     {
       "signalId": "access.punish",
@@ -72,6 +157,106 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable because it directly changes central access payoff."
+    },
+    {
+      "signalId": "access.rnd_top_card",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for access.rnd_top_card.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
+    },
+    {
+      "signalId": "access.rnd_top_cards",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for access.rnd_top_cards.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
+    },
+    {
+      "signalId": "access.rnd_top_reorder",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for access.rnd_top_reorder.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
+    },
+    {
+      "signalId": "access.rnd_trash_pressure",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for access.rnd_trash_pressure.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [
+        "Garbage In"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
+    },
+    {
+      "signalId": "access.trash_untrashable",
+      "group": "ai019_access",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for access.trash_untrashable.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "action.turn_limit_penalty",
+      "group": "ai019_action",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for action.turn_limit_penalty.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "breaker.ap",
@@ -680,6 +865,143 @@
       "notes": "General Watchdog coverage signal only; Dogcatcher uses subtype-limited Sentry signals instead."
     },
     {
+      "signalId": "corp.action_denial",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for corp.action_denial.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [
+        "Viral Pipeline"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp.bad_publicity_pressure",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for corp.bad_publicity_pressure.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp.draw_pressure",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for corp.draw_pressure.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp.economy_pressure",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for corp.economy_pressure.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp.hand_size_pressure",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for corp.hand_size_pressure.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp.install_punish",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for corp.install_punish.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp.random_discard_pressure",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for corp.random_discard_pressure.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp.rez_tax_pressure",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for corp.rez_tax_pressure.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp.rnd_trash_pressure",
+      "group": "ai019_corp",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for corp.rnd_trash_pressure.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "damage.payoff",
       "group": "damage_kill",
       "sideScope": "corp",
@@ -698,6 +1020,53 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Damage anchor requires Corp side and Runner scope."
+    },
+    {
+      "signalId": "defense.base_link",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for defense.base_link.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [
+        "Bakdoor"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "defense.brain_damage_prevention",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for defense.brain_damage_prevention.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "defense.brain_damage_reset",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for defense.brain_damage_reset.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "defense.damage_prevention",
@@ -721,6 +1090,70 @@
       "notes": "Anchor-capable as survival defense."
     },
     {
+      "signalId": "defense.flatline_prevention",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for defense.flatline_prevention.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.survival_defense"
+      ],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [
+        "Emergency Self-Construct"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
+    },
+    {
+      "signalId": "defense.meat_damage_immunity",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for defense.meat_damage_immunity.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "defense.meat_damage_prevention",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for defense.meat_damage_prevention.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "defense.net_damage_prevention",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for defense.net_damage_prevention.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "defense.tag_prevention",
       "group": "runner_defense",
       "sideScope": "runner",
@@ -740,15 +1173,30 @@
       "notes": "Anchor-capable as survival defense."
     },
     {
+      "signalId": "defense.trace_boost",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for defense.trace_boost.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [
+        "Signpost"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "defense.trace_defense",
       "group": "runner_defense",
       "sideScope": "runner",
       "description": "Improves trace defense or link.",
-      "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "effects.kind=trace_defense",
         "effects.kind=link"
@@ -758,7 +1206,24 @@
         "Runner Sensei"
       ],
       "targetProfileRelevant": false,
-      "notes": "Anchor-capable as survival defense."
+      "notes": "Support-only after AI019; trace/link support does not automatically anchor runner.survival_defense."
+    },
+    {
+      "signalId": "defense.trace_limit_reduction",
+      "group": "ai019_defense",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for defense.trace_limit_reduction.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [
+        "Rabbit"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "economy.action",
@@ -777,6 +1242,21 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Economy support signal only."
+    },
+    {
+      "signalId": "economy.action_credit",
+      "group": "ai019_economy",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for economy.action_credit.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "economy.advanceable",
@@ -864,6 +1344,21 @@
       "notes": "Generic economy deliberately does not create a strategy anchor."
     },
     {
+      "signalId": "economy.node_trash_credit",
+      "group": "ai019_economy",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for economy.node_trash_credit.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "economy.recurring",
       "group": "economy",
       "sideScope": "neutral",
@@ -900,6 +1395,36 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Credit-source availability is public support metadata; actual payment-source choice remains LegalAction/runtime context."
+    },
+    {
+      "signalId": "economy.recurring_install_credit",
+      "group": "ai019_economy",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for economy.recurring_install_credit.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "economy.recurring_trash_credit",
+      "group": "ai019_economy",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for economy.recurring_trash_credit.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "economy.rez_discount",
@@ -958,12 +1483,10 @@
       "signalId": "economy.trash_credit",
       "group": "remote_trash_economy",
       "sideScope": "runner",
-      "description": "Credits dedicated to trashing accessed cards.",
-      "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "runner.remote_trash"
-      ],
+      "description": "Runner trash-credit support for access trash costs; support-only and not an automatic remote-trash strategy anchor.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "effects.kind=trash_credit"
       ],
@@ -973,6 +1496,38 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Runner remote-trash credit support only. Icebreaker-use credits are economy.recurring_breaker_credit, not trash-credit economy."
+    },
+    {
+      "signalId": "economy.upgrade_trash_credit",
+      "group": "ai019_economy",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for economy.upgrade_trash_credit.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "ice.derez",
+      "group": "ai019_ice",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for ice.derez.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [
+        "Disintegrator"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "ice.etr",
@@ -994,6 +1549,21 @@
       "notes": "Broad but side- and scope-gated."
     },
     {
+      "signalId": "ice.force_rez",
+      "group": "ai019_ice",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for ice.force_rez.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "ice.future_pressure",
       "group": "corp_ice_tax",
       "sideScope": "corp",
@@ -1011,6 +1581,36 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Does not imply Runner run-event tempo."
+    },
+    {
+      "signalId": "ice.reorder_fort",
+      "group": "ai019_ice",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for ice.reorder_fort.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "ice.reverse_fort",
+      "group": "ai019_ice",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for ice.reverse_fort.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "ice.strength_modifier",
@@ -1071,6 +1671,21 @@
       "notes": "Anchor-capable only with Corp side/scope gates."
     },
     {
+      "signalId": "ice.trash_after_full_break",
+      "group": "ai019_ice",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for ice.trash_after_full_break.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "info.expose",
       "group": "information",
       "sideScope": "neutral",
@@ -1086,6 +1701,36 @@
       ],
       "targetProfileRelevant": true,
       "notes": "Information target choice remains outside tactic signals."
+    },
+    {
+      "signalId": "info.expose_fort",
+      "group": "ai019_info",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for info.expose_fort.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "info.expose_installed_card",
+      "group": "ai019_info",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for info.expose_installed_card.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "info.hq",
@@ -1107,6 +1752,95 @@
       "notes": "Anchor-capable when side- and scope-gated."
     },
     {
+      "signalId": "info.hq_information",
+      "group": "ai019_info",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for info.hq_information.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [
+        "Boardwalk",
+        "Expert Schedule Analyzer"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
+    },
+    {
+      "signalId": "info.ice_approach_expose",
+      "group": "ai019_info",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for info.ice_approach_expose.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "info.persistent_expose",
+      "group": "ai019_info",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for info.persistent_expose.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "info.rnd_information",
+      "group": "ai019_info",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for info.rnd_information.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [
+        "Deep Thought",
+        "R&D-Protocol Files"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
+    },
+    {
+      "signalId": "info.rnd_manipulation",
+      "group": "ai019_info",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for info.rnd_manipulation.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [
+        "Microtech AI Interface"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
+    },
+    {
       "signalId": "info.rnd_topdeck",
       "group": "information_central",
       "sideScope": "runner",
@@ -1124,6 +1858,21 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Does not expose hidden order in the signal."
+    },
+    {
+      "signalId": "remote.agenda_difficulty_tax",
+      "group": "ai019_remote",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for remote.agenda_difficulty_tax.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "remote.agenda_steal_tax",
@@ -1200,6 +1949,21 @@
       "notes": "Reserved but controlled remote-role signal."
     },
     {
+      "signalId": "remote.install_tax",
+      "group": "ai019_remote",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for remote.install_tax.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "remote.scoring_protection",
       "group": "corp_remote_scoring",
       "sideScope": "corp",
@@ -1241,6 +2005,36 @@
       "notes": "Break-cost support only; normal breaker coverage remains separate and support-only."
     },
     {
+      "signalId": "run.central_access_conversion",
+      "group": "ai019_run",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for run.central_access_conversion.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "run.ends_run_after_effect",
+      "group": "ai019_run",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for run.ends_run_after_effect.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "run.event_tempo",
       "group": "runner_run_tempo",
       "sideScope": "runner",
@@ -1275,6 +2069,21 @@
       "notes": "Side-gated to prevent Corp extra-action wrong-side anchors."
     },
     {
+      "signalId": "run.jackout_vs_node_upgrade",
+      "group": "ai019_run",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for run.jackout_vs_node_upgrade.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "run.lock",
       "group": "runner_run_tempo",
       "sideScope": "runner",
@@ -1290,6 +2099,51 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "Target server details belong in structured descriptors."
+    },
+    {
+      "signalId": "run.replacement_access",
+      "group": "ai019_run",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for run.replacement_access.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "run.rnd_scout_run",
+      "group": "ai019_run",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for run.rnd_scout_run.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "run.safe_jackout_window",
+      "group": "ai019_run",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for run.safe_jackout_window.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "score.advance_burst",
@@ -1363,6 +2217,36 @@
       "notes": "Setup support only; not a rig or survival strategy anchor by itself."
     },
     {
+      "signalId": "setup.hand_size_penalty",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for setup.hand_size_penalty.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.hosted_program_loss_risk",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for setup.hosted_program_loss_risk.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "setup.install_discount",
       "group": "setup_install",
       "sideScope": "neutral",
@@ -1376,6 +2260,21 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "Install target and timing are target-profile concerns."
+    },
+    {
+      "signalId": "setup.install_during_run",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for setup.install_during_run.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "setup.install_support",
@@ -1433,6 +2332,87 @@
       "notes": "Hosting capacity is diagnostic setup data; hosted target selection remains TargetProfile-only."
     },
     {
+      "signalId": "setup.program_install",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for setup.program_install.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [
+        "Self-Modifying Code"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.program_install_credit",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for setup.program_install_credit.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [
+        "Zetatech Software Installer"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.program_protection",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for setup.program_protection.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.program_search",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for setup.program_search.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [
+        "Self-Modifying Code"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.program_trash_prevention",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for setup.program_trash_prevention.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "setup.recovery",
       "group": "setup_draw_search",
       "sideScope": "runner",
@@ -1469,6 +2449,38 @@
       ],
       "targetProfileRelevant": true,
       "notes": "Anchor-capable only when the structured effect is narrowed to program search for breaker/toolbox setup; generic any-card search remains support-only."
+    },
+    {
+      "signalId": "setup.self_bounce",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for setup.self_bounce.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.stack_top_program_install",
+      "group": "ai019_setup",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for setup.stack_top_program_install.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [
+        "Mystery Box"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "tag.payoff",
@@ -1602,6 +2614,144 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Side- and scope-gated trace source."
+    },
+    {
+      "signalId": "virus.counter_amplification",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for virus.counter_amplification.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "virus.counter_engine",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for virus.counter_engine.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [
+        "Boardwalk",
+        "Highlighter"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "virus.purge_tax",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for virus.purge_tax.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "virus.random_payload",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for virus.random_payload.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "virus.trigger_any_successful_run",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for virus.trigger_any_successful_run.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "virus.trigger_hq",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for virus.trigger_hq.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "virus.trigger_multi_central",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for virus.trigger_multi_central.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "virus.trigger_remote",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for virus.trigger_remote.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "virus.trigger_rnd",
+      "group": "ai019_virus",
+      "sideScope": "runner",
+      "description": "AI019 Runner-program semantic signal for virus.trigger_rnd.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI019 reviewed Runner-program structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     }
   ]
 }

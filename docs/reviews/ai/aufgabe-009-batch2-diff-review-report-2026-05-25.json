@@ -6,9 +6,9 @@
   "batch": "batch_2_breaker_target_trash_credit",
   "mode": "read-only diff review; no active hint migration, no runtime compile, no planner or consumer binding",
   "hardErrorCount": 0,
-  "shapeDifferenceCount": 5,
+  "shapeDifferenceCount": 2,
   "targetProfileShapeDifferenceCount": 2,
-  "trashCreditTargetShapeDifferenceCount": 2,
+  "trashCreditTargetShapeDifferenceCount": 0,
   "costProfileShapeDifferenceCount": 6,
   "boardContextRequiredCount": 7,
   "realSemanticConflictCount": 0,
@@ -16,18 +16,14 @@
     "cost_profile_requires_overlay_split": 6,
     "generated_more_precise_than_monolith": 3,
     "install_cost_requires_engine_cost_context": 1,
-    "monolith_more_specific_than_generated": 2,
-    "semantic_equivalent_shape_difference": 2,
-    "target_equivalent_node_trash_credit": 1,
-    "target_equivalent_upgrade_trash_credit": 1,
+    "semantic_equivalent_shape_difference": 1,
     "target_profile_requires_search_legalaction_context": 6
   },
   "classificationCountsByWarningKind": {
     "board_context_required": 7,
     "cost_profile_shape_difference": 6,
-    "shape_difference": 5,
-    "target_profile_shape_difference": 2,
-    "trash_credit_target_shape_difference": 2
+    "shape_difference": 2,
+    "target_profile_shape_difference": 2
   },
   "boardContextClassifications": {
     "install_cost_requires_engine_cost_context": 1,
@@ -133,11 +129,6 @@
         {
           "cardId": "onr_v1_043_mystery-box",
           "title": "Mystery Box",
-          "fact": "effect:install_discount"
-        },
-        {
-          "cardId": "onr_v1_043_mystery-box",
-          "title": "Mystery Box",
           "fact": "targetProfile"
         },
         {
@@ -163,32 +154,6 @@
         }
       ],
       "rationale": "Represent full-stack search and top-five stack look/install as different stable targetProfile classes."
-    },
-    {
-      "rule": "trash_credit_target_normalization",
-      "appliesTo": [
-        {
-          "cardId": "onr_v1_048_poltergeist",
-          "title": "Poltergeist",
-          "fact": "effect:trash_credit"
-        },
-        {
-          "cardId": "onr_v1_048_poltergeist",
-          "title": "Poltergeist",
-          "fact": "effect:trash_credit"
-        },
-        {
-          "cardId": "onr_v1_057_scatter-shot",
-          "title": "Scatter Shot",
-          "fact": "effect:trash_credit"
-        },
-        {
-          "cardId": "onr_v1_057_scatter-shot",
-          "title": "Scatter Shot",
-          "fact": "effect:trash_credit"
-        }
-      ],
-      "rationale": "Preserve Poltergeist=node and Scatter Shot=upgrade targets while comparing generated trash_credit to active amount/repeatable shape."
     }
   ],
   "remainingIssueCount": 0,
@@ -584,12 +549,26 @@
               {
                 "kind": "install_discount",
                 "timing": "during_run",
-                "scope": "installed_card"
+                "scope": "runner",
+                "resource": "credits",
+                "target": "program_install"
+              },
+              {
+                "kind": "install_discount",
+                "timing": "during_run",
+                "scope": "runner"
+              },
+              {
+                "kind": "install",
+                "timing": "during_run",
+                "scope": "stack",
+                "target": "stack_top_program"
               },
               {
                 "kind": "search",
                 "timing": "during_run",
-                "scope": "runner"
+                "scope": "runner",
+                "target": "program"
               },
               {
                 "kind": "topdeck_info",
@@ -667,7 +646,8 @@
             "type": "effect",
             "kind": "install_discount",
             "timing": "during_run",
-            "scope": "installed_card",
+            "scope": "runner",
+            "resource": "credits",
             "source": "active.effects"
           },
           "generatedValue": {
@@ -686,12 +666,26 @@
               {
                 "kind": "install_discount",
                 "timing": "during_run",
-                "scope": "installed_card"
+                "scope": "runner",
+                "resource": "credits",
+                "target": "program_install"
+              },
+              {
+                "kind": "install_discount",
+                "timing": "during_run",
+                "scope": "runner"
+              },
+              {
+                "kind": "install",
+                "timing": "during_run",
+                "scope": "stack",
+                "target": "stack_top_program"
               },
               {
                 "kind": "search",
                 "timing": "during_run",
-                "scope": "runner"
+                "scope": "runner",
+                "target": "program"
               },
               {
                 "kind": "topdeck_info",
@@ -788,12 +782,26 @@
               {
                 "kind": "install_discount",
                 "timing": "during_run",
-                "scope": "installed_card"
+                "scope": "runner",
+                "resource": "credits",
+                "target": "program_install"
+              },
+              {
+                "kind": "install_discount",
+                "timing": "during_run",
+                "scope": "runner"
+              },
+              {
+                "kind": "install",
+                "timing": "during_run",
+                "scope": "stack",
+                "target": "stack_top_program"
               },
               {
                 "kind": "search",
                 "timing": "during_run",
-                "scope": "runner"
+                "scope": "runner",
+                "target": "program"
               },
               {
                 "kind": "topdeck_info",
@@ -887,12 +895,26 @@
               {
                 "kind": "install_discount",
                 "timing": "during_run",
-                "scope": "installed_card"
+                "scope": "runner",
+                "resource": "credits",
+                "target": "program_install"
+              },
+              {
+                "kind": "install_discount",
+                "timing": "during_run",
+                "scope": "runner"
+              },
+              {
+                "kind": "install",
+                "timing": "during_run",
+                "scope": "stack",
+                "target": "stack_top_program"
               },
               {
                 "kind": "search",
                 "timing": "during_run",
-                "scope": "runner"
+                "scope": "runner",
+                "target": "program"
               },
               {
                 "kind": "topdeck_info",
@@ -1021,108 +1043,6 @@
           ]
         },
         {
-          "sourceWarningKind": "shape_difference",
-          "cardId": "onr_v1_043_mystery-box",
-          "title": "Mystery Box",
-          "fact": "effect:install_discount",
-          "activeValue": {
-            "type": "effect",
-            "kind": "install_discount",
-            "timing": "during_run",
-            "scope": "installed_card",
-            "source": "active.effects"
-          },
-          "generatedValue": {
-            "type": "effect",
-            "kind": "install_discount",
-            "timing": "during_run",
-            "scope": "runner",
-            "confidence": "high",
-            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching.installCost"
-          },
-          "compiledPreviewValue": {
-            "cardId": "onr_v1_043_mystery-box",
-            "side": "runner",
-            "cardType": "program",
-            "effects": [
-              {
-                "kind": "install_discount",
-                "timing": "during_run",
-                "scope": "installed_card"
-              },
-              {
-                "kind": "search",
-                "timing": "during_run",
-                "scope": "runner"
-              },
-              {
-                "kind": "topdeck_info",
-                "timing": "during_run",
-                "scope": "runner",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              {
-                "kind": "requires_during_run"
-              },
-              {
-                "kind": "requires_installed_program"
-              }
-            ],
-            "targetProfiles": [
-              {
-                "zone": "stack_top",
-                "lookCount": 5,
-                "targetCardType": "program",
-                "installsTarget": true,
-                "installCost": "free",
-                "oncePerRun": true,
-                "shuffleAfter": true,
-                "showToOpponent": true
-              }
-            ],
-            "costProfile": {
-              "clicks": 0,
-              "reserveRisk": "low",
-              "opportunityCost": "medium"
-            }
-          },
-          "manualOverlay": {
-            "overlayPath": "data/ai/hints/overlays/onr-v1/runner/programs.json",
-            "fields": [
-              "lineSupport",
-              "manualNotes",
-              "quality"
-            ],
-            "value": {
-              "lineSupport": [
-                "runner.search.breaker"
-              ],
-              "quality": {
-                "hintReviewed": true,
-                "strategyCovered": false,
-                "benchmarkCovered": false,
-                "confidence": "high",
-                "needsHumanReview": false
-              },
-              "manualNotes": [
-                "The once-per-run limit is represented mechanically as targetProfiles.oncePerRun; search and install target profile stay generated."
-              ]
-            }
-          },
-          "consumerRelevant": true,
-          "boardContextRequired": true,
-          "conflict": false,
-          "normalizedSemanticMeaning": "Mystery Box has a during-run free-install effect for the selected program; generated scope=runner and active scope=installed_card describe different sides of the same effect.",
-          "classification": "semantic_equivalent_shape_difference",
-          "rationale": "The targetProfile confirms installCost=free, so the install_discount scope mismatch is a shape issue, not an SMC-style discount error.",
-          "proposedFutureAction": "target_profile_install_cost_normalization",
-          "normalizationRules": [
-            "target_profile_install_cost_normalization"
-          ]
-        },
-        {
           "sourceWarningKind": "target_profile_shape_difference",
           "cardId": "onr_v1_043_mystery-box",
           "title": "Mystery Box",
@@ -1148,12 +1068,26 @@
               {
                 "kind": "install_discount",
                 "timing": "during_run",
-                "scope": "installed_card"
+                "scope": "runner",
+                "resource": "credits",
+                "target": "program_install"
+              },
+              {
+                "kind": "install_discount",
+                "timing": "during_run",
+                "scope": "runner"
+              },
+              {
+                "kind": "install",
+                "timing": "during_run",
+                "scope": "stack",
+                "target": "stack_top_program"
               },
               {
                 "kind": "search",
                 "timing": "during_run",
-                "scope": "runner"
+                "scope": "runner",
+                "target": "program"
               },
               {
                 "kind": "topdeck_info",
@@ -1268,11 +1202,6 @@
             {
               "cardId": "onr_v1_043_mystery-box",
               "title": "Mystery Box",
-              "fact": "effect:install_discount"
-            },
-            {
-              "cardId": "onr_v1_043_mystery-box",
-              "title": "Mystery Box",
               "fact": "targetProfile"
             }
           ],
@@ -1296,15 +1225,13 @@
         "board_context_required": 4,
         "consumer_active_for_fact_type": 5,
         "cost_profile_shape_difference": 1,
-        "generated_fact_added_in_preview": 2,
+        "generated_fact_added_in_preview": 3,
         "generated_fact_already_present": 2,
-        "shape_difference": 1,
+        "monolith_only_mechanical_fact": 1,
         "target_profile_shape_difference": 1
       },
       "warningFacts": {
-        "shape_difference": [
-          "effect:install_discount"
-        ],
+        "shape_difference": [],
         "target_profile_shape_difference": [
           "targetProfile"
         ],
@@ -1366,126 +1293,6 @@
           "normalizationRules": [
             "cost_profile_split_normalization"
           ]
-        },
-        {
-          "sourceWarningKind": "shape_difference",
-          "cardId": "onr_v1_048_poltergeist",
-          "title": "Poltergeist",
-          "fact": "effect:trash_credit",
-          "activeValue": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "amount": 2,
-            "repeatable": true,
-            "source": "active.effects"
-          },
-          "generatedValue": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "confidence": "high",
-            "source": "implementation.restrictedHostedCreditSource"
-          },
-          "compiledPreviewValue": {
-            "cardId": "onr_v1_048_poltergeist",
-            "side": "runner",
-            "cardType": "program",
-            "effects": [
-              {
-                "kind": "trash_credit",
-                "timing": "persistent",
-                "scope": "runner",
-                "resource": "trash_credits",
-                "amount": 2,
-                "repeatable": true
-              }
-            ],
-            "costProfile": {
-              "credits": 0,
-              "memory": 1,
-              "reserveRisk": "low",
-              "opportunityCost": "low"
-            }
-          },
-          "manualOverlay": {
-            "fields": [],
-            "value": null
-          },
-          "consumerRelevant": true,
-          "boardContextRequired": false,
-          "conflict": false,
-          "normalizedSemanticMeaning": "Dedicated trash-credit source for the card's specific trash target; active monolith carries amount/repeatable while generated currently carries the source class.",
-          "classification": "monolith_more_specific_than_generated",
-          "rationale": "The generated fact confirms trash_credit but does not yet encode amount/repeatable or the card-specific node/upgrade target.",
-          "proposedFutureAction": "trash_credit_target_normalization",
-          "normalizationRules": [
-            "trash_credit_target_normalization"
-          ]
-        },
-        {
-          "sourceWarningKind": "trash_credit_target_shape_difference",
-          "cardId": "onr_v1_048_poltergeist",
-          "title": "Poltergeist",
-          "fact": "effect:trash_credit",
-          "activeValue": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "amount": 2,
-            "repeatable": true,
-            "source": "active.effects"
-          },
-          "generatedValue": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "confidence": "high",
-            "source": "implementation.restrictedHostedCreditSource"
-          },
-          "compiledPreviewValue": {
-            "cardId": "onr_v1_048_poltergeist",
-            "side": "runner",
-            "cardType": "program",
-            "effects": [
-              {
-                "kind": "trash_credit",
-                "timing": "persistent",
-                "scope": "runner",
-                "resource": "trash_credits",
-                "amount": 2,
-                "repeatable": true
-              }
-            ],
-            "costProfile": {
-              "credits": 0,
-              "memory": 1,
-              "reserveRisk": "low",
-              "opportunityCost": "low"
-            }
-          },
-          "manualOverlay": {
-            "fields": [],
-            "value": null
-          },
-          "normalizedSemanticMeaning": "Poltergeist provides dedicated trash credits for nodes.",
-          "consumerRelevant": true,
-          "boardContextRequired": false,
-          "conflict": false,
-          "classification": "target_equivalent_node_trash_credit",
-          "rationale": "The dry-run keeps node/upgrade targets separate via card-specific context; generated currently confirms the credit source but not the full target/amount shape.",
-          "proposedFutureAction": "trash_credit_target_normalization",
-          "normalizationRules": [
-            "trash_credit_target_normalization"
-          ]
         }
       ],
       "normalizationCandidates": [
@@ -1499,22 +1306,6 @@
             }
           ],
           "rationale": "Split mechanical install/MU costs from strategic reserveRisk/opportunityCost before future generated migration."
-        },
-        {
-          "rule": "trash_credit_target_normalization",
-          "appliesTo": [
-            {
-              "cardId": "onr_v1_048_poltergeist",
-              "title": "Poltergeist",
-              "fact": "effect:trash_credit"
-            },
-            {
-              "cardId": "onr_v1_048_poltergeist",
-              "title": "Poltergeist",
-              "fact": "effect:trash_credit"
-            }
-          ],
-          "rationale": "Preserve Poltergeist=node and Scatter Shot=upgrade targets while comparing generated trash_credit to active amount/repeatable shape."
         }
       ],
       "remainingIssues": [],
@@ -1523,17 +1314,13 @@
         "consumer_active_for_fact_type": 1,
         "cost_profile_shape_difference": 1,
         "descriptor_context_required": 1,
-        "shape_difference": 1,
-        "trash_credit_target_shape_difference": 1
+        "generated_fact_added_in_preview": 1,
+        "monolith_only_mechanical_fact": 1
       },
       "warningFacts": {
-        "shape_difference": [
-          "effect:trash_credit"
-        ],
+        "shape_difference": [],
         "target_profile_shape_difference": [],
-        "trash_credit_target_shape_difference": [
-          "effect:trash_credit"
-        ],
+        "trash_credit_target_shape_difference": [],
         "cost_profile_shape_difference": [
           "costProfile"
         ],
@@ -1586,126 +1373,6 @@
           "normalizationRules": [
             "cost_profile_split_normalization"
           ]
-        },
-        {
-          "sourceWarningKind": "shape_difference",
-          "cardId": "onr_v1_057_scatter-shot",
-          "title": "Scatter Shot",
-          "fact": "effect:trash_credit",
-          "activeValue": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "amount": 2,
-            "repeatable": true,
-            "source": "active.effects"
-          },
-          "generatedValue": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "confidence": "high",
-            "source": "implementation.restrictedHostedCreditSource"
-          },
-          "compiledPreviewValue": {
-            "cardId": "onr_v1_057_scatter-shot",
-            "side": "runner",
-            "cardType": "program",
-            "effects": [
-              {
-                "kind": "trash_credit",
-                "timing": "persistent",
-                "scope": "runner",
-                "resource": "trash_credits",
-                "amount": 2,
-                "repeatable": true
-              }
-            ],
-            "costProfile": {
-              "credits": 0,
-              "memory": 1,
-              "reserveRisk": "low",
-              "opportunityCost": "low"
-            }
-          },
-          "manualOverlay": {
-            "fields": [],
-            "value": null
-          },
-          "consumerRelevant": true,
-          "boardContextRequired": false,
-          "conflict": false,
-          "normalizedSemanticMeaning": "Dedicated trash-credit source for the card's specific trash target; active monolith carries amount/repeatable while generated currently carries the source class.",
-          "classification": "monolith_more_specific_than_generated",
-          "rationale": "The generated fact confirms trash_credit but does not yet encode amount/repeatable or the card-specific node/upgrade target.",
-          "proposedFutureAction": "trash_credit_target_normalization",
-          "normalizationRules": [
-            "trash_credit_target_normalization"
-          ]
-        },
-        {
-          "sourceWarningKind": "trash_credit_target_shape_difference",
-          "cardId": "onr_v1_057_scatter-shot",
-          "title": "Scatter Shot",
-          "fact": "effect:trash_credit",
-          "activeValue": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "amount": 2,
-            "repeatable": true,
-            "source": "active.effects"
-          },
-          "generatedValue": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "confidence": "high",
-            "source": "implementation.restrictedHostedCreditSource"
-          },
-          "compiledPreviewValue": {
-            "cardId": "onr_v1_057_scatter-shot",
-            "side": "runner",
-            "cardType": "program",
-            "effects": [
-              {
-                "kind": "trash_credit",
-                "timing": "persistent",
-                "scope": "runner",
-                "resource": "trash_credits",
-                "amount": 2,
-                "repeatable": true
-              }
-            ],
-            "costProfile": {
-              "credits": 0,
-              "memory": 1,
-              "reserveRisk": "low",
-              "opportunityCost": "low"
-            }
-          },
-          "manualOverlay": {
-            "fields": [],
-            "value": null
-          },
-          "normalizedSemanticMeaning": "Scatter Shot provides dedicated trash credits for upgrades.",
-          "consumerRelevant": true,
-          "boardContextRequired": false,
-          "conflict": false,
-          "classification": "target_equivalent_upgrade_trash_credit",
-          "rationale": "The dry-run keeps node/upgrade targets separate via card-specific context; generated currently confirms the credit source but not the full target/amount shape.",
-          "proposedFutureAction": "trash_credit_target_normalization",
-          "normalizationRules": [
-            "trash_credit_target_normalization"
-          ]
         }
       ],
       "normalizationCandidates": [
@@ -1719,22 +1386,6 @@
             }
           ],
           "rationale": "Split mechanical install/MU costs from strategic reserveRisk/opportunityCost before future generated migration."
-        },
-        {
-          "rule": "trash_credit_target_normalization",
-          "appliesTo": [
-            {
-              "cardId": "onr_v1_057_scatter-shot",
-              "title": "Scatter Shot",
-              "fact": "effect:trash_credit"
-            },
-            {
-              "cardId": "onr_v1_057_scatter-shot",
-              "title": "Scatter Shot",
-              "fact": "effect:trash_credit"
-            }
-          ],
-          "rationale": "Preserve Poltergeist=node and Scatter Shot=upgrade targets while comparing generated trash_credit to active amount/repeatable shape."
         }
       ],
       "remainingIssues": [],
@@ -1743,17 +1394,13 @@
         "consumer_active_for_fact_type": 1,
         "cost_profile_shape_difference": 1,
         "descriptor_context_required": 1,
-        "shape_difference": 1,
-        "trash_credit_target_shape_difference": 1
+        "generated_fact_added_in_preview": 1,
+        "monolith_only_mechanical_fact": 1
       },
       "warningFacts": {
-        "shape_difference": [
-          "effect:trash_credit"
-        ],
+        "shape_difference": [],
         "target_profile_shape_difference": [],
-        "trash_credit_target_shape_difference": [
-          "effect:trash_credit"
-        ],
+        "trash_credit_target_shape_difference": [],
         "cost_profile_shape_difference": [
           "costProfile"
         ],
@@ -1786,9 +1433,16 @@
             "cardType": "program",
             "effects": [
               {
+                "kind": "install",
+                "timing": "during_run",
+                "scope": "runner",
+                "target": "program"
+              },
+              {
                 "kind": "search",
                 "timing": "during_run",
-                "scope": "runner"
+                "scope": "runner",
+                "target": "program"
               }
             ],
             "conditions": [
@@ -1874,9 +1528,16 @@
             "cardType": "program",
             "effects": [
               {
+                "kind": "install",
+                "timing": "during_run",
+                "scope": "runner",
+                "target": "program"
+              },
+              {
                 "kind": "search",
                 "timing": "during_run",
-                "scope": "runner"
+                "scope": "runner",
+                "target": "program"
               }
             ],
             "conditions": [
@@ -1956,9 +1617,16 @@
             "cardType": "program",
             "effects": [
               {
+                "kind": "install",
+                "timing": "during_run",
+                "scope": "runner",
+                "target": "program"
+              },
+              {
                 "kind": "search",
                 "timing": "during_run",
-                "scope": "runner"
+                "scope": "runner",
+                "target": "program"
               }
             ],
             "conditions": [
@@ -2098,9 +1766,16 @@
             "cardType": "program",
             "effects": [
               {
+                "kind": "install",
+                "timing": "during_run",
+                "scope": "runner",
+                "target": "program"
+              },
+              {
                 "kind": "search",
                 "timing": "during_run",
-                "scope": "runner"
+                "scope": "runner",
+                "target": "program"
               }
             ],
             "conditions": [

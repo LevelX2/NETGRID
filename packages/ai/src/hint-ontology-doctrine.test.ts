@@ -54,11 +54,11 @@ describe("AI hint ontology doctrine diagnostics", () => {
     );
     expect(summary.effectCounts.byKind.search).toBe(2);
     expect(summary.effectCounts.byKind.trash_credit).toBe(2);
-    expect(summary.effectCounts.byKind.topdeck_info).toBe(1);
+    expect(summary.effectCounts.byKind.topdeck_info).toBe(2);
     expect(summary.lineSupportCounts.byKind["runner.search.breaker"]).toBe(2);
     expect(summary.lineSupportCounts.byKind["runner.rnd_pressure"]).toBe(1);
     expect(summary.lineSupportCounts.byKind["runner.interface_closeout"]).toBe(1);
-    expect(summary.lineSupportCounts.byKind["runner.remote_trash"]).toBe(2);
+    expect(summary.lineSupportCounts.byKind["runner.remote_trash"] ?? 0).toBe(0);
   });
 
   it("reports quality review gaps without changing plan weights", () => {

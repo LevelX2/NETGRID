@@ -78,10 +78,10 @@ describe("generated fact Batch-6 runner info closeout", () => {
   it("keeps included cards ready read-only with no conflicts or gaps", () => {
     const report = readReport();
     expect(report.confirmedGeneratedFactCount).toBe(27);
-    expect(report.previewAddedFactCount).toBe(12);
+    expect(report.previewAddedFactCount).toBe(4);
     expect(report.hardErrorCount).toBe(0);
     expect(report.realSemanticConflictCount).toBe(0);
-    expect(report.normalizedDifferenceCount).toBe(29);
+    expect(report.normalizedDifferenceCount).toBe(36);
     expect(report.remainingDifferenceCount).toBe(0);
     expect(report.descriptorFollowupCount).toBe(0);
     expect(report.readiness).toBe("ready_read_only_split_subbatches");

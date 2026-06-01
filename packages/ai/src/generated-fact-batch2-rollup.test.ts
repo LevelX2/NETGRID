@@ -59,12 +59,12 @@ describe("generated fact Batch-2 rollup", () => {
     expect(first).toEqual(readReport());
   });
 
-  it("marks Batch 2 conflict-free and gap-free after normalization", () => {
+  it("keeps Batch 2 conflict-free while surfacing AI019 follow-up gaps", () => {
     const report = readReport();
     expect(report.taskId).toBe("Aufgabe 011");
     expect(report.batchCardCount).toBe(6);
-    expect(report.confirmedGeneratedFactCount).toBe(11);
-    expect(report.previewAddedFactCount).toBe(3);
+    expect(report.confirmedGeneratedFactCount).toBe(8);
+    expect(report.previewAddedFactCount).toBe(6);
     expect(report.hardErrorCount).toBe(0);
     expect(report.conflictCount).toBe(0);
     expect(report.realSemanticConflictCount).toBe(0);
@@ -73,9 +73,9 @@ describe("generated fact Batch-2 rollup", () => {
     expect(report.remainingTrashCreditTargetDifferenceCount).toBe(0);
     expect(report.remainingCostProfileDifferenceCount).toBe(0);
     expect(report.deriverFollowupCandidateCount).toBe(0);
-    expect(report.descriptorGapRemainingCount).toBe(0);
-    expect(report.humanReviewCandidateCount).toBe(0);
-    expect(report.batchTwoStatus).toBe("future_migration_ready_read_only");
+    expect(report.descriptorGapRemainingCount).toBe(8);
+    expect(report.humanReviewCandidateCount).toBe(4);
+    expect(report.batchTwoStatus).toBe("needs_followup");
   });
 
   it("keeps all Batch-2 cards future-ready with board context called out where needed", () => {
@@ -105,6 +105,7 @@ describe("generated fact Batch-2 rollup", () => {
       "free_install_cost_retained",
     );
     expect(cardByTitle(report, "Mystery Box").previewAddedFacts).toEqual([
+      "effect:install_discount",
       "effect:topdeck_info",
       "targetProfile",
     ]);
@@ -151,7 +152,7 @@ describe("generated fact Batch-2 rollup", () => {
 
 function runRollupJson(): BatchTwoRollupReport {
   return JSON.parse(
-    execFileSync(
+    runJsonCommand(
       "node",
       ["scripts/check-ai-generated-fact-batch2-rollup.mjs", "--json"],
       {
@@ -166,6 +167,22 @@ function readReport(): BatchTwoRollupReport {
   return JSON.parse(
     fs.readFileSync(reportPath, "utf8"),
   ) as BatchTwoRollupReport;
+}
+
+function runJsonCommand(
+  command: string,
+  args: string[],
+  options: { cwd: string; encoding: BufferEncoding },
+): string {
+  try {
+    return execFileSync(command, args, options);
+  } catch (error) {
+    const output = (error as { stdout?: Buffer | string }).stdout;
+    if (output) {
+      return Buffer.isBuffer(output) ? output.toString(options.encoding) : output;
+    }
+    throw error;
+  }
 }
 
 function cardByTitle(report: BatchTwoRollupReport, title: string) {

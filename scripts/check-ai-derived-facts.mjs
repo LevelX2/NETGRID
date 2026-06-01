@@ -1652,6 +1652,10 @@ function deriveFromImplementation(card, implementationText, hint) {
       )
     ) {
       restrictedHostedCreditTarget = "icebreaker";
+    } else if (
+      /usableFor:\s*\[[\s\S]*?"install_programs"/.test(implementationText)
+    ) {
+      restrictedHostedCreditTarget = "program_install";
     }
 
     if (restrictedHostedCreditTarget) {

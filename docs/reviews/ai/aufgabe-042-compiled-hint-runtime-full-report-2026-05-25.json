@@ -7,13 +7,13 @@
   "generatedFactsCardCount": 391,
   "legacyFallbackOnlyCount": 136,
   "manualOverlayCardCount": 6,
-  "descriptorOrSchemaGapCount": 284,
+  "descriptorOrSchemaGapCount": 279,
   "manualOverlayRequiredCount": 0,
   "blockedMissingImplementationCount": 37,
   "coverageClassCounts": {
     "blocked_missing_implementation": 37,
-    "descriptor_or_schema_gap": 284,
-    "generated_mechanical_clean": 101,
+    "descriptor_or_schema_gap": 279,
+    "generated_mechanical_clean": 106,
     "generated_plus_overlay": 6,
     "legacy_fallback_only": 136
   },
@@ -25,12 +25,12 @@
     "corp:operation": 40,
     "corp:upgrade": 40,
     "runner:event": 76,
-    "runner:hardware": 38,
+    "runner:hardware": 37,
     "runner:identity": 1,
-    "runner:program": 104,
+    "runner:program": 105,
     "runner:resource": 61
   },
-  "warningCount": 1762,
+  "warningCount": 1792,
   "hardErrorCount": 0,
   "legacyCompatibility": {
     "legacyFieldsChecked": [

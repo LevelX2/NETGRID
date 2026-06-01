@@ -146,6 +146,9 @@ function smokeTest(
     | "runnerRiskyBreaker"
     | "runnerConfigurableBreaker"
     | "runnerTargetedBreaker"
+    | "runnerGeneralApBreaker"
+    | "runnerSubtypeLimitedApBreaker"
+    | "runnerSubtypeLimitedSentryBreaker"
     | "runnerIceStrengthReduction"
     | "runnerDelayedActionCostBreaker"
     | "runnerEndRunBreaker"
@@ -250,7 +253,7 @@ describe("AI003 strategy goal taxonomy", () => {
 
     expect(report.hardErrorCount).toBe(0);
     expect(tacticSignalCatalogData.schemaVersion).toBe("ai-tactic-signals-v1");
-    expect(report.taxonomy.tacticSignalCatalogCount).toBe(88);
+    expect(report.taxonomy.tacticSignalCatalogCount).toBe(161);
     expect(new Set(signalIds).size).toBe(signalIds.length);
     expect([...signalIds].sort()).toEqual(derivationSignalIds);
     expect(signalIds.some((signalId) => signalId.startsWith("anti.ice."))).toBe(
@@ -303,6 +306,21 @@ describe("AI003 strategy goal taxonomy", () => {
           supportOnly: true,
           mayAnchorStrategy: false,
           targetProfileRelevant: false,
+        }),
+        expect.objectContaining({
+          signalId: "setup.program_search",
+          supportOnly: true,
+          mayAnchorStrategy: false,
+        }),
+        expect.objectContaining({
+          signalId: "access.hq_full_reveal",
+          supportOnly: false,
+          mayAnchorStrategy: true,
+        }),
+        expect.objectContaining({
+          signalId: "defense.flatline_prevention",
+          supportOnly: false,
+          mayAnchorStrategy: true,
         }),
       ]),
     );
@@ -717,7 +735,14 @@ describe("AI003 strategy goal taxonomy", () => {
       explicitTriage.filter((entry) => entry.mappingCategory === "descriptor_gap")
         .length,
     ).toBeGreaterThan(0);
-    expect(report.ai004Triage.descriptorGaps).toHaveLength(3);
+    expect(report.ai004Triage.descriptorGaps).toHaveLength(4);
+    expect(report.ai004Triage.descriptorGaps).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          gapId: "ai019_strategy_role_pairs_report_only",
+        }),
+      ]),
+    );
     expect(
       report.ai004Triage.descriptorGaps.every(
         (gap) => gap.batchMigrationDecision === "do_not_bulk_migrate_in_AI004",

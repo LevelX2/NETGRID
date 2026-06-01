@@ -14,10 +14,10 @@
   "includedCardCount": 15,
   "excludedCardCount": 16,
   "confirmedGeneratedFactCount": 62,
-  "previewAddedFactCount": 59,
+  "previewAddedFactCount": 44,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 104,
+  "normalizedDifferenceCount": 111,
   "remainingDifferenceCount": 0,
   "preventionWindowContextInfoCount": 8,
   "damageWindowContextInfoCount": 4,
@@ -55,7 +55,7 @@
     "prevention_window_context_normalization": 16,
     "breaker_survival_overlap_normalization": 2,
     "payment_context_normalization": 0,
-    "survival_strategy_overlay_split_normalization": 51,
+    "survival_strategy_overlay_split_normalization": 58,
     "damage_window_context_required_classification": 12,
     "flatline_replacement_context_required_classification": 2,
     "trash_prevention_context_required_classification": 3,
@@ -81,7 +81,7 @@
       "subBatch": "trace_defense_or_link",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects"],
       "generatedFactsConfirmed": [
         "condition:requires_trace_attempt",
         "effect:base_link",
@@ -90,8 +90,6 @@
       ],
       "previewAdds": [
         "condition:requires_trace_attempt",
-        "effect:base_link",
-        "effect:link",
         "effect:trace_defense"
       ],
       "normalizedDifferences": [
@@ -129,6 +127,13 @@
           "classification": "trace_defense_context_normalized",
           "rule": "trace_defense_link_normalization",
           "rationale": "Link and trace-defense facts describe trace-window modifiers only and do not guarantee trace success."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "survival_strategy_overlay_split_normalized",
+          "rule": "survival_strategy_overlay_split_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-10 comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -188,7 +193,7 @@
       "subBatch": "flatline_prevention",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects"],
       "generatedFactsConfirmed": [
         "condition:requires_flatline",
         "condition:requires_prevention_window",
@@ -203,13 +208,7 @@
       "previewAdds": [
         "condition:requires_flatline",
         "condition:requires_prevention_window",
-        "effect:action_penalty",
-        "effect:flatline_prevention",
-        "effect:hand_size_modifier",
-        "effect:meat_damage_prevention",
-        "effect:persistent_survival_modifier",
-        "effect:prevention_replacement",
-        "effect:remove_brain_damage"
+        "effect:prevention_replacement"
       ],
       "normalizedDifferences": [
         {
@@ -281,6 +280,13 @@
           "classification": "flatline_replacement_context_normalized",
           "rule": "flatline_prevention_replacement_normalization",
           "rationale": "Flatline replacement facts describe a replacement window only and never assert the Runner is currently safe from flatline."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "survival_strategy_overlay_split_normalized",
+          "rule": "survival_strategy_overlay_split_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-10 comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -537,7 +543,7 @@
       "subBatch": "damage_prevention",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects"],
       "generatedFactsConfirmed": [
         "condition:requires_brain_damage",
         "condition:requires_damage",
@@ -553,10 +559,7 @@
         "condition:requires_damage",
         "condition:requires_net_damage",
         "condition:requires_prevention_window",
-        "condition:requires_turn_limit_available",
-        "effect:brain_damage_prevention",
-        "effect:damage_prevention",
-        "effect:net_damage_prevention"
+        "condition:requires_turn_limit_available"
       ],
       "normalizedDifferences": [
         {
@@ -621,6 +624,13 @@
           "classification": "damage_prevention_context_normalized",
           "rule": "damage_prevention_normalization",
           "rationale": "Damage prevention facts keep damage type, amount and per-turn context visible and never imply general immunity."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "survival_strategy_overlay_split_normalized",
+          "rule": "survival_strategy_overlay_split_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-10 comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -692,7 +702,7 @@
       "subBatch": "program_trash_prevention",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects", "targetProfiles"],
       "generatedFactsConfirmed": [
         "condition:requires_installed_program",
         "condition:requires_prevention_window",
@@ -702,8 +712,7 @@
       "previewAdds": [
         "condition:requires_installed_program",
         "condition:requires_prevention_window",
-        "condition:requires_program_trash",
-        "effect:program_trash_prevention"
+        "condition:requires_program_trash"
       ],
       "normalizedDifferences": [
         {
@@ -740,6 +749,13 @@
           "classification": "program_trash_prevention_context_normalized",
           "rule": "program_trash_prevention_normalization",
           "rationale": "Program-trash prevention stays scoped to installed programs and does not extend to hardware, resources or arbitrary cards."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "survival_strategy_overlay_split_normalized",
+          "rule": "survival_strategy_overlay_split_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-10 comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -811,7 +827,7 @@
       "subBatch": "trace_defense_or_link",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects"],
       "generatedFactsConfirmed": [
         "condition:requires_trace_attempt",
         "effect:trace_defense"
@@ -841,6 +857,13 @@
           "classification": "trace_defense_context_normalized",
           "rule": "trace_defense_link_normalization",
           "rationale": "Link and trace-defense facts describe trace-window modifiers only and do not guarantee trace success."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "survival_strategy_overlay_split_normalized",
+          "rule": "survival_strategy_overlay_split_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-10 comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -900,7 +923,7 @@
       "subBatch": "damage_prevention",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects"],
       "generatedFactsConfirmed": [
         "condition:requires_damage",
         "condition:requires_net_damage",
@@ -913,9 +936,7 @@
         "condition:requires_damage",
         "condition:requires_net_damage",
         "condition:requires_prevention_window",
-        "condition:requires_turn_limit_available",
-        "effect:damage_prevention",
-        "effect:net_damage_prevention"
+        "condition:requires_turn_limit_available"
       ],
       "normalizedDifferences": [
         {
@@ -966,6 +987,13 @@
           "classification": "damage_prevention_context_normalized",
           "rule": "damage_prevention_normalization",
           "rationale": "Damage prevention facts keep damage type, amount and per-turn context visible and never imply general immunity."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "survival_strategy_overlay_split_normalized",
+          "rule": "survival_strategy_overlay_split_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-10 comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -1037,7 +1065,7 @@
       "subBatch": "trace_defense_or_link",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects"],
       "generatedFactsConfirmed": [
         "condition:requires_trace_attempt",
         "effect:link",
@@ -1045,7 +1073,6 @@
       ],
       "previewAdds": [
         "condition:requires_trace_attempt",
-        "effect:link",
         "effect:trace_defense"
       ],
       "normalizedDifferences": [
@@ -1076,6 +1103,13 @@
           "classification": "trace_defense_context_normalized",
           "rule": "trace_defense_link_normalization",
           "rationale": "Link and trace-defense facts describe trace-window modifiers only and do not guarantee trace success."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "survival_strategy_overlay_split_normalized",
+          "rule": "survival_strategy_overlay_split_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-10 comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -1769,7 +1803,7 @@
       "cardId": "onr_v1_003_baedekers-net-map",
       "title": "Baedeker’s Net Map",
       "side": "runner",
-      "cardType": "hardware",
+      "cardType": "program",
       "activeHintFound": true,
       "runtimeCatalogCardFound": true,
       "cardImplementationFound": true,
@@ -1779,7 +1813,7 @@
       "compiledIndexFound": false,
       "migrationPriorityFound": false,
       "subBatch": "excluded_or_out_of_scope",
-      "excludedReason": "Catalog and implementation identify this as a Runner program, but the active monolith hint currently says hardware; excluded from Batch 10 rather than normalizing across a type mismatch.",
+      "excludedReason": "Trace/base-link support is not prevention/survival; keep for Runner trace/link support review rather than Batch 10.",
       "exclusionKind": "excluded_from_batch_with_reason"
     },
     {

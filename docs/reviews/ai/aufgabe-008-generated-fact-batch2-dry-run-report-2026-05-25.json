@@ -14,34 +14,34 @@
   },
   "mode": "read-only dry-run; does not write ai-card-hints-active.json and has no runtime, planner or consumer binding",
   "hardErrorCount": 0,
-  "warningCount": 47,
-  "infoCount": 22,
+  "warningCount": 48,
+  "infoCount": 20,
   "warningCountsByKind": {
     "board_context_required": 7,
     "consumer_active_for_fact_type": 14,
     "cost_profile_shape_difference": 6,
     "descriptor_context_required": 2,
-    "generated_fact_added_in_preview": 3,
+    "generated_fact_added_in_preview": 6,
     "generated_fact_already_present": 6,
-    "shape_difference": 5,
-    "target_profile_shape_difference": 2,
-    "trash_credit_target_shape_difference": 2
+    "monolith_only_mechanical_fact": 3,
+    "shape_difference": 2,
+    "target_profile_shape_difference": 2
   },
   "infoCountsByKind": {
     "legacy_keep_for_compat": 6,
     "manual_overlay_not_runtime": 3,
     "manual_overlay_present": 3,
-    "no_change_needed": 4,
+    "no_change_needed": 2,
     "preview_only": 6
   },
   "batchCardCount": 6,
-  "previewChangedCardCount": 2,
-  "confirmedFactCount": 11,
-  "previewAddedFactCount": 3,
+  "previewChangedCardCount": 4,
+  "confirmedFactCount": 8,
+  "previewAddedFactCount": 6,
   "conflictCount": 0,
-  "shapeDifferenceCount": 5,
+  "shapeDifferenceCount": 2,
   "targetProfileDifferenceCount": 2,
-  "trashCreditDifferenceCount": 2,
+  "trashCreditDifferenceCount": 0,
   "costProfileDifferenceCount": 6,
   "boardContextRequiredCount": 7,
   "manualOverlayPresentCount": 3,
@@ -665,7 +665,8 @@
           "type": "effect",
           "kind": "install_discount",
           "timing": "during_run",
-          "scope": "installed_card",
+          "scope": "runner",
+          "resource": "credits",
           "source": "active.effects"
         },
         {
@@ -684,12 +685,26 @@
           {
             "kind": "install_discount",
             "timing": "during_run",
-            "scope": "installed_card"
+            "scope": "runner",
+            "resource": "credits",
+            "target": "program_install"
+          },
+          {
+            "kind": "install_discount",
+            "timing": "during_run",
+            "scope": "runner"
+          },
+          {
+            "kind": "install",
+            "timing": "during_run",
+            "scope": "stack",
+            "target": "stack_top_program"
           },
           {
             "kind": "search",
             "timing": "during_run",
-            "scope": "runner"
+            "scope": "runner",
+            "target": "program"
           },
           {
             "kind": "topdeck_info",
@@ -725,25 +740,6 @@
         }
       },
       "confirmedByGeneratedFacts": [
-        {
-          "relation": "equivalent_shape_difference",
-          "fact": "effect:install_discount",
-          "generated": {
-            "type": "effect",
-            "kind": "install_discount",
-            "timing": "during_run",
-            "scope": "runner",
-            "confidence": "high",
-            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching.installCost"
-          },
-          "active": {
-            "type": "effect",
-            "kind": "install_discount",
-            "timing": "during_run",
-            "scope": "installed_card",
-            "source": "active.effects"
-          }
-        },
         {
           "relation": "exact",
           "fact": "condition:requires_during_run",
@@ -782,6 +778,14 @@
       "wouldAddToPreview": [
         {
           "type": "effect",
+          "kind": "install_discount",
+          "timing": "during_run",
+          "scope": "runner",
+          "confidence": "high",
+          "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching.installCost"
+        },
+        {
+          "type": "effect",
           "kind": "topdeck_info",
           "timing": "during_run",
           "scope": "runner",
@@ -812,7 +816,8 @@
           "type": "effect",
           "kind": "install_discount",
           "timing": "during_run",
-          "scope": "installed_card",
+          "scope": "runner",
+          "resource": "credits",
           "source": "active.effects"
         },
         {
@@ -823,26 +828,7 @@
           "source": "active.effects"
         }
       ],
-      "shapeDifferences": [
-        {
-          "fact": "effect:install_discount",
-          "generated": {
-            "type": "effect",
-            "kind": "install_discount",
-            "timing": "during_run",
-            "scope": "runner",
-            "confidence": "high",
-            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching.installCost"
-          },
-          "active": {
-            "type": "effect",
-            "kind": "install_discount",
-            "timing": "during_run",
-            "scope": "installed_card",
-            "source": "active.effects"
-          }
-        }
-      ],
+      "shapeDifferences": [],
       "targetProfileDifferences": [
         {
           "fact": "targetProfile",
@@ -931,6 +917,11 @@
         },
         {
           "kind": "generated_fact_added_in_preview",
+          "message": "Generated effect:install_discount would be added to the preview.",
+          "fact": "effect:install_discount"
+        },
+        {
+          "kind": "generated_fact_added_in_preview",
           "message": "Generated effect:topdeck_info would be added to the preview.",
           "fact": "effect:topdeck_info"
         },
@@ -950,8 +941,8 @@
           "fact": "effect:search"
         },
         {
-          "kind": "shape_difference",
-          "message": "Generated effect:install_discount matches active monolith semantically but has a different shape.",
+          "kind": "monolith_only_mechanical_fact",
+          "message": "Active monolith effect:install_discount is in Batch-2 scope but not generated.",
           "fact": "effect:install_discount"
         },
         {
@@ -1018,11 +1009,10 @@
         {
           "type": "effect",
           "kind": "trash_credit",
-          "timing": "persistent",
-          "scope": "runner",
+          "timing": "on_access",
+          "scope": "accessed_card",
           "resource": "trash_credits",
           "amount": 2,
-          "repeatable": true,
           "source": "active.effects"
         }
       ],
@@ -1032,12 +1022,27 @@
         "cardType": "program",
         "effects": [
           {
+            "kind": "recurring_economy",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 2,
+            "repeatable": true,
+            "target": "trash_cost"
+          },
+          {
+            "kind": "trash_credit",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "trash_credits",
+            "amount": 2,
+            "target": "node"
+          },
+          {
             "kind": "trash_credit",
             "timing": "persistent",
             "scope": "runner",
-            "resource": "trash_credits",
-            "amount": 2,
-            "repeatable": true
+            "resource": "trash_credits"
           }
         ],
         "costProfile": {
@@ -1047,94 +1052,32 @@
           "opportunityCost": "low"
         }
       },
-      "confirmedByGeneratedFacts": [
-        {
-          "relation": "equivalent_shape_difference",
-          "fact": "effect:trash_credit",
-          "generated": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "confidence": "high",
-            "source": "implementation.restrictedHostedCreditSource"
-          },
-          "active": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "amount": 2,
-            "repeatable": true,
-            "source": "active.effects"
-          }
-        }
-      ],
-      "wouldAddToPreview": [],
-      "wouldRemoveFromManualFuture": [
+      "confirmedByGeneratedFacts": [],
+      "wouldAddToPreview": [
         {
           "type": "effect",
           "kind": "trash_credit",
           "timing": "persistent",
           "scope": "runner",
           "resource": "trash_credits",
+          "confidence": "high",
+          "source": "implementation.restrictedHostedCreditSource"
+        }
+      ],
+      "wouldRemoveFromManualFuture": [
+        {
+          "type": "effect",
+          "kind": "trash_credit",
+          "timing": "on_access",
+          "scope": "accessed_card",
+          "resource": "trash_credits",
           "amount": 2,
-          "repeatable": true,
           "source": "active.effects"
         }
       ],
-      "shapeDifferences": [
-        {
-          "fact": "effect:trash_credit",
-          "generated": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "confidence": "high",
-            "source": "implementation.restrictedHostedCreditSource"
-          },
-          "active": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "amount": 2,
-            "repeatable": true,
-            "source": "active.effects"
-          }
-        }
-      ],
+      "shapeDifferences": [],
       "targetProfileDifferences": [],
-      "trashCreditDifferences": [
-        {
-          "fact": "effect:trash_credit",
-          "generated": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "confidence": "high",
-            "source": "implementation.restrictedHostedCreditSource"
-          },
-          "active": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "amount": 2,
-            "repeatable": true,
-            "source": "active.effects"
-          },
-          "reason": "Generated trash-credit fact confirms the source but does not yet carry target/recurring amount shape."
-        }
-      ],
+      "trashCreditDifferences": [],
       "costProfileDifferences": [
         {
           "fact": "costProfile",
@@ -1168,13 +1111,13 @@
           "expectedTrashCreditTarget": "node"
         },
         {
-          "kind": "shape_difference",
-          "message": "Generated effect:trash_credit matches active monolith semantically but has a different shape.",
+          "kind": "generated_fact_added_in_preview",
+          "message": "Generated effect:trash_credit would be added to the preview.",
           "fact": "effect:trash_credit"
         },
         {
-          "kind": "trash_credit_target_shape_difference",
-          "message": "Dedicated trash-credit target/amount shape is not fully present in generated facts.",
+          "kind": "monolith_only_mechanical_fact",
+          "message": "Active monolith effect:trash_credit is in Batch-2 scope but not generated.",
           "fact": "effect:trash_credit"
         }
       ],
@@ -1182,10 +1125,6 @@
         {
           "kind": "legacy_keep_for_compat",
           "message": "roles, planRoles and aiSupportStatus remain active monolith fields."
-        },
-        {
-          "kind": "no_change_needed",
-          "message": "Dry-run preview adds no new Batch-2 fact."
         },
         {
           "kind": "preview_only",
@@ -1232,11 +1171,10 @@
         {
           "type": "effect",
           "kind": "trash_credit",
-          "timing": "persistent",
-          "scope": "runner",
+          "timing": "on_access",
+          "scope": "accessed_card",
           "resource": "trash_credits",
           "amount": 2,
-          "repeatable": true,
           "source": "active.effects"
         }
       ],
@@ -1246,12 +1184,27 @@
         "cardType": "program",
         "effects": [
           {
+            "kind": "recurring_economy",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 2,
+            "repeatable": true,
+            "target": "trash_cost"
+          },
+          {
+            "kind": "trash_credit",
+            "timing": "on_access",
+            "scope": "accessed_card",
+            "resource": "trash_credits",
+            "amount": 2,
+            "target": "upgrade"
+          },
+          {
             "kind": "trash_credit",
             "timing": "persistent",
             "scope": "runner",
-            "resource": "trash_credits",
-            "amount": 2,
-            "repeatable": true
+            "resource": "trash_credits"
           }
         ],
         "costProfile": {
@@ -1261,94 +1214,32 @@
           "opportunityCost": "low"
         }
       },
-      "confirmedByGeneratedFacts": [
-        {
-          "relation": "equivalent_shape_difference",
-          "fact": "effect:trash_credit",
-          "generated": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "confidence": "high",
-            "source": "implementation.restrictedHostedCreditSource"
-          },
-          "active": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "amount": 2,
-            "repeatable": true,
-            "source": "active.effects"
-          }
-        }
-      ],
-      "wouldAddToPreview": [],
-      "wouldRemoveFromManualFuture": [
+      "confirmedByGeneratedFacts": [],
+      "wouldAddToPreview": [
         {
           "type": "effect",
           "kind": "trash_credit",
           "timing": "persistent",
           "scope": "runner",
           "resource": "trash_credits",
+          "confidence": "high",
+          "source": "implementation.restrictedHostedCreditSource"
+        }
+      ],
+      "wouldRemoveFromManualFuture": [
+        {
+          "type": "effect",
+          "kind": "trash_credit",
+          "timing": "on_access",
+          "scope": "accessed_card",
+          "resource": "trash_credits",
           "amount": 2,
-          "repeatable": true,
           "source": "active.effects"
         }
       ],
-      "shapeDifferences": [
-        {
-          "fact": "effect:trash_credit",
-          "generated": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "confidence": "high",
-            "source": "implementation.restrictedHostedCreditSource"
-          },
-          "active": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "amount": 2,
-            "repeatable": true,
-            "source": "active.effects"
-          }
-        }
-      ],
+      "shapeDifferences": [],
       "targetProfileDifferences": [],
-      "trashCreditDifferences": [
-        {
-          "fact": "effect:trash_credit",
-          "generated": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "confidence": "high",
-            "source": "implementation.restrictedHostedCreditSource"
-          },
-          "active": {
-            "type": "effect",
-            "kind": "trash_credit",
-            "timing": "persistent",
-            "scope": "runner",
-            "resource": "trash_credits",
-            "amount": 2,
-            "repeatable": true,
-            "source": "active.effects"
-          },
-          "reason": "Generated trash-credit fact confirms the source but does not yet carry target/recurring amount shape."
-        }
-      ],
+      "trashCreditDifferences": [],
       "costProfileDifferences": [
         {
           "fact": "costProfile",
@@ -1382,13 +1273,13 @@
           "expectedTrashCreditTarget": "upgrade"
         },
         {
-          "kind": "shape_difference",
-          "message": "Generated effect:trash_credit matches active monolith semantically but has a different shape.",
+          "kind": "generated_fact_added_in_preview",
+          "message": "Generated effect:trash_credit would be added to the preview.",
           "fact": "effect:trash_credit"
         },
         {
-          "kind": "trash_credit_target_shape_difference",
-          "message": "Dedicated trash-credit target/amount shape is not fully present in generated facts.",
+          "kind": "monolith_only_mechanical_fact",
+          "message": "Active monolith effect:trash_credit is in Batch-2 scope but not generated.",
           "fact": "effect:trash_credit"
         }
       ],
@@ -1396,10 +1287,6 @@
         {
           "kind": "legacy_keep_for_compat",
           "message": "roles, planRoles and aiSupportStatus remain active monolith fields."
-        },
-        {
-          "kind": "no_change_needed",
-          "message": "Dry-run preview adds no new Batch-2 fact."
         },
         {
           "kind": "preview_only",
@@ -1474,9 +1361,16 @@
         "cardType": "program",
         "effects": [
           {
+            "kind": "install",
+            "timing": "during_run",
+            "scope": "runner",
+            "target": "program"
+          },
+          {
             "kind": "search",
             "timing": "during_run",
-            "scope": "runner"
+            "scope": "runner",
+            "target": "program"
           }
         ],
         "conditions": [
@@ -1799,6 +1693,12 @@
     {
       "cardId": "onr_v1_043_mystery-box",
       "kind": "generated_fact_added_in_preview",
+      "message": "Generated effect:install_discount would be added to the preview.",
+      "fact": "effect:install_discount"
+    },
+    {
+      "cardId": "onr_v1_043_mystery-box",
+      "kind": "generated_fact_added_in_preview",
       "message": "Generated effect:topdeck_info would be added to the preview.",
       "fact": "effect:topdeck_info"
     },
@@ -1822,8 +1722,8 @@
     },
     {
       "cardId": "onr_v1_043_mystery-box",
-      "kind": "shape_difference",
-      "message": "Generated effect:install_discount matches active monolith semantically but has a different shape.",
+      "kind": "monolith_only_mechanical_fact",
+      "message": "Active monolith effect:install_discount is in Batch-2 scope but not generated.",
       "fact": "effect:install_discount"
     },
     {
@@ -1852,14 +1752,14 @@
     },
     {
       "cardId": "onr_v1_048_poltergeist",
-      "kind": "shape_difference",
-      "message": "Generated effect:trash_credit matches active monolith semantically but has a different shape.",
+      "kind": "generated_fact_added_in_preview",
+      "message": "Generated effect:trash_credit would be added to the preview.",
       "fact": "effect:trash_credit"
     },
     {
       "cardId": "onr_v1_048_poltergeist",
-      "kind": "trash_credit_target_shape_difference",
-      "message": "Dedicated trash-credit target/amount shape is not fully present in generated facts.",
+      "kind": "monolith_only_mechanical_fact",
+      "message": "Active monolith effect:trash_credit is in Batch-2 scope but not generated.",
       "fact": "effect:trash_credit"
     },
     {
@@ -1882,14 +1782,14 @@
     },
     {
       "cardId": "onr_v1_057_scatter-shot",
-      "kind": "shape_difference",
-      "message": "Generated effect:trash_credit matches active monolith semantically but has a different shape.",
+      "kind": "generated_fact_added_in_preview",
+      "message": "Generated effect:trash_credit would be added to the preview.",
       "fact": "effect:trash_credit"
     },
     {
       "cardId": "onr_v1_057_scatter-shot",
-      "kind": "trash_credit_target_shape_difference",
-      "message": "Dedicated trash-credit target/amount shape is not fully present in generated facts.",
+      "kind": "monolith_only_mechanical_fact",
+      "message": "Active monolith effect:trash_credit is in Batch-2 scope but not generated.",
       "fact": "effect:trash_credit"
     },
     {
@@ -2027,11 +1927,6 @@
     },
     {
       "cardId": "onr_v1_048_poltergeist",
-      "kind": "no_change_needed",
-      "message": "Dry-run preview adds no new Batch-2 fact."
-    },
-    {
-      "cardId": "onr_v1_048_poltergeist",
       "kind": "preview_only",
       "message": "Dry-run does not write ai-card-hints-active.json."
     },
@@ -2039,11 +1934,6 @@
       "cardId": "onr_v1_057_scatter-shot",
       "kind": "legacy_keep_for_compat",
       "message": "roles, planRoles and aiSupportStatus remain active monolith fields."
-    },
-    {
-      "cardId": "onr_v1_057_scatter-shot",
-      "kind": "no_change_needed",
-      "message": "Dry-run preview adds no new Batch-2 fact."
     },
     {
       "cardId": "onr_v1_057_scatter-shot",

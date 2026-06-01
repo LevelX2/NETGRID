@@ -60,7 +60,7 @@ describe("generated fact Batch-2 normalization dry run", () => {
     expect(report.taskId).toBe("Aufgabe 010");
     expect(report.batch).toBe("batch_2_breaker_target_trash_credit");
     expect(report.hardErrorCount).toBe(0);
-    expect(report.normalizedDifferenceCount).toBe(15);
+    expect(report.normalizedDifferenceCount).toBe(10);
     expect(report.remainingShapeDifferenceCount).toBe(0);
     expect(report.remainingTargetProfileDifferenceCount).toBe(0);
     expect(report.remainingTrashCreditTargetDifferenceCount).toBe(0);
@@ -120,22 +120,20 @@ describe("generated fact Batch-2 normalization dry run", () => {
     });
   });
 
-  it("keeps trash-credit targets and breaker profiles safe", () => {
+  it("keeps resolved trash-credit targets out of normalization and breaker profiles safe", () => {
     const report = readReport();
     expect(
-      normalizedForm(
-        report,
-        "onr_v1_048_poltergeist",
-        "trash_credit_target_normalization",
+      cardById(report, "onr_v1_048_poltergeist").normalizedEquivalences.some(
+        (equivalence) =>
+          equivalence.rules.includes("trash_credit_target_normalization"),
       ),
-    ).toMatchObject({ target: "node" });
+    ).toBe(false);
     expect(
-      normalizedForm(
-        report,
-        "onr_v1_057_scatter-shot",
-        "trash_credit_target_normalization",
+      cardById(report, "onr_v1_057_scatter-shot").normalizedEquivalences.some(
+        (equivalence) =>
+          equivalence.rules.includes("trash_credit_target_normalization"),
       ),
-    ).toMatchObject({ target: "upgrade" });
+    ).toBe(false);
     expect(
       normalizedForm(
         report,
@@ -155,9 +153,9 @@ describe("generated fact Batch-2 normalization dry run", () => {
   it("splits CostProfile and downgrades BoardContext to info", () => {
     const report = readReport();
     expect(report.normalizationRuleCounts).toEqual({
-      target_profile_install_cost_normalization: 3,
+      target_profile_install_cost_normalization: 2,
       target_profile_stack_search_normalization: 2,
-      trash_credit_target_normalization: 4,
+      trash_credit_target_normalization: 0,
       breaker_profile_shape_normalization: 2,
       cost_profile_split_normalization: 6,
       board_context_required_classification: 7,
@@ -207,9 +205,15 @@ function normalizedForm(
   return form.form;
 }
 
+function cardById(report: BatchTwoNormalizationDryRunReport, cardId: string) {
+  const card = report.cards.find((item) => item.cardId === cardId);
+  if (!card) throw new Error(`Missing card ${cardId}`);
+  return card;
+}
+
 function runNormalizationJson(): BatchTwoNormalizationDryRunReport {
   return JSON.parse(
-    execFileSync(
+    runJsonCommand(
       "node",
       [
         "scripts/check-ai-generated-fact-batch2-normalization-dry-run.mjs",
@@ -227,4 +231,20 @@ function readReport(): BatchTwoNormalizationDryRunReport {
   return JSON.parse(
     fs.readFileSync(reportPath, "utf8"),
   ) as BatchTwoNormalizationDryRunReport;
+}
+
+function runJsonCommand(
+  command: string,
+  args: string[],
+  options: { cwd: string; encoding: BufferEncoding },
+): string {
+  try {
+    return execFileSync(command, args, options);
+  } catch (error) {
+    const output = (error as { stdout?: Buffer | string }).stdout;
+    if (output) {
+      return Buffer.isBuffer(output) ? output.toString(options.encoding) : output;
+    }
+    throw error;
+  }
 }

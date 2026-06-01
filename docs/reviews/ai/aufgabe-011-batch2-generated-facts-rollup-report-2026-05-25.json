@@ -14,23 +14,23 @@
   "batch": "batch_2_breaker_target_trash_credit",
   "mode": "read-only rollup; no active hint migration, no runtime compile, no planner or consumer binding",
   "batchCardCount": 6,
-  "confirmedGeneratedFactCount": 11,
-  "previewAddedFactCount": 3,
-  "previewChangedCardCount": 2,
+  "confirmedGeneratedFactCount": 8,
+  "previewAddedFactCount": 6,
+  "previewChangedCardCount": 4,
   "hardErrorCount": 0,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "shapeDifferenceCount": 5,
-  "normalizedDifferenceCount": 15,
+  "shapeDifferenceCount": 2,
+  "normalizedDifferenceCount": 10,
   "remainingShapeDifferenceCount": 0,
   "remainingTargetProfileDifferenceCount": 0,
   "remainingTrashCreditTargetDifferenceCount": 0,
   "remainingCostProfileDifferenceCount": 0,
   "boardContextInfoCount": 7,
-  "monolithOnlyMechanicalFactCount": 0,
+  "monolithOnlyMechanicalFactCount": 3,
   "deriverFollowupCandidateCount": 0,
-  "descriptorGapRemainingCount": 0,
-  "humanReviewCandidateCount": 0,
+  "descriptorGapRemainingCount": 8,
+  "humanReviewCandidateCount": 4,
   "consumerActiveForFactTypeCount": 14,
   "legacyKeepForCompatCount": 6,
   "futureMigrationReadyCardCount": 6,
@@ -38,11 +38,11 @@
     "ready_but_board_context_required": 2,
     "ready_for_future_generated_migration": 4
   },
-  "batchTwoStatus": "future_migration_ready_read_only",
+  "batchTwoStatus": "needs_followup",
   "normalizationRuleCounts": {
-    "target_profile_install_cost_normalization": 3,
+    "target_profile_install_cost_normalization": 2,
     "target_profile_stack_search_normalization": 2,
-    "trash_credit_target_normalization": 4,
+    "trash_credit_target_normalization": 0,
     "breaker_profile_shape_normalization": 2,
     "cost_profile_split_normalization": 6,
     "board_context_required_classification": 7
@@ -168,10 +168,13 @@
       "risk": "medium",
       "confirmedGeneratedFacts": [
         "condition:requires_during_run",
-        "effect:install_discount",
         "effect:search"
       ],
-      "previewAddedFacts": ["effect:topdeck_info", "targetProfile"],
+      "previewAddedFacts": [
+        "effect:install_discount",
+        "effect:topdeck_info",
+        "targetProfile"
+      ],
       "generatedFactsAlreadyPresent": [
         "condition:requires_during_run",
         "effect:search"
@@ -188,12 +191,6 @@
           "sourceWarningKind": "cost_profile_shape_difference",
           "rules": ["cost_profile_split_normalization"],
           "classification": "normalized_cost_profile_split"
-        },
-        {
-          "fact": "effect:install_discount",
-          "sourceWarningKind": "shape_difference",
-          "rules": ["target_profile_install_cost_normalization"],
-          "classification": "normalized_equivalent"
         },
         {
           "fact": "targetProfile",
@@ -225,8 +222,8 @@
       "factGroups": ["costProfile", "trash_credit"],
       "priority": "P2",
       "risk": "low",
-      "confirmedGeneratedFacts": ["effect:trash_credit"],
-      "previewAddedFacts": [],
+      "confirmedGeneratedFacts": [],
+      "previewAddedFacts": ["effect:trash_credit"],
       "generatedFactsAlreadyPresent": [],
       "boardContextRequired": [],
       "normalizedDifferences": [
@@ -235,18 +232,6 @@
           "sourceWarningKind": "cost_profile_shape_difference",
           "rules": ["cost_profile_split_normalization"],
           "classification": "normalized_cost_profile_split"
-        },
-        {
-          "fact": "effect:trash_credit",
-          "sourceWarningKind": "shape_difference",
-          "rules": ["trash_credit_target_normalization"],
-          "classification": "normalized_equivalent"
-        },
-        {
-          "fact": "effect:trash_credit",
-          "sourceWarningKind": "trash_credit_target_shape_difference",
-          "rules": ["trash_credit_target_normalization"],
-          "classification": "normalized_equivalent"
         }
       ],
       "activeConsumers": [
@@ -268,8 +253,8 @@
       "factGroups": ["costProfile", "trash_credit"],
       "priority": "P2",
       "risk": "low",
-      "confirmedGeneratedFacts": ["effect:trash_credit"],
-      "previewAddedFacts": [],
+      "confirmedGeneratedFacts": [],
+      "previewAddedFacts": ["effect:trash_credit"],
       "generatedFactsAlreadyPresent": [],
       "boardContextRequired": [],
       "normalizedDifferences": [
@@ -278,18 +263,6 @@
           "sourceWarningKind": "cost_profile_shape_difference",
           "rules": ["cost_profile_split_normalization"],
           "classification": "normalized_cost_profile_split"
-        },
-        {
-          "fact": "effect:trash_credit",
-          "sourceWarningKind": "shape_difference",
-          "rules": ["trash_credit_target_normalization"],
-          "classification": "normalized_equivalent"
-        },
-        {
-          "fact": "effect:trash_credit",
-          "sourceWarningKind": "trash_credit_target_shape_difference",
-          "rules": ["trash_credit_target_normalization"],
-          "classification": "normalized_equivalent"
         }
       ],
       "activeConsumers": [
@@ -390,12 +363,12 @@
   "sourceSummary": {
     "derivedFacts": {
       "hardErrorCount": 0,
-      "warningCount": 984,
-      "cardsNeedingManualOverlay": 125
+      "warningCount": 978,
+      "cardsNeedingManualOverlay": 126
     },
     "compiledIndex": {
       "hardErrorCount": 0,
-      "warningCount": 643,
+      "warningCount": 657,
       "reviewCandidates": 122
     },
     "migrationPriority": {
@@ -417,23 +390,23 @@
       "confirmedGeneratedFactCount": 40
     },
     "batchTwoDryRun": {
-      "warningCount": 47,
+      "warningCount": 48,
       "warningCountsByKind": {
         "board_context_required": 7,
         "consumer_active_for_fact_type": 14,
         "cost_profile_shape_difference": 6,
         "descriptor_context_required": 2,
-        "generated_fact_added_in_preview": 3,
+        "generated_fact_added_in_preview": 6,
         "generated_fact_already_present": 6,
-        "shape_difference": 5,
-        "target_profile_shape_difference": 2,
-        "trash_credit_target_shape_difference": 2
+        "monolith_only_mechanical_fact": 3,
+        "shape_difference": 2,
+        "target_profile_shape_difference": 2
       },
       "infoCountsByKind": {
         "legacy_keep_for_compat": 6,
         "manual_overlay_not_runtime": 3,
         "manual_overlay_present": 3,
-        "no_change_needed": 4,
+        "no_change_needed": 2,
         "preview_only": 6
       }
     },
@@ -443,15 +416,12 @@
         "cost_profile_requires_overlay_split": 6,
         "generated_more_precise_than_monolith": 3,
         "install_cost_requires_engine_cost_context": 1,
-        "monolith_more_specific_than_generated": 2,
-        "semantic_equivalent_shape_difference": 2,
-        "target_equivalent_node_trash_credit": 1,
-        "target_equivalent_upgrade_trash_credit": 1,
+        "semantic_equivalent_shape_difference": 1,
         "target_profile_requires_search_legalaction_context": 6
       }
     },
     "batchTwoNormalization": {
-      "normalizedDifferenceCount": 15,
+      "normalizedDifferenceCount": 10,
       "boardContextInfoCount": 7,
       "remainingDifferenceCount": 0
     }

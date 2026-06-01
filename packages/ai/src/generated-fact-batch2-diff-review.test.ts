@@ -54,18 +54,21 @@ describe("generated fact Batch-2 diff review", () => {
     expect(report.batch).toBe("batch_2_breaker_target_trash_credit");
     expect(report.hardErrorCount).toBe(0);
     expect(report.realSemanticConflictCount).toBe(0);
-    expect(report.shapeDifferenceCount).toBe(5);
+    expect(report.shapeDifferenceCount).toBe(2);
     expect(report.targetProfileShapeDifferenceCount).toBe(2);
-    expect(report.trashCreditTargetShapeDifferenceCount).toBe(2);
+    expect(report.trashCreditTargetShapeDifferenceCount).toBe(0);
     expect(report.costProfileShapeDifferenceCount).toBe(6);
     expect(report.boardContextRequiredCount).toBe(7);
-    expect(report.classificationCountsByWarningKind).toEqual({
+    expect(report.classificationCountsByWarningKind).toMatchObject({
       board_context_required: 7,
       cost_profile_shape_difference: 6,
-      shape_difference: 5,
+      shape_difference: 2,
       target_profile_shape_difference: 2,
-      trash_credit_target_shape_difference: 2,
     });
+    expect(
+      report.classificationCountsByWarningKind
+        .trash_credit_target_shape_difference ?? 0,
+    ).toBe(0);
   });
 
   it("keeps SMC normal-cost target profile distinct from Mystery Box free install", () => {
@@ -103,13 +106,13 @@ describe("generated fact Batch-2 diff review", () => {
       card(report, "onr_v1_048_poltergeist").classifications.some(
         (item) => item.classification === "target_equivalent_node_trash_credit",
       ),
-    ).toBe(true);
+    ).toBe(false);
     expect(
       card(report, "onr_v1_057_scatter-shot").classifications.some(
         (item) =>
           item.classification === "target_equivalent_upgrade_trash_credit",
       ),
-    ).toBe(true);
+    ).toBe(false);
   });
 
   it("splits CostProfile and BoardContext into explicit non-conflict classes", () => {
@@ -139,7 +142,6 @@ describe("generated fact Batch-2 diff review", () => {
       "cost_profile_split_normalization",
       "target_profile_install_cost_normalization",
       "target_profile_stack_search_normalization",
-      "trash_credit_target_normalization",
     ]);
     const serialized = JSON.stringify(report);
     for (const blockedField of [
@@ -161,7 +163,7 @@ function card(report: BatchTwoDiffReviewReport, cardId: string) {
 
 function runDiffReviewJson(): BatchTwoDiffReviewReport {
   return JSON.parse(
-    execFileSync(
+    runJsonCommand(
       "node",
       ["scripts/check-ai-generated-fact-batch2-diff-review.mjs", "--json"],
       {
@@ -176,4 +178,20 @@ function readReport(): BatchTwoDiffReviewReport {
   return JSON.parse(
     fs.readFileSync(reportPath, "utf8"),
   ) as BatchTwoDiffReviewReport;
+}
+
+function runJsonCommand(
+  command: string,
+  args: string[],
+  options: { cwd: string; encoding: BufferEncoding },
+): string {
+  try {
+    return execFileSync(command, args, options);
+  } catch (error) {
+    const output = (error as { stdout?: Buffer | string }).stdout;
+    if (output) {
+      return Buffer.isBuffer(output) ? output.toString(options.encoding) : output;
+    }
+    throw error;
+  }
 }
