@@ -12,6 +12,7 @@ type AiHintInspectorIndex = {
   source: {
     compiledHintsPath: string;
     functionSignalDerivationPath: string;
+    tacticSignalCatalogPath?: string;
   };
   summary: {
     cardCount: number;
@@ -54,6 +55,9 @@ describe("AI005 hint inspector index", () => {
     expect(index.source.compiledHintsPath).toBe("data/ai/ai-card-hints-compiled.json");
     expect(index.source.functionSignalDerivationPath).toBe(
       "data/ai/function-signal-derivation-v1.json",
+    );
+    expect(index.source.tacticSignalCatalogPath).toBe(
+      "data/ai/tactic-signals-v1.json",
     );
     expect(index.summary.cardCount).toBeGreaterThan(400);
     expect(index.summary.cardsWithMechanicalFacts).toBeGreaterThan(300);
@@ -180,6 +184,70 @@ describe("AI005 hint inspector index", () => {
     expect(canisMinor.derivedFunctionSignals).toContain("tax.ice");
     expect(canisMinor.derivedStrategyAnchors).toContain(
       "corp.ice_tax_glacier",
+    );
+  });
+
+  it("exposes AI017 icebreaker pilot signals without planner-facing anchors", () => {
+    const index = readIndex();
+    const blackWidow = card(index, "onr_proteus_080_black-widow");
+    const bartmoss = card(index, "onr_v1_005_bartmoss-memorial-icebreaker");
+    const morphingTool = card(index, "onr_proteus_092_morphing-tool");
+    const clown = card(index, "onr_v1_012_clown");
+    const airportLocker = card(index, "onr_proteus_128_airport-locker");
+
+    expect(blackWidow.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "breaker.sentry",
+        "breaker.targeted_ice_bonus",
+        "breaker.strength_bonus_vs_chosen_ice",
+      ]),
+    );
+    expect(blackWidow.derivedStrategyAnchors).toEqual([]);
+
+    expect(bartmoss.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "breaker.risky",
+        "breaker.self_trash_risk",
+        "breaker.universal",
+      ]),
+    );
+    expect(bartmoss.derivedStrategyAnchors).toEqual([]);
+    expect(bartmoss.strategicRoleStatus.values).toContain("emergency_tool");
+
+    expect(morphingTool.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "breaker.configurable_coverage",
+        "breaker.reconfigurable_type",
+      ]),
+    );
+    expect(morphingTool.derivedFunctionSignals).not.toContain(
+      "breaker.universal",
+    );
+    expect(morphingTool.derivedStrategyAnchors).toEqual([]);
+
+    expect(clown.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "breaker.support",
+        "ice.strength_reduction",
+        "run.break_cost_support",
+      ]),
+    );
+    expect(clown.derivedStrategyAnchors).toEqual([]);
+    expect(clown.strategicRoleStatus.values).toContain("support_tool");
+
+    expect(airportLocker.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "breaker.emergency_search",
+        "breaker.search_during_encounter",
+        "setup.install_support",
+        "setup.search",
+      ]),
+    );
+    expect(airportLocker.derivedStrategyAnchors).toEqual([
+      "runner.breaker_search",
+    ]);
+    expect(JSON.stringify(airportLocker)).not.toMatch(
+      /actualStackOrder|hiddenCards|privatePayload|cardInstances/,
     );
   });
 });

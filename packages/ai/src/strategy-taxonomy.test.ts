@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 import functionSignalDerivationData from "../../../data/ai/function-signal-derivation-v1.json";
 import strategicRolesData from "../../../data/ai/strategic-roles-v1.json";
 import strategyGoalsData from "../../../data/ai/strategy-goals-v1.json";
+import tacticSignalCatalogData from "../../../data/ai/tactic-signals-v1.json";
 
 type StrategyGoal = {
   strategyId: string;
@@ -27,6 +28,7 @@ type CheckReport = {
     runnerStrategyGoalCount: number;
     corpStrategyGoalCount: number;
     strategicRoleIds: string[];
+    tacticSignalCatalogCount: number;
   };
   gates: Record<string, boolean>;
   derivationSmokeTests: Record<
@@ -88,6 +90,7 @@ function loadMutatedStrategyTaxonomyReport(mutator: string): CheckReport {
       "data/ai/strategy-goals-v1.json",
       "data/ai/strategic-roles-v1.json",
       "data/ai/function-signal-derivation-v1.json",
+      "data/ai/tactic-signals-v1.json",
     ];
     for (const relative of files) {
       const target = path.join(tempRoot, relative);
@@ -140,6 +143,11 @@ function smokeTest(
     | "rndMultiaccess"
     | "hqMultiaccess"
     | "normalBreaker"
+    | "runnerRiskyBreaker"
+    | "runnerConfigurableBreaker"
+    | "runnerTargetedBreaker"
+    | "runnerIceStrengthReduction"
+    | "runnerEncounterSearchInstall"
     | "corpTagPunishPayoff"
     | "corpCreditTagPunishPayoff"
     | "corpDamagePayoff"
@@ -216,6 +224,45 @@ describe("AI003 strategy goal taxonomy", () => {
     expect(report.taxonomy.strategicRoleIds).toEqual([...roleIds].sort());
     expect(strategicRolesData.lineSupportPolicy.ai003Enforcement).toBe(
       "optional_warn_only",
+    );
+  });
+
+  it("validates the AI017 controlled tactic signal catalog", () => {
+    const report = loadStrategyTaxonomyReport();
+    const signalIds = tacticSignalCatalogData.signals.map(
+      (signal) => signal.signalId,
+    );
+    const derivationSignalIds = [
+      ...new Set(functionSignalDerivationData.derivationRules.map((rule) => rule.signalId)),
+    ].sort();
+
+    expect(report.hardErrorCount).toBe(0);
+    expect(tacticSignalCatalogData.schemaVersion).toBe("ai-tactic-signals-v1");
+    expect(report.taxonomy.tacticSignalCatalogCount).toBe(68);
+    expect(new Set(signalIds).size).toBe(signalIds.length);
+    expect([...signalIds].sort()).toEqual(derivationSignalIds);
+    expect(signalIds.some((signalId) => signalId.startsWith("anti.ice."))).toBe(
+      false,
+    );
+
+    for (const signal of tacticSignalCatalogData.signals) {
+      expect(signal.group).toBeTruthy();
+      expect(signal.description).toBeTruthy();
+      expect(["runner", "corp", "neutral"]).toContain(signal.sideScope);
+      expect(Array.isArray(signal.sourceKinds)).toBe(true);
+      if (signal.supportOnly) {
+        expect(signal.mayAnchorStrategy).toBe(false);
+        expect(signal.allowedStrategyAnchors).toEqual([]);
+      }
+    }
+
+    expect(
+      tacticSignalCatalogData.signals.filter((signal) => signal.targetProfileRelevant),
+    ).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ signalId: "breaker.targeted_ice_bonus" }),
+        expect.objectContaining({ signalId: "breaker.search_during_encounter" }),
+      ]),
     );
   });
 
@@ -362,6 +409,69 @@ describe("AI003 strategy goal taxonomy", () => {
     );
   });
 
+  it("derives AI017 icebreaker pilot signals without strategy anchors", () => {
+    const report = loadStrategyTaxonomyReport();
+    const riskyBreaker = smokeTest(report, "runnerRiskyBreaker");
+    const configurableBreaker = smokeTest(report, "runnerConfigurableBreaker");
+    const targetedBreaker = smokeTest(report, "runnerTargetedBreaker");
+    const strengthReduction = smokeTest(report, "runnerIceStrengthReduction");
+    const encounterSearchInstall = smokeTest(
+      report,
+      "runnerEncounterSearchInstall",
+    );
+
+    expect(riskyBreaker.signals).toEqual(
+      expect.arrayContaining([
+        "breaker.risky",
+        "breaker.self_trash_risk",
+        "breaker.universal",
+      ]),
+    );
+    expect(riskyBreaker.anchorStrategyIds).toEqual([]);
+
+    expect(configurableBreaker.signals).toEqual(
+      expect.arrayContaining([
+        "breaker.configurable_coverage",
+        "breaker.reconfigurable_type",
+      ]),
+    );
+    expect(configurableBreaker.signals).not.toContain("breaker.universal");
+    expect(configurableBreaker.anchorStrategyIds).toEqual([]);
+
+    expect(targetedBreaker.signals).toEqual(
+      expect.arrayContaining([
+        "breaker.sentry",
+        "breaker.targeted_ice_bonus",
+        "breaker.strength_bonus_vs_chosen_ice",
+      ]),
+    );
+    expect(targetedBreaker.anchorStrategyIds).toEqual([]);
+
+    expect(strengthReduction.signals).toEqual(
+      expect.arrayContaining([
+        "breaker.support",
+        "ice.strength_reduction",
+        "run.break_cost_support",
+      ]),
+    );
+    expect(strengthReduction.anchorStrategyIds).toEqual([]);
+
+    expect(encounterSearchInstall.signals).toEqual(
+      expect.arrayContaining([
+        "breaker.emergency_search",
+        "breaker.search_during_encounter",
+        "setup.install_support",
+        "setup.search",
+      ]),
+    );
+    expect(encounterSearchInstall.anchorStrategyIds).toContain(
+      "runner.breaker_search",
+    );
+    expect(encounterSearchInstall.anchorStrategyIds).not.toContain(
+      "runner.rig_first",
+    );
+  });
+
   it("keeps legacy lineSupport cleared while retaining warn-only legacy and hard gates", () => {
     const report = loadStrategyTaxonomyReport();
     const legacyWarning = report.warnings.find(
@@ -455,6 +565,7 @@ describe("AI003 strategy goal taxonomy", () => {
       strategyGoalsData,
       strategicRolesData,
       functionSignalDerivationData,
+      tacticSignalCatalogData,
     });
 
     expect(

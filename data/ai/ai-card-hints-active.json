@@ -229,7 +229,8 @@
         "pumpCost": 1,
         "breakCost": 1,
         "sideEffects": ["random_failure", "program_trash_risk"]
-      }
+      },
+      "strategicRole": ["emergency_tool"]
     },
     {
       "cardId": "onr_v1_006_black-dahlia",
@@ -502,7 +503,8 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
-      }
+      },
+      "strategicRole": ["support_tool"]
     },
     {
       "cardId": "onr_v1_013_cockroach",
@@ -15306,6 +15308,11 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
+      },
+      "breakerProfile": {
+        "coverage": ["sentry"],
+        "targetedIceBonus": true,
+        "strengthBonusVsChosenIce": true
       }
     },
     {
@@ -15584,6 +15591,12 @@
         "strategyCovered": false,
         "confidence": "low",
         "needsHumanReview": true
+      },
+      "breakerProfile": {
+        "coverage": ["unknown_special"],
+        "configurableCoverage": true,
+        "reconfigurableType": true,
+        "coverageCandidates": ["code_gate", "sentry", "wall"]
       }
     },
     {
@@ -16422,6 +16435,25 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "effects": [
+        {
+          "kind": "search",
+          "timing": "during_ice_encounter",
+          "scope": "runner",
+          "target": "program"
+        },
+        {
+          "kind": "install",
+          "timing": "during_ice_encounter",
+          "scope": "runner",
+          "target": "program"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_encounter"
+        }
+      ],
       "lineSupport": ["runner.breaker_search"],
       "strategicRole": ["engine_anchor"]
     },

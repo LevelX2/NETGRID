@@ -8,6 +8,7 @@
     "strategyGoalsPath": "data/ai/strategy-goals-v1.json",
     "strategicRolesPath": "data/ai/strategic-roles-v1.json",
     "functionSignalDerivationPath": "data/ai/function-signal-derivation-v1.json",
+    "tacticSignalCatalogPath": "data/ai/tactic-signals-v1.json",
     "manualOverlayRoot": "data/ai/hints/overlays",
     "mode": "read-only card-catalog inspector index; no hint migration, planner effect, LegalAction effect or runtime state input"
   },
@@ -16,7 +17,7 @@
     "cardsWithMechanicalFacts": 392,
     "cardsWithGeneratedFacts": 314,
     "cardsWithOverlays": 6,
-    "cardsWithFunctionSignals": 344,
+    "cardsWithFunctionSignals": 345,
     "cardsWithStrategyAnchors": 236,
     "cardsWithWarnings": 353,
     "warningCategoryCounts": {
@@ -6256,7 +6257,9 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "breaker.sentry"
+        "breaker.sentry",
+        "breaker.strength_bonus_vs_chosen_ice",
+        "breaker.targeted_ice_bonus"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -6311,7 +6314,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "breakerProfile"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "breakerProfile"
@@ -6825,6 +6830,7 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "breaker.risky",
         "breaker.sentry"
       ],
       "derivedStrategyAnchors": [],
@@ -7206,6 +7212,8 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "breaker.configurable_coverage",
+        "breaker.reconfigurable_type",
         "breaker.unknown_special"
       ],
       "derivedStrategyAnchors": [],
@@ -7268,7 +7276,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "breakerProfile"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "breakerProfile"
@@ -9725,6 +9735,9 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "breaker.emergency_search",
+        "breaker.search_during_encounter",
+        "setup.install_support",
         "setup.search"
       ],
       "derivedStrategyAnchors": [
@@ -9778,7 +9791,10 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions",
@@ -11814,6 +11830,7 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "breaker.risky",
         "breaker.sentry"
       ],
       "derivedStrategyAnchors": [],
@@ -12089,6 +12106,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "breaker.risky",
+        "breaker.self_trash_risk",
         "breaker.universal"
       ],
       "derivedStrategyAnchors": [],
@@ -12165,8 +12184,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "emergency_tool"
+        ],
+        "validValues": [
+          "emergency_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -12263,6 +12286,7 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "breaker.risky",
         "breaker.universal"
       ],
       "derivedStrategyAnchors": [],
@@ -12724,7 +12748,11 @@
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "breaker.support",
+        "ice.strength_reduction",
+        "run.break_cost_support"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -12790,8 +12818,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "support_tool"
+        ],
+        "validValues": [
+          "support_tool"
+        ],
         "unknownValues": []
       }
     },

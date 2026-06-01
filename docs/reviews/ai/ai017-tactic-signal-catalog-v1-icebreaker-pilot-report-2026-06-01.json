@@ -1,0 +1,424 @@
+{
+  "schemaVersion": "ai017-tactic-signal-catalog-v1-icebreaker-pilot-report-v1",
+  "taskId": "AI017",
+  "generatedAt": "2026-06-01",
+  "status": "complete",
+  "summary": {
+    "conclusion": "AI017 defines a controlled tactic signal catalog V1 and applies it to the first Runner Program / Icebreaker pilot without planner, engine, legal, profile, default, catalog-baseline, or mass-migration effects.",
+    "catalogCreated": true,
+    "tacticSignalCatalogPath": "data/ai/tactic-signals-v1.json",
+    "catalogSignalCount": 68,
+    "catalogGroupCount": 29,
+    "mayAnchorStrategyCount": 31,
+    "supportOnlyCount": 37,
+    "antiIceSignalsPresent": false,
+    "activeHintsChanged": true,
+    "compiledHintsChanged": true,
+    "inspectorIndexChanged": true,
+    "plannerEffect": false,
+    "engineEffect": false,
+    "legalEffect": false,
+    "profileOrDefaultSwitch": false,
+    "catalogOrProteusBaselineFix": false,
+    "massMigration": false
+  },
+  "definitions": {
+    "tacticSignal": "Functional card capability between CardImplementation/mechanical facts and later tactical decisions.",
+    "strategyAnchor": "Large deck strategy evidence carried by a card.",
+    "targetProfileOrChoiceProfile": "Target or choice preference data for using a card safely and usefully."
+  },
+  "catalog": {
+    "schemaVersion": "ai-tactic-signals-v1",
+    "signalCount": 68,
+    "groupCount": 29,
+    "groups": [
+      "access_multiaccess",
+      "ambush_access_punish",
+      "breaker_coverage",
+      "breaker_flexible_coverage",
+      "breaker_risk",
+      "breaker_search_install",
+      "breaker_support",
+      "breaker_targeted_bonus",
+      "corp_ice_modifier",
+      "corp_ice_tax",
+      "corp_remote_ambush",
+      "corp_remote_economy",
+      "corp_remote_scoring",
+      "corp_score_acceleration",
+      "corp_scored_utility",
+      "corp_tag_trace_punish",
+      "damage_kill",
+      "economy",
+      "economy_rez_support",
+      "economy_trace_support",
+      "information",
+      "information_central",
+      "remote_tax",
+      "remote_trash_economy",
+      "runner_defense",
+      "runner_ice_efficiency_support",
+      "runner_run_tempo",
+      "setup_draw_search",
+      "setup_install"
+    ],
+    "newOrCorrectedSignals": [
+      "breaker.configurable_coverage",
+      "breaker.reconfigurable_type",
+      "breaker.emergency_coverage",
+      "breaker.targeted_ice_bonus",
+      "breaker.strength_bonus_vs_chosen_ice",
+      "breaker.risky",
+      "breaker.self_trash_risk",
+      "breaker.support",
+      "breaker.search_during_encounter",
+      "breaker.emergency_search",
+      "setup.install_support",
+      "ice.strength_reduction",
+      "run.break_cost_support"
+    ],
+    "forbiddenStaticSignalsAvoided": [
+      "anti.ice.sentry",
+      "anti.ice.wall",
+      "anti.ice.code_gate"
+    ]
+  },
+  "derivation": {
+    "path": "data/ai/function-signal-derivation-v1.json",
+    "ruleCount": 79,
+    "signalCount": 68,
+    "newSources": [
+      "breakerProfile",
+      "breakerProfile.sideEffects"
+    ],
+    "runtimeEffect": "none",
+    "notes": [
+      "All new AI017 pilot derivations are side-/scope-aware.",
+      "No derivation is based only on roles or planRoles.",
+      "Support-only AI017 signals do not create Strategy Anchors."
+    ]
+  },
+  "pilotCards": [
+    {
+      "cardId": "onr_proteus_080_black-widow",
+      "name": "Black Widow",
+      "mechanic": "Sentry breaker with a bonus against an installed ICE chosen on install.",
+      "beforeSignals": [
+        "breaker.sentry"
+      ],
+      "afterSignals": [
+        "breaker.sentry",
+        "breaker.strength_bonus_vs_chosen_ice",
+        "breaker.targeted_ice_bonus"
+      ],
+      "strategyAnchorsBefore": [],
+      "strategyAnchorsAfter": [],
+      "strategicRoleBefore": [],
+      "strategicRoleAfter": [],
+      "targetProfile": {
+        "needed": true,
+        "existingSchemaFits": false,
+        "added": false,
+        "proposal": {
+          "kind": "install_target",
+          "timing": "on_install",
+          "targetType": "installed_ice",
+          "purpose": "strength_bonus_vs_chosen_ice",
+          "preferences": [
+            "known_or_rezzed_sentry",
+            "high_strength_ice",
+            "high_break_cost_without_bonus",
+            "relevant_server_ice"
+          ],
+          "avoid": [
+            "unknown_low_information_target",
+            "irrelevant_server_ice",
+            "already_cheap_to_break"
+          ],
+          "hiddenInfoPolicy": "visible_or_known_only"
+        }
+      },
+      "humanReviewDecision": "kept; richer target choice is only documented, not implemented"
+    },
+    {
+      "cardId": "onr_v1_005_bartmoss-memorial-icebreaker",
+      "name": "Bartmoss Memorial Icebreaker",
+      "mechanic": "Risky universal breaker with random failure and program trash risk.",
+      "beforeSignals": [
+        "breaker.universal"
+      ],
+      "afterSignals": [
+        "breaker.risky",
+        "breaker.self_trash_risk",
+        "breaker.universal"
+      ],
+      "strategyAnchorsBefore": [],
+      "strategyAnchorsAfter": [],
+      "strategicRoleBefore": [],
+      "strategicRoleAfter": [
+        "emergency_tool"
+      ],
+      "targetProfile": {
+        "needed": false,
+        "existingSchemaFits": false,
+        "added": false,
+        "proposal": null
+      },
+      "humanReviewDecision": "unchanged; existing reviewed state remains"
+    },
+    {
+      "cardId": "onr_proteus_092_morphing-tool",
+      "name": "Morphing Tool",
+      "mechanic": "Reconfigurable breaker that can choose or switch ICE type coverage.",
+      "beforeSignals": [
+        "breaker.unknown_special"
+      ],
+      "afterSignals": [
+        "breaker.configurable_coverage",
+        "breaker.reconfigurable_type",
+        "breaker.unknown_special"
+      ],
+      "strategyAnchorsBefore": [],
+      "strategyAnchorsAfter": [],
+      "strategicRoleBefore": [],
+      "strategicRoleAfter": [],
+      "targetProfile": {
+        "needed": true,
+        "existingSchemaFits": false,
+        "added": false,
+        "proposal": {
+          "kind": "mode_choice",
+          "timing": "on_install_or_paid_action",
+          "targetType": "ice_type",
+          "purpose": "choose_current_breaker_coverage",
+          "preferences": [
+            "type_blocking_relevant_run_path",
+            "type_with_known_problem_ice",
+            "type_missing_in_current_rig"
+          ],
+          "hiddenInfoPolicy": "visible_or_known_only"
+        }
+      },
+      "humanReviewDecision": "kept; choice profile is only documented, not implemented",
+      "notes": [
+        "breaker.unknown_special remains because the generated basic fact still carries coverage unknown_special."
+      ]
+    },
+    {
+      "cardId": "onr_v1_012_clown",
+      "name": "Clown",
+      "mechanic": "Runner program reducing ICE strength and indirectly lowering break cost.",
+      "beforeSignals": [],
+      "afterSignals": [
+        "breaker.support",
+        "ice.strength_reduction",
+        "run.break_cost_support"
+      ],
+      "strategyAnchorsBefore": [],
+      "strategyAnchorsAfter": [],
+      "strategicRoleBefore": [],
+      "strategicRoleAfter": [
+        "support_tool"
+      ],
+      "targetProfile": {
+        "needed": false,
+        "existingSchemaFits": false,
+        "added": false,
+        "proposal": null
+      },
+      "humanReviewDecision": "kept; support semantics are clearer but no full review was performed"
+    },
+    {
+      "cardId": "onr_proteus_128_airport-locker",
+      "name": "Airport Locker",
+      "mechanic": "Searches and installs a program during an ICE encounter.",
+      "beforeSignals": [
+        "setup.search"
+      ],
+      "afterSignals": [
+        "breaker.emergency_search",
+        "breaker.search_during_encounter",
+        "setup.install_support",
+        "setup.search"
+      ],
+      "strategyAnchorsBefore": [
+        "runner.breaker_search"
+      ],
+      "strategyAnchorsAfter": [
+        "runner.breaker_search"
+      ],
+      "strategicRoleBefore": [
+        "engine_anchor"
+      ],
+      "strategicRoleAfter": [
+        "engine_anchor"
+      ],
+      "targetProfile": {
+        "needed": true,
+        "existingSchemaFits": "partially",
+        "added": false,
+        "existingDataKept": {
+          "zone": "stack",
+          "targetCardType": "program",
+          "installsTarget": true,
+          "installCost": "normal",
+          "shuffleAfter": true
+        },
+        "proposal": {
+          "kind": "search_install_target",
+          "timing": "during_ice_encounter",
+          "targetType": "program",
+          "purpose": "install_answer_to_current_ice",
+          "preferences": [
+            "program_breaks_current_ice",
+            "program_repairs_missing_coverage",
+            "program_affordable_after_install",
+            "program_preserves_run_goal"
+          ],
+          "hiddenInfoPolicy": "visible_or_known_only_for_current_ice"
+        }
+      },
+      "humanReviewDecision": "kept; richer search/install target evaluation is only documented, not implemented"
+    }
+  ],
+  "deferredCards": [
+    {
+      "name": "False Echo",
+      "reason": "Later bypass/runpath/encounter-interaction class."
+    },
+    {
+      "name": "Pox",
+      "reason": "Later damage/virus/runner-pressure class."
+    },
+    {
+      "name": "Doppelganger Antibody",
+      "reason": "Later ambush/access-punish/runner-tax class; AI016 already covers the core signals."
+    }
+  ],
+  "inspectorImpact": {
+    "cardCount": 564,
+    "cardsWithMechanicalFacts": 392,
+    "cardsWithGeneratedFacts": 314,
+    "cardsWithOverlays": 6,
+    "cardsWithFunctionSignals": 345,
+    "cardsWithStrategyAnchors": 236,
+    "cardsWithWarnings": 353,
+    "sourceIncludesTacticSignalCatalogPath": true,
+    "deckDoctrineEffect": "diagnostic only"
+  },
+  "observedNewSignalCounts": {
+    "breaker.configurable_coverage": 1,
+    "breaker.reconfigurable_type": 1,
+    "breaker.emergency_coverage": 0,
+    "breaker.targeted_ice_bonus": 1,
+    "breaker.strength_bonus_vs_chosen_ice": 1,
+    "breaker.risky": 4,
+    "breaker.self_trash_risk": 1,
+    "breaker.support": 1,
+    "breaker.search_during_encounter": 1,
+    "breaker.emergency_search": 1,
+    "setup.install_support": 1,
+    "ice.strength_reduction": 1,
+    "run.break_cost_support": 1
+  },
+  "testsAdded": [
+    "Tactic signal catalog validation and ID uniqueness.",
+    "Catalog fields, sideScope, groups, descriptions, StrategyAnchor restrictions, and support-only restrictions.",
+    "Exact coverage between derivable signal IDs and catalog signal IDs.",
+    "Static anti.ice.* signal rejection.",
+    "AI017 derivation smoke tests for risky, configurable, targeted, strength-reduction, and encounter-search/install cards.",
+    "Inspector index assertions for Black Widow, Bartmoss Memorial Icebreaker, Morphing Tool, Clown, and Airport Locker.",
+    "Hidden-info contract coverage for the new catalog."
+  ],
+  "checks": [
+    {
+      "command": "corepack pnpm build:ai-compiled-hints",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm build:ai-hint-inspector-index",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-inspector-index",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-strategy-taxonomy",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-compiled-hints",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-compiled-index",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-quality",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-approval-consistency",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-deck-doctrine-strategy",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai test",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit",
+      "status": "passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/web exec tsc -p tsconfig.json --noEmit",
+      "status": "passed"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed"
+    },
+    {
+      "command": "git diff --cached --check",
+      "status": "passed"
+    }
+  ],
+  "updatedArtifacts": [
+    "data/ai/tactic-signals-v1.json",
+    "data/ai/function-signal-derivation-v1.json",
+    "data/ai/ai-card-hints-active.json",
+    "data/ai/ai-card-hints-compiled.json",
+    "data/ai/ai-hint-inspector-index.json",
+    "scripts/check-ai-strategy-taxonomy.mjs",
+    "scripts/build-ai-hint-inspector-index.mjs",
+    "packages/ai/src/hint-ontology.ts",
+    "packages/ai/src/strategy-taxonomy.test.ts",
+    "packages/ai/src/ai-hint-inspector-index.test.ts",
+    "docs/reviews/ai/ai017-tactic-signal-catalog-v1-icebreaker-pilot-2026-06-01.md",
+    "docs/reviews/ai/ai017-tactic-signal-catalog-v1-icebreaker-pilot-report-2026-06-01.json",
+    "docs/reviews/ai/README.md",
+    "docs/reviews/ai/ai-hint-compiled-index-pilot-report-2026-05-25.json",
+    "docs/reviews/ai/ai004-side-aware-function-signal-derivation-report-2026-05-31.json",
+    "docs/reviews/ai/ai004-strategy-taxonomy-warning-triage-batch1-report-2026-05-31.json"
+  ],
+  "explicitNonScope": [
+    "No planner effect.",
+    "No Action Score change.",
+    "No PlanWeight change.",
+    "No engine or legal change.",
+    "No profile/default switch.",
+    "No Catalog/Proteus baseline correction.",
+    "No mass migration.",
+    "No new Strategy IDs.",
+    "No manual functionTags.",
+    "No derivation from roles or planRoles alone.",
+    "No hidden-info use.",
+    "No React/UI derivation logic.",
+    "No complete targeting AI."
+  ]
+}

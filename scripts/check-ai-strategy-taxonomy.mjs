@@ -19,6 +19,7 @@ const STRATEGY_GOALS_PATH = "data/ai/strategy-goals-v1.json";
 const STRATEGIC_ROLES_PATH = "data/ai/strategic-roles-v1.json";
 const FUNCTION_SIGNAL_DERIVATION_PATH =
   "data/ai/function-signal-derivation-v1.json";
+const TACTIC_SIGNAL_CATALOG_PATH = "data/ai/tactic-signals-v1.json";
 const DEFAULT_REPORT_PATH =
   "docs/reviews/ai/ai004-strategy-taxonomy-warning-triage-batch1-report-2026-05-31.json";
 const DEFAULT_SIDE_AWARE_REPORT_PATH =
@@ -42,7 +43,9 @@ const VALID_SUPPORT_VALUES = new Set([
 const VALID_RULE_SOURCES = new Set([
   "effects",
   "conditions",
+  "breakerProfile",
   "breakerProfile.coverage",
+  "breakerProfile.sideEffects",
   "remoteRole",
 ]);
 const VALID_RULE_GATE_FIELDS = new Set([
@@ -54,6 +57,11 @@ const VALID_RULE_GATE_FIELDS = new Set([
   "beneficiary",
   "remoteRole",
   "breakerProfileCoverage",
+]);
+const VALID_TACTIC_SIGNAL_SIDE_SCOPES = new Set([
+  "runner",
+  "corp",
+  "neutral",
 ]);
 
 const HIDDEN_INFO_RISK_FIELDS = [
@@ -524,6 +532,7 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
     repoRoot,
     FUNCTION_SIGNAL_DERIVATION_PATH,
   );
+  const tacticSignalCatalogData = readJson(repoRoot, TACTIC_SIGNAL_CATALOG_PATH);
 
   const hardErrors = [];
   const warnings = [];
@@ -541,11 +550,23 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
   const functionSignalIds = new Set(
     derivationRules.map((rule) => rule.signalId).filter(Boolean),
   );
+  const tacticSignalIds = new Set(
+    (tacticSignalCatalogData.signals ?? [])
+      .map((signal) => signal.signalId)
+      .filter(Boolean),
+  );
 
   validateStrategyGoals(strategyGoalsData, hardErrors);
   validateStrategicRoles(strategicRolesData, hardErrors);
   validateFunctionDerivation(
     functionDerivationData,
+    strategyIds,
+    hardErrors,
+    warnings,
+  );
+  validateTacticSignalCatalog(
+    tacticSignalCatalogData,
+    derivationRules,
     strategyIds,
     hardErrors,
     warnings,
@@ -563,6 +584,11 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
   validateHiddenInfoKeys(
     functionDerivationData,
     FUNCTION_SIGNAL_DERIVATION_PATH,
+    hardErrors,
+  );
+  validateHiddenInfoKeys(
+    tacticSignalCatalogData,
+    TACTIC_SIGNAL_CATALOG_PATH,
     hardErrors,
   );
   validateNoManualFunctionTags(
@@ -763,6 +789,7 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
       strategyGoalsPath: STRATEGY_GOALS_PATH,
       strategicRolesPath: STRATEGIC_ROLES_PATH,
       functionSignalDerivationPath: FUNCTION_SIGNAL_DERIVATION_PATH,
+      tacticSignalCatalogPath: TACTIC_SIGNAL_CATALOG_PATH,
       runtimeEffect:
         "none; AI003-1 sharpens read-only function-signal derivation gates only",
     },
@@ -784,6 +811,8 @@ export function buildAiStrategyTaxonomyReport(options = {}) {
       functionSignalRuleCount: derivationRules.length,
       functionSignalCount: functionSignalIds.size,
       functionSignalIds: [...functionSignalIds].sort(),
+      tacticSignalCatalogCount: tacticSignalIds.size,
+      tacticSignalCatalogIds: [...tacticSignalIds].sort(),
     },
     structuredHintInventory: {
       structuredFieldsAlreadyPresent: [
@@ -1383,12 +1412,25 @@ function ruleMatchesHint(rule, hint) {
       ruleGatesMatch(rule, hint, undefined),
     );
   }
+  if (rule.source === "breakerProfile") {
+    return matchRecord(hint.breakerProfile, rule.match) &&
+      ruleGatesMatch(rule, hint, undefined);
+  }
   if (rule.source === "breakerProfile.coverage") {
     const coverage = rule.match?.coverage;
     return (
       typeof coverage === "string" &&
       Array.isArray(hint.breakerProfile?.coverage) &&
       hint.breakerProfile.coverage.includes(coverage) &&
+      ruleGatesMatch(rule, hint, undefined)
+    );
+  }
+  if (rule.source === "breakerProfile.sideEffects") {
+    const sideEffect = rule.match?.sideEffect;
+    return (
+      typeof sideEffect === "string" &&
+      Array.isArray(hint.breakerProfile?.sideEffects) &&
+      hint.breakerProfile.sideEffects.includes(sideEffect) &&
       ruleGatesMatch(rule, hint, undefined)
     );
   }
@@ -1408,12 +1450,23 @@ function ruleBaseMatchesHint(rule, hint) {
       matchRecord(condition, rule.match),
     );
   }
+  if (rule.source === "breakerProfile") {
+    return matchRecord(hint.breakerProfile, rule.match);
+  }
   if (rule.source === "breakerProfile.coverage") {
     const coverage = rule.match?.coverage;
     return (
       typeof coverage === "string" &&
       Array.isArray(hint.breakerProfile?.coverage) &&
       hint.breakerProfile.coverage.includes(coverage)
+    );
+  }
+  if (rule.source === "breakerProfile.sideEffects") {
+    const sideEffect = rule.match?.sideEffect;
+    return (
+      typeof sideEffect === "string" &&
+      Array.isArray(hint.breakerProfile?.sideEffects) &&
+      hint.breakerProfile.sideEffects.includes(sideEffect)
     );
   }
   if (rule.source === "remoteRole") return matchRecord(hint.remoteRole, rule.match);
@@ -1513,12 +1566,74 @@ function buildDerivationSmokeTests(rules) {
     normalBreaker: {
       cardId: "ai003_smoke_normal_wall_breaker",
       side: "runner",
+      cardType: "program",
       breakerProfile: {
         coverage: ["wall"],
         baseStrength: 1,
         pumpCost: 1,
         breakCost: 1,
       },
+    },
+    runnerRiskyBreaker: {
+      cardId: "ai017_smoke_risky_breaker",
+      side: "runner",
+      cardType: "program",
+      breakerProfile: {
+        coverage: ["universal"],
+        sideEffects: ["random_failure", "program_trash_risk"],
+      },
+    },
+    runnerConfigurableBreaker: {
+      cardId: "ai017_smoke_configurable_breaker",
+      side: "runner",
+      cardType: "program",
+      breakerProfile: {
+        coverage: ["unknown_special"],
+        configurableCoverage: true,
+        reconfigurableType: true,
+      },
+    },
+    runnerTargetedBreaker: {
+      cardId: "ai017_smoke_targeted_breaker",
+      side: "runner",
+      cardType: "program",
+      breakerProfile: {
+        coverage: ["sentry"],
+        targetedIceBonus: true,
+        strengthBonusVsChosenIce: true,
+      },
+    },
+    runnerIceStrengthReduction: {
+      cardId: "ai017_smoke_ice_strength_reduction",
+      side: "runner",
+      cardType: "program",
+      effects: [
+        {
+          kind: "remote_protection",
+          timing: "persistent",
+          scope: "ice",
+          resource: "strength",
+        },
+      ],
+    },
+    runnerEncounterSearchInstall: {
+      cardId: "ai017_smoke_encounter_search_install",
+      side: "runner",
+      cardType: "resource",
+      effects: [
+        {
+          kind: "search",
+          timing: "during_ice_encounter",
+          scope: "runner",
+          target: "program",
+        },
+        {
+          kind: "install",
+          timing: "during_ice_encounter",
+          scope: "runner",
+          target: "program",
+        },
+      ],
     },
     corpTagPunishPayoff: {
       cardId: "ai003_smoke_tag_punish_payoff",
@@ -1758,6 +1873,180 @@ function analyzeSideAwareDerivation(cards, rules) {
     wrongSideAnchorMatchCount: wrongSideAnchorMatches.length,
     wrongSideAnchorMatches,
   };
+}
+
+function validateTacticSignalCatalog(
+  data,
+  derivationRules,
+  strategyIds,
+  errors,
+  warnings,
+) {
+  if (data.schemaVersion !== "ai-tactic-signals-v1") {
+    errors.push({
+      kind: "invalid_tactic_signal_schema",
+      path: TACTIC_SIGNAL_CATALOG_PATH,
+      message: "Expected schemaVersion ai-tactic-signals-v1.",
+    });
+  }
+  if (!Array.isArray(data.signals)) {
+    errors.push({
+      kind: "invalid_tactic_signal_shape",
+      path: `${TACTIC_SIGNAL_CATALOG_PATH}.signals`,
+      message: "signals must be an array.",
+    });
+    return;
+  }
+
+  const ids = new Set();
+  const anchorsBySignal = strategyAnchorsBySignalId(derivationRules);
+  for (const [index, signal] of data.signals.entries()) {
+    const basePath = `${TACTIC_SIGNAL_CATALOG_PATH}.signals[${index}]`;
+    if (!isRecord(signal)) {
+      errors.push({
+        kind: "invalid_tactic_signal_entry",
+        path: basePath,
+        message: "Each tactic signal entry must be an object.",
+      });
+      continue;
+    }
+    if (
+      typeof signal.signalId !== "string" ||
+      !/^[a-z][a-z0-9_]*(\.[a-z][a-z0-9_]*)+$/.test(signal.signalId)
+    ) {
+      errors.push({
+        kind: "invalid_tactic_signal_id",
+        path: `${basePath}.signalId`,
+        message: "signalId must be a dotted lower_snake_case string.",
+      });
+    } else if (signal.signalId.startsWith("anti.ice.")) {
+      errors.push({
+        kind: "forbidden_static_anti_ice_signal",
+        path: `${basePath}.signalId`,
+        message: "anti.ice.* is too broad and must not be a static tactic signal.",
+      });
+    } else if (ids.has(signal.signalId)) {
+      errors.push({
+        kind: "duplicate_tactic_signal_id",
+        path: `${basePath}.signalId`,
+        message: `Duplicate tactic signal ${signal.signalId}.`,
+      });
+    } else {
+      ids.add(signal.signalId);
+    }
+
+    for (const field of ["group", "description", "notes"]) {
+      if (typeof signal[field] !== "string" || signal[field].trim() === "") {
+        errors.push({
+          kind: "invalid_tactic_signal_text_field",
+          path: `${basePath}.${field}`,
+          message: `${field} must be a non-empty string.`,
+        });
+      }
+    }
+    if (!VALID_TACTIC_SIGNAL_SIDE_SCOPES.has(signal.sideScope)) {
+      errors.push({
+        kind: "invalid_tactic_signal_side_scope",
+        path: `${basePath}.sideScope`,
+        message: "sideScope must be runner, corp or neutral.",
+      });
+    }
+    for (const field of ["supportOnly", "mayAnchorStrategy", "targetProfileRelevant"]) {
+      if (typeof signal[field] !== "boolean") {
+        errors.push({
+          kind: "invalid_tactic_signal_boolean",
+          path: `${basePath}.${field}`,
+          message: `${field} must be boolean.`,
+        });
+      }
+    }
+    for (const field of ["allowedStrategyAnchors", "sourceKinds", "examples"]) {
+      if (!isStringArray(signal[field])) {
+        errors.push({
+          kind: "invalid_tactic_signal_array",
+          path: `${basePath}.${field}`,
+          message: `${field} must be a string array.`,
+        });
+      }
+    }
+    for (const strategyId of signal.allowedStrategyAnchors ?? []) {
+      if (!strategyIds.has(strategyId)) {
+        errors.push({
+          kind: "unknown_tactic_signal_strategy_anchor",
+          path: `${basePath}.allowedStrategyAnchors`,
+          message: `Unknown strategy anchor ${strategyId}.`,
+        });
+      }
+    }
+    if (signal.supportOnly === true) {
+      if (signal.mayAnchorStrategy !== false) {
+        errors.push({
+          kind: "support_only_signal_may_anchor",
+          path: `${basePath}.mayAnchorStrategy`,
+          message: "supportOnly signals must not be marked mayAnchorStrategy.",
+        });
+      }
+      if ((signal.allowedStrategyAnchors ?? []).length > 0) {
+        errors.push({
+          kind: "support_only_signal_has_anchor",
+          path: `${basePath}.allowedStrategyAnchors`,
+          message: "supportOnly signals must not list allowed strategy anchors.",
+        });
+      }
+    }
+
+    const derivedAnchors = anchorsBySignal.get(signal.signalId) ?? [];
+    if (!sameStringArray(derivedAnchors, signal.allowedStrategyAnchors ?? [])) {
+      errors.push({
+        kind: "tactic_signal_anchor_contract_mismatch",
+        path: `${basePath}.allowedStrategyAnchors`,
+        message: `Catalog anchors for ${signal.signalId} must match derivation rules.`,
+        expected: derivedAnchors,
+        actual: signal.allowedStrategyAnchors ?? [],
+      });
+    }
+  }
+
+  const missingCatalogSignals = [...anchorsBySignal.keys()].filter(
+    (signalId) => !ids.has(signalId),
+  );
+  if (missingCatalogSignals.length > 0) {
+    errors.push({
+      kind: "function_signal_missing_from_tactic_catalog",
+      path: TACTIC_SIGNAL_CATALOG_PATH,
+      message: "Every derivable function signal must be cataloged.",
+      items: missingCatalogSignals.sort(),
+    });
+  }
+
+  const dormantSignals = [...ids].filter((signalId) => !anchorsBySignal.has(signalId));
+  if (dormantSignals.length > 0) {
+    warnings.push({
+      kind: "dormant_tactic_signals_warn_only",
+      count: dormantSignals.length,
+      message:
+        "Some cataloged tactic signals are reserved for controlled future descriptors and have no derivation rule yet.",
+      items: dormantSignals.sort(),
+    });
+  }
+}
+
+function strategyAnchorsBySignalId(rules) {
+  const bySignal = new Map();
+  for (const rule of rules) {
+    if (typeof rule.signalId !== "string") continue;
+    const anchors = bySignal.get(rule.signalId) ?? new Set();
+    for (const strategyId of rule.strategyAnchorFor ?? []) {
+      anchors.add(strategyId);
+    }
+    bySignal.set(rule.signalId, anchors);
+  }
+  return new Map(
+    [...bySignal.entries()].map(([signalId, anchors]) => [
+      signalId,
+      [...anchors].sort(),
+    ]),
+  );
 }
 
 function validateStrategyGoals(data, errors) {

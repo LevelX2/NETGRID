@@ -19,6 +19,7 @@ const COMPILED_HINTS_PATH = "data/ai/ai-card-hints-compiled.json";
 const STRATEGY_GOALS_PATH = "data/ai/strategy-goals-v1.json";
 const STRATEGIC_ROLES_PATH = "data/ai/strategic-roles-v1.json";
 const FUNCTION_SIGNAL_DERIVATION_PATH = "data/ai/function-signal-derivation-v1.json";
+const TACTIC_SIGNAL_CATALOG_PATH = "data/ai/tactic-signals-v1.json";
 const MANUAL_OVERLAY_ROOT = "data/ai/hints/overlays";
 const INSPECTOR_INDEX_PATH = "data/ai/ai-hint-inspector-index.json";
 
@@ -180,6 +181,7 @@ export function buildAiHintInspectorIndex(options = {}) {
       strategyGoalsPath: STRATEGY_GOALS_PATH,
       strategicRolesPath: STRATEGIC_ROLES_PATH,
       functionSignalDerivationPath: FUNCTION_SIGNAL_DERIVATION_PATH,
+      tacticSignalCatalogPath: TACTIC_SIGNAL_CATALOG_PATH,
       manualOverlayRoot: MANUAL_OVERLAY_ROOT,
       mode: "read-only card-catalog inspector index; no hint migration, planner effect, LegalAction effect or runtime state input",
     },

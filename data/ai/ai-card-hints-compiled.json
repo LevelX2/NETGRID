@@ -371,7 +371,10 @@
           "program_trash_risk",
           "random_failure"
         ]
-      }
+      },
+      "strategicRole": [
+        "emergency_tool"
+      ]
     },
     {
       "cardId": "onr_v1_006_black-dahlia",
@@ -723,6 +726,9 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "strategicRole": [
+        "support_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -25437,20 +25443,22 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "breakerProfile": {
+        "breakCost": 1,
+        "coverage": [
+          "sentry"
+        ],
+        "pumpCost": 2,
+        "strengthBonusVsChosenIce": true,
+        "targetedIceBonus": true
+      },
       "effects": [
         {
           "kind": "breaker",
           "scope": "runner",
           "timing": "persistent"
         }
-      ],
-      "breakerProfile": {
-        "breakCost": 1,
-        "coverage": [
-          "sentry"
-        ],
-        "pumpCost": 2
-      }
+      ]
     },
     {
       "cardId": "onr_proteus_081_boring-bit",
@@ -25950,20 +25958,27 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "breakerProfile": {
+        "breakCost": 2,
+        "configurableCoverage": true,
+        "coverage": [
+          "unknown_special"
+        ],
+        "coverageCandidates": [
+          "code_gate",
+          "sentry",
+          "wall"
+        ],
+        "pumpCost": 1,
+        "reconfigurableType": true
+      },
       "effects": [
         {
           "kind": "breaker",
           "scope": "runner",
           "timing": "persistent"
         }
-      ],
-      "breakerProfile": {
-        "breakCost": 2,
-        "coverage": [
-          "unknown_special"
-        ],
-        "pumpCost": 1
-      }
+      ]
     },
     {
       "cardId": "onr_proteus_093_redecorator",
@@ -27251,13 +27266,19 @@
         "confidence": "low",
         "needsHumanReview": true
       },
-      "lineSupport": [
-        "runner.breaker_search"
-      ],
-      "strategicRole": [
-        "engine_anchor"
-      ],
       "effects": [
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "program",
+          "timing": "during_ice_encounter"
+        },
+        {
+          "kind": "install",
+          "scope": "runner",
+          "target": "program",
+          "timing": "during_ice_encounter"
+        },
         {
           "kind": "search",
           "scope": "runner",
@@ -27266,8 +27287,17 @@
       ],
       "conditions": [
         {
+          "kind": "requires_encounter"
+        },
+        {
           "kind": "requires_during_run"
         }
+      ],
+      "lineSupport": [
+        "runner.breaker_search"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ],
       "targetProfiles": [
         {

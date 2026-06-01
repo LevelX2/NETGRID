@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI016",
-  "updatesTaskId": "AI003/AI003-1/AI015",
+  "taskId": "AI017",
+  "updatesTaskId": "AI003/AI003-1/AI015/AI016",
   "generatedAt": "2026-06-01",
-  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI016 narrows scored agenda and tag payoff anchors and adds controlled ICE modifier, ICE tax, access-punish and Runner-tax signals. Function signals are derived analysis inputs and are not manual hint truth.",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI017 adds the controlled Taktiksignal-Katalog V1 and a narrow Icebreaker/Runner-program pilot for targeted breaker bonuses, risky breakers, configurable coverage, Runner ICE-strength support and encounter search/install. Function signals are derived analysis inputs and are not manual hint truth.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -249,6 +249,86 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "setup.install_support",
+      "source": "effects",
+      "match": {
+        "kind": "install",
+        "scope": "runner",
+        "target": "program"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event",
+          "program",
+          "resource"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.search_during_encounter",
+      "source": "effects",
+      "match": {
+        "kind": "search",
+        "scope": "runner",
+        "target": "program",
+        "timing": "during_ice_encounter"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event",
+          "program",
+          "resource"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.emergency_search",
+      "source": "effects",
+      "match": {
+        "kind": "search",
+        "scope": "runner",
+        "target": "program",
+        "timing": "during_ice_encounter"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event",
+          "program",
+          "resource"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "breaker.wall",
       "source": "breakerProfile.coverage",
       "match": {
@@ -317,6 +397,119 @@
       "source": "breakerProfile.coverage",
       "match": {
         "coverage": "unknown_special"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.configurable_coverage",
+      "source": "breakerProfile",
+      "match": {
+        "configurableCoverage": true
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.reconfigurable_type",
+      "source": "breakerProfile",
+      "match": {
+        "reconfigurableType": true
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.emergency_coverage",
+      "source": "breakerProfile",
+      "match": {
+        "emergencyCoverage": true
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program",
+          "resource"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.targeted_ice_bonus",
+      "source": "breakerProfile",
+      "match": {
+        "targetedIceBonus": true
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.strength_bonus_vs_chosen_ice",
+      "source": "breakerProfile",
+      "match": {
+        "strengthBonusVsChosenIce": true
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.risky",
+      "source": "breakerProfile.sideEffects",
+      "match": {
+        "sideEffect": "random_failure"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.self_trash_risk",
+      "source": "breakerProfile.sideEffects",
+      "match": {
+        "sideEffect": "program_trash_risk"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ]
       },
       "strategyAnchorFor": []
     },
@@ -980,6 +1173,69 @@
       "strategyAnchorFor": [
         "corp.ice_tax_glacier"
       ]
+    },
+    {
+      "signalId": "ice.strength_reduction",
+      "source": "effects",
+      "match": {
+        "kind": "remote_protection",
+        "resource": "strength",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "ice"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "run.break_cost_support",
+      "source": "effects",
+      "match": {
+        "kind": "remote_protection",
+        "resource": "strength",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "ice"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "breaker.support",
+      "source": "effects",
+      "match": {
+        "kind": "remote_protection",
+        "resource": "strength",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "effectScope": [
+          "ice"
+        ]
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "ice.strength_modifier",

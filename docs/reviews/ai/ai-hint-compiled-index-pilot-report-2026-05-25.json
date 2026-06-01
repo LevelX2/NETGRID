@@ -9133,6 +9133,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["breakerProfile"],

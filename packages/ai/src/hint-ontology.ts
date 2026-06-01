@@ -79,6 +79,7 @@ export const KNOWN_HINT_EFFECT_TIMINGS = [
   "when_scored",
   "start_of_turn",
   "during_run",
+  "during_ice_encounter",
   "on_access",
   "on_rez",
   "persistent",
