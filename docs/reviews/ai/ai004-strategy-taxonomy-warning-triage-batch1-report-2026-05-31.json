@@ -201,7 +201,7 @@
       "effects[].resource": 532,
       "effects[].scope": 841,
       "effects[].timing": 841,
-      "lineSupport": 88,
+      "lineSupport": 189,
       "manualNotes": 3,
       "planRoles": 564,
       "quality": 380,
@@ -223,7 +223,7 @@
       "scenarioRefs": 564,
       "side": 564,
       "strategicNotes": 3,
-      "strategicRole": 75,
+      "strategicRole": 189,
       "targetProfiles": 3,
       "targetProfiles[].installCost": 3,
       "targetProfiles[].installsTarget": 3,
@@ -301,7 +301,7 @@
   "wildGrowth": {
     "roleValueCount": 251,
     "planRoleValueCount": 102,
-    "lineSupportValueCount": 14,
+    "lineSupportValueCount": 15,
     "lineSupportLegacyStatus": "legacy_warn_only_in_ai003"
   },
   "functionSignals": {
@@ -665,20 +665,20 @@
     "totals": {
       "roles": 251,
       "planRoles": 102,
-      "lineSupport": 14,
-      "allValues": 367
+      "lineSupport": 15,
+      "allValues": 368
     },
     "categoryCounts": {
       "alias_to_strategy_goal": 75,
       "deferred_requires_human_review": 1,
       "descriptor_gap": 10,
-      "exact_strategy_goal": 14,
+      "exact_strategy_goal": 15,
       "function_signal_only": 219,
       "legacy_role_only": 47,
       "remove_or_deprecate": 1
     },
     "mappedCounts": {
-      "exactStrategyGoal": 14,
+      "exactStrategyGoal": 15,
       "aliasToStrategyGoal": 75,
       "functionSignalOnly": 219,
       "legacyRoleOnly": 47,
@@ -688,59 +688,63 @@
   },
   "ai004Triage": {
     "lineSupport": {
-      "totalOccurrences": 110,
+      "totalOccurrences": 234,
       "legacyOccurrences": 0,
       "categoryCounts": {
-        "normalized_strategy_id": 110
+        "normalized_strategy_id": 234
       },
       "valueCounts": [
         {
           "value": "corp.ice_tax_glacier",
-          "count": 20
+          "count": 50
+        },
+        {
+          "value": "runner.survival_defense",
+          "count": 42
         },
         {
           "value": "corp.tag_trace_punish",
-          "count": 20
-        },
-        {
-          "value": "corp.remote_scoring",
-          "count": 12
+          "count": 35
         },
         {
           "value": "corp.damage_kill",
-          "count": 9
+          "count": 29
+        },
+        {
+          "value": "corp.remote_scoring",
+          "count": 13
         },
         {
           "value": "corp.asset_economy",
-          "count": 8
-        },
-        {
-          "value": "runner.breaker_search",
-          "count": 8
+          "count": 11
         },
         {
           "value": "corp.economy_rez_reserve",
-          "count": 7
+          "count": 11
+        },
+        {
+          "value": "runner.breaker_search",
+          "count": 10
         },
         {
           "value": "corp.fast_advance",
           "count": 7
         },
         {
-          "value": "runner.rnd_pressure",
-          "count": 5
-        },
-        {
-          "value": "runner.survival_defense",
-          "count": 5
+          "value": "corp.ambush_bluff",
+          "count": 6
         },
         {
           "value": "runner.interface_closeout",
-          "count": 4
+          "count": 6
+        },
+        {
+          "value": "runner.rnd_pressure",
+          "count": 6
         },
         {
           "value": "runner.hq_pressure",
-          "count": 2
+          "count": 5
         },
         {
           "value": "runner.remote_trash",
@@ -752,6 +756,117 @@
         }
       ],
       "entries": [
+        {
+          "cardId": "onr_v1_003_baedekers-net-map",
+          "side": "runner",
+          "cardType": "hardware",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "base_link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "trace_defense",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              }
+            ],
+            "conditions": [
+              "requires_trace_attempt"
+            ],
+            "cardType": "hardware",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_004_bakdoor",
+          "side": "runner",
+          "cardType": "program",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "base_link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "trace_defense",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              }
+            ],
+            "conditions": [
+              "requires_trace_attempt"
+            ],
+            "cardType": "program",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_008_boardwalk",
+          "side": "runner",
+          "cardType": "program",
+          "value": "runner.hq_pressure",
+          "evidence": {
+            "lineSupport": [
+              "runner.hq_pressure"
+            ],
+            "effects": [
+              {
+                "kind": "hq_info",
+                "scope": "hq",
+                "timing": "start_of_turn",
+                "resource": "cards"
+              }
+            ],
+            "conditions": [
+              "requires_successful_run"
+            ],
+            "cardType": "program",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.hq_pressure"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
         {
           "cardId": "onr_v1_017_deep-thought",
           "side": "runner",
@@ -852,6 +967,144 @@
             ],
             "cardType": "program",
             "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_023_evil-twin",
+          "side": "runner",
+          "cardType": "program",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "brain_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "brain_damage"
+              },
+              {
+                "kind": "net_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "net_damage"
+              },
+              {
+                "kind": "breaker",
+                "scope": "runner",
+                "timing": "persistent"
+              }
+            ],
+            "conditions": [
+              "requires_brain_damage",
+              "requires_damage",
+              "requires_net_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "breakerProfile": {
+              "breakCost": 3,
+              "coverage": [
+                "sentry"
+              ],
+              "pumpCost": 1
+            },
+            "cardType": "program",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_024_expert-schedule-analyzer",
+          "side": "runner",
+          "cardType": "program",
+          "value": "runner.hq_pressure",
+          "evidence": {
+            "lineSupport": [
+              "runner.hq_pressure"
+            ],
+            "effects": [
+              {
+                "kind": "hq_info",
+                "scope": "hq",
+                "timing": "on_access",
+                "resource": "cards"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card"
+            ],
+            "cardType": "program",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.hq_pressure"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_028_force-shield",
+          "side": "runner",
+          "cardType": "program",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "brain_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "brain_damage"
+              },
+              {
+                "kind": "net_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "net_damage"
+              }
+            ],
+            "conditions": [
+              "requires_brain_damage",
+              "requires_damage",
+              "requires_net_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "program",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
@@ -1175,6 +1428,35 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
+          "cardId": "onr_v1_051_rabbit",
+          "side": "runner",
+          "cardType": "program",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "trace_defense",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              }
+            ],
+            "conditions": [
+              "requires_trace_attempt"
+            ],
+            "cardType": "program",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "cardId": "onr_v1_057_scatter-shot",
           "side": "runner",
           "cardType": "program",
@@ -1257,6 +1539,86 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.breaker_search"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_061_shield",
+          "side": "runner",
+          "cardType": "program",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "net_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "net_damage"
+              }
+            ],
+            "conditions": [
+              "requires_damage",
+              "requires_net_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "program",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_063_signpost",
+          "side": "runner",
+          "cardType": "program",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "trace_defense",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              }
+            ],
+            "conditions": [
+              "requires_trace_attempt"
+            ],
+            "cardType": "program",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -1901,6 +2263,721 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
+          "cardId": "onr_v1_120_armadillo-armored-road-home",
+          "side": "runner",
+          "cardType": "hardware",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "meat_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "meat_damage"
+              },
+              {
+                "kind": "trash_credit",
+                "scope": "runner",
+                "timing": "persistent",
+                "resource": "trash_credits"
+              }
+            ],
+            "conditions": [
+              "requires_damage",
+              "requires_meat_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "hardware",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_121_armored-fridge",
+          "side": "runner",
+          "cardType": "hardware",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "meat_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "meat_damage"
+              }
+            ],
+            "conditions": [
+              "requires_damage",
+              "requires_meat_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "hardware",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_125_dermatech-bodyplating",
+          "side": "runner",
+          "cardType": "hardware",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "meat_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "meat_damage"
+              }
+            ],
+            "conditions": [
+              "requires_damage",
+              "requires_meat_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "hardware",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_127_full-body-conversion",
+          "side": "runner",
+          "cardType": "hardware",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "meat_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "meat_damage"
+              }
+            ],
+            "conditions": [
+              "requires_damage",
+              "requires_meat_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "hardware",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_128_green-knight-surge-buffers",
+          "side": "runner",
+          "cardType": "hardware",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "net_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "net_damage"
+              }
+            ],
+            "conditions": [
+              "requires_damage",
+              "requires_net_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "hardware",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_130_lifesaver-nanosurgeons",
+          "side": "runner",
+          "cardType": "hardware",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "brain_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "brain_damage"
+              },
+              {
+                "kind": "draw",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "cards"
+              }
+            ],
+            "conditions": [
+              "requires_brain_damage",
+              "requires_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "hardware",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_131_microtech-backup-drive",
+          "side": "runner",
+          "cardType": "hardware",
+          "value": "runner.breaker_search",
+          "evidence": {
+            "lineSupport": [
+              "runner.breaker_search"
+            ],
+            "effects": [
+              {
+                "kind": "card_recovery",
+                "scope": "runner",
+                "timing": "persistent",
+                "resource": "cards"
+              },
+              {
+                "kind": "program_trash_prevention",
+                "scope": "installed_program",
+                "timing": "prevention_window",
+                "resource": "cards"
+              }
+            ],
+            "conditions": [
+              "requires_installed_hardware",
+              "requires_program_trash"
+            ],
+            "cardType": "hardware",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.breaker_search"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_135_nasuko-cycle",
+          "side": "runner",
+          "cardType": "hardware",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "tag_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "tags"
+              }
+            ],
+            "conditions": [
+              "requires_prevention_window"
+            ],
+            "cardType": "hardware",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_140_raven-microcyb-eagle",
+          "side": "runner",
+          "cardType": "hardware",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "net_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "net_damage"
+              },
+              {
+                "kind": "trash_credit",
+                "scope": "runner",
+                "timing": "persistent",
+                "resource": "trash_credits"
+              }
+            ],
+            "conditions": [
+              "requires_damage",
+              "requires_net_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "hardware",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_143_techtronica-utility-suit",
+          "side": "runner",
+          "cardType": "hardware",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "meat_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "meat_damage"
+              },
+              {
+                "kind": "trash_credit",
+                "scope": "runner",
+                "timing": "persistent",
+                "resource": "trash_credits"
+              }
+            ],
+            "conditions": [
+              "requires_damage",
+              "requires_meat_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "hardware",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_148_access-through-alpha",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "base_link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "trace_defense",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              }
+            ],
+            "conditions": [
+              "requires_trace_attempt"
+            ],
+            "cardType": "resource",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_149_access-to-arasaka",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "base_link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "trace_defense",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              }
+            ],
+            "conditions": [
+              "requires_trace_attempt"
+            ],
+            "cardType": "resource",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_150_access-to-kiribati",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "base_link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "trace_defense",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              }
+            ],
+            "conditions": [
+              "requires_trace_attempt"
+            ],
+            "cardType": "resource",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_152_back-door-to-hilliard",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "base_link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "trace_defense",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              }
+            ],
+            "conditions": [
+              "requires_trace_attempt"
+            ],
+            "cardType": "resource",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_153_back-door-to-orbital-air",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "base_link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "trace_defense",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              }
+            ],
+            "conditions": [
+              "requires_trace_attempt"
+            ],
+            "cardType": "resource",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_160_diplomatic-immunity",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "meat_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "meat_damage"
+              }
+            ],
+            "conditions": [
+              "requires_damage",
+              "requires_meat_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "resource",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_161_fall-guy",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "tag_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "tags"
+              }
+            ],
+            "conditions": [
+              "requires_prevention_window"
+            ],
+            "cardType": "resource",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "cardId": "onr_v1_167_leland-corporate-bodyguard",
           "side": "runner",
           "cardType": "resource",
@@ -1934,6 +3011,42 @@
               "requires_meat_damage",
               "requires_prevention_window",
               "requires_turn_limit_available"
+            ],
+            "cardType": "resource",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_170_nomad-allies",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "tag_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "tags"
+              },
+              {
+                "kind": "survival_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "tags"
+              }
+            ],
+            "conditions": [
+              "requires_prevention_window",
+              "requires_runner_tagged"
             ],
             "cardType": "resource",
             "side": "runner"
@@ -1989,6 +3102,82 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
+          "cardId": "onr_v1_181_the-springboard",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "trace_defense",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              }
+            ],
+            "conditions": [
+              "requires_trace_attempt"
+            ],
+            "cardType": "resource",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_182_submarine-uplink",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "base_link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "trace_defense",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              }
+            ],
+            "conditions": [
+              "requires_trace_attempt"
+            ],
+            "cardType": "resource",
+            "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "cardId": "onr_v1_185_trauma-team",
           "side": "runner",
           "cardType": "resource",
@@ -2019,6 +3208,57 @@
             ],
             "cardType": "resource",
             "side": "runner"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_187_wilson-weeflerunner-apprentice",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "tag_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "tags"
+              },
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "meat_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "meat_damage"
+              }
+            ],
+            "conditions": [
+              "requires_damage",
+              "requires_meat_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "resource",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
@@ -2826,6 +4066,48 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
+          "cardId": "onr_v1_216_security-purge",
+          "side": "corp",
+          "cardType": "agenda",
+          "value": "corp.economy_rez_reserve",
+          "evidence": {
+            "lineSupport": [
+              "corp.economy_rez_reserve"
+            ],
+            "effects": [
+              {
+                "kind": "topdeck_info",
+                "scope": "rnd",
+                "timing": "when_scored",
+                "resource": "cards"
+              },
+              {
+                "kind": "install",
+                "scope": "remote",
+                "timing": "when_scored"
+              },
+              {
+                "kind": "rez_discount",
+                "scope": "ice",
+                "timing": "when_scored",
+                "resource": "credits"
+              }
+            ],
+            "conditions": [
+              "requires_rnd_top",
+              "requires_score_window",
+              "requires_scored_agenda"
+            ],
+            "cardType": "agenda",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.economy_rez_reserve"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "cardId": "onr_v1_217_strike-force-kali",
           "side": "corp",
           "cardType": "agenda",
@@ -3074,6 +4356,52 @@
               "reviewedDate": "2026-05-25",
               "reviewedBy": "codex"
             }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_221_asp",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "run_lock",
+                "scope": "runner",
+                "timing": "trace_success",
+                "resource": "actions"
+              },
+              {
+                "kind": "trace",
+                "scope": "corp",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_trace_success",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
@@ -3826,6 +5154,242 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
+          "cardId": "onr_v1_229_code-corpse",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_229_code-corpse",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_233_d-arc-knight",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "program_trash",
+                "scope": "runner",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_234_data-darts",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_later_encounter",
+              "requires_remaining_ice",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_234_data-darts",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_later_encounter",
+              "requires_remaining_ice",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_235_data-naga",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "program_trash",
+                "scope": "runner",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "cardId": "onr_v1_236_data-raven",
           "side": "corp",
           "cardType": "ice",
@@ -3888,6 +5452,174 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
+          "cardId": "onr_v1_240_fang",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "run_lock",
+                "scope": "runner",
+                "timing": "trace_success",
+                "resource": "actions"
+              },
+              {
+                "kind": "trace",
+                "scope": "corp",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_trace_success",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_241_fang-2-0",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "run_lock",
+                "scope": "runner",
+                "timing": "trace_success",
+                "resource": "actions"
+              },
+              {
+                "kind": "trace",
+                "scope": "corp",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_trace_success",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_242_fatal-attractor",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_later_encounter",
+              "requires_remaining_ice",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_242_fatal-attractor",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_later_encounter",
+              "requires_remaining_ice",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "cardId": "onr_v1_243_fetch-4-0-1",
           "side": "corp",
           "cardType": "ice",
@@ -3940,6 +5672,202 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_246_fragmentation-storm",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "program_trash",
+                "scope": "runner",
+                "timing": "trace_success"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "run_lock",
+                "scope": "runner",
+                "timing": "trace_success",
+                "resource": "actions"
+              },
+              {
+                "kind": "trace",
+                "scope": "corp",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_trace_success",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_247_haunting-inquisition",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_248_homewrecker",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "trace_success",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "hardware_trash",
+                "scope": "runner",
+                "timing": "trace_success"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "trace",
+                "scope": "corp",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_trace_success",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_248_homewrecker",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "trace_success",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "hardware_trash",
+                "scope": "runner",
+                "timing": "trace_success"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "trace",
+                "scope": "corp",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_trace_success",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -4000,6 +5928,387 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
+          "cardId": "onr_v1_251_jack-attack",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish"
+            ],
+            "effects": [
+              {
+                "kind": "tag_source",
+                "scope": "runner",
+                "timing": "trace_success",
+                "resource": "tags"
+              },
+              {
+                "kind": "future_run_effect",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "no_jack_out",
+                "scope": "runner",
+                "timing": "during_run"
+              },
+              {
+                "kind": "trace",
+                "scope": "corp",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_during_run",
+              "requires_encounter",
+              "requires_trace_success",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_253_laser-wire",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_254_liche",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_254_liche",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_255_mastiff",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "run_tax",
+                "scope": "run_path",
+                "timing": "encounter",
+                "resource": "strength"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "future_run_effect",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "persistent_counter_effect",
+                "scope": "runner",
+                "timing": "persistent",
+                "resource": "counters"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "trace",
+                "scope": "corp",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_during_run",
+              "requires_encounter",
+              "requires_trace_success",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_255_mastiff",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "run_tax",
+                "scope": "run_path",
+                "timing": "encounter",
+                "resource": "strength"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "future_run_effect",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "persistent_counter_effect",
+                "scope": "runner",
+                "timing": "persistent",
+                "resource": "counters"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "trace",
+                "scope": "corp",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_during_run",
+              "requires_encounter",
+              "requires_trace_success",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_257_nerve-labyrinth",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_257_nerve-labyrinth",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "cardId": "onr_v1_258_neural-blade",
           "side": "corp",
           "cardType": "ice",
@@ -4039,6 +6348,176 @@
               "reviewedDate": "2026-05-25",
               "reviewedBy": "codex"
             }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_260_pocket-virtual-reality",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish"
+            ],
+            "effects": [
+              {
+                "kind": "tag_source",
+                "scope": "runner",
+                "timing": "trace_success",
+                "resource": "tags"
+              },
+              {
+                "kind": "trace_credit",
+                "scope": "corp",
+                "timing": "encounter",
+                "resource": "credits"
+              },
+              {
+                "kind": "trace",
+                "scope": "corp",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_trace_success",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_262_razor-wire",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_262_razor-wire",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_264_rex",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "run_lock",
+                "scope": "runner",
+                "timing": "trace_success",
+                "resource": "actions"
+              },
+              {
+                "kind": "trace",
+                "scope": "corp",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_trace_success",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
@@ -4133,6 +6612,161 @@
               "reviewedDate": "2026-05-25",
               "reviewedBy": "codex"
             }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_269_shotgun-wire",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_269_shotgun-wire",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_271_tko-2-0",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_273_triggerman",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "program_trash",
+                "scope": "runner",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
@@ -4395,6 +7029,88 @@
               "reviewedDate": "2026-05-25",
               "reviewedBy": "codex"
             }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_280_zombie",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_280_zombie",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp"
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
@@ -5424,6 +8140,45 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
+          "cardId": "onr_v1_310_blood-cat",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish"
+            ],
+            "effects": [
+              {
+                "kind": "tag_source",
+                "scope": "runner",
+                "timing": "trace_success",
+                "resource": "tags"
+              },
+              {
+                "kind": "trace",
+                "scope": "corp",
+                "timing": "action"
+              }
+            ],
+            "conditions": [
+              "requires_trace_success"
+            ],
+            "remoteRole": {
+              "kind": "tag_punish_asset",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "cardId": "onr_v1_311_braindance-campaign",
           "side": "corp",
           "cardType": "asset",
@@ -5593,6 +8348,54 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
+          "cardId": "onr_v1_313_city-surveillance",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish"
+            ],
+            "effects": [
+              {
+                "kind": "remote_tax",
+                "scope": "runner",
+                "timing": "runner_turn",
+                "resource": "credits"
+              },
+              {
+                "kind": "tag_source",
+                "scope": "runner",
+                "timing": "runner_turn",
+                "resource": "tags"
+              }
+            ],
+            "conditions": [
+              "requires_runner_draw",
+              "requires_runner_pay_or_take_tag"
+            ],
+            "remoteRole": {
+              "kind": "tag_punish_asset",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "cardId": "onr_v1_314_corporate-negotiating-center",
           "side": "corp",
           "cardType": "asset",
@@ -5632,6 +8435,56 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.asset_economy"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_315_corprunners-shattered-remains",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.ambush_bluff",
+          "evidence": {
+            "lineSupport": [
+              "corp.ambush_bluff"
+            ],
+            "effects": [
+              {
+                "kind": "access_punish",
+                "scope": "accessed_card",
+                "timing": "on_access"
+              },
+              {
+                "kind": "advanceable_economy",
+                "scope": "remote",
+                "timing": "action",
+                "resource": "advancement_counters"
+              },
+              {
+                "kind": "ambush",
+                "scope": "remote",
+                "timing": "on_access"
+              },
+              {
+                "kind": "hardware_trash",
+                "scope": "runner",
+                "timing": "on_access"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card",
+              "requires_advancement_counter"
+            ],
+            "remoteRole": {
+              "kind": "ambush",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ambush_bluff"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -5768,6 +8621,188 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
+          "cardId": "onr_v1_320_encoder-inc",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.remote_scoring",
+          "evidence": {
+            "lineSupport": [
+              "corp.remote_scoring",
+              "corp.economy_rez_reserve"
+            ],
+            "effects": [
+              {
+                "kind": "rez_discount",
+                "scope": "corp",
+                "timing": "persistent",
+                "resource": "credits"
+              },
+              {
+                "kind": "rez_discount",
+                "scope": "ice",
+                "timing": "persistent",
+                "resource": "credits"
+              },
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "fort",
+                "timing": "persistent",
+                "resource": "subroutines"
+              }
+            ],
+            "conditions": [],
+            "remoteRole": {
+              "kind": "scoring_protection",
+              "serverScope": "fort",
+              "threatLevel": "high"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_320_encoder-inc",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.economy_rez_reserve",
+          "evidence": {
+            "lineSupport": [
+              "corp.remote_scoring",
+              "corp.economy_rez_reserve"
+            ],
+            "effects": [
+              {
+                "kind": "rez_discount",
+                "scope": "corp",
+                "timing": "persistent",
+                "resource": "credits"
+              },
+              {
+                "kind": "rez_discount",
+                "scope": "ice",
+                "timing": "persistent",
+                "resource": "credits"
+              },
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "fort",
+                "timing": "persistent",
+                "resource": "subroutines"
+              }
+            ],
+            "conditions": [],
+            "remoteRole": {
+              "kind": "scoring_protection",
+              "serverScope": "fort",
+              "threatLevel": "high"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.economy_rez_reserve"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_323_experimental-ai",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.ambush_bluff",
+          "evidence": {
+            "lineSupport": [
+              "corp.ambush_bluff"
+            ],
+            "effects": [
+              {
+                "kind": "access_punish",
+                "scope": "accessed_card",
+                "timing": "on_access"
+              },
+              {
+                "kind": "advanceable_economy",
+                "scope": "remote",
+                "timing": "action",
+                "resource": "advancement_counters"
+              },
+              {
+                "kind": "ambush",
+                "scope": "remote",
+                "timing": "on_access"
+              },
+              {
+                "kind": "program_trash",
+                "scope": "runner",
+                "timing": "on_access"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card",
+              "requires_advancement_counter"
+            ],
+            "remoteRole": {
+              "kind": "ambush",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ambush_bluff"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_325_hacker-tracker-central",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish"
+            ],
+            "effects": [
+              {
+                "kind": "trace_credit",
+                "scope": "corp",
+                "timing": "persistent",
+                "resource": "credits"
+              }
+            ],
+            "conditions": [],
+            "remoteRole": {
+              "kind": "tag_punish_asset",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "cardId": "onr_v1_326_holovid-campaign",
           "side": "corp",
           "cardType": "asset",
@@ -5810,6 +8845,148 @@
             ],
             "conditions": [
               "requires_start_of_turn"
+            ],
+            "remoteRole": {
+              "kind": "asset_economy",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.asset_economy"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_327_i-got-a-rock",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_runner_tagged"
+            ],
+            "remoteRole": {
+              "kind": "tag_punish_asset",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_327_i-got-a-rock",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_runner_tagged"
+            ],
+            "remoteRole": {
+              "kind": "tag_punish_asset",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_328_information-laundering",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.asset_economy",
+          "evidence": {
+            "lineSupport": [
+              "corp.asset_economy"
+            ],
+            "effects": [
+              {
+                "kind": "advanceable_economy",
+                "scope": "remote",
+                "timing": "action",
+                "resource": "credits"
+              },
+              {
+                "kind": "economy",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "credits"
+              },
+              {
+                "kind": "advanceable_economy",
+                "scope": "remote",
+                "timing": "action",
+                "resource": "advancement_counters"
+              }
+            ],
+            "conditions": [
+              "requires_advancement_counter"
             ],
             "remoteRole": {
               "kind": "asset_economy",
@@ -5871,6 +9048,40 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
+          "cardId": "onr_v1_333_omniscience-foundation",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish"
+            ],
+            "effects": [
+              {
+                "kind": "tag_source",
+                "scope": "runner",
+                "timing": "runner_turn",
+                "resource": "tags"
+              }
+            ],
+            "conditions": [
+              "requires_runner_tagged"
+            ],
+            "remoteRole": {
+              "kind": "tag_punish_asset",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "cardId": "onr_v1_334_pacifica-regional-ai",
           "side": "corp",
           "cardType": "asset",
@@ -5903,6 +9114,394 @@
             },
             "cardType": "asset",
             "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.asset_economy"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_337_rockerboy-promotion",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.asset_economy",
+          "evidence": {
+            "lineSupport": [
+              "corp.asset_economy"
+            ],
+            "effects": [
+              {
+                "kind": "finite_economy_pool",
+                "scope": "remote",
+                "timing": "action",
+                "resource": "credits"
+              },
+              {
+                "kind": "action_economy",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "credits"
+              },
+              {
+                "kind": "counter_economy",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "credits"
+              }
+            ],
+            "conditions": [],
+            "remoteRole": {
+              "kind": "asset_economy",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.asset_economy"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_339_schlaghund",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_runner_tagged"
+            ],
+            "remoteRole": {
+              "kind": "tag_punish_asset",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_339_schlaghund",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_runner_tagged"
+            ],
+            "remoteRole": {
+              "kind": "tag_punish_asset",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_340_setup",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.ambush_bluff",
+          "evidence": {
+            "lineSupport": [
+              "corp.ambush_bluff",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "on_access",
+                "resource": "damage"
+              },
+              {
+                "kind": "access_punish",
+                "scope": "accessed_card",
+                "timing": "on_access"
+              },
+              {
+                "kind": "ambush",
+                "scope": "remote",
+                "timing": "on_access"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card"
+            ],
+            "remoteRole": {
+              "kind": "ambush",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ambush_bluff"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_340_setup",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.ambush_bluff",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "on_access",
+                "resource": "damage"
+              },
+              {
+                "kind": "access_punish",
+                "scope": "accessed_card",
+                "timing": "on_access"
+              },
+              {
+                "kind": "ambush",
+                "scope": "remote",
+                "timing": "on_access"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card"
+            ],
+            "remoteRole": {
+              "kind": "ambush",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_341_skalderviken-sa-beta-test-site",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.economy_rez_reserve",
+          "evidence": {
+            "lineSupport": [
+              "corp.economy_rez_reserve"
+            ],
+            "effects": [
+              {
+                "kind": "rez_discount",
+                "scope": "corp",
+                "timing": "persistent",
+                "resource": "credits"
+              },
+              {
+                "kind": "rez_discount",
+                "scope": "ice",
+                "timing": "persistent",
+                "resource": "credits"
+              }
+            ],
+            "conditions": [],
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.economy_rez_reserve"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_342_solo-squad",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_runner_tagged"
+            ],
+            "remoteRole": {
+              "kind": "tag_punish_asset",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_342_solo-squad",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_runner_tagged"
+            ],
+            "remoteRole": {
+              "kind": "tag_punish_asset",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_343_south-african-mining-corp",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.asset_economy",
+          "evidence": {
+            "lineSupport": [
+              "corp.asset_economy"
+            ],
+            "effects": [
+              {
+                "kind": "action_economy",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "credits"
+              },
+              {
+                "kind": "economy",
+                "scope": "corp",
+                "timing": "action",
+                "resource": "credits"
+              }
+            ],
+            "conditions": [],
+            "remoteRole": {
+              "kind": "asset_economy",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
@@ -5975,6 +9574,239 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
+          "cardId": "onr_v1_345_trap",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.ambush_bluff",
+          "evidence": {
+            "lineSupport": [
+              "corp.ambush_bluff",
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "tag_source",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "tags"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "on_access",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card"
+            ],
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ambush_bluff"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_345_trap",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.ambush_bluff",
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "tag_source",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "tags"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "on_access",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card"
+            ],
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_345_trap",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.ambush_bluff",
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "tag_source",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "tags"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "on_access",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card"
+            ],
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_346_vacant-soulkiller",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.ambush_bluff",
+          "evidence": {
+            "lineSupport": [
+              "corp.ambush_bluff",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "access_punish",
+                "scope": "accessed_card",
+                "timing": "on_access"
+              },
+              {
+                "kind": "advanceable_economy",
+                "scope": "remote",
+                "timing": "action",
+                "resource": "advancement_counters"
+              },
+              {
+                "kind": "ambush",
+                "scope": "remote",
+                "timing": "on_access"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "on_access",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card",
+              "requires_advancement_counter"
+            ],
+            "remoteRole": {
+              "kind": "ambush",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ambush_bluff"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_346_vacant-soulkiller",
+          "side": "corp",
+          "cardType": "asset",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.ambush_bluff",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "access_punish",
+                "scope": "accessed_card",
+                "timing": "on_access"
+              },
+              {
+                "kind": "advanceable_economy",
+                "scope": "remote",
+                "timing": "action",
+                "resource": "advancement_counters"
+              },
+              {
+                "kind": "ambush",
+                "scope": "remote",
+                "timing": "on_access"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "on_access",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card",
+              "requires_advancement_counter"
+            ],
+            "remoteRole": {
+              "kind": "ambush",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "asset",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "cardId": "onr_v1_350_antiquated-interface-routines",
           "side": "corp",
           "cardType": "upgrade",
@@ -6067,6 +9899,62 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_354_crybaby",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.ambush_bluff",
+          "evidence": {
+            "lineSupport": [
+              "corp.ambush_bluff"
+            ],
+            "effects": [
+              {
+                "kind": "link_penalty",
+                "scope": "runner",
+                "timing": "persistent",
+                "resource": "link"
+              },
+              {
+                "kind": "access_punish",
+                "scope": "accessed_card",
+                "timing": "on_access"
+              },
+              {
+                "kind": "ambush",
+                "scope": "remote",
+                "timing": "on_access"
+              },
+              {
+                "kind": "persistent_counter_effect",
+                "scope": "runner",
+                "timing": "on_access",
+                "resource": "counters"
+              },
+              {
+                "kind": "persistent_counter_effect",
+                "scope": "runner",
+                "timing": "persistent",
+                "resource": "counters"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card"
+            ],
+            "remoteRole": {
+              "kind": "ambush",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "cardType": "upgrade",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ambush_bluff"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -6167,6 +10055,92 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_356_dedicated-response-team",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "on_access",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card",
+              "requires_runner_tagged"
+            ],
+            "cardType": "upgrade",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_356_dedicated-response-team",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish",
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "on_access",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card",
+              "requires_runner_tagged"
+            ],
+            "cardType": "upgrade",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -6214,6 +10188,114 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_360_jerusalem-city-grid",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.economy_rez_reserve",
+          "evidence": {
+            "lineSupport": [
+              "corp.economy_rez_reserve",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "scope": "fort",
+                "timing": "persistent",
+                "resource": "strength"
+              },
+              {
+                "kind": "rez_discount",
+                "scope": "fort",
+                "timing": "persistent",
+                "resource": "credits"
+              },
+              {
+                "kind": "rez_discount",
+                "scope": "ice",
+                "timing": "persistent",
+                "resource": "credits"
+              }
+            ],
+            "conditions": [
+              "requires_rezzed_card"
+            ],
+            "remoteRole": {
+              "kind": "ice_modifier",
+              "serverScope": "fort",
+              "threatLevel": "medium"
+            },
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.economy_rez_reserve"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_360_jerusalem-city-grid",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.economy_rez_reserve",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "remote_protection",
+                "scope": "fort",
+                "timing": "persistent",
+                "resource": "strength"
+              },
+              {
+                "kind": "rez_discount",
+                "scope": "fort",
+                "timing": "persistent",
+                "resource": "credits"
+              },
+              {
+                "kind": "rez_discount",
+                "scope": "ice",
+                "timing": "persistent",
+                "resource": "credits"
+              }
+            ],
+            "conditions": [
+              "requires_rezzed_card"
+            ],
+            "remoteRole": {
+              "kind": "ice_modifier",
+              "serverScope": "fort",
+              "threatLevel": "medium"
+            },
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -6510,6 +10592,1297 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_372_turbeau-delacroix",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish"
+            ],
+            "effects": [
+              {
+                "kind": "tag_source",
+                "scope": "runner",
+                "timing": "trace_success",
+                "resource": "tags"
+              },
+              {
+                "kind": "trace",
+                "scope": "corp",
+                "timing": "action"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card",
+              "requires_trace_success"
+            ],
+            "cardType": "upgrade",
+            "side": "corp"
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_004_fetal-ai",
+          "side": "corp",
+          "cardType": "agenda",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "on_access",
+                "resource": "damage"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "scored_activated",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card"
+            ],
+            "cardType": "agenda",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_005_marked-accounts",
+          "side": "corp",
+          "cardType": "agenda",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish"
+            ],
+            "effects": [
+              {
+                "kind": "tag_source",
+                "scope": "runner",
+                "timing": "scored_activated",
+                "resource": "tags"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card"
+            ],
+            "cardType": "agenda",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_011_brain-wash",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_015_colonel-failure",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "program_trash",
+                "scope": "runner",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_019_death-yo-yo",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.damage_kill",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_019_death-yo-yo",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_027_iceberg",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_029_marionette",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "program_trash",
+                "scope": "runner",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_031_minotaur",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "fort",
+                "timing": "persistent",
+                "resource": "subroutines"
+              }
+            ],
+            "conditions": [],
+            "remoteRole": {
+              "kind": "scoring_protection",
+              "serverScope": "fort",
+              "threatLevel": "high"
+            },
+            "cardType": "ice",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_033_mobile-barricade",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "encounter",
+                "resource": "damage"
+              },
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_041_toughoniumtm-wall",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_044_walking-wall",
+          "side": "corp",
+          "cardType": "ice",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "etr",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "run_path",
+                "timing": "encounter"
+              }
+            ],
+            "conditions": [
+              "requires_encounter",
+              "requires_unbroken_subroutine"
+            ],
+            "cardType": "ice",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_048_data-sifters",
+          "side": "corp",
+          "cardType": "operation",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish"
+            ],
+            "effects": [
+              {
+                "kind": "tag_source",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "tags"
+              }
+            ],
+            "conditions": [],
+            "cardType": "operation",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_052_schlaghund-pointers",
+          "side": "corp",
+          "cardType": "operation",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish"
+            ],
+            "effects": [
+              {
+                "kind": "tag_source",
+                "scope": "runner",
+                "timing": "trace_success",
+                "resource": "tags"
+              },
+              {
+                "kind": "trace",
+                "scope": "corp",
+                "timing": "action"
+              }
+            ],
+            "conditions": [
+              "requires_trace_success"
+            ],
+            "cardType": "operation",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_086_enterprise-inc-shields",
+          "side": "runner",
+          "cardType": "program",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "brain_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "brain_damage"
+              },
+              {
+                "kind": "net_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "net_damage"
+              }
+            ],
+            "conditions": [
+              "requires_brain_damage",
+              "requires_damage",
+              "requires_net_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "program",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_096_skullcap",
+          "side": "runner",
+          "cardType": "program",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "brain_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "brain_damage"
+              },
+              {
+                "kind": "net_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "net_damage"
+              }
+            ],
+            "conditions": [
+              "requires_brain_damage",
+              "requires_damage",
+              "requires_net_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "program",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_101_all-hands",
+          "side": "runner",
+          "cardType": "event",
+          "value": "runner.hq_pressure",
+          "evidence": {
+            "lineSupport": [
+              "runner.hq_pressure",
+              "runner.interface_closeout"
+            ],
+            "effects": [
+              {
+                "kind": "multiaccess",
+                "scope": "hq",
+                "timing": "successful_run",
+                "resource": "cards"
+              }
+            ],
+            "conditions": [
+              "requires_successful_run"
+            ],
+            "cardType": "event",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.hq_pressure"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_101_all-hands",
+          "side": "runner",
+          "cardType": "event",
+          "value": "runner.interface_closeout",
+          "evidence": {
+            "lineSupport": [
+              "runner.hq_pressure",
+              "runner.interface_closeout"
+            ],
+            "effects": [
+              {
+                "kind": "multiaccess",
+                "scope": "hq",
+                "timing": "successful_run",
+                "resource": "cards"
+              }
+            ],
+            "conditions": [
+              "requires_successful_run"
+            ],
+            "cardType": "event",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.interface_closeout"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_112_identity-donor",
+          "side": "runner",
+          "cardType": "event",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "flatline_prevention",
+                "scope": "runner",
+                "timing": "flatline_replacement",
+                "resource": "damage"
+              },
+              {
+                "kind": "prevention_replacement",
+                "scope": "runner",
+                "timing": "flatline_replacement",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_flatline",
+              "requires_prevention_window"
+            ],
+            "cardType": "event",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_122_rush-hour",
+          "side": "runner",
+          "cardType": "event",
+          "value": "runner.rnd_pressure",
+          "evidence": {
+            "lineSupport": [
+              "runner.rnd_pressure",
+              "runner.interface_closeout"
+            ],
+            "effects": [
+              {
+                "kind": "multiaccess",
+                "scope": "rnd",
+                "timing": "successful_run",
+                "resource": "cards"
+              }
+            ],
+            "conditions": [
+              "requires_successful_run"
+            ],
+            "cardType": "event",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.rnd_pressure"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_122_rush-hour",
+          "side": "runner",
+          "cardType": "event",
+          "value": "runner.interface_closeout",
+          "evidence": {
+            "lineSupport": [
+              "runner.rnd_pressure",
+              "runner.interface_closeout"
+            ],
+            "effects": [
+              {
+                "kind": "multiaccess",
+                "scope": "rnd",
+                "timing": "successful_run",
+                "resource": "cards"
+              }
+            ],
+            "conditions": [
+              "requires_successful_run"
+            ],
+            "cardType": "event",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.interface_closeout"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_128_airport-locker",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.breaker_search",
+          "evidence": {
+            "lineSupport": [
+              "runner.breaker_search"
+            ],
+            "effects": [
+              {
+                "kind": "search",
+                "scope": "runner",
+                "timing": "during_run"
+              }
+            ],
+            "conditions": [
+              "requires_during_run"
+            ],
+            "targetProfiles": [
+              {
+                "installCost": "normal",
+                "installsTarget": true,
+                "shuffleAfter": true,
+                "targetCardType": "program",
+                "zone": "stack"
+              }
+            ],
+            "cardType": "resource",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.breaker_search"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_130_back-door-to-rivals",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "base_link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "trace_defense",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              }
+            ],
+            "conditions": [
+              "requires_trace_attempt"
+            ],
+            "cardType": "resource",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_132_bolt-hole",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "meat_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "meat_damage"
+              }
+            ],
+            "conditions": [
+              "requires_damage",
+              "requires_meat_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "resource",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_135_cortical-stimulators",
+          "side": "runner",
+          "cardType": "hardware",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "damage"
+              },
+              {
+                "kind": "brain_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "brain_damage"
+              },
+              {
+                "kind": "net_damage_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "net_damage"
+              }
+            ],
+            "conditions": [
+              "requires_brain_damage",
+              "requires_damage",
+              "requires_net_damage",
+              "requires_prevention_window",
+              "requires_turn_limit_available"
+            ],
+            "cardType": "hardware",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_138_deck-the",
+          "side": "runner",
+          "cardType": "hardware",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "base_link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "trace_defense",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              }
+            ],
+            "conditions": [
+              "requires_trace_attempt"
+            ],
+            "cardType": "hardware",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_140_expendable-family-member",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "tag_prevention",
+                "scope": "runner",
+                "timing": "prevention_window",
+                "resource": "tags"
+              }
+            ],
+            "conditions": [
+              "requires_prevention_window"
+            ],
+            "cardType": "resource",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_148_runner-sensei",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "base_link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "trace_defense",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              }
+            ],
+            "conditions": [
+              "requires_trace_attempt"
+            ],
+            "cardType": "resource",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_154_wired-switchboard",
+          "side": "runner",
+          "cardType": "resource",
+          "value": "runner.survival_defense",
+          "evidence": {
+            "lineSupport": [
+              "runner.survival_defense"
+            ],
+            "effects": [
+              {
+                "kind": "link",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              },
+              {
+                "kind": "trace_defense",
+                "scope": "trace",
+                "timing": "trace_window",
+                "resource": "link"
+              }
+            ],
+            "conditions": [
+              "requires_trace_attempt"
+            ],
+            "cardType": "resource",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": false,
+              "strategyCovered": false,
+              "confidence": "low",
+              "needsHumanReview": true
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.survival_defense"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }

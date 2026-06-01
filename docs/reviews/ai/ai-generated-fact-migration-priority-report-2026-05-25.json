@@ -2970,16 +2970,15 @@
         "condition:requires_stack_search",
         "effect:search"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects"],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": [],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 2
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 12,
       "rationale": "Activated program search is derivable by action and stack context, but generated facts must not expose hidden stack identity.",
       "doNotMigrateFields": [
@@ -3352,16 +3351,15 @@
         "effect:economy",
         "effect:scored_agenda_action"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects"],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": [],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 2
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 8,
       "rationale": "Score-area economy action is derivable, while disable-on-install/rez state remains engine context.",
       "doNotMigrateFields": [
@@ -4714,13 +4712,13 @@
         "effect:etr",
         "effect:remote_protection"
       ],
-      "monolithFields": ["effects"],
-      "duplicatedActiveMechanicalFields": ["effects"],
-      "generatedOnlyFields": ["conditions", "effects"],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
-        "monolith_mechanical_duplication_candidate": 1,
-        "generated_fact_absent_from_monolith": 2,
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",
@@ -6842,16 +6840,15 @@
       ],
       "generatedFields": ["effects", "remoteRole"],
       "generatedMechanicalFacts": ["effect:draw", "remoteRole:asset_economy"],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["effects", "remoteRole"],
+      "monolithFields": ["effects", "remoteRole"],
+      "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
+      "generatedOnlyFields": [],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 2
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 9,
       "rationale": "Remote draw utility is derivable, while use timing remains LegalAction context.",
       "doNotMigrateFields": [
@@ -6885,16 +6882,19 @@
         "effect:remote_protection",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "monolithFields": ["effects", "conditions", "remoteRole"],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": [],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 3,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 3
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 9,
       "rationale": "Draw and hand-size support are derivable, with rezzed board context explicit.",
       "doNotMigrateFields": [
@@ -6973,16 +6973,19 @@
         "effect:install_discount",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "monolithFields": ["effects", "conditions", "remoteRole"],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": [],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 3,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 3
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 9,
       "rationale": "ICE install discount is derivable, with rezzed board context explicit.",
       "doNotMigrateFields": [
@@ -7480,16 +7483,19 @@
         "effect:remote_protection",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "monolithFields": ["effects", "conditions", "remoteRole"],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": [],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 3,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 3
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 9,
       "rationale": "Corp hand-size support is derivable, with rezzed board context explicit.",
       "doNotMigrateFields": [

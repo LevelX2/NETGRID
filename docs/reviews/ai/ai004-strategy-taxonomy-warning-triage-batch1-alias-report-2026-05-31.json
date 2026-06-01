@@ -12,20 +12,20 @@
     "totals": {
       "roles": 251,
       "planRoles": 102,
-      "lineSupport": 14,
-      "allValues": 367
+      "lineSupport": 15,
+      "allValues": 368
     },
     "categoryCounts": {
       "alias_to_strategy_goal": 75,
       "deferred_requires_human_review": 1,
       "descriptor_gap": 10,
-      "exact_strategy_goal": 14,
+      "exact_strategy_goal": 15,
       "function_signal_only": 219,
       "legacy_role_only": 47,
       "remove_or_deprecate": 1
     },
     "mappedCounts": {
-      "exactStrategyGoal": 14,
+      "exactStrategyGoal": 15,
       "aliasToStrategyGoal": 75,
       "functionSignalOnly": 219,
       "legacyRoleOnly": 47,
@@ -36,20 +36,20 @@
   "totals": {
     "roles": 251,
     "planRoles": 102,
-    "lineSupport": 14,
-    "allValues": 367
+    "lineSupport": 15,
+    "allValues": 368
   },
   "categoryCounts": {
     "alias_to_strategy_goal": 75,
     "deferred_requires_human_review": 1,
     "descriptor_gap": 10,
-    "exact_strategy_goal": 14,
+    "exact_strategy_goal": 15,
     "function_signal_only": 219,
     "legacy_role_only": 47,
     "remove_or_deprecate": 1
   },
   "mappedCounts": {
-    "exactStrategyGoal": 14,
+    "exactStrategyGoal": 15,
     "aliasToStrategyGoal": 75,
     "functionSignalOnly": 219,
     "legacyRoleOnly": 47,
@@ -5233,7 +5233,7 @@
   "lineSupport": [
     {
       "value": "corp.ice_tax_glacier",
-      "count": 20,
+      "count": 50,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5244,17 +5244,38 @@
       "examples": [
         "onr_v1_191_black-ice-quality-assurance",
         "onr_v1_219_superior-net-barriers",
+        "onr_v1_221_asp",
         "onr_v1_222_ball-and-chain",
         "onr_v1_223_banpei",
         "onr_v1_224_bolter-cluster",
         "onr_v1_225_canis-major",
-        "onr_v1_226_canis-minor",
-        "onr_v1_227_cerberus"
+        "onr_v1_226_canis-minor"
+      ]
+    },
+    {
+      "value": "runner.survival_defense",
+      "count": 42,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "runner.survival_defense"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_003_baedekers-net-map",
+        "onr_v1_004_bakdoor",
+        "onr_v1_022_emergency-self-construct",
+        "onr_v1_023_evil-twin",
+        "onr_v1_028_force-shield",
+        "onr_v1_051_rabbit",
+        "onr_v1_061_shield",
+        "onr_v1_063_signpost"
       ]
     },
     {
       "value": "corp.tag_trace_punish",
-      "count": 20,
+      "count": 35,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5274,29 +5295,8 @@
       ]
     },
     {
-      "value": "corp.remote_scoring",
-      "count": 12,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "corp.remote_scoring"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_191_black-ice-quality-assurance",
-        "onr_v1_219_superior-net-barriers",
-        "onr_v1_312_chicago-branch",
-        "onr_v1_317_data-masons",
-        "onr_v1_350_antiquated-interface-routines",
-        "onr_v1_355_crystal-palace-station-grid",
-        "onr_v1_359_jenny-jett",
-        "onr_v1_361_namatoki-plaza"
-      ]
-    },
-    {
       "value": "corp.damage_kill",
-      "count": 9,
+      "count": 29,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5310,14 +5310,35 @@
         "onr_v1_224_bolter-cluster",
         "onr_v1_227_cerberus",
         "onr_v1_228_cinderella",
-        "onr_v1_278_wall-of-ice",
-        "onr_v1_301_punitive-counterstrike",
-        "onr_v1_302_scorched-earth"
+        "onr_v1_229_code-corpse",
+        "onr_v1_234_data-darts",
+        "onr_v1_242_fatal-attractor"
+      ]
+    },
+    {
+      "value": "corp.remote_scoring",
+      "count": 13,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "corp.remote_scoring"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_191_black-ice-quality-assurance",
+        "onr_v1_219_superior-net-barriers",
+        "onr_v1_312_chicago-branch",
+        "onr_v1_317_data-masons",
+        "onr_v1_320_encoder-inc",
+        "onr_v1_350_antiquated-interface-routines",
+        "onr_v1_355_crystal-palace-station-grid",
+        "onr_v1_359_jenny-jett"
       ]
     },
     {
       "value": "corp.asset_economy",
-      "count": 8,
+      "count": 11,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5331,14 +5352,35 @@
         "onr_v1_311_braindance-campaign",
         "onr_v1_314_corporate-negotiating-center",
         "onr_v1_326_holovid-campaign",
+        "onr_v1_328_information-laundering",
         "onr_v1_329_investment-firm",
-        "onr_v1_334_pacifica-regional-ai",
-        "onr_v1_344_spinn-public-relations"
+        "onr_v1_334_pacifica-regional-ai"
+      ]
+    },
+    {
+      "value": "corp.economy_rez_reserve",
+      "count": 11,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "corp.economy_rez_reserve"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_193_corporate-coup",
+        "onr_v1_196_corporate-war",
+        "onr_v1_203_hostile-takeover",
+        "onr_v1_206_marine-arcology",
+        "onr_v1_209_political-coup",
+        "onr_v1_210_political-overthrow",
+        "onr_v1_212_priority-requisition",
+        "onr_v1_216_security-purge"
       ]
     },
     {
       "value": "runner.breaker_search",
-      "count": 8,
+      "count": 10,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5355,26 +5397,6 @@
         "onr_v1_099_mantis-fixer-at-large",
         "onr_v1_110_sneak-preview",
         "onr_v1_114_temple-microcode-outlet"
-      ]
-    },
-    {
-      "value": "corp.economy_rez_reserve",
-      "count": 7,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "corp.economy_rez_reserve"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_193_corporate-coup",
-        "onr_v1_196_corporate-war",
-        "onr_v1_203_hostile-takeover",
-        "onr_v1_206_marine-arcology",
-        "onr_v1_209_political-coup",
-        "onr_v1_210_political-overthrow",
-        "onr_v1_212_priority-requisition"
       ]
     },
     {
@@ -5398,8 +5420,46 @@
       ]
     },
     {
+      "value": "corp.ambush_bluff",
+      "count": 6,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "corp.ambush_bluff"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_315_corprunners-shattered-remains",
+        "onr_v1_323_experimental-ai",
+        "onr_v1_340_setup",
+        "onr_v1_345_trap",
+        "onr_v1_346_vacant-soulkiller",
+        "onr_v1_354_crybaby"
+      ]
+    },
+    {
+      "value": "runner.interface_closeout",
+      "count": 6,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "runner.interface_closeout"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_041_microtech-ai-interface",
+        "onr_v1_050_r-and-d-protocol-files",
+        "onr_v1_081_custodial-position",
+        "onr_v1_085_executive-wiretaps",
+        "onr_proteus_101_all-hands",
+        "onr_proteus_122_rush-hour"
+      ]
+    },
+    {
       "value": "runner.rnd_pressure",
-      "count": 5,
+      "count": 6,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5412,47 +5472,13 @@
         "onr_v1_041_microtech-ai-interface",
         "onr_v1_050_r-and-d-protocol-files",
         "onr_v1_081_custodial-position",
-        "onr_v1_096_kilroy-was-here"
-      ]
-    },
-    {
-      "value": "runner.survival_defense",
-      "count": 5,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.survival_defense"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_022_emergency-self-construct",
-        "onr_v1_078_arasaka-owns-you",
-        "onr_v1_116_total-genetic-retrofit",
-        "onr_v1_167_leland-corporate-bodyguard",
-        "onr_v1_185_trauma-team"
-      ]
-    },
-    {
-      "value": "runner.interface_closeout",
-      "count": 4,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.interface_closeout"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_041_microtech-ai-interface",
-        "onr_v1_050_r-and-d-protocol-files",
-        "onr_v1_081_custodial-position",
-        "onr_v1_085_executive-wiretaps"
+        "onr_v1_096_kilroy-was-here",
+        "onr_proteus_122_rush-hour"
       ]
     },
     {
       "value": "runner.hq_pressure",
-      "count": 2,
+      "count": 5,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5461,8 +5487,11 @@
       ],
       "rationale": "Already uses a normalized strategy ID.",
       "examples": [
+        "onr_v1_008_boardwalk",
+        "onr_v1_024_expert-schedule-analyzer",
         "onr_v1_084_edited-shipping-manifests",
-        "onr_v1_085_executive-wiretaps"
+        "onr_v1_085_executive-wiretaps",
+        "onr_proteus_101_all-hands"
       ]
     },
     {

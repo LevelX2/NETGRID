@@ -15,17 +15,17 @@
   "overlayCardCount": 6,
   "cardsWithoutOverlay": 187,
   "hardErrorCount": 0,
-  "warningCount": 649,
+  "warningCount": 643,
   "warningCountsByKind": {
-    "active_monolith_mechanical_duplication": 181,
-    "generated_fact_missing_from_active_monolith": 334,
+    "active_monolith_mechanical_duplication": 197,
+    "generated_fact_missing_from_active_monolith": 318,
     "manual_overlay_strategy_field_missing_from_active": 6,
-    "overlay_missing_for_manual_gap": 128
+    "overlay_missing_for_manual_gap": 122
   },
   "warningClassificationCounts": {
-    "generated_fact_absent_from_monolith": 334,
-    "manual_review_candidate": 128,
-    "monolith_mechanical_duplication_candidate": 181,
+    "generated_fact_absent_from_monolith": 318,
+    "manual_review_candidate": 122,
+    "monolith_mechanical_duplication_candidate": 197,
     "overlay_strategy_field_not_in_monolith": 6
   },
   "warningClassificationByCard": [
@@ -769,13 +769,12 @@
     {
       "cardId": "onr_v1_177_the-short-circuit",
       "title": "The Short Circuit",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 2
       },
-      "info": []
+      "info": ["info_no_overlay_needed"]
     },
     {
       "cardId": "onr_v1_178_short-term-contract",
@@ -871,13 +870,12 @@
     {
       "cardId": "onr_v1_195_corporate-retreat",
       "title": "Corporate Retreat",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 2
       },
-      "info": []
+      "info": ["info_no_overlay_needed"]
     },
     {
       "cardId": "onr_v1_196_corporate-war",
@@ -1227,9 +1225,9 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 2,
+        "generated_fact_absent_from_monolith": 1,
         "manual_review_candidate": 1,
-        "monolith_mechanical_duplication_candidate": 1
+        "monolith_mechanical_duplication_candidate": 2
       },
       "info": []
     },
@@ -1775,24 +1773,22 @@
     {
       "cardId": "onr_v1_321_esa-contract",
       "title": "ESA Contract",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 2
       },
-      "info": []
+      "info": ["info_no_overlay_needed"]
     },
     {
       "cardId": "onr_v1_322_euromarket-consortium",
       "title": "Euromarket Consortium",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 3,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 3
       },
-      "info": []
+      "info": ["info_no_overlay_needed"]
     },
     {
       "cardId": "onr_v1_323_experimental-ai",
@@ -1808,13 +1804,12 @@
     {
       "cardId": "onr_v1_324_fortress-architects",
       "title": "Fortress Architects",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 3,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 3
       },
-      "info": []
+      "info": ["info_no_overlay_needed"]
     },
     {
       "cardId": "onr_v1_325_hacker-tracker-central",
@@ -1940,13 +1935,12 @@
     {
       "cardId": "onr_v1_338_rustbelt-hq-branch",
       "title": "Rustbelt HQ Branch",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 3,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 3
       },
-      "info": []
+      "info": ["info_no_overlay_needed"]
     },
     {
       "cardId": "onr_v1_339_schlaghund",
@@ -2787,11 +2781,11 @@
     {
       "cardId": "onr_v1_177_the-short-circuit",
       "title": "The Short Circuit",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "generatedFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "generatedOnlyFields": [],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
       "cardId": "onr_v1_178_short-term-contract",
@@ -2868,11 +2862,11 @@
     {
       "cardId": "onr_v1_195_corporate-retreat",
       "title": "Corporate Retreat",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "generatedFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "generatedOnlyFields": [],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
       "cardId": "onr_v1_196_corporate-war",
@@ -3150,8 +3144,8 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": ["effects"]
+      "generatedOnlyFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
       "cardId": "onr_v1_234_data-darts",
@@ -3607,20 +3601,24 @@
     {
       "cardId": "onr_v1_321_esa-contract",
       "title": "ESA Contract",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "generatedFields": ["effects", "remoteRole"],
-      "generatedOnlyFields": ["effects", "remoteRole"],
-      "duplicatedActiveMechanicalFields": []
+      "generatedOnlyFields": [],
+      "duplicatedActiveMechanicalFields": ["effects", "remoteRole"]
     },
     {
       "cardId": "onr_v1_322_euromarket-consortium",
       "title": "Euromarket Consortium",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "generatedFields": ["conditions", "effects", "remoteRole"],
-      "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
-      "duplicatedActiveMechanicalFields": []
+      "generatedOnlyFields": [],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ]
     },
     {
       "cardId": "onr_v1_323_experimental-ai",
@@ -3634,11 +3632,15 @@
     {
       "cardId": "onr_v1_324_fortress-architects",
       "title": "Fortress Architects",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "generatedFields": ["conditions", "effects", "remoteRole"],
-      "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
-      "duplicatedActiveMechanicalFields": []
+      "generatedOnlyFields": [],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ]
     },
     {
       "cardId": "onr_v1_325_hacker-tracker-central",
@@ -3742,11 +3744,15 @@
     {
       "cardId": "onr_v1_338_rustbelt-hq-branch",
       "title": "Rustbelt HQ Branch",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "generatedFields": ["conditions", "effects", "remoteRole"],
-      "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
-      "duplicatedActiveMechanicalFields": []
+      "generatedOnlyFields": [],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ]
     },
     {
       "cardId": "onr_v1_339_schlaghund",
@@ -4314,17 +4320,6 @@
       ]
     },
     {
-      "cardId": "onr_v1_177_the-short-circuit",
-      "title": "The Short Circuit",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_runner_action",
-        "condition:requires_stack_search",
-        "effect:search"
-      ]
-    },
-    {
       "cardId": "onr_v1_178_short-term-contract",
       "title": "Short-Term Contract",
       "recommendedNextAction": "manual_review_candidate",
@@ -4340,10 +4335,7 @@
       "title": "AI Chief Financial Officer",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "effect:scored_agenda_action",
-        "effect:shuffle_draw"
-      ]
+      "missingManualOverlay": ["effect:scored_agenda_action"]
     },
     {
       "cardId": "onr_v1_189_artificial-security-directors",
@@ -4385,17 +4377,6 @@
         "effect:agenda_reveal_economy",
         "effect:economy",
         "effect:zone_shuffle"
-      ]
-    },
-    {
-      "cardId": "onr_v1_195_corporate-retreat",
-      "title": "Corporate Retreat",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_scored_agenda",
-        "effect:economy",
-        "effect:scored_agenda_action"
       ]
     },
     {
@@ -4670,13 +4651,7 @@
       "title": "Cortical Scrub",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine",
-        "effect:damage",
-        "effect:etr",
-        "effect:program_trash"
-      ]
+      "missingManualOverlay": ["effect:program_trash"]
     },
     {
       "cardId": "onr_v1_234_data-darts",
@@ -5075,25 +5050,6 @@
       "missingManualOverlay": ["effect:zone_shuffle"]
     },
     {
-      "cardId": "onr_v1_321_esa-contract",
-      "title": "ESA Contract",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["effect:draw", "remoteRole:asset_economy"]
-    },
-    {
-      "cardId": "onr_v1_322_euromarket-consortium",
-      "title": "Euromarket Consortium",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_rezzed_card",
-        "effect:draw",
-        "effect:remote_protection",
-        "remoteRole:asset_economy"
-      ]
-    },
-    {
       "cardId": "onr_v1_323_experimental-ai",
       "title": "Experimental AI",
       "recommendedNextAction": "manual_review_candidate",
@@ -5106,17 +5062,6 @@
         "effect:ambush",
         "effect:program_trash",
         "remoteRole:ambush"
-      ]
-    },
-    {
-      "cardId": "onr_v1_324_fortress-architects",
-      "title": "Fortress Architects",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_rezzed_card",
-        "effect:install_discount",
-        "remoteRole:asset_economy"
       ]
     },
     {
@@ -5240,17 +5185,6 @@
         "effect:action_economy",
         "effect:counter_economy",
         "effect:finite_economy_pool",
-        "remoteRole:asset_economy"
-      ]
-    },
-    {
-      "cardId": "onr_v1_338_rustbelt-hq-branch",
-      "title": "Rustbelt HQ Branch",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_rezzed_card",
-        "effect:remote_protection",
         "remoteRole:asset_economy"
       ]
     },
@@ -6050,8 +5984,8 @@
     {
       "cardId": "onr_v1_177_the-short-circuit",
       "title": "The Short Circuit",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "mechanicalFactsFromGenerated": [
         "condition:requires_runner_action",
         "condition:requires_stack_search",
@@ -6152,8 +6086,8 @@
     {
       "cardId": "onr_v1_195_corporate-retreat",
       "title": "Corporate Retreat",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "mechanicalFactsFromGenerated": [
         "condition:requires_scored_agenda",
         "effect:economy",
@@ -7137,8 +7071,8 @@
     {
       "cardId": "onr_v1_321_esa-contract",
       "title": "ESA Contract",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "mechanicalFactsFromGenerated": [
         "effect:draw",
         "remoteRole:asset_economy"
@@ -7147,8 +7081,8 @@
     {
       "cardId": "onr_v1_322_euromarket-consortium",
       "title": "Euromarket Consortium",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "mechanicalFactsFromGenerated": [
         "condition:requires_rezzed_card",
         "effect:draw",
@@ -7174,8 +7108,8 @@
     {
       "cardId": "onr_v1_324_fortress-architects",
       "title": "Fortress Architects",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "mechanicalFactsFromGenerated": [
         "condition:requires_rezzed_card",
         "effect:install_discount",
@@ -7309,8 +7243,8 @@
     {
       "cardId": "onr_v1_338_rustbelt-hq-branch",
       "title": "Rustbelt HQ Branch",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "mechanicalFactsFromGenerated": [
         "condition:requires_rezzed_card",
         "effect:remote_protection",
@@ -7924,17 +7858,6 @@
       ]
     },
     {
-      "cardId": "onr_v1_177_the-short-circuit",
-      "title": "The Short Circuit",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_runner_action",
-        "condition:requires_stack_search",
-        "effect:search"
-      ]
-    },
-    {
       "cardId": "onr_v1_178_short-term-contract",
       "title": "Short-Term Contract",
       "recommendedNextAction": "manual_review_candidate",
@@ -7950,10 +7873,7 @@
       "title": "AI Chief Financial Officer",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "effect:scored_agenda_action",
-        "effect:shuffle_draw"
-      ]
+      "missingManualOverlay": ["effect:scored_agenda_action"]
     },
     {
       "cardId": "onr_v1_189_artificial-security-directors",
@@ -7995,17 +7915,6 @@
         "effect:agenda_reveal_economy",
         "effect:economy",
         "effect:zone_shuffle"
-      ]
-    },
-    {
-      "cardId": "onr_v1_195_corporate-retreat",
-      "title": "Corporate Retreat",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_scored_agenda",
-        "effect:economy",
-        "effect:scored_agenda_action"
       ]
     },
     {
@@ -8280,13 +8189,7 @@
       "title": "Cortical Scrub",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine",
-        "effect:damage",
-        "effect:etr",
-        "effect:program_trash"
-      ]
+      "missingManualOverlay": ["effect:program_trash"]
     },
     {
       "cardId": "onr_v1_234_data-darts",
@@ -8685,25 +8588,6 @@
       "missingManualOverlay": ["effect:zone_shuffle"]
     },
     {
-      "cardId": "onr_v1_321_esa-contract",
-      "title": "ESA Contract",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["effect:draw", "remoteRole:asset_economy"]
-    },
-    {
-      "cardId": "onr_v1_322_euromarket-consortium",
-      "title": "Euromarket Consortium",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_rezzed_card",
-        "effect:draw",
-        "effect:remote_protection",
-        "remoteRole:asset_economy"
-      ]
-    },
-    {
       "cardId": "onr_v1_323_experimental-ai",
       "title": "Experimental AI",
       "recommendedNextAction": "manual_review_candidate",
@@ -8716,17 +8600,6 @@
         "effect:ambush",
         "effect:program_trash",
         "remoteRole:ambush"
-      ]
-    },
-    {
-      "cardId": "onr_v1_324_fortress-architects",
-      "title": "Fortress Architects",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_rezzed_card",
-        "effect:install_discount",
-        "remoteRole:asset_economy"
       ]
     },
     {
@@ -8850,17 +8723,6 @@
         "effect:action_economy",
         "effect:counter_economy",
         "effect:finite_economy_pool",
-        "remoteRole:asset_economy"
-      ]
-    },
-    {
-      "cardId": "onr_v1_338_rustbelt-hq-branch",
-      "title": "Rustbelt HQ Branch",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_rezzed_card",
-        "effect:remote_protection",
         "remoteRole:asset_economy"
       ]
     },
@@ -9038,7 +8900,7 @@
     }
   ],
   "infoCounts": {
-    "info_no_overlay_needed": 59,
+    "info_no_overlay_needed": 65,
     "info_overlay_present": 6
   },
   "cards": [
@@ -9187,9 +9049,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -9512,9 +9376,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -10164,9 +10030,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "breakerProfile"],
@@ -10255,9 +10123,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -10393,10 +10263,12 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -10933,6 +10805,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -11400,6 +11273,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -11488,6 +11362,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -11570,9 +11445,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -11984,6 +11861,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -12360,10 +12238,12 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -12538,9 +12418,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -13092,6 +12974,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -13200,6 +13083,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -13284,6 +13168,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -14255,10 +14140,12 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -14510,9 +14397,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -14771,10 +14660,12 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -15037,12 +14928,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": true,
-      "missingManualOverlay": [
-        "condition:requires_runner_action",
-        "condition:requires_stack_search",
-        "effect:search"
-      ],
+      "needsManualReview": false,
+      "missingManualOverlay": [],
       "compiledPreview": {
         "cardId": "onr_v1_177_the-short-circuit",
         "side": "runner",
@@ -15085,7 +14972,7 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
         "quality",
         "requiredMechanics",
@@ -15093,36 +14980,29 @@
         "scenarioRefs",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects", "conditions"],
+      "generatedOnlyFields": [],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
           "cardId": "onr_v1_177_the-short-circuit",
           "field": "conditions"
         },
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_177_the-short-circuit",
           "field": "effects"
-        },
-        {
-          "classification": "manual_review_candidate",
-          "blocking": false,
-          "kind": "overlay_missing_for_manual_gap",
-          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-          "cardId": "onr_v1_177_the-short-circuit"
         }
       ],
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review"
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
     },
     {
       "cardId": "onr_v1_178_short-term-contract",
@@ -15259,10 +15139,7 @@
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
-      "missingManualOverlay": [
-        "effect:scored_agenda_action",
-        "effect:shuffle_draw"
-      ],
+      "missingManualOverlay": ["effect:scored_agenda_action"],
       "compiledPreview": {
         "cardId": "onr_v1_188_ai-chief-financial-officer",
         "side": "corp",
@@ -15938,12 +15815,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": true,
-      "missingManualOverlay": [
-        "condition:requires_scored_agenda",
-        "effect:economy",
-        "effect:scored_agenda_action"
-      ],
+      "needsManualReview": false,
+      "missingManualOverlay": [],
       "compiledPreview": {
         "cardId": "onr_v1_195_corporate-retreat",
         "side": "corp",
@@ -15984,43 +15857,36 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects", "conditions"],
+      "generatedOnlyFields": [],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
           "cardId": "onr_v1_195_corporate-retreat",
           "field": "conditions"
         },
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_195_corporate-retreat",
           "field": "effects"
-        },
-        {
-          "classification": "manual_review_candidate",
-          "blocking": false,
-          "kind": "overlay_missing_for_manual_gap",
-          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-          "cardId": "onr_v1_195_corporate-retreat"
         }
       ],
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review"
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
     },
     {
       "cardId": "onr_v1_196_corporate-war",
@@ -17108,6 +16974,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -17735,6 +17602,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -17942,9 +17810,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -18401,9 +18271,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -19394,13 +19266,7 @@
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
-      "missingManualOverlay": [
-        "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine",
-        "effect:damage",
-        "effect:etr",
-        "effect:program_trash"
-      ],
+      "missingManualOverlay": ["effect:program_trash"],
       "compiledPreview": {
         "cardId": "onr_v1_231_cortical-scrub",
         "side": "corp",
@@ -19455,7 +19321,7 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
         "quality",
         "requiredMechanics",
@@ -19463,7 +19329,7 @@
         "scenarioRefs",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects", "conditions"],
+      "generatedOnlyFields": ["effects"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
@@ -19471,17 +19337,17 @@
           "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
           "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_231_cortical-scrub",
+          "field": "conditions"
+        },
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
           "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_231_cortical-scrub",
           "field": "effects"
-        },
-        {
-          "classification": "generated_fact_absent_from_monolith",
-          "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
-          "cardId": "onr_v1_231_cortical-scrub",
-          "field": "conditions"
         },
         {
           "classification": "generated_fact_absent_from_monolith",
@@ -19580,9 +19446,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -19687,9 +19555,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -19944,9 +19814,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -20068,9 +19940,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -20182,9 +20056,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -20438,9 +20314,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -20572,9 +20450,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -20827,9 +20707,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -20989,9 +20871,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -21238,9 +21122,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -21745,6 +21631,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -21843,6 +21730,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -22118,6 +22006,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -23461,6 +23350,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -23890,9 +23780,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
@@ -24273,10 +24165,12 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
@@ -24493,9 +24387,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
@@ -24712,8 +24608,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": true,
-      "missingManualOverlay": ["effect:draw", "remoteRole:asset_economy"],
+      "needsManualReview": false,
+      "missingManualOverlay": [],
       "compiledPreview": {
         "cardId": "onr_v1_321_esa-contract",
         "side": "corp",
@@ -24746,43 +24642,36 @@
       ],
       "generatedFields": ["effects", "remoteRole"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
       "activeMonolithOnlyFields": [
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects", "remoteRole"],
+      "generatedOnlyFields": [],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_321_esa-contract",
           "field": "effects"
         },
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
           "cardId": "onr_v1_321_esa-contract",
           "field": "remoteRole"
-        },
-        {
-          "classification": "manual_review_candidate",
-          "blocking": false,
-          "kind": "overlay_missing_for_manual_gap",
-          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-          "cardId": "onr_v1_321_esa-contract"
         }
       ],
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review"
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
     },
     {
       "cardId": "onr_v1_322_euromarket-consortium",
@@ -24793,13 +24682,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": true,
-      "missingManualOverlay": [
-        "condition:requires_rezzed_card",
-        "effect:draw",
-        "effect:remote_protection",
-        "remoteRole:asset_economy"
-      ],
+      "needsManualReview": false,
+      "missingManualOverlay": [],
       "compiledPreview": {
         "cardId": "onr_v1_322_euromarket-consortium",
         "side": "corp",
@@ -24850,51 +24734,48 @@
       ],
       "generatedFields": ["conditions", "effects", "remoteRole"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
       "activeMonolithOnlyFields": [
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
+      "generatedOnlyFields": [],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
           "cardId": "onr_v1_322_euromarket-consortium",
           "field": "conditions"
         },
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_322_euromarket-consortium",
           "field": "effects"
         },
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
           "cardId": "onr_v1_322_euromarket-consortium",
           "field": "remoteRole"
-        },
-        {
-          "classification": "manual_review_candidate",
-          "blocking": false,
-          "kind": "overlay_missing_for_manual_gap",
-          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-          "cardId": "onr_v1_322_euromarket-consortium"
         }
       ],
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review"
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
     },
     {
       "cardId": "onr_v1_323_experimental-ai",
@@ -24986,9 +24867,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
@@ -25039,12 +24922,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": true,
-      "missingManualOverlay": [
-        "condition:requires_rezzed_card",
-        "effect:install_discount",
-        "remoteRole:asset_economy"
-      ],
+      "needsManualReview": false,
+      "missingManualOverlay": [],
       "compiledPreview": {
         "cardId": "onr_v1_324_fortress-architects",
         "side": "corp",
@@ -25085,7 +24964,11 @@
       ],
       "generatedFields": ["conditions", "effects", "remoteRole"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
       "activeMonolithOnlyFields": [
         "quality",
         "requiredMechanics",
@@ -25093,44 +24976,37 @@
         "scenarioRefs",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
+      "generatedOnlyFields": [],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
           "cardId": "onr_v1_324_fortress-architects",
           "field": "conditions"
         },
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_324_fortress-architects",
           "field": "effects"
         },
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
           "cardId": "onr_v1_324_fortress-architects",
           "field": "remoteRole"
-        },
-        {
-          "classification": "manual_review_candidate",
-          "blocking": false,
-          "kind": "overlay_missing_for_manual_gap",
-          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-          "cardId": "onr_v1_324_fortress-architects"
         }
       ],
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review"
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
     },
     {
       "cardId": "onr_v1_325_hacker-tracker-central",
@@ -25180,9 +25056,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "remoteRole"],
@@ -25428,10 +25306,12 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
@@ -25549,9 +25429,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
@@ -25859,9 +25741,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
@@ -26266,9 +26150,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "remoteRole"],
@@ -26311,12 +26197,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": true,
-      "missingManualOverlay": [
-        "condition:requires_rezzed_card",
-        "effect:remote_protection",
-        "remoteRole:asset_economy"
-      ],
+      "needsManualReview": false,
+      "missingManualOverlay": [],
       "compiledPreview": {
         "cardId": "onr_v1_338_rustbelt-hq-branch",
         "side": "corp",
@@ -26357,51 +26239,48 @@
       ],
       "generatedFields": ["conditions", "effects", "remoteRole"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
       "activeMonolithOnlyFields": [
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
+      "generatedOnlyFields": [],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
           "cardId": "onr_v1_338_rustbelt-hq-branch",
           "field": "conditions"
         },
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_338_rustbelt-hq-branch",
           "field": "effects"
         },
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
           "cardId": "onr_v1_338_rustbelt-hq-branch",
           "field": "remoteRole"
-        },
-        {
-          "classification": "manual_review_candidate",
-          "blocking": false,
-          "kind": "overlay_missing_for_manual_gap",
-          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-          "cardId": "onr_v1_338_rustbelt-hq-branch"
         }
       ],
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review"
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
     },
     {
       "cardId": "onr_v1_339_schlaghund",
@@ -26481,9 +26360,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
@@ -26609,9 +26490,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
@@ -26720,9 +26603,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
@@ -26823,10 +26708,12 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "remoteRole"],
@@ -27107,9 +26994,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
@@ -27431,9 +27320,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
@@ -27881,10 +27772,12 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
@@ -30462,27 +30355,20 @@
       "cardId": "onr_v1_176_the-shell-traders"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
       "cardId": "onr_v1_177_the-short-circuit",
       "field": "conditions"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
       "cardId": "onr_v1_177_the-short-circuit",
       "field": "effects"
-    },
-    {
-      "classification": "manual_review_candidate",
-      "blocking": false,
-      "kind": "overlay_missing_for_manual_gap",
-      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-      "cardId": "onr_v1_177_the-short-circuit"
     },
     {
       "classification": "monolith_mechanical_duplication_candidate",
@@ -30679,27 +30565,20 @@
       "cardId": "onr_v1_194_corporate-downsizing"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
       "cardId": "onr_v1_195_corporate-retreat",
       "field": "conditions"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
       "cardId": "onr_v1_195_corporate-retreat",
       "field": "effects"
-    },
-    {
-      "classification": "manual_review_candidate",
-      "blocking": false,
-      "kind": "overlay_missing_for_manual_gap",
-      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-      "cardId": "onr_v1_195_corporate-retreat"
     },
     {
       "classification": "monolith_mechanical_duplication_candidate",
@@ -31522,17 +31401,17 @@
       "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
       "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_231_cortical-scrub",
+      "field": "conditions"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
       "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
       "cardId": "onr_v1_231_cortical-scrub",
       "field": "effects"
-    },
-    {
-      "classification": "generated_fact_absent_from_monolith",
-      "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
-      "cardId": "onr_v1_231_cortical-scrub",
-      "field": "conditions"
     },
     {
       "classification": "generated_fact_absent_from_monolith",
@@ -32845,58 +32724,44 @@
       "field": "effects"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
       "cardId": "onr_v1_321_esa-contract",
       "field": "effects"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
       "cardId": "onr_v1_321_esa-contract",
       "field": "remoteRole"
     },
     {
-      "classification": "manual_review_candidate",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "overlay_missing_for_manual_gap",
-      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-      "cardId": "onr_v1_321_esa-contract"
-    },
-    {
-      "classification": "generated_fact_absent_from_monolith",
-      "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
       "cardId": "onr_v1_322_euromarket-consortium",
       "field": "conditions"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
       "cardId": "onr_v1_322_euromarket-consortium",
       "field": "effects"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
       "cardId": "onr_v1_322_euromarket-consortium",
       "field": "remoteRole"
-    },
-    {
-      "classification": "manual_review_candidate",
-      "blocking": false,
-      "kind": "overlay_missing_for_manual_gap",
-      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-      "cardId": "onr_v1_322_euromarket-consortium"
     },
     {
       "classification": "generated_fact_absent_from_monolith",
@@ -32930,35 +32795,28 @@
       "cardId": "onr_v1_323_experimental-ai"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
       "cardId": "onr_v1_324_fortress-architects",
       "field": "conditions"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
       "cardId": "onr_v1_324_fortress-architects",
       "field": "effects"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
       "cardId": "onr_v1_324_fortress-architects",
       "field": "remoteRole"
-    },
-    {
-      "classification": "manual_review_candidate",
-      "blocking": false,
-      "kind": "overlay_missing_for_manual_gap",
-      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-      "cardId": "onr_v1_324_fortress-architects"
     },
     {
       "classification": "generated_fact_absent_from_monolith",
@@ -33262,35 +33120,28 @@
       "cardId": "onr_v1_337_rockerboy-promotion"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
       "cardId": "onr_v1_338_rustbelt-hq-branch",
       "field": "conditions"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
       "cardId": "onr_v1_338_rustbelt-hq-branch",
       "field": "effects"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
       "cardId": "onr_v1_338_rustbelt-hq-branch",
       "field": "remoteRole"
-    },
-    {
-      "classification": "manual_review_candidate",
-      "blocking": false,
-      "kind": "overlay_missing_for_manual_gap",
-      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-      "cardId": "onr_v1_338_rustbelt-hq-branch"
     },
     {
       "classification": "generated_fact_absent_from_monolith",

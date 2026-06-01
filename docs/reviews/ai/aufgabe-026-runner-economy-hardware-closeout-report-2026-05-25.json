@@ -17,11 +17,11 @@
   "includedCardCount": 18,
   "excludedCardCount": 17,
   "confirmedGeneratedFactCount": 45,
-  "previewAddedFactCount": 34,
+  "previewAddedFactCount": 31,
   "hardErrorCount": 0,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 37,
+  "normalizedDifferenceCount": 34,
   "remainingDifferenceCount": 0,
   "paymentContextInfoCount": 3,
   "actionContextInfoCount": 1,
@@ -29,7 +29,7 @@
   "handSizeContextInfoCount": 2,
   "hiddenZoneContextInfoCount": 8,
   "delayedPenaltyContextInfoCount": 1,
-  "descriptorFollowupCount": 24,
+  "descriptorFollowupCount": 22,
   "readiness": "ready_read_only_split_subbatches",
   "subBatchReadiness": {
     "runner_action_economy": {
@@ -72,13 +72,13 @@
   "normalizationRuleCounts": {
     "hidden_zone_context_normalization": 4,
     "runner_action_economy_normalization": 3,
-    "runner_economy_strategy_overlay_split": 13,
+    "runner_economy_strategy_overlay_split": 12,
     "runner_finite_pool_economy_normalization": 2,
     "runner_hand_size_normalization": 2,
     "runner_install_discount_context_normalization": 1,
     "runner_loan_debt_normalization": 3,
     "runner_resource_economy_risk_split": 1,
-    "runner_search_recovery_normalization": 8
+    "runner_search_recovery_normalization": 6
   },
   "normalizationRules": [
     "runner_burst_economy_normalization",
@@ -863,28 +863,8 @@
         "condition:requires_stack_search",
         "effect:search"
       ],
-      "previewAdds": [
-        "condition:requires_runner_action",
-        "condition:requires_stack_search",
-        "effect:search"
-      ],
-      "normalizedDifferences": [
-        {
-          "kind": "condition:requires_runner_action",
-          "rule": "runner_economy_strategy_overlay_split",
-          "status": "normalized"
-        },
-        {
-          "kind": "condition:requires_stack_search",
-          "rule": "runner_search_recovery_normalization",
-          "status": "normalized"
-        },
-        {
-          "kind": "effect:search",
-          "rule": "runner_search_recovery_normalization",
-          "status": "normalized"
-        }
-      ],
+      "previewAdds": [],
+      "normalizedDifferences": [],
       "paymentContextInfos": [],
       "actionContextInfos": [
         {
@@ -903,12 +883,9 @@
         }
       ],
       "delayedPenaltyContextInfos": [],
-      "descriptorFollowups": [
-        "Generated facts contain fields not currently mirrored manually.",
-        "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
-      ],
+      "descriptorFollowups": [],
       "remainingIssues": [],
-      "readiness": "ready_read_only_with_context_followup"
+      "readiness": "ready_read_only_with_payment_memory_context"
     },
     {
       "cardId": "onr_v1_178_short-term-contract",

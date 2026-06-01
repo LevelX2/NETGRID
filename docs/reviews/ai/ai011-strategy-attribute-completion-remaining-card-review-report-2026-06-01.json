@@ -1,0 +1,5309 @@
+{
+  "schemaVersion": "ai011-strategy-attribute-completion-report-v1",
+  "taskId": "AI011",
+  "generatedAt": "2026-06-01",
+  "source": {
+    "activeHints": "data/ai/ai-card-hints-active.json",
+    "compiledHints": "data/ai/ai-card-hints-compiled.json",
+    "inspectorIndex": "data/ai/ai-hint-inspector-index.json",
+    "strategyGoals": "data/ai/strategy-goals-v1.json",
+    "strategicRoles": "data/ai/strategic-roles-v1.json",
+    "taxonomyReport": "docs/reviews/ai/ai004-strategy-taxonomy-warning-triage-batch1-report-2026-05-31.json",
+    "deckDoctrineReport": "docs/reviews/ai/ai006-deck-doctrine-strategy-aggregation-v1-report-2026-05-31.json",
+    "ai010Report": "docs/reviews/ai/ai010-strategy-anchor-completion-deferred-review-report-2026-05-31.json"
+  },
+  "summary": {
+    "changedCardCount": 114,
+    "lineSupportAddedCardCount": 101,
+    "strategicRoleOnlyCardCount": 13,
+    "remainingDerivedAnchorWithoutLineSupportCount": 52,
+    "perCardDecision": true,
+    "usedRolesOrPlanRolesAloneAsEvidence": false,
+    "plannerEffectIntroduced": false,
+    "actionScoreChange": false,
+    "planWeightChange": false,
+    "engineOrLegalityChange": false,
+    "profileOrDefaultSwitch": false,
+    "hiddenInfoUsed": false,
+    "newStrategyIdsIntroduced": false
+  },
+  "metrics": {
+    "before": {
+      "active": {
+        "cards": 564,
+        "cardsWithNorm": 88,
+        "normalizedLineSupportOccurrences": 110,
+        "legacyLineSupportOccurrences": 0,
+        "normalizedCardsWithoutStrategicRole": 13,
+        "strategyCounts": {
+          "runner.rnd_pressure": 5,
+          "runner.survival_defense": 5,
+          "runner.interface_closeout": 4,
+          "runner.breaker_search": 8,
+          "runner.remote_trash": 2,
+          "runner.hq_pressure": 2,
+          "runner.remote_contest": 1,
+          "corp.remote_scoring": 12,
+          "corp.ice_tax_glacier": 20,
+          "corp.fast_advance": 7,
+          "corp.economy_rez_reserve": 7,
+          "corp.tag_trace_punish": 20,
+          "corp.damage_kill": 9,
+          "corp.asset_economy": 8
+        }
+      },
+      "compiled": {
+        "cards": 564,
+        "cardsWithNorm": 88,
+        "normalizedLineSupportOccurrences": 110,
+        "legacyLineSupportOccurrences": 0,
+        "normalizedCardsWithoutStrategicRole": 13,
+        "strategyCounts": {
+          "runner.rnd_pressure": 5,
+          "runner.survival_defense": 5,
+          "runner.interface_closeout": 4,
+          "runner.breaker_search": 8,
+          "runner.remote_trash": 2,
+          "runner.hq_pressure": 2,
+          "runner.remote_contest": 1,
+          "corp.remote_scoring": 12,
+          "corp.ice_tax_glacier": 20,
+          "corp.fast_advance": 7,
+          "corp.economy_rez_reserve": 7,
+          "corp.tag_trace_punish": 20,
+          "corp.damage_kill": 9,
+          "corp.asset_economy": 8
+        }
+      },
+      "inspector": {
+        "cardsWithWarnings": 353,
+        "legacyLineSupportCards": 0,
+        "cardsWithDerivedStrategyAnchors": 226,
+        "derivedAnchorWithoutNormalizedLineSupport": 153,
+        "warningCandidatesWithoutNormalizedLineSupport": 70
+      },
+      "taxonomyWarningCount": 55
+    },
+    "after": {
+      "active": {
+        "cards": 564,
+        "cardsWithNorm": 189,
+        "normalizedLineSupportOccurrences": 234,
+        "legacyLineSupportOccurrences": 0,
+        "normalizedCardsWithoutStrategicRole": 0,
+        "strategyCounts": {
+          "runner.survival_defense": 42,
+          "runner.hq_pressure": 5,
+          "runner.rnd_pressure": 6,
+          "runner.interface_closeout": 6,
+          "runner.breaker_search": 10,
+          "runner.remote_trash": 2,
+          "runner.remote_contest": 1,
+          "corp.remote_scoring": 13,
+          "corp.ice_tax_glacier": 50,
+          "corp.fast_advance": 7,
+          "corp.economy_rez_reserve": 11,
+          "corp.tag_trace_punish": 35,
+          "corp.damage_kill": 29,
+          "corp.asset_economy": 11,
+          "corp.ambush_bluff": 6
+        }
+      },
+      "compiled": {
+        "cards": 564,
+        "cardsWithNorm": 189,
+        "normalizedLineSupportOccurrences": 234,
+        "legacyLineSupportOccurrences": 0,
+        "normalizedCardsWithoutStrategicRole": 0,
+        "strategyCounts": {
+          "runner.survival_defense": 42,
+          "runner.hq_pressure": 5,
+          "runner.rnd_pressure": 6,
+          "runner.interface_closeout": 6,
+          "runner.breaker_search": 10,
+          "runner.remote_trash": 2,
+          "runner.remote_contest": 1,
+          "corp.remote_scoring": 13,
+          "corp.ice_tax_glacier": 50,
+          "corp.fast_advance": 7,
+          "corp.economy_rez_reserve": 11,
+          "corp.tag_trace_punish": 35,
+          "corp.damage_kill": 29,
+          "corp.asset_economy": 11,
+          "corp.ambush_bluff": 6
+        }
+      },
+      "inspector": {
+        "cardsWithWarnings": 353,
+        "legacyLineSupportCards": 0,
+        "cardsWithDerivedStrategyAnchors": 226,
+        "derivedAnchorWithoutNormalizedLineSupport": 52,
+        "warningCandidatesWithoutNormalizedLineSupport": 28
+      },
+      "taxonomyWarningCount": 55
+    }
+  },
+  "changedGroupCounts": {
+    "Corp ambush / access punish": 6,
+    "Corp asset economy": 3,
+    "Corp economy / rez / remote protection": 3,
+    "Corp ICE tax / glacier pressure": 19,
+    "Corp tag / trace / damage punish": 27,
+    "Runner breaker search / recovery": 2,
+    "Runner central pressure / interface closeout": 4,
+    "Runner survival / trace / damage defense": 37,
+    "StrategicRole completion for existing normalized lineSupport": 13
+  },
+  "changedStrategyCounts": {
+    "corp.ambush_bluff": 6,
+    "corp.damage_kill": 20,
+    "corp.tag_trace_punish": 21,
+    "corp.asset_economy": 3,
+    "corp.economy_rez_reserve": 4,
+    "corp.remote_scoring": 1,
+    "corp.ice_tax_glacier": 30,
+    "runner.breaker_search": 2,
+    "runner.hq_pressure": 5,
+    "runner.interface_closeout": 6,
+    "runner.rnd_pressure": 4,
+    "runner.survival_defense": 37,
+    "runner.remote_trash": 2
+  },
+  "changedStrategicRoleCounts": {
+    "punish_payoff": 24,
+    "engine_anchor": 14,
+    "support_tool": 6,
+    "tax_tool": 31,
+    "enabler": 6,
+    "win_condition": 2,
+    "emergency_tool": 3,
+    "payoff_anchor": 8,
+    "defensive_tool": 35
+  },
+  "remainingReasonCounts": {
+    "descriptor_gap_kept_for_separate_review": 3,
+    "draw_or_generic_economy_support_only": 5,
+    "hand_size_or_remote_slot_support_only": 2,
+    "low_damage_or_descriptor_review_needed": 4,
+    "plain_etr_or_deferred_basic_ice_only": 21,
+    "recurring_credit_or_install_support_only": 17
+  },
+  "changedCards": [
+    {
+      "cardId": "onr_v1_315_corprunners-shattered-remains",
+      "title": "Corprunner's Shattered Remains",
+      "side": "corp",
+      "cardType": "asset",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ambush / access punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ambush_bluff"
+        ],
+        "derivedFunctionSignals": [
+          "access.punish",
+          "remote.ambush"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Access punishment or advanceable ambush text creates a direct bluff/punish anchor.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_323_experimental-ai",
+      "title": "Experimental AI",
+      "side": "corp",
+      "cardType": "asset",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ambush / access punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ambush_bluff"
+        ],
+        "derivedFunctionSignals": [
+          "access.punish",
+          "remote.ambush"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Access punishment or advanceable ambush text creates a direct bluff/punish anchor.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_340_setup",
+      "title": "Setup!",
+      "side": "corp",
+      "cardType": "asset",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ambush / access punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ambush_bluff",
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ambush_bluff",
+          "corp.damage_kill"
+        ],
+        "derivedFunctionSignals": [
+          "access.punish",
+          "damage.payoff",
+          "remote.ambush"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Access punishment or advanceable ambush text creates a direct bluff/punish anchor.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_345_trap",
+      "title": "TRAP!",
+      "side": "corp",
+      "cardType": "asset",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ambush / access punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ambush_bluff",
+          "corp.tag_trace_punish",
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "tag.source"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Access punishment or advanceable ambush text creates a direct bluff/punish anchor.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_346_vacant-soulkiller",
+      "title": "Vacant Soulkiller",
+      "side": "corp",
+      "cardType": "asset",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ambush / access punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ambush_bluff",
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ambush_bluff",
+          "corp.damage_kill"
+        ],
+        "derivedFunctionSignals": [
+          "access.punish",
+          "damage.payoff",
+          "remote.ambush"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Access punishment or advanceable ambush text creates a direct bluff/punish anchor.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_354_crybaby",
+      "title": "Crybaby",
+      "side": "corp",
+      "cardType": "upgrade",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ambush / access punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ambush_bluff"
+        ],
+        "derivedFunctionSignals": [
+          "access.punish",
+          "remote.ambush"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Access punishment or advanceable ambush text creates a direct bluff/punish anchor.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_328_information-laundering",
+      "title": "Information Laundering",
+      "side": "corp",
+      "cardType": "asset",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp asset economy",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.asset_economy"
+        ],
+        "derivedFunctionSignals": [
+          "economy.generic",
+          "remote.asset_economy"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Remote asset economy produces explicit credit flow rather than only hand-size or draw support.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_337_rockerboy-promotion",
+      "title": "Rockerboy Promotion",
+      "side": "corp",
+      "cardType": "asset",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp asset economy",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.asset_economy"
+        ],
+        "derivedFunctionSignals": [
+          "economy.action",
+          "economy.counter",
+          "economy.finite_pool",
+          "remote.asset_economy"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Remote asset economy produces explicit credit flow rather than only hand-size or draw support.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_343_south-african-mining-corp",
+      "title": "South African Mining Corp",
+      "side": "corp",
+      "cardType": "asset",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp asset economy",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.asset_economy"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.asset_economy"
+        ],
+        "derivedFunctionSignals": [
+          "economy.action",
+          "economy.generic",
+          "remote.asset_economy"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Remote asset economy produces explicit credit flow rather than only hand-size or draw support.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_216_security-purge",
+      "title": "Security Purge",
+      "side": "corp",
+      "cardType": "agenda",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp economy / rez / remote protection",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.economy_rez_reserve"
+        ],
+        "strategicRole": [
+          "support_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.economy_rez_reserve"
+        ],
+        "derivedFunctionSignals": [
+          "economy.rez_discount"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card explicitly supports rez reserves, ICE protection, or remote scoring protection.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_320_encoder-inc",
+      "title": "Encoder, Inc.",
+      "side": "corp",
+      "cardType": "asset",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp economy / rez / remote protection",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.remote_scoring",
+          "corp.economy_rez_reserve"
+        ],
+        "strategicRole": [
+          "support_tool",
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.economy_rez_reserve",
+          "corp.remote_scoring"
+        ],
+        "derivedFunctionSignals": [
+          "economy.rez_discount",
+          "remote.scoring_protection"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card explicitly supports rez reserves, ICE protection, or remote scoring protection.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_341_skalderviken-sa-beta-test-site",
+      "title": "Skälderviken SA Beta Test Site",
+      "side": "corp",
+      "cardType": "asset",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp economy / rez / remote protection",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.economy_rez_reserve"
+        ],
+        "strategicRole": [
+          "support_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.economy_rez_reserve"
+        ],
+        "derivedFunctionSignals": [
+          "economy.rez_discount"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card explicitly supports rez reserves, ICE protection, or remote scoring protection.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_015_colonel-failure",
+      "title": "Colonel Failure",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "ice.etr"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_027_iceberg",
+      "title": "Iceberg",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "ice.etr"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_029_marionette",
+      "title": "Marionette",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "ice.etr"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_031_minotaur",
+      "title": "Minotaur",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "ice.future_pressure"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_033_mobile-barricade",
+      "title": "Mobile Barricade",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "ice.etr"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_041_toughoniumtm-wall",
+      "title": "Toughonium™ Wall",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "ice.etr"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_044_walking-wall",
+      "title": "Walking Wall",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "ice.etr"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_221_asp",
+      "title": "Asp",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_233_d-arc-knight",
+      "title": "D'Arc Knight",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_235_data-naga",
+      "title": "Data Naga",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_240_fang",
+      "title": "Fang",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_241_fang-2-0",
+      "title": "Fang 2.0",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_246_fragmentation-storm",
+      "title": "Fragmentation Storm",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_247_haunting-inquisition",
+      "title": "Haunting Inquisition",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "ice.etr"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_253_laser-wire",
+      "title": "Laser Wire",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_264_rex",
+      "title": "Rex",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_271_tko-2-0",
+      "title": "TKO 2.0",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_273_triggerman",
+      "title": "Triggerman",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_360_jerusalem-city-grid",
+      "title": "Jerusalem City Grid",
+      "side": "corp",
+      "cardType": "upgrade",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp ICE tax / glacier pressure",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.economy_rez_reserve",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "support_tool",
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.economy_rez_reserve"
+        ],
+        "derivedFunctionSignals": [
+          "economy.rez_discount"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "ICE text adds non-basic tax, program trash, run lock, significant damage, or future encounter pressure; plain ETR ICE remains excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_004_fetal-ai",
+      "title": "Fetal AI",
+      "side": "corp",
+      "cardType": "agenda",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_005_marked-accounts",
+      "title": "Marked Accounts",
+      "side": "corp",
+      "cardType": "agenda",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "tag.source"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_011_brain-wash",
+      "title": "Brain Wash",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_019_death-yo-yo",
+      "title": "Death Yo-Yo",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "ice.etr"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_048_data-sifters",
+      "title": "Data Sifters",
+      "side": "corp",
+      "cardType": "operation",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "tag.source"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_052_schlaghund-pointers",
+      "title": "Schlaghund Pointers",
+      "side": "corp",
+      "cardType": "operation",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "tag.source"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_229_code-corpse",
+      "title": "Code Corpse",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_234_data-darts",
+      "title": "Data Darts",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "ice.future_pressure"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_242_fatal-attractor",
+      "title": "Fatal Attractor",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "ice.future_pressure"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_248_homewrecker",
+      "title": "Homewrecker™",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_251_jack-attack",
+      "title": "Jack Attack",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "tag.source"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_254_liche",
+      "title": "Liche",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_255_mastiff",
+      "title": "Mastiff",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_257_nerve-labyrinth",
+      "title": "Nerve Labyrinth",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_260_pocket-virtual-reality",
+      "title": "Pocket Virtual Reality",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "economy.trace_credit",
+          "tag.source"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_262_razor-wire",
+      "title": "Razor Wire",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_269_shotgun-wire",
+      "title": "Shotgun Wire",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_280_zombie",
+      "title": "Zombie",
+      "side": "corp",
+      "cardType": "ice",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "tax_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "ice.etr"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_310_blood-cat",
+      "title": "Blood Cat",
+      "side": "corp",
+      "cardType": "asset",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "tag.payoff",
+          "tag.source"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_313_city-surveillance",
+      "title": "City Surveillance",
+      "side": "corp",
+      "cardType": "asset",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "tag.payoff",
+          "tag.source"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_325_hacker-tracker-central",
+      "title": "Hacker Tracker Central",
+      "side": "corp",
+      "cardType": "asset",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "economy.trace_credit",
+          "tag.payoff"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_327_i-got-a-rock",
+      "title": "I Got a Rock",
+      "side": "corp",
+      "cardType": "asset",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish",
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "win_condition"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "tag.payoff"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_333_omniscience-foundation",
+      "title": "Omniscience Foundation",
+      "side": "corp",
+      "cardType": "asset",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "tag.payoff",
+          "tag.source"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_339_schlaghund",
+      "title": "Schlaghund",
+      "side": "corp",
+      "cardType": "asset",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish",
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff",
+          "win_condition"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "tag.payoff"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_342_solo-squad",
+      "title": "Solo Squad",
+      "side": "corp",
+      "cardType": "asset",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish",
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "tag.payoff"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_356_dedicated-response-team",
+      "title": "Dedicated Response Team",
+      "side": "corp",
+      "cardType": "upgrade",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish",
+          "corp.damage_kill"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "tag.payoff"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_372_turbeau-delacroix",
+      "title": "Turbeau Delacroix",
+      "side": "corp",
+      "cardType": "upgrade",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Corp tag / trace / damage punish",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "tag.source"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "The card creates tags/traces or converts tags/access into damage or other punish payoff.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_128_airport-locker",
+      "title": "Airport Locker",
+      "side": "runner",
+      "cardType": "resource",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner breaker search / recovery",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.breaker_search"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.breaker_search"
+        ],
+        "derivedFunctionSignals": [
+          "setup.search"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Search or recovery explicitly assembles or restores programs/breakers rather than providing generic draw.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "title": "Microtech Backup Drive",
+      "side": "runner",
+      "cardType": "hardware",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner breaker search / recovery",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.breaker_search"
+        ],
+        "strategicRole": [
+          "emergency_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.breaker_search"
+        ],
+        "derivedFunctionSignals": [
+          "setup.recovery"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Search or recovery explicitly assembles or restores programs/breakers rather than providing generic draw.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_101_all-hands",
+      "title": "All-Hands",
+      "side": "runner",
+      "cardType": "event",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner central pressure / interface closeout",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.hq_pressure",
+          "runner.interface_closeout"
+        ],
+        "strategicRole": [
+          "payoff_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.hq_pressure",
+          "runner.interface_closeout"
+        ],
+        "derivedFunctionSignals": [
+          "access.hq_multiaccess"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Direct HQ/R&D multiaccess, information, or central-access payoff supports a pressure line.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_122_rush-hour",
+      "title": "Rush Hour",
+      "side": "runner",
+      "cardType": "event",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner central pressure / interface closeout",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.rnd_pressure",
+          "runner.interface_closeout"
+        ],
+        "strategicRole": [
+          "payoff_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.interface_closeout",
+          "runner.rnd_pressure"
+        ],
+        "derivedFunctionSignals": [
+          "access.rnd_multiaccess"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Direct HQ/R&D multiaccess, information, or central-access payoff supports a pressure line.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_008_boardwalk",
+      "title": "Boardwalk",
+      "side": "runner",
+      "cardType": "program",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner central pressure / interface closeout",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.hq_pressure"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.hq_pressure"
+        ],
+        "derivedFunctionSignals": [
+          "info.hq"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Direct HQ/R&D multiaccess, information, or central-access payoff supports a pressure line.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_024_expert-schedule-analyzer",
+      "title": "Expert Schedule Analyzer",
+      "side": "runner",
+      "cardType": "program",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner central pressure / interface closeout",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.hq_pressure"
+        ],
+        "strategicRole": [
+          "payoff_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.hq_pressure"
+        ],
+        "derivedFunctionSignals": [
+          "info.hq"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Direct HQ/R&D multiaccess, information, or central-access payoff supports a pressure line.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_086_enterprise-inc-shields",
+      "title": "Enterprise, Inc., Shields",
+      "side": "runner",
+      "cardType": "program",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.damage_prevention"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_096_skullcap",
+      "title": "Skullcap",
+      "side": "runner",
+      "cardType": "program",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.damage_prevention"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_112_identity-donor",
+      "title": "Identity Donor",
+      "side": "runner",
+      "cardType": "event",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "emergency_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.damage_prevention"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_130_back-door-to-rivals",
+      "title": "Back Door to Rivals",
+      "side": "runner",
+      "cardType": "resource",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.trace_defense"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_132_bolt-hole",
+      "title": "Bolt-Hole",
+      "side": "runner",
+      "cardType": "resource",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.damage_prevention"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_135_cortical-stimulators",
+      "title": "Cortical Stimulators",
+      "side": "runner",
+      "cardType": "hardware",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.damage_prevention"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_138_deck-the",
+      "title": "Deck, The",
+      "side": "runner",
+      "cardType": "hardware",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.trace_defense"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_140_expendable-family-member",
+      "title": "Expendable Family Member",
+      "side": "runner",
+      "cardType": "resource",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.tag_prevention"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_148_runner-sensei",
+      "title": "Runner Sensei",
+      "side": "runner",
+      "cardType": "resource",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.trace_defense"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_proteus_154_wired-switchboard",
+      "title": "Wired Switchboard",
+      "side": "runner",
+      "cardType": "resource",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.trace_defense"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_003_baedekers-net-map",
+      "title": "Baedeker’s Net Map",
+      "side": "runner",
+      "cardType": "hardware",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.trace_defense"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_004_bakdoor",
+      "title": "Bakdoor™",
+      "side": "runner",
+      "cardType": "program",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.trace_defense"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_023_evil-twin",
+      "title": "Evil Twin",
+      "side": "runner",
+      "cardType": "program",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "breaker.sentry",
+          "defense.damage_prevention"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_028_force-shield",
+      "title": "Force Shield",
+      "side": "runner",
+      "cardType": "program",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.damage_prevention"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_051_rabbit",
+      "title": "Rabbit",
+      "side": "runner",
+      "cardType": "program",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.trace_defense"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_061_shield",
+      "title": "Shield",
+      "side": "runner",
+      "cardType": "program",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.damage_prevention"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_063_signpost",
+      "title": "Signpost",
+      "side": "runner",
+      "cardType": "program",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.trace_defense"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_120_armadillo-armored-road-home",
+      "title": "“Armadillo” Armored Road Home",
+      "side": "runner",
+      "cardType": "hardware",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.remote_trash",
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.damage_prevention",
+          "economy.trash_credit"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_121_armored-fridge",
+      "title": "Armored Fridge",
+      "side": "runner",
+      "cardType": "hardware",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.damage_prevention"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_125_dermatech-bodyplating",
+      "title": "Dermatech Bodyplating",
+      "side": "runner",
+      "cardType": "hardware",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.damage_prevention"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_127_full-body-conversion",
+      "title": "Full Body Conversion",
+      "side": "runner",
+      "cardType": "hardware",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.damage_prevention"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_128_green-knight-surge-buffers",
+      "title": "“Green Knight” Surge Buffers",
+      "side": "runner",
+      "cardType": "hardware",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.damage_prevention"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_130_lifesaver-nanosurgeons",
+      "title": "Lifesaver™ Nanosurgeons",
+      "side": "runner",
+      "cardType": "hardware",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "emergency_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.damage_prevention",
+          "setup.draw"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_135_nasuko-cycle",
+      "title": "Nasuko Cycle",
+      "side": "runner",
+      "cardType": "hardware",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.tag_prevention"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_140_raven-microcyb-eagle",
+      "title": "Raven Microcyb Eagle",
+      "side": "runner",
+      "cardType": "hardware",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.remote_trash",
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.damage_prevention",
+          "economy.trash_credit"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_143_techtronica-utility-suit",
+      "title": "Techtronica™ Utility Suit",
+      "side": "runner",
+      "cardType": "hardware",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.remote_trash",
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.damage_prevention",
+          "economy.trash_credit"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_148_access-through-alpha",
+      "title": "Access through Alpha",
+      "side": "runner",
+      "cardType": "resource",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.trace_defense"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_149_access-to-arasaka",
+      "title": "Access to Arasaka",
+      "side": "runner",
+      "cardType": "resource",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.trace_defense"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_150_access-to-kiribati",
+      "title": "Access to Kiribati",
+      "side": "runner",
+      "cardType": "resource",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.trace_defense"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_152_back-door-to-hilliard",
+      "title": "Back Door to Hilliard",
+      "side": "runner",
+      "cardType": "resource",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.trace_defense"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_153_back-door-to-orbital-air",
+      "title": "Back Door to Orbital Air",
+      "side": "runner",
+      "cardType": "resource",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.trace_defense"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_160_diplomatic-immunity",
+      "title": "Diplomatic Immunity",
+      "side": "runner",
+      "cardType": "resource",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.damage_prevention"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_161_fall-guy",
+      "title": "Fall Guy",
+      "side": "runner",
+      "cardType": "resource",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.tag_prevention"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_170_nomad-allies",
+      "title": "Nomad Allies",
+      "side": "runner",
+      "cardType": "resource",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.tag_prevention"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_181_the-springboard",
+      "title": "The Springboard",
+      "side": "runner",
+      "cardType": "resource",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.trace_defense"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_182_submarine-uplink",
+      "title": "Submarine Uplink",
+      "side": "runner",
+      "cardType": "resource",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.trace_defense"
+        ],
+        "warningCategories": [],
+        "quality": null
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_187_wilson-weeflerunner-apprentice",
+      "title": "Wilson, Weeflerunner Apprentice",
+      "side": "runner",
+      "cardType": "resource",
+      "changeType": "lineSupport_and_strategicRole",
+      "group": "Runner survival / trace / damage defense",
+      "oldValues": {
+        "lineSupport": [],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.survival_defense"
+        ],
+        "strategicRole": [
+          "defensive_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.survival_defense"
+        ],
+        "derivedFunctionSignals": [
+          "defense.damage_prevention",
+          "defense.tag_prevention"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": false,
+          "strategyCovered": false,
+          "confidence": "low",
+          "needsHumanReview": true
+        }
+      },
+      "rationale": "Card text or existing hint evidence directly protects against damage, tags, or traces; recurring-credit-only cards are excluded.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_041_microtech-ai-interface",
+      "title": "Microtech AI Interface",
+      "side": "runner",
+      "cardType": "program",
+      "changeType": "strategicRole_only",
+      "group": "StrategicRole completion for existing normalized lineSupport",
+      "oldValues": {
+        "lineSupport": [
+          "runner.rnd_pressure",
+          "runner.interface_closeout"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.rnd_pressure",
+          "runner.interface_closeout"
+        ],
+        "strategicRole": [
+          "payoff_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.rnd_pressure"
+        ],
+        "derivedFunctionSignals": [
+          "info.rnd_topdeck"
+        ],
+        "warningCategories": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "rationale": "Existing normalized lineSupport now carries a compatible controlled strategicRole.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_048_poltergeist",
+      "title": "Poltergeist",
+      "side": "runner",
+      "cardType": "program",
+      "changeType": "strategicRole_only",
+      "group": "StrategicRole completion for existing normalized lineSupport",
+      "oldValues": {
+        "lineSupport": [
+          "runner.remote_trash"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.remote_trash"
+        ],
+        "strategicRole": [
+          "support_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.remote_trash"
+        ],
+        "derivedFunctionSignals": [
+          "economy.trash_credit"
+        ],
+        "warningCategories": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "rationale": "Existing normalized lineSupport now carries a compatible controlled strategicRole.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_050_r-and-d-protocol-files",
+      "title": "R&D-Protocol Files",
+      "side": "runner",
+      "cardType": "program",
+      "changeType": "strategicRole_only",
+      "group": "StrategicRole completion for existing normalized lineSupport",
+      "oldValues": {
+        "lineSupport": [
+          "runner.rnd_pressure",
+          "runner.interface_closeout"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.rnd_pressure",
+          "runner.interface_closeout"
+        ],
+        "strategicRole": [
+          "payoff_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.rnd_pressure"
+        ],
+        "derivedFunctionSignals": [
+          "info.rnd_topdeck"
+        ],
+        "warningCategories": [
+          "descriptor_gap",
+          "function_signal_descriptor_gap"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "rationale": "Existing normalized lineSupport now carries a compatible controlled strategicRole.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_057_scatter-shot",
+      "title": "Scatter Shot",
+      "side": "runner",
+      "cardType": "program",
+      "changeType": "strategicRole_only",
+      "group": "StrategicRole completion for existing normalized lineSupport",
+      "oldValues": {
+        "lineSupport": [
+          "runner.remote_trash"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.remote_trash"
+        ],
+        "strategicRole": [
+          "support_tool"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.remote_trash"
+        ],
+        "derivedFunctionSignals": [
+          "economy.trash_credit"
+        ],
+        "warningCategories": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "rationale": "Existing normalized lineSupport now carries a compatible controlled strategicRole.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_081_custodial-position",
+      "title": "Custodial Position",
+      "side": "runner",
+      "cardType": "event",
+      "changeType": "strategicRole_only",
+      "group": "StrategicRole completion for existing normalized lineSupport",
+      "oldValues": {
+        "lineSupport": [
+          "runner.rnd_pressure",
+          "runner.interface_closeout"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.rnd_pressure",
+          "runner.interface_closeout"
+        ],
+        "strategicRole": [
+          "payoff_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.interface_closeout",
+          "runner.rnd_pressure"
+        ],
+        "derivedFunctionSignals": [
+          "access.rnd_multiaccess"
+        ],
+        "warningCategories": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "rationale": "Existing normalized lineSupport now carries a compatible controlled strategicRole.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_084_edited-shipping-manifests",
+      "title": "Edited Shipping Manifests",
+      "side": "runner",
+      "cardType": "event",
+      "changeType": "strategicRole_only",
+      "group": "StrategicRole completion for existing normalized lineSupport",
+      "oldValues": {
+        "lineSupport": [
+          "runner.hq_pressure"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.hq_pressure"
+        ],
+        "strategicRole": [
+          "payoff_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [],
+        "derivedFunctionSignals": [
+          "economy.generic"
+        ],
+        "warningCategories": [
+          "function_signal_descriptor_gap"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "rationale": "Existing normalized lineSupport now carries a compatible controlled strategicRole.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_085_executive-wiretaps",
+      "title": "Executive Wiretaps",
+      "side": "runner",
+      "cardType": "event",
+      "changeType": "strategicRole_only",
+      "group": "StrategicRole completion for existing normalized lineSupport",
+      "oldValues": {
+        "lineSupport": [
+          "runner.hq_pressure",
+          "runner.interface_closeout"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "runner.hq_pressure",
+          "runner.interface_closeout"
+        ],
+        "strategicRole": [
+          "payoff_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "runner.hq_pressure",
+          "runner.interface_closeout"
+        ],
+        "derivedFunctionSignals": [
+          "access.hq_multiaccess"
+        ],
+        "warningCategories": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "rationale": "Existing normalized lineSupport now carries a compatible controlled strategicRole.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_207_netwatch-operations-office",
+      "title": "Netwatch Operations Office",
+      "side": "corp",
+      "cardType": "agenda",
+      "changeType": "strategicRole_only",
+      "group": "StrategicRole completion for existing normalized lineSupport",
+      "oldValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.fast_advance",
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "score.agenda_action",
+          "tag.source",
+          "trace.source"
+        ],
+        "warningCategories": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "rationale": "Existing normalized lineSupport now carries a compatible controlled strategicRole.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_213_private-cybernet-police",
+      "title": "Private Cybernet Police",
+      "side": "corp",
+      "cardType": "agenda",
+      "changeType": "strategicRole_only",
+      "group": "StrategicRole completion for existing normalized lineSupport",
+      "oldValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "engine_anchor"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.fast_advance",
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "score.agenda_action",
+          "tag.source",
+          "trace.source"
+        ],
+        "warningCategories": [],
+        "quality": {
+          "benchmarkCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "rationale": "Existing normalized lineSupport now carries a compatible controlled strategicRole.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "title": "Audit of Call Records",
+      "side": "corp",
+      "cardType": "operation",
+      "changeType": "strategicRole_only",
+      "group": "StrategicRole completion for existing normalized lineSupport",
+      "oldValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "tag.source",
+          "trace.source"
+        ],
+        "warningCategories": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "rationale": "Existing normalized lineSupport now carries a compatible controlled strategicRole.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_284_chance-observation",
+      "title": "Chance Observation",
+      "side": "corp",
+      "cardType": "operation",
+      "changeType": "strategicRole_only",
+      "group": "StrategicRole completion for existing normalized lineSupport",
+      "oldValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "tag.source",
+          "trace.source"
+        ],
+        "warningCategories": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "rationale": "Existing normalized lineSupport now carries a compatible controlled strategicRole.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_287_datapool-by-zetatech",
+      "title": "Datapool by Zetatech",
+      "side": "corp",
+      "cardType": "operation",
+      "changeType": "strategicRole_only",
+      "group": "StrategicRole completion for existing normalized lineSupport",
+      "oldValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "punish_payoff"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "tag.payoff",
+          "tag.source"
+        ],
+        "warningCategories": [
+          "deferred_requires_human_review"
+        ],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": true,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "rationale": "Existing normalized lineSupport now carries a compatible controlled strategicRole.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    },
+    {
+      "cardId": "onr_v1_306_trojan-horse",
+      "title": "Trojan Horse",
+      "side": "corp",
+      "cardType": "operation",
+      "changeType": "strategicRole_only",
+      "group": "StrategicRole completion for existing normalized lineSupport",
+      "oldValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": []
+      },
+      "newValues": {
+        "lineSupport": [
+          "corp.tag_trace_punish"
+        ],
+        "strategicRole": [
+          "enabler"
+        ]
+      },
+      "evidence": {
+        "derivedStrategyAnchors": [
+          "corp.tag_trace_punish"
+        ],
+        "derivedFunctionSignals": [
+          "tag.source"
+        ],
+        "warningCategories": [],
+        "quality": {
+          "benchmarkCovered": true,
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false,
+          "reviewedDate": "2026-05-25",
+          "reviewedBy": "codex"
+        }
+      },
+      "rationale": "Existing normalized lineSupport now carries a compatible controlled strategicRole.",
+      "usedRolesOrPlanRolesAloneAsEvidence": false
+    }
+  ],
+  "remainingCandidates": [
+    {
+      "cardId": "onr_v1_177_the-short-circuit",
+      "title": "The Short Circuit",
+      "side": "runner",
+      "cardType": "resource",
+      "derivedStrategyAnchors": [
+        "runner.breaker_search"
+      ],
+      "derivedFunctionSignals": [
+        "setup.search"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review",
+        "descriptor_gap"
+      ],
+      "reason": "descriptor_gap_kept_for_separate_review"
+    },
+    {
+      "cardId": "onr_v1_250_ice-pick-willie",
+      "title": "Ice Pick Willie",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "descriptor_gap"
+      ],
+      "reason": "descriptor_gap_kept_for_separate_review"
+    },
+    {
+      "cardId": "onr_v1_348_virus-test-site",
+      "title": "Virus Test Site",
+      "side": "corp",
+      "cardType": "asset",
+      "derivedStrategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "derivedFunctionSignals": [
+        "damage.payoff"
+      ],
+      "warningCategories": [
+        "descriptor_gap"
+      ],
+      "reason": "descriptor_gap_kept_for_separate_review"
+    },
+    {
+      "cardId": "onr_v1_188_ai-chief-financial-officer",
+      "title": "AI Chief Financial Officer",
+      "side": "corp",
+      "cardType": "agenda",
+      "derivedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "derivedFunctionSignals": [
+        "score.agenda_action",
+        "setup.draw"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "draw_or_generic_economy_support_only"
+    },
+    {
+      "cardId": "onr_v1_195_corporate-retreat",
+      "title": "Corporate Retreat",
+      "side": "corp",
+      "cardType": "agenda",
+      "derivedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "derivedFunctionSignals": [
+        "economy.generic",
+        "score.agenda_action"
+      ],
+      "warningCategories": [],
+      "reason": "draw_or_generic_economy_support_only"
+    },
+    {
+      "cardId": "onr_v1_199_employee-empowerment",
+      "title": "Employee Empowerment",
+      "side": "corp",
+      "cardType": "agenda",
+      "derivedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "derivedFunctionSignals": [
+        "score.agenda_action",
+        "setup.draw"
+      ],
+      "warningCategories": [],
+      "reason": "draw_or_generic_economy_support_only"
+    },
+    {
+      "cardId": "onr_v1_321_esa-contract",
+      "title": "ESA Contract",
+      "side": "corp",
+      "cardType": "asset",
+      "derivedStrategyAnchors": [
+        "corp.asset_economy"
+      ],
+      "derivedFunctionSignals": [
+        "remote.asset_economy",
+        "setup.draw"
+      ],
+      "warningCategories": [],
+      "reason": "draw_or_generic_economy_support_only"
+    },
+    {
+      "cardId": "onr_v1_322_euromarket-consortium",
+      "title": "Euromarket Consortium",
+      "side": "corp",
+      "cardType": "asset",
+      "derivedStrategyAnchors": [
+        "corp.asset_economy"
+      ],
+      "derivedFunctionSignals": [
+        "remote.asset_economy",
+        "setup.draw"
+      ],
+      "warningCategories": [],
+      "reason": "draw_or_generic_economy_support_only"
+    },
+    {
+      "cardId": "onr_v1_324_fortress-architects",
+      "title": "Fortress Architects",
+      "side": "corp",
+      "cardType": "asset",
+      "derivedStrategyAnchors": [
+        "corp.asset_economy"
+      ],
+      "derivedFunctionSignals": [
+        "remote.asset_economy",
+        "setup.install_discount"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "hand_size_or_remote_slot_support_only"
+    },
+    {
+      "cardId": "onr_v1_338_rustbelt-hq-branch",
+      "title": "Rustbelt HQ Branch",
+      "side": "corp",
+      "cardType": "asset",
+      "derivedStrategyAnchors": [
+        "corp.asset_economy"
+      ],
+      "derivedFunctionSignals": [
+        "remote.asset_economy"
+      ],
+      "warningCategories": [],
+      "reason": "hand_size_or_remote_slot_support_only"
+    },
+    {
+      "cardId": "onr_proteus_054_bel-digmo-antibody",
+      "title": "Bel-Digmo Antibody",
+      "side": "corp",
+      "cardType": "asset",
+      "derivedStrategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "derivedFunctionSignals": [
+        "damage.payoff"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "low_damage_or_descriptor_review_needed"
+    },
+    {
+      "cardId": "onr_proteus_075_stereogram-antibody",
+      "title": "Stereogram Antibody",
+      "side": "corp",
+      "cardType": "asset",
+      "derivedStrategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "derivedFunctionSignals": [
+        "damage.payoff"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "low_damage_or_descriptor_review_needed"
+    },
+    {
+      "cardId": "onr_v1_231_cortical-scrub",
+      "title": "Cortical Scrub",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "damage.payoff",
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "low_damage_or_descriptor_review_needed"
+    },
+    {
+      "cardId": "onr_v1_357_dieter-esslin",
+      "title": "Dieter Esslin",
+      "side": "corp",
+      "cardType": "upgrade",
+      "derivedStrategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "derivedFunctionSignals": [
+        "damage.payoff"
+      ],
+      "warningCategories": [],
+      "reason": "low_damage_or_descriptor_review_needed"
+    },
+    {
+      "cardId": "onr_proteus_018_datacomb",
+      "title": "Datacomb",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_proteus_035_roadblock",
+      "title": "Roadblock",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_proteus_037_scaffolding",
+      "title": "Scaffolding",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_proteus_042_tumblers",
+      "title": "Tumblers",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_proteus_043_twisty-passages",
+      "title": "Twisty Passages",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_v1_230_cortical-scanner",
+      "title": "Cortical Scanner",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_v1_232_crystal-wall",
+      "title": "Crystal Wall",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_v1_237_data-wall",
+      "title": "Data Wall",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_v1_238_data-wall-2-0",
+      "title": "Data Wall 2.0",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_v1_239_endless-corridor",
+      "title": "Endless Corridor",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_v1_244_filter",
+      "title": "Filter",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_v1_245_fire-wall",
+      "title": "Fire Wall",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_v1_252_keeper",
+      "title": "Keeper",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_v1_256_mazer",
+      "title": "Mazer",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_v1_259_in-the-face",
+      "title": "Pi in the 'Face",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_v1_261_quandary",
+      "title": "Quandary",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_v1_263_reinforced-wall",
+      "title": "Reinforced Wall",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_v1_265_rock-is-strong",
+      "title": "Rock Is Strong",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_v1_266_scramble",
+      "title": "Scramble",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_v1_270_sleeper",
+      "title": "Sleeper",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_v1_279_wall-of-static",
+      "title": "Wall of Static",
+      "side": "corp",
+      "cardType": "ice",
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "warningCategories": [],
+      "reason": "plain_etr_or_deferred_basic_ice_only"
+    },
+    {
+      "cardId": "onr_proteus_134_cortical-cybermodem",
+      "title": "Cortical Cybermodem",
+      "side": "runner",
+      "cardType": "hardware",
+      "derivedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "derivedFunctionSignals": [
+        "economy.trash_credit"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "recurring_credit_or_install_support_only"
+    },
+    {
+      "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
+      "title": "Eurocorpse (TM) Spin Chip",
+      "side": "runner",
+      "cardType": "hardware",
+      "derivedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "derivedFunctionSignals": [
+        "economy.trash_credit"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "recurring_credit_or_install_support_only"
+    },
+    {
+      "cardId": "onr_proteus_151_sunburst-cranial-interface",
+      "title": "Sunburst Cranial Interface",
+      "side": "runner",
+      "cardType": "hardware",
+      "derivedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "derivedFunctionSignals": [
+        "economy.trash_credit"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "recurring_credit_or_install_support_only"
+    },
+    {
+      "cardId": "onr_v1_011_cloak",
+      "title": "Cloak",
+      "side": "runner",
+      "cardType": "program",
+      "derivedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "derivedFunctionSignals": [
+        "economy.generic",
+        "economy.trash_credit"
+      ],
+      "warningCategories": [],
+      "reason": "recurring_credit_or_install_support_only"
+    },
+    {
+      "cardId": "onr_v1_035_invisibility",
+      "title": "Invisibility",
+      "side": "runner",
+      "cardType": "program",
+      "derivedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "derivedFunctionSignals": [
+        "economy.trash_credit"
+      ],
+      "warningCategories": [],
+      "reason": "recurring_credit_or_install_support_only"
+    },
+    {
+      "cardId": "onr_v1_071_vewy-vewy-quiet",
+      "title": "Vewy Vewy Quiet",
+      "side": "runner",
+      "cardType": "program",
+      "derivedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "derivedFunctionSignals": [
+        "economy.generic",
+        "economy.trash_credit"
+      ],
+      "warningCategories": [],
+      "reason": "recurring_credit_or_install_support_only"
+    },
+    {
+      "cardId": "onr_v1_075_zetatech-software-installer",
+      "title": "Zetatech Software Installer",
+      "side": "runner",
+      "cardType": "program",
+      "derivedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "derivedFunctionSignals": [
+        "economy.trash_credit",
+        "setup.install_discount"
+      ],
+      "warningCategories": [],
+      "reason": "recurring_credit_or_install_support_only"
+    },
+    {
+      "cardId": "onr_v1_119_arasaka-portable-prototype",
+      "title": "Arasaka Portable Prototype",
+      "side": "runner",
+      "cardType": "hardware",
+      "derivedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "derivedFunctionSignals": [
+        "economy.trash_credit"
+      ],
+      "warningCategories": [],
+      "reason": "recurring_credit_or_install_support_only"
+    },
+    {
+      "cardId": "onr_v1_122_artemis-2020",
+      "title": "Artemis 2020",
+      "side": "runner",
+      "cardType": "hardware",
+      "derivedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "derivedFunctionSignals": [
+        "economy.trash_credit"
+      ],
+      "warningCategories": [],
+      "reason": "recurring_credit_or_install_support_only"
+    },
+    {
+      "cardId": "onr_v1_124_corolla-speed-chip",
+      "title": "Corolla Speed Chip",
+      "side": "runner",
+      "cardType": "hardware",
+      "derivedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "derivedFunctionSignals": [
+        "economy.trash_credit"
+      ],
+      "warningCategories": [],
+      "reason": "recurring_credit_or_install_support_only"
+    },
+    {
+      "cardId": "onr_v1_126_drifter-mobile-environment",
+      "title": "“Drifter” Mobile Environment",
+      "side": "runner",
+      "cardType": "hardware",
+      "derivedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "derivedFunctionSignals": [
+        "economy.trash_credit"
+      ],
+      "warningCategories": [],
+      "reason": "recurring_credit_or_install_support_only"
+    },
+    {
+      "cardId": "onr_v1_136_pandoras-deck",
+      "title": "Pandora’s Deck",
+      "side": "runner",
+      "cardType": "hardware",
+      "derivedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "derivedFunctionSignals": [
+        "economy.trash_credit"
+      ],
+      "warningCategories": [],
+      "reason": "recurring_credit_or_install_support_only"
+    },
+    {
+      "cardId": "onr_v1_137_parraline-5750",
+      "title": "Parraline 5750",
+      "side": "runner",
+      "cardType": "hardware",
+      "derivedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "derivedFunctionSignals": [
+        "economy.trash_credit"
+      ],
+      "warningCategories": [],
+      "reason": "recurring_credit_or_install_support_only"
+    },
+    {
+      "cardId": "onr_v1_138_pk-6089a",
+      "title": "PK-6089a",
+      "side": "runner",
+      "cardType": "hardware",
+      "derivedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "derivedFunctionSignals": [
+        "economy.trash_credit"
+      ],
+      "warningCategories": [],
+      "reason": "recurring_credit_or_install_support_only"
+    },
+    {
+      "cardId": "onr_v1_141_raven-microcyb-owl",
+      "title": "Raven Microcyb Owl",
+      "side": "runner",
+      "cardType": "hardware",
+      "derivedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "derivedFunctionSignals": [
+        "economy.trash_credit"
+      ],
+      "warningCategories": [
+        "deferred_requires_human_review"
+      ],
+      "reason": "recurring_credit_or_install_support_only"
+    },
+    {
+      "cardId": "onr_v1_147_zz22-speed-chip",
+      "title": "ZZ22 Speed Chip",
+      "side": "runner",
+      "cardType": "hardware",
+      "derivedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "derivedFunctionSignals": [
+        "economy.trash_credit"
+      ],
+      "warningCategories": [],
+      "reason": "recurring_credit_or_install_support_only"
+    },
+    {
+      "cardId": "onr_v1_164_hells-run",
+      "title": "Hell's Run",
+      "side": "runner",
+      "cardType": "resource",
+      "derivedStrategyAnchors": [
+        "runner.remote_trash"
+      ],
+      "derivedFunctionSignals": [
+        "economy.trash_credit"
+      ],
+      "warningCategories": [],
+      "reason": "recurring_credit_or_install_support_only"
+    }
+  ],
+  "explicitNonScope": [
+    "Keine Plannerwirkung, keine Action Scores und keine PlanWeights.",
+    "Keine Engine-, Rules-, LegalActions-, ApplyAction-, StateHash- oder Replay-Aenderung.",
+    "Keine Profil- oder Default-Umschaltung.",
+    "Keine Hidden-Info-Nutzung und keine neuen Strategy IDs.",
+    "AI010-bewusst-zurueckgestellte Function-Signal-Faelle wurden nicht erneut als Strategieanker erzwungen.",
+    "Normale Recurring-Credit-Hardware, reine Basis-ETR-ICE, reine Draw-/Hand-size-Karten und Descriptor-Gaps bleiben ohne pauschales lineSupport."
+  ],
+  "checks": [
+    {
+      "command": "corepack pnpm build:ai-compiled-hints",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm build:ai-hint-inspector-index",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-strategy-taxonomy",
+      "status": "pass"
+    },
+    {
+      "command": "node scripts/check-ai-manual-overlays.mjs --write",
+      "status": "pass"
+    },
+    {
+      "command": "node scripts/check-ai-derived-facts.mjs --write",
+      "status": "pass"
+    },
+    {
+      "command": "node scripts/check-ai-hint-compiled-index.mjs --write",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-compiled-hints",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-inspector-index",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-quality",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-approval-consistency",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-deck-doctrine-strategy",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai test",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/web exec tsc -p tsconfig.json --noEmit",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass"
+    }
+  ]
+}

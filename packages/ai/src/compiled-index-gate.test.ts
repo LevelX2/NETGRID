@@ -140,9 +140,9 @@ describe("compiled hint index pilot report", () => {
   it("keeps missing overlays non-fatal when the pilot card does not need one", () => {
     const report = readReport();
     expect(report.warningCountsByKind.overlay_missing_for_manual_gap ?? 0).toBe(
-      128,
+      122,
     );
-    expect(report.infoCounts.info_no_overlay_needed).toBe(59);
+    expect(report.infoCounts.info_no_overlay_needed).toBe(65);
     expect(
       report.cards
         .filter((card) => !card.manualOverlayFound)
@@ -164,11 +164,11 @@ describe("compiled hint index pilot report", () => {
 
   it("classifies compiled-index warnings into non-blocking comparison groups", () => {
     const report = readReport();
-    expect(report.warningCount).toBe(649);
+    expect(report.warningCount).toBe(643);
     expect(report.warningClassificationCounts).toEqual({
-      generated_fact_absent_from_monolith: 334,
-      manual_review_candidate: 128,
-      monolith_mechanical_duplication_candidate: 181,
+      generated_fact_absent_from_monolith: 318,
+      manual_review_candidate: 122,
+      monolith_mechanical_duplication_candidate: 197,
       overlay_strategy_field_not_in_monolith: 6,
     });
     expect(
@@ -199,7 +199,7 @@ describe("compiled hint index pilot report", () => {
     );
     expect(report.migrationCandidates.length).toBe(193);
     expect(report.generatedFactCandidates.length).toBe(193);
-    expect(report.overlayCandidates.length).toBe(128);
+    expect(report.overlayCandidates.length).toBe(122);
     expect(
       report.overlayCandidates.map((candidate) => candidate.cardId),
     ).toEqual(

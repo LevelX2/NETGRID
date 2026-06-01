@@ -77,7 +77,7 @@ describe("generated fact Batch-7 Corp ICE closeout", () => {
   it("keeps included cards ready read-only with no conflicts or gaps", () => {
     const report = readReport();
     expect(report.confirmedGeneratedFactCount).toBe(158);
-    expect(report.previewAddedFactCount).toBe(123);
+    expect(report.previewAddedFactCount).toBe(119);
     expect(report.hardErrorCount).toBe(0);
     expect(report.realSemanticConflictCount).toBe(0);
     expect(report.normalizedDifferenceCount).toBe(252);

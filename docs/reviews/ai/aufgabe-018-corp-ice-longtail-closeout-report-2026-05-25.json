@@ -14,7 +14,7 @@
   "includedCardCount": 24,
   "excludedCardCount": 20,
   "confirmedGeneratedFactCount": 158,
-  "previewAddedFactCount": 123,
+  "previewAddedFactCount": 119,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
   "normalizedDifferenceCount": 252,
@@ -1252,7 +1252,7 @@
       "subBatch": "damage_ice",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": ["effects"],
+      "activeMechanicalFields": ["effects", "conditions"],
       "generatedFactsConfirmed": [
         "condition:requires_encounter",
         "condition:requires_unbroken_subroutine",
@@ -1260,12 +1260,7 @@
         "effect:etr",
         "effect:remote_protection"
       ],
-      "previewAdds": [
-        "condition:requires_encounter",
-        "condition:requires_unbroken_subroutine",
-        "effect:damage",
-        "effect:etr"
-      ],
+      "previewAdds": [],
       "normalizedDifferences": [
         {
           "field": "condition:requires_encounter",
@@ -1283,7 +1278,7 @@
         },
         {
           "field": "conditions",
-          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "classification": "simple_ice_baseline_normalized",
           "rule": "simple_ice_baseline_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-7 comparator path; active hints and runtime behavior are unchanged."

@@ -14,10 +14,10 @@
   "includedCardCount": 30,
   "excludedCardCount": 0,
   "confirmedGeneratedFactCount": 101,
-  "previewAddedFactCount": 84,
+  "previewAddedFactCount": 80,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 199,
+  "normalizedDifferenceCount": 198,
   "remainingDifferenceCount": 0,
   "scoreContextInfoCount": 18,
   "legalActionContextInfoCount": 11,
@@ -80,7 +80,7 @@
         "effect:shuffle_draw",
         "effect:zone_shuffle"
       ],
-      "previewAdds": ["effect:shuffle_draw"],
+      "previewAdds": [],
       "normalizedDifferences": [
         {
           "field": "condition:requires_scored_agenda",
@@ -579,17 +579,13 @@
       "subBatch": "scored_agenda_economy",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects", "conditions"],
       "generatedFactsConfirmed": [
         "condition:requires_scored_agenda",
         "effect:economy",
         "effect:scored_agenda_action"
       ],
-      "previewAdds": [
-        "condition:requires_scored_agenda",
-        "effect:economy",
-        "effect:scored_agenda_action"
-      ],
+      "previewAdds": [],
       "normalizedDifferences": [
         {
           "field": "condition:requires_scored_agenda",
@@ -600,7 +596,7 @@
         },
         {
           "field": "conditions",
-          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "rule": "simple_ice_baseline_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
         },
@@ -620,13 +616,7 @@
         },
         {
           "field": "effects",
-          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
-          "rule": "simple_ice_baseline_normalization",
-          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
-        },
-        {
-          "field": "overlay_missing_for_manual_gap",
-          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "rule": "simple_ice_baseline_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
         }

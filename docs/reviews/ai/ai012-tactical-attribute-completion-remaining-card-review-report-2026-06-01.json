@@ -1,0 +1,1826 @@
+{
+  "schemaVersion": "ai012-tactical-attribute-completion-report-v1",
+  "taskId": "AI012",
+  "generatedAt": "2026-06-01",
+  "source": {
+    "activeHints": "data/ai/ai-card-hints-active.json",
+    "ai011Report": "docs/reviews/ai/ai011-strategy-attribute-completion-remaining-card-review-report-2026-06-01.json",
+    "compiledHints": "data/ai/ai-card-hints-compiled.json",
+    "inspectorIndex": "data/ai/ai-hint-inspector-index.json"
+  },
+  "summary": {
+    "reviewedAi011RemainingCards": 52,
+    "changedCardCount": 52,
+    "changedCardsWithoutLineSupportChange": 52,
+    "changedCardsWithoutStrategicRoleChange": 52,
+    "plannerEffectIntroduced": false,
+    "actionScoreChange": false,
+    "planWeightChange": false,
+    "engineOrLegalityChange": false,
+    "profileOrDefaultSwitch": false,
+    "hiddenInfoUsed": false
+  },
+  "fieldCounts": {
+    "effects": 52,
+    "conditions": 34,
+    "remoteRole": 4
+  },
+  "reasonCounts": {
+    "descriptor_gap_kept_for_separate_review": 3,
+    "draw_or_generic_economy_support_only": 5,
+    "hand_size_or_remote_slot_support_only": 2,
+    "low_damage_or_descriptor_review_needed": 4,
+    "plain_etr_or_deferred_basic_ice_only": 21,
+    "recurring_credit_or_install_support_only": 17
+  },
+  "activeStructuredFieldCounts": {
+    "before": {
+      "cards": 564,
+      "effects": 118,
+      "conditions": 52,
+      "costProfile": 69,
+      "breakerProfile": 20,
+      "remoteRole": 13,
+      "targetProfiles": 0,
+      "lineSupport": 189,
+      "strategicRole": 189
+    },
+    "after": {
+      "cards": 564,
+      "effects": 162,
+      "conditions": 86,
+      "costProfile": 69,
+      "breakerProfile": 20,
+      "remoteRole": 17,
+      "targetProfiles": 0,
+      "lineSupport": 189,
+      "strategicRole": 189
+    }
+  },
+  "changedCards": [
+    {
+      "cardId": "onr_v1_177_the-short-circuit",
+      "title": "The Short Circuit",
+      "side": "runner",
+      "cardType": "resource",
+      "ai011Reason": "descriptor_gap_kept_for_separate_review",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "search",
+            "resource": "cards",
+            "scope": "stack",
+            "timing": "action"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_runner_action"
+          },
+          {
+            "kind": "requires_stack_search"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_250_ice-pick-willie",
+      "title": "Ice Pick Willie",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "descriptor_gap_kept_for_separate_review",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "program_trash",
+            "scope": "runner",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_348_virus-test-site",
+      "title": "Virus Test Site",
+      "side": "corp",
+      "cardType": "asset",
+      "ai011Reason": "descriptor_gap_kept_for_separate_review",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "damage",
+            "resource": "damage",
+            "scope": "runner",
+            "timing": "on_access"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          },
+          {
+            "kind": "requires_advancement_counter"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_188_ai-chief-financial-officer",
+      "title": "AI Chief Financial Officer",
+      "side": "corp",
+      "cardType": "agenda",
+      "ai011Reason": "draw_or_generic_economy_support_only",
+      "changedFields": [
+        "effects"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "zone_shuffle",
+            "timing": "scored_activated",
+            "scope": "corp"
+          },
+          {
+            "kind": "draw",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 5,
+            "repeatable": true
+          },
+          {
+            "amount": 5,
+            "kind": "draw",
+            "resource": "cards",
+            "scope": "corp",
+            "timing": "scored_activated"
+          },
+          {
+            "amount": 5,
+            "kind": "shuffle_draw",
+            "resource": "cards",
+            "scope": "corp",
+            "timing": "scored_activated"
+          },
+          {
+            "kind": "zone_shuffle",
+            "resource": "cards",
+            "scope": "rnd",
+            "timing": "scored_activated"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_195_corporate-retreat",
+      "title": "Corporate Retreat",
+      "side": "corp",
+      "cardType": "agenda",
+      "ai011Reason": "draw_or_generic_economy_support_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "amount": 2,
+            "kind": "economy",
+            "resource": "credits",
+            "scope": "corp",
+            "timing": "scored_activated"
+          },
+          {
+            "kind": "scored_agenda_action",
+            "scope": "score_area",
+            "timing": "scored_activated"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_scored_agenda"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_199_employee-empowerment",
+      "title": "Employee Empowerment",
+      "side": "corp",
+      "cardType": "agenda",
+      "ai011Reason": "draw_or_generic_economy_support_only",
+      "changedFields": [
+        "effects"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "draw",
+            "timing": "start_of_turn",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 1,
+            "repeatable": true
+          },
+          {
+            "kind": "scored_agenda_action",
+            "timing": "scored_activated",
+            "scope": "score_area"
+          },
+          {
+            "kind": "draw",
+            "timing": "scored_activated",
+            "scope": "corp",
+            "resource": "cards",
+            "amount": 2,
+            "repeatable": true
+          },
+          {
+            "amount": 1,
+            "kind": "draw",
+            "resource": "cards",
+            "scope": "corp",
+            "timing": "start_of_turn"
+          },
+          {
+            "amount": 2,
+            "kind": "draw",
+            "resource": "cards",
+            "scope": "corp",
+            "timing": "scored_activated"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_321_esa-contract",
+      "title": "ESA Contract",
+      "side": "corp",
+      "cardType": "asset",
+      "ai011Reason": "draw_or_generic_economy_support_only",
+      "changedFields": [
+        "effects",
+        "remoteRole"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "amount": 2,
+            "kind": "draw",
+            "resource": "cards",
+            "scope": "corp",
+            "timing": "action"
+          }
+        ],
+        "remoteRole": {
+          "kind": "asset_economy",
+          "serverScope": "remote",
+          "threatLevel": "medium"
+        }
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_322_euromarket-consortium",
+      "title": "Euromarket Consortium",
+      "side": "corp",
+      "cardType": "asset",
+      "ai011Reason": "draw_or_generic_economy_support_only",
+      "changedFields": [
+        "effects",
+        "conditions",
+        "remoteRole"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "amount": 2,
+            "kind": "draw",
+            "resource": "cards",
+            "scope": "corp",
+            "timing": "action"
+          },
+          {
+            "amount": 2,
+            "kind": "remote_protection",
+            "resource": "cards",
+            "scope": "corp",
+            "timing": "persistent"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_rezzed_card"
+          }
+        ],
+        "remoteRole": {
+          "kind": "asset_economy",
+          "serverScope": "remote",
+          "threatLevel": "medium"
+        }
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_324_fortress-architects",
+      "title": "Fortress Architects",
+      "side": "corp",
+      "cardType": "asset",
+      "ai011Reason": "hand_size_or_remote_slot_support_only",
+      "changedFields": [
+        "effects",
+        "conditions",
+        "remoteRole"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "amount": 1,
+            "kind": "install_discount",
+            "resource": "credits",
+            "scope": "corp",
+            "timing": "persistent"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_rezzed_card"
+          }
+        ],
+        "remoteRole": {
+          "kind": "asset_economy",
+          "serverScope": "remote",
+          "threatLevel": "medium"
+        }
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_338_rustbelt-hq-branch",
+      "title": "Rustbelt HQ Branch",
+      "side": "corp",
+      "cardType": "asset",
+      "ai011Reason": "hand_size_or_remote_slot_support_only",
+      "changedFields": [
+        "effects",
+        "conditions",
+        "remoteRole"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "amount": 2,
+            "kind": "remote_protection",
+            "resource": "cards",
+            "scope": "corp",
+            "timing": "persistent"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_rezzed_card"
+          }
+        ],
+        "remoteRole": {
+          "kind": "asset_economy",
+          "serverScope": "remote",
+          "threatLevel": "medium"
+        }
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_proteus_054_bel-digmo-antibody",
+      "title": "Bel-Digmo Antibody",
+      "side": "corp",
+      "cardType": "asset",
+      "ai011Reason": "low_damage_or_descriptor_review_needed",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "amount": 1,
+            "kind": "damage",
+            "resource": "damage",
+            "scope": "runner",
+            "timing": "action"
+          },
+          {
+            "amount": 1,
+            "kind": "damage",
+            "resource": "damage",
+            "scope": "runner",
+            "timing": "on_access"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_proteus_075_stereogram-antibody",
+      "title": "Stereogram Antibody",
+      "side": "corp",
+      "cardType": "asset",
+      "ai011Reason": "low_damage_or_descriptor_review_needed",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "amount": 1,
+            "kind": "damage",
+            "resource": "damage",
+            "scope": "runner",
+            "timing": "action"
+          },
+          {
+            "amount": 1,
+            "kind": "damage",
+            "resource": "damage",
+            "scope": "runner",
+            "timing": "on_access"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_231_cortical-scrub",
+      "title": "Cortical Scrub",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "low_damage_or_descriptor_review_needed",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "program_trash",
+            "timing": "encounter",
+            "scope": "runner"
+          },
+          {
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "amount": 1,
+            "kind": "damage",
+            "resource": "damage",
+            "scope": "runner",
+            "timing": "encounter"
+          },
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_357_dieter-esslin",
+      "title": "Dieter Esslin",
+      "side": "corp",
+      "cardType": "upgrade",
+      "ai011Reason": "low_damage_or_descriptor_review_needed",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "amount": 1,
+            "kind": "damage",
+            "resource": "damage",
+            "scope": "runner",
+            "timing": "action"
+          },
+          {
+            "amount": 1,
+            "kind": "damage",
+            "resource": "damage",
+            "scope": "runner",
+            "timing": "on_access"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_accessed_card"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_proteus_018_datacomb",
+      "title": "Datacomb",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_proteus_035_roadblock",
+      "title": "Roadblock",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_proteus_037_scaffolding",
+      "title": "Scaffolding",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_proteus_042_tumblers",
+      "title": "Tumblers",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_proteus_043_twisty-passages",
+      "title": "Twisty Passages",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_230_cortical-scanner",
+      "title": "Cortical Scanner",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_232_crystal-wall",
+      "title": "Crystal Wall",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_237_data-wall",
+      "title": "Data Wall",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_238_data-wall-2-0",
+      "title": "Data Wall 2.0",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_239_endless-corridor",
+      "title": "Endless Corridor",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_244_filter",
+      "title": "Filter",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_245_fire-wall",
+      "title": "Fire Wall",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_252_keeper",
+      "title": "Keeper",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_256_mazer",
+      "title": "Mazer",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_259_in-the-face",
+      "title": "Pi in the 'Face",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_261_quandary",
+      "title": "Quandary",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_263_reinforced-wall",
+      "title": "Reinforced Wall",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_265_rock-is-strong",
+      "title": "Rock Is Strong",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_266_scramble",
+      "title": "Scramble",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_270_sleeper",
+      "title": "Sleeper",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          },
+          {
+            "kind": "remote_protection",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_279_wall-of-static",
+      "title": "Wall of Static",
+      "side": "corp",
+      "cardType": "ice",
+      "ai011Reason": "plain_etr_or_deferred_basic_ice_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "remote_protection",
+            "timing": "encounter",
+            "scope": "run_path"
+          },
+          {
+            "kind": "etr",
+            "scope": "run_path",
+            "timing": "encounter"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_encounter"
+          },
+          {
+            "kind": "requires_unbroken_subroutine"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_proteus_134_cortical-cybermodem",
+      "title": "Cortical Cybermodem",
+      "side": "runner",
+      "cardType": "hardware",
+      "ai011Reason": "recurring_credit_or_install_support_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "amount": 2,
+            "kind": "hand_size_modifier",
+            "resource": "hand_size",
+            "scope": "runner",
+            "timing": "persistent"
+          },
+          {
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "timing": "persistent"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_card"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
+      "title": "Eurocorpse (TM) Spin Chip",
+      "side": "runner",
+      "cardType": "hardware",
+      "ai011Reason": "recurring_credit_or_install_support_only",
+      "changedFields": [
+        "effects"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "timing": "persistent"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_proteus_151_sunburst-cranial-interface",
+      "title": "Sunburst Cranial Interface",
+      "side": "runner",
+      "cardType": "hardware",
+      "ai011Reason": "recurring_credit_or_install_support_only",
+      "changedFields": [
+        "effects",
+        "conditions"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "amount": 1,
+            "kind": "hand_size_modifier",
+            "resource": "hand_size",
+            "scope": "runner",
+            "timing": "persistent"
+          },
+          {
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "timing": "persistent"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_installed_card"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_011_cloak",
+      "title": "Cloak",
+      "side": "runner",
+      "cardType": "program",
+      "ai011Reason": "recurring_credit_or_install_support_only",
+      "changedFields": [
+        "effects"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "during_run",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 3,
+            "repeatable": true
+          },
+          {
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "timing": "persistent"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_035_invisibility",
+      "title": "Invisibility",
+      "side": "runner",
+      "cardType": "program",
+      "ai011Reason": "recurring_credit_or_install_support_only",
+      "changedFields": [
+        "effects"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "timing": "persistent"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_071_vewy-vewy-quiet",
+      "title": "Vewy Vewy Quiet",
+      "side": "runner",
+      "cardType": "program",
+      "ai011Reason": "recurring_credit_or_install_support_only",
+      "changedFields": [
+        "effects"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "during_run",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 2,
+            "repeatable": true
+          },
+          {
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "timing": "persistent"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_075_zetatech-software-installer",
+      "title": "Zetatech Software Installer",
+      "side": "runner",
+      "cardType": "program",
+      "ai011Reason": "recurring_credit_or_install_support_only",
+      "changedFields": [
+        "effects"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "install_discount",
+            "timing": "action",
+            "scope": "installed_card",
+            "resource": "credits",
+            "amount": 2,
+            "repeatable": true
+          },
+          {
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "timing": "persistent"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_119_arasaka-portable-prototype",
+      "title": "Arasaka Portable Prototype",
+      "side": "runner",
+      "cardType": "hardware",
+      "ai011Reason": "recurring_credit_or_install_support_only",
+      "changedFields": [
+        "effects"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "timing": "persistent"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_122_artemis-2020",
+      "title": "Artemis 2020",
+      "side": "runner",
+      "cardType": "hardware",
+      "ai011Reason": "recurring_credit_or_install_support_only",
+      "changedFields": [
+        "effects"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "timing": "persistent"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_124_corolla-speed-chip",
+      "title": "Corolla Speed Chip",
+      "side": "runner",
+      "cardType": "hardware",
+      "ai011Reason": "recurring_credit_or_install_support_only",
+      "changedFields": [
+        "effects"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "timing": "persistent"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_126_drifter-mobile-environment",
+      "title": "“Drifter” Mobile Environment",
+      "side": "runner",
+      "cardType": "hardware",
+      "ai011Reason": "recurring_credit_or_install_support_only",
+      "changedFields": [
+        "effects"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "timing": "persistent"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_136_pandoras-deck",
+      "title": "Pandora’s Deck",
+      "side": "runner",
+      "cardType": "hardware",
+      "ai011Reason": "recurring_credit_or_install_support_only",
+      "changedFields": [
+        "effects"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "timing": "persistent"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_137_parraline-5750",
+      "title": "Parraline 5750",
+      "side": "runner",
+      "cardType": "hardware",
+      "ai011Reason": "recurring_credit_or_install_support_only",
+      "changedFields": [
+        "effects"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "timing": "persistent"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_138_pk-6089a",
+      "title": "PK-6089a",
+      "side": "runner",
+      "cardType": "hardware",
+      "ai011Reason": "recurring_credit_or_install_support_only",
+      "changedFields": [
+        "effects"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "timing": "persistent"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_141_raven-microcyb-owl",
+      "title": "Raven Microcyb Owl",
+      "side": "runner",
+      "cardType": "hardware",
+      "ai011Reason": "recurring_credit_or_install_support_only",
+      "changedFields": [
+        "effects"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "timing": "persistent"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_147_zz22-speed-chip",
+      "title": "ZZ22 Speed Chip",
+      "side": "runner",
+      "cardType": "hardware",
+      "ai011Reason": "recurring_credit_or_install_support_only",
+      "changedFields": [
+        "effects"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "timing": "persistent"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    },
+    {
+      "cardId": "onr_v1_164_hells-run",
+      "title": "Hell's Run",
+      "side": "runner",
+      "cardType": "resource",
+      "ai011Reason": "recurring_credit_or_install_support_only",
+      "changedFields": [
+        "effects"
+      ],
+      "newValues": {
+        "effects": [
+          {
+            "kind": "trash_credit",
+            "resource": "trash_credits",
+            "scope": "runner",
+            "timing": "persistent"
+          }
+        ]
+      },
+      "lineSupportChanged": false,
+      "strategicRoleChanged": false
+    }
+  ],
+  "explicitNonScope": [
+    "Kein lineSupport-Zwang fuer Karten ohne strategischen Oberanker.",
+    "Keine neuen Strategy IDs oder StrategicRoles.",
+    "Keine Planner-, Action-Score-, PlanWeight-, Engine-, Legalitaets-, Profil- oder Default-Aenderung.",
+    "Keine Hidden-Info-Felder."
+  ],
+  "checks": [
+    {
+      "command": "corepack pnpm build:ai-compiled-hints",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm build:ai-hint-inspector-index",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-strategy-taxonomy",
+      "status": "pass"
+    },
+    {
+      "command": "node scripts/check-ai-derived-facts.mjs --write",
+      "status": "pass"
+    },
+    {
+      "command": "node scripts/check-ai-hint-compiled-index.mjs --write",
+      "status": "pass"
+    },
+    {
+      "command": "node scripts/check-ai-manual-overlays.mjs --write",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-compiled-hints",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-inspector-index",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-quality",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-approval-consistency",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-deck-doctrine-strategy",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai test",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/web exec tsc -p tsconfig.json --noEmit",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass"
+    }
+  ]
+}

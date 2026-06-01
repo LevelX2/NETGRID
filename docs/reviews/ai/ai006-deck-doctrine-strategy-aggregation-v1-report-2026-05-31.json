@@ -1525,6 +1525,14 @@
               "signal": "runner.hq_pressure",
               "strategyId": "runner.hq_pressure",
               "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_085_executive-wiretaps",
+              "quantity": 2,
+              "source": "strategicRole",
+              "role": "payoff_anchor",
+              "strategyId": "runner.hq_pressure",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -1605,6 +1613,14 @@
               "reason": "normalized_lineSupport_strategy_goal"
             },
             {
+              "cardId": "onr_v1_081_custodial-position",
+              "quantity": 2,
+              "source": "strategicRole",
+              "role": "payoff_anchor",
+              "strategyId": "runner.interface_closeout",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
+            },
+            {
               "cardId": "onr_v1_085_executive-wiretaps",
               "quantity": 2,
               "source": "derivedStrategyAnchor",
@@ -1618,6 +1634,14 @@
               "signal": "runner.interface_closeout",
               "strategyId": "runner.interface_closeout",
               "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_085_executive-wiretaps",
+              "quantity": 2,
+              "source": "strategicRole",
+              "role": "payoff_anchor",
+              "strategyId": "runner.interface_closeout",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -1952,6 +1976,14 @@
               "signal": "runner.rnd_pressure",
               "strategyId": "runner.rnd_pressure",
               "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_081_custodial-position",
+              "quantity": 2,
+              "source": "strategicRole",
+              "role": "payoff_anchor",
+              "strategyId": "runner.rnd_pressure",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -2472,9 +2504,9 @@
           "confidence": "medium"
         },
         "runner.hq_pressure": {
-          "anchorScore": 28,
+          "anchorScore": 40,
           "supportScore": 85,
-          "finalScore": 51,
+          "finalScore": 58,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_084_edited-shipping-manifests",
@@ -2483,6 +2515,14 @@
               "signal": "runner.hq_pressure",
               "strategyId": "runner.hq_pressure",
               "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_084_edited-shipping-manifests",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "payoff_anchor",
+              "strategyId": "runner.hq_pressure",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -3107,8 +3147,8 @@
       },
       "primaryStrategies": [
         "runner.rig_first",
-        "runner.economy_first",
-        "runner.hq_pressure"
+        "runner.hq_pressure",
+        "runner.economy_first"
       ],
       "secondaryStrategies": [
         "runner.breaker_search",
@@ -4761,6 +4801,14 @@
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.damage_kill",
               "reason": "derived_strategy_anchor_from_inspector_index"
+            },
+            {
+              "cardId": "onr_v1_287_datapool-by-zetatech",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "punish_payoff",
+              "strategyId": "corp.damage_kill",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -5814,6 +5862,14 @@
               "reason": "normalized_lineSupport_strategy_goal"
             },
             {
+              "cardId": "onr_v1_287_datapool-by-zetatech",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "punish_payoff",
+              "strategyId": "corp.tag_trace_punish",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
+            },
+            {
               "cardId": "onr_v1_293_netwatch-credit-voucher",
               "quantity": 1,
               "source": "derivedStrategyAnchor",
@@ -6071,6 +6127,6 @@
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 5
     },
-    "contentSha256": "5da3cfe56cda5f5bfe4676768254cac2e814c2f37705eb164694a402acf0c2c4"
+    "contentSha256": "0232eb341b80f5f385b3c1d8b3a457a0be7b6e5e1809a105930423175381964d"
   }
 }

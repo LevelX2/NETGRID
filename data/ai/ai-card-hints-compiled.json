@@ -205,6 +205,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
       ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -259,6 +265,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_program_hosting_tools"
+      ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
       ],
       "effects": [
         {
@@ -524,6 +536,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1921-smokes.json#runner_v1921_random_programs"
+      ],
+      "lineSupport": [
+        "runner.hq_pressure"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ],
       "effects": [
         {
@@ -1354,6 +1372,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#runner_damage_prevention_tools"
       ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 2,
@@ -1438,6 +1462,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1915-smokes.json#runner_v1915_run_access_tools"
+      ],
+      "lineSupport": [
+        "runner.hq_pressure"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
       ],
       "effects": [
         {
@@ -1598,6 +1628,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 2,
@@ -2287,7 +2323,10 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
-      }
+      },
+      "strategicRole": [
+        "payoff_anchor"
+      ]
     },
     {
       "cardId": "onr_v1_042_mouse",
@@ -2698,7 +2737,10 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
-      }
+      },
+      "strategicRole": [
+        "support_tool"
+      ]
     },
     {
       "cardId": "onr_v1_049_pox",
@@ -2804,6 +2846,9 @@
       "lineSupport": [
         "runner.rnd_pressure",
         "runner.interface_closeout"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
       ]
     },
     {
@@ -2835,6 +2880,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_program_longtail"
+      ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
       ],
       "effects": [
         {
@@ -3236,7 +3287,10 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
-      }
+      },
+      "strategicRole": [
+        "support_tool"
+      ]
     },
     {
       "cardId": "onr_v1_058_seeya",
@@ -3467,6 +3521,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 2,
@@ -3569,6 +3629,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_trace_link_tools"
+      ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
       ],
       "effects": [
         {
@@ -4507,6 +4573,9 @@
       "lineSupport": [
         "runner.rnd_pressure",
         "runner.interface_closeout"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
       ]
     },
     {
@@ -4657,6 +4726,9 @@
       ],
       "lineSupport": [
         "runner.hq_pressure"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
       ]
     },
     {
@@ -4719,6 +4791,9 @@
       "lineSupport": [
         "runner.hq_pressure",
         "runner.interface_closeout"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
       ]
     },
     {
@@ -6285,6 +6360,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 3,
@@ -6363,6 +6444,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -6540,6 +6627,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#runner_damage_prevention_tools"
       ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -6638,6 +6731,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
       ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "damageTypes": [
@@ -6705,6 +6804,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -6809,6 +6914,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
       ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "emergency_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -6888,6 +6999,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.breaker_search"
+      ],
+      "strategicRole": [
+        "emergency_tool"
+      ],
       "effects": [
         {
           "kind": "card_recovery",
@@ -7063,6 +7180,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
+      ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
       ],
       "effects": [
         {
@@ -7263,6 +7386,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -7416,6 +7545,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
+      ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
       ],
       "effects": [
         {
@@ -7643,6 +7778,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
       ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 9,
@@ -7698,6 +7839,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -7752,6 +7899,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
+      ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
       ],
       "effects": [
         {
@@ -7849,6 +8002,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -7903,6 +8062,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
+      ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
       ],
       "effects": [
         {
@@ -8223,6 +8388,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_root_modifier_upgrade"
       ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "damageTypes": [
@@ -8288,6 +8459,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -8700,6 +8877,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
+      ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
       ],
       "effects": [
         {
@@ -9260,6 +9443,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_trace_link_tools"
       ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -9309,6 +9498,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
+      ],
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
       ],
       "effects": [
         {
@@ -9574,6 +9769,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -10960,6 +11161,9 @@
       },
       "lineSupport": [
         "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ]
     },
     {
@@ -11467,7 +11671,10 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-05-25",
         "reviewedBy": "codex"
-      }
+      },
+      "strategicRole": [
+        "engine_anchor"
+      ]
     },
     {
       "cardId": "onr_v1_214_project-babylon",
@@ -11615,6 +11822,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_agenda_longtail"
+      ],
+      "lineSupport": [
+        "corp.economy_rez_reserve"
+      ],
+      "strategicRole": [
+        "support_tool"
       ],
       "effects": [
         {
@@ -11971,6 +12184,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#corp_v1914_trace_ice"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ],
       "effects": [
         {
@@ -12672,6 +12891,14 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_core_damage_ice_pressure"
       ],
+      "lineSupport": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "tax_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -12921,6 +13148,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_program_trash_ice"
       ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "kind": "etr",
@@ -12976,6 +13209,14 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#corp_v1913_damage_ice"
+      ],
+      "lineSupport": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "tax_tool"
       ],
       "effects": [
         {
@@ -13039,6 +13280,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v191-v194-smokes.json#corp_v192_agenda_economy_and_program_trash_ice"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ],
       "effects": [
         {
@@ -13368,6 +13615,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#corp_v1914_trace_ice"
       ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "kind": "etr",
@@ -13431,6 +13684,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#corp_v1914_trace_ice"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ],
       "effects": [
         {
@@ -13499,6 +13758,14 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#corp_ice_run_pressure_modifiers"
+      ],
+      "lineSupport": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "tax_tool"
       ],
       "effects": [
         {
@@ -13766,6 +14033,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#corp_v1916_fragmentation_storm"
       ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "kind": "etr",
@@ -13843,6 +14116,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "kind": "etr",
@@ -13898,6 +14177,14 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#corp_v1914_trace_ice"
+      ],
+      "lineSupport": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "tax_tool"
       ],
       "effects": [
         {
@@ -14126,6 +14413,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v191-v194-smokes.json#corp_v193_trace_tag_and_run_lock_windows"
       ],
+      "lineSupport": [
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -14254,6 +14547,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-legacy-open64-smokes.json#corp_legacy_damage_ice_pressure"
       ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -14315,6 +14614,14 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_core_damage_ice_pressure"
       ],
+      "lineSupport": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "tax_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -14373,6 +14680,14 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1915-smokes.json#corp_v1915_trace_ice"
+      ],
+      "lineSupport": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "tax_tool"
       ],
       "effects": [
         {
@@ -14512,6 +14827,14 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-legacy-open64-smokes.json#corp_legacy_damage_ice_pressure"
+      ],
+      "lineSupport": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "tax_tool"
       ],
       "effects": [
         {
@@ -14713,6 +15036,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#corp_v1914_trace_ice"
       ],
+      "lineSupport": [
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -14835,6 +15164,14 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-legacy-open64-smokes.json#corp_legacy_damage_ice_pressure"
       ],
+      "lineSupport": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "tax_tool"
+      ],
       "effects": [
         {
           "amount": 2,
@@ -14948,6 +15285,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#corp_v1914_trace_ice"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ],
       "effects": [
         {
@@ -15274,6 +15617,14 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-legacy-open64-smokes.json#corp_legacy_damage_ice_pressure"
       ],
+      "lineSupport": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "tax_tool"
+      ],
       "effects": [
         {
           "amount": 2,
@@ -15386,6 +15737,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v191-v194-smokes.json#corp_v193_trace_tag_and_run_lock_windows"
       ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "kind": "etr",
@@ -15483,6 +15840,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_program_trash_ice"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ],
       "effects": [
         {
@@ -15953,6 +16316,14 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_ice_longtail"
       ],
+      "lineSupport": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "tax_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -16173,6 +16544,9 @@
       },
       "lineSupport": [
         "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "enabler"
       ]
     },
     {
@@ -16256,6 +16630,9 @@
       },
       "lineSupport": [
         "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "enabler"
       ]
     },
     {
@@ -16485,6 +16862,9 @@
       ],
       "lineSupport": [
         "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "punish_payoff"
       ]
     },
     {
@@ -17637,6 +18017,9 @@
       "lineSupport": [
         "corp.tag_trace_punish"
       ],
+      "strategicRole": [
+        "enabler"
+      ],
       "conditions": [
         {
           "kind": "requires_stolen_agenda_last_turn"
@@ -17934,6 +18317,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_trace_hidden_targets"
       ],
+      "lineSupport": [
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -18172,6 +18561,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -18301,6 +18696,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_asset_agenda_support"
+      ],
+      "lineSupport": [
+        "corp.ambush_bluff"
+      ],
+      "strategicRole": [
+        "punish_payoff"
       ],
       "effects": [
         {
@@ -18566,6 +18967,14 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_global_modifier_assets"
       ],
+      "lineSupport": [
+        "corp.remote_scoring",
+        "corp.economy_rez_reserve"
+      ],
+      "strategicRole": [
+        "support_tool",
+        "tax_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -18728,6 +19137,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_asset_agenda_support"
       ],
+      "lineSupport": [
+        "corp.ambush_bluff"
+      ],
+      "strategicRole": [
+        "punish_payoff"
+      ],
       "effects": [
         {
           "kind": "access_punish",
@@ -18849,6 +19264,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_rezzed_modifier_asset"
+      ],
+      "lineSupport": [
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "enabler"
       ],
       "effects": [
         {
@@ -18990,6 +19411,14 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.tag_trace_punish",
+        "corp.damage_kill"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "win_condition"
+      ],
       "effects": [
         {
           "amount": 15,
@@ -19043,6 +19472,12 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_asset_agenda_support"
+      ],
+      "lineSupport": [
+        "corp.asset_economy"
+      ],
+      "strategicRole": [
+        "engine_anchor"
       ],
       "effects": [
         {
@@ -19294,6 +19729,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_trace_hidden_targets"
       ],
+      "lineSupport": [
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ],
       "effects": [
         {
           "kind": "tag_source",
@@ -19504,6 +19945,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_economy_recurring"
       ],
+      "lineSupport": [
+        "corp.asset_economy"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ],
       "effects": [
         {
           "amount": 15,
@@ -19622,6 +20069,14 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1921-smokes.json#corp_v1921_random_root"
       ],
+      "lineSupport": [
+        "corp.tag_trace_punish",
+        "corp.damage_kill"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "win_condition"
+      ],
       "effects": [
         {
           "amount": 10,
@@ -19675,6 +20130,13 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_access_ambush"
+      ],
+      "lineSupport": [
+        "corp.ambush_bluff",
+        "corp.damage_kill"
+      ],
+      "strategicRole": [
+        "punish_payoff"
       ],
       "effects": [
         {
@@ -19745,6 +20207,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_global_modifier_assets"
       ],
+      "lineSupport": [
+        "corp.economy_rez_reserve"
+      ],
+      "strategicRole": [
+        "support_tool"
+      ],
       "effects": [
         {
           "amount": 2,
@@ -19788,6 +20256,13 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_trace_hidden_targets"
+      ],
+      "lineSupport": [
+        "corp.tag_trace_punish",
+        "corp.damage_kill"
+      ],
+      "strategicRole": [
+        "punish_payoff"
       ],
       "effects": [
         {
@@ -19851,6 +20326,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.asset_economy"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ],
       "effects": [
         {
           "amount": 6,
@@ -19997,6 +20478,14 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_access_ambush"
       ],
+      "lineSupport": [
+        "corp.ambush_bluff",
+        "corp.tag_trace_punish",
+        "corp.damage_kill"
+      ],
+      "strategicRole": [
+        "punish_payoff"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -20054,6 +20543,13 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_asset_agenda_support"
+      ],
+      "lineSupport": [
+        "corp.ambush_bluff",
+        "corp.damage_kill"
+      ],
+      "strategicRole": [
+        "punish_payoff"
       ],
       "effects": [
         {
@@ -20443,6 +20939,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_access_ambush"
       ],
+      "lineSupport": [
+        "corp.ambush_bluff"
+      ],
+      "strategicRole": [
+        "punish_payoff"
+      ],
       "effects": [
         {
           "amount": 2,
@@ -20594,6 +21096,13 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_access_ambush"
+      ],
+      "lineSupport": [
+        "corp.tag_trace_punish",
+        "corp.damage_kill"
+      ],
+      "strategicRole": [
+        "punish_payoff"
       ],
       "effects": [
         {
@@ -20847,6 +21356,14 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "support_tool",
+        "tax_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -21542,6 +22059,12 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_access_ambush"
       ],
+      "lineSupport": [
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -21781,6 +22304,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.damage_kill"
+      ],
+      "strategicRole": [
+        "punish_payoff"
+      ],
       "effects": [
         {
           "amount": 2,
@@ -21833,6 +22362,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -22056,6 +22591,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.damage_kill"
+      ],
+      "strategicRole": [
+        "punish_payoff"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -22231,6 +22772,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "kind": "etr",
@@ -22437,6 +22984,14 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "punish_payoff",
+        "tax_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -22731,6 +23286,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -22822,6 +23383,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "kind": "etr",
@@ -22913,6 +23480,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "kind": "future_encounter_effect",
@@ -23014,6 +23587,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -23354,6 +23933,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "kind": "etr",
@@ -23510,6 +24095,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "kind": "etr",
@@ -23670,6 +24261,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -23805,6 +24402,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -25076,6 +25679,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 2,
@@ -25505,6 +26114,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "damageTypes": [
@@ -25707,6 +26322,13 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.hq_pressure",
+        "runner.interface_closeout"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ],
       "effects": [
         {
           "amount": 4,
@@ -26107,6 +26729,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "emergency_tool"
+      ],
       "effects": [
         {
           "kind": "flatline_prevention",
@@ -26412,6 +27040,13 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.rnd_pressure",
+        "runner.interface_closeout"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ],
       "effects": [
         {
           "amount": 4,
@@ -26616,6 +27251,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.breaker_search"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ],
       "effects": [
         {
           "kind": "search",
@@ -26699,6 +27340,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -26786,6 +27433,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 2,
@@ -26939,6 +27592,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -27077,6 +27736,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -27173,6 +27838,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -27435,6 +28106,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -27687,6 +28364,12 @@
         "confidence": "low",
         "needsHumanReview": true
       },
+      "lineSupport": [
+        "runner.survival_defense"
+      ],
+      "strategicRole": [
+        "defensive_tool"
+      ],
       "effects": [
         {
           "amount": 3,
