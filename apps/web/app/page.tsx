@@ -12238,10 +12238,10 @@ function DeckStrategyProfilePanel({ response, loading }: { response: DeckStrateg
         <div>
           <h3>
             <Bot size={16} />
-            KI-Deckprofil
+            Diagnostisches KI-Deckprofil
           </h3>
           <p className="meta">
-            {viewer ? `${sideLabel(viewer.side)} · ${viewer.cardCount} Karten · ${viewer.source.aggregation}` : loading ? "Analyse läuft" : "DeckDoctrine diagnostic"}
+            {viewer ? `${sideLabel(viewer.side)} · ${viewer.cardCount} Karten · Diagnostisch · Keine direkte Plannerwirkung` : loading ? "Analyse läuft" : "Diagnostisches KI-Deckprofil"}
           </p>
         </div>
         <button
@@ -12284,7 +12284,7 @@ function DeckStrategyProfileViewerPanel({ viewer, loading }: { viewer: DeckStrat
         ))}
       </div>
       <p className="deckStrategyDiagnosticNotice">{viewer.diagnosticNotice}</p>
-      <DeckStrategyRows title="Strategien" strategies={fallbackRows} prominent />
+      <DeckStrategyRows title="Strategien (diagnostisch)" strategies={fallbackRows} prominent />
       {lowRows.length > 0 ? (
         <details className="deckStrategyDetails">
           <summary>Weitere Strategien ({lowRows.length})</summary>
@@ -12293,8 +12293,14 @@ function DeckStrategyProfileViewerPanel({ viewer, loading }: { viewer: DeckStrat
       ) : null}
       <DeckStrategySections title={viewer.sideProfileTitle} sections={viewer.sideProfileGroups} />
       <DeckStrategyEvidenceGroups groups={viewer.evidenceGroups} />
-      <DeckStrategyFlatEntries title="Function-Signal-Counts" entries={viewer.functionSignalCounts} emptyText="Keine Function-Signals." />
-      <DeckStrategySections title="Legacy-Signal-Counts" sections={viewer.legacySignalGroups} />
+      <DeckStrategyFlatEntries title="Taktiksignale (Function-Signal-Counts)" entries={viewer.functionSignalCounts} emptyText="Keine Function-Signals." />
+      {viewer.legacySignalGroups.length > 0 ? (
+        <details className="deckStrategyDetails legacy">
+          <summary>Legacy / Migration Signal-Counts ({viewer.legacySignalGroups.length})</summary>
+          <p className="meta">Legacy-Signale werden getrennt gezählt und sind nicht die neue Zielsemantik.</p>
+          <DeckStrategySections title="Legacy / Migration" sections={viewer.legacySignalGroups} />
+        </details>
+      ) : null}
       <DeckStrategyWarnings warnings={viewer.warnings} />
     </div>
   );
@@ -12369,7 +12375,7 @@ function DeckStrategySections({ title, sections }: { title: string; sections: De
 function DeckStrategyEvidenceGroups({ groups }: { groups: DeckStrategyProfileEvidenceGroup[] }) {
   return (
     <section className="deckStrategySection">
-      <h4>Evidence / Gaps</h4>
+      <h4>Strategie-Evidence / Gaps</h4>
       {groups.length > 0 ? (
         <div className="deckStrategyEvidenceGroups">
           {groups.map((group, index) => (
@@ -12476,7 +12482,7 @@ function DeckStrategyEntryBadge({ entry }: { entry: DeckStrategyProfileEntry }) 
 function DeckStrategyWarnings({ warnings }: { warnings: DeckStrategyProfileViewer["warnings"] }) {
   return (
     <section className="deckStrategySection">
-      <h4>Warnings / Hinweise</h4>
+      <h4>Prüfpunkte / Hinweise</h4>
       {warnings.length > 0 ? (
         <div className="deckStrategyEntryList">
           {warnings.map((warning, index) => (
@@ -13361,17 +13367,18 @@ function CatalogLegacyAiHintPanel({ hints }: { hints: CatalogAiHints }) {
           type="button"
           aria-expanded={isOpen}
           onClick={() => setIsOpen((current) => !current)}
-          title={isOpen ? "Alte KI-Hinweise einklappen" : "Alte KI-Hinweise öffnen"}
+          title={isOpen ? "Legacy-/Migrationsdetails einklappen" : "Legacy-/Migrationsdetails öffnen"}
         >
-          <strong>KI-Hinweise</strong>
+          <strong>Legacy / Migration / KI-Hinweise</strong>
           {isOpen ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
         </button>
-        <span>{CATALOG_STATUS_LABELS.ai_supported}: {hints.aiSupportStatus === "ai_supported" ? "ja" : hints.aiSupportStatus}</span>
+        <span>Legacy-Daten vorhanden · {CATALOG_STATUS_LABELS.ai_supported}: {hints.aiSupportStatus === "ai_supported" ? "ja" : hints.aiSupportStatus}</span>
       </div>
       {isOpen ? (
         <>
-          <AiHintChips title="Rollen" values={hints.roles} />
-          <AiHintChips title="Pläne" values={hints.planRoles} />
+          <p className="meta">Diese Felder gehören zum bisherigen KI-Pfad und werden noch nicht vollständig entfernt, solange Teile der KI darauf angewiesen sind. Sie sind nicht die neue Zielsemantik.</p>
+          <AiHintChips title="Legacy roles" values={hints.roles} />
+          <AiHintChips title="Legacy planRoles" values={hints.planRoles} />
           {valueHintEntries.length > 0 ? (
             <div className="catalogAiValueGrid">
               {valueHintEntries.map(([key, value]) => (
@@ -13401,7 +13408,7 @@ function CatalogAiHintInspectorPanel({ inspector }: { inspector: CatalogAiInspec
   return (
     <section className="catalogAiHints catalogAiInspector" data-testid="catalog-ai-hint-inspector">
       <div className="catalogAiHintsHead">
-        <strong>Aktive KI-Semantik</strong>
+        <strong>KI-Semantik Zielmodell</strong>
         <span>AI Hint Inspector · {inspector.schemaVersion}</span>
       </div>
       <div className="catalogAiInspectorGrid">

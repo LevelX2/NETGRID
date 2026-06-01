@@ -95,18 +95,33 @@ const FORBIDDEN_RUNTIME_KEYS = [
   "planWeights",
 ];
 
+const RUNTIME_LEGACY_NOTICE = "Hinweis: Legacy-Rollen werden intern noch teilweise von der KI verwendet.";
+const LEGACY_MIGRATION_NOTICE =
+  "Diese Felder gehören zum bisherigen KI-Pfad und werden noch nicht vollständig entfernt, solange Teile der KI darauf angewiesen sind. Sie sind nicht die neue Zielsemantik.";
+const CARD_ROLE_MANIFEST_NOTICE =
+  "`card-role-manifest-0.9` bleibt Runtime-/DeckDoctrine-Altbestand und ist nicht Teil der neuen Zielsemantik.";
+
 export function aiInspectorSections(inspector: CatalogAiInspector): AiInspectorSection[] {
   return [
-    supportStatusSection(inspector),
-    activeSemanticsSection(inspector),
+    mechanicalFactsSection(inspector),
+    tacticalSignalsSection(inspector),
     strategyAnchorSection(inspector),
-    noticeSection(inspector),
-    legacyDeveloperSection(inspector),
+    strategicRoleSection(inspector),
+    qualitySection(inspector),
+    checkpointsSection(inspector),
+    legacyMigrationSection(inspector),
   ];
 }
 
 export function defaultCollapsedAiInspectorSections(sections: AiInspectorSection[]): Record<string, boolean> {
-  const openByDefault = new Set(["support", "activeSemantics", "strategyAnchors", "notices"]);
+  const openByDefault = new Set([
+    "mechanicalFacts",
+    "tacticalSignals",
+    "strategyAnchors",
+    "strategicRole",
+    "quality",
+    "checkpoints",
+  ]);
   return Object.fromEntries(
     sections
       .filter((section) => !openByDefault.has(section.key))
@@ -179,67 +194,25 @@ export function forbiddenInspectorFields(value: unknown, found = new Set<string>
   return [...found].sort();
 }
 
-function supportStatusSection(inspector: CatalogAiInspector): AiInspectorSection {
-  const support = inspector.supportStatus;
-  const legacyCount = legacyDetailCount(inspector);
+function mechanicalFactsSection(inspector: CatalogAiInspector): AiInspectorSection {
   return {
-    key: "support",
-    title: "Supportstatus",
+    key: "mechanicalFacts",
+    title: "Mechanische Facts",
     description:
-      "Aktiver Diagnoseanschluss: zeigt KI-Supportstatus, compiled Hint, mechanische und generierte Facts sowie kompakte Hinweiszahlen ohne Freigabewirkung.",
-    entries: [
-      {
-        label: "KI geeignet",
-        value: support.aiSupportStatus === "ai_supported" ? "ja" : formatAiInspectorLabel(support.aiSupportStatus),
-        tone: support.aiSupportStatus === "ai_supported" ? "valid" : "info",
-      },
-      {
-        label: "Compiled Hint",
-        value: support.compiledHintFound ? "vorhanden" : "fehlt",
-        tone: support.compiledHintFound ? "valid" : "danger",
-      },
-      {
-        label: "Mechanische Facts",
-        value: support.mechanicalFactsFound ? "vorhanden" : "nicht gesetzt",
-        tone: support.mechanicalFactsFound ? "valid" : "info",
-      },
-      {
-        label: "Generated Facts",
-        value: support.generatedFactsFound ? "ja" : "nein",
-        tone: support.generatedFactsFound ? "valid" : "info",
-      },
-      {
-        label: "Hinweise",
-        value: String(support.warningCount),
-        tone: support.warningCount > 0 ? "warning" : "valid",
-      },
-      ...(legacyCount > 0
-        ? [
-            {
-              label: "Legacy",
-              value: `Legacy-Daten vorhanden: ${legacyCount}`,
-              tone: "legacy" as const,
-            },
-          ]
-        : []),
-    ],
+      "Neues KI-Semantik-Zielmodell aus vorhandenen ViewModel-Feldern: effects, conditions, costProfile, breakerProfile, remoteRole und targetProfiles.",
+    emptyText: "Keine mechanischen Facts vorhanden.",
+    entries: mechanicalFactEntries(inspector),
   };
 }
 
-function activeSemanticsSection(inspector: CatalogAiInspector): AiInspectorSection {
-  const entries: AiInspectorEntry[] = [
-    ...mechanicalFactEntries(inspector),
-    ...stringEntries("Funktionssignal", inspector.functionSignals, "info"),
-    ...stringEntries("Strategic Role", validStrategicRoles(inspector), "valid"),
-    ...qualityEntries(inspector),
-  ];
+function tacticalSignalsSection(inspector: CatalogAiInspector): AiInspectorSection {
   return {
-    key: "activeSemantics",
-    title: "Aktive KI-Semantik",
+    key: "tacticalSignals",
+    title: "Taktiksignale (Function-Signals)",
     description:
-      "Aktive read-only Verbindung zu compiled Hint und Inspector-Index: mechanische Facts, Funktionssignale, gültige Strategic Roles und Quality ohne Runtime- oder Plannerwirkung.",
-    emptyText: "Keine aktive KI-Semantik vorhanden.",
-    entries,
+      "Aus dem Inspector-Index gelesene Taktiksignale; die UI leitet hier keine neuen Function-Signals aus Legacy-Feldern ab.",
+    emptyText: "Keine Taktiksignale vorhanden.",
+    entries: stringEntries("Taktiksignal", inspector.functionSignals, "info"),
   };
 }
 
@@ -259,28 +232,74 @@ function strategyAnchorSection(inspector: CatalogAiInspector): AiInspectorSectio
     key: "strategyAnchors",
     title: "Strategieanker",
     description:
-      "Diagnostischer Strategieanschluss: zeigt abgeleitete Strategy Anchors und nur normalisierten lineSupport als gültige Strategy-ID; Alias- und Review-Werte bleiben Legacy.",
+      "Abgeleitete Strategy Anchors und nur normalisierter lineSupport als gültige Strategy-ID; Alias- und Review-Werte bleiben Legacy.",
     entries,
   };
 }
 
-function noticeSection(inspector: CatalogAiInspector): AiInspectorSection {
+function strategicRoleSection(inspector: CatalogAiInspector): AiInspectorSection {
+  return {
+    key: "strategicRole",
+    title: "Strategische Rolle",
+    description: "Gültige strategicRole-Werte aus dem vorhandenen ViewModel.",
+    emptyText: "Keine strategische Rolle gesetzt.",
+    entries: stringEntries("strategicRole", validStrategicRoles(inspector), "valid"),
+  };
+}
+
+function qualitySection(inspector: CatalogAiInspector): AiInspectorSection {
+  return {
+    key: "quality",
+    title: "Quality",
+    description: "Nur tatsächlich vorhandene Quality-Felder aus dem compiled Hint.",
+    emptyText: "Keine Quality-Felder vorhanden.",
+    entries: qualityEntries(inspector),
+  };
+}
+
+function checkpointsSection(inspector: CatalogAiInspector): AiInspectorSection {
   const entries: AiInspectorEntry[] = [];
+  const support = inspector.supportStatus;
+  entries.push(
+    {
+      label: "Compiled Hint",
+      value: support.compiledHintFound ? "vorhanden" : "fehlt",
+      tone: support.compiledHintFound ? "valid" : "danger",
+    },
+    {
+      label: "Mechanische Facts",
+      value: support.mechanicalFactsFound ? "vorhanden" : "nicht gesetzt",
+      tone: support.mechanicalFactsFound ? "valid" : "info",
+    },
+    {
+      label: "Generated Facts",
+      value: support.generatedFactsFound ? "ja" : "nein",
+      tone: support.generatedFactsFound ? "valid" : "info",
+    },
+  );
+  if (support.legacyFallbackOnly) {
+    entries.push({
+      label: "Legacy / Migration",
+      value: "Legacy-Fallback-only",
+      detail: RUNTIME_LEGACY_NOTICE,
+      tone: "legacy",
+    });
+  }
   if (!inspector.supportStatus.compiledHintFound) {
-    entries.push({ label: "Kritisch", value: "missing compiled hint", tone: "danger" });
+    entries.push({ label: "Missing compiled hint", value: "missing compiled hint", tone: "danger" });
   }
   for (const category of inspector.warnings.categories) {
     if (isLegacyNoticeCategory(category)) continue;
-    const label = noticeLabelForCategory(category);
+    const label = checkpointLabelForCategory(category);
     entries.push({
       label,
       value: formatAiInspectorLabel(category),
-      tone: noticeToneForLabel(label),
+      tone: checkpointToneForLabel(label),
     });
   }
   for (const gap of inspector.warnings.descriptorGaps) {
     entries.push({
-      label: "Prüfen",
+      label: "Descriptor-Gap",
       value: `Descriptor-Gap ${String(gap.gapId ?? "descriptor_gap")}`,
       ...(typeof gap.description === "string" ? { detail: gap.description } : {}),
       tone: "warning",
@@ -289,32 +308,50 @@ function noticeSection(inspector: CatalogAiInspector): AiInspectorSection {
   const legacyCount = legacyDetailCount(inspector);
   if (legacyCount > 0) {
     entries.push({
-      label: "Legacy",
-      value: `Legacy-Daten vorhanden: ${legacyCount}`,
+      label: "Legacy / Migration",
+      value: "Legacy-Daten vorhanden",
+      detail: RUNTIME_LEGACY_NOTICE,
       tone: "legacy",
     });
   }
   return {
-    key: "notices",
-    title: "Hinweise / Prüfpunkte",
+    key: "checkpoints",
+    title: "Prüfpunkte",
     description:
-      "Review-Anschluss: bündelt kritische, prüfpflichtige und Legacy-Hinweise kompakt; Detailursachen stehen im geschlossenen Entwicklerbereich.",
-    emptyText: "Keine Hinweise oder Prüfpunkte.",
+      "Descriptor-Gaps, Deferred/Human Review, Missing compiled hint, Invalid/Hard Problem und kompakter Legacy-Hinweis.",
+    emptyText: "Keine Prüfpunkte.",
     entries,
   };
 }
 
-function legacyDeveloperSection(inspector: CatalogAiInspector): AiInspectorSection {
+function legacyMigrationSection(inspector: CatalogAiInspector): AiInspectorSection {
+  const legacyCount = legacyDetailCount(inspector);
   const entries: AiInspectorEntry[] = [
+    ...(legacyCount > 0
+      ? [
+          {
+            label: "Hinweis",
+            value: "bisheriger KI-Pfad",
+            detail: LEGACY_MIGRATION_NOTICE,
+            tone: "legacy" as const,
+          },
+          {
+            label: "card-role-manifest",
+            value: "Runtime-Legacy",
+            detail: CARD_ROLE_MANIFEST_NOTICE,
+            tone: "legacy" as const,
+          },
+        ]
+      : []),
     ...compiledHintEntries(inspector),
-    ...stringEntries("Legacy-Rollen", inspector.legacyRoles.roles, "legacy"),
-    ...stringEntries("Legacy-Planrollen", inspector.legacyRoles.planRoles, "legacy"),
+    ...stringEntries("Legacy roles", inspector.legacyRoles.roles, "legacy"),
+    ...stringEntries("Legacy planRoles", inspector.legacyRoles.planRoles, "legacy"),
     ...inactiveLineSupportEntries(inspector.lineSupport.classification),
     ...inspector.legacyRoles.rolesClassification.map((entry) =>
-      classificationEntry("Legacy-Rollen-Klassifikation", entry),
+      classificationEntry("Legacy roles-Klassifikation", entry),
     ),
     ...inspector.legacyRoles.planRolesClassification.map((entry) =>
-      classificationEntry("Legacy-Planrollen-Klassifikation", entry),
+      classificationEntry("Legacy planRoles-Klassifikation", entry),
     ),
     ...inspector.warnings.categories.map((category) => ({
       label: "Hinweis-Kategorie",
@@ -326,10 +363,10 @@ function legacyDeveloperSection(inspector: CatalogAiInspector): AiInspectorSecti
   ];
   return {
     key: "legacyDetails",
-    title: "Legacy / Entwicklerdetails anzeigen",
+    title: "Legacy / Migration / Entwicklerdetails",
     description:
-      "Entwickler- und Migrationskontext: zeigt Legacy-Rollen, Legacy-Planrollen, Alias-Klassifikationen, compiled Quelle und Rohkategorien ohne aktive KI-Semantik.",
-    emptyText: "Keine Legacy- oder Entwicklerdetails vorhanden.",
+      "Altbestand, Migration und Debug: zeigt roles, planRoles, Legacy-lineSupport, Alias-/Migrationsklassifikationen und alte Rohkategorien ohne neue Zielsemantik.",
+    emptyText: "Keine Legacy-, Migrations- oder Entwicklerdetails vorhanden.",
     entries,
   };
 }
@@ -361,12 +398,12 @@ function mechanicalFactEntries(inspector: CatalogAiInspector): AiInspectorEntry[
   const facts = inspector.mechanicalFacts;
   const entries: AiInspectorEntry[] = [];
   if (!facts) return entries;
-  entries.push(...recordListEntries("Effekt", facts.effects, "kind"));
-  entries.push(...recordListEntries("Bedingung", facts.conditions, "kind"));
-  if (facts.costProfile) entries.push({ label: "Kostenprofil", value: formatRecord(facts.costProfile), tone: "info" });
-  if (facts.breakerProfile) entries.push({ label: "Breaker", value: formatRecord(facts.breakerProfile), tone: "info" });
-  if (facts.remoteRole) entries.push({ label: "RemoteRole", value: formatRecord(facts.remoteRole), tone: "info" });
-  entries.push(...recordListEntries("Target", facts.targetProfiles));
+  entries.push(...recordListEntries("effects", facts.effects, "kind"));
+  entries.push(...recordListEntries("conditions", facts.conditions, "kind"));
+  if (facts.costProfile) entries.push({ label: "costProfile", value: formatRecord(facts.costProfile), tone: "info" });
+  if (facts.breakerProfile) entries.push({ label: "breakerProfile", value: formatRecord(facts.breakerProfile), tone: "info" });
+  if (facts.remoteRole) entries.push({ label: "remoteRole", value: formatRecord(facts.remoteRole), tone: "info" });
+  entries.push(...recordListEntries("targetProfiles", facts.targetProfiles));
   return entries;
 }
 
@@ -420,29 +457,23 @@ function stringArrayField(record: Record<string, unknown>, key: string): string[
   return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
 }
 
-function noticeLabelForCategory(category: string): "Kritisch" | "Prüfen" | "Info" {
-  if (
-    category.includes("missing") ||
-    category.includes("invalid") ||
-    category.includes("hard") ||
-    category.includes("wrong_side")
-  ) {
-    return "Kritisch";
-  }
+function checkpointLabelForCategory(category: string): string {
+  if (category.includes("missing")) return "Missing compiled hint";
+  if (category.includes("invalid") || category.includes("hard") || category.includes("wrong_side")) return "Invalid / Hard Problem";
   if (
     category.includes("deferred") ||
     category.includes("human_review") ||
-    category.includes("descriptor_gap") ||
     category.includes("requires_card_review")
   ) {
-    return "Prüfen";
+    return "Deferred / Human Review";
   }
+  if (category.includes("descriptor_gap")) return "Descriptor-Gap";
   return "Info";
 }
 
-function noticeToneForLabel(label: "Kritisch" | "Prüfen" | "Info"): AiInspectorTone {
-  if (label === "Kritisch") return "danger";
-  if (label === "Prüfen") return "warning";
+function checkpointToneForLabel(label: string): AiInspectorTone {
+  if (label === "Missing compiled hint" || label === "Invalid / Hard Problem") return "danger";
+  if (label === "Deferred / Human Review" || label === "Descriptor-Gap") return "warning";
   return "info";
 }
 

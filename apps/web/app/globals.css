@@ -2326,6 +2326,13 @@ select {
   gap: 8px;
 }
 
+.deckStrategyDetails.legacy {
+  padding: 8px;
+  border: 1px dashed color-mix(in srgb, var(--muted), var(--line) 55%);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--muted), transparent 94%);
+}
+
 .deckStrategyDetails summary,
 .deckStrategyEvidenceGroup summary {
   cursor: pointer;

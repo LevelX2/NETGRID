@@ -17,13 +17,23 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
     const viewer = expectAvailable(response);
 
     expect(viewer.source).toMatchObject({
-      label: "DeckDoctrine diagnostic",
+      label: "Diagnostisches KI-Deckprofil",
       aggregation: "AI006 strategy aggregation",
       plannerEffect: "none",
     });
     expect(viewer.statusEntries.map((entry) => entry.value)).toContain(
-      "AI006 strategy aggregation",
+      "AI006 strategy aggregation aus neuer KI-Semantik",
     );
+    expect(viewer.statusEntries).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ label: "Analysequelle", value: "Diagnostisches KI-Deckprofil" }),
+        expect.objectContaining({ label: "Plannerwirkung", value: "Noch keine direkte Plannerwirkung" }),
+        expect.objectContaining({ label: "Legacy-Signale", value: "getrennt gezählt" }),
+      ]),
+    );
+    expect(viewer.diagnosticNotice).toContain("Strategieprofile werden aus neuer KI-Semantik berechnet");
+    expect(viewer.diagnosticNotice).toContain("Noch keine direkte Plannerwirkung");
+    expect(viewer.diagnosticNotice).toContain("Legacy-PlanWeights");
     expect(viewer.strategies.length).toBeGreaterThan(3);
     expect(viewer.strategies[0]?.finalScore).toBeGreaterThanOrEqual(
       viewer.strategies[1]?.finalScore ?? 0,
@@ -81,9 +91,9 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
     expect(evidenceViewer.evidenceGroups.some((group) => group.anchorEvidence.length > 0)).toBe(true);
     expect(evidenceViewer.evidenceGroups.some((group) => group.supportEvidence.length > 0)).toBe(true);
     expect(gapViewer.strategies.some((strategy) => strategy.gapCount > 0)).toBe(true);
-    expect(gapViewer.legacySignalGroups.map((group) => group.title)).toEqual(
-      expect.arrayContaining(["roles", "planRoles", "lineSupport"]),
-    );
+    const legacyGroupTitles = gapViewer.legacySignalGroups.map((group) => group.title);
+    expect(legacyGroupTitles).toEqual(expect.arrayContaining(["Legacy roles", "Legacy planRoles"]));
+    expect(legacyGroupTitles.every((title) => title.startsWith("Legacy"))).toBe(true);
   });
 
   it("does not expose planner, action-score or runtime-only fields", () => {
@@ -94,7 +104,7 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
     const serialized = JSON.stringify(response);
 
     expect(serialized).not.toMatch(
-      /planWeights|actionScores|actionScore|legalActions|playerActions|stateHash|stateVersion|cardInstances|privatePayload|GameState/i,
+      /"(?:planWeights|actionScores|actionScore|legalActions|playerActions|stateHash|stateVersion|cardInstances|privatePayload|GameState)"\s*:/i,
     );
   });
 

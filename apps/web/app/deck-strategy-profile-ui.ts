@@ -86,7 +86,7 @@ export type DeckStrategyProfileViewer = {
   cardCount: number;
   statusEntries: DeckStrategyProfileEntry[];
   source: {
-    label: "DeckDoctrine diagnostic";
+    label: "Diagnostisches KI-Deckprofil";
     aggregation: "AI006 strategy aggregation";
     profileSchemaVersion: string;
     profileTaskId: string;

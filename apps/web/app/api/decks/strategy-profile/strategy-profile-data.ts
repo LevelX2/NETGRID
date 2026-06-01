@@ -116,14 +116,15 @@ export function buildDeckStrategyProfileViewer(
     cardCount: profile.cardCount,
     statusEntries: statusEntries(profile, snapshot, deck),
     source: {
-      label: "DeckDoctrine diagnostic",
+      label: "Diagnostisches KI-Deckprofil",
       aggregation: "AI006 strategy aggregation",
       profileSchemaVersion: profile.schemaVersion,
       profileTaskId: profile.taskId,
       plannerEffect: profile.source.plannerEffect,
       deckHash: snapshot.deckHash,
     },
-    diagnosticNotice: "Diagnostisch, noch keine Plannerwirkung",
+    diagnosticNotice:
+      "Diagnostisches KI-Deckprofil: Strategieprofile werden aus neuer KI-Semantik berechnet. Noch keine direkte Plannerwirkung. Hinweis: Der aktuelle KI-Spieler verwendet teilweise noch bestehende DeckDoctrine-/Legacy-PlanWeights; Legacy-Signale werden getrennt gezählt.",
     primaryStrategies: profile.primaryStrategies,
     secondaryStrategies: profile.secondaryStrategies,
     strategies,
@@ -152,8 +153,10 @@ function statusEntries(
     { label: "Deck-ID", value: deck.deckId, tone: "legacy" },
     { label: "Seite", value: sideLabel(profile.side), tone: "info" },
     { label: "Karten", value: String(profile.cardCount), tone: "info" },
-    { label: "Analysequelle", value: "DeckDoctrine diagnostic", tone: "valid" },
-    { label: "Aggregation", value: "AI006 strategy aggregation", tone: "valid" },
+    { label: "Analysequelle", value: "Diagnostisches KI-Deckprofil", tone: "valid" },
+    { label: "Aggregation", value: "AI006 strategy aggregation aus neuer KI-Semantik", tone: "valid" },
+    { label: "Plannerwirkung", value: "Noch keine direkte Plannerwirkung", tone: "warning" },
+    { label: "Legacy-Signale", value: "getrennt gezählt", tone: "legacy" },
     { label: "Profil-Schema", value: profile.schemaVersion, tone: "legacy" },
     { label: "Deck-Hash", value: snapshot.deckHash, tone: "legacy" },
   ];
@@ -479,10 +482,10 @@ function legacySignalGroups(
     else groups.other.push(entry);
   }
   return [
-    { key: "legacy-roles", title: "roles", entries: groups.roles },
-    { key: "legacy-planRoles", title: "planRoles", entries: groups.planRoles },
-    { key: "legacy-lineSupport", title: "lineSupport", entries: groups.lineSupport },
-    { key: "legacy-other", title: "Weitere Legacy-Signale", entries: groups.other },
+    { key: "legacy-roles", title: "Legacy roles", entries: groups.roles },
+    { key: "legacy-planRoles", title: "Legacy planRoles", entries: groups.planRoles },
+    { key: "legacy-lineSupport", title: "Legacy lineSupport", entries: groups.lineSupport },
+    { key: "legacy-other", title: "Weitere Legacy-/Migrationssignale", entries: groups.other },
   ].filter((section) => section.entries.length > 0);
 }
 

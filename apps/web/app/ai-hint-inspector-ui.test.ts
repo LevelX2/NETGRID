@@ -157,18 +157,22 @@ describe("AI hint inspector UI view model", () => {
   it("builds the active-semantics first card catalog sections", () => {
     const sections = aiInspectorSections(INSPECTOR_FIXTURE);
     expect(sections.map((section) => section.title)).toEqual([
-      "Supportstatus",
-      "Aktive KI-Semantik",
+      "Mechanische Facts",
+      "Taktiksignale (Function-Signals)",
       "Strategieanker",
-      "Hinweise / Prüfpunkte",
-      "Legacy / Entwicklerdetails anzeigen",
+      "Strategische Rolle",
+      "Quality",
+      "Prüfpunkte",
+      "Legacy / Migration / Entwicklerdetails",
     ]);
     expect(sections.map((section) => section.description)).toEqual([
-      expect.stringContaining("KI-Supportstatus"),
-      expect.stringContaining("compiled Hint und Inspector-Index"),
-      expect.stringContaining("normalisierten lineSupport"),
-      expect.stringContaining("Review-Anschluss"),
-      expect.stringContaining("Entwickler- und Migrationskontext"),
+      expect.stringContaining("effects, conditions"),
+      expect.stringContaining("keine neuen Function-Signals"),
+      expect.stringContaining("normalisierter lineSupport"),
+      expect.stringContaining("strategicRole"),
+      expect.stringContaining("Quality"),
+      expect.stringContaining("Descriptor-Gaps"),
+      expect.stringContaining("Altbestand"),
     ]);
   });
 
@@ -189,52 +193,59 @@ describe("AI hint inspector UI view model", () => {
   });
 
   it("shows function signals, mechanical facts, valid strategic roles and existing quality fields in active semantics", () => {
-    const text = sectionText(aiInspectorSections(INSPECTOR_FIXTURE), "activeSemantics");
+    const sections = aiInspectorSections(INSPECTOR_FIXTURE);
+    const mechanicalText = sectionText(sections, "mechanicalFacts");
+    const tacticalText = sectionText(sections, "tacticalSignals");
+    const roleText = sectionText(sections, "strategicRole");
+    const qualityText = sectionText(sections, "quality");
 
-    expect(text).toContain("Effekt breaker");
-    expect(text).toContain("Bedingung requires trace success");
-    expect(text).toContain("Kostenprofil credits: 3");
-    expect(text).toContain("Breaker coverage: wall, sentry");
-    expect(text).toContain("RemoteRole kind: ice_modifier");
-    expect(text).toContain("Target");
-    expect(text).toContain("Funktionssignal breaker.wall");
-    expect(text).toContain("Funktionssignal remote.ice_modifier");
-    expect(text).toContain("Strategic Role tempo_anchor");
-    expect(text).not.toContain("unknown_role");
-    expect(text).toContain("Quality hint reviewed: ja");
-    expect(text).not.toContain("economyQuality");
+    expect(mechanicalText).toContain("effects breaker");
+    expect(mechanicalText).toContain("conditions requires trace success");
+    expect(mechanicalText).toContain("costProfile credits: 3");
+    expect(mechanicalText).toContain("breakerProfile coverage: wall, sentry");
+    expect(mechanicalText).toContain("remoteRole kind: ice_modifier");
+    expect(mechanicalText).toContain("targetProfiles");
+    expect(tacticalText).toContain("Taktiksignal breaker.wall");
+    expect(tacticalText).toContain("Taktiksignal remote.ice_modifier");
+    expect(roleText).toContain("strategicRole tempo_anchor");
+    expect(roleText).not.toContain("unknown_role");
+    expect(qualityText).toContain("Quality hint reviewed: ja");
+    expect(qualityText).not.toContain("economyQuality");
   });
 
   it("keeps full legacy roles and planRoles out of the open main view", () => {
     const sections = aiInspectorSections(INSPECTOR_FIXTURE);
     const text = openText(sections);
 
-    expect(text).toContain("Legacy-Daten vorhanden:");
-    expect(text).not.toContain("Legacy-Rollen breaker");
-    expect(text).not.toContain("Legacy-Planrollen build_rig");
+    expect(text).toContain("Legacy-Daten vorhanden");
+    expect(text).toContain("Hinweis: Legacy-Rollen werden intern noch teilweise von der KI verwendet.");
+    expect(text).not.toContain("Legacy roles breaker");
+    expect(text).not.toContain("Legacy planRoles build_rig");
     expect(text).not.toContain("Legacy-lineSupport remote_contest");
-    expect(text).not.toContain("Legacy-Rollen-Klassifikation breaker [function_signal_only]");
-    expect(text).not.toContain("Legacy-Planrollen-Klassifikation build_rig [strategy_alias]");
+    expect(text).not.toContain("Legacy roles-Klassifikation breaker [function_signal_only]");
+    expect(text).not.toContain("Legacy planRoles-Klassifikation build_rig [strategy_alias]");
   });
 
   it("keeps legacy roles, planRoles, alias classifications and raw categories in the closed developer section", () => {
     const sections = aiInspectorSections(INSPECTOR_FIXTURE);
     const text = sectionText(sections, "legacyDetails");
 
-    expect(text).toContain("Legacy-Rollen breaker");
-    expect(text).toContain("Legacy-Planrollen build_rig");
+    expect(text).toContain("Diese Felder gehören zum bisherigen KI-Pfad");
+    expect(text).toContain("card-role-manifest Runtime-Legacy");
+    expect(text).toContain("Legacy roles breaker");
+    expect(text).toContain("Legacy planRoles build_rig");
     expect(text).toContain("Legacy-lineSupport remote_contest [safe_strategy_anchor_alias] -> runner.remote_contest");
-    expect(text).toContain("Legacy-Rollen-Klassifikation breaker [function_signal_only]");
-    expect(text).toContain("Legacy-Planrollen-Klassifikation build_rig [strategy_alias] -> runner.rig_first");
+    expect(text).toContain("Legacy roles-Klassifikation breaker [function_signal_only]");
+    expect(text).toContain("Legacy planRoles-Klassifikation build_rig [strategy_alias] -> runner.rig_first");
     expect(text).toContain("Hinweis-Kategorie legacy line support");
   });
 
   it("groups relevant warnings in the main view without expanding legacy warnings", () => {
-    const text = sectionText(aiInspectorSections(INSPECTOR_FIXTURE), "notices");
+    const text = sectionText(aiInspectorSections(INSPECTOR_FIXTURE), "checkpoints");
 
-    expect(text).toContain("Prüfen deferred requires human review");
-    expect(text).toContain("Prüfen Descriptor-Gap interface_closeout_density_requires_aggregation");
-    expect(text).toContain("Legacy Legacy-Daten vorhanden:");
+    expect(text).toContain("Deferred / Human Review deferred requires human review");
+    expect(text).toContain("Descriptor-Gap Descriptor-Gap interface_closeout_density_requires_aggregation");
+    expect(text).toContain("Legacy / Migration Legacy-Daten vorhanden");
     expect(text).not.toContain("legacy line support");
   });
 
@@ -254,11 +265,12 @@ describe("AI hint inspector UI view model", () => {
     const sections = aiInspectorSections(LEGACY_ONLY_FIXTURE);
     const text = openText(sections);
 
-    expect(sectionText(sections, "activeSemantics")).toBe("");
+    expect(sectionText(sections, "mechanicalFacts")).toBe("");
+    expect(sectionText(sections, "tacticalSignals")).toBe("");
     expect(sectionText(sections, "strategyAnchors")).toContain(
       "Strategieanker keine aktive Strategiezuordnung",
     );
-    expect(text).toContain("Legacy-Daten vorhanden:");
+    expect(text).toContain("Legacy-Daten vorhanden");
     expect(defaultCollapsedAiInspectorSections(sections).legacyDetails).toBe(true);
   });
 
@@ -284,9 +296,12 @@ describe("AI hint inspector UI view model", () => {
   it("renders active sections before legacy and debug details", () => {
     const keys = aiInspectorSections(INSPECTOR_FIXTURE).map((section) => section.key);
 
-    expect(keys.indexOf("activeSemantics")).toBeLessThan(keys.indexOf("legacyDetails"));
+    expect(keys.indexOf("mechanicalFacts")).toBeLessThan(keys.indexOf("legacyDetails"));
+    expect(keys.indexOf("tacticalSignals")).toBeLessThan(keys.indexOf("legacyDetails"));
     expect(keys.indexOf("strategyAnchors")).toBeLessThan(keys.indexOf("legacyDetails"));
-    expect(keys.indexOf("notices")).toBeLessThan(keys.indexOf("legacyDetails"));
+    expect(keys.indexOf("strategicRole")).toBeLessThan(keys.indexOf("legacyDetails"));
+    expect(keys.indexOf("quality")).toBeLessThan(keys.indexOf("legacyDetails"));
+    expect(keys.indexOf("checkpoints")).toBeLessThan(keys.indexOf("legacyDetails"));
   });
 
   it("creates unique render keys when cards have repeated mechanical effects", () => {
@@ -300,11 +315,11 @@ describe("AI hint inspector UI view model", () => {
         ],
       },
     });
-    const activeSection = sections.find((section) => section.key === "activeSemantics");
+    const activeSection = sections.find((section) => section.key === "mechanicalFacts");
     expect(activeSection).toBeDefined();
 
     const effectEntries = activeSection!.entries.filter(
-      (entry) => entry.label === "Effekt" && entry.value === "draw",
+      (entry) => entry.label === "effects" && entry.value === "draw",
     );
     const keys = activeSection!.entries.map((entry, index) =>
       aiInspectorEntryKey(activeSection!.key, entry, index),
