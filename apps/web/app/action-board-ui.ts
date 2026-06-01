@@ -1067,7 +1067,14 @@ export function cardChoiceUsesReadableCards(choice: NonNullable<PlayerView["pend
 }
 
 export function cardChoiceIsReadonlyPrivateLook(choice: NonNullable<PlayerView["pendingChoice"]>): boolean {
-  if (choice.kind !== "select_cards" || !choice.source.startsWith("p3_33.private_look:")) return false;
+  if (
+    choice.kind !== "select_cards" ||
+    !(
+      choice.source.startsWith("p3_33.private_look:") ||
+      choice.source.startsWith("p3_38.mystery_box_corp_review:")
+    )
+  )
+    return false;
   const doneOptions = choice.options.filter((option) => option.id === "done" && option.selectable !== false);
   const cardOptions = choice.options.filter((option) => option.id !== "done");
   return (

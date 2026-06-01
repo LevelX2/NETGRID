@@ -42,10 +42,11 @@ function definition(
 function choice(input: {
   source: string;
   options?: ChoiceRequest["options"];
+  side?: ChoiceRequest["side"];
 }): ChoiceRequest {
   return {
     choiceId: "choice_1",
-    side: "runner",
+    side: input.side ?? "runner",
     source: input.source,
     prompt: "Choice",
     kind: "select_cards",
@@ -449,6 +450,79 @@ describe("hidden-zone search choice handlers", () => {
       hiddenZoneAction: "p3_38_search_stack_install",
       searchDestination: "runner_rig",
       installedProgramCount: 1,
+    });
+  });
+
+  it("turns p3_38 Mystery Box Corp review into the Runner install choice", () => {
+    const testHost = host(
+      choice({
+        side: "corp",
+        source: `p3_38.mystery_box_corp_review:${sourceCardId}:${sourceDefinitionId}:${programId},${hardwareId}:1`,
+        options: [
+          { id: `shown_${programId}`, label: "Program", value: programId, selectable: false },
+          { id: `shown_${hardwareId}`, label: "Hardware", value: hardwareId, selectable: false },
+          { id: "done", label: "Gesehen", value: "done" },
+        ],
+      }),
+      playerAction("done"),
+      { stack: [programId, hardwareId] },
+    );
+
+    const result = handleHiddenZoneSearchChoice(testHost);
+
+    expect(result).toMatchObject({
+      handled: true,
+      stateChanged: true,
+    });
+    expect(result.deletePendingChoice).toBeUndefined();
+    expect(testHost.state.pendingChoice).toMatchObject({
+      choiceId: "p3_38_stack_show_install_2",
+      side: "runner",
+      source: `p3_38.look_top_stack_show_to_corp_then_install_matching:${sourceCardId}:${sourceDefinitionId}:${programId},${hardwareId}:2`,
+      visibility: "public",
+    });
+    expect(testHost.state.pendingChoice?.options.map((option) => option.value)).toEqual([
+      programId,
+    ]);
+    expect(testHost.legalAction.payload).toMatchObject({
+      hiddenZoneAction: "p3_38_look_top_stack_show_to_corp_then_install_matching",
+      programFound: true,
+      choiceVisibility: "public",
+      shufflePerformed: false,
+    });
+  });
+
+  it("resolves p3_38 Mystery Box Corp review no-program path after confirmation", () => {
+    const testHost = host(
+      choice({
+        side: "corp",
+        source: `p3_38.mystery_box_corp_review:${sourceCardId}:${sourceDefinitionId}:${hardwareId}:1`,
+        options: [
+          { id: `shown_${hardwareId}`, label: "Hardware", value: hardwareId, selectable: false },
+          { id: "done", label: "Gesehen", value: "done" },
+        ],
+      }),
+      playerAction("done"),
+      { stack: [hardwareId] },
+    );
+
+    const result = handleHiddenZoneSearchChoice(testHost);
+
+    expect(result).toMatchObject({
+      handled: true,
+      deletePendingChoice: true,
+      shufflePerformed: true,
+    });
+    expect(testHost.state.run?.successfulRunAbilityUsedSourceIds).toEqual([
+      sourceCardId,
+    ]);
+    expect(testHost.legalAction.payload).toMatchObject({
+      hiddenZoneAction: "p3_38_look_top_stack_show_to_corp_then_install_matching",
+      programFound: false,
+      installedProgramCount: 0,
+      selfTrashed: false,
+      shufflePerformed: true,
+      randomCounterAfter: 0,
     });
   });
 

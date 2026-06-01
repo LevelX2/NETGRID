@@ -1554,17 +1554,31 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
     });
     state = apply(state, "runner", (action) => action.actionId === mysteryAction.actionId);
     expect(state.pendingChoice).toMatchObject({
+      side: "corp",
+      visibility: "public",
+      minSelections: 1,
+      maxSelections: 1,
+    });
+    expect(state.pendingChoice?.source).toContain("p3_38.mystery_box_corp_review");
+    expect(
+      state.pendingChoice?.options.map((option) => option.value),
+    ).toEqual(expect.arrayContaining([selectedProgram, secondProgram, "done"]));
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).toContain(
+      "simple_decoder",
+    );
+    state = applyChoice(state, "corp", "done");
+    expect(state.pendingChoice).toMatchObject({
       side: "runner",
       visibility: "public",
       minSelections: 1,
       maxSelections: 1,
     });
+    expect(state.pendingChoice?.source).toContain(
+      "p3_38.look_top_stack_show_to_corp_then_install_matching",
+    );
     expect(
       state.pendingChoice?.options.map((option) => option.value),
     ).toEqual(expect.arrayContaining([selectedProgram, secondProgram]));
-    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).toContain(
-      "simple_decoder",
-    );
     state = applyChoice(state, "runner", `card_${selectedProgram}`);
     expect(state.runner.rig.programs).toContain(selectedProgram);
     expect(state.runner.heap).toContain(mysteryId);
@@ -1619,6 +1633,11 @@ describe("Originalset Spotcheck 2026-05-15 Agenda/Run/Recurring Nachtest", () =>
         action.type === "activated_card_ability" &&
         sourceDefinition(noProgram, action) === "onr_v1_043_mystery-box",
     );
+    expect(noProgram.pendingChoice).toMatchObject({
+      side: "corp",
+      source: expect.stringContaining("p3_38.mystery_box_corp_review"),
+    });
+    noProgram = applyChoice(noProgram, "corp", "done");
     expect(noProgram.pendingChoice).toBeUndefined();
     expect(noProgram.eventLog.at(-1)?.publicPayload).toMatchObject({
       programFound: false,

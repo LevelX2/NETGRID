@@ -667,6 +667,39 @@ describe("V1.0.5 action board UI helpers", () => {
         { id: "done", label: "Fertig", value: "done" }
       ]
     };
+    const mysteryBoxCorpReviewChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...technicianPrivateLookChoice,
+      choiceId: "p3_38_mystery_box_corp_review_7",
+      side: "corp",
+      source: "p3_38.mystery_box_corp_review:mystery_box:onr_v1_043_mystery-box:stack_a,stack_b:7",
+      prompt: "Mystery Box: Stack-Spitze ansehen",
+      options: [
+        {
+          id: "shown_stack_a",
+          label: "Stack A",
+          value: "stack_a",
+          selectable: false,
+          card: card("stack_a", "Stack A", "program")
+        },
+        {
+          id: "shown_stack_b",
+          label: "Stack B",
+          value: "stack_b",
+          selectable: false,
+          card: card("stack_b", "Stack B", "event")
+        },
+        { id: "done", label: "Gesehen", value: "done" }
+      ],
+      cardSearchPresentation: {
+        sourceZone: "stack",
+        selectableFilter: "matching_cards",
+        reveal: "public",
+        destination: "install_program",
+        shuffleAfter: true,
+        publicRevealKind: "reveal",
+        showNonMatchingCards: true
+      }
+    };
 
     expect(shouldUseCardChoicePanel(organDonorChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(exactSingleChoice)).toBe(false);
@@ -676,14 +709,18 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(shouldUseCardChoicePanel(stackTopFiveChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(technicianPrivateLookChoice)).toBe(true);
     expect(shouldUseCardChoicePanel(protocolFilesPrivateLookChoice)).toBe(true);
+    expect(shouldUseCardChoicePanel(mysteryBoxCorpReviewChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(organDonorChoice)).toBe(false);
     expect(cardChoiceUsesReadableCards(forgottenBackupChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(heapSearchChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(stackTopFiveChoice)).toBe(true);
     expect(cardChoiceUsesReadableCards(technicianPrivateLookChoice)).toBe(true);
+    expect(cardChoiceUsesReadableCards(mysteryBoxCorpReviewChoice)).toBe(true);
     expect(cardChoiceIsReadonlyPrivateLook(technicianPrivateLookChoice)).toBe(true);
     expect(cardChoiceIsReadonlyPrivateLook(protocolFilesPrivateLookChoice)).toBe(true);
+    expect(cardChoiceIsReadonlyPrivateLook(mysteryBoxCorpReviewChoice)).toBe(true);
     expect(cardChoiceReadonlyConfirmationOptionId(technicianPrivateLookChoice)).toBe("done");
+    expect(cardChoiceReadonlyConfirmationOptionId(mysteryBoxCorpReviewChoice)).toBe("done");
     expect(cardChoiceUsesOrderedSelection(stackTopFiveChoice)).toBe(true);
     expect(cardChoiceUsesOrderedSelection(organDonorChoice)).toBe(false);
   });

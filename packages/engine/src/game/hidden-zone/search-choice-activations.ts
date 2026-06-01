@@ -9,6 +9,7 @@ import type {
 import {
   buildLookTopStackTakeMatchingChoice,
   buildLookTopStackTakeMatchingPayload,
+  buildMysteryBoxCorpReviewChoice,
   buildMysteryBoxInstallChoice,
   buildSearchStackInstallChoice,
   buildSearchStackInstallPayload,
@@ -358,7 +359,7 @@ export function startLookTopStackShowToCorpThenInstallMatchingActivation(
   )
     throw new Error("Diese Stack-Reveal-Installation ist nicht unterstuetzt.");
   if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
-  const run = requireRun(host);
+  requireRun(host);
   const topCards = host.state.runner.stack.slice(0, input.count);
   if (topCards.length === 0) throw new Error("Der Stack ist leer.");
   const installableProgramIds =
@@ -383,52 +384,27 @@ export function startLookTopStackShowToCorpThenInstallMatchingActivation(
     revealedProgramCount: topCards.filter(
       (cardId) => host.cards.definitionFor(cardId).type === "program",
     ).length,
+    programFound: installableProgramIds.length > 0,
+    choiceVisibility: "corp_review",
     shufflePerformed: false,
   };
-  if (!installableProgramIds.length) {
-    run.successfulRunAbilityUsedSourceIds = [
-      ...(run.successfulRunAbilityUsedSourceIds ?? []),
-      input.sourceCardId,
-    ].sort();
-    host.shuffleRunnerStack(
-      `p3_38_stack_show_install:no_program:${input.sourceCardId}:${run.runId}`,
-    );
-    host.legalAction.payload = {
-      ...(host.legalAction.payload ?? {}),
-      programFound: false,
-      installedProgramCount: 0,
-      selfTrashed: false,
-      shufflePerformed: true,
-      shuffled: true,
-      randomCounterAfter: host.state.randomCounter,
-    };
-    return { publicPayload: host.legalAction.payload as HiddenZonePayload };
-  }
-  host.state.pendingChoice = {
-    choiceId: `p3_38_stack_show_install_${host.state.stateVersion + 1}`,
-    side: "runner",
-    source: `p3_38.look_top_stack_show_to_corp_then_install_matching:${input.sourceCardId}:${input.sourceDefinitionId}:${topCards.join(",")}:${host.state.stateVersion + 1}`,
-    prompt: "Gezeigtes Programm installieren",
-    kind: "select_cards",
-    options: installableProgramIds.map((cardId) => {
+  host.state.pendingChoice = buildMysteryBoxCorpReviewChoice({
+    stateVersion: host.state.stateVersion,
+    sourceCardId: input.sourceCardId,
+    sourceDefinitionId: input.sourceDefinitionId,
+    topCards,
+    programFound: installableProgramIds.length > 0,
+    options: topCards.map((cardId) => {
       const definition = host.cards.definitionFor(cardId);
       return {
-        id: `card_${cardId}`,
+        id: `shown_${cardId}`,
         label: definition.title,
         publicLabel: definition.title,
         value: cardId,
+        selectable: false,
       };
     }),
-    minSelections: 1,
-    maxSelections: 1,
-    stateVersion: host.state.stateVersion + 1,
-    visibility: "public",
-  };
-  host.legalAction.payload = {
-    ...(host.legalAction.payload ?? {}),
-    programFound: true,
-    choiceVisibility: "public",
-  };
+  });
   return { publicPayload: host.legalAction.payload as HiddenZonePayload };
 }
 

@@ -9572,7 +9572,7 @@ function CardChoicePanel({
         <footer className="cardChoiceFooter">
           <div className="cardChoiceFooterText">
             {effectHint ? <p className="cardChoiceEffectHint">{effectHint}</p> : null}
-            <p className="cardChoiceQuestion">{readonlyPrivateLook ? "Diese Karten wurden nur dir angezeigt." : programInstallTrashInfo?.question ?? cardChoiceQuestion(choice, selectedOptions)}</p>
+            <p className="cardChoiceQuestion">{readonlyPrivateLook ? cardChoiceReadonlyQuestion(choice) : programInstallTrashInfo?.question ?? cardChoiceQuestion(choice, selectedOptions)}</p>
           </div>
           <button
             className="button primary cardChoiceSubmit"
@@ -9607,6 +9607,10 @@ function cardChoiceRows(options: VisibleChoiceOption[]): VisibleChoiceOption[][]
 
 function cardChoiceReadonlyPrivateLookTitle(choice: VisibleChoice, view: PlayerView): string | null {
   if (!cardChoiceIsReadonlyPrivateLook(choice)) return null;
+  if (choice.source.startsWith("p3_38.mystery_box_corp_review:")) {
+    const shownCards = choice.options.filter((option) => option.id !== "done").length;
+    return `Mystery Box: ${shownCards === 1 ? "Stack-Karte für die Korp" : `${shownCards} Stack-Karten für die Korp`}`;
+  }
   const [, , sourceCardId, zone] = choice.source.split(":");
   const sourceTitle = sourceCardId ? visibleCardsByInstanceId(view).get(sourceCardId)?.title : null;
   const shownCards = choice.options.filter((option) => option.id !== "done").length;
@@ -9619,6 +9623,13 @@ function cardChoiceReadonlyPrivateLookTitle(choice: VisibleChoice, view: PlayerV
         ? "HQ-Karten ansehen"
         : "Karten ansehen";
   return sourceTitle ? `${sourceTitle}: ${zoneLabel}` : zoneLabel;
+}
+
+function cardChoiceReadonlyQuestion(choice: VisibleChoice): string {
+  if (choice.source.startsWith("p3_38.mystery_box_corp_review:")) {
+    return "Diese Stack-Karten wurden der Korp durch Mystery Box gezeigt.";
+  }
+  return "Diese Karten wurden nur dir angezeigt.";
 }
 
 function cardChoiceTitle(choice: VisibleChoice): string {
@@ -9687,6 +9698,9 @@ function cardChoiceEffectHint(choice: VisibleChoice): string | null {
   if (newBloodHint) return newBloodHint;
   const presentation = choice.cardSearchPresentation;
   const resolution = presentation ?? choice.stackSearchResolution;
+  if (choice.source.startsWith("p3_38.mystery_box_corp_review:")) {
+    return "Nach der Bestätigung wählt der Runner ein gezeigtes installierbares Programm; wenn keines installierbar ist, wird der Stack gemischt.";
+  }
   if (isRunnerStackTopChooseOneArrangeRestChoice(choice)) {
     return "Die erste gewählte Karte geht in den Grip; danach bilden die übrigen gewählten Karten in Auswahlreihenfolge die neue Stack-Spitze.";
   }

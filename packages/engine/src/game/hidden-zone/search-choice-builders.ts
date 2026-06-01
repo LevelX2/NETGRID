@@ -344,3 +344,62 @@ export function buildMysteryBoxInstallChoice(input: {
     visibility: "public",
   };
 }
+
+export function buildMysteryBoxCorpReviewChoice(input: {
+  stateVersion: number;
+  sourceCardId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  topCards: readonly CardInstanceId[];
+  options: ChoiceOptions;
+  programFound: boolean;
+}): ChoiceRequest {
+  const nextStateVersion = input.stateVersion + 1;
+  return {
+    choiceId: `p3_38_mystery_box_corp_review_${nextStateVersion}`,
+    side: "corp",
+    source: `p3_38.mystery_box_corp_review:${input.sourceCardId}:${input.sourceDefinitionId}:${input.topCards.join(",")}:${nextStateVersion}`,
+    prompt: input.programFound
+      ? "Mystery Box: Stack-Spitze ansehen"
+      : "Mystery Box: keine Programmkarte",
+    kind: "select_cards",
+    options: [
+      ...input.options,
+      { id: "done", label: "Gesehen", value: "done" },
+    ],
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: nextStateVersion,
+    visibility: "public",
+    cardSearchPresentation: {
+      sourceZone: "stack",
+      selectableFilter: "matching_cards",
+      reveal: "public",
+      destination: "install_program",
+      shuffleAfter: true,
+      publicRevealKind: "reveal",
+      showNonMatchingCards: true,
+    },
+  };
+}
+
+export function buildLookTopStackShowToCorpThenInstallMatchingChoice(input: {
+  stateVersion: number;
+  sourceCardId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  topCards: readonly CardInstanceId[];
+  options: ChoiceOptions;
+}): ChoiceRequest {
+  const nextStateVersion = input.stateVersion + 1;
+  return {
+    choiceId: `p3_38_stack_show_install_${nextStateVersion}`,
+    side: "runner",
+    source: `p3_38.look_top_stack_show_to_corp_then_install_matching:${input.sourceCardId}:${input.sourceDefinitionId}:${input.topCards.join(",")}:${nextStateVersion}`,
+    prompt: "Gezeigtes Programm installieren",
+    kind: "select_cards",
+    options: input.options,
+    minSelections: 1,
+    maxSelections: 1,
+    stateVersion: nextStateVersion,
+    visibility: "public",
+  };
+}

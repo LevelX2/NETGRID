@@ -5118,6 +5118,133 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(continued.requesterPayload.playerView.stateVersion).toBeGreaterThan(declined.actorPayload.playerView.stateVersion);
   });
 
+  it("waits for Human Corp Mystery Box review before Runner AI installs a shown program", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "ai-runner-mystery-box-review" });
+    const created = await service.createMatch({
+      mode: "human_corp_vs_runner_ai",
+      hostSide: "corp",
+      seed: "server-runner-ai-mystery-box-review",
+      runnerDifficulty: "normal"
+    });
+    const record = await storage.load(created.matchId);
+    if (!record) throw new Error("Missing stored match");
+
+    const runnerDeck: DeckDefinition = {
+      id: "server_runner_ai_mystery_box_runner",
+      name: "Server Runner AI Mystery Box Runner",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "onr_v1_043_mystery-box", quantity: 1 },
+        { id: "simple_decoder", quantity: 1 },
+        { id: "simple_economy_event", quantity: 8 }
+      ]
+    };
+    const corpDeck: DeckDefinition = {
+      id: "server_runner_ai_mystery_box_corp",
+      name: "Server Runner AI Mystery Box Corp",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "simple_agenda", quantity: 3 },
+        { id: "simple_economy_operation", quantity: 6 }
+      ]
+    };
+    let gameState = toRunnerTurnEngine(
+      createGameAfterSetup({
+        matchId: created.matchId,
+        seed: "server-runner-ai-mystery-box-review-engine",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck,
+        corpDeck,
+        agendaPointsToWin: 7
+      })
+    );
+    expectCurrentRulesBaseline(gameState);
+    gameState.runner.credits = 20;
+    gameState.runner.memoryLimit = 8;
+    moveRunnerCardToGripForTest(gameState, "onr_v1_043_mystery-box");
+    gameState = applyEngineAction(
+      gameState,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionForServerTest(gameState, action) === "onr_v1_043_mystery-box"
+    );
+    putRunnerCardOnTopOfStackForTest(gameState, "simple_economy_event");
+    const decoderId = putRunnerCardOnTopOfStackForTest(gameState, "simple_decoder");
+    putCorpCardOnTopOfRdForTest(gameState, "simple_agenda");
+    gameState = applyEngineAction(gameState, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    gameState = applyEngineAction(
+      gameState,
+      "runner",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionForServerTest(gameState, action) === "onr_v1_043_mystery-box"
+    );
+    expect(gameState.pendingChoice).toMatchObject({
+      side: "corp",
+      source: expect.stringContaining("p3_38.mystery_box_corp_review")
+    });
+
+    record.gameState = gameState;
+    record.match.baseline = gameState.baseline;
+    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+    record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_ai_mystery_box_review")];
+    record.actionReceipts = [];
+    record.undoSnapshots = [];
+    delete record.pendingUndo;
+    await storage.save(record);
+
+    const beforeReview = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    expect("error" in beforeReview).toBe(false);
+    if ("error" in beforeReview) throw new Error(beforeReview.error.message);
+    expect(beforeReview.pendingChoice?.source).toContain("p3_38.mystery_box_corp_review");
+    expect(beforeReview.pendingChoice?.options.some((option) => option.value === decoderId)).toBe(true);
+    expect(beforeReview.aiTurnPresentation).toEqual({ canAdvanceAi: false, pacingMode: "paced" });
+
+    const blocked = await service.advanceAi({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: beforeReview.playerView.stateVersion,
+      knownMatchVersion: beforeReview.matchVersion,
+      mode: "single_step"
+    });
+    expect(blocked.ok).toBe(false);
+    if (blocked.ok) throw new Error("Expected advance_ai to wait for the human Corp review");
+    expect(blocked.error.code).toBe("ai_not_active");
+
+    const afterReview = await submitChoice(
+      service,
+      created.matchId,
+      { side: "corp", sessionToken: created.hostSessionToken, reconnectToken: created.hostReconnectToken },
+      "done",
+      "human-corp-mystery-box-review"
+    );
+    expect(afterReview.pendingChoice).toBeUndefined();
+    expect(afterReview.aiTurnPresentation).toEqual({ activeAiSide: "runner", canAdvanceAi: true, pacingMode: "paced" });
+
+    const runnerChoice = await service.advanceAi({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: afterReview.playerView.stateVersion,
+      knownMatchVersion: afterReview.matchVersion,
+      mode: "single_step"
+    });
+    expect(runnerChoice.ok).toBe(true);
+    if (!runnerChoice.ok) throw new Error(runnerChoice.error.message);
+    expect(runnerChoice.publicEvent?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      hiddenZoneAction: "p3_38_look_top_stack_show_to_corp_then_install_matching",
+      installedProgramDefinitionId: "simple_decoder",
+      selfTrashed: true
+    });
+    expect(JSON.stringify(runnerChoice.requesterPayload)).not.toContain("cardInstances");
+  });
+
   it("advances Runner AI through Krash breaking Filter into R&D access without post-pass jack-out", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, { tokenSalt: "ai-runner-krash-filter-access" });
@@ -6456,6 +6583,11 @@ function applyEngineChoice(state: GameState, side: Side, selectedOptionIds: stri
   });
   if (!result.ok) throw new Error(result.error.message);
   return result.state;
+}
+
+function sourceDefinitionForServerTest(state: GameState, action: LegalAction): string | undefined {
+  const cardId = String(action.payload?.cardId ?? action.source ?? "");
+  return state.cardInstances[cardId]?.definitionId;
 }
 
 function putCorpIceOnServerForTest(state: GameState, serverId: "hq" | "rd" | "archives" | `remote_${number}`, definitionId: string): CardInstanceId {

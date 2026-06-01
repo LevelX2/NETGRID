@@ -11,6 +11,7 @@ import {
   searchStackToGripTargets,
   searchTrashToGripTargets,
   sneakPreviewSourceOptions,
+  startLookTopStackShowToCorpThenInstallMatchingActivation,
   startLookTopStackTakeMatchingActivation,
   startSearchStackInstallActivation,
   startSearchStackToGripActivation,
@@ -210,6 +211,55 @@ describe("hidden-zone search choice activations", () => {
       hiddenZoneAction: "p3_38_search_stack_install",
       searchDestination: "install_program",
     });
+  });
+
+  it("starts p3_38 Mystery Box with a Corp review before Runner program choice", () => {
+    const program = "program" as CardInstanceId;
+    const resource = "resource" as CardInstanceId;
+    const run = { runId: "run_1" };
+    const host = makeHost({
+      run: run as NonNullable<HiddenZoneSearchActivationHost["state"]["run"]>,
+      stack: [program, resource],
+      rigPrograms: [sourceCardId],
+      canInstallIds: [program],
+      definitions: {
+        [sourceCardId]: card("mystery_box", "program", "Mystery Box"),
+        [program]: card("program_def", "program", "Program"),
+        [resource]: card("resource_def", "resource", "Resource"),
+      },
+    });
+
+    const result = startLookTopStackShowToCorpThenInstallMatchingActivation(host, {
+      sourceCardId,
+      sourceDefinitionId,
+      count: 5,
+      allowedTypes: ["program"],
+      installCost: "free",
+      trashSourceIfInstalled: true,
+      shuffleAfterwards: true,
+    });
+
+    expect(result.publicPayload).toMatchObject({
+      hiddenZoneAction: "p3_38_look_top_stack_show_to_corp_then_install_matching",
+      revealCount: 2,
+      programFound: true,
+      choiceVisibility: "corp_review",
+      shufflePerformed: false,
+    });
+    expect(host.state.pendingChoice).toMatchObject({
+      choiceId: "p3_38_mystery_box_corp_review_11",
+      side: "corp",
+      source: `p3_38.mystery_box_corp_review:${sourceCardId}:${sourceDefinitionId}:${program},${resource}:11`,
+      visibility: "public",
+      minSelections: 1,
+      maxSelections: 1,
+    });
+    expect(host.state.pendingChoice?.options.map((option) => option.id)).toEqual([
+      `shown_${program}`,
+      `shown_${resource}`,
+      "done",
+    ]);
+    expect(host.state.run?.successfulRunAbilityUsedSourceIds).toBeUndefined();
   });
 
   it("builds Sneak Preview source activation from heap and stack options", () => {

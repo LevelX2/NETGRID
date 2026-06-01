@@ -1,22 +1,41 @@
 ---
 activityId: act-2026-06-01-mystery-box-corp-review-gate
-status: inbox
+status: done
 kind: fix
 area: cards
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-01
-startedAt:
-completedAt:
+startedAt: 2026-06-01
+completedAt: 2026-06-01
 branch:
 releaseTarget:
 blockedBy: []
 relatedActivities:
   - act-2026-05-22-hidden-zone-search-card-image-choices
   - act-2026-05-24-private-look-readonly-card-display
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/hidden-zone/search-choice-builders.ts
+  - packages/engine/src/game/hidden-zone/search-choice-activations.ts
+  - packages/engine/src/game/hidden-zone/search-choice-handlers.ts
+  - packages/engine/src/game/hidden-zone/search-choice-activations.test.ts
+  - packages/engine/src/game/hidden-zone/search-choice-handlers.test.ts
+  - packages/engine/src/index-tests/originalset/agenda-scorearea-recurring.test.ts
+  - apps/server/src/multiplayer.test.ts
+  - apps/web/app/action-board-ui.ts
+  - apps/web/app/action-board-ui.test.ts
+  - apps/web/app/page.tsx
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/hidden-zone/search-choice-activations.test.ts src/game/hidden-zone/search-choice-handlers.test.ts
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/originalset/agenda-scorearea-recurring.test.ts -t "Mystery Box"
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/hidden-zone/search-choice-builders.test.ts
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/view/choice-view.test.ts
+  - corepack pnpm --filter @netgrid/server exec vitest run src/multiplayer.test.ts -t "Mystery Box review"
+  - corepack pnpm --filter @netgrid/web exec vitest run app/action-board-ui.test.ts -t "hidden multi-card choices"
+  - corepack pnpm --filter @netgrid/server typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - git diff --check
 ---
 
 # Mystery Box: Korp sieht Top-5-Reveal vor Programmauswahl
@@ -51,14 +70,14 @@ checks: []
 
 ## Akzeptanzkriterien
 
-- [ ] In Human-Korp-vs-Runner-KI bleibt der Mystery-Box-Top-5-Reveal sichtbar, bis die Korp ihn bestätigt oder schließt.
-- [ ] Die Runner-KI installiert kein Programm aus den gezeigten Karten, bevor die menschliche Korp den Reveal gesehen und bestätigt hat.
-- [ ] Die Anzeige nennt Quelle (`Mystery Box`), Zone (`Stack`), Anzahl der gezeigten Karten und alle gezeigten Kartennamen/Kartenansichten side-sicher.
-- [ ] Bei gefundenem Programm wählt der Runner weiterhin genau ein legal installierbares Programm aus den gezeigten Karten; `applyAction` revalidiert Stack-Spitze, Quelle, Timing und Ziel.
-- [ ] Bei keinem installierbaren Programm gibt es eine sichtbare Korp-Review mit No-Program-Hinweis und anschließendem Shuffle-Hinweis.
-- [ ] Hidden-Info-Grenzen bleiben gewahrt: nur die durch `Mystery Box` regelgemäß gezeigten Stack-Karten werden öffentlich, keine weiteren Stack-/Grip-/Heap-Informationen.
-- [ ] Replay und StateHash bleiben deterministisch; zusätzliche Review-/Ack-Schritte verändern keine verdeckte Zufalls- oder Kartenreihenfolge außerhalb des dokumentierten Shuffles.
-- [ ] Fokussierte Engine-/Server-/Web-Regressionen decken Human-Korp-vs-Runner-KI mit Programmfund und No-Program-Fall ab.
+- [x] In Human-Korp-vs-Runner-KI bleibt der Mystery-Box-Top-5-Reveal sichtbar, bis die Korp ihn bestätigt oder schließt.
+- [x] Die Runner-KI installiert kein Programm aus den gezeigten Karten, bevor die menschliche Korp den Reveal gesehen und bestätigt hat.
+- [x] Die Anzeige nennt Quelle (`Mystery Box`), Zone (`Stack`), Anzahl der gezeigten Karten und alle gezeigten Kartennamen/Kartenansichten side-sicher.
+- [x] Bei gefundenem Programm wählt der Runner weiterhin genau ein legal installierbares Programm aus den gezeigten Karten; `applyAction` revalidiert Stack-Spitze, Quelle, Timing und Ziel.
+- [x] Bei keinem installierbaren Programm gibt es eine sichtbare Korp-Review mit No-Program-Hinweis und anschließendem Shuffle-Hinweis.
+- [x] Hidden-Info-Grenzen bleiben gewahrt: nur die durch `Mystery Box` regelgemäß gezeigten Stack-Karten werden öffentlich, keine weiteren Stack-/Grip-/Heap-Informationen.
+- [x] Replay und StateHash bleiben deterministisch; zusätzliche Review-/Ack-Schritte verändern keine verdeckte Zufalls- oder Kartenreihenfolge außerhalb des dokumentierten Shuffles.
+- [x] Fokussierte Engine-/Server-/Web-Regressionen decken Human-Korp-vs-Runner-KI mit Programmfund und No-Program-Fall ab.
 
 ## Umsetzungshinweise
 
@@ -74,4 +93,6 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt: `Mystery Box` öffnet im aktuellen CardImplementation-Pfad nach der Aktivierung zuerst eine Korp-seitige Read-only-Review-Choice mit den gezeigten Stack-Karten. Erst nach `Gesehen` entsteht die öffentliche Runner-Programmauswahl; bei keinem installierbaren Programm wird der No-Program-/Shuffle-Pfad ebenfalls erst nach der Korp-Bestätigung aufgelöst. Human-Korp-vs-Runner-KI wartet dadurch auf die menschliche Korp und blockiert `advance_ai`, bis der Reveal bestätigt wurde. Der Webclient rendert die Korp-Review als reine Kartenanzeige mit `Fertig`.
+
+Checks: fokussierte Engine-, Server- und Web-Regressionen sowie Server-/Web-Typecheck bestanden. `corepack pnpm --filter @netgrid/engine typecheck` wurde ausgeführt und scheitert weiterhin an einem bestehenden, nicht paketbezogenen Fixture-Typfehler in `packages/engine/src/game/card-implementation/trace-runtime-deps.test.ts` (`addHackerTrackerTraceCounters`/`resolveTraceTrashRunnerResourceSuccess` fehlen im Test-Stub).
