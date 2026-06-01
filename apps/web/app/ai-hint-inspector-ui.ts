@@ -103,23 +103,21 @@ const CARD_ROLE_MANIFEST_NOTICE =
 
 export function aiInspectorSections(inspector: CatalogAiInspector): AiInspectorSection[] {
   return [
-    mechanicalFactsSection(inspector),
     tacticalSignalsSection(inspector),
     strategyAnchorSection(inspector),
     strategicRoleSection(inspector),
-    qualitySection(inspector),
     checkpointsSection(inspector),
+    mechanicalDetailsSection(inspector),
+    qualityDetailsSection(inspector),
     legacyMigrationSection(inspector),
   ];
 }
 
 export function defaultCollapsedAiInspectorSections(sections: AiInspectorSection[]): Record<string, boolean> {
   const openByDefault = new Set([
-    "mechanicalFacts",
     "tacticalSignals",
     "strategyAnchors",
     "strategicRole",
-    "quality",
     "checkpoints",
   ]);
   return Object.fromEntries(
@@ -194,37 +192,31 @@ export function forbiddenInspectorFields(value: unknown, found = new Set<string>
   return [...found].sort();
 }
 
-function mechanicalFactsSection(inspector: CatalogAiInspector): AiInspectorSection {
-  return {
-    key: "mechanicalFacts",
-    title: "Mechanische Facts",
-    description:
-      "Neues KI-Semantik-Zielmodell aus vorhandenen ViewModel-Feldern: effects, conditions, costProfile, breakerProfile, remoteRole und targetProfiles.",
-    emptyText: "Keine mechanischen Facts vorhanden.",
-    entries: mechanicalFactEntries(inspector),
-  };
-}
-
 function tacticalSignalsSection(inspector: CatalogAiInspector): AiInspectorSection {
+  const entries = stringEntries("Taktiksignal", inspector.functionSignals, "info");
+  if (entries.length === 0 && hasMechanicalDetails(inspector)) {
+    entries.push({
+      label: "Hinweis",
+      value: "Keine Taktiksignale vorhanden",
+      detail: "Mechanische Daten vorhanden, aber noch keine Taktiksignale abgeleitet.",
+      tone: "warning",
+    });
+  }
   return {
     key: "tacticalSignals",
-    title: "Taktiksignale (Function-Signals)",
-    description:
-      "Aus dem Inspector-Index gelesene Taktiksignale; die UI leitet hier keine neuen Function-Signals aus Legacy-Feldern ab.",
+    title: "Taktiksignale",
+    description: "Aus Kartenmechanik abgeleitete Funktionssignale.",
     emptyText: "Keine Taktiksignale vorhanden.",
-    entries: stringEntries("Taktiksignal", inspector.functionSignals, "info"),
+    entries,
   };
 }
 
 function strategyAnchorSection(inspector: CatalogAiInspector): AiInspectorSection {
-  const entries: AiInspectorEntry[] = [
-    ...stringEntries("Abgeleiteter Strategieanker", inspector.strategyAnchors, "valid"),
-    ...activeLineSupportEntries(inspector.lineSupport.classification),
-  ];
+  const entries = mergedStrategyAnchorEntries(inspector);
   if (entries.length === 0) {
     entries.push({
       label: "Strategieanker",
-      value: "keine aktive Strategiezuordnung",
+      value: "Keine aktive Strategiezuordnung",
       tone: "info",
     });
   }
@@ -232,7 +224,7 @@ function strategyAnchorSection(inspector: CatalogAiInspector): AiInspectorSectio
     key: "strategyAnchors",
     title: "Strategieanker",
     description:
-      "Abgeleitete Strategy Anchors und nur normalisierter lineSupport als gültige Strategy-ID; Alias- und Review-Werte bleiben Legacy.",
+      "Eindeutige Strategy Goals aus abgeleiteten Strategieankern und gültigem normalisiertem lineSupport.",
     entries,
   };
 }
@@ -241,18 +233,18 @@ function strategicRoleSection(inspector: CatalogAiInspector): AiInspectorSection
   return {
     key: "strategicRole",
     title: "Strategische Rolle",
-    description: "Gültige strategicRole-Werte aus dem vorhandenen ViewModel.",
+    description: "Rolle der Karte innerhalb einer Strategie, falls sie als Strategieanker oder strategisches Werkzeug dient.",
     emptyText: "Keine strategische Rolle gesetzt.",
-    entries: stringEntries("strategicRole", validStrategicRoles(inspector), "valid"),
+    entries: stringEntries("Strategische Rolle", validStrategicRoles(inspector), "valid"),
   };
 }
 
-function qualitySection(inspector: CatalogAiInspector): AiInspectorSection {
+function qualityDetailsSection(inspector: CatalogAiInspector): AiInspectorSection {
   return {
-    key: "quality",
-    title: "Quality",
-    description: "Nur tatsächlich vorhandene Quality-Felder aus dem compiled Hint.",
-    emptyText: "Keine Quality-Felder vorhanden.",
+    key: "qualityDetails",
+    title: "Interne Qualität / Reviewdaten",
+    description: "Interne Qualitäts- und Review-Metadaten aus dem compiled Hint.",
+    emptyText: "Keine internen Qualität- oder Reviewdaten vorhanden.",
     entries: qualityEntries(inspector),
   };
 }
@@ -260,33 +252,16 @@ function qualitySection(inspector: CatalogAiInspector): AiInspectorSection {
 function checkpointsSection(inspector: CatalogAiInspector): AiInspectorSection {
   const entries: AiInspectorEntry[] = [];
   const support = inspector.supportStatus;
-  entries.push(
-    {
-      label: "Compiled Hint",
-      value: support.compiledHintFound ? "vorhanden" : "fehlt",
-      tone: support.compiledHintFound ? "valid" : "danger",
-    },
-    {
-      label: "Mechanische Facts",
-      value: support.mechanicalFactsFound ? "vorhanden" : "nicht gesetzt",
-      tone: support.mechanicalFactsFound ? "valid" : "info",
-    },
-    {
-      label: "Generated Facts",
-      value: support.generatedFactsFound ? "ja" : "nein",
-      tone: support.generatedFactsFound ? "valid" : "info",
-    },
-  );
-  if (support.legacyFallbackOnly) {
-    entries.push({
-      label: "Legacy / Migration",
-      value: "Legacy-Fallback-only",
-      detail: RUNTIME_LEGACY_NOTICE,
-      tone: "legacy",
-    });
-  }
-  if (!inspector.supportStatus.compiledHintFound) {
+  if (!support.compiledHintFound) {
     entries.push({ label: "Missing compiled hint", value: "missing compiled hint", tone: "danger" });
+  }
+  entries.push(...qualityCheckpointEntries(inspector));
+  if (support.mechanicalFactsFound && inspector.functionSignals.length === 0) {
+    entries.push({
+      label: "Taktiksignal-Lücke",
+      value: "Mechanische Daten vorhanden, aber noch keine Taktiksignale abgeleitet",
+      tone: "warning",
+    });
   }
   for (const category of inspector.warnings.categories) {
     if (isLegacyNoticeCategory(category)) continue;
@@ -305,12 +280,20 @@ function checkpointsSection(inspector: CatalogAiInspector): AiInspectorSection {
       tone: "warning",
     });
   }
+  if (support.legacyFallbackOnly) {
+    entries.push({
+      label: "Legacy / Migration",
+      value: "Legacy-Fallback-only",
+      detail: RUNTIME_LEGACY_NOTICE,
+      tone: "legacy",
+    });
+  }
   const legacyCount = legacyDetailCount(inspector);
   if (legacyCount > 0) {
     entries.push({
       label: "Legacy / Migration",
       value: "Legacy-Daten vorhanden",
-      detail: RUNTIME_LEGACY_NOTICE,
+      detail: "Details unter Legacy / Migration.",
       tone: "legacy",
     });
   }
@@ -318,9 +301,20 @@ function checkpointsSection(inspector: CatalogAiInspector): AiInspectorSection {
     key: "checkpoints",
     title: "Prüfpunkte",
     description:
-      "Descriptor-Gaps, Deferred/Human Review, Missing compiled hint, Invalid/Hard Problem und kompakter Legacy-Hinweis.",
-    emptyText: "Keine Prüfpunkte.",
+      "Echte fachliche Prüfpunkte: Human Review, niedrige Confidence, Descriptor-Gaps, Missing compiled hint, Invalid/Hard Problem und kompakter Legacy-Hinweis.",
+    emptyText: "Keine fachlichen Prüfpunkte.",
     entries,
+  };
+}
+
+function mechanicalDetailsSection(inspector: CatalogAiInspector): AiInspectorSection {
+  return {
+    key: "mechanicalDetails",
+    title: "Herleitung / mechanische Details",
+    description:
+      "Diese Daten zeigen, aus welchen regelnahen Karteninformationen die Taktiksignale abgeleitet wurden.",
+    emptyText: "Keine mechanischen Details vorhanden.",
+    entries: mechanicalDetailsEntries(inspector),
   };
 }
 
@@ -333,6 +327,12 @@ function legacyMigrationSection(inspector: CatalogAiInspector): AiInspectorSecti
             label: "Hinweis",
             value: "bisheriger KI-Pfad",
             detail: LEGACY_MIGRATION_NOTICE,
+            tone: "legacy" as const,
+          },
+          {
+            label: "Runtime-Legacy",
+            value: "KI nutzt Legacy teilweise",
+            detail: RUNTIME_LEGACY_NOTICE,
             tone: "legacy" as const,
           },
           {
@@ -407,6 +407,19 @@ function mechanicalFactEntries(inspector: CatalogAiInspector): AiInspectorEntry[
   return entries;
 }
 
+function mechanicalDetailsEntries(inspector: CatalogAiInspector): AiInspectorEntry[] {
+  const entries = mechanicalFactEntries(inspector);
+  const compiledHintsPath = inspector.source.compiledHintsPath;
+  if (typeof compiledHintsPath === "string") {
+    entries.push({
+      label: "Compiled source",
+      value: compiledHintsPath,
+      tone: "info",
+    });
+  }
+  return entries;
+}
+
 function classificationEntry(field: string, entry: CatalogAiInspectorClassification): AiInspectorEntry {
   const isSelfMapping = entry.mapsTo.length === 1 && entry.mapsTo[0] === entry.value;
   const classification =
@@ -420,15 +433,27 @@ function classificationEntry(field: string, entry: CatalogAiInspectorClassificat
   };
 }
 
-function activeLineSupportEntries(classification: CatalogAiInspectorClassification[]): AiInspectorEntry[] {
-  return classification
-    .filter((entry) => isActiveLineSupport(entry))
-    .map((entry) => ({
-      label: "Gültiger lineSupport",
-      value: entry.value,
-      detail: "normalisierte Strategy-ID",
-      tone: "valid" as const,
-    }));
+function mergedStrategyAnchorEntries(inspector: CatalogAiInspector): AiInspectorEntry[] {
+  const sources = new Map<string, { derived: boolean; lineSupport: boolean }>();
+  for (const strategyId of inspector.strategyAnchors) {
+    sources.set(strategyId, { ...(sources.get(strategyId) ?? { derived: false, lineSupport: false }), derived: true });
+  }
+  for (const entry of inspector.lineSupport.classification) {
+    if (!isActiveLineSupport(entry)) continue;
+    sources.set(entry.value, { ...(sources.get(entry.value) ?? { derived: false, lineSupport: false }), lineSupport: true });
+  }
+  return [...sources.entries()].map(([strategyId, source]) => ({
+    label: "Strategieanker",
+    value: strategyId,
+    detail: `Quelle: ${strategyAnchorSourceLabel(source)}`,
+    tone: "valid" as const,
+  }));
+}
+
+function strategyAnchorSourceLabel(source: { derived: boolean; lineSupport: boolean }): string {
+  if (source.derived && source.lineSupport) return "abgeleitet + lineSupport";
+  if (source.derived) return "abgeleitet";
+  return "lineSupport";
 }
 
 function inactiveLineSupportEntries(classification: CatalogAiInspectorClassification[]): AiInspectorEntry[] {
@@ -442,7 +467,28 @@ function isActiveLineSupport(entry: CatalogAiInspectorClassification): boolean {
 }
 
 function qualityEntries(inspector: CatalogAiInspector): AiInspectorEntry[] {
-  return inspector.quality ? keyValueEntries("Quality", inspector.quality, "info") : [];
+  return inspector.quality ? keyValueEntries("Reviewdaten", inspector.quality, "info") : [];
+}
+
+function qualityCheckpointEntries(inspector: CatalogAiInspector): AiInspectorEntry[] {
+  const quality = inspector.quality;
+  const entries: AiInspectorEntry[] = [];
+  if (!quality) return entries;
+  if (quality.needsHumanReview === true) {
+    entries.push({
+      label: "Human Review",
+      value: "needs_human_review",
+      tone: "warning",
+    });
+  }
+  if (quality.confidence === "low") {
+    entries.push({
+      label: "Confidence low",
+      value: "confidence low",
+      tone: "warning",
+    });
+  }
+  return entries;
 }
 
 function validStrategicRoles(inspector: CatalogAiInspector): string[] {
@@ -490,6 +536,19 @@ function legacyDetailCount(inspector: CatalogAiInspector): number {
     inspector.lineSupport.classification.filter((entry) => !isActiveLineSupport(entry)).length +
     inspector.warnings.categories.filter(isLegacyNoticeCategory).length +
     Object.keys(inspector.warnings.legacyStatus).length
+  );
+}
+
+function hasMechanicalDetails(inspector: CatalogAiInspector): boolean {
+  const facts = inspector.mechanicalFacts;
+  return Boolean(
+    facts &&
+      (facts.effects.length > 0 ||
+        facts.conditions.length > 0 ||
+        facts.costProfile ||
+        facts.breakerProfile ||
+        facts.remoteRole ||
+        facts.targetProfiles.length > 0),
   );
 }
 
