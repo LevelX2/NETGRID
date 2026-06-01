@@ -3489,25 +3489,10 @@
           "confidence": "medium"
         },
         "corp.damage_kill": {
-          "anchorScore": 100,
+          "anchorScore": 72,
           "supportScore": 45,
-          "finalScore": 78,
+          "finalScore": 61,
           "anchorEvidence": [
-            {
-              "cardId": "onr_v1_285_closed-accounts",
-              "quantity": 1,
-              "source": "derivedStrategyAnchor",
-              "strategyId": "corp.damage_kill",
-              "reason": "derived_strategy_anchor_from_inspector_index"
-            },
-            {
-              "cardId": "onr_v1_285_closed-accounts",
-              "quantity": 1,
-              "source": "strategicRole",
-              "role": "punish_payoff",
-              "strategyId": "corp.damage_kill",
-              "reason": "valid_strategicRole_reinforces_existing_anchor"
-            },
             {
               "cardId": "onr_v1_301_punitive-counterstrike",
               "quantity": 1,
@@ -3573,12 +3558,12 @@
             "low_ambush_support",
             "low_tagOrTrace_support"
           ],
-          "confidence": "high"
+          "confidence": "medium"
         },
         "corp.economy_rez_reserve": {
           "anchorScore": 100,
-          "supportScore": 90,
-          "finalScore": 95,
+          "supportScore": 95,
+          "finalScore": 97,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_203_hostile-takeover",
@@ -3611,6 +3596,13 @@
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_214_project-babylon",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "score.advance_burst",
+              "reason": "support:scorePlan"
             },
             {
               "cardId": "onr_v1_232_crystal-wall",
@@ -3697,16 +3689,21 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_scorePlan_support"
-          ],
+          "supportGaps": [],
           "confidence": "high"
         },
         "corp.fast_advance": {
-          "anchorScore": 40,
-          "supportScore": 60,
-          "finalScore": 48,
+          "anchorScore": 72,
+          "supportScore": 80,
+          "finalScore": 75,
           "anchorEvidence": [
+            {
+              "cardId": "onr_v1_214_project-babylon",
+              "quantity": 1,
+              "source": "derivedStrategyAnchor",
+              "strategyId": "corp.fast_advance",
+              "reason": "derived_strategy_anchor_from_inspector_index"
+            },
             {
               "cardId": "onr_v1_214_project-babylon",
               "quantity": 1,
@@ -3745,6 +3742,13 @@
               "source": "compiledHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
+            },
+            {
+              "cardId": "onr_v1_214_project-babylon",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "score.advance_burst",
+              "reason": "support:scoreAcceleration"
             },
             {
               "cardId": "onr_v1_220_tycho-extension",
@@ -3838,10 +3842,8 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [
-            "low_scoreAcceleration_support"
-          ],
-          "confidence": "medium"
+          "supportGaps": [],
+          "confidence": "high"
         },
         "corp.ice_tax_glacier": {
           "anchorScore": 100,
@@ -3872,6 +3874,13 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
+              "source": "derivedStrategyAnchor",
+              "strategyId": "corp.ice_tax_glacier",
+              "reason": "derived_strategy_anchor_from_inspector_index"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.ice_tax_glacier",
               "reason": "derived_strategy_anchor_from_inspector_index"
@@ -4403,9 +4412,9 @@
       ],
       "secondaryStrategies": [
         "corp.tag_trace_punish",
+        "corp.fast_advance",
         "corp.damage_kill",
         "corp.central_stabilize",
-        "corp.fast_advance",
         "corp.rush_score"
       ],
       "functionSignalCounts": {
@@ -4414,8 +4423,11 @@
         "economy.generic": 5,
         "economy.rez_discount": 1,
         "ice.etr": 8,
+        "ice.strength_modifier": 1,
+        "score.advance_burst": 1,
         "setup.draw": 4,
-        "tag.payoff": 2
+        "tag.payoff": 2,
+        "tax.runner_credit": 1
       },
       "legacySignalCounts": {
         "lineSupport:corp.damage_kill": 1,
@@ -4466,8 +4478,8 @@
           "taxRunCost": 8
         },
         "scoreProfile": {
-          "scoreAcceleration": 0,
-          "agendaInstallAdvanceScoreSupport": 6,
+          "scoreAcceleration": 1,
+          "agendaInstallAdvanceScoreSupport": 7,
           "remoteScoringProtection": 3,
           "stealTax": 0
         },
@@ -4776,41 +4788,10 @@
           "confidence": "medium"
         },
         "corp.damage_kill": {
-          "anchorScore": 100,
+          "anchorScore": 0,
           "supportScore": 45,
-          "finalScore": 78,
-          "anchorEvidence": [
-            {
-              "cardId": "onr_v1_285_closed-accounts",
-              "quantity": 2,
-              "source": "derivedStrategyAnchor",
-              "strategyId": "corp.damage_kill",
-              "reason": "derived_strategy_anchor_from_inspector_index"
-            },
-            {
-              "cardId": "onr_v1_285_closed-accounts",
-              "quantity": 2,
-              "source": "strategicRole",
-              "role": "punish_payoff",
-              "strategyId": "corp.damage_kill",
-              "reason": "valid_strategicRole_reinforces_existing_anchor"
-            },
-            {
-              "cardId": "onr_v1_287_datapool-by-zetatech",
-              "quantity": 1,
-              "source": "derivedStrategyAnchor",
-              "strategyId": "corp.damage_kill",
-              "reason": "derived_strategy_anchor_from_inspector_index"
-            },
-            {
-              "cardId": "onr_v1_287_datapool-by-zetatech",
-              "quantity": 1,
-              "source": "strategicRole",
-              "role": "punish_payoff",
-              "strategyId": "corp.damage_kill",
-              "reason": "valid_strategicRole_reinforces_existing_anchor"
-            }
-          ],
+          "finalScore": 18,
+          "anchorEvidence": [],
           "supportEvidence": [
             {
               "cardId": "onr_v1_203_hostile-takeover",
@@ -4894,7 +4875,7 @@
             "low_ambush_support",
             "low_punish_payoff_density"
           ],
-          "confidence": "high"
+          "confidence": "low"
         },
         "corp.economy_rez_reserve": {
           "anchorScore": 100,
@@ -5246,6 +5227,13 @@
             {
               "cardId": "onr_v1_279_wall-of-static",
               "quantity": 2,
+              "source": "derivedStrategyAnchor",
+              "strategyId": "corp.ice_tax_glacier",
+              "reason": "derived_strategy_anchor_from_inspector_index"
+            },
+            {
+              "cardId": "onr_v1_317_data-masons",
+              "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.ice_tax_glacier",
               "reason": "derived_strategy_anchor_from_inspector_index"
@@ -5997,7 +5985,6 @@
       ],
       "secondaryStrategies": [
         "corp.remote_scoring",
-        "corp.damage_kill",
         "corp.central_stabilize",
         "corp.rush_score"
       ],
@@ -6006,9 +5993,11 @@
         "economy.generic": 6,
         "economy.rez_discount": 1,
         "ice.etr": 6,
+        "ice.strength_modifier": 1,
         "setup.draw": 4,
         "tag.payoff": 3,
         "tag.source": 4,
+        "tax.runner_credit": 2,
         "trace.source": 2
       },
       "legacySignalCounts": {
@@ -6127,6 +6116,6 @@
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 5
     },
-    "contentSha256": "0232eb341b80f5f385b3c1d8b3a457a0be7b6e5e1809a105930423175381964d"
+    "contentSha256": "fc35ffe0f8ba4ec198879b79ddbf296ba3fb8d9b38b214feea7e675c6e98e6b8"
   }
 }

@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI003-1",
-  "updatesTaskId": "AI003",
-  "generatedAt": "2026-05-31",
-  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. Function signals are derived analysis inputs and are not manual hint truth.",
+  "taskId": "AI016",
+  "updatesTaskId": "AI003/AI003-1/AI015",
+  "generatedAt": "2026-06-01",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI016 narrows scored agenda and tag payoff anchors and adds controlled ICE modifier, ICE tax, access-punish and Runner-tax signals. Function signals are derived analysis inputs and are not manual hint truth.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -75,6 +75,29 @@
       "source": "effects",
       "match": {
         "kind": "counter_economy"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "tax.runner_credit",
+      "source": "effects",
+      "match": {
+        "kind": "counter_economy",
+        "resource": "credits",
+        "scope": "runner"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "runner"
+        ]
       },
       "strategyAnchorFor": []
     },
@@ -580,8 +603,7 @@
         ]
       },
       "strategyAnchorFor": [
-        "corp.tag_trace_punish",
-        "corp.damage_kill"
+        "corp.tag_trace_punish"
       ]
     },
     {
@@ -657,6 +679,31 @@
       ]
     },
     {
+      "signalId": "damage.payoff",
+      "source": "effects",
+      "match": {
+        "kind": "tag_punish_payoff",
+        "resource": "damage"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "agenda",
+          "asset",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.damage_kill"
+      ]
+    },
+    {
       "signalId": "access.punish",
       "source": "effects",
       "match": {
@@ -677,6 +724,52 @@
       "strategyAnchorFor": [
         "corp.ambush_bluff"
       ]
+    },
+    {
+      "signalId": "access.punish",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "scope": "runner",
+        "timing": "on_access"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "upgrade"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "tax.runner_persistent",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "scope": "runner"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "ice",
+          "upgrade"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "defense.damage_prevention",
@@ -797,6 +890,34 @@
       ]
     },
     {
+      "signalId": "score.advance_burst",
+      "source": "effects",
+      "match": {
+        "kind": "score_acceleration",
+        "resource": "advancement_counters"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "agenda",
+          "asset",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "corp",
+          "installed_card",
+          "remote",
+          "score_area"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.fast_advance"
+      ]
+    },
+    {
       "signalId": "score.agenda_action",
       "source": "effects",
       "match": {
@@ -813,9 +934,7 @@
           "score_area"
         ]
       },
-      "strategyAnchorFor": [
-        "corp.fast_advance"
-      ]
+      "strategyAnchorFor": []
     },
     {
       "signalId": "tax.ice",
@@ -834,6 +953,109 @@
         "effectScope": [
           "ice",
           "run_path"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "tax.ice",
+      "source": "effects",
+      "match": {
+        "kind": "run_tax",
+        "scope": "run_path"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "ice"
+        ],
+        "effectScope": [
+          "run_path"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "ice.strength_modifier",
+      "source": "effects",
+      "match": {
+        "kind": "global_modifier",
+        "resource": "strength",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "agenda",
+          "asset",
+          "ice",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "ice"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "ice.strength_modifier",
+      "source": "effects",
+      "match": {
+        "kind": "remote_protection",
+        "resource": "strength",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "agenda",
+          "asset",
+          "ice",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "ice"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "ice.subroutine_modifier",
+      "source": "effects",
+      "match": {
+        "kind": "global_modifier",
+        "resource": "subroutines",
+        "scope": "ice"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "agenda",
+          "asset",
+          "ice",
+          "operation",
+          "upgrade"
+        ],
+        "effectScope": [
+          "ice"
         ]
       },
       "strategyAnchorFor": [

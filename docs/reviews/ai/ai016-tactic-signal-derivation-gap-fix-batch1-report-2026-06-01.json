@@ -1,0 +1,322 @@
+{
+  "schemaVersion": "ai016-tactic-signal-derivation-gap-fix-batch1-report-v1",
+  "taskId": "AI016",
+  "generatedAt": "2026-06-01",
+  "status": "implemented",
+  "runtimeEffect": "none",
+  "plannerEffect": "none",
+  "hintMigration": "none",
+  "summary": {
+    "before": {
+      "source": "AI015 review baseline",
+      "derivationRuleCount": 57,
+      "catalogSignalCount": 51,
+      "observedSignalCount": 44,
+      "cardsWithFunctionSignals": 330,
+      "cardsWithStrategyAnchors": 226,
+      "mechanicalFactsWithoutSignals": 62
+    },
+    "after": {
+      "source": "rebuilt data/ai/ai-hint-inspector-index.json",
+      "derivationRuleCount": 66,
+      "catalogSignalCount": 55,
+      "observedSignalCount": 49,
+      "cardsWithFunctionSignals": 344,
+      "cardsWithStrategyAnchors": 236,
+      "mechanicalFactsWithoutSignals": 48
+    }
+  },
+  "ruleChanges": [
+    {
+      "area": "score",
+      "change": "score.agenda_action no longer derives corp.fast_advance",
+      "replacementAnchorPath": "score.advance_burst derives corp.fast_advance from advance_burst or score_acceleration with advancement counter facts"
+    },
+    {
+      "area": "tag_payoff",
+      "change": "tag.payoff derives only corp.tag_trace_punish",
+      "replacementAnchorPath": "damage.payoff derives corp.damage_kill from damage facts or tag_punish_payoff with resource=damage"
+    },
+    {
+      "area": "ice_modifier",
+      "change": "Added ice.strength_modifier and ice.subroutine_modifier from Corp side- and scope-gated ICE modifier facts",
+      "anchorPath": "corp.ice_tax_glacier"
+    },
+    {
+      "area": "ice_tax",
+      "change": "tax.ice also derives from Corp ICE run_tax with scope=run_path",
+      "anchorPath": "corp.ice_tax_glacier"
+    },
+    {
+      "area": "ambush_access_punish",
+      "change": "persistent_counter_effect on_access against the Runner derives access.punish for Corp assets/upgrades",
+      "anchorPath": "corp.ambush_bluff"
+    },
+    {
+      "area": "runner_tax",
+      "change": "Added support-only tax.runner_credit and tax.runner_persistent",
+      "anchorPath": null
+    }
+  ],
+  "targetedCards": [
+    {
+      "cardId": "onr_v1_191_black-ice-quality-assurance",
+      "before": {
+        "derivedFunctionSignals": [],
+        "derivedStrategyAnchors": []
+      },
+      "after": {
+        "derivedFunctionSignals": [
+          "ice.strength_modifier"
+        ],
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ]
+      }
+    },
+    {
+      "cardId": "onr_v1_204_ice-transmutation",
+      "before": {
+        "derivedFunctionSignals": [],
+        "derivedStrategyAnchors": []
+      },
+      "after": {
+        "derivedFunctionSignals": [
+          "ice.strength_modifier",
+          "ice.subroutine_modifier"
+        ],
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ]
+      }
+    },
+    {
+      "cardId": "onr_proteus_057_doppelganger-antibody",
+      "before": {
+        "derivedFunctionSignals": [
+          "economy.counter"
+        ],
+        "derivedStrategyAnchors": []
+      },
+      "after": {
+        "derivedFunctionSignals": [
+          "access.punish",
+          "economy.counter",
+          "tax.runner_credit",
+          "tax.runner_persistent"
+        ],
+        "derivedStrategyAnchors": [
+          "corp.ambush_bluff"
+        ]
+      }
+    },
+    {
+      "cardId": "onr_v1_285_closed-accounts",
+      "before": {
+        "derivedFunctionSignals": [
+          "economy.counter",
+          "tag.payoff"
+        ],
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ]
+      },
+      "after": {
+        "derivedFunctionSignals": [
+          "economy.counter",
+          "tag.payoff",
+          "tax.runner_credit"
+        ],
+        "derivedStrategyAnchors": [
+          "corp.tag_trace_punish"
+        ]
+      }
+    },
+    {
+      "cardId": "onr_v1_208_on-call-solo-team",
+      "before": {
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "score.agenda_action",
+          "tag.payoff"
+        ],
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.fast_advance",
+          "corp.tag_trace_punish"
+        ]
+      },
+      "after": {
+        "derivedFunctionSignals": [
+          "damage.payoff",
+          "score.agenda_action",
+          "tag.payoff"
+        ],
+        "derivedStrategyAnchors": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ]
+      }
+    },
+    {
+      "cardId": "onr_proteus_001_ai-board-member",
+      "before": {
+        "derivedFunctionSignals": [],
+        "derivedStrategyAnchors": []
+      },
+      "after": {
+        "derivedFunctionSignals": [],
+        "derivedStrategyAnchors": []
+      }
+    },
+    {
+      "cardId": "onr_proteus_065_networked-center",
+      "before": {
+        "derivedFunctionSignals": [],
+        "derivedStrategyAnchors": []
+      },
+      "after": {
+        "derivedFunctionSignals": [
+          "score.advance_burst"
+        ],
+        "derivedStrategyAnchors": [
+          "corp.fast_advance"
+        ]
+      }
+    },
+    {
+      "cardId": "onr_v1_226_canis-minor",
+      "before": {
+        "derivedFunctionSignals": [],
+        "derivedStrategyAnchors": []
+      },
+      "after": {
+        "derivedFunctionSignals": [
+          "tax.ice"
+        ],
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ]
+      }
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "before": {
+        "derivedFunctionSignals": [],
+        "derivedStrategyAnchors": []
+      },
+      "after": {
+        "derivedFunctionSignals": [
+          "tax.ice"
+        ],
+        "derivedStrategyAnchors": [
+          "corp.ice_tax_glacier"
+        ]
+      }
+    }
+  ],
+  "signalCountsAfter": {
+    "access.punish": 6,
+    "damage.payoff": 38,
+    "ice.strength_modifier": 5,
+    "ice.subroutine_modifier": 1,
+    "score.advance_burst": 13,
+    "score.agenda_action": 12,
+    "tag.payoff": 17,
+    "tax.ice": 7,
+    "tax.runner_credit": 2,
+    "tax.runner_persistent": 5
+  },
+  "strategyAnchorCounts": {
+    "corp.ambush_bluff": {
+      "before": 5,
+      "after": 6
+    },
+    "corp.damage_kill": {
+      "before": 42,
+      "after": 38
+    },
+    "corp.fast_advance": {
+      "before": 15,
+      "after": 13
+    },
+    "corp.ice_tax_glacier": {
+      "before": 62,
+      "after": 71
+    },
+    "corp.tag_trace_punish": {
+      "before": 35,
+      "after": 35
+    }
+  },
+  "deliberatelyUnchanged": [
+    "No roles, planRoles, lineSupport or valueHints derivation",
+    "No manual functionTags",
+    "No active or compiled hint migration",
+    "No planner, action score, plan weight or runtime decision change",
+    "No engine, LegalAction, profile, default, Catalog or Proteus baseline change",
+    "No UI or React derivation logic",
+    "No remote-contest or central-defense derivation without first-class facts"
+  ],
+  "updatedGeneratedReports": [
+    "docs/reviews/ai/ai004-strategy-taxonomy-warning-triage-batch1-report-2026-05-31.json",
+    "docs/reviews/ai/ai004-side-aware-function-signal-derivation-report-2026-05-31.json",
+    "docs/reviews/ai/ai006-deck-doctrine-strategy-aggregation-v1-report-2026-05-31.json"
+  ],
+  "checks": [
+    {
+      "command": "corepack pnpm build:ai-hint-inspector-index",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-inspector-index",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-strategy-taxonomy",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-compiled-hints",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-quality",
+      "status": "pass_with_known_warnings"
+    },
+    {
+      "command": "corepack pnpm check:ai-approval-consistency",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm check:ai-deck-doctrine-strategy",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai test",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit",
+      "status": "pass"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/web exec tsc -p tsconfig.json --noEmit",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --check",
+      "status": "pass"
+    },
+    {
+      "command": "git diff --cached --check",
+      "status": "pass"
+    }
+  ],
+  "compiledHintRebuild": {
+    "command": "corepack pnpm build:ai-compiled-hints",
+    "required": false,
+    "reason": "AI016 did not change active or compiled hint source data."
+  }
+}

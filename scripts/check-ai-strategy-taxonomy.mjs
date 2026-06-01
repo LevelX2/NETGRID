@@ -1535,6 +1535,26 @@ function buildDerivationSmokeTests(rules) {
       ],
       conditions: [{ kind: "requires_runner_tagged" }],
     },
+    corpCreditTagPunishPayoff: {
+      cardId: "ai016_smoke_credit_tag_punish_payoff",
+      side: "corp",
+      cardType: "operation",
+      effects: [
+        {
+          kind: "counter_economy",
+          timing: "action",
+          scope: "runner",
+          resource: "credits",
+        },
+        {
+          kind: "tag_punish_payoff",
+          timing: "action",
+          scope: "runner",
+          resource: "credits",
+        },
+      ],
+      conditions: [{ kind: "requires_runner_tagged" }],
+    },
     corpDamagePayoff: {
       cardId: "ai003_1_smoke_corp_damage_payoff",
       side: "corp",
@@ -1548,6 +1568,84 @@ function buildDerivationSmokeTests(rules) {
           amount: 4,
         },
       ],
+    },
+    corpScoredAgendaUtility: {
+      cardId: "ai016_smoke_scored_agenda_utility",
+      side: "corp",
+      cardType: "agenda",
+      effects: [
+        {
+          kind: "scored_agenda_action",
+          timing: "scored_activated",
+          scope: "score_area",
+        },
+      ],
+    },
+    corpScoreAcceleration: {
+      cardId: "ai016_smoke_score_acceleration",
+      side: "corp",
+      cardType: "upgrade",
+      effects: [
+        {
+          kind: "score_acceleration",
+          timing: "persistent",
+          scope: "corp",
+          resource: "advancement_counters",
+        },
+      ],
+    },
+    corpIceStrengthModifier: {
+      cardId: "ai016_smoke_ice_strength_modifier",
+      side: "corp",
+      cardType: "agenda",
+      effects: [
+        {
+          kind: "global_modifier",
+          timing: "persistent",
+          scope: "ice",
+          resource: "strength",
+        },
+      ],
+    },
+    corpIceSubroutineModifier: {
+      cardId: "ai016_smoke_ice_subroutine_modifier",
+      side: "corp",
+      cardType: "agenda",
+      effects: [
+        {
+          kind: "global_modifier",
+          timing: "when_scored",
+          scope: "ice",
+          resource: "subroutines",
+        },
+      ],
+    },
+    corpRunPathIceTax: {
+      cardId: "ai016_smoke_run_path_ice_tax",
+      side: "corp",
+      cardType: "ice",
+      effects: [
+        {
+          kind: "run_tax",
+          timing: "encounter",
+          scope: "run_path",
+          resource: "credits",
+        },
+      ],
+    },
+    corpPersistentAccessPunish: {
+      cardId: "ai016_smoke_persistent_access_punish",
+      side: "corp",
+      cardType: "asset",
+      effects: [
+        {
+          kind: "persistent_counter_effect",
+          timing: "on_access",
+          scope: "runner",
+          resource: "counters",
+        },
+      ],
+      conditions: [{ kind: "requires_accessed_card" }],
     },
     corpExtraAction: {
       cardId: "ai003_1_smoke_corp_extra_action",

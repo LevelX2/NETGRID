@@ -85,6 +85,103 @@ describe("AI005 hint inspector index", () => {
       /"cardInstances"|"privatePayload"|"fullState"|"stateHash"|"actionId"/,
     );
   });
+
+  it("exposes AI016 tactic-signal derivation fixes without broad legacy anchors", () => {
+    const index = readIndex();
+    const blackIceQualityAssurance = card(
+      index,
+      "onr_v1_191_black-ice-quality-assurance",
+    );
+    const iceTransmutation = card(index, "onr_v1_204_ice-transmutation");
+    const doppelganger = card(
+      index,
+      "onr_proteus_057_doppelganger-antibody",
+    );
+    const closedAccounts = card(index, "onr_v1_285_closed-accounts");
+    const onCallSoloTeam = card(index, "onr_v1_208_on-call-solo-team");
+    const aiBoardMember = card(index, "onr_proteus_001_ai-board-member");
+    const networkedCenter = card(index, "onr_proteus_065_networked-center");
+    const canisMinor = card(index, "onr_v1_226_canis-minor");
+
+    expect(blackIceQualityAssurance.derivedFunctionSignals).toContain(
+      "ice.strength_modifier",
+    );
+    expect(blackIceQualityAssurance.derivedStrategyAnchors).toContain(
+      "corp.ice_tax_glacier",
+    );
+    expect(blackIceQualityAssurance.derivedStrategyAnchors).not.toContain(
+      "corp.remote_scoring",
+    );
+
+    expect(iceTransmutation.derivedFunctionSignals).toContain(
+      "ice.strength_modifier",
+    );
+    expect(iceTransmutation.derivedFunctionSignals).toContain(
+      "ice.subroutine_modifier",
+    );
+    expect(iceTransmutation.derivedStrategyAnchors).toContain(
+      "corp.ice_tax_glacier",
+    );
+    expect(iceTransmutation.derivedStrategyAnchors).not.toContain(
+      "corp.remote_scoring",
+    );
+
+    expect(doppelganger.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "access.punish",
+        "economy.counter",
+        "tax.runner_credit",
+        "tax.runner_persistent",
+      ]),
+    );
+    expect(doppelganger.derivedStrategyAnchors).toContain(
+      "corp.ambush_bluff",
+    );
+    expect(doppelganger.derivedStrategyAnchors).not.toContain(
+      "corp.asset_economy",
+    );
+
+    expect(closedAccounts.derivedFunctionSignals).toEqual(
+      expect.arrayContaining(["tag.payoff", "tax.runner_credit"]),
+    );
+    expect(closedAccounts.derivedStrategyAnchors).toContain(
+      "corp.tag_trace_punish",
+    );
+    expect(closedAccounts.derivedStrategyAnchors).not.toContain(
+      "corp.damage_kill",
+    );
+
+    expect(onCallSoloTeam.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "damage.payoff",
+        "score.agenda_action",
+        "tag.payoff",
+      ]),
+    );
+    expect(onCallSoloTeam.derivedStrategyAnchors).toContain(
+      "corp.damage_kill",
+    );
+    expect(onCallSoloTeam.derivedStrategyAnchors).toContain(
+      "corp.tag_trace_punish",
+    );
+    expect(onCallSoloTeam.derivedStrategyAnchors).not.toContain(
+      "corp.fast_advance",
+    );
+
+    expect(aiBoardMember.derivedStrategyAnchors).not.toContain(
+      "corp.fast_advance",
+    );
+    expect(networkedCenter.derivedFunctionSignals).toContain(
+      "score.advance_burst",
+    );
+    expect(networkedCenter.derivedStrategyAnchors).toContain(
+      "corp.fast_advance",
+    );
+    expect(canisMinor.derivedFunctionSignals).toContain("tax.ice");
+    expect(canisMinor.derivedStrategyAnchors).toContain(
+      "corp.ice_tax_glacier",
+    );
+  });
 });
 
 function readIndex(): AiHintInspectorIndex {

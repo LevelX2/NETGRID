@@ -16,8 +16,8 @@
     "cardsWithMechanicalFacts": 392,
     "cardsWithGeneratedFacts": 314,
     "cardsWithOverlays": 6,
-    "cardsWithFunctionSignals": 330,
-    "cardsWithStrategyAnchors": 226,
+    "cardsWithFunctionSignals": 344,
+    "cardsWithStrategyAnchors": 236,
     "cardsWithWarnings": 353,
     "warningCategoryCounts": {
       "deferred_requires_human_review": 282,
@@ -1354,9 +1354,12 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "economy.generic"
+        "economy.generic",
+        "tax.ice"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -4768,9 +4771,14 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "economy.counter"
+        "access.punish",
+        "economy.counter",
+        "tax.runner_credit",
+        "tax.runner_persistent"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -5262,8 +5270,12 @@
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "score.advance_burst"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -5707,8 +5719,12 @@
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "score.advance_burst"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -6018,8 +6034,12 @@
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "score.advance_burst"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -28556,9 +28576,7 @@
         "score.agenda_action",
         "setup.draw"
       ],
-      "derivedStrategyAnchors": [
-        "corp.fast_advance"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -28659,8 +28677,12 @@
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "score.advance_burst"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -28821,8 +28843,12 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "ice.strength_modifier"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "lineSupportClassification": [
         {
           "value": "corp.ice_tax_glacier",
@@ -28920,9 +28946,7 @@
       "derivedFunctionSignals": [
         "score.agenda_action"
       ],
-      "derivedStrategyAnchors": [
-        "corp.fast_advance"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "corp.fast_advance",
@@ -29016,9 +29040,7 @@
         "economy.counter",
         "score.agenda_action"
       ],
-      "derivedStrategyAnchors": [
-        "corp.fast_advance"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "corp.economy_rez_reserve",
@@ -29224,9 +29246,7 @@
         "economy.generic",
         "score.agenda_action"
       ],
-      "derivedStrategyAnchors": [
-        "corp.fast_advance"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -29570,9 +29590,7 @@
         "score.agenda_action",
         "setup.draw"
       ],
-      "derivedStrategyAnchors": [
-        "corp.fast_advance"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -29647,9 +29665,12 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "economy.generic"
+        "economy.generic",
+        "ice.strength_modifier"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -29737,8 +29758,12 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "score.advance_burst"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -29826,8 +29851,12 @@
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "score.advance_burst"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -29999,8 +30028,13 @@
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "ice.strength_modifier",
+        "ice.subroutine_modifier"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -30149,9 +30183,7 @@
         "economy.generic",
         "score.agenda_action"
       ],
-      "derivedStrategyAnchors": [
-        "corp.fast_advance"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "corp.economy_rez_reserve",
@@ -30254,7 +30286,6 @@
         "trace.source"
       ],
       "derivedStrategyAnchors": [
-        "corp.fast_advance",
         "corp.tag_trace_punish"
       ],
       "lineSupportClassification": [
@@ -30378,7 +30409,6 @@
       ],
       "derivedStrategyAnchors": [
         "corp.damage_kill",
-        "corp.fast_advance",
         "corp.tag_trace_punish"
       ],
       "lineSupportClassification": [
@@ -30502,9 +30532,7 @@
         "economy.finite_pool",
         "score.agenda_action"
       ],
-      "derivedStrategyAnchors": [
-        "corp.fast_advance"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "corp.economy_rez_reserve",
@@ -30623,9 +30651,7 @@
         "economy.generic",
         "score.agenda_action"
       ],
-      "derivedStrategyAnchors": [
-        "corp.fast_advance"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "corp.economy_rez_reserve",
@@ -30962,7 +30988,6 @@
         "trace.source"
       ],
       "derivedStrategyAnchors": [
-        "corp.fast_advance",
         "corp.tag_trace_punish"
       ],
       "lineSupportClassification": [
@@ -31079,8 +31104,12 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "score.advance_burst"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
       "lineSupportClassification": [
         {
           "value": "corp.fast_advance",
@@ -31383,7 +31412,6 @@
       ],
       "derivedStrategyAnchors": [
         "corp.damage_kill",
-        "corp.fast_advance",
         "corp.tag_trace_punish"
       ],
       "lineSupportClassification": [
@@ -31578,9 +31606,12 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "economy.generic"
+        "economy.generic",
+        "ice.strength_modifier"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "lineSupportClassification": [
         {
           "value": "corp.ice_tax_glacier",
@@ -31905,7 +31936,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "ice.future_pressure"
+        "ice.future_pressure",
+        "tax.ice"
       ],
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
@@ -32295,7 +32327,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "ice.future_pressure"
+        "ice.future_pressure",
+        "tax.ice"
       ],
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
@@ -32406,8 +32439,12 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "tax.ice"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "lineSupportClassification": [
         {
           "value": "corp.ice_tax_glacier",
@@ -32517,6 +32554,7 @@
       "derivedFunctionSignals": [
         "damage.payoff",
         "ice.etr",
+        "tax.runner_persistent",
         "trace.source"
       ],
       "derivedStrategyAnchors": [
@@ -33543,6 +33581,7 @@
       },
       "derivedFunctionSignals": [
         "tag.source",
+        "tax.runner_persistent",
         "trace.source"
       ],
       "derivedStrategyAnchors": [
@@ -35533,7 +35572,9 @@
       },
       "derivedFunctionSignals": [
         "damage.payoff",
-        "ice.etr"
+        "ice.etr",
+        "tax.ice",
+        "tax.runner_persistent"
       ],
       "derivedStrategyAnchors": [
         "corp.damage_kill",
@@ -37716,8 +37757,12 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "tax.ice"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "lineSupportClassification": [
         {
           "value": "corp.ice_tax_glacier",
@@ -37814,8 +37859,12 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "tax.ice"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "lineSupportClassification": [
         {
           "value": "corp.ice_tax_glacier",
@@ -38623,10 +38672,10 @@
       },
       "derivedFunctionSignals": [
         "economy.counter",
-        "tag.payoff"
+        "tag.payoff",
+        "tax.runner_credit"
       ],
       "derivedStrategyAnchors": [
-        "corp.damage_kill",
         "corp.tag_trace_punish"
       ],
       "lineSupportClassification": [
@@ -38735,7 +38784,6 @@
         "tag.payoff"
       ],
       "derivedStrategyAnchors": [
-        "corp.damage_kill",
         "corp.tag_trace_punish"
       ],
       "lineSupportClassification": [
@@ -38843,7 +38891,6 @@
         "tag.source"
       ],
       "derivedStrategyAnchors": [
-        "corp.damage_kill",
         "corp.tag_trace_punish"
       ],
       "lineSupportClassification": [
@@ -39243,8 +39290,12 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "score.advance_burst"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
       "lineSupportClassification": [
         {
           "value": "corp.fast_advance",
@@ -39835,7 +39886,6 @@
         "tag.payoff"
       ],
       "derivedStrategyAnchors": [
-        "corp.damage_kill",
         "corp.tag_trace_punish"
       ],
       "lineSupportClassification": [
@@ -41157,10 +41207,12 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "remote.asset_economy"
+        "remote.asset_economy",
+        "score.advance_burst"
       ],
       "derivedStrategyAnchors": [
-        "corp.asset_economy"
+        "corp.asset_economy",
+        "corp.fast_advance"
       ],
       "lineSupportClassification": [
         {
@@ -41650,10 +41702,12 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.rez_discount"
+        "economy.rez_discount",
+        "ice.strength_modifier"
       ],
       "derivedStrategyAnchors": [
-        "corp.economy_rez_reserve"
+        "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier"
       ],
       "lineSupportClassification": [
         {
@@ -45193,7 +45247,8 @@
       },
       "derivedFunctionSignals": [
         "access.punish",
-        "remote.ambush"
+        "remote.ambush",
+        "tax.runner_persistent"
       ],
       "derivedStrategyAnchors": [
         "corp.ambush_bluff"
@@ -47110,8 +47165,12 @@
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "score.advance_burst"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {

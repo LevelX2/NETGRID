@@ -60,8 +60,8 @@
       "utility",
       "win_condition"
     ],
-    "functionSignalRuleCount": 57,
-    "functionSignalCount": 51,
+    "functionSignalRuleCount": 66,
+    "functionSignalCount": 55,
     "functionSignalIds": [
       "access.hq_multiaccess",
       "access.punish",
@@ -92,6 +92,8 @@
       "economy.trash_credit",
       "ice.etr",
       "ice.future_pressure",
+      "ice.strength_modifier",
+      "ice.subroutine_modifier",
       "info.expose",
       "info.hq",
       "info.rnd_topdeck",
@@ -113,6 +115,8 @@
       "tag.source",
       "tax.ice",
       "tax.remote",
+      "tax.runner_credit",
+      "tax.runner_persistent",
       "trace.source"
     ]
   },
@@ -307,7 +311,7 @@
   "functionSignals": {
     "derivedSignalCounts": {
       "access.hq_multiaccess": 2,
-      "access.punish": 5,
+      "access.punish": 6,
       "access.rnd_multiaccess": 2,
       "breaker.ap": 2,
       "breaker.code_gate": 7,
@@ -333,6 +337,8 @@
       "economy.trash_credit": 23,
       "ice.etr": 54,
       "ice.future_pressure": 8,
+      "ice.strength_modifier": 5,
+      "ice.subroutine_modifier": 1,
       "info.expose": 5,
       "info.hq": 2,
       "info.rnd_topdeck": 3,
@@ -340,7 +346,7 @@
       "remote.ambush": 5,
       "remote.asset_economy": 16,
       "remote.scoring_protection": 5,
-      "score.advance_burst": 3,
+      "score.advance_burst": 13,
       "score.agenda_action": 12,
       "setup.draw": 19,
       "setup.install_discount": 7,
@@ -348,16 +354,19 @@
       "setup.search": 10,
       "tag.payoff": 17,
       "tag.source": 20,
+      "tax.ice": 7,
       "tax.remote": 7,
+      "tax.runner_credit": 2,
+      "tax.runner_persistent": 5,
       "trace.source": 9
     },
     "derivedStrategyAnchorCounts": {
-      "corp.ambush_bluff": 5,
+      "corp.ambush_bluff": 6,
       "corp.asset_economy": 16,
-      "corp.damage_kill": 42,
+      "corp.damage_kill": 38,
       "corp.economy_rez_reserve": 7,
-      "corp.fast_advance": 15,
-      "corp.ice_tax_glacier": 62,
+      "corp.fast_advance": 13,
+      "corp.ice_tax_glacier": 71,
       "corp.remote_scoring": 6,
       "corp.tag_trace_punish": 35,
       "runner.breaker_search": 11,
@@ -367,9 +376,9 @@
       "runner.rnd_pressure": 5,
       "runner.survival_defense": 42
     },
-    "totalDerivedStrategyAnchors": 277,
-    "cardsWithDerivedSignals": 330,
-    "cardsWithStrategyAnchors": 226,
+    "totalDerivedStrategyAnchors": 281,
+    "cardsWithDerivedSignals": 344,
+    "cardsWithStrategyAnchors": 236,
     "descriptorGaps": [
       {
         "gapId": "remote_contest_pressure_not_first_class",
@@ -393,8 +402,22 @@
     ]
   },
   "sideAwareDerivation": {
-    "preventedWrongSideAnchorCount": 26,
+    "preventedWrongSideAnchorCount": 28,
     "preventedWrongSideAnchorExamples": [
+      {
+        "cardId": "onr_v1_012_clown",
+        "side": "runner",
+        "cardType": "program",
+        "signalId": "ice.strength_modifier",
+        "strategyId": "corp.ice_tax_glacier"
+      },
+      {
+        "cardId": "onr_v1_156_corporate-ally",
+        "side": "runner",
+        "cardType": "resource",
+        "signalId": "score.advance_burst",
+        "strategyId": "corp.fast_advance"
+      },
       {
         "cardId": "onr_v1_192_corporate-boon",
         "side": "corp",
@@ -619,10 +642,22 @@
     "corpTagPunishPayoff": {
       "cardId": "ai003_smoke_tag_punish_payoff",
       "signals": [
+        "damage.payoff",
         "tag.payoff"
       ],
       "anchorStrategyIds": [
         "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ]
+    },
+    "corpCreditTagPunishPayoff": {
+      "cardId": "ai016_smoke_credit_tag_punish_payoff",
+      "signals": [
+        "economy.counter",
+        "tag.payoff",
+        "tax.runner_credit"
+      ],
+      "anchorStrategyIds": [
         "corp.tag_trace_punish"
       ]
     },
@@ -633,6 +668,59 @@
       ],
       "anchorStrategyIds": [
         "corp.damage_kill"
+      ]
+    },
+    "corpScoredAgendaUtility": {
+      "cardId": "ai016_smoke_scored_agenda_utility",
+      "signals": [
+        "score.agenda_action"
+      ],
+      "anchorStrategyIds": []
+    },
+    "corpScoreAcceleration": {
+      "cardId": "ai016_smoke_score_acceleration",
+      "signals": [
+        "score.advance_burst"
+      ],
+      "anchorStrategyIds": [
+        "corp.fast_advance"
+      ]
+    },
+    "corpIceStrengthModifier": {
+      "cardId": "ai016_smoke_ice_strength_modifier",
+      "signals": [
+        "ice.strength_modifier"
+      ],
+      "anchorStrategyIds": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    "corpIceSubroutineModifier": {
+      "cardId": "ai016_smoke_ice_subroutine_modifier",
+      "signals": [
+        "ice.subroutine_modifier"
+      ],
+      "anchorStrategyIds": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    "corpRunPathIceTax": {
+      "cardId": "ai016_smoke_run_path_ice_tax",
+      "signals": [
+        "tax.ice"
+      ],
+      "anchorStrategyIds": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    "corpPersistentAccessPunish": {
+      "cardId": "ai016_smoke_persistent_access_punish",
+      "signals": [
+        "access.punish",
+        "tax.runner_persistent"
+      ],
+      "anchorStrategyIds": [
+        "corp.ambush_bluff"
       ]
     },
     "corpExtraAction": {

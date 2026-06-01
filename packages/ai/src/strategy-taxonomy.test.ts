@@ -141,7 +141,14 @@ function smokeTest(
     | "hqMultiaccess"
     | "normalBreaker"
     | "corpTagPunishPayoff"
+    | "corpCreditTagPunishPayoff"
     | "corpDamagePayoff"
+    | "corpScoredAgendaUtility"
+    | "corpScoreAcceleration"
+    | "corpIceStrengthModifier"
+    | "corpIceSubroutineModifier"
+    | "corpRunPathIceTax"
+    | "corpPersistentAccessPunish"
     | "corpExtraAction"
     | "corpIceFutureRunEffect"
     | "corpTopdeckInfo"
@@ -299,6 +306,60 @@ describe("AI003 strategy goal taxonomy", () => {
     );
     expect(corpDamagePayoff.signals).toContain("damage.payoff");
     expect(corpDamagePayoff.anchorStrategyIds).toContain("corp.damage_kill");
+  });
+
+  it("keeps AI016 tactic derivation fixes narrow and side-aware", () => {
+    const report = loadStrategyTaxonomyReport();
+    const creditTagPunish = smokeTest(report, "corpCreditTagPunishPayoff");
+    const scoredAgendaUtility = smokeTest(report, "corpScoredAgendaUtility");
+    const scoreAcceleration = smokeTest(report, "corpScoreAcceleration");
+    const iceStrengthModifier = smokeTest(report, "corpIceStrengthModifier");
+    const iceSubroutineModifier = smokeTest(
+      report,
+      "corpIceSubroutineModifier",
+    );
+    const runPathIceTax = smokeTest(report, "corpRunPathIceTax");
+    const persistentAccessPunish = smokeTest(
+      report,
+      "corpPersistentAccessPunish",
+    );
+
+    expect(creditTagPunish.signals).toContain("tag.payoff");
+    expect(creditTagPunish.signals).toContain("tax.runner_credit");
+    expect(creditTagPunish.anchorStrategyIds).toContain(
+      "corp.tag_trace_punish",
+    );
+    expect(creditTagPunish.anchorStrategyIds).not.toContain(
+      "corp.damage_kill",
+    );
+
+    expect(scoredAgendaUtility.signals).toContain("score.agenda_action");
+    expect(scoredAgendaUtility.anchorStrategyIds).not.toContain(
+      "corp.fast_advance",
+    );
+    expect(scoreAcceleration.signals).toContain("score.advance_burst");
+    expect(scoreAcceleration.anchorStrategyIds).toContain("corp.fast_advance");
+
+    expect(iceStrengthModifier.signals).toContain("ice.strength_modifier");
+    expect(iceStrengthModifier.anchorStrategyIds).toContain(
+      "corp.ice_tax_glacier",
+    );
+    expect(iceSubroutineModifier.signals).toContain(
+      "ice.subroutine_modifier",
+    );
+    expect(iceSubroutineModifier.anchorStrategyIds).toContain(
+      "corp.ice_tax_glacier",
+    );
+    expect(runPathIceTax.signals).toContain("tax.ice");
+    expect(runPathIceTax.anchorStrategyIds).toContain("corp.ice_tax_glacier");
+
+    expect(persistentAccessPunish.signals).toContain("access.punish");
+    expect(persistentAccessPunish.signals).toContain(
+      "tax.runner_persistent",
+    );
+    expect(persistentAccessPunish.anchorStrategyIds).toContain(
+      "corp.ambush_bluff",
+    );
   });
 
   it("keeps legacy lineSupport cleared while retaining warn-only legacy and hard gates", () => {
