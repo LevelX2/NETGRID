@@ -4,6 +4,7 @@ Das Projektlog ist nach Monaten untergliedert. Der Einstieg bleibt hier kurz; vo
 
 ## Aktuelle Archive
 
+- [[Log 2026-06]]
 - [[Log 2026-05]]
 
 ## Sortierregel

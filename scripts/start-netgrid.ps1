@@ -177,6 +177,81 @@ function Stop-PortListeners {
   }
 }
 
+function Stop-ProcessTrees {
+  param(
+    [Parameter(Mandatory = $true)][int[]]$RootProcessIds,
+    [Parameter(Mandatory = $true)]$ProcessSnapshot,
+    [Parameter(Mandatory = $true)][string]$Reason
+  )
+
+  $childrenByParent = @{}
+  foreach ($process in $ProcessSnapshot) {
+    $parentProcessId = [int]$process.ParentProcessId
+    if (-not $childrenByParent.ContainsKey($parentProcessId)) {
+      $childrenByParent[$parentProcessId] = @()
+    }
+    $childrenByParent[$parentProcessId] += [int]$process.ProcessId
+  }
+
+  $processIds = New-Object System.Collections.Generic.HashSet[int]
+  $queue = New-Object System.Collections.Generic.Queue[int]
+  foreach ($processId in $RootProcessIds) {
+    if ($processId -gt 0) {
+      $queue.Enqueue($processId)
+    }
+  }
+
+  while ($queue.Count -gt 0) {
+    $processId = $queue.Dequeue()
+    if (-not $processIds.Add($processId)) {
+      continue
+    }
+
+    if ($childrenByParent.ContainsKey($processId)) {
+      foreach ($childProcessId in $childrenByParent[$processId]) {
+        $queue.Enqueue([int]$childProcessId)
+      }
+    }
+  }
+
+  foreach ($processId in $processIds) {
+    if ($processId -eq $PID) {
+      continue
+    }
+
+    try {
+      Write-LauncherLog "Stopping NETGRID process tree member pid=$processId reason=$Reason"
+      Stop-Process -Id $processId -Force -ErrorAction Stop
+    } catch {
+      # ignore already-exited processes
+    }
+  }
+
+  if ($processIds.Count -gt 0) {
+    Start-Sleep -Seconds 2
+  }
+}
+
+function Stop-NetgridServerProcessTrees {
+  $processes = @(Get-CimInstance Win32_Process -ErrorAction SilentlyContinue)
+  $serverRoots = @(
+    $processes |
+      Where-Object {
+        $commandLine = [string]$_.CommandLine
+        $isServerDev = $commandLine -match "pnpm\s+--filter\s+@netgrid/server\s+dev"
+        $isServerNormal = $commandLine -match "pnpm\s+--filter\s+@netgrid/server\s+exec\s+tsx\s+src/index\.ts"
+        $isServerTsxWatch = $commandLine -match "apps\\server" -and $commandLine -match "tsx" -and $commandLine -match "watch\s+src/index\.ts"
+        $isServerRoot = $isServerDev -or $isServerNormal -or ($commandLine -match [regex]::Escape($projectRoot) -and $isServerTsxWatch)
+        $isServerRoot
+      } |
+      Select-Object -ExpandProperty ProcessId
+  )
+
+  if ($serverRoots.Count -gt 0) {
+    Stop-ProcessTrees -RootProcessIds $serverRoots -ProcessSnapshot $processes -Reason "server-restart"
+  }
+}
+
 Set-Location $projectRoot
 
 $lanIp = Get-LanIpv4
@@ -223,6 +298,7 @@ Write-LauncherLog "Server precheck lan=$serverReadyLanBefore local=$serverReadyL
 
 if ($RestartServer) {
   Stop-PortListeners -Ports @(8787)
+  Stop-NetgridServerProcessTrees
   $serverReadyLanBefore = $false
   $serverReadyLocalBefore = $false
 }
@@ -235,6 +311,7 @@ if ($serverReadyLanBefore -and $maintenanceRequested -and -not $maintenanceReady
 
 if (-not $serverReadyLanBefore) {
   Stop-PortListeners -Ports @(8787)
+  Stop-NetgridServerProcessTrees
   Write-LauncherLog "Starting server command mode=$serverMode"
   Start-NetgridProcess -Command $serverCommand -LogPath $serverLog -Environment $serverEnvironment
 }
