@@ -11835,9 +11835,9 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
-        "needsHumanReview": true,
-        "reviewedDate": "2026-05-25",
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -11889,7 +11889,12 @@
         "clicks": 1,
         "reserveRisk": "low",
         "opportunityCost": "medium"
-      }
+      },
+      "tacticSignals": [
+        "score.draw",
+        "score.hq_archive_to_rnd_shuffle",
+        "score.rnd_archive_recycle"
+      ]
     },
     {
       "cardId": "onr_v1_189_artificial-security-directors",
@@ -11919,7 +11924,26 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_scored_agenda"
-      ]
+      ],
+      "tacticSignals": [
+        "score.agenda_difficulty_discount",
+        "score.black_ops_difficulty_discount"
+      ],
+      "lineSupport": [
+        "corp.fast_advance"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_190_bioweapons-engineering",
@@ -11951,7 +11975,27 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_scored_modifier_agenda"
-      ]
+      ],
+      "tacticSignals": [
+        "damage.payoff",
+        "score.damage_amp",
+        "score.meat_damage_amp"
+      ],
+      "lineSupport": [
+        "corp.damage_kill"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_191_black-ice-quality-assurance",
@@ -11984,10 +12028,10 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "medium",
+        "strategyCovered": true,
+        "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -12001,11 +12045,15 @@
         }
       ],
       "lineSupport": [
-        "corp.remote_scoring",
         "corp.ice_tax_glacier"
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "tacticSignals": [
+        "ice.strength_modifier",
+        "score.black_ice_strength_bonus",
+        "score.ice_type_tax_support"
       ]
     },
     {
@@ -12042,7 +12090,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex",
         "focusedDecisionTest": "packages/ai/src/index.test.ts::uses Corporate Boon extra-action ability as scored-agenda tempo"
       },
@@ -12072,11 +12120,10 @@
         "reserveRisk": "low",
         "opportunityCost": "low"
       },
-      "lineSupport": [
-        "corp.fast_advance"
-      ],
-      "strategicRole": [
-        "scoring_tool"
+      "tacticSignals": [
+        "score.action_counter_bank",
+        "score.action_gain",
+        "score.agenda_action"
       ]
     },
     {
@@ -12118,7 +12165,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -12147,11 +12194,10 @@
         "reserveRisk": "low",
         "opportunityCost": "low"
       },
-      "lineSupport": [
-        "corp.economy_rez_reserve"
-      ],
-      "strategicRole": [
-        "engine_anchor"
+      "tacticSignals": [
+        "score.agenda_action",
+        "score.economy_action",
+        "score.economy_counter_bank"
       ]
     },
     {
@@ -12189,11 +12235,18 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "score.economy_conditional_burst",
+        "score.hq_agenda_reveal",
+        "score.hq_agenda_shuffle"
+      ]
     },
     {
       "cardId": "onr_v1_195_corporate-retreat",
@@ -12243,7 +12296,21 @@
         {
           "kind": "requires_scored_agenda"
         }
-      ]
+      ],
+      "tacticSignals": [
+        "risk.loses_ability_on_install_or_rez",
+        "score.agenda_action",
+        "score.economy_action"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_196_corporate-war",
@@ -12279,9 +12346,9 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
-        "needsHumanReview": true,
-        "reviewedDate": "2026-05-25",
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -12294,11 +12361,10 @@
           "finite": true
         }
       ],
-      "lineSupport": [
-        "corp.economy_rez_reserve"
-      ],
-      "strategicRole": [
-        "support_tool"
+      "tacticSignals": [
+        "risk.economy_crash_on_score",
+        "risk.requires_corp_credit_threshold",
+        "score.economy_conditional_burst"
       ]
     },
     {
@@ -12333,11 +12399,23 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "score.remote_fort_creation",
+        "score.remote_install_budget"
+      ],
+      "lineSupport": [
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "engine_anchor"
+      ]
     },
     {
       "cardId": "onr_v1_198_detroit-police-contract",
@@ -12368,7 +12446,20 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1912-smokes.json#corp_v1912_agenda_counter_economy"
-      ]
+      ],
+      "tacticSignals": [
+        "score.economy_counter_bank",
+        "score.economy_recurring"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_199_employee-empowerment",
@@ -12452,9 +12543,14 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
-      }
+      },
+      "tacticSignals": [
+        "score.agenda_action",
+        "score.draw",
+        "score.recurring_draw"
+      ]
     },
     {
       "cardId": "onr_v1_200_encryption-breakthrough",
@@ -12487,7 +12583,28 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_scored_modifier_agenda"
-      ]
+      ],
+      "tacticSignals": [
+        "ice.strength_modifier",
+        "score.code_gate_strength_bonus",
+        "score.ice_type_reveal_economy",
+        "score.ice_type_tax_support"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_201_executive-extraction",
@@ -12519,7 +12636,26 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#corp_agenda_economy_modifiers"
-      ]
+      ],
+      "tacticSignals": [
+        "score.agenda_difficulty_discount",
+        "score.gray_ops_difficulty_discount"
+      ],
+      "lineSupport": [
+        "corp.fast_advance"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_202_genetics-visionary-acquisition",
@@ -12549,7 +12685,26 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_scored_agenda"
-      ]
+      ],
+      "tacticSignals": [
+        "score.agenda_difficulty_discount",
+        "score.research_difficulty_discount"
+      ],
+      "lineSupport": [
+        "corp.fast_advance"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_203_hostile-takeover",
@@ -12590,7 +12745,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -12603,11 +12758,8 @@
           "finite": true
         }
       ],
-      "lineSupport": [
-        "corp.economy_rez_reserve"
-      ],
-      "strategicRole": [
-        "support_tool"
+      "tacticSignals": [
+        "score.economy_burst"
       ]
     },
     {
@@ -12641,11 +12793,25 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "ice.strength_modifier",
+        "ice.subroutine_modifier",
+        "score.chosen_ice_strength_bonus",
+        "score.repeat_ice_subroutines"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ]
     },
     {
       "cardId": "onr_v1_205_main-office-relocation",
@@ -12674,7 +12840,19 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_scored_modifier_agenda"
-      ]
+      ],
+      "tacticSignals": [
+        "score.hand_size"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_206_marine-arcology",
@@ -12731,20 +12909,18 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "lineSupport": [
-        "corp.economy_rez_reserve"
-      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
-      "strategicRole": [
-        "engine_anchor"
+      "tacticSignals": [
+        "score.agenda_action",
+        "score.economy_action"
       ]
     },
     {
@@ -12785,10 +12961,10 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -12839,6 +13015,12 @@
       ],
       "strategicRole": [
         "engine_anchor"
+      ],
+      "tacticSignals": [
+        "score.tag_source",
+        "score.trace_tag_source",
+        "tag.source",
+        "trace.source"
       ]
     },
     {
@@ -12912,8 +13094,8 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "corp.tag_trace_punish",
-        "corp.damage_kill"
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
       ],
       "strategicRole": [
         "punish_payoff"
@@ -12921,12 +13103,19 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
-      }
+      },
+      "tacticSignals": [
+        "damage.payoff",
+        "risk.requires_tagged_runner",
+        "score.meat_damage_source",
+        "score.tagged_meat_damage_payoff",
+        "tag.payoff"
+      ]
     },
     {
       "cardId": "onr_v1_209_political-coup",
@@ -12967,7 +13156,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -12996,11 +13185,10 @@
         "reserveRisk": "low",
         "opportunityCost": "low"
       },
-      "lineSupport": [
-        "corp.economy_rez_reserve"
-      ],
-      "strategicRole": [
-        "engine_anchor"
+      "tacticSignals": [
+        "score.agenda_action",
+        "score.economy_action",
+        "score.economy_counter_bank"
       ]
     },
     {
@@ -13058,21 +13246,19 @@
         "reserveRisk": "low",
         "opportunityCost": "low"
       },
-      "lineSupport": [
-        "corp.economy_rez_reserve"
-      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex",
         "focusedDecisionTest": "packages/ai/src/index.test.ts::uses Political Overthrow scored-agenda economy before basic credit"
       },
-      "strategicRole": [
-        "engine_anchor"
+      "tacticSignals": [
+        "score.agenda_action",
+        "score.economy_action"
       ]
     },
     {
@@ -13106,7 +13292,19 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v191-v194-smokes.json#corp_v192_agenda_economy_and_program_trash_ice"
-      ]
+      ],
+      "tacticSignals": [
+        "score.economy_recurring"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_212_priority-requisition",
@@ -13150,10 +13348,10 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "medium",
+        "strategyCovered": true,
+        "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -13172,10 +13370,14 @@
         }
       ],
       "lineSupport": [
-        "corp.economy_rez_reserve"
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
       ],
       "strategicRole": [
-        "support_tool"
+        "scoring_tool"
+      ],
+      "tacticSignals": [
+        "score.free_rez_ice"
       ]
     },
     {
@@ -13262,14 +13464,20 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "strategicRole": [
         "engine_anchor"
+      ],
+      "tacticSignals": [
+        "score.tag_source",
+        "score.trace_tag_source",
+        "tag.source",
+        "trace.source"
       ]
     },
     {
@@ -13305,10 +13513,10 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "medium",
+        "strategyCovered": true,
+        "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -13325,6 +13533,11 @@
       ],
       "strategicRole": [
         "scoring_tool"
+      ],
+      "tacticSignals": [
+        "score.conditional_bonus_agenda_points",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling"
       ]
     },
     {
@@ -13361,11 +13574,24 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "ice.strength_modifier",
+        "score.fort_ice_strength_bonus"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ]
     },
     {
       "cardId": "onr_v1_216_security-purge",
@@ -13398,11 +13624,27 @@
         "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_agenda_longtail"
       ],
       "lineSupport": [
-        "corp.economy_rez_reserve"
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
       ],
       "strategicRole": [
-        "support_tool"
-      ]
+        "scoring_tool"
+      ],
+      "tacticSignals": [
+        "access.rnd_reveal_requirement",
+        "score.free_install_and_rez_ice",
+        "score.rnd_install_and_rez",
+        "score.rnd_reveal"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_217_strike-force-kali",
@@ -13475,8 +13717,8 @@
         "opportunityCost": "medium"
       },
       "lineSupport": [
-        "corp.tag_trace_punish",
-        "corp.damage_kill"
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
       ],
       "strategicRole": [
         "punish_payoff"
@@ -13484,12 +13726,19 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
-      }
+      },
+      "tacticSignals": [
+        "damage.payoff",
+        "risk.requires_tagged_runner",
+        "score.meat_damage_source",
+        "score.tagged_meat_damage_payoff",
+        "tag.payoff"
+      ]
     },
     {
       "cardId": "onr_v1_218_subsidiary-branch",
@@ -13520,11 +13769,16 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "score.recurring_extra_action"
+      ]
     },
     {
       "cardId": "onr_v1_219_superior-net-barriers",
@@ -13570,10 +13824,10 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "medium",
-        "needsHumanReview": true,
-        "reviewedDate": "2026-05-25",
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -13594,11 +13848,16 @@
         }
       ],
       "lineSupport": [
-        "corp.remote_scoring",
         "corp.ice_tax_glacier"
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "tacticSignals": [
+        "ice.strength_modifier",
+        "score.ice_type_reveal_economy",
+        "score.ice_type_tax_support",
+        "score.wall_strength_bonus"
       ]
     },
     {
@@ -13634,11 +13893,17 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "score.high_agenda_value",
+        "score.vanilla_points"
+      ]
     },
     {
       "cardId": "onr_v1_221_asp",
@@ -21272,11 +21537,17 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "risk.random_action",
+        "score.random_extra_action"
+      ]
     },
     {
       "cardId": "onr_proteus_002_charity-takeover",
@@ -21302,11 +21573,20 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "risk.bad_publicity",
+        "risk.loss_condition",
+        "score.bad_publicity_gain",
+        "score.bad_publicity_win_risk",
+        "score.economy_burst"
+      ]
     },
     {
       "cardId": "onr_proteus_003_corporate-headhunters",
@@ -21334,11 +21614,28 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "damage.payoff",
+        "risk.requires_tagged_runner",
+        "score.brain_damage_or_hand_size_pressure",
+        "score.meat_damage_source",
+        "score.tagged_meat_damage_payoff",
+        "tag.payoff"
+      ],
+      "lineSupport": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "punish_payoff"
+      ]
     },
     {
       "cardId": "onr_proteus_004_fetal-ai",
@@ -21365,16 +21662,28 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "lineSupport": [
-        "corp.damage_kill"
+        "corp.damage_kill",
+        "corp.ambush_bluff"
       ],
       "strategicRole": [
         "punish_payoff"
+      ],
+      "tacticSignals": [
+        "access.agenda_ambush",
+        "access.agenda_net_damage",
+        "access.agenda_steal_tax",
+        "access.archives_safe_exception",
+        "access.rnd_reveal_requirement",
+        "damage.payoff",
+        "score.net_damage_access_punish"
       ]
     },
     {
@@ -21402,16 +21711,25 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "lineSupport": [
-        "corp.tag_trace_punish"
+        "corp.tag_trace_punish",
+        "corp.ambush_bluff"
       ],
       "strategicRole": [
         "engine_anchor"
+      ],
+      "tacticSignals": [
+        "access.agenda_ambush",
+        "access.agenda_tag",
+        "access.rnd_reveal_requirement",
+        "tag.source"
       ]
     },
     {
@@ -21439,11 +21757,17 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "score.action_counter_bank",
+        "score.damage_conversion_action_engine"
+      ]
     },
     {
       "cardId": "onr_proteus_007_project-venice",
@@ -21469,11 +21793,24 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "score.overadvance_bonus",
+        "score.overadvance_scaling",
+        "score.recurring_extra_action"
+      ],
+      "lineSupport": [
+        "corp.fast_advance"
+      ],
+      "strategicRole": [
+        "scoring_tool"
+      ]
     },
     {
       "cardId": "onr_proteus_008_project-zurich",
@@ -21499,11 +21836,18 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "score.economy_recurring",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling"
+      ]
     },
     {
       "cardId": "onr_proteus_009_viral-breeding-ground",
@@ -21529,11 +21873,25 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "access.agenda_ambush",
+        "access.runner_program_bounce",
+        "access.runner_program_disruption",
+        "score.fort_trash_on_score"
+      ],
+      "lineSupport": [
+        "corp.ambush_bluff"
+      ],
+      "strategicRole": [
+        "punish_payoff"
+      ]
     },
     {
       "cardId": "onr_proteus_010_world-domination",
@@ -21559,11 +21917,24 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "risk.high_difficulty_agenda",
+        "score.bonus_agenda_points",
+        "score.closeout_agenda"
+      ],
+      "lineSupport": [
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "win_condition"
+      ]
     },
     {
       "cardId": "onr_proteus_011_brain-wash",

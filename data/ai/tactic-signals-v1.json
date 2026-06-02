@@ -1,8 +1,8 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI022",
+  "taskId": "AI023",
   "generatedAt": "2026-06-02",
-  "description": "Controlled V1 tactic-signal catalog. AI022 adds Runner-Resource semantics for hidden resources, trace/link support, economy, search/recovery/install, access payoffs, remote sabotage, survival, virus support and action/random resources without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
+  "description": "Controlled V1 tactic-signal catalog. AI023 adds Corp-Agenda semantics for scoring value, agenda difficulty, economy, action, draw, ICE/fort setup, tag/trace, damage, access punish and bad-publicity risk without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
   "signalPolicy": {
     "tacticSignal": "Functional card utility: what the AI can use the card for.",
     "strategyAnchor": "Large deck line: which strategy the card can anchor or materially support.",
@@ -13,6 +13,91 @@
     ]
   },
   "signals": [
+    {
+      "signalId": "access.agenda_ambush",
+      "group": "ai023_agenda_access",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: access.agenda ambush.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "access.agenda_net_damage",
+      "group": "ai023_agenda_access",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: access.agenda net damage.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff",
+        "corp.damage_kill"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "access.agenda_steal_tax",
+      "group": "ai023_agenda_access",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: access.agenda steal tax.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "access.agenda_tag",
+      "group": "ai023_agenda_access",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: access.agenda tag.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff",
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "access.archives_safe_exception",
+      "group": "ai023_agenda_access",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: access.archives safe exception.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
     {
       "signalId": "access.current_access_trash",
       "group": "access",
@@ -361,6 +446,21 @@
       "notes": "Anchor-capable because it directly changes central access payoff."
     },
     {
+      "signalId": "access.rnd_reveal_requirement",
+      "group": "ai023_agenda_access",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: access.rnd reveal requirement.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "access.rnd_top_card",
       "group": "ai019_access",
       "sideScope": "runner",
@@ -446,6 +546,38 @@
       ],
       "targetProfileRelevant": true,
       "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
+    },
+    {
+      "signalId": "access.runner_program_bounce",
+      "group": "ai023_agenda_access",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: access.runner program bounce.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "access.runner_program_disruption",
+      "group": "ai023_agenda_access",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: access.runner program disruption.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "access.trash_untrashable",
@@ -3338,6 +3470,21 @@
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "risk.bad_publicity",
+      "group": "ai023_agenda_risk",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: risk.bad publicity.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "risk.brain_damage_self_inflicted",
       "group": "ai020_hardware_risk",
       "sideScope": "runner",
@@ -3385,6 +3532,21 @@
       "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
+      "signalId": "risk.economy_crash_on_score",
+      "group": "ai023_agenda_risk",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: risk.economy crash on score.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "risk.ends_on_run",
       "group": "risk",
       "sideScope": "runner",
@@ -3430,6 +3592,21 @@
       "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
+      "signalId": "risk.high_difficulty_agenda",
+      "group": "ai023_agenda_risk",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: risk.high difficulty agenda.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "risk.installed_card_trash_cost",
       "group": "ai021_prep_risk",
       "sideScope": "runner",
@@ -3458,6 +3635,36 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "risk.loses_ability_on_install_or_rez",
+      "group": "ai023_agenda_risk",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: risk.loses ability on install or rez.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.loss_condition",
+      "group": "ai023_agenda_risk",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: risk.loss condition.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "risk.mandatory_action",
@@ -3521,18 +3728,18 @@
     },
     {
       "signalId": "risk.random_action",
-      "group": "risk",
-      "sideScope": "runner",
-      "description": "Random action/outcome risk.",
+      "group": "ai023_agenda_risk",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: risk.random action.",
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
       "sourceKinds": [
-        "AI022 reviewed Runner-Resource structured hint effects"
+        "AI023 reviewed Corp-Agenda structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": false,
-      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "risk.random_economy",
@@ -3563,6 +3770,36 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "risk.requires_corp_credit_threshold",
+      "group": "ai023_agenda_risk",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: risk.requires corp credit threshold.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.requires_tagged_runner",
+      "group": "ai023_agenda_risk",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: risk.requires tagged runner.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "risk.run_spend_limit",
@@ -4094,6 +4331,36 @@
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "score.action_counter_bank",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.action counter bank.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.action_gain",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.action gain.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "score.advance_burst",
       "group": "corp_score_acceleration",
       "sideScope": "corp",
@@ -4131,6 +4398,23 @@
       "notes": "AI016 intentionally removed automatic fast-advance anchoring."
     },
     {
+      "signalId": "score.agenda_difficulty_discount",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.agenda difficulty discount.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "score.agenda_point_gain",
       "group": "ai021_prep_score",
       "sideScope": "runner",
@@ -4148,6 +4432,53 @@
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "score.bad_publicity_gain",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.bad publicity gain.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.bad_publicity_win_risk",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.bad publicity win risk.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.black_ice_strength_bonus",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.black ice strength bonus.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "score.black_ops_agenda_condition",
       "group": "ai021_prep_score",
       "sideScope": "runner",
@@ -4161,6 +4492,21 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.black_ops_difficulty_discount",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.black ops difficulty discount.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "score.bonus_agenda_point",
@@ -4180,6 +4526,89 @@
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "score.bonus_agenda_points",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.bonus agenda points.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.brain_damage_or_hand_size_pressure",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.brain damage or hand size pressure.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.chosen_ice_strength_bonus",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.chosen ice strength bonus.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.closeout_agenda",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.closeout agenda.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.code_gate_strength_bonus",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.code gate strength bonus.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "score.conditional_agenda_point",
       "group": "ai021_prep_score",
       "sideScope": "runner",
@@ -4195,6 +4624,212 @@
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "score.conditional_bonus_agenda_points",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.conditional bonus agenda points.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.damage_amp",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.damage amp.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.damage_conversion_action_engine",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.damage conversion action engine.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.draw",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.draw.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.economy_action",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.economy action.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.economy_burst",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.economy burst.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.economy_conditional_burst",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.economy conditional burst.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.economy_counter_bank",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.economy counter bank.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.economy_recurring",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.economy recurring.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.fort_ice_strength_bonus",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.fort ice strength bonus.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.fort_trash_on_score",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.fort trash on score.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.free_install_and_rez_ice",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.free install and rez ice.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.free_rez_ice",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.free rez ice.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "score.gray_ops_agenda_condition",
       "group": "ai021_prep_score",
       "sideScope": "runner",
@@ -4208,6 +4843,453 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.gray_ops_difficulty_discount",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.gray ops difficulty discount.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.hand_size",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.hand size.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.high_agenda_value",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.high agenda value.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.hq_agenda_reveal",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.hq agenda reveal.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.hq_agenda_shuffle",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.hq agenda shuffle.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.hq_archive_to_rnd_shuffle",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.hq archive to rnd shuffle.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.ice_type_reveal_economy",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.ice type reveal economy.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.ice_type_tax_support",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.ice type tax support.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.meat_damage_amp",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.meat damage amp.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.meat_damage_source",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.meat damage source.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.net_damage_access_punish",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.net damage access punish.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff",
+        "corp.damage_kill"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.overadvance_bonus",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.overadvance bonus.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.overadvance_scaling",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.overadvance scaling.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.random_extra_action",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.random extra action.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.recurring_draw",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.recurring draw.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.recurring_extra_action",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.recurring extra action.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.remote_fort_creation",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.remote fort creation.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.remote_install_budget",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.remote install budget.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.repeat_ice_subroutines",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.repeat ice subroutines.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.research_difficulty_discount",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.research difficulty discount.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.rnd_archive_recycle",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.rnd archive recycle.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.rnd_install_and_rez",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.rnd install and rez.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.rnd_reveal",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.rnd reveal.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.tag_source",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.tag source.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.tagged_meat_damage_payoff",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.tagged meat damage payoff.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.trace_tag_source",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.trace tag source.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.vanilla_points",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.vanilla points.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.wall_strength_bonus",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.wall strength bonus.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "setup.card_recovery",

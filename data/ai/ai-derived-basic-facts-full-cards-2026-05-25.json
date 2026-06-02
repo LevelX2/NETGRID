@@ -3267,7 +3267,7 @@
       "implementationFound": true,
       "fullCoverageScope": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate."
     },
@@ -5714,7 +5714,7 @@
       "implementationFound": true,
       "fullCoverageScope": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate."
     },
@@ -5727,7 +5727,7 @@
       "implementationFound": true,
       "fullCoverageScope": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate."
     },
@@ -5740,7 +5740,7 @@
       "implementationFound": true,
       "fullCoverageScope": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate."
     },
@@ -5753,7 +5753,7 @@
       "implementationFound": true,
       "fullCoverageScope": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate."
     },
@@ -5766,7 +5766,7 @@
       "implementationFound": true,
       "fullCoverageScope": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate."
     },
@@ -5779,7 +5779,7 @@
       "implementationFound": true,
       "fullCoverageScope": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate."
     },
@@ -5792,7 +5792,7 @@
       "implementationFound": true,
       "fullCoverageScope": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate."
     },
@@ -5805,7 +5805,7 @@
       "implementationFound": true,
       "fullCoverageScope": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate."
     },
@@ -5818,7 +5818,7 @@
       "implementationFound": true,
       "fullCoverageScope": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate."
     },
@@ -5831,7 +5831,7 @@
       "implementationFound": true,
       "fullCoverageScope": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "coverageClass": "legacy_fallback_only",
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate."
     },

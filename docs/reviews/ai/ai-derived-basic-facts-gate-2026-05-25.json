@@ -128,7 +128,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 1009,
+  "warningCount": 999,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -1636,11 +1636,6 @@
       "cardId": "onr_v1_178_short-term-contract"
     },
     {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence medium.",
-      "cardId": "onr_v1_188_ai-chief-financial-officer"
-    },
-    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Manual ontology contains fields not currently derivable.",
       "cardId": "onr_v1_188_ai-chief-financial-officer"
@@ -1711,11 +1706,6 @@
       "cardId": "onr_v1_190_bioweapons-engineering"
     },
     {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence medium.",
-      "cardId": "onr_v1_191_black-ice-quality-assurance"
-    },
-    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_191_black-ice-quality-assurance"
@@ -1744,11 +1734,6 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_193_corporate-coup"
-    },
-    {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence low.",
-      "cardId": "onr_v1_194_corporate-downsizing"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -1806,11 +1791,6 @@
       "cardId": "onr_v1_195_corporate-retreat"
     },
     {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence medium.",
-      "cardId": "onr_v1_196_corporate-war"
-    },
-    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_196_corporate-war"
@@ -1844,11 +1824,6 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_196_corporate-war"
-    },
-    {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence low.",
-      "cardId": "onr_v1_197_data-fort-reclamation"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -2056,11 +2031,6 @@
       "cardId": "onr_v1_203_hostile-takeover"
     },
     {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence low.",
-      "cardId": "onr_v1_204_ice-transmutation"
-    },
-    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_204_ice-transmutation"
@@ -2161,11 +2131,6 @@
       "cardId": "onr_v1_211_polymer-breakthrough"
     },
     {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence medium.",
-      "cardId": "onr_v1_212_priority-requisition"
-    },
-    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_212_priority-requisition"
@@ -2209,11 +2174,6 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_213_private-cybernet-police"
-    },
-    {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence low.",
-      "cardId": "onr_v1_215_security-net-optimization"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -2296,11 +2256,6 @@
       "cardId": "onr_v1_217_strike-force-kali"
     },
     {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence low.",
-      "cardId": "onr_v1_218_subsidiary-branch"
-    },
-    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_218_subsidiary-branch"
@@ -2324,11 +2279,6 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_218_subsidiary-branch"
-    },
-    {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence medium.",
-      "cardId": "onr_v1_219_superior-net-barriers"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -13362,8 +13312,8 @@
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "medium",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -13386,10 +13336,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Manual ontology contains fields not currently derivable."
@@ -13455,7 +13401,16 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -13541,7 +13496,16 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -13638,14 +13602,13 @@
         ],
         "conditions": [],
         "lineSupport": [
-          "corp.ice_tax_glacier",
-          "corp.remote_scoring"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "medium",
+          "confidence": "high",
           "needsHumanReview": false
         }
       },
@@ -13666,10 +13629,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -13762,9 +13721,7 @@
           "reserveRisk": "low",
           "opportunityCost": "low"
         },
-        "lineSupport": [
-          "corp.fast_advance"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -13873,9 +13830,7 @@
           "reserveRisk": "low",
           "opportunityCost": "low"
         },
-        "lineSupport": [
-          "corp.economy_rez_reserve"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -13990,11 +13945,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -14024,10 +13979,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -14142,7 +14093,14 @@
             "kind": "requires_scored_agenda"
           }
         ],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [
@@ -14241,15 +14199,13 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "corp.economy_rez_reserve"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "medium",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -14275,10 +14231,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -14390,13 +14342,15 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.remote_scoring"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -14426,10 +14380,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -14526,7 +14476,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -14787,7 +14744,16 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -14901,7 +14867,16 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -14989,7 +14964,16 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -15088,9 +15072,7 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "corp.economy_rez_reserve"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -15198,13 +15180,15 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -15228,10 +15212,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -15337,9 +15317,7 @@
           "reserveRisk": "low",
           "opportunityCost": "medium"
         },
-        "lineSupport": [
-          "corp.economy_rez_reserve"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -15483,7 +15461,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -15622,7 +15600,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -15739,9 +15717,7 @@
           "reserveRisk": "low",
           "opportunityCost": "low"
         },
-        "lineSupport": [
-          "corp.economy_rez_reserve"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -15862,9 +15838,7 @@
           "reserveRisk": "low",
           "opportunityCost": "low"
         },
-        "lineSupport": [
-          "corp.economy_rez_reserve"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -15942,7 +15916,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -16058,13 +16039,14 @@
         ],
         "conditions": [],
         "lineSupport": [
-          "corp.economy_rez_reserve"
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "medium",
+          "confidence": "high",
           "needsHumanReview": false
         }
       },
@@ -16093,10 +16075,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -16243,7 +16221,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -16326,13 +16304,16 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -16354,10 +16335,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -16459,8 +16436,16 @@
         "effects": [],
         "conditions": [],
         "lineSupport": [
-          "corp.economy_rez_reserve"
-        ]
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -16632,7 +16617,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -16709,11 +16694,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -16733,10 +16718,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -16854,15 +16835,14 @@
         ],
         "conditions": [],
         "lineSupport": [
-          "corp.ice_tax_glacier",
-          "corp.remote_scoring"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "medium",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -16889,10 +16869,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."

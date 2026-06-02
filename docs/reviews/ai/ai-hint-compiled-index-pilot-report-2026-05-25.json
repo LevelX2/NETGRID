@@ -15454,6 +15454,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -15545,9 +15546,13 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -15621,9 +15626,13 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -15710,6 +15719,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -15797,12 +15807,11 @@
       "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -15891,12 +15900,11 @@
       "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -16024,6 +16032,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -16110,9 +16119,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": [],
@@ -16210,12 +16221,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -16346,10 +16356,13 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -16442,9 +16455,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -16545,6 +16560,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -16663,9 +16679,13 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -16749,9 +16769,13 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -16827,9 +16851,13 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -16909,12 +16937,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -17021,10 +17048,13 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -17112,12 +17142,11 @@
       "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -17226,6 +17255,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -17335,6 +17365,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -17433,12 +17464,11 @@
       "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -17534,12 +17564,11 @@
       "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -17622,9 +17651,11 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -17739,6 +17770,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -17854,6 +17886,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -17943,10 +17976,13 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -18062,10 +18098,12 @@
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
         "lineSupport",
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -18174,6 +18212,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -18260,6 +18299,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -18393,6 +18433,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],

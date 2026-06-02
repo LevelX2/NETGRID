@@ -1,0 +1,2631 @@
+{
+  "schemaVersion": "ai023-corp-agendas-semantics-review-report-v1",
+  "taskId": "AI023",
+  "generatedAt": "2026-06-02",
+  "status": "complete",
+  "scope": "corp_agendas",
+  "sourceCommit": "ddaf36973d682701c4a616c74c582fbb31f992f2",
+  "summary": {
+    "activeCorpAgendaCount": 43,
+    "reviewedAgendaCount": 43,
+    "inactiveCheckedAgendaCount": 4,
+    "changedAgendaCount": 43,
+    "unchangedCheckedAgendaCount": 0,
+    "newTacticSignalCount": 69,
+    "changedExistingTacticSignalCount": 0,
+    "newStrategyIdCount": 0,
+    "strategySupportPairCount": 31,
+    "targetProfileCandidateCount": 9,
+    "schemaGapCount": 6,
+    "plannerEffect": false,
+    "actionScoreEffect": false,
+    "planWeightEffect": false,
+    "targetingAiEffect": false,
+    "engineEffect": false,
+    "legalEffect": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivationEffect": false,
+    "hiddenInfoLeakEffect": false
+  },
+  "inventory": {
+    "activeCompiledAgendaCardIds": [
+      "onr_v1_188_ai-chief-financial-officer",
+      "onr_v1_189_artificial-security-directors",
+      "onr_v1_190_bioweapons-engineering",
+      "onr_v1_191_black-ice-quality-assurance",
+      "onr_v1_192_corporate-boon",
+      "onr_v1_193_corporate-coup",
+      "onr_v1_194_corporate-downsizing",
+      "onr_v1_195_corporate-retreat",
+      "onr_v1_196_corporate-war",
+      "onr_v1_197_data-fort-reclamation",
+      "onr_v1_198_detroit-police-contract",
+      "onr_v1_199_employee-empowerment",
+      "onr_v1_200_encryption-breakthrough",
+      "onr_v1_201_executive-extraction",
+      "onr_v1_202_genetics-visionary-acquisition",
+      "onr_v1_203_hostile-takeover",
+      "onr_v1_204_ice-transmutation",
+      "onr_v1_205_main-office-relocation",
+      "onr_v1_206_marine-arcology",
+      "onr_v1_207_netwatch-operations-office",
+      "onr_v1_208_on-call-solo-team",
+      "onr_v1_209_political-coup",
+      "onr_v1_210_political-overthrow",
+      "onr_v1_211_polymer-breakthrough",
+      "onr_v1_212_priority-requisition",
+      "onr_v1_213_private-cybernet-police",
+      "onr_v1_214_project-babylon",
+      "onr_v1_215_security-net-optimization",
+      "onr_v1_216_security-purge",
+      "onr_v1_217_strike-force-kali",
+      "onr_v1_218_subsidiary-branch",
+      "onr_v1_219_superior-net-barriers",
+      "onr_v1_220_tycho-extension",
+      "onr_proteus_001_ai-board-member",
+      "onr_proteus_002_charity-takeover",
+      "onr_proteus_003_corporate-headhunters",
+      "onr_proteus_004_fetal-ai",
+      "onr_proteus_005_marked-accounts",
+      "onr_proteus_006_please-dont-choke-anyone",
+      "onr_proteus_007_project-venice",
+      "onr_proteus_008_project-zurich",
+      "onr_proteus_009_viral-breeding-ground",
+      "onr_proteus_010_world-domination"
+    ],
+    "inactiveCheckedAgendaCardIds": [
+      "onr_classic_001_data-fort-remapping",
+      "onr_classic_002_superserum",
+      "onr_classic_003_unlisted-research-lab",
+      "onr_classic_004_theorem-proof"
+    ],
+    "countDiscrepancies": [
+      {
+        "setId": "originalset-v1",
+        "expectedSpoilerCount": 33,
+        "activeCompiledRepoCount": 33,
+        "status": "matches"
+      },
+      {
+        "setId": "proteus",
+        "expectedSpoilerCount": 10,
+        "activeCompiledRepoCount": 10,
+        "status": "matches"
+      },
+      {
+        "setId": "classic",
+        "expectedSpoilerCount": null,
+        "activeCompiledRepoCount": 0,
+        "inactiveKnownRepoCount": 4,
+        "status": "known_inactive_not_in_active_scope"
+      }
+    ]
+  },
+  "clusterOverview": [
+    {
+      "mechanicalFamily": "access_ambush_or_access_punish",
+      "count": 3,
+      "cardIds": [
+        "onr_proteus_004_fetal-ai",
+        "onr_proteus_005_marked-accounts",
+        "onr_proteus_009_viral-breeding-ground"
+      ]
+    },
+    {
+      "mechanicalFamily": "agenda_difficulty_discount",
+      "count": 3,
+      "cardIds": [
+        "onr_v1_189_artificial-security-directors",
+        "onr_v1_201_executive-extraction",
+        "onr_v1_202_genetics-visionary-acquisition"
+      ]
+    },
+    {
+      "mechanicalFamily": "agenda_recycle_or_rnd_hq_archives_manipulation",
+      "count": 2,
+      "cardIds": [
+        "onr_v1_188_ai-chief-financial-officer",
+        "onr_v1_216_security-purge"
+      ]
+    },
+    {
+      "mechanicalFamily": "bad_publicity_agenda",
+      "count": 1,
+      "cardIds": [
+        "onr_proteus_002_charity-takeover"
+      ]
+    },
+    {
+      "mechanicalFamily": "damage_source_or_damage_amp",
+      "count": 1,
+      "cardIds": [
+        "onr_v1_190_bioweapons-engineering"
+      ]
+    },
+    {
+      "mechanicalFamily": "free_rez_or_install",
+      "count": 1,
+      "cardIds": [
+        "onr_v1_212_priority-requisition"
+      ]
+    },
+    {
+      "mechanicalFamily": "ice_strength_or_ice_type_buff",
+      "count": 5,
+      "cardIds": [
+        "onr_v1_191_black-ice-quality-assurance",
+        "onr_v1_200_encryption-breakthrough",
+        "onr_v1_204_ice-transmutation",
+        "onr_v1_215_security-net-optimization",
+        "onr_v1_219_superior-net-barriers"
+      ]
+    },
+    {
+      "mechanicalFamily": "overadvance_or_bonus_points",
+      "count": 3,
+      "cardIds": [
+        "onr_v1_214_project-babylon",
+        "onr_proteus_007_project-venice",
+        "onr_proteus_008_project-zurich"
+      ]
+    },
+    {
+      "mechanicalFamily": "remote_or_fort_setup",
+      "count": 1,
+      "cardIds": [
+        "onr_v1_197_data-fort-reclamation"
+      ]
+    },
+    {
+      "mechanicalFamily": "risk_or_drawback_agenda",
+      "count": 2,
+      "cardIds": [
+        "onr_v1_195_corporate-retreat",
+        "onr_v1_196_corporate-war"
+      ]
+    },
+    {
+      "mechanicalFamily": "score_action_engine",
+      "count": 4,
+      "cardIds": [
+        "onr_v1_192_corporate-boon",
+        "onr_v1_218_subsidiary-branch",
+        "onr_proteus_001_ai-board-member",
+        "onr_proteus_006_please-dont-choke-anyone"
+      ]
+    },
+    {
+      "mechanicalFamily": "score_draw_or_hand",
+      "count": 2,
+      "cardIds": [
+        "onr_v1_199_employee-empowerment",
+        "onr_v1_205_main-office-relocation"
+      ]
+    },
+    {
+      "mechanicalFamily": "score_economy_burst",
+      "count": 6,
+      "cardIds": [
+        "onr_v1_193_corporate-coup",
+        "onr_v1_194_corporate-downsizing",
+        "onr_v1_203_hostile-takeover",
+        "onr_v1_206_marine-arcology",
+        "onr_v1_209_political-coup",
+        "onr_v1_210_political-overthrow"
+      ]
+    },
+    {
+      "mechanicalFamily": "score_economy_recurring",
+      "count": 2,
+      "cardIds": [
+        "onr_v1_198_detroit-police-contract",
+        "onr_v1_211_polymer-breakthrough"
+      ]
+    },
+    {
+      "mechanicalFamily": "tag_source_or_trace_agenda",
+      "count": 2,
+      "cardIds": [
+        "onr_v1_207_netwatch-operations-office",
+        "onr_v1_213_private-cybernet-police"
+      ]
+    },
+    {
+      "mechanicalFamily": "tagged_damage_payoff",
+      "count": 3,
+      "cardIds": [
+        "onr_v1_208_on-call-solo-team",
+        "onr_v1_217_strike-force-kali",
+        "onr_proteus_003_corporate-headhunters"
+      ]
+    },
+    {
+      "mechanicalFamily": "vanilla_or_point_dense_agenda",
+      "count": 2,
+      "cardIds": [
+        "onr_v1_220_tycho-extension",
+        "onr_proteus_010_world-domination"
+      ]
+    }
+  ],
+  "newTacticSignals": [
+    {
+      "signalId": "score.high_agenda_value",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.vanilla_points",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.bonus_agenda_points",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.conditional_bonus_agenda_points",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.overadvance_bonus",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.overadvance_scaling",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.closeout_agenda",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "signalId": "score.agenda_difficulty_discount",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.fast_advance"
+      ]
+    },
+    {
+      "signalId": "score.black_ops_difficulty_discount",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.gray_ops_difficulty_discount",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.research_difficulty_discount",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.economy_burst",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.economy_conditional_burst",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.economy_recurring",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.economy_counter_bank",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.economy_action",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.bad_publicity_gain",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.bad_publicity_win_risk",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.action_counter_bank",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.action_gain",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.recurring_extra_action",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.random_extra_action",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.damage_conversion_action_engine",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.draw",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.recurring_draw",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.hand_size",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.hq_archive_to_rnd_shuffle",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.rnd_archive_recycle",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.hq_agenda_reveal",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.hq_agenda_shuffle",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.rnd_reveal",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.rnd_install_and_rez",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "signalId": "score.free_rez_ice",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "signalId": "score.free_install_and_rez_ice",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "signalId": "score.remote_fort_creation",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "signalId": "score.remote_install_budget",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "signalId": "score.fort_ice_strength_bonus",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "signalId": "score.chosen_ice_strength_bonus",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "score.repeat_ice_subroutines",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "score.code_gate_strength_bonus",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "score.wall_strength_bonus",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "score.black_ice_strength_bonus",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "score.ice_type_reveal_economy",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "score.ice_type_tax_support",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "score.trace_tag_source",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "signalId": "score.tag_source",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "signalId": "score.tagged_meat_damage_payoff",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "signalId": "score.meat_damage_source",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "score.meat_damage_amp",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "score.damage_amp",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "score.brain_damage_or_hand_size_pressure",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "score.net_damage_access_punish",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff",
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "score.fort_trash_on_score",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "access.agenda_ambush",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "access.agenda_net_damage",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff",
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "access.agenda_tag",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff",
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "signalId": "access.agenda_steal_tax",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "access.rnd_reveal_requirement",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "access.archives_safe_exception",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "access.runner_program_bounce",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "access.runner_program_disruption",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "risk.economy_crash_on_score",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "risk.bad_publicity",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "risk.loss_condition",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "risk.requires_corp_credit_threshold",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "risk.loses_ability_on_install_or_rez",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "risk.random_action",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "risk.requires_tagged_runner",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "risk.high_difficulty_agenda",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    }
+  ],
+  "changedExistingTacticSignals": [],
+  "newStrategyIds": [],
+  "strategySupportPairs": [
+    {
+      "cardId": "onr_v1_189_artificial-security-directors",
+      "title": "Artificial Security Directors",
+      "strategyId": "corp.fast_advance",
+      "role": "enabler",
+      "evidence": [
+        "score.agenda_difficulty_discount",
+        "score.black_ops_difficulty_discount"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_190_bioweapons-engineering",
+      "title": "Bioweapons Engineering",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_amp_anchor",
+      "evidence": [
+        "score.meat_damage_amp",
+        "score.damage_amp"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_191_black-ice-quality-assurance",
+      "title": "Black Ice Quality Assurance",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_type_anchor",
+      "evidence": [
+        "score.black_ice_strength_bonus",
+        "score.ice_type_tax_support"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_197_data-fort-reclamation",
+      "title": "Data Fort Reclamation",
+      "strategyId": "corp.remote_scoring",
+      "role": "remote_setup_engine",
+      "evidence": [
+        "score.remote_fort_creation",
+        "score.remote_install_budget"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_200_encryption-breakthrough",
+      "title": "Encryption Breakthrough",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_type_anchor",
+      "evidence": [
+        "score.code_gate_strength_bonus",
+        "score.ice_type_tax_support"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_201_executive-extraction",
+      "title": "Executive Extraction",
+      "strategyId": "corp.fast_advance",
+      "role": "enabler",
+      "evidence": [
+        "score.agenda_difficulty_discount",
+        "score.gray_ops_difficulty_discount"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_202_genetics-visionary-acquisition",
+      "title": "Genetics-Visionary Acquisition",
+      "strategyId": "corp.fast_advance",
+      "role": "enabler",
+      "evidence": [
+        "score.agenda_difficulty_discount",
+        "score.research_difficulty_discount"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_204_ice-transmutation",
+      "title": "Ice Transmutation",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_upgrade_payoff",
+      "evidence": [
+        "score.chosen_ice_strength_bonus",
+        "score.repeat_ice_subroutines"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_207_netwatch-operations-office",
+      "title": "Netwatch Operations Office",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "tag_source",
+      "evidence": [
+        "score.trace_tag_source",
+        "score.tag_source"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_208_on-call-solo-team",
+      "title": "On-Call Solo Team",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_payoff",
+      "evidence": [
+        "score.tagged_meat_damage_payoff",
+        "score.meat_damage_source"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_208_on-call-solo-team",
+      "title": "On-Call Solo Team",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "punish_payoff",
+      "evidence": [
+        "risk.requires_tagged_runner"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_212_priority-requisition",
+      "title": "Priority Requisition",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "tempo_payoff",
+      "evidence": [
+        "score.free_rez_ice"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_212_priority-requisition",
+      "title": "Priority Requisition",
+      "strategyId": "corp.remote_scoring",
+      "role": "score_window_payoff",
+      "evidence": [
+        "score.free_rez_ice"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_213_private-cybernet-police",
+      "title": "Private Cybernet Police",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "tag_source",
+      "evidence": [
+        "score.trace_tag_source",
+        "score.tag_source"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_214_project-babylon",
+      "title": "Project Babylon",
+      "strategyId": "corp.fast_advance",
+      "role": "overadvance_payoff",
+      "evidence": [
+        "score.overadvance_bonus",
+        "score.overadvance_scaling"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_215_security-net-optimization",
+      "title": "Security Net Optimization",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "fort_tax_anchor",
+      "evidence": [
+        "score.fort_ice_strength_bonus"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_215_security-net-optimization",
+      "title": "Security Net Optimization",
+      "strategyId": "corp.remote_scoring",
+      "role": "remote_defense_anchor",
+      "evidence": [
+        "score.fort_ice_strength_bonus"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_216_security-purge",
+      "title": "Security Purge",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "setup_payoff",
+      "evidence": [
+        "score.free_install_and_rez_ice",
+        "score.rnd_install_and_rez"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_216_security-purge",
+      "title": "Security Purge",
+      "strategyId": "corp.remote_scoring",
+      "role": "setup_payoff",
+      "evidence": [
+        "score.free_install_and_rez_ice",
+        "score.rnd_install_and_rez"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_217_strike-force-kali",
+      "title": "Strike Force Kali",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_payoff",
+      "evidence": [
+        "score.tagged_meat_damage_payoff",
+        "score.meat_damage_source"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_217_strike-force-kali",
+      "title": "Strike Force Kali",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "punish_payoff",
+      "evidence": [
+        "risk.requires_tagged_runner"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_219_superior-net-barriers",
+      "title": "Superior Net Barriers",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_type_anchor",
+      "evidence": [
+        "score.wall_strength_bonus",
+        "score.ice_type_tax_support"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_proteus_003_corporate-headhunters",
+      "title": "Corporate Headhunters",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_engine",
+      "evidence": [
+        "score.tagged_meat_damage_payoff",
+        "score.meat_damage_source",
+        "score.brain_damage_or_hand_size_pressure"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_proteus_003_corporate-headhunters",
+      "title": "Corporate Headhunters",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "punish_payoff",
+      "evidence": [
+        "risk.requires_tagged_runner"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_proteus_004_fetal-ai",
+      "title": "Fetal AI",
+      "strategyId": "corp.damage_kill",
+      "role": "access_punish",
+      "evidence": [
+        "access.agenda_net_damage",
+        "score.net_damage_access_punish"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_proteus_004_fetal-ai",
+      "title": "Fetal AI",
+      "strategyId": "corp.ambush_bluff",
+      "role": "access_punish",
+      "evidence": [
+        "access.agenda_ambush",
+        "access.agenda_steal_tax"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_proteus_005_marked-accounts",
+      "title": "Marked Accounts",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "access_tag_source",
+      "evidence": [
+        "access.agenda_tag"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_proteus_005_marked-accounts",
+      "title": "Marked Accounts",
+      "strategyId": "corp.ambush_bluff",
+      "role": "access_punish",
+      "evidence": [
+        "access.agenda_ambush",
+        "access.agenda_tag"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_007_project-venice",
+      "title": "Project Venice",
+      "strategyId": "corp.fast_advance",
+      "role": "overadvance_payoff",
+      "evidence": [
+        "score.overadvance_bonus",
+        "score.recurring_extra_action",
+        "score.overadvance_scaling"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_009_viral-breeding-ground",
+      "title": "Viral Breeding Ground",
+      "strategyId": "corp.ambush_bluff",
+      "role": "access_punish",
+      "evidence": [
+        "access.agenda_ambush",
+        "access.runner_program_disruption"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_010_world-domination",
+      "title": "World Domination",
+      "strategyId": "corp.remote_scoring",
+      "role": "win_condition",
+      "evidence": [
+        "score.bonus_agenda_points",
+        "score.closeout_agenda"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "targetProfileCandidates": [
+    {
+      "cardId": "onr_v1_194_corporate-downsizing",
+      "title": "Corporate Downsizing",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "choose_hq_agendas_to_reveal_and_shuffle"
+      ]
+    },
+    {
+      "cardId": "onr_v1_197_data-fort-reclamation",
+      "title": "Data Fort Reclamation",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "multi_card_hq_install_sequence",
+        "optional_rez_sequence"
+      ]
+    },
+    {
+      "cardId": "onr_v1_200_encryption-breakthrough",
+      "title": "Encryption Breakthrough",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "reveal_code_gates_if_choice_supported"
+      ]
+    },
+    {
+      "cardId": "onr_v1_204_ice-transmutation",
+      "title": "Ice Transmutation",
+      "status": "candidate",
+      "targetProfileKinds": [
+        "use_target:rezzed_ice"
+      ]
+    },
+    {
+      "cardId": "onr_v1_212_priority-requisition",
+      "title": "Priority Requisition",
+      "status": "candidate",
+      "targetProfileKinds": [
+        "use_target:installed_ice"
+      ]
+    },
+    {
+      "cardId": "onr_v1_215_security-net-optimization",
+      "title": "Security Net Optimization",
+      "status": "candidate",
+      "targetProfileKinds": [
+        "use_target:server"
+      ]
+    },
+    {
+      "cardId": "onr_v1_216_security-purge",
+      "title": "Security Purge",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "top_three_rnd_reveal_install_rez_sequence"
+      ]
+    },
+    {
+      "cardId": "onr_v1_219_superior-net-barriers",
+      "title": "Superior Net Barriers",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "reveal_walls_if_choice_supported"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_009_viral-breeding-ground",
+      "title": "Viral Breeding Ground",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "access_choose_programs_by_advancement_counter"
+      ]
+    }
+  ],
+  "hiddenInfoSafetyReview": [
+    {
+      "topic": "corp_agenda_hidden_semantics",
+      "result": "pass",
+      "notes": "Corp-KI darf eigene Agenda-Semantik im bestehenden side-safe Inputkontext kennen; Runner-KI erhaelt keine verdeckte Corp-Agenda-Semantik vor Reveal, Score, Access oder anderer bekannter Sichtbarkeit."
+    },
+    {
+      "topic": "access_ambush_agendas",
+      "result": "pass",
+      "notes": "Fetal AI, Marked Accounts und Viral Breeding Ground bleiben im Report voll beschrieben, aber Runtime-/Inspector-Projektion erhaelt keine neue Runner-seitige Hidden-Info-Quelle."
+    }
+  ],
+  "deferredItems": [
+    {
+      "topic": "corp_tempo_or_agenda_economy_strategy",
+      "decision": "deferred",
+      "rationale": "Corporate Boon, Subsidiary Branch und starke Economy-Agendas erhalten Taktiksignale, aber keine neue Strategy-ID ohne separate Taxonomieentscheidung."
+    },
+    {
+      "topic": "target_profile_v1_on_score_choices",
+      "decision": "deferred",
+      "rationale": "Mehrere Agenda-Zielwahlen sind on-score oder mehrstufig; TargetProfile V1 bleibt diagnostischer Kandidat oder schema_gap ohne Targeting-KI."
+    }
+  ],
+  "postReviewAssignments": [
+    {
+      "cardId": "onr_v1_188_ai-chief-financial-officer",
+      "title": "AI Chief Financial Officer",
+      "cardType": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "mechanicalFamily": "agenda_recycle_or_rnd_hq_archives_manipulation",
+      "tacticSignals": [
+        "score.draw",
+        "score.hq_archive_to_rnd_shuffle",
+        "score.rnd_archive_recycle"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Score-Utility fuer HQ/Archives-Recycling und Draw; kein Strategieanker, weil es Setup/Recovery-Support bleibt."
+    },
+    {
+      "cardId": "onr_v1_189_artificial-security-directors",
+      "title": "Artificial Security Directors",
+      "cardType": "agenda",
+      "subtypes": [
+        "research"
+      ],
+      "mechanicalFamily": "agenda_difficulty_discount",
+      "tacticSignals": [
+        "score.agenda_difficulty_discount",
+        "score.black_ops_difficulty_discount"
+      ],
+      "strategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "legacyStrategicRole": [
+        "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "enabler",
+          "evidence": [
+            "score.agenda_difficulty_discount",
+            "score.black_ops_difficulty_discount"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Difficulty-Reduction ist funktional Fast-Advance-Support; der Black-Ops-Subtype selbst ist kein Anker."
+    },
+    {
+      "cardId": "onr_v1_190_bioweapons-engineering",
+      "title": "Bioweapons Engineering",
+      "cardType": "agenda",
+      "subtypes": [
+        "research"
+      ],
+      "mechanicalFamily": "damage_source_or_damage_amp",
+      "tacticSignals": [
+        "damage.payoff",
+        "score.damage_amp",
+        "score.meat_damage_amp"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "legacyStrategicRole": [
+        "engine_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_amp_anchor",
+          "evidence": [
+            "score.meat_damage_amp",
+            "score.damage_amp"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Verstaerkt vorhandene Meat-Damage-Quellen und traegt damit echte Kill-Linien, erzeugt aber keinen Schaden allein."
+    },
+    {
+      "cardId": "onr_v1_191_black-ice-quality-assurance",
+      "title": "Black Ice Quality Assurance",
+      "cardType": "agenda",
+      "subtypes": [
+        "black-ops",
+        "research"
+      ],
+      "mechanicalFamily": "ice_strength_or_ice_type_buff",
+      "tacticSignals": [
+        "ice.strength_modifier",
+        "score.black_ice_strength_bonus",
+        "score.ice_type_tax_support"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_type_anchor",
+          "evidence": [
+            "score.black_ice_strength_bonus",
+            "score.ice_type_tax_support"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Black-ICE-Staerke ist ICE-Tax/Glacier-Anker; kein Damage-Anker allein aus dem Black-ICE-Kontext."
+    },
+    {
+      "cardId": "onr_v1_192_corporate-boon",
+      "title": "Corporate Boon",
+      "cardType": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "mechanicalFamily": "score_action_engine",
+      "tacticSignals": [
+        "score.action_counter_bank",
+        "score.action_gain",
+        "score.agenda_action"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Starke Action-Bank, aber ohne eigene Corp-Tempo-Strategy-ID bleibt sie support/candidate statt kanonischer Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_193_corporate-coup",
+      "title": "Corporate Coup",
+      "cardType": "agenda",
+      "subtypes": [
+        "black-ops"
+      ],
+      "mechanicalFamily": "score_economy_burst",
+      "tacticSignals": [
+        "score.agenda_action",
+        "score.economy_action",
+        "score.economy_counter_bank"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Economy-Counter-Bank bleibt Support; kein Strategieanker nur aus Economy."
+    },
+    {
+      "cardId": "onr_v1_194_corporate-downsizing",
+      "title": "Corporate Downsizing",
+      "cardType": "agenda",
+      "subtypes": [
+        "gray-ops"
+      ],
+      "mechanicalFamily": "score_economy_burst",
+      "tacticSignals": [
+        "score.economy_conditional_burst",
+        "score.hq_agenda_reveal",
+        "score.hq_agenda_shuffle"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "choose_hq_agendas_to_reveal_and_shuffle"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_revealed",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "HQ-Agenda-Auswahl bleibt schema gap; keine Runner-seitige Ableitung verdeckter HQ-Agendas."
+    },
+    {
+      "cardId": "onr_v1_195_corporate-retreat",
+      "title": "Corporate Retreat",
+      "cardType": "agenda",
+      "subtypes": [
+        "gray-ops"
+      ],
+      "mechanicalFamily": "risk_or_drawback_agenda",
+      "tacticSignals": [
+        "risk.loses_ability_on_install_or_rez",
+        "score.agenda_action",
+        "score.economy_action"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Action-Economy mit Rez-/Install-Drawback; support-only."
+    },
+    {
+      "cardId": "onr_v1_196_corporate-war",
+      "title": "Corporate War",
+      "cardType": "agenda",
+      "subtypes": [
+        "black-ops"
+      ],
+      "mechanicalFamily": "risk_or_drawback_agenda",
+      "tacticSignals": [
+        "risk.economy_crash_on_score",
+        "risk.requires_corp_credit_threshold",
+        "score.economy_conditional_burst"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "High-risk Economy-Payoff; kein Strategieanker ohne deckpraegende Economy-Taxonomieentscheidung."
+    },
+    {
+      "cardId": "onr_v1_197_data-fort-reclamation",
+      "title": "Data Fort Reclamation",
+      "cardType": "agenda",
+      "subtypes": [
+        "gray-ops"
+      ],
+      "mechanicalFamily": "remote_or_fort_setup",
+      "tacticSignals": [
+        "score.remote_fort_creation",
+        "score.remote_install_budget"
+      ],
+      "strategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "legacyStrategicRole": [
+        "engine_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "remote_setup_engine",
+          "evidence": [
+            "score.remote_fort_creation",
+            "score.remote_install_budget"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "multi_card_hq_install_sequence",
+        "optional_rez_sequence"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_revealed",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Echte Remote-Setup-Engine, aber Zielwahl/Install-Sequenz passt nicht in TargetProfile V1."
+    },
+    {
+      "cardId": "onr_v1_198_detroit-police-contract",
+      "title": "Detroit Police Contract",
+      "cardType": "agenda",
+      "subtypes": [
+        "black-ops"
+      ],
+      "mechanicalFamily": "score_economy_recurring",
+      "tacticSignals": [
+        "score.economy_counter_bank",
+        "score.economy_recurring"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Recurring Economy bleibt Support."
+    },
+    {
+      "cardId": "onr_v1_199_employee-empowerment",
+      "title": "Employee Empowerment",
+      "cardType": "agenda",
+      "subtypes": [
+        "gray-ops"
+      ],
+      "mechanicalFamily": "score_draw_or_hand",
+      "tacticSignals": [
+        "score.agenda_action",
+        "score.draw",
+        "score.recurring_draw"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Draw-Engine/Support ohne Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_200_encryption-breakthrough",
+      "title": "Encryption Breakthrough",
+      "cardType": "agenda",
+      "subtypes": [
+        "research"
+      ],
+      "mechanicalFamily": "ice_strength_or_ice_type_buff",
+      "tacticSignals": [
+        "ice.strength_modifier",
+        "score.code_gate_strength_bonus",
+        "score.ice_type_reveal_economy",
+        "score.ice_type_tax_support"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_type_anchor",
+          "evidence": [
+            "score.code_gate_strength_bonus",
+            "score.ice_type_tax_support"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "reveal_code_gates_if_choice_supported"
+      ],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Code-Gate-Buff traegt ICE-Tax; Reveal-Economy bleibt Support."
+    },
+    {
+      "cardId": "onr_v1_201_executive-extraction",
+      "title": "Executive Extraction",
+      "cardType": "agenda",
+      "subtypes": [
+        "black-ops"
+      ],
+      "mechanicalFamily": "agenda_difficulty_discount",
+      "tacticSignals": [
+        "score.agenda_difficulty_discount",
+        "score.gray_ops_difficulty_discount"
+      ],
+      "strategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "legacyStrategicRole": [
+        "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "enabler",
+          "evidence": [
+            "score.agenda_difficulty_discount",
+            "score.gray_ops_difficulty_discount"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Difficulty-Reduction ist Fast-Advance-Support; Gray-Ops-Subtype allein bleibt kein Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_202_genetics-visionary-acquisition",
+      "title": "Genetics-Visionary Acquisition",
+      "cardType": "agenda",
+      "subtypes": [
+        "gray-ops"
+      ],
+      "mechanicalFamily": "agenda_difficulty_discount",
+      "tacticSignals": [
+        "score.agenda_difficulty_discount",
+        "score.research_difficulty_discount"
+      ],
+      "strategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "legacyStrategicRole": [
+        "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "enabler",
+          "evidence": [
+            "score.agenda_difficulty_discount",
+            "score.research_difficulty_discount"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Research-Difficulty-Reduction ermoeglicht Fast-Advance-Linien, nicht Research als Subtyp."
+    },
+    {
+      "cardId": "onr_v1_203_hostile-takeover",
+      "title": "Hostile Takeover",
+      "cardType": "agenda",
+      "subtypes": [
+        "gray-ops"
+      ],
+      "mechanicalFamily": "score_economy_burst",
+      "tacticSignals": [
+        "score.economy_burst"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Burst Economy ist stark, aber support-only."
+    },
+    {
+      "cardId": "onr_v1_204_ice-transmutation",
+      "title": "Ice Transmutation",
+      "cardType": "agenda",
+      "subtypes": [
+        "research"
+      ],
+      "mechanicalFamily": "ice_strength_or_ice_type_buff",
+      "tacticSignals": [
+        "ice.strength_modifier",
+        "ice.subroutine_modifier",
+        "score.chosen_ice_strength_bonus",
+        "score.repeat_ice_subroutines"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "payoff_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_upgrade_payoff",
+          "evidence": [
+            "score.chosen_ice_strength_bonus",
+            "score.repeat_ice_subroutines"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "use_target:rezzed_ice"
+      ],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Gezielter ICE-Upgrade-Payoff; TargetProfile V1 waere moeglich, bleibt aber read-only Kandidat."
+    },
+    {
+      "cardId": "onr_v1_205_main-office-relocation",
+      "title": "Main-Office Relocation",
+      "cardType": "agenda",
+      "subtypes": [
+        "gray-ops"
+      ],
+      "mechanicalFamily": "score_draw_or_hand",
+      "tacticSignals": [
+        "score.hand_size"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Handsize-Support ohne Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_206_marine-arcology",
+      "title": "Marine Arcology",
+      "cardType": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "mechanicalFamily": "score_economy_burst",
+      "tacticSignals": [
+        "score.agenda_action",
+        "score.economy_action"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Action-for-credit ist Economy-Support."
+    },
+    {
+      "cardId": "onr_v1_207_netwatch-operations-office",
+      "title": "Netwatch Operations Office",
+      "cardType": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "mechanicalFamily": "tag_source_or_trace_agenda",
+      "tacticSignals": [
+        "score.tag_source",
+        "score.trace_tag_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "engine_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "tag_source",
+          "evidence": [
+            "score.trace_tag_source",
+            "score.tag_source"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Trace-Tag-Quelle, getrennt von Tag-Payoff."
+    },
+    {
+      "cardId": "onr_v1_208_on-call-solo-team",
+      "title": "On-Call Solo Team",
+      "cardType": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "mechanicalFamily": "tagged_damage_payoff",
+      "tacticSignals": [
+        "damage.payoff",
+        "risk.requires_tagged_runner",
+        "score.meat_damage_source",
+        "score.tagged_meat_damage_payoff",
+        "tag.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_payoff",
+          "evidence": [
+            "score.tagged_meat_damage_payoff",
+            "score.meat_damage_source"
+          ],
+          "confidence": "high"
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "punish_payoff",
+          "evidence": [
+            "risk.requires_tagged_runner"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Tagged Meat-Damage-Payoff; Tag-Quelle und Payoff bleiben getrennt."
+    },
+    {
+      "cardId": "onr_v1_209_political-coup",
+      "title": "Political Coup",
+      "cardType": "agenda",
+      "subtypes": [
+        "black-ops"
+      ],
+      "mechanicalFamily": "score_economy_burst",
+      "tacticSignals": [
+        "score.agenda_action",
+        "score.economy_action",
+        "score.economy_counter_bank"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Economy-Counter-Bank bleibt Support."
+    },
+    {
+      "cardId": "onr_v1_210_political-overthrow",
+      "title": "Political Overthrow",
+      "cardType": "agenda",
+      "subtypes": [
+        "black-ops"
+      ],
+      "mechanicalFamily": "score_economy_burst",
+      "tacticSignals": [
+        "score.agenda_action",
+        "score.economy_action"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Hohe Agenda-Punkte plus Action-Economy sind kein eigener Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_211_polymer-breakthrough",
+      "title": "Polymer Breakthrough",
+      "cardType": "agenda",
+      "subtypes": [
+        "research"
+      ],
+      "mechanicalFamily": "score_economy_recurring",
+      "tacticSignals": [
+        "score.economy_recurring"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Recurring Economy support-only."
+    },
+    {
+      "cardId": "onr_v1_212_priority-requisition",
+      "title": "Priority Requisition",
+      "cardType": "agenda",
+      "subtypes": [
+        "gray-ops"
+      ],
+      "mechanicalFamily": "free_rez_or_install",
+      "tacticSignals": [
+        "score.free_rez_ice"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "legacyStrategicRole": [
+        "scoring_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "tempo_payoff",
+          "evidence": [
+            "score.free_rez_ice"
+          ],
+          "confidence": "high"
+        },
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "score_window_payoff",
+          "evidence": [
+            "score.free_rez_ice"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "use_target:installed_ice"
+      ],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Free-rez-payoff stuetzt ICE-Tax und Scoring-Window; nicht Economy-Reserve."
+    },
+    {
+      "cardId": "onr_v1_213_private-cybernet-police",
+      "title": "Private Cybernet Police",
+      "cardType": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "mechanicalFamily": "tag_source_or_trace_agenda",
+      "tacticSignals": [
+        "score.tag_source",
+        "score.trace_tag_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "engine_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "tag_source",
+          "evidence": [
+            "score.trace_tag_source",
+            "score.tag_source"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Trace-Tag-Quelle, getrennt von Payoff."
+    },
+    {
+      "cardId": "onr_v1_214_project-babylon",
+      "title": "Project Babylon",
+      "cardType": "agenda",
+      "subtypes": [
+        "black-ops"
+      ],
+      "mechanicalFamily": "overadvance_or_bonus_points",
+      "tacticSignals": [
+        "score.conditional_bonus_agenda_points",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling"
+      ],
+      "strategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "legacyStrategicRole": [
+        "scoring_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "overadvance_payoff",
+          "evidence": [
+            "score.overadvance_bonus",
+            "score.overadvance_scaling"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Overadvance-Agenda-Point-Payoff stuetzt Fast-Advance/Overadvance, nicht einfache Agenda-Punkte."
+    },
+    {
+      "cardId": "onr_v1_215_security-net-optimization",
+      "title": "Security Net Optimization",
+      "cardType": "agenda",
+      "subtypes": [
+        "gray-ops"
+      ],
+      "mechanicalFamily": "ice_strength_or_ice_type_buff",
+      "tacticSignals": [
+        "ice.strength_modifier",
+        "score.fort_ice_strength_bonus"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "fort_tax_anchor",
+          "evidence": [
+            "score.fort_ice_strength_bonus"
+          ],
+          "confidence": "high"
+        },
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "remote_defense_anchor",
+          "evidence": [
+            "score.fort_ice_strength_bonus"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "use_target:server"
+      ],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Fortbezogener ICE-Buff traegt ICE-Tax und Remote-Defense."
+    },
+    {
+      "cardId": "onr_v1_216_security-purge",
+      "title": "Security Purge",
+      "cardType": "agenda",
+      "subtypes": [
+        "gray-ops"
+      ],
+      "mechanicalFamily": "agenda_recycle_or_rnd_hq_archives_manipulation",
+      "tacticSignals": [
+        "access.rnd_reveal_requirement",
+        "score.free_install_and_rez_ice",
+        "score.rnd_install_and_rez",
+        "score.rnd_reveal"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "legacyStrategicRole": [
+        "scoring_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "setup_payoff",
+          "evidence": [
+            "score.free_install_and_rez_ice",
+            "score.rnd_install_and_rez"
+          ],
+          "confidence": "medium"
+        },
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "setup_payoff",
+          "evidence": [
+            "score.free_install_and_rez_ice",
+            "score.rnd_install_and_rez"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "top_three_rnd_reveal_install_rez_sequence"
+      ],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "R&D-Reveal plus free install/rez ist Setup-Payoff; Sequenzzielwahl bleibt schema gap."
+    },
+    {
+      "cardId": "onr_v1_217_strike-force-kali",
+      "title": "Strike Force Kali",
+      "cardType": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "mechanicalFamily": "tagged_damage_payoff",
+      "tacticSignals": [
+        "damage.payoff",
+        "risk.requires_tagged_runner",
+        "score.meat_damage_source",
+        "score.tagged_meat_damage_payoff",
+        "tag.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_payoff",
+          "evidence": [
+            "score.tagged_meat_damage_payoff",
+            "score.meat_damage_source"
+          ],
+          "confidence": "high"
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "punish_payoff",
+          "evidence": [
+            "risk.requires_tagged_runner"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Staerkerer Tagged Meat-Damage-Payoff; Tag-Quelle bleibt externe Bedingung."
+    },
+    {
+      "cardId": "onr_v1_218_subsidiary-branch",
+      "title": "Subsidiary Branch",
+      "cardType": "agenda",
+      "subtypes": [
+        "gray-ops"
+      ],
+      "mechanicalFamily": "score_action_engine",
+      "tacticSignals": [
+        "score.recurring_extra_action"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Starke Tempo-Engine, aber ohne passende Corp-Tempo-Strategy-ID nur candidate/support."
+    },
+    {
+      "cardId": "onr_v1_219_superior-net-barriers",
+      "title": "Superior Net Barriers",
+      "cardType": "agenda",
+      "subtypes": [
+        "research"
+      ],
+      "mechanicalFamily": "ice_strength_or_ice_type_buff",
+      "tacticSignals": [
+        "ice.strength_modifier",
+        "score.ice_type_reveal_economy",
+        "score.ice_type_tax_support",
+        "score.wall_strength_bonus"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_type_anchor",
+          "evidence": [
+            "score.wall_strength_bonus",
+            "score.ice_type_tax_support"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "reveal_walls_if_choice_supported"
+      ],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Wall-Buff traegt ICE-Tax; Reveal-Economy bleibt Support."
+    },
+    {
+      "cardId": "onr_v1_220_tycho-extension",
+      "title": "Tycho Extension",
+      "cardType": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "mechanicalFamily": "vanilla_or_point_dense_agenda",
+      "tacticSignals": [
+        "score.high_agenda_value",
+        "score.vanilla_points"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Vier Agenda-Punkte und kein weiterer Effekt; bewusst kein Strategieanker nur wegen Punktewert."
+    },
+    {
+      "cardId": "onr_proteus_001_ai-board-member",
+      "title": "AI Board Member",
+      "cardType": "agenda",
+      "subtypes": [
+        "ai",
+        "random",
+        "research"
+      ],
+      "mechanicalFamily": "score_action_engine",
+      "tacticSignals": [
+        "risk.random_action",
+        "score.random_extra_action"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Randomisierte Extra-Aktion bleibt support/candidate und wird wegen Zufall nicht als Strategieanker gesetzt."
+    },
+    {
+      "cardId": "onr_proteus_002_charity-takeover",
+      "title": "Charity Takeover",
+      "cardType": "agenda",
+      "subtypes": [
+        "bad_publicity",
+        "black_ops"
+      ],
+      "mechanicalFamily": "bad_publicity_agenda",
+      "tacticSignals": [
+        "risk.bad_publicity",
+        "risk.loss_condition",
+        "score.bad_publicity_gain",
+        "score.bad_publicity_win_risk",
+        "score.economy_burst"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Bad Publicity ist Drawback/Risiko, kein Corp-Payoff und keine Corp-Strategie."
+    },
+    {
+      "cardId": "onr_proteus_003_corporate-headhunters",
+      "title": "Corporate Headhunters",
+      "cardType": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "mechanicalFamily": "tagged_damage_payoff",
+      "tacticSignals": [
+        "damage.payoff",
+        "risk.requires_tagged_runner",
+        "score.brain_damage_or_hand_size_pressure",
+        "score.meat_damage_source",
+        "score.tagged_meat_damage_payoff",
+        "tag.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_engine",
+          "evidence": [
+            "score.tagged_meat_damage_payoff",
+            "score.meat_damage_source",
+            "score.brain_damage_or_hand_size_pressure"
+          ],
+          "confidence": "high"
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "punish_payoff",
+          "evidence": [
+            "risk.requires_tagged_runner"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Tagged Damage plus Hand-size-Pressure ist Kill-Engine/Payoff."
+    },
+    {
+      "cardId": "onr_proteus_004_fetal-ai",
+      "title": "Fetal AI",
+      "cardType": "agenda",
+      "subtypes": [
+        "ai",
+        "ambush",
+        "asset"
+      ],
+      "mechanicalFamily": "access_ambush_or_access_punish",
+      "tacticSignals": [
+        "access.agenda_ambush",
+        "access.agenda_net_damage",
+        "access.agenda_steal_tax",
+        "access.archives_safe_exception",
+        "access.rnd_reveal_requirement",
+        "damage.payoff",
+        "score.net_damage_access_punish"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.ambush_bluff"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "access_punish",
+          "evidence": [
+            "access.agenda_net_damage",
+            "score.net_damage_access_punish"
+          ],
+          "confidence": "high"
+        },
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "access_punish",
+          "evidence": [
+            "access.agenda_ambush",
+            "access.agenda_steal_tax"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_revealed",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Access-Ambush mit Net-Damage und Steal-Tax; keine Runner-seitige verdeckte Semantik vor Access/Revealed."
+    },
+    {
+      "cardId": "onr_proteus_005_marked-accounts",
+      "title": "Marked Accounts",
+      "cardType": "agenda",
+      "subtypes": [
+        "ambush",
+        "gray_ops"
+      ],
+      "mechanicalFamily": "access_ambush_or_access_punish",
+      "tacticSignals": [
+        "access.agenda_ambush",
+        "access.agenda_tag",
+        "access.rnd_reveal_requirement",
+        "tag.source"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish",
+        "corp.ambush_bluff"
+      ],
+      "legacyStrategicRole": [
+        "engine_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "access_tag_source",
+          "evidence": [
+            "access.agenda_tag"
+          ],
+          "confidence": "high"
+        },
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "access_punish",
+          "evidence": [
+            "access.agenda_ambush",
+            "access.agenda_tag"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_revealed",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Access-Tag-Quelle; Tag-source und spaetere Payoffs bleiben getrennt."
+    },
+    {
+      "cardId": "onr_proteus_006_please-dont-choke-anyone",
+      "title": "Please Don't Choke Anyone",
+      "cardType": "agenda",
+      "subtypes": [
+        "gray_ops"
+      ],
+      "mechanicalFamily": "score_action_engine",
+      "tacticSignals": [
+        "score.action_counter_bank",
+        "score.damage_conversion_action_engine"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Konvertiert eigenen erfolgreichen Schaden in Action-Counter; kein Damage-Kill-Anker, weil Schaden verhindert wird."
+    },
+    {
+      "cardId": "onr_proteus_007_project-venice",
+      "title": "Project Venice",
+      "cardType": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "mechanicalFamily": "overadvance_or_bonus_points",
+      "tacticSignals": [
+        "score.overadvance_bonus",
+        "score.overadvance_scaling",
+        "score.recurring_extra_action"
+      ],
+      "strategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "legacyStrategicRole": [
+        "scoring_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "overadvance_payoff",
+          "evidence": [
+            "score.overadvance_bonus",
+            "score.recurring_extra_action",
+            "score.overadvance_scaling"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Overadvance erzeugt wiederkehrende Tempo-Engine; als Fast-Advance/Overadvance-Payoff geankert."
+    },
+    {
+      "cardId": "onr_proteus_008_project-zurich",
+      "title": "Project Zurich",
+      "cardType": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "mechanicalFamily": "overadvance_or_bonus_points",
+      "tacticSignals": [
+        "score.economy_recurring",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Overadvance-Economy bleibt support/candidate; kein Economy-Strategieanker."
+    },
+    {
+      "cardId": "onr_proteus_009_viral-breeding-ground",
+      "title": "Viral Breeding Ground",
+      "cardType": "agenda",
+      "subtypes": [
+        "ambush",
+        "research",
+        "virus"
+      ],
+      "mechanicalFamily": "access_ambush_or_access_punish",
+      "tacticSignals": [
+        "access.agenda_ambush",
+        "access.runner_program_bounce",
+        "access.runner_program_disruption",
+        "score.fort_trash_on_score"
+      ],
+      "strategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "access_punish",
+          "evidence": [
+            "access.agenda_ambush",
+            "access.runner_program_disruption"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "access_choose_programs_by_advancement_counter"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_revealed",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Programmbounce/-Disruption ist Access-Punish, kein Damage-Kill; Access-Zielwahl bleibt schema gap."
+    },
+    {
+      "cardId": "onr_proteus_010_world-domination",
+      "title": "World Domination",
+      "cardType": "agenda",
+      "subtypes": [
+        "black_ops"
+      ],
+      "mechanicalFamily": "vanilla_or_point_dense_agenda",
+      "tacticSignals": [
+        "risk.high_difficulty_agenda",
+        "score.bonus_agenda_points",
+        "score.closeout_agenda"
+      ],
+      "strategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "legacyStrategicRole": [
+        "win_condition"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "win_condition",
+          "evidence": [
+            "score.bonus_agenda_points",
+            "score.closeout_agenda"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Extrem hoher Score-Payoff ist Closeout/Win-Condition, aber wegen Difficulty kein Fast-Advance-Anker."
+    }
+  ],
+  "verification": [
+    {
+      "command": "node scripts/check-ai023-corp-agendas-semantics.mjs",
+      "result": "pending_after_apply"
+    }
+  ]
+}

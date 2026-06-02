@@ -4003,18 +4003,10 @@
           "confidence": "medium"
         },
         "corp.economy_rez_reserve": {
-          "anchorScore": 100,
+          "anchorScore": 44,
           "supportScore": 95,
-          "finalScore": 97,
+          "finalScore": 72,
           "anchorEvidence": [
-            {
-              "cardId": "onr_v1_203_hostile-takeover",
-              "quantity": 3,
-              "source": "lineSupport",
-              "signal": "corp.economy_rez_reserve",
-              "strategyId": "corp.economy_rez_reserve",
-              "reason": "normalized_lineSupport_strategy_goal"
-            },
             {
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
@@ -4848,13 +4840,13 @@
         }
       },
       "primaryStrategies": [
-        "corp.economy_rez_reserve",
         "corp.ice_tax_glacier",
-        "corp.remote_scoring"
+        "corp.remote_scoring",
+        "corp.tag_trace_punish"
       ],
       "secondaryStrategies": [
-        "corp.tag_trace_punish",
         "corp.fast_advance",
+        "corp.economy_rez_reserve",
         "corp.damage_kill",
         "corp.central_stabilize",
         "corp.rush_score"
@@ -4872,7 +4864,6 @@
       },
       "legacySignalCounts": {
         "lineSupport:corp.damage_kill": 1,
-        "lineSupport:corp.economy_rez_reserve": 3,
         "lineSupport:corp.fast_advance": 1,
         "lineSupport:corp.ice_tax_glacier": 2,
         "lineSupport:corp.remote_scoring": 2,
@@ -5319,18 +5310,10 @@
           "confidence": "low"
         },
         "corp.economy_rez_reserve": {
-          "anchorScore": 100,
+          "anchorScore": 44,
           "supportScore": 90,
-          "finalScore": 95,
+          "finalScore": 69,
           "anchorEvidence": [
-            {
-              "cardId": "onr_v1_203_hostile-takeover",
-              "quantity": 3,
-              "source": "lineSupport",
-              "signal": "corp.economy_rez_reserve",
-              "strategyId": "corp.economy_rez_reserve",
-              "reason": "normalized_lineSupport_strategy_goal"
-            },
             {
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
@@ -6421,11 +6404,11 @@
       },
       "primaryStrategies": [
         "corp.tag_trace_punish",
-        "corp.economy_rez_reserve",
-        "corp.ice_tax_glacier"
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
       ],
       "secondaryStrategies": [
-        "corp.remote_scoring",
+        "corp.economy_rez_reserve",
         "corp.central_stabilize",
         "corp.rush_score"
       ],
@@ -6441,7 +6424,6 @@
         "trace.source": 2
       },
       "legacySignalCounts": {
-        "lineSupport:corp.economy_rez_reserve": 3,
         "lineSupport:corp.ice_tax_glacier": 2,
         "lineSupport:corp.remote_scoring": 2,
         "lineSupport:corp.tag_trace_punish": 6,
@@ -6541,10 +6523,9 @@
       "onr_origin_runner_ai_snapshot_v1"
     ],
     "primaryStrategyCounts": {
-      "corp.economy_rez_reserve": 2,
       "corp.ice_tax_glacier": 2,
-      "corp.remote_scoring": 1,
-      "corp.tag_trace_punish": 1,
+      "corp.remote_scoring": 2,
+      "corp.tag_trace_punish": 2,
       "runner.economy_first": 2,
       "runner.hq_pressure": 1,
       "runner.interface_closeout": 2,
@@ -6557,6 +6538,6 @@
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 2
     },
-    "contentSha256": "e7a96f134d53d58f27bbbaad1fb82cc26a863d953de68e9dd63ae78cba830a67"
+    "contentSha256": "a74a543a30536c7c368d09e8bc3e9388d2664077c4fcff2f30910af3c69d8605"
   }
 }

@@ -10505,7 +10505,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/agendas/ai-board-member.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -10535,11 +10535,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -10557,10 +10557,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -10583,7 +10579,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/agendas/charity-takeover.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -10607,11 +10603,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -10622,16 +10618,7 @@
       "missingManualOverlay": [],
       "descriptorGaps": [],
       "confidence": "high",
-      "warnings": [
-        {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        }
-      ],
+      "warnings": [],
       "fullCoverageScope": true,
       "coverageClass": "legacy_fallback_only"
     },
@@ -10641,7 +10628,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/agendas/corporate-headhunters.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -10669,13 +10656,16 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.tag_trace_punish"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -10693,10 +10683,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -10719,7 +10705,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/agendas/fetal-ai.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -10767,14 +10753,15 @@
         "effects": [],
         "conditions": [],
         "lineSupport": [
+          "corp.ambush_bluff",
           "corp.damage_kill"
         ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -10794,10 +10781,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -10824,7 +10807,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/agendas/marked-accounts.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -10863,14 +10846,15 @@
         "effects": [],
         "conditions": [],
         "lineSupport": [
+          "corp.ambush_bluff",
           "corp.tag_trace_punish"
         ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -10890,10 +10874,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -10920,7 +10900,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/agendas/please-dont-choke-anyone.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -10950,11 +10930,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -10972,10 +10952,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -10998,7 +10974,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/agendas/project-venice.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -11026,13 +11002,15 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -11050,10 +11028,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -11076,7 +11050,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/agendas/project-zurich.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -11106,11 +11080,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -11128,10 +11102,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -11154,7 +11124,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/agendas/viral-breeding-ground.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -11182,13 +11152,15 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ambush_bluff"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -11206,10 +11178,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -11232,7 +11200,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/agendas/world-domination.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -11260,13 +11228,15 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.remote_scoring"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -11284,10 +11254,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -47881,8 +47847,8 @@
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "medium",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -47905,10 +47871,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Manual ontology contains fields not currently derivable."
@@ -47976,7 +47938,16 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -48064,7 +48035,16 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [
+          "corp.damage_kill"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -48163,14 +48143,13 @@
         ],
         "conditions": [],
         "lineSupport": [
-          "corp.ice_tax_glacier",
-          "corp.remote_scoring"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "medium",
+          "confidence": "high",
           "needsHumanReview": false
         }
       },
@@ -48191,10 +48170,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -48289,9 +48264,7 @@
           "reserveRisk": "low",
           "opportunityCost": "low"
         },
-        "lineSupport": [
-          "corp.fast_advance"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -48402,9 +48375,7 @@
           "reserveRisk": "low",
           "opportunityCost": "low"
         },
-        "lineSupport": [
-          "corp.economy_rez_reserve"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -48521,11 +48492,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -48555,10 +48526,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -48675,7 +48642,14 @@
             "kind": "requires_scored_agenda"
           }
         ],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [
@@ -48776,15 +48750,13 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "corp.economy_rez_reserve"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "medium",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -48810,10 +48782,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -48927,13 +48895,15 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.remote_scoring"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -48963,10 +48933,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -49065,7 +49031,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -49330,7 +49303,16 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -49446,7 +49428,16 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -49536,7 +49527,16 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [
+          "corp.fast_advance"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -49637,9 +49637,7 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "corp.economy_rez_reserve"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -49749,13 +49747,15 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -49779,10 +49779,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -49850,7 +49846,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -49962,9 +49965,7 @@
           "reserveRisk": "low",
           "opportunityCost": "medium"
         },
-        "lineSupport": [
-          "corp.economy_rez_reserve"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -50110,7 +50111,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -50251,7 +50252,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -50370,9 +50371,7 @@
           "reserveRisk": "low",
           "opportunityCost": "low"
         },
-        "lineSupport": [
-          "corp.economy_rez_reserve"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -50495,9 +50494,7 @@
           "reserveRisk": "low",
           "opportunityCost": "low"
         },
-        "lineSupport": [
-          "corp.economy_rez_reserve"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -50577,7 +50574,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -50695,13 +50699,14 @@
         ],
         "conditions": [],
         "lineSupport": [
-          "corp.economy_rez_reserve"
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "medium",
+          "confidence": "high",
           "needsHumanReview": false
         }
       },
@@ -50730,10 +50735,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -50882,7 +50883,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -50961,9 +50962,9 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "medium",
+          "confidence": "high",
           "needsHumanReview": false
         }
       },
@@ -50986,10 +50987,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -51069,13 +51066,16 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -51097,10 +51097,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -51204,8 +51200,16 @@
         "effects": [],
         "conditions": [],
         "lineSupport": [
-          "corp.economy_rez_reserve"
-        ]
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -51379,7 +51383,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -51458,11 +51462,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -51482,10 +51486,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -51605,15 +51605,14 @@
         ],
         "conditions": [],
         "lineSupport": [
-          "corp.ice_tax_glacier",
-          "corp.remote_scoring"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "medium",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -51640,10 +51639,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -51678,7 +51673,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/__missing__/onr_v1_220_tycho-extension.ts",
       "implementationFound": false,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -51706,11 +51701,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -51726,10 +51721,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Implementation file not found."
