@@ -136,6 +136,7 @@ const KNOWN_EFFECT_KINDS = new Set([
   "net_damage_prevention",
   "brain_damage_prevention",
   "hand_size_modifier",
+  "hardware_trait",
   "program_host",
   "action_penalty",
   "persistent_survival_modifier",

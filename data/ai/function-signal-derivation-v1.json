@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI019a",
-  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019",
+  "taskId": "AI020",
+  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a",
   "generatedAt": "2026-06-02",
-  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI019a narrows Runner-program semantic derivation after AI019: multi-central virus counter effects count as counter engines, setup.draw is runner-scope only, and setup.hand_size only covers positive Runner hand-size support. No planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default or UI-derivation effects.",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI020 adds Runner-hardware trait, credit, prevention, backup, access-interface, extra-run/action and Archives/R&D manipulation semantics while keeping normal support hardware support-only. No planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default or UI-derivation effects.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -86,6 +86,7 @@
         ],
         "cardType": [
           "event",
+          "hardware",
           "program",
           "resource"
         ],
@@ -227,6 +228,7 @@
         ],
         "cardType": [
           "event",
+          "hardware",
           "program",
           "resource"
         ],
@@ -306,6 +308,29 @@
       ]
     },
     {
+      "signalId": "access.rnd_topdeck_setup",
+      "source": "effects",
+      "match": {
+        "kind": "topdeck_info",
+        "target": "rnd_topdeck_setup"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "rnd"
+        ],
+        "target": [
+          "rnd_topdeck_setup"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "access.rnd_trash_pressure",
       "source": "effects",
       "match": {
@@ -347,6 +372,29 @@
         ],
         "target": [
           "trash_untrashable"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "action.recurring_extra_action",
+      "source": "effects",
+      "match": {
+        "kind": "action_economy",
+        "target": "recurring_extra_action"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "recurring_extra_action"
         ]
       },
       "strategyAnchorFor": []
@@ -986,6 +1034,29 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "corp.archives_to_rnd_pressure",
+      "source": "effects",
+      "match": {
+        "kind": "access_replacement",
+        "target": "archives_to_rnd_pressure"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "archives"
+        ],
+        "target": [
+          "archives_to_rnd_pressure"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "corp.bad_publicity_pressure",
       "source": "effects",
       "match": {
@@ -1150,6 +1221,29 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "cost.agenda_point_penalty",
+      "source": "effects",
+      "match": {
+        "kind": "delayed_penalty",
+        "target": "agenda_point_install_cost"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "agenda_point_install_cost"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "damage.payoff",
       "source": "effects",
       "match": {
@@ -1200,6 +1294,52 @@
       ]
     },
     {
+      "signalId": "defense.ap_damage_mitigation",
+      "source": "effects",
+      "match": {
+        "kind": "net_damage_prevention",
+        "target": "ap_subroutine_damage"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "damage"
+        ],
+        "target": [
+          "ap_subroutine_damage"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "defense.ap_subroutine_mitigation",
+      "source": "effects",
+      "match": {
+        "kind": "prevention_replacement",
+        "target": "ap_subroutine"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "ice"
+        ],
+        "target": [
+          "ap_subroutine"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "defense.base_link",
       "source": "effects",
       "match": {
@@ -1210,6 +1350,7 @@
           "runner"
         ],
         "cardType": [
+          "hardware",
           "program"
         ],
         "effectScope": [
@@ -1229,6 +1370,7 @@
           "runner"
         ],
         "cardType": [
+          "hardware",
           "program"
         ]
       },
@@ -1265,9 +1407,7 @@
           "damage"
         ]
       },
-      "strategyAnchorFor": [
-        "runner.survival_defense"
-      ]
+      "strategyAnchorFor": []
     },
     {
       "signalId": "defense.damage_prevention",
@@ -1284,9 +1424,93 @@
           "damage"
         ]
       },
-      "strategyAnchorFor": [
-        "runner.survival_defense"
-      ]
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "defense.damage_recovery_draw",
+      "source": "effects",
+      "match": {
+        "kind": "draw",
+        "target": "recent_damage_recovery"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "recent_damage_recovery"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "defense.finite_damage_prevention",
+      "source": "effects",
+      "match": {
+        "kind": "brain_damage_prevention",
+        "finite": true
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "runner",
+          "damage"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "defense.finite_damage_prevention",
+      "source": "effects",
+      "match": {
+        "kind": "meat_damage_prevention",
+        "finite": true
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "runner",
+          "damage"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "defense.finite_damage_prevention",
+      "source": "effects",
+      "match": {
+        "kind": "net_damage_prevention",
+        "finite": true
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "runner",
+          "damage"
+        ]
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "defense.flatline_prevention",
@@ -1340,6 +1564,7 @@
           "runner"
         ],
         "cardType": [
+          "hardware",
           "program"
         ]
       },
@@ -1356,7 +1581,56 @@
           "runner"
         ],
         "cardType": [
+          "hardware",
           "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "defense.pay_through_prevention",
+      "source": "effects",
+      "match": {
+        "kind": "damage_prevention",
+        "target": "pay_through_meat_damage"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "damage"
+        ],
+        "target": [
+          "pay_through_meat_damage"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "defense.tag_clear_support",
+      "source": "effects",
+      "match": {
+        "kind": "recurring_economy",
+        "resource": "credits",
+        "scope": "runner",
+        "target": "tag_clear"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "tag_clear"
         ]
       },
       "strategyAnchorFor": []
@@ -1375,9 +1649,7 @@
           "runner"
         ]
       },
-      "strategyAnchorFor": [
-        "runner.survival_defense"
-      ]
+      "strategyAnchorFor": []
     },
     {
       "signalId": "defense.trace_boost",
@@ -1391,6 +1663,7 @@
           "runner"
         ],
         "cardType": [
+          "hardware",
           "program"
         ],
         "target": [
@@ -1412,6 +1685,31 @@
         "effectScope": [
           "runner",
           "trace"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "defense.trace_defense",
+      "source": "effects",
+      "match": {
+        "kind": "recurring_economy",
+        "resource": "credits",
+        "scope": "runner",
+        "target": "link"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "link"
         ]
       },
       "strategyAnchorFor": []
@@ -1579,7 +1877,27 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "economy.recurring_breaker_credit",
+      "signalId": "economy.recurring_install_credit",
+      "source": "effects",
+      "match": {
+        "kind": "recurring_economy",
+        "target": "program_install"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "program_install"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.recurring_killer_credit",
       "source": "effects",
       "match": {
         "kind": "recurring_economy",
@@ -1605,21 +1923,76 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "economy.recurring_install_credit",
+      "signalId": "economy.recurring_link_credit",
       "source": "effects",
       "match": {
         "kind": "recurring_economy",
-        "target": "program_install"
+        "resource": "credits",
+        "scope": "runner",
+        "target": "link"
       },
       "gates": {
         "side": [
           "runner"
         ],
         "cardType": [
-          "program"
+          "hardware"
+        ],
+        "effectScope": [
+          "runner"
         ],
         "target": [
-          "program_install"
+          "link"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.recurring_non_noisy_breaker_credit",
+      "source": "effects",
+      "match": {
+        "kind": "recurring_economy",
+        "resource": "credits",
+        "scope": "runner",
+        "target": "non_noisy_icebreaker"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "non_noisy_icebreaker"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.recurring_tag_clear_credit",
+      "source": "effects",
+      "match": {
+        "kind": "recurring_economy",
+        "resource": "credits",
+        "scope": "runner",
+        "target": "tag_clear"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "tag_clear"
         ]
       },
       "strategyAnchorFor": []
@@ -1702,6 +2075,11 @@
           "runner",
           "remote",
           "accessed_card"
+        ],
+        "cardType": [
+          "event",
+          "program",
+          "resource"
         ]
       },
       "strategyAnchorFor": []
@@ -2342,6 +2720,98 @@
       ]
     },
     {
+      "signalId": "risk.brain_damage_self_inflicted",
+      "source": "effects",
+      "match": {
+        "kind": "damage",
+        "target": "self_inflicted_brain_damage"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "self_inflicted_brain_damage"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "risk.hardware_trash_target",
+      "source": "effects",
+      "match": {
+        "kind": "hardware_trash",
+        "target": "runner_hardware"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "hardware"
+        ],
+        "target": [
+          "runner_hardware"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "run.archives_replacement_access",
+      "source": "effects",
+      "match": {
+        "kind": "access_replacement",
+        "target": "archives_replacement_access"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "archives"
+        ],
+        "target": [
+          "archives_replacement_access"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "run.break_cost_penalty",
+      "source": "effects",
+      "match": {
+        "kind": "action_penalty",
+        "target": "break_subroutine_cost"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "break_subroutine_cost"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "run.break_cost_support",
       "source": "effects",
       "match": {
@@ -2504,6 +2974,29 @@
       ]
     },
     {
+      "signalId": "run.extra_run_after_success",
+      "source": "effects",
+      "match": {
+        "kind": "future_run_effect",
+        "target": "extra_run_after_success"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "extra_run_after_success"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "run.jackout_vs_node_upgrade",
       "source": "effects",
       "match": {
@@ -2555,6 +3048,29 @@
       "signalId": "run.replacement_access",
       "source": "effects",
       "match": {
+        "kind": "access_replacement",
+        "target": "archives_replacement_access"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "archives"
+        ],
+        "target": [
+          "archives_replacement_access"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "run.replacement_access",
+      "source": "effects",
+      "match": {
         "kind": "access_replacement"
       },
       "gates": {
@@ -2562,6 +3078,7 @@
           "runner"
         ],
         "cardType": [
+          "hardware",
           "program"
         ]
       },
@@ -2579,6 +3096,7 @@
           "runner"
         ],
         "cardType": [
+          "hardware",
           "program"
         ],
         "target": [
@@ -2674,6 +3192,52 @@
         ],
         "effectScope": [
           "score_area"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.cybernetics",
+      "source": "effects",
+      "match": {
+        "kind": "hardware_trait",
+        "target": "cybernetics"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "hardware"
+        ],
+        "target": [
+          "cybernetics"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.deck_exclusive",
+      "source": "effects",
+      "match": {
+        "kind": "hardware_trait",
+        "target": "deck_exclusive"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "hardware"
+        ],
+        "target": [
+          "deck_exclusive"
         ]
       },
       "strategyAnchorFor": []
@@ -2839,6 +3403,29 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "setup.memory_chip",
+      "source": "effects",
+      "match": {
+        "kind": "hardware_trait",
+        "target": "memory_chip"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "hardware"
+        ],
+        "target": [
+          "memory_chip"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "setup.memory",
       "source": "effects",
       "match": {
@@ -2851,6 +3438,26 @@
         ],
         "effectScope": [
           "runner"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.program_backup",
+      "source": "effects",
+      "match": {
+        "kind": "program_trash_prevention",
+        "target": "program_backup"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "target": [
+          "program_backup"
         ]
       },
       "strategyAnchorFor": []
@@ -2929,6 +3536,29 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "setup.program_recovery",
+      "source": "effects",
+      "match": {
+        "kind": "card_recovery",
+        "target": "stored_program"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "stored_program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "setup.program_search",
       "source": "effects",
       "match": {
@@ -2960,10 +3590,31 @@
           "runner"
         ],
         "cardType": [
+          "hardware",
           "program"
         ],
         "target": [
           "program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.program_trash_replacement",
+      "source": "effects",
+      "match": {
+        "kind": "program_trash_prevention",
+        "target": "program_backup"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "target": [
+          "program_backup"
         ]
       },
       "strategyAnchorFor": []
@@ -3074,6 +3725,52 @@
         ],
         "target": [
           "stack_top_program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.stored_program_reclaim",
+      "source": "effects",
+      "match": {
+        "kind": "card_recovery",
+        "target": "stored_program"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "runner"
+        ],
+        "target": [
+          "stored_program"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.vehicle",
+      "source": "effects",
+      "match": {
+        "kind": "hardware_trait",
+        "target": "vehicle"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "hardware"
+        ],
+        "effectScope": [
+          "hardware"
+        ],
+        "target": [
+          "vehicle"
         ]
       },
       "strategyAnchorFor": []
@@ -3313,26 +4010,6 @@
       "source": "effects",
       "match": {
         "kind": "persistent_counter_effect",
-        "target": "virus"
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "program"
-        ],
-        "target": [
-          "virus"
-        ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "virus.counter_engine",
-      "source": "effects",
-      "match": {
-        "kind": "persistent_counter_effect",
         "target": "virus_multi_central"
       },
       "gates": {
@@ -3344,6 +4021,26 @@
         ],
         "target": [
           "virus_multi_central"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "virus.counter_engine",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "target": "virus"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "virus"
         ]
       },
       "strategyAnchorFor": []

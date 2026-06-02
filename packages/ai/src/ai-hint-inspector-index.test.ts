@@ -410,6 +410,80 @@ describe("AI005 hint inspector index", () => {
       /actualStackOrder|hiddenCards|privatePayload|cardInstances/,
     );
   });
+
+  it("exposes AI020 runner hardware semantics without broad support anchors", () => {
+    const index = readIndex();
+    const hqInterface = card(index, "onr_v1_129_hq-interface");
+    const rdInterface = card(index, "onr_v1_139_r-and-d-interface");
+    const fullBodyConversion = card(index, "onr_v1_127_full-body-conversion");
+    const microtechBackupDrive = card(index, "onr_v1_131_microtech-backup-drive");
+    const microtechTrodeSet = card(index, "onr_v1_132_microtech-trode-set");
+    const ravenOwl = card(index, "onr_v1_141_raven-microcyb-owl");
+    const nasukoCycle = card(index, "onr_v1_135_nasuko-cycle");
+    const corticalStimulators = card(index, "onr_proteus_135_cortical-stimulators");
+    const recordReconstructor = card(index, "onr_v1_142_record-reconstructor");
+    const lucidrine = card(index, "onr_proteus_144_lucidrinetm-drip-feed");
+    const bodyweight = card(index, "onr_v1_123_bodyweight-data-creche");
+
+    expect(hqInterface.derivedFunctionSignals).toContain("access.hq_multiaccess");
+    expect(hqInterface.derivedStrategyAnchors).toEqual([
+      "runner.hq_pressure",
+      "runner.interface_closeout",
+    ]);
+    expect(rdInterface.derivedFunctionSignals).toContain("access.rnd_multiaccess");
+    expect(rdInterface.derivedStrategyAnchors).toEqual([
+      "runner.interface_closeout",
+      "runner.rnd_pressure",
+    ]);
+
+    expect(fullBodyConversion.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "defense.damage_prevention",
+        "defense.pay_through_prevention",
+        "setup.cybernetics",
+      ]),
+    );
+    expect(fullBodyConversion.derivedStrategyAnchors).toEqual([]);
+
+    expect(microtechBackupDrive.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "setup.program_backup",
+        "setup.program_recovery",
+        "setup.program_trash_replacement",
+        "setup.stored_program_reclaim",
+      ]),
+    );
+    expect(microtechBackupDrive.derivedStrategyAnchors).toEqual([]);
+    expect(microtechTrodeSet.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "defense.ap_subroutine_mitigation",
+        "run.break_cost_penalty",
+      ]),
+    );
+    expect(microtechTrodeSet.derivedFunctionSignals).not.toContain("breaker.ap");
+    expect(ravenOwl.derivedFunctionSignals).toContain(
+      "economy.recurring_non_noisy_breaker_credit",
+    );
+    expect(nasukoCycle.derivedFunctionSignals).toContain("defense.tag_prevention");
+    expect(nasukoCycle.derivedStrategyAnchors).toEqual([]);
+    expect(corticalStimulators.derivedStrategyAnchors).toEqual([]);
+    expect(recordReconstructor.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "access.rnd_topdeck_setup",
+        "run.archives_replacement_access",
+      ]),
+    );
+    expect(recordReconstructor.derivedStrategyAnchors).toEqual([]);
+    expect(lucidrine.derivedFunctionSignals).toEqual(
+      expect.arrayContaining([
+        "action.recurring_extra_action",
+        "risk.brain_damage_self_inflicted",
+      ]),
+    );
+    expect(lucidrine.derivedStrategyAnchors).toEqual([]);
+    expect(bodyweight.derivedFunctionSignals).toContain("run.extra_run_after_success");
+    expect(bodyweight.derivedStrategyAnchors).toEqual([]);
+  });
 });
 
 function readIndex(): AiHintInspectorIndex {

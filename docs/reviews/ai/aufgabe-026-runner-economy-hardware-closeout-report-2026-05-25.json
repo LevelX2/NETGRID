@@ -17,11 +17,11 @@
   "includedCardCount": 18,
   "excludedCardCount": 17,
   "confirmedGeneratedFactCount": 45,
-  "previewAddedFactCount": 30,
+  "previewAddedFactCount": 26,
   "hardErrorCount": 0,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 33,
+  "normalizedDifferenceCount": 31,
   "remainingDifferenceCount": 0,
   "paymentContextInfoCount": 3,
   "actionContextInfoCount": 1,
@@ -29,7 +29,7 @@
   "handSizeContextInfoCount": 2,
   "hiddenZoneContextInfoCount": 8,
   "delayedPenaltyContextInfoCount": 1,
-  "descriptorFollowupCount": 21,
+  "descriptorFollowupCount": 23,
   "readiness": "ready_read_only_split_subbatches",
   "subBatchReadiness": {
     "runner_action_economy": {
@@ -72,13 +72,12 @@
   "normalizationRuleCounts": {
     "hidden_zone_context_normalization": 4,
     "runner_action_economy_normalization": 2,
-    "runner_economy_strategy_overlay_split": 12,
+    "runner_economy_strategy_overlay_split": 13,
     "runner_finite_pool_economy_normalization": 2,
-    "runner_hand_size_normalization": 2,
     "runner_install_discount_context_normalization": 1,
     "runner_loan_debt_normalization": 3,
     "runner_resource_economy_risk_split": 1,
-    "runner_search_recovery_normalization": 6
+    "runner_search_recovery_normalization": 5
   },
   "normalizationRules": [
     "runner_burst_economy_normalization",
@@ -515,9 +514,7 @@
       ],
       "previewAdds": [
         "condition:requires_installed_hardware",
-        "condition:requires_program_trash",
-        "effect:card_recovery",
-        "effect:program_trash_prevention"
+        "condition:requires_program_trash"
       ],
       "normalizedDifferences": [
         {
@@ -527,16 +524,6 @@
         },
         {
           "kind": "condition:requires_program_trash",
-          "rule": "runner_economy_strategy_overlay_split",
-          "status": "normalized"
-        },
-        {
-          "kind": "effect:card_recovery",
-          "rule": "runner_search_recovery_normalization",
-          "status": "normalized"
-        },
-        {
-          "kind": "effect:program_trash_prevention",
           "rule": "runner_economy_strategy_overlay_split",
           "status": "normalized"
         }
@@ -568,10 +555,7 @@
         "condition:requires_installed_card",
         "effect:hand_size_modifier"
       ],
-      "previewAdds": [
-        "condition:requires_installed_card",
-        "effect:hand_size_modifier"
-      ],
+      "previewAdds": ["condition:requires_installed_card"],
       "normalizedDifferences": [
         {
           "kind": "condition:requires_installed_card",
@@ -579,8 +563,8 @@
           "status": "normalized"
         },
         {
-          "kind": "effect:hand_size_modifier",
-          "rule": "runner_hand_size_normalization",
+          "kind": "effect:hardware_trait",
+          "rule": "runner_economy_strategy_overlay_split",
           "status": "normalized"
         }
       ],
@@ -603,7 +587,8 @@
       "hiddenZoneContextInfos": [],
       "delayedPenaltyContextInfos": [],
       "descriptorFollowups": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "remainingIssues": [],
       "readiness": "ready_read_only_with_context_followup"
@@ -623,10 +608,7 @@
         "condition:requires_installed_card",
         "effect:hand_size_modifier"
       ],
-      "previewAdds": [
-        "condition:requires_installed_card",
-        "effect:hand_size_modifier"
-      ],
+      "previewAdds": ["condition:requires_installed_card"],
       "normalizedDifferences": [
         {
           "kind": "condition:requires_installed_card",
@@ -634,8 +616,8 @@
           "status": "normalized"
         },
         {
-          "kind": "effect:hand_size_modifier",
-          "rule": "runner_hand_size_normalization",
+          "kind": "effect:hardware_trait",
+          "rule": "runner_economy_strategy_overlay_split",
           "status": "normalized"
         }
       ],
@@ -658,7 +640,8 @@
       "hiddenZoneContextInfos": [],
       "delayedPenaltyContextInfos": [],
       "descriptorFollowups": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "remainingIssues": [],
       "readiness": "ready_read_only_with_context_followup"

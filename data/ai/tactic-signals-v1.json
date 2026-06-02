@@ -1,8 +1,8 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI019a",
+  "taskId": "AI020",
   "generatedAt": "2026-06-02",
-  "description": "Controlled V1 tactic-signal catalog. AI019a keeps the AI019 Runner-program signal set and narrows read-only derivation semantics for draw, hand-size and multi-central virus counter effects without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
+  "description": "Controlled V1 tactic-signal catalog. AI020 adds Runner-hardware semantics for Decks, chips, cybernetics, recurring hardware credits, tag/link support, prevention, program backup, access interfaces, extra-run/action risk and Archives/R&D manipulation without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
   "signalPolicy": {
     "tacticSignal": "Functional card utility: what the AI can use the card for.",
     "strategyAnchor": "Large deck line: which strategy the card can anchor or materially support.",
@@ -57,10 +57,11 @@
         "runner.interface_closeout"
       ],
       "sourceKinds": [
-        "effects.kind=multiaccess scope=hq"
+        "effects.kind=multiaccess scope=hq on Runner event/program/resource/hardware"
       ],
       "examples": [
-        "Executive Wiretaps"
+        "Executive Wiretaps",
+        "HQ Interface"
       ],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable because it directly changes central access payoff."
@@ -150,10 +151,11 @@
         "runner.rnd_pressure"
       ],
       "sourceKinds": [
-        "effects.kind=multiaccess scope=rnd"
+        "effects.kind=multiaccess scope=rnd on Runner event/program/resource/hardware"
       ],
       "examples": [
-        "Rush Hour"
+        "Rush Hour",
+        "R&D Interface"
       ],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable because it directly changes central access payoff."
@@ -210,6 +212,23 @@
       "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
     },
     {
+      "signalId": "access.rnd_topdeck_setup",
+      "group": "ai020_hardware_archives_rnd",
+      "sideScope": "runner",
+      "description": "Sets up or pressures R&D topdeck from a non-hidden source.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=topdeck_info target=rnd_topdeck_setup"
+      ],
+      "examples": [
+        "Record Reconstructor"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
       "signalId": "access.rnd_trash_pressure",
       "group": "ai019_access",
       "sideScope": "runner",
@@ -242,6 +261,23 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "action.recurring_extra_action",
+      "group": "ai020_hardware_run_action",
+      "sideScope": "runner",
+      "description": "Recurring extra action generated on a hardware cadence.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=action_economy target=recurring_extra_action"
+      ],
+      "examples": [
+        "Lucidrine Drip Feed"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
       "signalId": "action.turn_limit_penalty",
@@ -882,6 +918,23 @@
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "corp.archives_to_rnd_pressure",
+      "group": "ai020_hardware_archives_rnd",
+      "sideScope": "runner",
+      "description": "Moves public Archives pressure toward R&D without hidden-info assumptions.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=access_replacement target=archives_to_rnd_pressure"
+      ],
+      "examples": [
+        "Record Reconstructor"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
       "signalId": "corp.bad_publicity_pressure",
       "group": "ai019_corp",
       "sideScope": "runner",
@@ -1002,6 +1055,23 @@
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "cost.agenda_point_penalty",
+      "group": "ai020_hardware_cost_risk",
+      "sideScope": "runner",
+      "description": "Install or use cost includes an agenda-point penalty.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=delayed_penalty target=agenda_point_install_cost"
+      ],
+      "examples": [
+        "Arasaka Portable Prototype"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
       "signalId": "damage.payoff",
       "group": "damage_kill",
       "sideScope": "corp",
@@ -1020,6 +1090,40 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Damage anchor requires Corp side and Runner scope."
+    },
+    {
+      "signalId": "defense.ap_damage_mitigation",
+      "group": "ai020_hardware_ap",
+      "sideScope": "runner",
+      "description": "Mitigates AP damage without providing normal breaker coverage.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=net_damage_prevention target=ap_subroutine_damage"
+      ],
+      "examples": [
+        "Microtech Trode Set"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
+      "signalId": "defense.ap_subroutine_mitigation",
+      "group": "ai020_hardware_ap",
+      "sideScope": "runner",
+      "description": "Mitigates or ignores AP subroutines without modelling an icebreaker.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=prevention_replacement target=ap_subroutine"
+      ],
+      "examples": [
+        "Microtech Trode Set"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
       "signalId": "defense.base_link",
@@ -1047,7 +1151,8 @@
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
       "sourceKinds": [
-        "AI019 reviewed Runner-program structured hint effects"
+        "AI019 reviewed Runner-program structured hint effects",
+        "AI020 Runner hardware subtype prevention effects"
       ],
       "examples": [],
       "targetProfileRelevant": false,
@@ -1073,11 +1178,9 @@
       "group": "runner_defense",
       "sideScope": "runner",
       "description": "Prevents damage or flatline risk.",
-      "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "effects.kind=damage_prevention",
         "effects.kind=flatline_prevention"
@@ -1087,7 +1190,42 @@
         "Bolt-Hole"
       ],
       "targetProfileRelevant": false,
-      "notes": "Anchor-capable as survival defense."
+      "notes": "AI020 narrows generic damage prevention to support-only. Strategy anchors require a separate reviewed lineSupport/role decision or a more specific anchor-capable signal such as flatline prevention."
+    },
+    {
+      "signalId": "defense.damage_recovery_draw",
+      "group": "ai020_hardware_defense",
+      "sideScope": "runner",
+      "description": "Draw or recovery after recent damage.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=draw target=recent_damage_recovery"
+      ],
+      "examples": [
+        "Lifesaver Nanosurgeons"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
+      "signalId": "defense.finite_damage_prevention",
+      "group": "ai020_hardware_defense",
+      "sideScope": "runner",
+      "description": "Damage prevention with finite counters, trash, or one-shot capacity.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.*_damage_prevention finite=true"
+      ],
+      "examples": [
+        "Armored Fridge",
+        "Lifesaver Nanosurgeons"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
       "signalId": "defense.flatline_prevention",
@@ -1132,7 +1270,8 @@
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
       "sourceKinds": [
-        "AI019 reviewed Runner-program structured hint effects"
+        "AI019 reviewed Runner-program structured hint effects",
+        "AI020 Runner hardware subtype prevention effects"
       ],
       "examples": [],
       "targetProfileRelevant": false,
@@ -1147,22 +1286,56 @@
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
       "sourceKinds": [
-        "AI019 reviewed Runner-program structured hint effects"
+        "AI019 reviewed Runner-program structured hint effects",
+        "AI020 Runner hardware subtype prevention effects"
       ],
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "defense.pay_through_prevention",
+      "group": "ai020_hardware_defense",
+      "sideScope": "runner",
+      "description": "Damage prevention that the Corp can pay through.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=damage_prevention target=pay_through_meat_damage"
+      ],
+      "examples": [
+        "Full Body Conversion"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
+      "signalId": "defense.tag_clear_support",
+      "group": "ai020_hardware_defense",
+      "sideScope": "runner",
+      "description": "Supports clearing existing tags without creating a survival strategy anchor.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=recurring_economy resource=credits scope=runner target=tag_clear"
+      ],
+      "examples": [
+        "Armadillo Armored Road Home",
+        "Drifter Mobile Environment"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
       "signalId": "defense.tag_prevention",
       "group": "runner_defense",
       "sideScope": "runner",
       "description": "Prevents or avoids tags.",
-      "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "effects.kind=tag_prevention"
       ],
@@ -1170,7 +1343,7 @@
         "Fall Guy"
       ],
       "targetProfileRelevant": false,
-      "notes": "Anchor-capable as survival defense."
+      "notes": "AI020 narrows tag prevention to support-only; avoiding tags does not by itself create runner.survival_defense or any planner-facing strategy anchor."
     },
     {
       "signalId": "defense.trace_boost",
@@ -1384,8 +1557,7 @@
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
       "sourceKinds": [
-        "effects.kind=recurring_economy resource=credits scope=runner target=icebreaker",
-        "effects.kind=recurring_economy resource=credits scope=runner target=killer"
+        "effects.kind=recurring_economy resource=credits scope=runner target=icebreaker"
       ],
       "examples": [
         "Cloak",
@@ -1394,7 +1566,7 @@
         "Eurocorpse (TM) Spin Chip"
       ],
       "targetProfileRelevant": false,
-      "notes": "Credit-source availability is public support metadata; actual payment-source choice remains LegalAction/runtime context."
+      "notes": "Support-only recurring icebreaker-credit signal. Killer-only, non-noisy and hosted-only hardware are separated by AI020-specific signals or report scope facts."
     },
     {
       "signalId": "economy.recurring_install_credit",
@@ -1410,6 +1582,78 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "economy.recurring_killer_credit",
+      "group": "ai020_hardware_economy",
+      "sideScope": "runner",
+      "description": "Recurring credits restricted to Killer use.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=recurring_economy resource=credits scope=runner target=killer"
+      ],
+      "examples": [
+        "Corolla Speed Chip",
+        "ZZ22 Speed Chip"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
+      "signalId": "economy.recurring_link_credit",
+      "group": "ai020_hardware_economy",
+      "sideScope": "runner",
+      "description": "Recurring credits restricted to increasing link during traces.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=recurring_economy resource=credits scope=runner target=link"
+      ],
+      "examples": [
+        "PK-6089a",
+        "Techtronica Utility Suit"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
+      "signalId": "economy.recurring_non_noisy_breaker_credit",
+      "group": "ai020_hardware_economy",
+      "sideScope": "runner",
+      "description": "Recurring credits restricted to non-noisy icebreakers.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=recurring_economy resource=credits scope=runner target=non_noisy_icebreaker"
+      ],
+      "examples": [
+        "Raven Microcyb Owl",
+        "Sunburst Cranial Interface"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
+      "signalId": "economy.recurring_tag_clear_credit",
+      "group": "ai020_hardware_economy",
+      "sideScope": "runner",
+      "description": "Recurring credits restricted to removing tags.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=recurring_economy resource=credits scope=runner target=tag_clear"
+      ],
+      "examples": [
+        "Armadillo Armored Road Home",
+        "Drifter Mobile Environment"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
       "signalId": "economy.recurring_trash_credit",
@@ -1495,7 +1739,7 @@
         "Scatter Shot"
       ],
       "targetProfileRelevant": false,
-      "notes": "Runner remote-trash credit support only. Icebreaker-use credits are economy.recurring_breaker_credit, not trash-credit economy."
+      "notes": "Support-only trash-credit signal. AI020 keeps Runner hardware recurring tag/link/breaker credits out of trash-credit strategy semantics by card-type gating the derivation."
     },
     {
       "signalId": "economy.upgrade_trash_credit",
@@ -1983,6 +2227,72 @@
       "notes": "Anchor-capable through Corp remote-role gate."
     },
     {
+      "signalId": "risk.brain_damage_self_inflicted",
+      "group": "ai020_hardware_risk",
+      "sideScope": "runner",
+      "description": "Self-inflicted brain damage risk from using or keeping hardware.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=damage target=self_inflicted_brain_damage"
+      ],
+      "examples": [
+        "Lucidrine Drip Feed"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
+      "signalId": "risk.hardware_trash_target",
+      "group": "ai020_hardware_cost_risk",
+      "sideScope": "runner",
+      "description": "Hardware creates an explicit installed-hardware trash target or vulnerability.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=hardware_trash target=runner_hardware"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
+      "signalId": "run.archives_replacement_access",
+      "group": "ai020_hardware_archives_rnd",
+      "sideScope": "runner",
+      "description": "Successful Archives run replaces normal Archives access with another effect.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=access_replacement target=archives_replacement_access"
+      ],
+      "examples": [
+        "Record Reconstructor"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
+      "signalId": "run.break_cost_penalty",
+      "group": "ai020_hardware_ap",
+      "sideScope": "runner",
+      "description": "Adds a cost penalty to breaking subroutines.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=action_penalty target=break_subroutine_cost"
+      ],
+      "examples": [
+        "Microtech Trode Set"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
       "signalId": "run.break_cost_support",
       "group": "runner_ice_efficiency_support",
       "sideScope": "runner",
@@ -2067,6 +2377,23 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "Side-gated to prevent Corp extra-action wrong-side anchors."
+    },
+    {
+      "signalId": "run.extra_run_after_success",
+      "group": "ai020_hardware_run_action",
+      "sideScope": "runner",
+      "description": "Optional extra run after a successful run.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=future_run_effect target=extra_run_after_success"
+      ],
+      "examples": [
+        "Bodyweight Data Creche"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
       "signalId": "run.jackout_vs_node_upgrade",
@@ -2181,6 +2508,42 @@
       ],
       "targetProfileRelevant": false,
       "notes": "AI016 intentionally removed automatic fast-advance anchoring."
+    },
+    {
+      "signalId": "setup.cybernetics",
+      "group": "ai020_hardware_setup",
+      "sideScope": "runner",
+      "description": "Runner cybernetics hardware typing that may matter for later vulnerability or deckbuilding analysis.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=hardware_trait scope=hardware target=cybernetics"
+      ],
+      "examples": [
+        "Full Body Conversion",
+        "Cortical Cybermodem"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
+      "signalId": "setup.deck_exclusive",
+      "group": "ai020_hardware_setup",
+      "sideScope": "runner",
+      "description": "Runner hardware deck exclusivity: only one deck can be in play at a time.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=hardware_trait scope=hardware target=deck_exclusive"
+      ],
+      "examples": [
+        "Artemis 2020",
+        "Cortical Cybermodem"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
       "signalId": "setup.draw",
@@ -2312,6 +2675,41 @@
       "notes": "Memory support is diagnostic setup information and does not alter deck profile defaults."
     },
     {
+      "signalId": "setup.memory_chip",
+      "group": "ai020_hardware_setup",
+      "sideScope": "runner",
+      "description": "Runner hardware chip or memory-chip support.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=hardware_trait scope=hardware target=memory_chip"
+      ],
+      "examples": [
+        "Tycho Mem Chip",
+        "MRAM Chip"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
+      "signalId": "setup.program_backup",
+      "group": "ai020_hardware_program_backup",
+      "sideScope": "runner",
+      "description": "Stores or preserves installed programs that would be trashed.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=program_trash_prevention target=program_backup"
+      ],
+      "examples": [
+        "Microtech Backup Drive"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
       "signalId": "setup.program_host",
       "group": "runner_setup",
       "sideScope": "runner",
@@ -2381,6 +2779,23 @@
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "setup.program_recovery",
+      "group": "ai020_hardware_program_backup",
+      "sideScope": "runner",
+      "description": "Recovers a program from a hardware backup or protected pile.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=card_recovery target=stored_program"
+      ],
+      "examples": [
+        "Microtech Backup Drive"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
       "signalId": "setup.program_search",
       "group": "ai019_setup",
       "sideScope": "runner",
@@ -2411,6 +2826,23 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.program_trash_replacement",
+      "group": "ai020_hardware_program_backup",
+      "sideScope": "runner",
+      "description": "Replacement effect for installed program trash.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=program_trash_prevention target=program_backup"
+      ],
+      "examples": [
+        "Microtech Backup Drive"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
       "signalId": "setup.recovery",
@@ -2481,6 +2913,41 @@
       ],
       "targetProfileRelevant": true,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.stored_program_reclaim",
+      "group": "ai020_hardware_program_backup",
+      "sideScope": "runner",
+      "description": "Reclaims the top stored program from hardware backup.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=card_recovery target=stored_program"
+      ],
+      "examples": [
+        "Microtech Backup Drive"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
+      "signalId": "setup.vehicle",
+      "group": "ai020_hardware_setup",
+      "sideScope": "runner",
+      "description": "Runner vehicle hardware typing for support classification.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=hardware_trait scope=hardware target=vehicle"
+      ],
+      "examples": [
+        "Nasuko Cycle",
+        "Drifter Mobile Environment"
+      ],
+      "targetProfileRelevant": false,
+      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
       "signalId": "tag.payoff",

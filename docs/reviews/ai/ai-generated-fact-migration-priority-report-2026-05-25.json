@@ -2610,11 +2610,12 @@
         "effect:card_recovery",
         "effect:program_trash_prevention"
       ],
-      "monolithFields": ["targetProfiles"],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects", "targetProfiles"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -2651,11 +2652,12 @@
         "condition:requires_installed_card",
         "effect:hand_size_modifier"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -2692,11 +2694,12 @@
         "condition:requires_installed_card",
         "effect:hand_size_modifier"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -2733,11 +2736,12 @@
         "condition:requires_prevention_window",
         "effect:tag_prevention"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },

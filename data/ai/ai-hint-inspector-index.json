@@ -14,17 +14,17 @@
   },
   "summary": {
     "cardCount": 564,
-    "cardsWithMechanicalFacts": 426,
-    "cardsWithGeneratedFacts": 318,
+    "cardsWithMechanicalFacts": 434,
+    "cardsWithGeneratedFacts": 323,
     "cardsWithOverlays": 6,
-    "cardsWithFunctionSignals": 379,
-    "cardsWithStrategyAnchors": 202,
-    "cardsWithWarnings": 316,
+    "cardsWithFunctionSignals": 389,
+    "cardsWithStrategyAnchors": 178,
+    "cardsWithWarnings": 295,
     "warningCategoryCounts": {
-      "deferred_requires_human_review": 258,
+      "deferred_requires_human_review": 239,
       "descriptor_gap": 33,
       "function_signal_descriptor_gap": 28,
-      "legacy_fallback_only": 138
+      "legacy_fallback_only": 130
     }
   },
   "cards": [
@@ -6795,9 +6795,7 @@
         "defense.damage_prevention",
         "defense.net_damage_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -7658,9 +7656,7 @@
         "defense.damage_prevention",
         "defense.net_damage_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -8811,9 +8807,7 @@
       "derivedFunctionSignals": [
         "defense.damage_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.survival_defense",
@@ -10195,9 +10189,7 @@
       "derivedFunctionSignals": [
         "defense.damage_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.survival_defense",
@@ -10346,11 +10338,13 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "economy.recurring",
         "economy.recurring_breaker_credit",
+        "setup.cybernetics",
+        "setup.deck_exclusive",
         "setup.hand_size",
         "setup.memory"
       ],
@@ -10392,9 +10386,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -10412,12 +10404,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "support_tool"
-        ],
-        "validValues": [
-          "support_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -10432,25 +10420,16 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.damage_prevention"
+        "defense.brain_damage_prevention",
+        "defense.damage_prevention",
+        "defense.net_damage_prevention",
+        "setup.cybernetics"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "hardware",
@@ -10480,15 +10459,15 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -10500,12 +10479,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -10650,23 +10625,17 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.trace_defense"
+        "defense.base_link",
+        "defense.trace_boost",
+        "defense.trace_defense",
+        "setup.deck_exclusive",
+        "setup.memory"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "hardware",
@@ -10703,15 +10672,15 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -10723,12 +10692,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -10743,11 +10708,12 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "economy.recurring",
         "economy.recurring_breaker_credit",
+        "setup.memory_chip",
         "setup.program_host"
       ],
       "derivedStrategyAnchors": [],
@@ -10788,16 +10754,15 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
-          "effects"
+          "effects",
+          "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
           "effects",
@@ -10810,12 +10775,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "support_tool"
-        ],
-        "validValues": [
-          "support_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -10835,9 +10796,7 @@
       "derivedFunctionSignals": [
         "defense.tag_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.survival_defense",
@@ -11112,13 +11071,17 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "action.recurring_extra_action",
+        "economy.action",
+        "risk.brain_damage_self_inflicted"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -11150,17 +11113,18 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -11590,14 +11554,17 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "economy.recurring",
         "economy.recurring_breaker_credit",
+        "economy.recurring_non_noisy_breaker_credit",
+        "setup.cybernetics",
+        "setup.deck_exclusive",
         "setup.hand_size",
         "setup.memory"
       ],
@@ -11639,9 +11606,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -11655,16 +11620,14 @@
           "effects",
           "conditions"
         ],
-        "generatedFactFields": [],
+        "generatedFactFields": [
+          "effects"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "support_tool"
-        ],
-        "validValues": [
-          "support_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -14015,9 +13978,7 @@
         "defense.damage_prevention",
         "defense.net_damage_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.survival_defense",
@@ -14471,9 +14432,7 @@
         "defense.damage_prevention",
         "defense.net_damage_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -17674,9 +17633,7 @@
         "defense.damage_prevention",
         "defense.net_damage_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -19171,9 +19128,7 @@
       "derivedFunctionSignals": [
         "defense.damage_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.survival_defense",
@@ -22514,9 +22469,7 @@
       "derivedFunctionSignals": [
         "defense.tag_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.survival_defense",
@@ -22766,8 +22719,10 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "cost.agenda_point_penalty",
         "economy.recurring",
         "economy.recurring_breaker_credit",
+        "setup.deck_exclusive",
         "setup.memory"
       ],
       "derivedStrategyAnchors": [],
@@ -22852,12 +22807,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "support_tool"
-        ],
-        "validValues": [
-          "support_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -22872,26 +22823,19 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "defense.damage_prevention",
-        "economy.trash_credit"
+        "defense.finite_damage_prevention",
+        "defense.meat_damage_prevention",
+        "defense.tag_clear_support",
+        "economy.recurring",
+        "economy.recurring_tag_clear_credit",
+        "setup.vehicle"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "hardware",
@@ -22928,15 +22872,15 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -22948,12 +22892,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -22968,25 +22908,15 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.damage_prevention"
+        "defense.damage_prevention",
+        "defense.finite_damage_prevention",
+        "defense.meat_damage_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "counter",
@@ -23030,15 +22960,15 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -23050,12 +22980,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -23075,6 +23001,7 @@
       "derivedFunctionSignals": [
         "economy.recurring",
         "economy.recurring_breaker_credit",
+        "setup.deck_exclusive",
         "setup.memory"
       ],
       "derivedStrategyAnchors": [],
@@ -23148,84 +23075,13 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "support_tool"
-        ],
-        "validValues": [
-          "support_tool"
-        ],
-        "unknownValues": []
-      }
-    },
-    {
-      "cardId": "onr_v1_123_bodyweight-data-creche",
-      "side": "runner",
-      "cardType": "hardware",
-      "supportStatus": {
-        "aiSupportStatus": "ai_supported",
-        "compiledHintFound": true,
-        "mechanicalFactsFound": false,
-        "generatedFactsFound": false,
-        "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
-      },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
-      "rolesClassification": [
-        {
-          "value": "hardware",
-          "category": "legacy_role_only",
-          "triageCategory": "legacy_role_only",
-          "mapsTo": [],
-          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
-        },
-        {
-          "value": "per_card_longtail",
-          "category": "legacy_role_only",
-          "triageCategory": "legacy_role_only",
-          "mapsTo": [],
-          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
-        },
-        {
-          "value": "runner",
-          "category": "legacy_role_only",
-          "triageCategory": "legacy_role_only",
-          "mapsTo": [],
-          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
-        }
-      ],
-      "planRolesClassification": [
-        {
-          "value": "runner_install_hardware",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        }
-      ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
-      "descriptorGaps": [],
-      "legacyStatus": {
-        "rolesPresent": true,
-        "planRolesPresent": true,
-        "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
-        "generatedFactFields": [],
-        "overlayFields": []
-      },
-      "strategicRoleStatus": {
         "values": [],
         "validValues": [],
         "unknownValues": []
       }
     },
     {
-      "cardId": "onr_v1_124_corolla-speed-chip",
+      "cardId": "onr_v1_123_bodyweight-data-creche",
       "side": "runner",
       "cardType": "hardware",
       "supportStatus": {
@@ -23238,8 +23094,9 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.recurring",
-        "economy.recurring_breaker_credit"
+        "run.extra_run_after_success",
+        "setup.deck_exclusive",
+        "setup.memory"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -23291,12 +23148,81 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "support_tool"
+        "values": [],
+        "validValues": [],
+        "unknownValues": []
+      }
+    },
+    {
+      "cardId": "onr_v1_124_corolla-speed-chip",
+      "side": "runner",
+      "cardType": "hardware",
+      "supportStatus": {
+        "aiSupportStatus": "ai_supported",
+        "compiledHintFound": true,
+        "mechanicalFactsFound": true,
+        "generatedFactsFound": false,
+        "overlayFields": [],
+        "legacyFallbackOnly": false,
+        "warningCount": 0
+      },
+      "derivedFunctionSignals": [
+        "economy.recurring",
+        "economy.recurring_killer_credit",
+        "setup.memory_chip"
+      ],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [],
+      "rolesClassification": [
+        {
+          "value": "hardware",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "per_card_longtail",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "runner",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        }
+      ],
+      "planRolesClassification": [
+        {
+          "value": "runner_install_hardware",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        }
+      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
+      "legacyStatus": {
+        "rolesPresent": true,
+        "planRolesPresent": true,
+        "legacyLineSupportPresent": false,
+        "activeMechanicalFactFields": [
+          "effects"
         ],
-        "validValues": [
-          "support_tool"
+        "compiledMechanicalFactFields": [
+          "effects"
         ],
+        "generatedFactFields": [],
+        "overlayFields": []
+      },
+      "strategicRoleStatus": {
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -23314,22 +23240,12 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.damage_prevention"
+        "defense.damage_prevention",
+        "defense.meat_damage_prevention",
+        "setup.cybernetics"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "damage_prevention",
@@ -23379,7 +23295,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -23391,12 +23309,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -23408,13 +23322,16 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.trash_credit"
+        "defense.tag_clear_support",
+        "economy.recurring",
+        "economy.recurring_tag_clear_credit",
+        "setup.vehicle"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -23466,7 +23383,9 @@
         "compiledMechanicalFactFields": [
           "effects"
         ],
-        "generatedFactFields": [],
+        "generatedFactFields": [
+          "effects"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -23489,11 +23408,12 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.damage_prevention"
+        "defense.damage_prevention",
+        "defense.meat_damage_prevention",
+        "defense.pay_through_prevention",
+        "setup.cybernetics"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.survival_defense",
@@ -23547,7 +23467,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -23579,25 +23501,14 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.damage_prevention"
+        "defense.damage_prevention",
+        "defense.net_damage_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "damage_prevention",
@@ -23634,15 +23545,15 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -23654,12 +23565,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -23670,15 +23577,39 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
+      "derivedFunctionSignals": [
+        "access.hq_multiaccess"
+      ],
+      "derivedStrategyAnchors": [
+        "runner.hq_pressure",
+        "runner.interface_closeout"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "runner.hq_pressure",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.hq_pressure"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "value": "runner.interface_closeout",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.interface_closeout"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "hardware",
@@ -23726,23 +23657,28 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "payoff_anchor"
+        ],
+        "validValues": [
+          "payoff_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -23760,23 +23696,14 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "defense.brain_damage_prevention",
         "defense.damage_prevention",
+        "defense.damage_recovery_draw",
+        "defense.finite_damage_prevention",
         "setup.draw"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "core_damage",
@@ -23842,7 +23769,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -23854,12 +23783,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "emergency_tool"
-        ],
-        "validValues": [
-          "emergency_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -23874,10 +23799,14 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "setup.recovery"
+        "setup.program_backup",
+        "setup.program_recovery",
+        "setup.program_trash_replacement",
+        "setup.recovery",
+        "setup.stored_program_reclaim"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -23913,15 +23842,14 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
+          "effects",
           "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
@@ -23936,12 +23864,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "emergency_tool"
-        ],
-        "validValues": [
-          "emergency_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -23952,13 +23876,17 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "defense.ap_subroutine_mitigation",
+        "defense.net_damage_prevention",
+        "run.break_cost_penalty"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -23995,16 +23923,18 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -24025,9 +23955,12 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "setup.cybernetics",
+        "setup.memory_chip"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -24062,21 +23995,20 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
         ],
         "generatedFactFields": [
-          "effects",
           "conditions"
         ],
         "overlayFields": []
@@ -24098,10 +24030,12 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "setup.hand_size"
+        "setup.cybernetics",
+        "setup.hand_size",
+        "setup.memory_chip"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -24137,21 +24071,20 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
         ],
         "generatedFactFields": [
-          "effects",
           "conditions"
         ],
         "overlayFields": []
@@ -24176,22 +24109,11 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.tag_prevention"
+        "defense.tag_prevention",
+        "setup.vehicle"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "hardware",
@@ -24234,7 +24156,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -24246,12 +24170,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -24263,13 +24183,17 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.trash_credit"
+        "defense.trace_defense",
+        "economy.recurring",
+        "economy.recurring_link_credit",
+        "setup.deck_exclusive",
+        "setup.memory"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -24317,7 +24241,9 @@
         "compiledMechanicalFactFields": [
           "effects"
         ],
-        "generatedFactFields": [],
+        "generatedFactFields": [
+          "effects"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -24342,6 +24268,7 @@
       "derivedFunctionSignals": [
         "economy.recurring",
         "economy.recurring_breaker_credit",
+        "setup.deck_exclusive",
         "setup.memory"
       ],
       "derivedStrategyAnchors": [],
@@ -24394,12 +24321,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "support_tool"
-        ],
-        "validValues": [
-          "support_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -24411,13 +24334,17 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.trash_credit"
+        "defense.trace_defense",
+        "economy.recurring",
+        "economy.recurring_link_credit",
+        "setup.deck_exclusive",
+        "setup.memory"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -24479,7 +24406,9 @@
         "compiledMechanicalFactFields": [
           "effects"
         ],
-        "generatedFactFields": [],
+        "generatedFactFields": [
+          "effects"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -24495,15 +24424,39 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
+      "derivedFunctionSignals": [
+        "access.rnd_multiaccess"
+      ],
+      "derivedStrategyAnchors": [
+        "runner.interface_closeout",
+        "runner.rnd_pressure"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "runner.interface_closeout",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.interface_closeout"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "value": "runner.rnd_pressure",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.rnd_pressure"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "hardware",
@@ -24542,23 +24495,28 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "payoff_anchor"
+        ],
+        "validValues": [
+          "payoff_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -24573,111 +24531,14 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "defense.damage_prevention",
+        "defense.net_damage_prevention",
         "economy.recurring",
         "economy.recurring_breaker_credit",
-        "setup.memory"
-      ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
-      "rolesClassification": [
-        {
-          "value": "hardware",
-          "category": "legacy_role_only",
-          "triageCategory": "legacy_role_only",
-          "mapsTo": [],
-          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
-        },
-        {
-          "value": "recurring",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        }
-      ],
-      "planRolesClassification": [
-        {
-          "value": "build_rig",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "run_support",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        }
-      ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
-      "descriptorGaps": [],
-      "legacyStatus": {
-        "rolesPresent": true,
-        "planRolesPresent": true,
-        "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [
-          "effects"
-        ],
-        "compiledMechanicalFactFields": [
-          "effects",
-          "conditions"
-        ],
-        "generatedFactFields": [
-          "effects",
-          "conditions"
-        ],
-        "overlayFields": []
-      },
-      "strategicRoleStatus": {
-        "values": [
-          "defensive_tool",
-          "support_tool"
-        ],
-        "validValues": [
-          "defensive_tool",
-          "support_tool"
-        ],
-        "unknownValues": []
-      }
-    },
-    {
-      "cardId": "onr_v1_141_raven-microcyb-owl",
-      "side": "runner",
-      "cardType": "hardware",
-      "supportStatus": {
-        "aiSupportStatus": "ai_supported",
-        "compiledHintFound": true,
-        "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
-        "overlayFields": [],
-        "legacyFallbackOnly": false,
-        "warningCount": 1
-      },
-      "derivedFunctionSignals": [
-        "economy.recurring",
-        "economy.recurring_breaker_credit",
+        "setup.deck_exclusive",
         "setup.memory"
       ],
       "derivedStrategyAnchors": [],
@@ -24716,9 +24577,88 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
+      "warningCategories": [],
+      "descriptorGaps": [],
+      "legacyStatus": {
+        "rolesPresent": true,
+        "planRolesPresent": true,
+        "legacyLineSupportPresent": false,
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "generatedFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "overlayFields": []
+      },
+      "strategicRoleStatus": {
+        "values": [],
+        "validValues": [],
+        "unknownValues": []
+      }
+    },
+    {
+      "cardId": "onr_v1_141_raven-microcyb-owl",
+      "side": "runner",
+      "cardType": "hardware",
+      "supportStatus": {
+        "aiSupportStatus": "ai_supported",
+        "compiledHintFound": true,
+        "mechanicalFactsFound": true,
+        "generatedFactsFound": true,
+        "overlayFields": [],
+        "legacyFallbackOnly": false,
+        "warningCount": 0
+      },
+      "derivedFunctionSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit",
+        "economy.recurring_non_noisy_breaker_credit",
+        "setup.deck_exclusive",
+        "setup.memory"
       ],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [],
+      "rolesClassification": [
+        {
+          "value": "hardware",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "recurring",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        }
+      ],
+      "planRolesClassification": [
+        {
+          "value": "build_rig",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "runner.rig_first"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "run_support",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        }
+      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -24730,16 +24670,14 @@
         "compiledMechanicalFactFields": [
           "effects"
         ],
-        "generatedFactFields": [],
+        "generatedFactFields": [
+          "effects"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "support_tool"
-        ],
-        "validValues": [
-          "support_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -24756,7 +24694,12 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "access.rnd_topdeck_setup",
+        "corp.archives_to_rnd_pressure",
+        "run.archives_replacement_access",
+        "run.replacement_access"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -24801,7 +24744,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -24833,22 +24778,15 @@
       },
       "derivedFunctionSignals": [
         "defense.damage_prevention",
-        "economy.trash_credit"
+        "defense.meat_damage_prevention",
+        "defense.trace_defense",
+        "economy.recurring",
+        "economy.recurring_link_credit",
+        "setup.deck_exclusive",
+        "setup.memory"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "damage_prevention",
@@ -24919,7 +24857,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -24931,12 +24871,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -24947,13 +24883,16 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "setup.memory",
+        "setup.memory_chip"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -25006,17 +24945,18 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -25033,13 +24973,16 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "setup.memory",
+        "setup.memory_chip"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -25078,17 +25021,18 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -25105,13 +25049,16 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "setup.memory",
+        "setup.memory_chip"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -25164,17 +25111,18 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -25199,7 +25147,8 @@
       },
       "derivedFunctionSignals": [
         "economy.recurring",
-        "economy.recurring_breaker_credit"
+        "economy.recurring_killer_credit",
+        "setup.memory_chip"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -25265,12 +25214,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "support_tool"
-        ],
-        "validValues": [
-          "support_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -26323,9 +26268,7 @@
       "derivedFunctionSignals": [
         "defense.damage_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.survival_defense",
@@ -26419,9 +26362,7 @@
       "derivedFunctionSignals": [
         "defense.tag_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.survival_defense",
@@ -26900,9 +26841,7 @@
         "defense.damage_prevention",
         "defense.tag_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.survival_defense",
@@ -27166,9 +27105,7 @@
       "derivedFunctionSignals": [
         "defense.tag_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.survival_defense",
@@ -28558,9 +28495,7 @@
       "derivedFunctionSignals": [
         "defense.damage_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.survival_defense",
@@ -28732,9 +28667,7 @@
         "defense.damage_prevention",
         "defense.tag_prevention"
       ],
-      "derivedStrategyAnchors": [
-        "runner.survival_defense"
-      ],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "runner.survival_defense",

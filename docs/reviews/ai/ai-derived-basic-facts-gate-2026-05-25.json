@@ -9,7 +9,7 @@
   "pilotCardCount": 193,
   "implementationFoundCount": 193,
   "cardsWithDerivedFacts": 193,
-  "cardsWithManualOntologyOverlap": 119,
+  "cardsWithManualOntologyOverlap": 123,
   "cardsNeedingManualOverlay": 126,
   "effectKindCounts": {
     "access_punish": 5,
@@ -128,7 +128,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 978,
+  "warningCount": 976,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -1151,11 +1151,6 @@
       "cardId": "onr_v1_116_total-genetic-retrofit"
     },
     {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence medium.",
-      "cardId": "onr_v1_131_microtech-backup-drive"
-    },
-    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_131_microtech-backup-drive"
@@ -1171,16 +1166,6 @@
       "cardId": "onr_v1_131_microtech-backup-drive"
     },
     {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:card_recovery has no manual ontology match.",
-      "cardId": "onr_v1_131_microtech-backup-drive"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:program_trash_prevention has no manual ontology match.",
-      "cardId": "onr_v1_131_microtech-backup-drive"
-    },
-    {
       "kind": "manual_overlay_expectation_mismatch",
       "cardId": "onr_v1_131_microtech-backup-drive",
       "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
@@ -1191,13 +1176,13 @@
       "cardId": "onr_v1_131_microtech-backup-drive"
     },
     {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence low.",
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_133_militech-mram-chip"
     },
     {
       "kind": "descriptor_or_overlay_gap",
-      "message": "Generated facts contain fields not currently mirrored manually.",
+      "message": "Manual ontology contains fields not currently derivable.",
       "cardId": "onr_v1_133_militech-mram-chip"
     },
     {
@@ -1206,8 +1191,8 @@
       "cardId": "onr_v1_133_militech-mram-chip"
     },
     {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:hand_size_modifier has no manual ontology match.",
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual effect:hardware_trait has no generated basic fact match.",
       "cardId": "onr_v1_133_militech-mram-chip"
     },
     {
@@ -1221,13 +1206,13 @@
       "cardId": "onr_v1_133_militech-mram-chip"
     },
     {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence low.",
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_134_mram-chip"
     },
     {
       "kind": "descriptor_or_overlay_gap",
-      "message": "Generated facts contain fields not currently mirrored manually.",
+      "message": "Manual ontology contains fields not currently derivable.",
       "cardId": "onr_v1_134_mram-chip"
     },
     {
@@ -1236,8 +1221,8 @@
       "cardId": "onr_v1_134_mram-chip"
     },
     {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:hand_size_modifier has no manual ontology match.",
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual effect:hardware_trait has no generated basic fact match.",
       "cardId": "onr_v1_134_mram-chip"
     },
     {
@@ -1256,13 +1241,18 @@
       "cardId": "onr_v1_135_nasuko-cycle"
     },
     {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Manual ontology contains fields not currently derivable.",
+      "cardId": "onr_v1_135_nasuko-cycle"
+    },
+    {
       "kind": "generated_fact_without_manual_match",
       "message": "Generated condition:requires_prevention_window has no manual ontology match.",
       "cardId": "onr_v1_135_nasuko-cycle"
     },
     {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:tag_prevention has no manual ontology match.",
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual effect:hardware_trait has no generated basic fact match.",
       "cardId": "onr_v1_135_nasuko-cycle"
     },
     {
@@ -11527,42 +11517,48 @@
         "planRoles": [
           "runner_install_hardware"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "card_recovery",
+            "timing": "action",
+            "scope": "runner"
+          },
+          {
+            "kind": "program_trash_prevention",
+            "timing": "prevention_window",
+            "scope": "installed_program"
+          }
+        ],
         "conditions": [],
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "medium",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
-          "condition:requires_installed_hardware",
-          "condition:requires_program_trash",
+        "matches": [
           "effect:card_recovery",
           "effect:program_trash_prevention"
+        ],
+        "generatedOnly": [
+          "condition:requires_installed_hardware",
+          "condition:requires_program_trash"
         ],
         "manualOnly": []
       },
       "missingManualOverlay": [
         "condition:requires_installed_hardware",
-        "condition:requires_program_trash",
-        "effect:card_recovery",
-        "effect:program_trash_prevention"
+        "condition:requires_program_trash"
       ],
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually."
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -11574,14 +11570,6 @@
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_program_trash has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:card_recovery has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:program_trash_prevention has no manual ontology match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -11635,49 +11623,71 @@
         "planRoles": [
           "remote_upgrade_modifier"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "hand_size_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "hand_size",
+            "amount": 3
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          }
+        ],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
-          "condition:requires_installed_card",
+        "matches": [
           "effect:hand_size_modifier"
         ],
-        "manualOnly": []
+        "generatedOnly": [
+          "condition:requires_installed_card"
+        ],
+        "manualOnly": [
+          "effect:hardware_trait"
+        ]
       },
       "missingManualOverlay": [
         "condition:requires_installed_card",
-        "effect:hand_size_modifier"
+        "effect:hardware_trait"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_installed_card has no manual ontology match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:hand_size_modifier has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -11731,49 +11741,71 @@
         "planRoles": [
           "remote_upgrade_modifier"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "hand_size_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "hand_size",
+            "amount": 2
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          }
+        ],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
-          "condition:requires_installed_card",
+        "matches": [
           "effect:hand_size_modifier"
         ],
-        "manualOnly": []
+        "generatedOnly": [
+          "condition:requires_installed_card"
+        ],
+        "manualOnly": [
+          "effect:hardware_trait"
+        ]
       },
       "missingManualOverlay": [
         "condition:requires_installed_card",
-        "effect:hand_size_modifier"
+        "effect:hardware_trait"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_installed_card has no manual ontology match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:hand_size_modifier has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -11829,26 +11861,47 @@
           "avoid_tags",
           "build_rig"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "tag_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "tags"
+          }
+        ],
         "conditions": [],
-        "lineSupport": [
-          "runner.survival_defense"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
-          "condition:requires_prevention_window",
+        "matches": [
           "effect:tag_prevention"
         ],
-        "manualOnly": []
+        "generatedOnly": [
+          "condition:requires_prevention_window"
+        ],
+        "manualOnly": [
+          "effect:hardware_trait"
+        ]
       },
       "missingManualOverlay": [
         "condition:requires_prevention_window",
-        "effect:tag_prevention"
+        "effect:hardware_trait"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
@@ -11857,12 +11910,16 @@
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_prevention_window has no manual ontology match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:tag_prevention has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",

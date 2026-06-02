@@ -61,8 +61,8 @@
       "utility",
       "win_condition"
     ],
-    "functionSignalRuleCount": 182,
-    "functionSignalCount": 161,
+    "functionSignalRuleCount": 212,
+    "functionSignalCount": 188,
     "functionSignalIds": [
       "access.free_trash",
       "access.hq_full_reveal",
@@ -75,8 +75,10 @@
       "access.rnd_top_card",
       "access.rnd_top_cards",
       "access.rnd_top_reorder",
+      "access.rnd_topdeck_setup",
       "access.rnd_trash_pressure",
       "access.trash_untrashable",
+      "action.recurring_extra_action",
       "action.turn_limit_penalty",
       "breaker.ap",
       "breaker.ap_subtype_limited",
@@ -114,6 +116,7 @@
       "breaker.wall",
       "breaker.watchdog",
       "corp.action_denial",
+      "corp.archives_to_rnd_pressure",
       "corp.bad_publicity_pressure",
       "corp.draw_pressure",
       "corp.economy_pressure",
@@ -122,15 +125,22 @@
       "corp.random_discard_pressure",
       "corp.rez_tax_pressure",
       "corp.rnd_trash_pressure",
+      "cost.agenda_point_penalty",
       "damage.payoff",
+      "defense.ap_damage_mitigation",
+      "defense.ap_subroutine_mitigation",
       "defense.base_link",
       "defense.brain_damage_prevention",
       "defense.brain_damage_reset",
       "defense.damage_prevention",
+      "defense.damage_recovery_draw",
+      "defense.finite_damage_prevention",
       "defense.flatline_prevention",
       "defense.meat_damage_immunity",
       "defense.meat_damage_prevention",
       "defense.net_damage_prevention",
+      "defense.pay_through_prevention",
+      "defense.tag_clear_support",
       "defense.tag_prevention",
       "defense.trace_boost",
       "defense.trace_defense",
@@ -146,6 +156,10 @@
       "economy.recurring",
       "economy.recurring_breaker_credit",
       "economy.recurring_install_credit",
+      "economy.recurring_killer_credit",
+      "economy.recurring_link_credit",
+      "economy.recurring_non_noisy_breaker_credit",
+      "economy.recurring_tag_clear_credit",
       "economy.recurring_trash_credit",
       "economy.rez_discount",
       "economy.start_of_turn",
@@ -179,11 +193,16 @@
       "remote.bait",
       "remote.install_tax",
       "remote.scoring_protection",
+      "risk.brain_damage_self_inflicted",
+      "risk.hardware_trash_target",
+      "run.archives_replacement_access",
+      "run.break_cost_penalty",
       "run.break_cost_support",
       "run.central_access_conversion",
       "run.ends_run_after_effect",
       "run.event_tempo",
       "run.extra_action",
+      "run.extra_run_after_success",
       "run.jackout_vs_node_upgrade",
       "run.lock",
       "run.replacement_access",
@@ -191,6 +210,8 @@
       "run.safe_jackout_window",
       "score.advance_burst",
       "score.agenda_action",
+      "setup.cybernetics",
+      "setup.deck_exclusive",
       "setup.draw",
       "setup.hand_size",
       "setup.hand_size_penalty",
@@ -199,16 +220,22 @@
       "setup.install_during_run",
       "setup.install_support",
       "setup.memory",
+      "setup.memory_chip",
+      "setup.program_backup",
       "setup.program_host",
       "setup.program_install",
       "setup.program_install_credit",
       "setup.program_protection",
+      "setup.program_recovery",
       "setup.program_search",
       "setup.program_trash_prevention",
+      "setup.program_trash_replacement",
       "setup.recovery",
       "setup.search",
       "setup.self_bounce",
       "setup.stack_top_program_install",
+      "setup.stored_program_reclaim",
+      "setup.vehicle",
       "tag.payoff",
       "tag.source",
       "tax.ice",
@@ -226,7 +253,7 @@
       "virus.trigger_remote",
       "virus.trigger_rnd"
     ],
-    "tacticSignalCatalogCount": 161,
+    "tacticSignalCatalogCount": 188,
     "tacticSignalCatalogIds": [
       "access.free_trash",
       "access.hq_full_reveal",
@@ -239,8 +266,10 @@
       "access.rnd_top_card",
       "access.rnd_top_cards",
       "access.rnd_top_reorder",
+      "access.rnd_topdeck_setup",
       "access.rnd_trash_pressure",
       "access.trash_untrashable",
+      "action.recurring_extra_action",
       "action.turn_limit_penalty",
       "breaker.ap",
       "breaker.ap_subtype_limited",
@@ -278,6 +307,7 @@
       "breaker.wall",
       "breaker.watchdog",
       "corp.action_denial",
+      "corp.archives_to_rnd_pressure",
       "corp.bad_publicity_pressure",
       "corp.draw_pressure",
       "corp.economy_pressure",
@@ -286,15 +316,22 @@
       "corp.random_discard_pressure",
       "corp.rez_tax_pressure",
       "corp.rnd_trash_pressure",
+      "cost.agenda_point_penalty",
       "damage.payoff",
+      "defense.ap_damage_mitigation",
+      "defense.ap_subroutine_mitigation",
       "defense.base_link",
       "defense.brain_damage_prevention",
       "defense.brain_damage_reset",
       "defense.damage_prevention",
+      "defense.damage_recovery_draw",
+      "defense.finite_damage_prevention",
       "defense.flatline_prevention",
       "defense.meat_damage_immunity",
       "defense.meat_damage_prevention",
       "defense.net_damage_prevention",
+      "defense.pay_through_prevention",
+      "defense.tag_clear_support",
       "defense.tag_prevention",
       "defense.trace_boost",
       "defense.trace_defense",
@@ -310,6 +347,10 @@
       "economy.recurring",
       "economy.recurring_breaker_credit",
       "economy.recurring_install_credit",
+      "economy.recurring_killer_credit",
+      "economy.recurring_link_credit",
+      "economy.recurring_non_noisy_breaker_credit",
+      "economy.recurring_tag_clear_credit",
       "economy.recurring_trash_credit",
       "economy.rez_discount",
       "economy.start_of_turn",
@@ -343,11 +384,16 @@
       "remote.bait",
       "remote.install_tax",
       "remote.scoring_protection",
+      "risk.brain_damage_self_inflicted",
+      "risk.hardware_trash_target",
+      "run.archives_replacement_access",
+      "run.break_cost_penalty",
       "run.break_cost_support",
       "run.central_access_conversion",
       "run.ends_run_after_effect",
       "run.event_tempo",
       "run.extra_action",
+      "run.extra_run_after_success",
       "run.jackout_vs_node_upgrade",
       "run.lock",
       "run.replacement_access",
@@ -355,6 +401,8 @@
       "run.safe_jackout_window",
       "score.advance_burst",
       "score.agenda_action",
+      "setup.cybernetics",
+      "setup.deck_exclusive",
       "setup.draw",
       "setup.hand_size",
       "setup.hand_size_penalty",
@@ -363,16 +411,22 @@
       "setup.install_during_run",
       "setup.install_support",
       "setup.memory",
+      "setup.memory_chip",
+      "setup.program_backup",
       "setup.program_host",
       "setup.program_install",
       "setup.program_install_credit",
       "setup.program_protection",
+      "setup.program_recovery",
       "setup.program_search",
       "setup.program_trash_prevention",
+      "setup.program_trash_replacement",
       "setup.recovery",
       "setup.search",
       "setup.self_bounce",
       "setup.stack_top_program_install",
+      "setup.stored_program_reclaim",
+      "setup.vehicle",
       "tag.payoff",
       "tag.source",
       "tax.ice",
@@ -476,30 +530,30 @@
       "costProfile.credits": 23,
       "costProfile.memory": 25,
       "costProfile.opportunityCost": 70,
-      "costProfile.reserveRisk": 70,
-      "effects": 403,
-      "effects[].amount": 490,
+      "costProfile.reserveRisk": 69,
+      "effects": 411,
+      "effects[].amount": 523,
       "effects[].damageTypes": 19,
-      "effects[].finite": 44,
-      "effects[].kind": 964,
+      "effects[].finite": 47,
+      "effects[].kind": 1037,
       "effects[].perTurnLimit": 36,
-      "effects[].repeatable": 70,
-      "effects[].resource": 637,
-      "effects[].scope": 964,
-      "effects[].target": 119,
-      "effects[].timing": 964,
-      "lineSupport": 180,
-      "manualNotes": 8,
+      "effects[].repeatable": 77,
+      "effects[].resource": 670,
+      "effects[].scope": 1037,
+      "effects[].target": 176,
+      "effects[].timing": 1037,
+      "lineSupport": 172,
+      "manualNotes": 41,
       "planRoles": 564,
-      "quality": 405,
-      "quality.benchmarkCovered": 382,
-      "quality.confidence": 399,
+      "quality": 421,
+      "quality.benchmarkCovered": 398,
+      "quality.confidence": 415,
       "quality.focusedDecisionTest": 3,
-      "quality.hintReviewed": 405,
-      "quality.needsHumanReview": 405,
-      "quality.reviewedBy": 164,
-      "quality.reviewedDate": 164,
-      "quality.strategyCovered": 386,
+      "quality.hintReviewed": 421,
+      "quality.needsHumanReview": 421,
+      "quality.reviewedBy": 197,
+      "quality.reviewedDate": 197,
+      "quality.strategyCovered": 402,
       "remoteRole": 53,
       "remoteRole.kind": 53,
       "remoteRole.serverScope": 53,
@@ -510,23 +564,23 @@
       "scenarioRefs": 564,
       "side": 564,
       "strategicNotes": 3,
-      "strategicRole": 196,
+      "strategicRole": 178,
       "targetProfiles": 23,
-      "targetProfiles[].avoid": 23,
-      "targetProfiles[].hiddenInfoPolicy": 23,
+      "targetProfiles[].avoid": 24,
+      "targetProfiles[].hiddenInfoPolicy": 24,
       "targetProfiles[].installCost": 3,
       "targetProfiles[].installsTarget": 3,
-      "targetProfiles[].kind": 23,
+      "targetProfiles[].kind": 24,
       "targetProfiles[].lookCount": 1,
       "targetProfiles[].oncePerRun": 1,
-      "targetProfiles[].preferences": 18,
-      "targetProfiles[].purpose": 23,
-      "targetProfiles[].schemaVersion": 23,
+      "targetProfiles[].preferences": 19,
+      "targetProfiles[].purpose": 24,
+      "targetProfiles[].schemaVersion": 24,
       "targetProfiles[].showToOpponent": 1,
       "targetProfiles[].shuffleAfter": 3,
       "targetProfiles[].targetCardType": 3,
-      "targetProfiles[].targetType": 23,
-      "targetProfiles[].timing": 23,
+      "targetProfiles[].targetType": 24,
+      "targetProfiles[].timing": 24,
       "targetProfiles[].zone": 3,
       "valueHints": 564,
       "valueHints.access": 8,
@@ -603,17 +657,19 @@
     "derivedSignalCounts": {
       "access.free_trash": 2,
       "access.hq_full_reveal": 1,
-      "access.hq_multiaccess": 3,
+      "access.hq_multiaccess": 4,
       "access.hq_random_reveal": 1,
       "access.hq_trash_pressure": 1,
       "access.hq_via_archives": 1,
       "access.punish": 6,
-      "access.rnd_multiaccess": 3,
+      "access.rnd_multiaccess": 4,
       "access.rnd_top_card": 1,
       "access.rnd_top_cards": 1,
       "access.rnd_top_reorder": 1,
+      "access.rnd_topdeck_setup": 1,
       "access.rnd_trash_pressure": 1,
       "access.trash_untrashable": 2,
+      "action.recurring_extra_action": 1,
       "action.turn_limit_penalty": 1,
       "breaker.ap": 1,
       "breaker.ap_subtype_limited": 1,
@@ -647,6 +703,7 @@
       "breaker.universal": 4,
       "breaker.wall": 15,
       "corp.action_denial": 1,
+      "corp.archives_to_rnd_pressure": 1,
       "corp.bad_publicity_pressure": 1,
       "corp.draw_pressure": 1,
       "corp.economy_pressure": 1,
@@ -655,34 +712,44 @@
       "corp.random_discard_pressure": 1,
       "corp.rez_tax_pressure": 1,
       "corp.rnd_trash_pressure": 1,
+      "cost.agenda_point_penalty": 1,
       "damage.payoff": 38,
-      "defense.base_link": 2,
-      "defense.brain_damage_prevention": 4,
+      "defense.ap_subroutine_mitigation": 1,
+      "defense.base_link": 3,
+      "defense.brain_damage_prevention": 6,
       "defense.brain_damage_reset": 1,
       "defense.damage_prevention": 22,
+      "defense.damage_recovery_draw": 1,
+      "defense.finite_damage_prevention": 3,
       "defense.flatline_prevention": 1,
       "defense.meat_damage_immunity": 1,
-      "defense.meat_damage_prevention": 1,
-      "defense.net_damage_prevention": 5,
+      "defense.meat_damage_prevention": 6,
+      "defense.net_damage_prevention": 9,
+      "defense.pay_through_prevention": 1,
+      "defense.tag_clear_support": 2,
       "defense.tag_prevention": 7,
-      "defense.trace_boost": 2,
-      "defense.trace_defense": 15,
+      "defense.trace_boost": 3,
+      "defense.trace_defense": 18,
       "defense.trace_limit_reduction": 1,
-      "economy.action": 7,
+      "economy.action": 8,
       "economy.action_credit": 1,
       "economy.burst": 3,
       "economy.counter": 19,
       "economy.finite_pool": 10,
       "economy.generic": 42,
       "economy.node_trash_credit": 1,
-      "economy.recurring": 21,
-      "economy.recurring_breaker_credit": 13,
+      "economy.recurring": 26,
+      "economy.recurring_breaker_credit": 11,
       "economy.recurring_install_credit": 1,
+      "economy.recurring_killer_credit": 2,
+      "economy.recurring_link_credit": 3,
+      "economy.recurring_non_noisy_breaker_credit": 2,
+      "economy.recurring_tag_clear_credit": 2,
       "economy.recurring_trash_credit": 2,
       "economy.rez_discount": 7,
       "economy.start_of_turn": 3,
       "economy.trace_credit": 2,
-      "economy.trash_credit": 9,
+      "economy.trash_credit": 4,
       "economy.upgrade_trash_credit": 1,
       "ice.derez": 1,
       "ice.etr": 54,
@@ -710,16 +777,22 @@
       "remote.asset_economy": 16,
       "remote.install_tax": 1,
       "remote.scoring_protection": 5,
+      "risk.brain_damage_self_inflicted": 1,
+      "run.archives_replacement_access": 1,
+      "run.break_cost_penalty": 1,
       "run.break_cost_support": 5,
       "run.central_access_conversion": 1,
       "run.ends_run_after_effect": 1,
       "run.event_tempo": 4,
+      "run.extra_run_after_success": 1,
       "run.jackout_vs_node_upgrade": 1,
-      "run.replacement_access": 3,
+      "run.replacement_access": 4,
       "run.rnd_scout_run": 1,
       "run.safe_jackout_window": 1,
       "score.advance_burst": 13,
       "score.agenda_action": 12,
+      "setup.cybernetics": 7,
+      "setup.deck_exclusive": 12,
       "setup.draw": 9,
       "setup.hand_size": 3,
       "setup.hand_size_penalty": 1,
@@ -727,17 +800,23 @@
       "setup.install_discount": 7,
       "setup.install_during_run": 2,
       "setup.install_support": 2,
-      "setup.memory": 7,
+      "setup.memory": 15,
+      "setup.memory_chip": 8,
+      "setup.program_backup": 1,
       "setup.program_host": 4,
       "setup.program_install": 1,
       "setup.program_install_credit": 1,
       "setup.program_protection": 1,
+      "setup.program_recovery": 1,
       "setup.program_search": 2,
       "setup.program_trash_prevention": 1,
+      "setup.program_trash_replacement": 1,
       "setup.recovery": 3,
       "setup.search": 10,
       "setup.self_bounce": 1,
       "setup.stack_top_program_install": 1,
+      "setup.stored_program_reclaim": 1,
+      "setup.vehicle": 3,
       "tag.payoff": 17,
       "tag.source": 20,
       "tax.ice": 7,
@@ -764,16 +843,16 @@
       "corp.ice_tax_glacier": 71,
       "corp.remote_scoring": 6,
       "corp.tag_trace_punish": 35,
-      "runner.hq_pressure": 7,
-      "runner.interface_closeout": 6,
-      "runner.rnd_pressure": 7,
+      "runner.hq_pressure": 8,
+      "runner.interface_closeout": 8,
+      "runner.rnd_pressure": 8,
       "runner.run_event_tempo": 4,
       "runner.search.breaker": 3,
-      "runner.survival_defense": 27
+      "runner.survival_defense": 1
     },
-    "totalDerivedStrategyAnchors": 246,
-    "cardsWithDerivedSignals": 379,
-    "cardsWithStrategyAnchors": 202,
+    "totalDerivedStrategyAnchors": 224,
+    "cardsWithDerivedSignals": 389,
+    "cardsWithStrategyAnchors": 178,
     "descriptorGaps": [
       {
         "gapId": "remote_contest_pressure_not_first_class",
@@ -801,7 +880,7 @@
     ]
   },
   "sideAwareDerivation": {
-    "preventedWrongSideAnchorCount": 30,
+    "preventedWrongSideAnchorCount": 31,
     "preventedWrongSideAnchorExamples": [
       {
         "cardId": "onr_v1_012_clown",
@@ -1010,6 +1089,13 @@
         "cardId": "onr_proteus_108_faked-hit",
         "side": "runner",
         "cardType": "event",
+        "signalId": "damage.payoff",
+        "strategyId": "corp.damage_kill"
+      },
+      {
+        "cardId": "onr_proteus_144_lucidrinetm-drip-feed",
+        "side": "runner",
+        "cardType": "hardware",
         "signalId": "damage.payoff",
         "strategyId": "corp.damage_kill"
       }
@@ -1360,10 +1446,10 @@
   },
   "ai004Triage": {
     "lineSupport": {
-      "totalOccurrences": 224,
+      "totalOccurrences": 218,
       "legacyOccurrences": 0,
       "categoryCounts": {
-        "normalized_strategy_id": 224
+        "normalized_strategy_id": 218
       },
       "valueCounts": [
         {
@@ -1375,12 +1461,12 @@
           "count": 35
         },
         {
-          "value": "runner.survival_defense",
-          "count": 34
-        },
-        {
           "value": "corp.damage_kill",
           "count": 29
+        },
+        {
+          "value": "runner.survival_defense",
+          "count": 24
         },
         {
           "value": "corp.remote_scoring",
@@ -1396,14 +1482,18 @@
         },
         {
           "value": "runner.hq_pressure",
-          "count": 8
+          "count": 9
         },
         {
           "value": "runner.rnd_pressure",
-          "count": 8
+          "count": 9
         },
         {
           "value": "corp.fast_advance",
+          "count": 7
+        },
+        {
+          "value": "runner.interface_closeout",
           "count": 7
         },
         {
@@ -1413,10 +1503,6 @@
         {
           "value": "runner.search.breaker",
           "count": 6
-        },
-        {
-          "value": "runner.interface_closeout",
-          "count": 5
         },
         {
           "value": "runner.remote_contest",
@@ -2576,140 +2662,6 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "cardId": "onr_v1_120_armadillo-armored-road-home",
-          "side": "runner",
-          "cardType": "hardware",
-          "value": "runner.survival_defense",
-          "evidence": {
-            "lineSupport": [
-              "runner.survival_defense"
-            ],
-            "effects": [
-              {
-                "kind": "damage_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "damage"
-              },
-              {
-                "kind": "meat_damage_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "meat_damage"
-              },
-              {
-                "kind": "trash_credit",
-                "scope": "runner",
-                "timing": "persistent",
-                "resource": "trash_credits"
-              }
-            ],
-            "conditions": [
-              "requires_damage",
-              "requires_meat_damage",
-              "requires_prevention_window",
-              "requires_turn_limit_available"
-            ],
-            "cardType": "hardware",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": false,
-              "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true
-            }
-          },
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_v1_121_armored-fridge",
-          "side": "runner",
-          "cardType": "hardware",
-          "value": "runner.survival_defense",
-          "evidence": {
-            "lineSupport": [
-              "runner.survival_defense"
-            ],
-            "effects": [
-              {
-                "kind": "damage_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "damage"
-              },
-              {
-                "kind": "meat_damage_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "meat_damage"
-              }
-            ],
-            "conditions": [
-              "requires_damage",
-              "requires_meat_damage",
-              "requires_prevention_window",
-              "requires_turn_limit_available"
-            ],
-            "cardType": "hardware",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": false,
-              "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true
-            }
-          },
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_v1_125_dermatech-bodyplating",
-          "side": "runner",
-          "cardType": "hardware",
-          "value": "runner.survival_defense",
-          "evidence": {
-            "lineSupport": [
-              "runner.survival_defense"
-            ],
-            "effects": [
-              {
-                "kind": "damage_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "damage"
-              },
-              {
-                "kind": "meat_damage_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "meat_damage"
-              }
-            ],
-            "conditions": [
-              "requires_damage",
-              "requires_meat_damage",
-              "requires_prevention_window",
-              "requires_turn_limit_available"
-            ],
-            "cardType": "hardware",
-            "side": "runner"
-          },
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
           "cardId": "onr_v1_127_full-body-conversion",
           "side": "runner",
           "cardType": "hardware",
@@ -2720,6 +2672,17 @@
             ],
             "effects": [
               {
+                "kind": "hardware_trait",
+                "scope": "hardware",
+                "timing": "persistent"
+              },
+              {
+                "kind": "damage_prevention",
+                "scope": "damage",
+                "timing": "prevention_window",
+                "resource": "meat_damage"
+              },
+              {
                 "kind": "damage_prevention",
                 "scope": "runner",
                 "timing": "prevention_window",
@@ -2739,51 +2702,15 @@
               "requires_turn_limit_available"
             ],
             "cardType": "hardware",
-            "side": "runner"
-          },
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_v1_128_green-knight-surge-buffers",
-          "side": "runner",
-          "cardType": "hardware",
-          "value": "runner.survival_defense",
-          "evidence": {
-            "lineSupport": [
-              "runner.survival_defense"
-            ],
-            "effects": [
-              {
-                "kind": "damage_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "damage"
-              },
-              {
-                "kind": "net_damage_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "net_damage"
-              }
-            ],
-            "conditions": [
-              "requires_damage",
-              "requires_net_damage",
-              "requires_prevention_window",
-              "requires_turn_limit_available"
-            ],
-            "cardType": "hardware",
             "side": "runner",
             "quality": {
               "benchmarkCovered": true,
-              "hintReviewed": false,
+              "hintReviewed": true,
               "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true
+              "confidence": "high",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-02",
+              "reviewedBy": "codex"
             }
           },
           "triageCategory": "normalized_strategy_id",
@@ -2793,176 +2720,146 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "cardId": "onr_v1_130_lifesaver-nanosurgeons",
+          "cardId": "onr_v1_129_hq-interface",
           "side": "runner",
           "cardType": "hardware",
-          "value": "runner.survival_defense",
+          "value": "runner.hq_pressure",
           "evidence": {
             "lineSupport": [
-              "runner.survival_defense"
+              "runner.hq_pressure",
+              "runner.interface_closeout"
             ],
             "effects": [
               {
-                "kind": "damage_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "damage"
-              },
-              {
-                "kind": "brain_damage_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "brain_damage"
-              },
-              {
-                "kind": "draw",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "cards"
+                "kind": "multiaccess",
+                "scope": "hq",
+                "timing": "successful_run"
               }
             ],
-            "conditions": [
-              "requires_brain_damage",
-              "requires_damage",
-              "requires_prevention_window",
-              "requires_turn_limit_available"
-            ],
-            "cardType": "hardware",
-            "side": "runner"
-          },
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_v1_135_nasuko-cycle",
-          "side": "runner",
-          "cardType": "hardware",
-          "value": "runner.survival_defense",
-          "evidence": {
-            "lineSupport": [
-              "runner.survival_defense"
-            ],
-            "effects": [
-              {
-                "kind": "tag_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "tags"
-              }
-            ],
-            "conditions": [
-              "requires_prevention_window"
-            ],
-            "cardType": "hardware",
-            "side": "runner"
-          },
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_v1_140_raven-microcyb-eagle",
-          "side": "runner",
-          "cardType": "hardware",
-          "value": "runner.survival_defense",
-          "evidence": {
-            "lineSupport": [
-              "runner.survival_defense"
-            ],
-            "effects": [
-              {
-                "kind": "recurring_economy",
-                "scope": "runner",
-                "timing": "persistent",
-                "resource": "credits"
-              },
-              {
-                "kind": "global_modifier",
-                "scope": "runner",
-                "timing": "persistent",
-                "resource": "memory"
-              },
-              {
-                "kind": "damage_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "damage"
-              },
-              {
-                "kind": "net_damage_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "net_damage"
-              }
-            ],
-            "conditions": [
-              "requires_damage",
-              "requires_net_damage",
-              "requires_prevention_window",
-              "requires_turn_limit_available"
-            ],
+            "conditions": [],
             "cardType": "hardware",
             "side": "runner",
             "quality": {
               "benchmarkCovered": true,
-              "hintReviewed": false,
+              "hintReviewed": true,
               "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true
+              "confidence": "high",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-02",
+              "reviewedBy": "codex"
             }
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "runner.survival_defense"
+            "runner.hq_pressure"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "cardId": "onr_v1_143_techtronica-utility-suit",
+          "cardId": "onr_v1_129_hq-interface",
           "side": "runner",
           "cardType": "hardware",
-          "value": "runner.survival_defense",
+          "value": "runner.interface_closeout",
           "evidence": {
             "lineSupport": [
-              "runner.survival_defense"
+              "runner.hq_pressure",
+              "runner.interface_closeout"
             ],
             "effects": [
               {
-                "kind": "damage_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "damage"
-              },
-              {
-                "kind": "meat_damage_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "meat_damage"
-              },
-              {
-                "kind": "trash_credit",
-                "scope": "runner",
-                "timing": "persistent",
-                "resource": "trash_credits"
+                "kind": "multiaccess",
+                "scope": "hq",
+                "timing": "successful_run"
               }
             ],
-            "conditions": [
-              "requires_damage",
-              "requires_meat_damage",
-              "requires_prevention_window",
-              "requires_turn_limit_available"
-            ],
+            "conditions": [],
             "cardType": "hardware",
-            "side": "runner"
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "high",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-02",
+              "reviewedBy": "codex"
+            }
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "runner.survival_defense"
+            "runner.interface_closeout"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_139_r-and-d-interface",
+          "side": "runner",
+          "cardType": "hardware",
+          "value": "runner.rnd_pressure",
+          "evidence": {
+            "lineSupport": [
+              "runner.rnd_pressure",
+              "runner.interface_closeout"
+            ],
+            "effects": [
+              {
+                "kind": "multiaccess",
+                "scope": "rnd",
+                "timing": "successful_run"
+              }
+            ],
+            "conditions": [],
+            "cardType": "hardware",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "high",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-02",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.rnd_pressure"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_139_r-and-d-interface",
+          "side": "runner",
+          "cardType": "hardware",
+          "value": "runner.interface_closeout",
+          "evidence": {
+            "lineSupport": [
+              "runner.rnd_pressure",
+              "runner.interface_closeout"
+            ],
+            "effects": [
+              {
+                "kind": "multiaccess",
+                "scope": "rnd",
+                "timing": "successful_run"
+              }
+            ],
+            "conditions": [],
+            "cardType": "hardware",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "high",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-02",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.interface_closeout"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -12088,106 +11985,6 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "cardId": "onr_proteus_135_cortical-stimulators",
-          "side": "runner",
-          "cardType": "hardware",
-          "value": "runner.survival_defense",
-          "evidence": {
-            "lineSupport": [
-              "runner.survival_defense"
-            ],
-            "effects": [
-              {
-                "kind": "damage_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "damage"
-              },
-              {
-                "kind": "brain_damage_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "brain_damage"
-              },
-              {
-                "kind": "net_damage_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "net_damage"
-              }
-            ],
-            "conditions": [
-              "requires_brain_damage",
-              "requires_damage",
-              "requires_net_damage",
-              "requires_prevention_window",
-              "requires_turn_limit_available"
-            ],
-            "cardType": "hardware",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": false,
-              "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true
-            }
-          },
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_proteus_138_deck-the",
-          "side": "runner",
-          "cardType": "hardware",
-          "value": "runner.survival_defense",
-          "evidence": {
-            "lineSupport": [
-              "runner.survival_defense"
-            ],
-            "effects": [
-              {
-                "kind": "link",
-                "scope": "trace",
-                "timing": "trace_window",
-                "resource": "link"
-              },
-              {
-                "kind": "base_link",
-                "scope": "trace",
-                "timing": "trace_window",
-                "resource": "link"
-              },
-              {
-                "kind": "trace_defense",
-                "scope": "trace",
-                "timing": "trace_window",
-                "resource": "link"
-              }
-            ],
-            "conditions": [
-              "requires_trace_attempt"
-            ],
-            "cardType": "hardware",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": false,
-              "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true
-            }
-          },
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
           "cardId": "onr_proteus_140_expendable-family-member",
           "side": "runner",
           "cardType": "resource",
@@ -17605,7 +17402,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[116].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[132].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "info.rnd_manipulation",
       "strategyAnchorFor": [

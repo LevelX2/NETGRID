@@ -253,7 +253,7 @@ describe("AI003 strategy goal taxonomy", () => {
 
     expect(report.hardErrorCount).toBe(0);
     expect(tacticSignalCatalogData.schemaVersion).toBe("ai-tactic-signals-v1");
-    expect(report.taxonomy.tacticSignalCatalogCount).toBe(161);
+    expect(report.taxonomy.tacticSignalCatalogCount).toBe(188);
     expect(new Set(signalIds).size).toBe(signalIds.length);
     expect([...signalIds].sort()).toEqual(derivationSignalIds);
     expect(signalIds.some((signalId) => signalId.startsWith("anti.ice."))).toBe(
@@ -321,6 +321,26 @@ describe("AI003 strategy goal taxonomy", () => {
           signalId: "defense.flatline_prevention",
           supportOnly: false,
           mayAnchorStrategy: true,
+        }),
+        expect.objectContaining({
+          signalId: "setup.deck_exclusive",
+          supportOnly: true,
+          mayAnchorStrategy: false,
+        }),
+        expect.objectContaining({
+          signalId: "economy.recurring_non_noisy_breaker_credit",
+          supportOnly: true,
+          mayAnchorStrategy: false,
+        }),
+        expect.objectContaining({
+          signalId: "defense.damage_prevention",
+          supportOnly: true,
+          mayAnchorStrategy: false,
+        }),
+        expect.objectContaining({
+          signalId: "run.archives_replacement_access",
+          supportOnly: true,
+          mayAnchorStrategy: false,
         }),
       ]),
     );

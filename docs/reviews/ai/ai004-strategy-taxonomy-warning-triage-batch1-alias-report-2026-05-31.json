@@ -5274,27 +5274,6 @@
       ]
     },
     {
-      "value": "runner.survival_defense",
-      "count": 34,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.survival_defense"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_022_emergency-self-construct",
-        "onr_v1_023_evil-twin",
-        "onr_v1_078_arasaka-owns-you",
-        "onr_v1_116_total-genetic-retrofit",
-        "onr_v1_120_armadillo-armored-road-home",
-        "onr_v1_121_armored-fridge",
-        "onr_v1_125_dermatech-bodyplating",
-        "onr_v1_127_full-body-conversion"
-      ]
-    },
-    {
       "value": "corp.damage_kill",
       "count": 29,
       "mappingCategory": "exact_strategy_goal",
@@ -5313,6 +5292,27 @@
         "onr_v1_229_code-corpse",
         "onr_v1_234_data-darts",
         "onr_v1_242_fatal-attractor"
+      ]
+    },
+    {
+      "value": "runner.survival_defense",
+      "count": 24,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "runner.survival_defense"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_022_emergency-self-construct",
+        "onr_v1_023_evil-twin",
+        "onr_v1_078_arasaka-owns-you",
+        "onr_v1_116_total-genetic-retrofit",
+        "onr_v1_127_full-body-conversion",
+        "onr_v1_148_access-through-alpha",
+        "onr_v1_149_access-to-arasaka",
+        "onr_v1_150_access-to-kiribati"
       ]
     },
     {
@@ -5380,7 +5380,7 @@
     },
     {
       "value": "runner.hq_pressure",
-      "count": 8,
+      "count": 9,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5394,14 +5394,14 @@
         "onr_v1_062_shredder-uplink-protocol",
         "onr_v1_084_edited-shipping-manifests",
         "onr_v1_085_executive-wiretaps",
+        "onr_v1_129_hq-interface",
         "onr_proteus_084_crumble",
-        "onr_proteus_098_vienna-22",
-        "onr_proteus_101_all-hands"
+        "onr_proteus_098_vienna-22"
       ]
     },
     {
       "value": "runner.rnd_pressure",
-      "count": 8,
+      "count": 9,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5415,9 +5415,9 @@
         "onr_v1_050_r-and-d-protocol-files",
         "onr_v1_081_custodial-position",
         "onr_v1_096_kilroy-was-here",
+        "onr_v1_139_r-and-d-interface",
         "onr_proteus_089_garbage-in",
-        "onr_proteus_090_highlighter",
-        "onr_proteus_122_rush-hour"
+        "onr_proteus_090_highlighter"
       ]
     },
     {
@@ -5438,6 +5438,26 @@
         "onr_v1_304_systematic-layoffs",
         "onr_v1_305_team-restructuring",
         "onr_v1_312_chicago-branch"
+      ]
+    },
+    {
+      "value": "runner.interface_closeout",
+      "count": 7,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "runner.interface_closeout"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_041_microtech-ai-interface",
+        "onr_v1_081_custodial-position",
+        "onr_v1_085_executive-wiretaps",
+        "onr_v1_129_hq-interface",
+        "onr_v1_139_r-and-d-interface",
+        "onr_proteus_101_all-hands",
+        "onr_proteus_122_rush-hour"
       ]
     },
     {
@@ -5476,24 +5496,6 @@
         "onr_v1_110_sneak-preview",
         "onr_v1_114_temple-microcode-outlet",
         "onr_proteus_128_airport-locker"
-      ]
-    },
-    {
-      "value": "runner.interface_closeout",
-      "count": 5,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.interface_closeout"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_041_microtech-ai-interface",
-        "onr_v1_081_custodial-position",
-        "onr_v1_085_executive-wiretaps",
-        "onr_proteus_101_all-hands",
-        "onr_proteus_122_rush-hour"
       ]
     },
     {

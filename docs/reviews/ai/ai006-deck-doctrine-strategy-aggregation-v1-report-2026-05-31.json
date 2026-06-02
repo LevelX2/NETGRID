@@ -1222,7 +1222,9 @@
         "breaker.code_gate": 5,
         "breaker.sentry": 5,
         "economy.generic": 4,
-        "setup.draw": 4
+        "setup.draw": 4,
+        "setup.memory": 1,
+        "setup.memory_chip": 1
       },
       "legacySignalCounts": {
         "planRole:build_rig": 11,
@@ -1251,8 +1253,7 @@
         "role:tempo": 2
       },
       "warnings": [
-        "inspector:deferred_requires_human_review",
-        "inspector:legacy_fallback_only"
+        "inspector:deferred_requires_human_review"
       ],
       "runnerProfile": {
         "coverageProfile": {
@@ -1395,6 +1396,13 @@
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "access.hq_multiaccess",
+              "reason": "support:pressurePayoff"
             }
           ],
           "supportGaps": [
@@ -1426,6 +1434,29 @@
             {
               "cardId": "onr_v1_085_executive-wiretaps",
               "quantity": 2,
+              "source": "strategicRole",
+              "role": "payoff_anchor",
+              "strategyId": "runner.hq_pressure",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 1,
+              "source": "derivedStrategyAnchor",
+              "strategyId": "runner.hq_pressure",
+              "reason": "derived_strategy_anchor_from_inspector_index"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 1,
+              "source": "lineSupport",
+              "signal": "runner.hq_pressure",
+              "strategyId": "runner.hq_pressure",
+              "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 1,
               "source": "strategicRole",
               "role": "payoff_anchor",
               "strategyId": "runner.hq_pressure",
@@ -1546,6 +1577,29 @@
               "role": "payoff_anchor",
               "strategyId": "runner.interface_closeout",
               "reason": "valid_strategicRole_reinforces_existing_anchor"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 1,
+              "source": "derivedStrategyAnchor",
+              "strategyId": "runner.interface_closeout",
+              "reason": "derived_strategy_anchor_from_inspector_index"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 1,
+              "source": "lineSupport",
+              "signal": "runner.interface_closeout",
+              "strategyId": "runner.interface_closeout",
+              "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 1,
+              "source": "strategicRole",
+              "role": "payoff_anchor",
+              "strategyId": "runner.interface_closeout",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -1608,6 +1662,13 @@
             {
               "cardId": "onr_v1_085_executive-wiretaps",
               "quantity": 2,
+              "source": "functionSignal",
+              "signal": "access.hq_multiaccess",
+              "reason": "support:centralAccess"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 1,
               "source": "functionSignal",
               "signal": "access.hq_multiaccess",
               "reason": "support:centralAccess"
@@ -1764,6 +1825,13 @@
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "access.hq_multiaccess",
+              "reason": "support:remoteAccess"
             }
           ],
           "supportGaps": [
@@ -2264,6 +2332,13 @@
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "access.hq_multiaccess",
+              "reason": "support:pressurePayoff"
             }
           ],
           "supportGaps": [
@@ -2282,18 +2357,20 @@
         "runner.rig_first"
       ],
       "functionSignalCounts": {
-        "access.hq_multiaccess": 2,
+        "access.hq_multiaccess": 3,
         "access.rnd_multiaccess": 2,
         "breaker.code_gate": 1,
         "breaker.scaling_strength": 2,
         "breaker.sentry": 3,
         "breaker.universal": 2,
         "breaker.wall": 4,
-        "setup.draw": 2
+        "setup.draw": 2,
+        "setup.memory": 1,
+        "setup.memory_chip": 1
       },
       "legacySignalCounts": {
-        "lineSupport:runner.hq_pressure": 2,
-        "lineSupport:runner.interface_closeout": 4,
+        "lineSupport:runner.hq_pressure": 3,
+        "lineSupport:runner.interface_closeout": 5,
         "lineSupport:runner.rnd_pressure": 2,
         "planRole:build_rig": 12,
         "planRole:draw_for_answers": 4,
@@ -2364,7 +2441,7 @@
         },
         "pressureProfile": {
           "rnd": 5,
-          "hq": 5,
+          "hq": 6,
           "remote": 0,
           "archives": "unknown"
         },
@@ -2392,8 +2469,8 @@
       "strategyScores": {
         "runner.economy_first": {
           "anchorScore": 0,
-          "supportScore": 85,
-          "finalScore": 55,
+          "supportScore": 95,
+          "finalScore": 62,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -2458,18 +2535,24 @@
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "access.hq_multiaccess",
+              "reason": "support:pressurePayoff"
             }
           ],
           "supportGaps": [
-            "low_pressurePayoff_support",
             "weak_tag_damage_defense"
           ],
           "confidence": "medium"
         },
         "runner.hq_pressure": {
-          "anchorScore": 40,
+          "anchorScore": 100,
           "supportScore": 85,
-          "finalScore": 58,
+          "finalScore": 94,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_084_edited-shipping-manifests",
@@ -2482,6 +2565,29 @@
             {
               "cardId": "onr_v1_084_edited-shipping-manifests",
               "quantity": 1,
+              "source": "strategicRole",
+              "role": "payoff_anchor",
+              "strategyId": "runner.hq_pressure",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 2,
+              "source": "derivedStrategyAnchor",
+              "strategyId": "runner.hq_pressure",
+              "reason": "derived_strategy_anchor_from_inspector_index"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 2,
+              "source": "lineSupport",
+              "signal": "runner.hq_pressure",
+              "strategyId": "runner.hq_pressure",
+              "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 2,
               "source": "strategicRole",
               "role": "payoff_anchor",
               "strategyId": "runner.hq_pressure",
@@ -2556,13 +2662,37 @@
           "supportGaps": [
             "weak_tag_damage_defense"
           ],
-          "confidence": "medium"
+          "confidence": "high"
         },
         "runner.interface_closeout": {
-          "anchorScore": 0,
-          "supportScore": 55,
-          "finalScore": 22,
-          "anchorEvidence": [],
+          "anchorScore": 100,
+          "supportScore": 90,
+          "finalScore": 96,
+          "anchorEvidence": [
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 2,
+              "source": "derivedStrategyAnchor",
+              "strategyId": "runner.interface_closeout",
+              "reason": "derived_strategy_anchor_from_inspector_index"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 2,
+              "source": "lineSupport",
+              "signal": "runner.interface_closeout",
+              "strategyId": "runner.interface_closeout",
+              "reason": "normalized_lineSupport_strategy_goal"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 2,
+              "source": "strategicRole",
+              "role": "payoff_anchor",
+              "strategyId": "runner.interface_closeout",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
+            }
+          ],
           "supportEvidence": [
             {
               "cardId": "onr_v1_021_dwarf",
@@ -2619,13 +2749,19 @@
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "access.hq_multiaccess",
+              "reason": "support:centralAccess"
             }
           ],
           "supportGaps": [
-            "low_centralAccess_support",
             "weak_tag_damage_defense"
           ],
-          "confidence": "low"
+          "confidence": "high"
         },
         "runner.remote_contest": {
           "anchorScore": 0,
@@ -2705,8 +2841,8 @@
         },
         "runner.remote_trash": {
           "anchorScore": 0,
-          "supportScore": 70,
-          "finalScore": 28,
+          "supportScore": 100,
+          "finalScore": 40,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -2771,12 +2907,17 @@
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "access.hq_multiaccess",
+              "reason": "support:remoteAccess"
             }
           ],
-          "supportGaps": [
-            "weak_remote_access_support"
-          ],
-          "confidence": "low"
+          "supportGaps": [],
+          "confidence": "medium"
         },
         "runner.rig_first": {
           "anchorScore": 0,
@@ -3232,8 +3373,8 @@
         },
         "runner.survival_defense": {
           "anchorScore": 0,
-          "supportScore": 40,
-          "finalScore": 22,
+          "supportScore": 55,
+          "finalScore": 30,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -3263,35 +3404,47 @@
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_129_hq-interface",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "access.hq_multiaccess",
+              "reason": "support:pressurePayoff"
             }
           ],
           "supportGaps": [
-            "low_pressurePayoff_support",
             "weak_tag_damage_defense"
           ],
           "confidence": "low"
         }
       },
       "primaryStrategies": [
-        "runner.rig_first",
+        "runner.interface_closeout",
         "runner.hq_pressure",
         "runner.economy_first"
       ],
       "secondaryStrategies": [
+        "runner.rig_first",
+        "runner.remote_trash",
         "runner.search.breaker",
         "runner.rnd_pressure",
         "runner.run_event_tempo"
       ],
       "functionSignalCounts": {
+        "access.hq_multiaccess": 2,
         "breaker.scaling_strength": 2,
         "breaker.sentry": 2,
         "breaker.universal": 2,
         "breaker.wall": 4,
         "economy.generic": 5,
-        "setup.draw": 3
+        "setup.draw": 3,
+        "setup.memory": 2,
+        "setup.memory_chip": 2
       },
       "legacySignalCounts": {
-        "lineSupport:runner.hq_pressure": 1,
+        "lineSupport:runner.hq_pressure": 3,
+        "lineSupport:runner.interface_closeout": 2,
         "planRole:build_rig": 12,
         "planRole:contest_remote": 1,
         "planRole:draw_for_answers": 4,
@@ -3370,7 +3523,7 @@
         },
         "pressureProfile": {
           "rnd": 0,
-          "hq": 1,
+          "hq": 5,
           "remote": 0,
           "archives": "unknown"
         },
@@ -6233,15 +6386,15 @@
       "corp.tag_trace_punish": 1,
       "runner.economy_first": 2,
       "runner.hq_pressure": 2,
-      "runner.interface_closeout": 1,
-      "runner.rig_first": 2,
+      "runner.interface_closeout": 2,
+      "runner.rig_first": 1,
       "runner.rnd_pressure": 1
     },
     "warningCounts": {
       "inspector:deferred_requires_human_review": 5,
       "inspector:function_signal_descriptor_gap": 1,
-      "inspector:legacy_fallback_only": 5
+      "inspector:legacy_fallback_only": 4
     },
-    "contentSha256": "553294f6b625a6f7107f30ff0655171bab4351edc0a3ed0265a8f39d4c1976dc"
+    "contentSha256": "321ec6bd0e71cf7bb6ed807cc29c1335af3aa5fdfa5b984982c0e6dc728c3076"
   }
 }

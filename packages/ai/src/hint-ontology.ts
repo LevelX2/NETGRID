@@ -66,6 +66,7 @@ export const KNOWN_HINT_EFFECT_KINDS = [
   "net_damage_prevention",
   "brain_damage_prevention",
   "hand_size_modifier",
+  "hardware_trait",
   "program_host",
   "action_penalty",
   "persistent_survival_modifier",

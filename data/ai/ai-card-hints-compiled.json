@@ -7331,6 +7331,19 @@
       ],
       "effects": [
         {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "deck_exclusive",
+          "timing": "persistent"
+        },
+        {
+          "amount": 3,
+          "kind": "global_modifier",
+          "resource": "memory",
+          "scope": "runner",
+          "timing": "persistent"
+        },
+        {
           "amount": 3,
           "kind": "recurring_economy",
           "repeatable": true,
@@ -7340,24 +7353,28 @@
           "timing": "persistent"
         },
         {
-          "amount": 3,
-          "kind": "global_modifier",
-          "resource": "memory",
+          "kind": "delayed_penalty",
           "scope": "runner",
-          "timing": "persistent"
+          "target": "agenda_point_install_cost",
+          "timing": "install"
         }
-      ],
-      "strategicRole": [
-        "support_tool"
       ],
       "costProfile": {
         "agendaPoints": 1,
-        "reserveRisk": "high",
         "opportunityCost": "high"
       },
       "manualNotes": [
-        "AI018 review adjustment: install agenda-point cost is recorded diagnostically in costProfile; no runtime or planner consumption is implied."
-      ]
+        "AI020: Deck/MU and recurring icebreaker credits are support-only; agenda-point install cost is diagnostic cost metadata, not strategy or planner input."
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_120_armadillo-armored-road-home",
@@ -7388,18 +7405,37 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
       "effects": [
+        {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "vehicle",
+          "timing": "persistent"
+        },
+        {
+          "amount": 2,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
+          "scope": "runner",
+          "target": "tag_clear",
+          "timing": "persistent"
+        },
+        {
+          "amount": 3,
+          "finite": true,
+          "kind": "meat_damage_prevention",
+          "resource": "meat_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
         {
           "amount": 3,
           "damageTypes": [
@@ -7425,6 +7461,9 @@
           "scope": "runner",
           "timing": "persistent"
         }
+      ],
+      "manualNotes": [
+        "AI020: tag-clear credits and finite meat prevention remain support-only; no automatic survival strategy anchor."
       ],
       "conditions": [
         {
@@ -7472,18 +7511,23 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
       "effects": [
+        {
+          "amount": 1,
+          "finite": true,
+          "kind": "meat_damage_prevention",
+          "resource": "meat_damage",
+          "scope": "runner",
+          "target": "ablative_counter",
+          "timing": "prevention_window"
+        },
         {
           "amount": 1,
           "damageTypes": [
@@ -7503,6 +7547,9 @@
           "scope": "runner",
           "timing": "prevention_window"
         }
+      ],
+      "manualNotes": [
+        "AI020: finite meat prevention is support-only and does not by itself anchor runner.survival_defense."
       ],
       "conditions": [
         {
@@ -7558,12 +7605,9 @@
       ],
       "effects": [
         {
-          "amount": 2,
-          "kind": "recurring_economy",
-          "repeatable": true,
-          "resource": "credits",
-          "scope": "runner",
-          "target": "icebreaker",
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "deck_exclusive",
           "timing": "persistent"
         },
         {
@@ -7572,10 +7616,28 @@
           "resource": "memory",
           "scope": "runner",
           "timing": "persistent"
+        },
+        {
+          "amount": 2,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
+          "scope": "runner",
+          "target": "icebreaker",
+          "timing": "persistent"
         }
       ],
-      "strategicRole": [
-        "support_tool"
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "manualNotes": [
+        "AI020: deck exclusivity, MU and recurring icebreaker credits are support-only."
       ]
     },
     {
@@ -7606,6 +7668,39 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
+      ],
+      "effects": [
+        {
+          "kind": "hardware_trait",
+          "timing": "persistent",
+          "scope": "hardware",
+          "target": "deck_exclusive"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 1
+        },
+        {
+          "kind": "future_run_effect",
+          "timing": "successful_run",
+          "scope": "runner",
+          "target": "extra_run_after_success"
+        }
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "manualNotes": [
+        "AI020: extra run after success is server-neutral run support; no HQ/R&D/Remote strategy anchor is inferred."
       ]
     },
     {
@@ -7639,6 +7734,12 @@
       ],
       "effects": [
         {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "memory_chip",
+          "timing": "persistent"
+        },
+        {
           "amount": 1,
           "kind": "recurring_economy",
           "repeatable": true,
@@ -7648,8 +7749,17 @@
           "timing": "persistent"
         }
       ],
-      "strategicRole": [
-        "support_tool"
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "manualNotes": [
+        "AI020: killer-only recurring credits are separated from generic icebreaker recurring credits and remain support-only."
       ]
     },
     {
@@ -7679,13 +7789,20 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#runner_damage_prevention_tools"
       ],
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
       "effects": [
+        {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "cybernetics",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "meat_damage_prevention",
+          "resource": "meat_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
         {
           "amount": 1,
           "damageTypes": [
@@ -7705,6 +7822,18 @@
           "scope": "runner",
           "timing": "prevention_window"
         }
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "manualNotes": [
+        "AI020: simple recurring meat prevention is support-only."
       ],
       "conditions": [
         {
@@ -7749,11 +7878,38 @@
       ],
       "effects": [
         {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "vehicle",
+          "timing": "persistent"
+        },
+        {
+          "amount": 2,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
+          "scope": "runner",
+          "target": "tag_clear",
+          "timing": "persistent"
+        },
+        {
           "kind": "trash_credit",
           "resource": "trash_credits",
           "scope": "runner",
           "timing": "persistent"
         }
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "manualNotes": [
+        "AI020: recurring tag-clear credits are tag support, not survival strategy."
       ]
     },
     {
@@ -7791,6 +7947,19 @@
       ],
       "effects": [
         {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "cybernetics",
+          "timing": "persistent"
+        },
+        {
+          "kind": "damage_prevention",
+          "resource": "meat_damage",
+          "scope": "damage",
+          "target": "pay_through_meat_damage",
+          "timing": "prevention_window"
+        },
+        {
           "damageTypes": [
             "meat"
           ],
@@ -7805,6 +7974,18 @@
           "scope": "runner",
           "timing": "prevention_window"
         }
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "manualNotes": [
+        "AI020: reviewed as the only active hardware survival-defense anchor because it broadly prevents meat damage, with Corp pay-through explicitly modelled."
       ],
       "conditions": [
         {
@@ -7851,18 +8032,21 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
       "effects": [
+        {
+          "amount": 1,
+          "kind": "net_damage_prevention",
+          "resource": "net_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
         {
           "amount": 1,
           "damageTypes": [
@@ -7882,6 +8066,9 @@
           "scope": "runner",
           "timing": "prevention_window"
         }
+      ],
+      "manualNotes": [
+        "AI020: simple once-per-turn net prevention is support-only."
       ],
       "conditions": [
         {
@@ -7928,11 +8115,32 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "multiaccess",
+          "timing": "successful_run",
+          "scope": "hq",
+          "target": "hq",
+          "amount": 1
+        }
+      ],
+      "lineSupport": [
+        "runner.hq_pressure",
+        "runner.interface_closeout"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ],
+      "manualNotes": [
+        "AI020: HQ Interface is reviewed as real HQ multiaccess payoff and interface-closeout evidence."
+      ]
     },
     {
       "cardId": "onr_v1_130_lifesaver-nanosurgeons",
@@ -7966,13 +8174,23 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
       ],
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "emergency_tool"
-      ],
       "effects": [
+        {
+          "amount": 1,
+          "finite": true,
+          "kind": "brain_damage_prevention",
+          "resource": "brain_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 2,
+          "kind": "draw",
+          "resource": "cards",
+          "scope": "runner",
+          "target": "recent_damage_recovery",
+          "timing": "action"
+        },
         {
           "amount": 1,
           "damageTypes": [
@@ -7999,6 +8217,18 @@
           "scope": "runner",
           "timing": "action"
         }
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "manualNotes": [
+        "AI020: brain prevention plus recent-damage draw is useful survival support but not strong enough for a canonical survival strategy anchor."
       ],
       "conditions": [
         {
@@ -8048,14 +8278,11 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
-        "needsHumanReview": true,
-        "reviewedDate": "2026-06-01",
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
-      "strategicRole": [
-        "emergency_tool"
-      ],
       "targetProfiles": [
         {
           "schemaVersion": "target-profile-v1",
@@ -8074,9 +8301,21 @@
         }
       ],
       "manualNotes": [
-        "AI018 review adjustment: not treated as a pure breaker-search anchor; retained as program-trash recovery/resilience until a dedicated recovery strategy exists."
+        "AI020: program backup/recovery semantics stay support-only; no runner.search.breaker or generic search/recovery strategy anchor is inferred."
       ],
       "effects": [
+        {
+          "kind": "program_trash_prevention",
+          "scope": "installed_program",
+          "target": "program_backup",
+          "timing": "prevention_window"
+        },
+        {
+          "kind": "card_recovery",
+          "scope": "runner",
+          "target": "stored_program",
+          "timing": "action"
+        },
         {
           "kind": "card_recovery",
           "resource": "cards",
@@ -8125,6 +8364,41 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_trace_link_tools"
+      ],
+      "effects": [
+        {
+          "kind": "action_penalty",
+          "timing": "during_run",
+          "scope": "runner",
+          "resource": "credits",
+          "amount": 1,
+          "target": "break_subroutine_cost"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "during_run",
+          "scope": "ice",
+          "target": "ap_subroutine"
+        },
+        {
+          "kind": "net_damage_prevention",
+          "timing": "prevention_window",
+          "scope": "runner",
+          "resource": "net_damage",
+          "target": "ap_subroutine_damage"
+        }
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "manualNotes": [
+        "AI020: AP mitigation and break-cost penalty are not modelled as icebreaker coverage and receive no survival anchor."
       ]
     },
     {
@@ -8156,12 +8430,26 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "memory_chip",
+          "timing": "persistent"
+        },
+        {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "cybernetics",
+          "timing": "persistent"
+        },
         {
           "amount": 3,
           "kind": "hand_size_modifier",
@@ -8169,6 +8457,9 @@
           "scope": "runner",
           "timing": "persistent"
         }
+      ],
+      "manualNotes": [
+        "AI020: hand-size cybernetics chip support only; no strategy anchor."
       ],
       "conditions": [
         {
@@ -8205,12 +8496,26 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "memory_chip",
+          "timing": "persistent"
+        },
+        {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "cybernetics",
+          "timing": "persistent"
+        },
         {
           "amount": 2,
           "kind": "hand_size_modifier",
@@ -8218,6 +8523,9 @@
           "scope": "runner",
           "timing": "persistent"
         }
+      ],
+      "manualNotes": [
+        "AI020: hand-size cybernetics chip support only; no strategy anchor."
       ],
       "conditions": [
         {
@@ -8252,13 +8560,20 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
       ],
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
       "effects": [
+        {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "vehicle",
+          "timing": "persistent"
+        },
+        {
+          "kind": "tag_prevention",
+          "resource": "tags",
+          "scope": "runner",
+          "target": "avoid_tag",
+          "timing": "prevention_window"
+        },
         {
           "amount": 1,
           "kind": "tag_prevention",
@@ -8266,6 +8581,18 @@
           "scope": "runner",
           "timing": "prevention_window"
         }
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "manualNotes": [
+        "AI020: paid tag avoidance is support-only and does not create runner.survival_defense."
       ],
       "conditions": [
         {
@@ -8304,11 +8631,45 @@
       ],
       "effects": [
         {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "deck_exclusive",
+          "timing": "persistent"
+        },
+        {
+          "amount": 2,
+          "kind": "global_modifier",
+          "resource": "memory",
+          "scope": "runner",
+          "timing": "persistent"
+        },
+        {
+          "amount": 3,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
+          "scope": "runner",
+          "target": "link",
+          "timing": "persistent"
+        },
+        {
           "kind": "trash_credit",
           "resource": "trash_credits",
           "scope": "runner",
           "timing": "persistent"
         }
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "manualNotes": [
+        "AI020: deck/MU and recurring link credits are trace-defense support only."
       ]
     },
     {
@@ -8342,12 +8703,9 @@
       ],
       "effects": [
         {
-          "amount": 1,
-          "kind": "recurring_economy",
-          "repeatable": true,
-          "resource": "credits",
-          "scope": "runner",
-          "target": "icebreaker",
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "deck_exclusive",
           "timing": "persistent"
         },
         {
@@ -8356,10 +8714,28 @@
           "resource": "memory",
           "scope": "runner",
           "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
+          "scope": "runner",
+          "target": "icebreaker",
+          "timing": "persistent"
         }
       ],
-      "strategicRole": [
-        "support_tool"
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "manualNotes": [
+        "AI020: deck/MU and recurring icebreaker credits are support-only."
       ]
     },
     {
@@ -8396,11 +8772,45 @@
       ],
       "effects": [
         {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "deck_exclusive",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "global_modifier",
+          "resource": "memory",
+          "scope": "runner",
+          "timing": "persistent"
+        },
+        {
+          "amount": 3,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
+          "scope": "runner",
+          "target": "link",
+          "timing": "persistent"
+        },
+        {
           "kind": "trash_credit",
           "resource": "trash_credits",
           "scope": "runner",
           "timing": "persistent"
         }
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "manualNotes": [
+        "AI020: recurring link credits are trace-defense support only."
       ]
     },
     {
@@ -8433,11 +8843,32 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "multiaccess",
+          "timing": "successful_run",
+          "scope": "rnd",
+          "target": "rnd",
+          "amount": 1
+        }
+      ],
+      "lineSupport": [
+        "runner.rnd_pressure",
+        "runner.interface_closeout"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ],
+      "manualNotes": [
+        "AI020: R&D Interface is reviewed as real R&D multiaccess payoff and interface-closeout evidence."
+      ]
     },
     {
       "cardId": "onr_v1_140_raven-microcyb-eagle",
@@ -8465,19 +8896,27 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool",
-        "support_tool"
-      ],
       "effects": [
+        {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "deck_exclusive",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "global_modifier",
+          "resource": "memory",
+          "scope": "runner",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "recurring_economy",
@@ -8489,10 +8928,10 @@
         },
         {
           "amount": 1,
-          "kind": "global_modifier",
-          "resource": "memory",
+          "kind": "net_damage_prevention",
+          "resource": "net_damage",
           "scope": "runner",
-          "timing": "persistent"
+          "timing": "prevention_window"
         },
         {
           "amount": 1,
@@ -8513,6 +8952,9 @@
           "scope": "runner",
           "timing": "prevention_window"
         }
+      ],
+      "manualNotes": [
+        "AI020: deck/MU, simple net prevention and recurring breaker credit remain support-only; prior broad survival anchor removed."
       ],
       "conditions": [
         {
@@ -8555,19 +8997,18 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
         {
-          "amount": 3,
-          "kind": "recurring_economy",
-          "repeatable": true,
-          "resource": "credits",
-          "scope": "runner",
-          "target": "icebreaker",
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "deck_exclusive",
           "timing": "persistent"
         },
         {
@@ -8576,10 +9017,28 @@
           "resource": "memory",
           "scope": "runner",
           "timing": "persistent"
+        },
+        {
+          "amount": 3,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
+          "scope": "runner",
+          "target": "non_noisy_icebreaker",
+          "timing": "persistent"
+        },
+        {
+          "amount": 3,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
+          "scope": "runner",
+          "target": "icebreaker",
+          "timing": "persistent"
         }
       ],
-      "strategicRole": [
-        "support_tool"
+      "manualNotes": [
+        "AI020: non-noisy breaker credits are separated from generic icebreaker recurring credits and remain support-only."
       ]
     },
     {
@@ -8611,8 +9070,39 @@
         {
           "kind": "access_replacement",
           "scope": "archives",
+          "target": "archives_replacement_access",
+          "timing": "successful_run"
+        },
+        {
+          "kind": "access_replacement",
+          "scope": "archives",
+          "target": "archives_to_rnd_pressure",
+          "timing": "successful_run"
+        },
+        {
+          "amount": 2,
+          "kind": "topdeck_info",
+          "scope": "rnd",
+          "target": "rnd_topdeck_setup",
+          "timing": "successful_run"
+        },
+        {
+          "kind": "access_replacement",
+          "scope": "archives",
           "timing": "successful_run"
         }
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "manualNotes": [
+        "AI020: Archives replacement access and R&D topdeck setup are enabler/candidate semantics, not a strong R&D payoff anchor."
       ],
       "conditions": [
         {
@@ -8654,13 +9144,36 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
       ],
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
       "effects": [
+        {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "deck_exclusive",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "global_modifier",
+          "resource": "memory",
+          "scope": "runner",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "meat_damage_prevention",
+          "resource": "meat_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 5,
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
+          "scope": "runner",
+          "target": "link",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "damageTypes": [
@@ -8686,6 +9199,18 @@
           "scope": "runner",
           "timing": "persistent"
         }
+      ],
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "manualNotes": [
+        "AI020: deck/MU, simple meat prevention and recurring link credits are support-only."
       ],
       "conditions": [
         {
@@ -8736,11 +9261,31 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "hardware_trait",
+          "timing": "persistent",
+          "scope": "hardware",
+          "target": "memory_chip"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 3
+        }
+      ],
+      "manualNotes": [
+        "AI020: memory chip support only; no strategy anchor."
+      ]
     },
     {
       "cardId": "onr_v1_145_wutech-mem-chip",
@@ -8770,11 +9315,31 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "hardware_trait",
+          "timing": "persistent",
+          "scope": "hardware",
+          "target": "memory_chip"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 1
+        }
+      ],
+      "manualNotes": [
+        "AI020: memory chip support only; no strategy anchor."
+      ]
     },
     {
       "cardId": "onr_v1_146_zetatech-mem-chip",
@@ -8810,11 +9375,31 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "hardware_trait",
+          "timing": "persistent",
+          "scope": "hardware",
+          "target": "memory_chip"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "resource": "memory",
+          "amount": 2
+        }
+      ],
+      "manualNotes": [
+        "AI020: memory chip support only; no strategy anchor."
+      ]
     },
     {
       "cardId": "onr_v1_147_zz22-speed-chip",
@@ -8852,6 +9437,12 @@
       ],
       "effects": [
         {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "memory_chip",
+          "timing": "persistent"
+        },
+        {
           "amount": 2,
           "kind": "recurring_economy",
           "repeatable": true,
@@ -8861,8 +9452,17 @@
           "timing": "persistent"
         }
       ],
-      "strategicRole": [
-        "support_tool"
+      "quality": {
+        "benchmarkCovered": true,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "manualNotes": [
+        "AI020: killer-only recurring credits are separated from generic icebreaker recurring credits and remain support-only."
       ]
     },
     {
@@ -29225,13 +29825,34 @@
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
       ],
       "quality": {
-        "benchmarkCovered": false,
-        "hintReviewed": false,
+        "benchmarkCovered": true,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "deck_exclusive",
+          "timing": "persistent"
+        },
+        {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "cybernetics",
+          "timing": "persistent"
+        },
+        {
+          "amount": 2,
+          "kind": "global_modifier",
+          "resource": "memory",
+          "scope": "runner",
+          "timing": "persistent"
+        },
         {
           "amount": 2,
           "kind": "hand_size_modifier",
@@ -29247,13 +29868,6 @@
           "scope": "runner",
           "target": "icebreaker",
           "timing": "persistent"
-        },
-        {
-          "amount": 2,
-          "kind": "global_modifier",
-          "resource": "memory",
-          "scope": "runner",
-          "timing": "persistent"
         }
       ],
       "conditions": [
@@ -29261,8 +29875,8 @@
           "kind": "requires_installed_card"
         }
       ],
-      "strategicRole": [
-        "support_tool"
+      "manualNotes": [
+        "AI020: deck, cybernetics, MU, hand-size and recurring breaker credits are support-only."
       ]
     },
     {
@@ -29288,19 +29902,35 @@
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
       ],
       "quality": {
-        "benchmarkCovered": false,
-        "hintReviewed": false,
+        "benchmarkCovered": true,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
       "effects": [
+        {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "cybernetics",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "net_damage_prevention",
+          "resource": "net_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
+        {
+          "amount": 1,
+          "kind": "brain_damage_prevention",
+          "resource": "brain_damage",
+          "scope": "runner",
+          "timing": "prevention_window"
+        },
         {
           "amount": 1,
           "damageTypes": [
@@ -29329,6 +29959,9 @@
           "scope": "runner",
           "timing": "prevention_window"
         }
+      ],
+      "manualNotes": [
+        "AI020: simple net/brain prevention is support-only; no automatic survival anchor."
       ],
       "conditions": [
         {
@@ -29432,29 +30065,46 @@
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
       ],
       "quality": {
-        "benchmarkCovered": false,
-        "hintReviewed": false,
+        "benchmarkCovered": true,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
       "effects": [
         {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "deck_exclusive",
+          "timing": "persistent"
+        },
+        {
           "amount": 1,
-          "kind": "link",
+          "kind": "global_modifier",
+          "resource": "memory",
+          "scope": "runner",
+          "timing": "persistent"
+        },
+        {
+          "amount": 5,
+          "kind": "base_link",
           "resource": "link",
           "scope": "trace",
           "timing": "trace_window"
         },
         {
-          "amount": 5,
-          "kind": "base_link",
+          "amount": 1,
+          "kind": "link",
+          "resource": "link",
+          "scope": "trace",
+          "target": "trace_boost",
+          "timing": "trace_window"
+        },
+        {
+          "amount": 1,
+          "kind": "link",
           "resource": "link",
           "scope": "trace",
           "timing": "trace_window"
@@ -29466,6 +30116,9 @@
           "scope": "trace",
           "timing": "trace_window"
         }
+      ],
+      "manualNotes": [
+        "AI020: base-link and trace boost are trace-defense support only, not survival strategy."
       ],
       "conditions": [
         {
@@ -29495,15 +30148,29 @@
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
       ],
       "quality": {
-        "benchmarkCovered": false,
+        "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
-        "needsHumanReview": true,
-        "reviewedDate": "2026-06-01",
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "memory_chip",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "program_host",
+          "resource": "memory",
+          "scope": "runner",
+          "target": "icebreaker",
+          "timing": "install"
+        },
         {
           "amount": 2,
           "kind": "recurring_economy",
@@ -29521,10 +30188,22 @@
           "timing": "persistent"
         }
       ],
-      "strategicRole": [
-        "support_tool"
-      ],
       "targetProfiles": [
+        {
+          "avoid": [
+            "target_would_break_host_limit"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "kind": "hosted_install_target",
+          "preferences": [
+            "hosted_icebreaker_eligible",
+            "installed_icebreaker"
+          ],
+          "purpose": "host_mu_one_icebreaker_for_spin_chip",
+          "schemaVersion": "target-profile-v1",
+          "targetType": "icebreaker",
+          "timing": "on_install"
+        },
         {
           "avoid": [
             "target_would_break_host_limit"
@@ -29540,6 +30219,9 @@
           "targetType": "icebreaker",
           "timing": "on_install"
         }
+      ],
+      "manualNotes": [
+        "AI020: hosted-only icebreaker credit plus MU<=1 host scope is support-only and targetProfile V1 is diagnostic."
       ]
     },
     {
@@ -29716,12 +30398,35 @@
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
       ],
       "quality": {
-        "benchmarkCovered": false,
-        "hintReviewed": false,
+        "benchmarkCovered": true,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "action_economy",
+          "timing": "start_of_turn",
+          "scope": "runner",
+          "resource": "actions",
+          "amount": 1,
+          "target": "recurring_extra_action"
+        },
+        {
+          "kind": "damage",
+          "timing": "start_of_turn",
+          "scope": "runner",
+          "resource": "brain_damage",
+          "amount": 1,
+          "target": "self_inflicted_brain_damage"
+        }
+      ],
+      "manualNotes": [
+        "AI020: recurring extra action and self-inflicted brain-damage risk are tactical/risk semantics; no new action-economy strategy ID is introduced."
+      ]
     },
     {
       "cardId": "onr_proteus_145_mercenary-subcontract",
@@ -29964,13 +30669,34 @@
         "data/scenarios/card-support-ai-supported-current.json#active_card_support_ai_supported"
       ],
       "quality": {
-        "benchmarkCovered": false,
-        "hintReviewed": false,
+        "benchmarkCovered": true,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "deck_exclusive",
+          "timing": "persistent"
+        },
+        {
+          "kind": "hardware_trait",
+          "scope": "hardware",
+          "target": "cybernetics",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "global_modifier",
+          "resource": "memory",
+          "scope": "runner",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "hand_size_modifier",
@@ -29984,14 +30710,16 @@
           "repeatable": true,
           "resource": "credits",
           "scope": "runner",
-          "target": "icebreaker",
+          "target": "non_noisy_icebreaker",
           "timing": "persistent"
         },
         {
           "amount": 1,
-          "kind": "global_modifier",
-          "resource": "memory",
+          "kind": "recurring_economy",
+          "repeatable": true,
+          "resource": "credits",
           "scope": "runner",
+          "target": "icebreaker",
           "timing": "persistent"
         }
       ],
@@ -30000,8 +30728,8 @@
           "kind": "requires_installed_card"
         }
       ],
-      "strategicRole": [
-        "support_tool"
+      "manualNotes": [
+        "AI020: stealth deck support, MU, hand-size and non-noisy breaker credit remain support-only."
       ]
     },
     {

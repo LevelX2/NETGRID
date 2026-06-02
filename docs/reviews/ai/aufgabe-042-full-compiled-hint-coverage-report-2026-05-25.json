@@ -14,13 +14,13 @@
   "generatedFactsCardCount": 391,
   "manualOverlayCardCount": 6,
   "legacyFallbackOnlyCount": 136,
-  "descriptorOrSchemaGapCount": 279,
+  "descriptorOrSchemaGapCount": 284,
   "manualOverlayRequiredCount": 0,
   "blockedMissingImplementationCount": 37,
   "coverageClassCounts": {
     "blocked_missing_implementation": 37,
-    "descriptor_or_schema_gap": 279,
-    "generated_mechanical_clean": 106,
+    "descriptor_or_schema_gap": 284,
+    "generated_mechanical_clean": 101,
     "generated_plus_overlay": 6,
     "legacy_fallback_only": 136
   },
@@ -155,7 +155,7 @@
   },
   "hardErrorCount": 0,
   "hardErrors": [],
-  "warningCount": 1792,
+  "warningCount": 1829,
   "warnings": [
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -2128,6 +2128,11 @@
       "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_134_cortical-cybermodem",
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
+    },
+    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_proteus_134_cortical-cybermodem",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
@@ -2165,17 +2170,12 @@
     {
       "kind": "generated_fact_absent_from_active_monolith",
       "cardId": "onr_proteus_135_cortical-stimulators",
-      "message": "Generated effect:brain_damage_prevention is absent from the active monolith."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_proteus_135_cortical-stimulators",
       "message": "Generated effect:damage_prevention is absent from the active monolith."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_135_cortical-stimulators",
-      "message": "Generated effect:net_damage_prevention is absent from the active monolith."
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -2205,17 +2205,17 @@
     {
       "kind": "generated_fact_absent_from_active_monolith",
       "cardId": "onr_proteus_138_deck-the",
-      "message": "Generated effect:base_link is absent from the active monolith."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_proteus_138_deck-the",
-      "message": "Generated effect:link is absent from the active monolith."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_proteus_138_deck-the",
       "message": "Generated effect:trace_defense is absent from the active monolith."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_138_deck-the",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_138_deck-the",
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -2228,9 +2228,9 @@
       "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
-      "message": "Generated effect:program_host is absent from the active monolith."
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -2286,6 +2286,16 @@
       "kind": "legacy_fallback_only",
       "cardId": "onr_proteus_144_lucidrinetm-drip-feed",
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_144_lucidrinetm-drip-feed",
+      "message": "Active monolith has effect:action_economy that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_144_lucidrinetm-drip-feed",
+      "message": "Active monolith has effect:damage that the current deriver does not reproduce."
     },
     {
       "kind": "legacy_fallback_only",
@@ -2361,6 +2371,11 @@
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_151_sunburst-cranial-interface",
       "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_151_sunburst-cranial-interface",
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -3970,7 +3985,17 @@
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_119_arasaka-portable-prototype",
+      "message": "Active monolith has effect:delayed_penalty that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_119_arasaka-portable-prototype",
       "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_119_arasaka-portable-prototype",
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -4010,12 +4035,17 @@
     {
       "kind": "generated_fact_absent_from_active_monolith",
       "cardId": "onr_v1_120_armadillo-armored-road-home",
-      "message": "Generated effect:meat_damage_prevention is absent from the active monolith."
+      "message": "Generated effect:trash_credit is absent from the active monolith."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_120_armadillo-armored-road-home",
-      "message": "Generated effect:trash_credit is absent from the active monolith."
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_120_armadillo-armored-road-home",
+      "message": "Active monolith has effect:recurring_economy that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -4053,11 +4083,6 @@
       "message": "Generated effect:damage_prevention is absent from the active monolith."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_v1_121_armored-fridge",
-      "message": "Generated effect:meat_damage_prevention is absent from the active monolith."
-    },
-    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_v1_121_armored-fridge",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
@@ -4073,6 +4098,11 @@
       "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_122_artemis-2020",
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
+    },
+    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_v1_122_artemis-2020",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
@@ -4081,6 +4111,31 @@
       "kind": "legacy_fallback_only",
       "cardId": "onr_v1_123_bodyweight-data-creche",
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_123_bodyweight-data-creche",
+      "message": "Active monolith has effect:future_run_effect that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_123_bodyweight-data-creche",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_123_bodyweight-data-creche",
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
+    },
+    {
+      "kind": "descriptor_or_schema_gap",
+      "cardId": "onr_v1_124_corolla-speed-chip",
+      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_124_corolla-speed-chip",
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -4118,14 +4173,34 @@
       "message": "Generated effect:damage_prevention is absent from the active monolith."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_125_dermatech-bodyplating",
-      "message": "Generated effect:meat_damage_prevention is absent from the active monolith."
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
       "cardId": "onr_v1_125_dermatech-bodyplating",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
+    },
+    {
+      "kind": "descriptor_or_schema_gap",
+      "cardId": "onr_v1_126_drifter-mobile-environment",
+      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
+    },
+    {
+      "kind": "generated_fact_absent_from_active_monolith",
+      "cardId": "onr_v1_126_drifter-mobile-environment",
+      "message": "Generated effect:trash_credit is absent from the active monolith."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_126_drifter-mobile-environment",
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_126_drifter-mobile-environment",
+      "message": "Active monolith has effect:recurring_economy that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -4160,12 +4235,12 @@
     {
       "kind": "generated_fact_absent_from_active_monolith",
       "cardId": "onr_v1_127_full-body-conversion",
-      "message": "Generated effect:damage_prevention is absent from the active monolith."
+      "message": "Generated effect:meat_damage_prevention is absent from the active monolith."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_127_full-body-conversion",
-      "message": "Generated effect:meat_damage_prevention is absent from the active monolith."
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -4203,11 +4278,6 @@
       "message": "Generated effect:damage_prevention is absent from the active monolith."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_v1_128_green-knight-surge-buffers",
-      "message": "Generated effect:net_damage_prevention is absent from the active monolith."
-    },
-    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_v1_128_green-knight-surge-buffers",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
@@ -4216,6 +4286,11 @@
       "kind": "legacy_fallback_only",
       "cardId": "onr_v1_129_hq-interface",
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_129_hq-interface",
+      "message": "Active monolith has effect:multiaccess that the current deriver does not reproduce."
     },
     {
       "kind": "descriptor_or_schema_gap",
@@ -4245,17 +4320,7 @@
     {
       "kind": "generated_fact_absent_from_active_monolith",
       "cardId": "onr_v1_130_lifesaver-nanosurgeons",
-      "message": "Generated effect:brain_damage_prevention is absent from the active monolith."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_v1_130_lifesaver-nanosurgeons",
       "message": "Generated effect:damage_prevention is absent from the active monolith."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_v1_130_lifesaver-nanosurgeons",
-      "message": "Generated effect:draw is absent from the active monolith."
     },
     {
       "kind": "text_pattern_derivation",
@@ -4278,16 +4343,6 @@
       "message": "Generated condition:requires_program_trash is absent from the active monolith."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_v1_131_microtech-backup-drive",
-      "message": "Generated effect:card_recovery is absent from the active monolith."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_v1_131_microtech-backup-drive",
-      "message": "Generated effect:program_trash_prevention is absent from the active monolith."
-    },
-    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_v1_131_microtech-backup-drive",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
@@ -4298,6 +4353,21 @@
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_132_microtech-trode-set",
+      "message": "Active monolith has effect:action_penalty that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_132_microtech-trode-set",
+      "message": "Active monolith has effect:net_damage_prevention that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_132_microtech-trode-set",
+      "message": "Active monolith has effect:prevention_replacement that the current deriver does not reproduce."
+    },
+    {
       "kind": "descriptor_or_schema_gap",
       "cardId": "onr_v1_133_militech-mram-chip",
       "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
@@ -4308,9 +4378,9 @@
       "message": "Generated condition:requires_installed_card is absent from the active monolith."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_133_militech-mram-chip",
-      "message": "Generated effect:hand_size_modifier is absent from the active monolith."
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -4328,9 +4398,9 @@
       "message": "Generated condition:requires_installed_card is absent from the active monolith."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_134_mram-chip",
-      "message": "Generated effect:hand_size_modifier is absent from the active monolith."
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -4348,14 +4418,39 @@
       "message": "Generated condition:requires_prevention_window is absent from the active monolith."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_135_nasuko-cycle",
-      "message": "Generated effect:tag_prevention is absent from the active monolith."
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
       "cardId": "onr_v1_135_nasuko-cycle",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
+    },
+    {
+      "kind": "descriptor_or_schema_gap",
+      "cardId": "onr_v1_136_pandoras-deck",
+      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
+    },
+    {
+      "kind": "generated_fact_absent_from_active_monolith",
+      "cardId": "onr_v1_136_pandoras-deck",
+      "message": "Generated effect:trash_credit is absent from the active monolith."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_136_pandoras-deck",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_136_pandoras-deck",
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_136_pandoras-deck",
+      "message": "Active monolith has effect:recurring_economy that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -4373,9 +4468,39 @@
       "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_137_parraline-5750",
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
+    },
+    {
       "kind": "text_pattern_derivation",
       "cardId": "onr_v1_137_parraline-5750",
       "message": "Derived facts use read-only text/descriptor pattern scans rather than imported TS descriptors."
+    },
+    {
+      "kind": "descriptor_or_schema_gap",
+      "cardId": "onr_v1_138_pk-6089a",
+      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
+    },
+    {
+      "kind": "generated_fact_absent_from_active_monolith",
+      "cardId": "onr_v1_138_pk-6089a",
+      "message": "Generated effect:trash_credit is absent from the active monolith."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_138_pk-6089a",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_138_pk-6089a",
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_138_pk-6089a",
+      "message": "Active monolith has effect:recurring_economy that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -4386,6 +4511,11 @@
       "kind": "legacy_fallback_only",
       "cardId": "onr_v1_139_r-and-d-interface",
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_139_r-and-d-interface",
+      "message": "Active monolith has effect:multiaccess that the current deriver does not reproduce."
     },
     {
       "kind": "descriptor_or_schema_gap",
@@ -4418,14 +4548,14 @@
       "message": "Generated effect:damage_prevention is absent from the active monolith."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_140_raven-microcyb-eagle",
-      "message": "Generated effect:net_damage_prevention is absent from the active monolith."
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_140_raven-microcyb-eagle",
-      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -4441,6 +4571,11 @@
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_141_raven-microcyb-owl",
       "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_141_raven-microcyb-owl",
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -4458,9 +4593,9 @@
       "message": "Generated condition:requires_successful_run is absent from the active monolith."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_142_record-reconstructor",
-      "message": "Generated effect:access_replacement is absent from the active monolith."
+      "message": "Active monolith has effect:topdeck_info that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -4500,12 +4635,22 @@
     {
       "kind": "generated_fact_absent_from_active_monolith",
       "cardId": "onr_v1_143_techtronica-utility-suit",
-      "message": "Generated effect:meat_damage_prevention is absent from the active monolith."
+      "message": "Generated effect:trash_credit is absent from the active monolith."
     },
     {
-      "kind": "generated_fact_absent_from_active_monolith",
+      "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_143_techtronica-utility-suit",
-      "message": "Generated effect:trash_credit is absent from the active monolith."
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_143_techtronica-utility-suit",
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_143_techtronica-utility-suit",
+      "message": "Active monolith has effect:recurring_economy that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -4518,14 +4663,54 @@
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_144_tycho-mem-chip",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_144_tycho-mem-chip",
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
+    },
+    {
       "kind": "legacy_fallback_only",
       "cardId": "onr_v1_145_wutech-mem-chip",
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
     },
     {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_145_wutech-mem-chip",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_145_wutech-mem-chip",
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
+    },
+    {
       "kind": "legacy_fallback_only",
       "cardId": "onr_v1_146_zetatech-mem-chip",
       "message": "No structured mechanical fact was derived in the current full-coverage scope; active legacy hint remains the runtime fallback."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_146_zetatech-mem-chip",
+      "message": "Active monolith has effect:global_modifier that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_146_zetatech-mem-chip",
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
+    },
+    {
+      "kind": "descriptor_or_schema_gap",
+      "cardId": "onr_v1_147_zz22-speed-chip",
+      "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_v1_147_zz22-speed-chip",
+      "message": "Active monolith has effect:hardware_trait that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -20914,7 +21099,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/hardware/cortical-cybermodem.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -20978,6 +21163,16 @@
             "amount": 2
           },
           {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
             "kind": "recurring_economy",
             "timing": "persistent",
             "scope": "runner",
@@ -20992,11 +21187,11 @@
         ],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
-          "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -21007,11 +21202,13 @@
         ],
         "generatedOnly": [],
         "manualOnly": [
-          "effect:global_modifier"
+          "effect:global_modifier",
+          "effect:hardware_trait"
         ]
       },
       "missingManualOverlay": [
-        "effect:global_modifier"
+        "effect:global_modifier",
+        "effect:hardware_trait"
       ],
       "descriptorGaps": [
         "Manual ontology contains fields not currently derivable."
@@ -21019,16 +21216,16 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
-        {
           "kind": "descriptor_or_overlay_gap",
           "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "manual_ontology_without_generated_match",
           "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -21044,7 +21241,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/hardware/cortical-stimulators.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -21127,32 +21324,53 @@
           "build_rig",
           "safe_probe_run"
         ],
-        "effects": [],
-        "conditions": [],
-        "lineSupport": [
-          "runner.survival_defense"
+        "effects": [
+          {
+            "kind": "brain_damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "brain_damage",
+            "amount": 1
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "net_damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "net_damage",
+            "amount": 1
+          }
         ],
+        "conditions": [],
+        "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
-          "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
+        "matches": [
+          "effect:brain_damage_prevention",
+          "effect:net_damage_prevention"
+        ],
         "generatedOnly": [
           "condition:requires_brain_damage",
           "condition:requires_damage",
           "condition:requires_net_damage",
           "condition:requires_prevention_window",
           "condition:requires_turn_limit_available",
-          "effect:brain_damage_prevention",
-          "effect:damage_prevention",
-          "effect:net_damage_prevention"
+          "effect:damage_prevention"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:hardware_trait"
+        ]
       },
       "missingManualOverlay": [
         "condition:requires_brain_damage",
@@ -21160,22 +21378,22 @@
         "condition:requires_net_damage",
         "condition:requires_prevention_window",
         "condition:requires_turn_limit_available",
-        "effect:brain_damage_prevention",
         "effect:damage_prevention",
-        "effect:net_damage_prevention"
+        "effect:hardware_trait"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "generated_fact_without_manual_match",
@@ -21199,15 +21417,11 @@
         },
         {
           "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:brain_damage_prevention has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
           "message": "Generated effect:damage_prevention has no manual ontology match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:net_damage_prevention has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -21339,7 +21553,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/hardware/deck-the.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -21394,47 +21608,77 @@
           "build_rig",
           "safe_probe_run"
         ],
-        "effects": [],
-        "conditions": [],
-        "lineSupport": [
-          "runner.survival_defense"
+        "effects": [
+          {
+            "kind": "base_link",
+            "timing": "trace_window",
+            "scope": "trace",
+            "resource": "link",
+            "amount": 5
+          },
+          {
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 1
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "link",
+            "timing": "trace_window",
+            "scope": "trace",
+            "resource": "link",
+            "amount": 1
+          }
         ],
+        "conditions": [],
+        "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
-          "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
+        "matches": [
+          "effect:base_link",
+          "effect:link"
+        ],
         "generatedOnly": [
           "condition:requires_trace_attempt",
-          "effect:base_link",
-          "effect:link",
           "effect:trace_defense"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:global_modifier",
+          "effect:hardware_trait"
+        ]
       },
       "missingManualOverlay": [
         "condition:requires_trace_attempt",
-        "effect:base_link",
-        "effect:link",
+        "effect:global_modifier",
+        "effect:hardware_trait",
         "effect:trace_defense"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "generated_fact_without_manual_match",
@@ -21442,15 +21686,15 @@
         },
         {
           "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:base_link has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:link has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
           "message": "Generated effect:trace_defense has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -21466,7 +21710,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/hardware/eurocorpse-tm-spin-chip.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -21527,6 +21771,18 @@
         ],
         "effects": [
           {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "program_host",
+            "timing": "install",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 1
+          },
+          {
             "kind": "recurring_economy",
             "timing": "persistent",
             "scope": "runner",
@@ -21539,39 +21795,36 @@
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
-          "benchmarkCovered": false,
-          "confidence": "medium",
-          "needsHumanReview": true
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
         "matches": [
+          "effect:program_host",
           "effect:recurring_economy"
         ],
-        "generatedOnly": [
-          "effect:program_host"
-        ],
-        "manualOnly": []
+        "generatedOnly": [],
+        "manualOnly": [
+          "effect:hardware_trait"
+        ]
       },
       "missingManualOverlay": [
-        "effect:program_host"
+        "effect:hardware_trait"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
-        {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:program_host has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -21883,7 +22136,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/hardware/lucidrinetm-drip-feed.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -21903,33 +22156,64 @@
           "build_rig",
           "safe_probe_run"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "action_economy",
+            "timing": "start_of_turn",
+            "scope": "runner",
+            "resource": "actions",
+            "amount": 1
+          },
+          {
+            "kind": "damage",
+            "timing": "start_of_turn",
+            "scope": "runner",
+            "resource": "brain_damage",
+            "amount": 1
+          }
+        ],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
-          "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "benchmarkCovered": true,
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:action_economy",
+          "effect:damage"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:action_economy",
+        "effect:damage"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:action_economy has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:damage has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -22381,7 +22665,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/runner/hardware/sunburst-cranial-interface.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -22445,6 +22729,16 @@
             "amount": 1
           },
           {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
             "kind": "recurring_economy",
             "timing": "persistent",
             "scope": "runner",
@@ -22459,11 +22753,11 @@
         ],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
-          "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -22474,11 +22768,13 @@
         ],
         "generatedOnly": [],
         "manualOnly": [
-          "effect:global_modifier"
+          "effect:global_modifier",
+          "effect:hardware_trait"
         ]
       },
       "missingManualOverlay": [
-        "effect:global_modifier"
+        "effect:global_modifier",
+        "effect:hardware_trait"
       ],
       "descriptorGaps": [
         "Manual ontology contains fields not currently derivable."
@@ -22486,16 +22782,16 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
-        {
           "kind": "descriptor_or_overlay_gap",
           "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "manual_ontology_without_generated_match",
           "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -34374,11 +34670,21 @@
         ],
         "effects": [
           {
+            "kind": "delayed_penalty",
+            "timing": "install",
+            "scope": "runner"
+          },
+          {
             "kind": "global_modifier",
             "timing": "persistent",
             "scope": "runner",
             "resource": "memory",
             "amount": 3
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
           },
           {
             "kind": "recurring_economy",
@@ -34391,10 +34697,16 @@
         "conditions": [],
         "costProfile": {
           "agendaPoints": 1,
-          "reserveRisk": "high",
           "opportunityCost": "high"
         },
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [
@@ -34402,11 +34714,15 @@
         ],
         "generatedOnly": [],
         "manualOnly": [
-          "effect:global_modifier"
+          "effect:delayed_penalty",
+          "effect:global_modifier",
+          "effect:hardware_trait"
         ]
       },
       "missingManualOverlay": [
-        "effect:global_modifier"
+        "effect:delayed_penalty",
+        "effect:global_modifier",
+        "effect:hardware_trait"
       ],
       "descriptorGaps": [
         "Manual ontology contains fields not currently derivable."
@@ -34419,7 +34735,15 @@
         },
         {
           "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:delayed_penalty has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
           "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -34435,7 +34759,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/armadillo-armored-road-home.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -34511,31 +34835,53 @@
           "build_rig",
           "survive_damage"
         ],
-        "effects": [],
-        "conditions": [],
-        "lineSupport": [
-          "runner.survival_defense"
+        "effects": [
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "meat_damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "meat_damage",
+            "amount": 3
+          },
+          {
+            "kind": "recurring_economy",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 2
+          }
         ],
+        "conditions": [],
+        "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
+        "matches": [
+          "effect:meat_damage_prevention"
+        ],
         "generatedOnly": [
           "condition:requires_damage",
           "condition:requires_meat_damage",
           "condition:requires_prevention_window",
           "condition:requires_turn_limit_available",
           "effect:damage_prevention",
-          "effect:meat_damage_prevention",
           "effect:trash_credit"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:hardware_trait",
+          "effect:recurring_economy"
+        ]
       },
       "missingManualOverlay": [
         "condition:requires_damage",
@@ -34543,21 +34889,23 @@
         "condition:requires_prevention_window",
         "condition:requires_turn_limit_available",
         "effect:damage_prevention",
-        "effect:meat_damage_prevention",
+        "effect:hardware_trait",
+        "effect:recurring_economy",
         "effect:trash_credit"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "generated_fact_without_manual_match",
@@ -34581,11 +34929,15 @@
         },
         {
           "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:meat_damage_prevention has no manual ontology match."
+          "message": "Generated effect:trash_credit has no manual ontology match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:trash_credit has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:recurring_economy has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -34601,7 +34953,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/armored-fridge.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -34670,28 +35022,35 @@
           "build_rig",
           "survive_meat_damage"
         ],
-        "effects": [],
-        "conditions": [],
-        "lineSupport": [
-          "runner.survival_defense"
+        "effects": [
+          {
+            "kind": "meat_damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "meat_damage",
+            "amount": 1
+          }
         ],
+        "conditions": [],
+        "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
+        "matches": [
+          "effect:meat_damage_prevention"
+        ],
         "generatedOnly": [
           "condition:requires_damage",
           "condition:requires_meat_damage",
           "condition:requires_prevention_window",
           "condition:requires_turn_limit_available",
-          "effect:damage_prevention",
-          "effect:meat_damage_prevention"
+          "effect:damage_prevention"
         ],
         "manualOnly": []
       },
@@ -34700,18 +35059,13 @@
         "condition:requires_meat_damage",
         "condition:requires_prevention_window",
         "condition:requires_turn_limit_available",
-        "effect:damage_prevention",
-        "effect:meat_damage_prevention"
+        "effect:damage_prevention"
       ],
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually."
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -34735,10 +35089,6 @@
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated effect:damage_prevention has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:meat_damage_prevention has no manual ontology match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -34799,6 +35149,11 @@
             "amount": 2
           },
           {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
             "kind": "recurring_economy",
             "timing": "persistent",
             "scope": "runner",
@@ -34807,7 +35162,14 @@
           }
         ],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [
@@ -34815,11 +35177,13 @@
         ],
         "generatedOnly": [],
         "manualOnly": [
-          "effect:global_modifier"
+          "effect:global_modifier",
+          "effect:hardware_trait"
         ]
       },
       "missingManualOverlay": [
-        "effect:global_modifier"
+        "effect:global_modifier",
+        "effect:hardware_trait"
       ],
       "descriptorGaps": [
         "Manual ontology contains fields not currently derivable."
@@ -34833,6 +35197,10 @@
         {
           "kind": "manual_ontology_without_generated_match",
           "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -34869,19 +35237,71 @@
         "planRoles": [
           "runner_install_hardware"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "future_run_effect",
+            "timing": "successful_run",
+            "scope": "runner"
+          },
+          {
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 1
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          }
+        ],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:future_run_effect",
+          "effect:global_modifier",
+          "effect:hardware_trait"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:future_run_effect",
+        "effect:global_modifier",
+        "effect:hardware_trait"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
-      "warnings": [],
+      "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:future_run_effect has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
+        }
+      ],
       "fullCoverageScope": true,
       "coverageClass": "legacy_fallback_only"
     },
@@ -34926,6 +35346,11 @@
         ],
         "effects": [
           {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
             "kind": "recurring_economy",
             "timing": "persistent",
             "scope": "runner",
@@ -34934,26 +35359,47 @@
           }
         ],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [
           "effect:recurring_economy"
         ],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:hardware_trait"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:hardware_trait"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "generated_mechanical_clean"
+      "coverageClass": "descriptor_or_schema_gap"
     },
     {
       "cardId": "onr_v1_125_dermatech-bodyplating",
@@ -35030,23 +35476,44 @@
           "build_rig",
           "recover_economy"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "meat_damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "meat_damage",
+            "amount": 1
+          }
+        ],
         "conditions": [],
-        "lineSupport": [
-          "runner.survival_defense"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [],
+        "matches": [
+          "effect:meat_damage_prevention"
+        ],
         "generatedOnly": [
           "condition:requires_damage",
           "condition:requires_meat_damage",
           "condition:requires_prevention_window",
           "condition:requires_turn_limit_available",
-          "effect:damage_prevention",
-          "effect:meat_damage_prevention"
+          "effect:damage_prevention"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:hardware_trait"
+        ]
       },
       "missingManualOverlay": [
         "condition:requires_damage",
@@ -35054,16 +35521,21 @@
         "condition:requires_prevention_window",
         "condition:requires_turn_limit_available",
         "effect:damage_prevention",
-        "effect:meat_damage_prevention"
+        "effect:hardware_trait"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "generated_fact_without_manual_match",
@@ -35086,8 +35558,8 @@
           "message": "Generated effect:damage_prevention has no manual ontology match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:meat_damage_prevention has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -35135,33 +35607,76 @@
         ],
         "effects": [
           {
-            "kind": "trash_credit",
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "recurring_economy",
             "timing": "persistent",
             "scope": "runner",
-            "resource": "trash_credits"
+            "resource": "credits",
+            "amount": 2
           }
         ],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [
+        "matches": [],
+        "generatedOnly": [
           "effect:trash_credit"
         ],
-        "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:hardware_trait",
+          "effect:recurring_economy"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:hardware_trait",
+        "effect:recurring_economy",
+        "effect:trash_credit"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:trash_credit has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:recurring_economy has no generated basic fact match."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "generated_mechanical_clean"
+      "coverageClass": "descriptor_or_schema_gap"
     },
     {
       "cardId": "onr_v1_127_full-body-conversion",
@@ -35233,40 +35748,67 @@
           "build_rig",
           "survive_meat_damage"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "damage_prevention",
+            "timing": "prevention_window",
+            "scope": "damage",
+            "resource": "meat_damage"
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          }
+        ],
         "conditions": [],
         "lineSupport": [
           "runner.survival_defense"
-        ]
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [],
+        "matches": [
+          "effect:damage_prevention"
+        ],
         "generatedOnly": [
           "condition:requires_damage",
           "condition:requires_meat_damage",
           "condition:requires_prevention_window",
           "condition:requires_turn_limit_available",
-          "effect:damage_prevention",
           "effect:meat_damage_prevention"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:hardware_trait"
+        ]
       },
       "missingManualOverlay": [
         "condition:requires_damage",
         "condition:requires_meat_damage",
         "condition:requires_prevention_window",
         "condition:requires_turn_limit_available",
-        "effect:damage_prevention",
+        "effect:hardware_trait",
         "effect:meat_damage_prevention"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "generated_fact_without_manual_match",
@@ -35286,11 +35828,11 @@
         },
         {
           "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:damage_prevention has no manual ontology match."
+          "message": "Generated effect:meat_damage_prevention has no manual ontology match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:meat_damage_prevention has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -35306,7 +35848,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/green-knight-surge-buffers.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -35374,28 +35916,35 @@
           "build_rig",
           "survive_net_damage"
         ],
-        "effects": [],
-        "conditions": [],
-        "lineSupport": [
-          "runner.survival_defense"
+        "effects": [
+          {
+            "kind": "net_damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "net_damage",
+            "amount": 1
+          }
         ],
+        "conditions": [],
+        "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
+        "matches": [
+          "effect:net_damage_prevention"
+        ],
         "generatedOnly": [
           "condition:requires_damage",
           "condition:requires_net_damage",
           "condition:requires_prevention_window",
           "condition:requires_turn_limit_available",
-          "effect:damage_prevention",
-          "effect:net_damage_prevention"
+          "effect:damage_prevention"
         ],
         "manualOnly": []
       },
@@ -35404,18 +35953,13 @@
         "condition:requires_net_damage",
         "condition:requires_prevention_window",
         "condition:requires_turn_limit_available",
-        "effect:damage_prevention",
-        "effect:net_damage_prevention"
+        "effect:damage_prevention"
       ],
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually."
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -35441,10 +35985,6 @@
           "message": "Generated effect:damage_prevention has no manual ontology match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:net_damage_prevention has no manual ontology match."
-        },
-        {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
         }
@@ -35458,7 +35998,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/hq-interface.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -35480,33 +36020,49 @@
           "build_rig",
           "pressure_hq"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "multiaccess",
+            "timing": "successful_run",
+            "scope": "hq",
+            "amount": 1
+          }
+        ],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "runner.hq_pressure",
+          "runner.interface_closeout"
+        ],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:multiaccess"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:multiaccess"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:multiaccess has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -35598,22 +36154,43 @@
           "recover_cards",
           "survive_core_damage"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "brain_damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "brain_damage",
+            "amount": 1
+          },
+          {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "runner",
+            "resource": "cards",
+            "amount": 2
+          }
+        ],
         "conditions": [],
-        "lineSupport": [
-          "runner.survival_defense"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [],
+        "matches": [
+          "effect:brain_damage_prevention",
+          "effect:draw"
+        ],
         "generatedOnly": [
           "condition:requires_brain_damage",
           "condition:requires_damage",
           "condition:requires_prevention_window",
           "condition:requires_turn_limit_available",
-          "effect:brain_damage_prevention",
-          "effect:damage_prevention",
-          "effect:draw"
+          "effect:damage_prevention"
         ],
         "manualOnly": []
       },
@@ -35622,9 +36199,7 @@
         "condition:requires_damage",
         "condition:requires_prevention_window",
         "condition:requires_turn_limit_available",
-        "effect:brain_damage_prevention",
-        "effect:damage_prevention",
-        "effect:draw"
+        "effect:damage_prevention"
       ],
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually."
@@ -35653,15 +36228,7 @@
         },
         {
           "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:brain_damage_prevention has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
           "message": "Generated effect:damage_prevention has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:draw has no manual ontology match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -35733,42 +36300,48 @@
         "planRoles": [
           "runner_install_hardware"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "card_recovery",
+            "timing": "action",
+            "scope": "runner"
+          },
+          {
+            "kind": "program_trash_prevention",
+            "timing": "prevention_window",
+            "scope": "installed_program"
+          }
+        ],
         "conditions": [],
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "medium",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
-          "condition:requires_installed_hardware",
-          "condition:requires_program_trash",
+        "matches": [
           "effect:card_recovery",
           "effect:program_trash_prevention"
+        ],
+        "generatedOnly": [
+          "condition:requires_installed_hardware",
+          "condition:requires_program_trash"
         ],
         "manualOnly": []
       },
       "missingManualOverlay": [
         "condition:requires_installed_hardware",
-        "condition:requires_program_trash",
-        "effect:card_recovery",
-        "effect:program_trash_prevention"
+        "condition:requires_program_trash"
       ],
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually."
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -35780,14 +36353,6 @@
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_program_trash has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:card_recovery has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:program_trash_prevention has no manual ontology match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -35824,19 +36389,76 @@
           "build_rig",
           "trace_bid_support"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "action_penalty",
+            "timing": "during_run",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 1
+          },
+          {
+            "kind": "net_damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "net_damage"
+          },
+          {
+            "kind": "prevention_replacement",
+            "timing": "during_run",
+            "scope": "ice"
+          }
+        ],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:action_penalty",
+          "effect:net_damage_prevention",
+          "effect:prevention_replacement"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:action_penalty",
+        "effect:net_damage_prevention",
+        "effect:prevention_replacement"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
-      "warnings": [],
+      "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:action_penalty has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:net_damage_prevention has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:prevention_replacement has no generated basic fact match."
+        }
+      ],
       "fullCoverageScope": true,
       "coverageClass": "legacy_fallback_only"
     },
@@ -35886,49 +36508,71 @@
         "planRoles": [
           "remote_upgrade_modifier"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "hand_size_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "hand_size",
+            "amount": 3
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          }
+        ],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
-          "condition:requires_installed_card",
+        "matches": [
           "effect:hand_size_modifier"
         ],
-        "manualOnly": []
+        "generatedOnly": [
+          "condition:requires_installed_card"
+        ],
+        "manualOnly": [
+          "effect:hardware_trait"
+        ]
       },
       "missingManualOverlay": [
         "condition:requires_installed_card",
-        "effect:hand_size_modifier"
+        "effect:hardware_trait"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_installed_card has no manual ontology match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:hand_size_modifier has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -35984,49 +36628,71 @@
         "planRoles": [
           "remote_upgrade_modifier"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "hand_size_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "hand_size",
+            "amount": 2
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          }
+        ],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
-          "condition:requires_installed_card",
+        "matches": [
           "effect:hand_size_modifier"
         ],
-        "manualOnly": []
+        "generatedOnly": [
+          "condition:requires_installed_card"
+        ],
+        "manualOnly": [
+          "effect:hardware_trait"
+        ]
       },
       "missingManualOverlay": [
         "condition:requires_installed_card",
-        "effect:hand_size_modifier"
+        "effect:hardware_trait"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_installed_card has no manual ontology match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:hand_size_modifier has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -36084,26 +36750,47 @@
           "avoid_tags",
           "build_rig"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "tag_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "tags"
+          }
+        ],
         "conditions": [],
-        "lineSupport": [
-          "runner.survival_defense"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
-          "condition:requires_prevention_window",
+        "matches": [
           "effect:tag_prevention"
         ],
-        "manualOnly": []
+        "generatedOnly": [
+          "condition:requires_prevention_window"
+        ],
+        "manualOnly": [
+          "effect:hardware_trait"
+        ]
       },
       "missingManualOverlay": [
         "condition:requires_prevention_window",
-        "effect:tag_prevention"
+        "effect:hardware_trait"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
@@ -36112,12 +36799,16 @@
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_prevention_window has no manual ontology match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:tag_prevention has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -36165,33 +36856,89 @@
         ],
         "effects": [
           {
-            "kind": "trash_credit",
+            "kind": "global_modifier",
             "timing": "persistent",
             "scope": "runner",
-            "resource": "trash_credits"
+            "resource": "memory",
+            "amount": 2
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "recurring_economy",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 3
           }
         ],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [
+        "matches": [],
+        "generatedOnly": [
           "effect:trash_credit"
         ],
-        "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:global_modifier",
+          "effect:hardware_trait",
+          "effect:recurring_economy"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:global_modifier",
+        "effect:hardware_trait",
+        "effect:recurring_economy",
+        "effect:trash_credit"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:trash_credit has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:recurring_economy has no generated basic fact match."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "generated_mechanical_clean"
+      "coverageClass": "descriptor_or_schema_gap"
     },
     {
       "cardId": "onr_v1_137_parraline-5750",
@@ -36241,6 +36988,11 @@
             "amount": 1
           },
           {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
             "kind": "recurring_economy",
             "timing": "persistent",
             "scope": "runner",
@@ -36249,7 +37001,14 @@
           }
         ],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [
@@ -36257,11 +37016,13 @@
         ],
         "generatedOnly": [],
         "manualOnly": [
-          "effect:global_modifier"
+          "effect:global_modifier",
+          "effect:hardware_trait"
         ]
       },
       "missingManualOverlay": [
-        "effect:global_modifier"
+        "effect:global_modifier",
+        "effect:hardware_trait"
       ],
       "descriptorGaps": [
         "Manual ontology contains fields not currently derivable."
@@ -36275,6 +37036,10 @@
         {
           "kind": "manual_ontology_without_generated_match",
           "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -36324,33 +37089,89 @@
         ],
         "effects": [
           {
-            "kind": "trash_credit",
+            "kind": "global_modifier",
             "timing": "persistent",
             "scope": "runner",
-            "resource": "trash_credits"
+            "resource": "memory",
+            "amount": 1
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "recurring_economy",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 3
           }
         ],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [
+        "matches": [],
+        "generatedOnly": [
           "effect:trash_credit"
         ],
-        "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:global_modifier",
+          "effect:hardware_trait",
+          "effect:recurring_economy"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:global_modifier",
+        "effect:hardware_trait",
+        "effect:recurring_economy",
+        "effect:trash_credit"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:trash_credit has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:recurring_economy has no generated basic fact match."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "generated_mechanical_clean"
+      "coverageClass": "descriptor_or_schema_gap"
     },
     {
       "cardId": "onr_v1_139_r-and-d-interface",
@@ -36358,7 +37179,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/r-d-interface.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -36379,33 +37200,49 @@
           "build_rig",
           "run_pressure"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "multiaccess",
+            "timing": "successful_run",
+            "scope": "rnd",
+            "amount": 1
+          }
+        ],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "runner.interface_closeout",
+          "runner.rnd_pressure"
+        ],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:multiaccess"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:multiaccess"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:multiaccess has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -36417,7 +37254,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/raven-microcyb-eagle.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -36505,6 +37342,18 @@
             "amount": 1
           },
           {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "net_damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "net_damage",
+            "amount": 1
+          },
+          {
             "kind": "recurring_economy",
             "timing": "persistent",
             "scope": "runner",
@@ -36513,19 +37362,18 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "runner.survival_defense"
-        ],
+        "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
         "matches": [
+          "effect:net_damage_prevention",
           "effect:recurring_economy"
         ],
         "generatedOnly": [
@@ -36533,11 +37381,11 @@
           "condition:requires_net_damage",
           "condition:requires_prevention_window",
           "condition:requires_turn_limit_available",
-          "effect:damage_prevention",
-          "effect:net_damage_prevention"
+          "effect:damage_prevention"
         ],
         "manualOnly": [
-          "effect:global_modifier"
+          "effect:global_modifier",
+          "effect:hardware_trait"
         ]
       },
       "missingManualOverlay": [
@@ -36547,7 +37395,7 @@
         "condition:requires_turn_limit_available",
         "effect:damage_prevention",
         "effect:global_modifier",
-        "effect:net_damage_prevention"
+        "effect:hardware_trait"
       ],
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually.",
@@ -36555,10 +37403,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -36588,12 +37432,12 @@
           "message": "Generated effect:damage_prevention has no manual ontology match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:net_damage_prevention has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:global_modifier has no generated basic fact match."
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -36609,7 +37453,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/raven-microcyb-owl.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -36651,6 +37495,11 @@
             "amount": 1
           },
           {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
             "kind": "recurring_economy",
             "timing": "persistent",
             "scope": "runner",
@@ -36661,11 +37510,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -36674,11 +37523,13 @@
         ],
         "generatedOnly": [],
         "manualOnly": [
-          "effect:global_modifier"
+          "effect:global_modifier",
+          "effect:hardware_trait"
         ]
       },
       "missingManualOverlay": [
-        "effect:global_modifier"
+        "effect:global_modifier",
+        "effect:hardware_trait"
       ],
       "descriptorGaps": [
         "Manual ontology contains fields not currently derivable."
@@ -36686,16 +37537,16 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
-        {
           "kind": "descriptor_or_overlay_gap",
           "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "manual_ontology_without_generated_match",
           "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -36746,38 +37597,74 @@
           "build_rig",
           "run_pressure"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "access_replacement",
+            "timing": "successful_run",
+            "scope": "archives"
+          },
+          {
+            "kind": "access_replacement",
+            "timing": "successful_run",
+            "scope": "archives"
+          },
+          {
+            "kind": "topdeck_info",
+            "timing": "successful_run",
+            "scope": "rnd",
+            "amount": 2
+          }
+        ],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
-          "condition:requires_successful_run",
+        "matches": [
           "effect:access_replacement"
         ],
-        "manualOnly": []
+        "generatedOnly": [
+          "condition:requires_successful_run"
+        ],
+        "manualOnly": [
+          "effect:topdeck_info"
+        ]
       },
       "missingManualOverlay": [
         "condition:requires_successful_run",
-        "effect:access_replacement"
+        "effect:topdeck_info"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_successful_run has no manual ontology match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:access_replacement has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:topdeck_info has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -36873,24 +37760,61 @@
           "increase_link",
           "survive_meat_damage"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 1
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
+            "kind": "meat_damage_prevention",
+            "timing": "prevention_window",
+            "scope": "runner",
+            "resource": "meat_damage",
+            "amount": 1
+          },
+          {
+            "kind": "recurring_economy",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "credits",
+            "amount": 5
+          }
+        ],
         "conditions": [],
-        "lineSupport": [
-          "runner.survival_defense"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [],
+        "matches": [
+          "effect:meat_damage_prevention"
+        ],
         "generatedOnly": [
           "condition:requires_damage",
           "condition:requires_meat_damage",
           "condition:requires_prevention_window",
           "condition:requires_turn_limit_available",
           "effect:damage_prevention",
-          "effect:meat_damage_prevention",
           "effect:trash_credit"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:global_modifier",
+          "effect:hardware_trait",
+          "effect:recurring_economy"
+        ]
       },
       "missingManualOverlay": [
         "condition:requires_damage",
@@ -36898,17 +37822,24 @@
         "condition:requires_prevention_window",
         "condition:requires_turn_limit_available",
         "effect:damage_prevention",
-        "effect:meat_damage_prevention",
+        "effect:global_modifier",
+        "effect:hardware_trait",
+        "effect:recurring_economy",
         "effect:trash_credit"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "generated_fact_without_manual_match",
@@ -36932,11 +37863,19 @@
         },
         {
           "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:meat_damage_prevention has no manual ontology match."
+          "message": "Generated effect:trash_credit has no manual ontology match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:trash_credit has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:recurring_economy has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -36952,7 +37891,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/tycho-mem-chip.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -36975,33 +37914,58 @@
         "planRoles": [
           "build_rig"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 3
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          }
+        ],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:global_modifier",
+          "effect:hardware_trait"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:global_modifier",
+        "effect:hardware_trait"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -37013,7 +37977,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/wutech-mem-chip.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -37034,33 +37998,58 @@
         "planRoles": [
           "build_rig"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 1
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          }
+        ],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:global_modifier",
+          "effect:hardware_trait"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:global_modifier",
+        "effect:hardware_trait"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -37072,7 +38061,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/runner/hardware/zetatech-mem-chip.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -37095,33 +38084,58 @@
         "planRoles": [
           "build_rig"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "global_modifier",
+            "timing": "persistent",
+            "scope": "runner",
+            "resource": "memory",
+            "amount": 2
+          },
+          {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          }
+        ],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
         "matches": [],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:global_modifier",
+          "effect:hardware_trait"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:global_modifier",
+        "effect:hardware_trait"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:global_modifier has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -37170,6 +38184,11 @@
         ],
         "effects": [
           {
+            "kind": "hardware_trait",
+            "timing": "persistent",
+            "scope": "hardware"
+          },
+          {
             "kind": "recurring_economy",
             "timing": "persistent",
             "scope": "runner",
@@ -37178,26 +38197,47 @@
           }
         ],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": true,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [
           "effect:recurring_economy"
         ],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:hardware_trait"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "effect:hardware_trait"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:hardware_trait has no generated basic fact match."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
         }
       ],
       "fullCoverageScope": true,
-      "coverageClass": "generated_mechanical_clean"
+      "coverageClass": "descriptor_or_schema_gap"
     },
     {
       "cardId": "onr_v1_148_access-through-alpha",
