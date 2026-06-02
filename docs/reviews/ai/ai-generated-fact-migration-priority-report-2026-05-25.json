@@ -2790,11 +2790,12 @@
         "effect:counter_economy",
         "effect:finite_economy_pool"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -2828,11 +2829,12 @@
       ],
       "generatedFields": ["effects"],
       "generatedMechanicalFacts": ["effect:draw", "effect:survival_payoff"],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 1,
         "manual_review_candidate": 1
       },
@@ -2869,11 +2871,12 @@
         "condition:requires_prevention_window",
         "effect:tag_prevention"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -2955,11 +2958,12 @@
         "condition:requires_installed_resource",
         "effect:install_discount"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects", "targetProfiles"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -2997,15 +3001,17 @@
         "condition:requires_stack_search",
         "effect:search"
       ],
-      "monolithFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
-      "generatedOnlyFields": [],
+      "monolithFields": ["effects", "targetProfiles"],
+      "duplicatedActiveMechanicalFields": ["effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
-        "monolith_mechanical_duplication_candidate": 2
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 12,
       "rationale": "Activated program search is derivable by action and stack context, but generated facts must not expose hidden stack identity.",
       "doNotMigrateFields": [

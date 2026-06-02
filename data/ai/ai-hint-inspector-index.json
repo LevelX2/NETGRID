@@ -14,17 +14,17 @@
   },
   "summary": {
     "cardCount": 564,
-    "cardsWithMechanicalFacts": 472,
-    "cardsWithGeneratedFacts": 323,
+    "cardsWithMechanicalFacts": 493,
+    "cardsWithGeneratedFacts": 325,
     "cardsWithOverlays": 6,
-    "cardsWithFunctionSignals": 433,
-    "cardsWithStrategyAnchors": 202,
-    "cardsWithWarnings": 253,
+    "cardsWithFunctionSignals": 458,
+    "cardsWithStrategyAnchors": 215,
+    "cardsWithWarnings": 231,
     "warningCategoryCounts": {
-      "deferred_requires_human_review": 200,
-      "descriptor_gap": 33,
+      "deferred_requires_human_review": 168,
+      "descriptor_gap": 45,
       "function_signal_descriptor_gap": 28,
-      "legacy_fallback_only": 92
+      "legacy_fallback_only": 71
     }
   },
   "cards": [
@@ -10058,12 +10058,21 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 0
+        "warningCount": 1
       },
       "derivedFunctionSignals": [
         "breaker.emergency_search",
         "breaker.search_during_encounter",
+        "hidden.one_shot_resource",
+        "hidden.reveals_on_trash",
+        "hidden.reveals_on_use",
+        "hidden.runner_resource",
+        "resource.hidden",
+        "resource.hidden_one_shot",
+        "setup.install_during_run",
         "setup.install_support",
+        "setup.program_install",
+        "setup.program_search",
         "setup.search"
       ],
       "derivedStrategyAnchors": [
@@ -10081,6 +10090,22 @@
         }
       ],
       "rolesClassification": [
+        {
+          "value": "hidden_zone_tool",
+          "category": "descriptor_gap",
+          "triageCategory": "descriptor_gap",
+          "mapsTo": [],
+          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
+        },
+        {
+          "value": "program_search",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "runner.search.breaker"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
         {
           "value": "resource",
           "category": "legacy_role_only",
@@ -10109,7 +10134,9 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [],
+      "warningCategories": [
+        "descriptor_gap"
+      ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -10149,22 +10176,55 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp.bad_publicity_on_trace_cancel",
+        "corp.bad_publicity_pressure",
+        "corp.trace_effect_bad_publicity",
+        "defense.trace_cancel",
+        "defense.trace_cancel_bad_publicity",
+        "hidden.one_shot_resource",
+        "hidden.reveals_on_trash",
+        "hidden.reveals_on_use",
+        "hidden.runner_resource",
+        "resource.hidden",
+        "resource.hidden_one_shot"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
+        {
+          "value": "corp_pressure",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "hidden_zone_tool",
+          "category": "descriptor_gap",
+          "triageCategory": "descriptor_gap",
+          "mapsTo": [],
+          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
+        },
         {
           "value": "resource",
           "category": "legacy_role_only",
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "trace_tag_ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
       "planRolesClassification": [
@@ -10188,16 +10248,19 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -10218,26 +10281,21 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.trace_defense"
+        "defense.base_link",
+        "defense.trace_boost",
+        "defense.trace_defense",
+        "economy.generic",
+        "economy.trace_success_credit",
+        "resource.base_link"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
-          "value": "economy",
+          "value": "link",
           "category": "function_signal_only",
           "triageCategory": "function_signal_only",
           "mapsTo": [],
@@ -10249,6 +10307,13 @@
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "successful_run_reward",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
       "planRolesClassification": [
@@ -10262,15 +10327,15 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -10282,12 +10347,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -10298,22 +10359,38 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "action.mandatory_extra_action",
+        "action.random_extra_action",
+        "economy.action_credit",
+        "economy.generic",
+        "resource.random",
+        "risk.mandatory_action",
+        "risk.random_action",
+        "risk.random_hand_reveal",
+        "run.event_tempo",
+        "run.extra_action",
+        "run.make_run",
+        "setup.draw",
+        "setup.search"
+      ],
+      "derivedStrategyAnchors": [
+        "runner.run_event_tempo"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
-          "value": "economy",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
+          "value": "random",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
           "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         },
         {
           "value": "resource",
@@ -10334,17 +10411,18 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -10368,21 +10446,32 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "defense.damage_prevention"
+        "defense.damage_prevention",
+        "defense.meat_damage_prevention",
+        "hidden.one_shot_resource",
+        "hidden.reveals_on_trash",
+        "hidden.reveals_on_use",
+        "hidden.runner_resource",
+        "resource.hidden",
+        "resource.hidden_one_shot"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
+        {
+          "value": "damage_prevention",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "hidden_zone_tool",
+          "category": "descriptor_gap",
+          "triageCategory": "descriptor_gap",
+          "mapsTo": [],
+          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
+        },
         {
           "value": "resource",
           "category": "legacy_role_only",
@@ -10412,14 +10501,16 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -10431,12 +10522,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -10454,7 +10541,16 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "economy.generic"
+        "economy.burst_credit",
+        "economy.cost_window_credit",
+        "economy.generic",
+        "economy.hidden_burst_credit",
+        "hidden.one_shot_resource",
+        "hidden.reveals_on_trash",
+        "hidden.reveals_on_use",
+        "hidden.runner_resource",
+        "resource.hidden",
+        "resource.hidden_one_shot"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -10465,6 +10561,13 @@
           "triageCategory": "function_signal_only",
           "mapsTo": [],
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "hidden_zone_tool",
+          "category": "descriptor_gap",
+          "triageCategory": "descriptor_gap",
+          "mapsTo": [],
+          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
         },
         {
           "value": "resource",
@@ -10486,14 +10589,16 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects"
         ],
@@ -10670,16 +10775,61 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 1
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
+      "derivedFunctionSignals": [
+        "access.hq_sabotage_credit_loss",
+        "corp.economy_pressure",
+        "hidden.one_shot_resource",
+        "hidden.reveals_on_trash",
+        "hidden.reveals_on_use",
+        "hidden.runner_resource",
+        "resource.hidden",
+        "resource.hidden_one_shot",
+        "resource.sabotage"
+      ],
+      "derivedStrategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "runner.hq_pressure",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.hq_pressure"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
+        {
+          "value": "access_trash",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "hidden_zone_tool",
+          "category": "descriptor_gap",
+          "triageCategory": "descriptor_gap",
+          "mapsTo": [],
+          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
+        },
+        {
+          "value": "hq_pressure",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "runner.hq_pressure"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
         {
           "value": "resource",
           "category": "legacy_role_only",
@@ -10709,22 +10859,29 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "punish_payoff"
+        ],
+        "validValues": [
+          "punish_payoff"
+        ],
         "unknownValues": []
       }
     },
@@ -10735,16 +10892,71 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 1
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
+      "derivedFunctionSignals": [
+        "access.remote_full_trash",
+        "access.remote_sabotage_payoff",
+        "access.trash_untrashable",
+        "hidden.one_shot_resource",
+        "hidden.reveals_on_trash",
+        "hidden.reveals_on_use",
+        "hidden.runner_resource",
+        "remote.full_fort_trash",
+        "resource.hidden",
+        "resource.hidden_one_shot",
+        "resource.sabotage"
+      ],
+      "derivedStrategyAnchors": [
+        "runner.remote_contest",
+        "runner.remote_trash"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "runner.remote_contest",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.remote_contest"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "value": "runner.remote_trash",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.remote_trash"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
+        {
+          "value": "access_trash",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "hidden_zone_tool",
+          "category": "descriptor_gap",
+          "triageCategory": "descriptor_gap",
+          "mapsTo": [],
+          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
+        },
+        {
+          "value": "remote_support",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
         {
           "value": "resource",
           "category": "legacy_role_only",
@@ -10774,22 +10986,31 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "punish_payoff"
+        ],
+        "validValues": [
+          "punish_payoff"
+        ],
         "unknownValues": []
       }
     },
@@ -10972,27 +11193,38 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "defense.tag_prevention"
+        "defense.next_tag_avoidance",
+        "defense.tag_prevention",
+        "hidden.one_shot_resource",
+        "hidden.reveals_on_trash",
+        "hidden.reveals_on_use",
+        "hidden.runner_resource",
+        "resource.hidden",
+        "resource.hidden_one_shot"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
+        {
+          "value": "hidden_zone_tool",
+          "category": "descriptor_gap",
+          "triageCategory": "descriptor_gap",
+          "mapsTo": [],
+          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
+        },
         {
           "value": "resource",
           "category": "legacy_role_only",
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "tag_avoid",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
       "planRolesClassification": [
@@ -11016,14 +11248,16 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -11035,12 +11269,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -11051,16 +11281,48 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "access.hq_random_discard_retaliation",
+        "corp.random_discard_pressure",
+        "defense.damage_retaliation",
+        "hidden.one_shot_resource",
+        "hidden.reveals_on_trash",
+        "hidden.reveals_on_use",
+        "hidden.runner_resource",
+        "resource.connection",
+        "resource.hidden",
+        "resource.hidden_one_shot"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
+        {
+          "value": "connection",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Runner resource subtype/catalog context."
+        },
+        {
+          "value": "hidden_zone_tool",
+          "category": "descriptor_gap",
+          "triageCategory": "descriptor_gap",
+          "mapsTo": [],
+          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
+        },
+        {
+          "value": "random_discard_pressure",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
         {
           "value": "resource",
           "category": "legacy_role_only",
@@ -11090,16 +11352,19 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -11116,16 +11381,63 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 1
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
+      "derivedFunctionSignals": [
+        "access.hq_hidden_multiaccess",
+        "access.hq_multiaccess",
+        "hidden.one_shot_resource",
+        "hidden.reveals_on_trash",
+        "hidden.reveals_on_use",
+        "hidden.runner_resource",
+        "resource.hidden",
+        "resource.hidden_one_shot"
+      ],
+      "derivedStrategyAnchors": [
+        "runner.hq_pressure",
+        "runner.interface_closeout"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "runner.hq_pressure",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.hq_pressure"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "value": "runner.interface_closeout",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.interface_closeout"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
+        {
+          "value": "hidden_zone_tool",
+          "category": "descriptor_gap",
+          "triageCategory": "descriptor_gap",
+          "mapsTo": [],
+          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
+        },
+        {
+          "value": "multiaccess",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "runner.interface_closeout"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
         {
           "value": "resource",
           "category": "legacy_role_only",
@@ -11155,22 +11467,29 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "payoff_anchor"
+        ],
+        "validValues": [
+          "payoff_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -11188,7 +11507,16 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "economy.generic"
+        "economy.burst_credit",
+        "economy.cost_window_credit",
+        "economy.generic",
+        "economy.hidden_burst_credit",
+        "hidden.one_shot_resource",
+        "hidden.reveals_on_trash",
+        "hidden.reveals_on_use",
+        "hidden.runner_resource",
+        "resource.hidden",
+        "resource.hidden_one_shot"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -11199,6 +11527,13 @@
           "triageCategory": "function_signal_only",
           "mapsTo": [],
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "hidden_zone_tool",
+          "category": "descriptor_gap",
+          "triageCategory": "descriptor_gap",
+          "mapsTo": [],
+          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
         },
         {
           "value": "resource",
@@ -11220,14 +11555,16 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects"
         ],
@@ -11319,16 +11656,41 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "access.current_access_trash",
+        "access.free_trash",
+        "access.trash_untrashable",
+        "hidden.one_shot_resource",
+        "hidden.reveals_on_trash",
+        "hidden.reveals_on_use",
+        "hidden.runner_resource",
+        "resource.hidden",
+        "resource.hidden_one_shot",
+        "resource.sabotage"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
+        {
+          "value": "access_trash",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "hidden_zone_tool",
+          "category": "descriptor_gap",
+          "triageCategory": "descriptor_gap",
+          "mapsTo": [],
+          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
+        },
         {
           "value": "resource",
           "category": "legacy_role_only",
@@ -11358,16 +11720,21 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -11384,18 +11751,47 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
+      "derivedFunctionSignals": [
+        "fort.creation_lock",
+        "resource.unique"
+      ],
+      "derivedStrategyAnchors": [
+        "runner.remote_contest"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "runner.remote_contest",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.remote_contest"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
+          "value": "remote_support",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
           "value": "resource",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "unique",
           "category": "legacy_role_only",
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
@@ -11422,23 +11818,28 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -11449,16 +11850,63 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 1
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
+      "derivedFunctionSignals": [
+        "access.rnd_hidden_multiaccess",
+        "access.rnd_multiaccess",
+        "hidden.one_shot_resource",
+        "hidden.reveals_on_trash",
+        "hidden.reveals_on_use",
+        "hidden.runner_resource",
+        "resource.hidden",
+        "resource.hidden_one_shot"
+      ],
+      "derivedStrategyAnchors": [
+        "runner.interface_closeout",
+        "runner.rnd_pressure"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "runner.interface_closeout",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.interface_closeout"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "value": "runner.rnd_pressure",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.rnd_pressure"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
+        {
+          "value": "hidden_zone_tool",
+          "category": "descriptor_gap",
+          "triageCategory": "descriptor_gap",
+          "mapsTo": [],
+          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
+        },
+        {
+          "value": "rd_multiaccess",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "runner.rnd_pressure"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
         {
           "value": "resource",
           "category": "legacy_role_only",
@@ -11488,22 +11936,29 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "payoff_anchor"
+        ],
+        "validValues": [
+          "payoff_anchor"
+        ],
         "unknownValues": []
       }
     },
@@ -11518,26 +11973,22 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.trace_defense"
+        "defense.base_link",
+        "defense.trace_boost",
+        "defense.trace_defense",
+        "economy.generic",
+        "economy.trace_success_credit",
+        "resource.base_link",
+        "resource.position"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
-          "value": "economy",
+          "value": "link",
           "category": "function_signal_only",
           "triageCategory": "function_signal_only",
           "mapsTo": [],
@@ -11549,6 +12000,13 @@
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "successful_run_reward",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
       "planRolesClassification": [
@@ -11562,15 +12020,15 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -11582,12 +12040,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -11598,22 +12052,57 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 1
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "defense.ap_ice_bypass",
+        "hidden.one_shot_resource",
+        "hidden.reveals_on_trash",
+        "hidden.reveals_on_use",
+        "hidden.runner_resource",
+        "resource.connection",
+        "resource.hidden",
+        "resource.hidden_one_shot",
+        "run.bypass_ap_ice",
+        "run.encounter_escape",
+        "run.event_tempo"
+      ],
+      "derivedStrategyAnchors": [
+        "runner.run_event_tempo"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
+        {
+          "value": "connection",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Runner resource subtype/catalog context."
+        },
+        {
+          "value": "hidden_zone_tool",
+          "category": "descriptor_gap",
+          "triageCategory": "descriptor_gap",
+          "mapsTo": [],
+          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
+        },
         {
           "value": "resource",
           "category": "legacy_role_only",
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "run_bypass",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
       "planRolesClassification": [
@@ -11637,16 +12126,19 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -11667,10 +12159,16 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.counter"
+        "economy.action_credit",
+        "economy.counter",
+        "economy.generic",
+        "economy.temporary_resource_bank",
+        "economy.turn_start_credit",
+        "resource.bbs",
+        "resource.position"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -11688,6 +12186,13 @@
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "utility_resource",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         }
       ],
       "planRolesClassification": [
@@ -11701,15 +12206,15 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects"
         ],
@@ -11822,7 +12327,16 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "economy.generic"
+        "economy.burst_credit",
+        "economy.cost_window_credit",
+        "economy.generic",
+        "economy.hidden_burst_credit",
+        "hidden.one_shot_resource",
+        "hidden.reveals_on_trash",
+        "hidden.reveals_on_use",
+        "hidden.runner_resource",
+        "resource.hidden",
+        "resource.hidden_one_shot"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -11833,6 +12347,13 @@
           "triageCategory": "function_signal_only",
           "mapsTo": [],
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "hidden_zone_tool",
+          "category": "descriptor_gap",
+          "triageCategory": "descriptor_gap",
+          "mapsTo": [],
+          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
         },
         {
           "value": "resource",
@@ -11854,14 +12375,16 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects"
         ],
@@ -11889,16 +12412,38 @@
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "defense.resource_trash_prevention",
+        "hidden.one_shot_resource",
+        "hidden.reveals_on_trash",
+        "hidden.reveals_on_use",
+        "hidden.runner_resource",
+        "resource.hidden",
+        "resource.hidden_one_shot"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
+        {
+          "value": "hidden_zone_tool",
+          "category": "descriptor_gap",
+          "triageCategory": "descriptor_gap",
+          "mapsTo": [],
+          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
+        },
         {
           "value": "resource",
           "category": "legacy_role_only",
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "trash_prevention",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
       "planRolesClassification": [
@@ -11922,16 +12467,21 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
         "compiledMechanicalFactFields": [
-          "conditions"
+          "effects",
+          "conditions",
+          "targetProfiles"
         ],
         "generatedFactFields": [
           "conditions"
@@ -11958,21 +12508,32 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "defense.trace_defense"
+        "defense.trace_boost",
+        "defense.trace_defense",
+        "hidden.one_shot_resource",
+        "hidden.reveals_on_trash",
+        "hidden.reveals_on_use",
+        "hidden.runner_resource",
+        "resource.hidden",
+        "resource.hidden_one_shot"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
+        {
+          "value": "hidden_zone_tool",
+          "category": "descriptor_gap",
+          "triageCategory": "descriptor_gap",
+          "mapsTo": [],
+          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
+        },
+        {
+          "value": "post_bid_link",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
         {
           "value": "resource",
           "category": "legacy_role_only",
@@ -12002,14 +12563,16 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review"
+        "descriptor_gap"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -12021,12 +12584,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -25659,20 +26218,12 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.trace_defense"
+        "defense.base_link",
+        "defense.trace_defense",
+        "resource.base_link"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "link",
@@ -25713,7 +26264,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -25725,12 +26278,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -25745,23 +26294,16 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.trace_defense"
+        "defense.base_link",
+        "defense.trace_boost",
+        "defense.trace_defense",
+        "resource.base_link"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "link",
@@ -25796,15 +26338,15 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -25816,12 +26358,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -25839,20 +26377,13 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.trace_defense"
+        "defense.base_link",
+        "defense.trace_boost",
+        "defense.trace_defense",
+        "resource.base_link"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "link",
@@ -25893,7 +26424,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -25905,12 +26438,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -25921,22 +26450,30 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "resource.bbs",
+        "setup.program_search",
+        "setup.search",
+        "setup.search_reveals_to_corp",
+        "setup.stack_filter"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
-          "value": "hidden_zone_tool",
-          "category": "descriptor_gap",
-          "triageCategory": "descriptor_gap",
-          "mapsTo": [],
-          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
+          "value": "program_search",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "runner.search.breaker"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
           "value": "resource",
@@ -25946,13 +26483,11 @@
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         },
         {
-          "value": "stack_search",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.search.breaker"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "value": "utility_resource",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         }
       ],
       "planRolesClassification": [
@@ -25975,17 +26510,20 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "descriptor_gap",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -26006,114 +26544,16 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
-      },
-      "derivedFunctionSignals": [
-        "defense.trace_defense"
-      ],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
-      "rolesClassification": [
-        {
-          "value": "link",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "resource",
-          "category": "legacy_role_only",
-          "triageCategory": "legacy_role_only",
-          "mapsTo": [],
-          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
-        }
-      ],
-      "planRolesClassification": [
-        {
-          "value": "build_rig",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "trace_bid_support",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        }
-      ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
-      "descriptorGaps": [],
-      "legacyStatus": {
-        "rolesPresent": true,
-        "planRolesPresent": true,
-        "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [
-          "effects",
-          "conditions"
-        ],
-        "generatedFactFields": [
-          "effects",
-          "conditions"
-        ],
-        "overlayFields": []
-      },
-      "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
-        "unknownValues": []
-      }
-    },
-    {
-      "cardId": "onr_v1_153_back-door-to-orbital-air",
-      "side": "runner",
-      "cardType": "resource",
-      "supportStatus": {
-        "aiSupportStatus": "ai_supported",
-        "compiledHintFound": true,
-        "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
-        "overlayFields": [],
-        "legacyFallbackOnly": false,
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.trace_defense"
+        "defense.base_link",
+        "defense.trace_boost",
+        "defense.trace_defense",
+        "resource.base_link"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "link",
@@ -26154,7 +26594,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -26166,12 +26608,88 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
+        "values": [],
+        "validValues": [],
+        "unknownValues": []
+      }
+    },
+    {
+      "cardId": "onr_v1_153_back-door-to-orbital-air",
+      "side": "runner",
+      "cardType": "resource",
+      "supportStatus": {
+        "aiSupportStatus": "ai_supported",
+        "compiledHintFound": true,
+        "mechanicalFactsFound": true,
+        "generatedFactsFound": true,
+        "overlayFields": [],
+        "legacyFallbackOnly": false,
+        "warningCount": 0
+      },
+      "derivedFunctionSignals": [
+        "defense.base_link",
+        "defense.trace_boost",
+        "defense.trace_defense",
+        "resource.base_link"
+      ],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [],
+      "rolesClassification": [
+        {
+          "value": "link",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "resource",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        }
+      ],
+      "planRolesClassification": [
+        {
+          "value": "build_rig",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "runner.rig_first"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "trace_bid_support",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        }
+      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
+      "legacyStatus": {
+        "rolesPresent": true,
+        "planRolesPresent": true,
+        "legacyLineSupportPresent": false,
+        "activeMechanicalFactFields": [
+          "effects"
         ],
-        "validValues": [
-          "defensive_tool"
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions"
         ],
+        "generatedFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "overlayFields": []
+      },
+      "strategicRoleStatus": {
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -26186,22 +26704,33 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "economy.action",
+        "economy.action_credit",
         "economy.counter",
-        "economy.finite_pool"
+        "economy.finite_pool",
+        "economy.generic",
+        "economy.temporary_resource_bank",
+        "resource.connection"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
-          "value": "recursion",
+          "value": "connection",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Runner resource subtype/catalog context."
+        },
+        {
+          "value": "economy",
           "category": "function_signal_only",
           "triageCategory": "function_signal_only",
           "mapsTo": [],
-          "rationale": "Card recovery/recursion function context only."
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "resource",
@@ -26209,20 +26738,6 @@
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
-        },
-        {
-          "value": "tag_risk",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "trash_recovery",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
       "planRolesClassification": [
@@ -26252,15 +26767,15 @@
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -26284,13 +26799,18 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "virus.counter_protection",
+        "virus.counter_retention",
+        "virus.purge_resistance",
+        "virus.support"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -26334,16 +26854,18 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -26366,23 +26888,38 @@
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "cost.agenda_point_penalty",
+        "remote.agenda_difficulty_tax",
+        "resource.connection",
+        "resource.unique"
+      ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
-      "rolesClassification": [
+      "lineSupportClassification": [
         {
-          "value": "agenda_modifier",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
+          "value": "runner.remote_contest",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.remote_contest"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "rolesClassification": [
         {
           "value": "connection",
           "category": "legacy_role_only",
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Runner resource subtype/catalog context."
+        },
+        {
+          "value": "remote_upgrade_tax",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "resource",
@@ -26439,7 +26976,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects"
         ],
@@ -26449,8 +26988,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -26468,11 +27011,22 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "setup.draw"
+        "resource.connection",
+        "resource.unique",
+        "setup.draw",
+        "setup.search",
+        "setup.stack_filter"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
+        {
+          "value": "connection",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Runner resource subtype/catalog context."
+        },
         {
           "value": "draw",
           "category": "function_signal_only",
@@ -26482,6 +27036,13 @@
         },
         {
           "value": "resource",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "unique",
           "category": "legacy_role_only",
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
@@ -26512,7 +27073,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects"
         ],
@@ -26540,7 +27103,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "defense.tag_clear_support"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -26557,13 +27122,6 @@
           "triageCategory": "function_signal_only",
           "mapsTo": [],
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "utility_resource",
-          "category": "legacy_role_only",
-          "triageCategory": "legacy_role_only",
-          "mapsTo": [],
-          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         }
       ],
       "planRolesClassification": [
@@ -26592,7 +27150,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -26616,13 +27176,18 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "cost.agenda_point_penalty",
+        "economy.generic",
+        "economy.high_risk_burst_credit",
+        "resource.connection"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -26659,16 +27224,18 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -26692,9 +27259,15 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.damage_prevention"
+        "cost.agenda_point_penalty",
+        "defense.all_meat_damage_prevention",
+        "defense.damage_prevention",
+        "defense.meat_damage_prevention",
+        "resource.unique"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "runner.survival_defense"
+      ],
       "lineSupportClassification": [
         {
           "value": "runner.survival_defense",
@@ -26708,14 +27281,7 @@
       ],
       "rolesClassification": [
         {
-          "value": "agenda_point_cancel",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "prevention",
+          "value": "meat_damage",
           "category": "function_signal_only",
           "triageCategory": "function_signal_only",
           "mapsTo": [],
@@ -26729,7 +27295,7 @@
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         },
         {
-          "value": "runner",
+          "value": "unique",
           "category": "legacy_role_only",
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
@@ -26751,7 +27317,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -26783,23 +27351,14 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "defense.next_tag_avoidance",
         "defense.tag_prevention"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "resource",
@@ -26836,15 +27395,15 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -26856,12 +27415,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -26872,22 +27427,26 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 3
+        "legacyFallbackOnly": false,
+        "warningCount": 2
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "economy.conditional_burst_credit",
+        "economy.generic",
+        "resource.position"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
-          "value": "information",
-          "category": "descriptor_gap",
-          "triageCategory": "descriptor_gap",
+          "value": "economy",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
           "mapsTo": [],
-          "rationale": "Broad information pressure is not stable enough to map without a narrower descriptor."
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
           "value": "resource",
@@ -26917,8 +27476,7 @@
       ],
       "warningCategories": [
         "descriptor_gap",
-        "function_signal_descriptor_gap",
-        "legacy_fallback_only"
+        "function_signal_descriptor_gap"
       ],
       "descriptorGaps": [
         {
@@ -26938,8 +27496,12 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -26963,7 +27525,11 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.generic"
+        "economy.generic",
+        "economy.recurring",
+        "economy.turn_start_credit",
+        "resource.bbs",
+        "resource.position"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -26983,11 +27549,11 @@
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         },
         {
-          "value": "start_of_turn",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
+          "value": "utility_resource",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
           "mapsTo": [],
-          "rationale": "Timing context only."
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         }
       ],
       "planRolesClassification": [
@@ -27007,7 +27573,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects"
         ],
@@ -27030,26 +27598,22 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "defense.trace_defense",
+        "economy.generic",
+        "economy.recurring_link_credit",
         "economy.trash_credit"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
-          "value": "link",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "recurring",
+          "value": "link_recurring_credit",
           "category": "function_signal_only",
           "triageCategory": "function_signal_only",
           "mapsTo": [],
@@ -27061,13 +27625,6 @@
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
-        },
-        {
-          "value": "trace",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
       "planRolesClassification": [
@@ -27102,7 +27659,9 @@
         "compiledMechanicalFactFields": [
           "effects"
         ],
-        "generatedFactFields": [],
+        "generatedFactFields": [
+          "effects"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -27118,13 +27677,18 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "resource.bbs",
+        "setup.recovery",
+        "setup.search",
+        "setup.top_trash_recovery"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -27136,11 +27700,18 @@
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         },
         {
-          "value": "tag_risk",
+          "value": "trash_recovery",
           "category": "function_signal_only",
           "triageCategory": "function_signal_only",
           "mapsTo": [],
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "utility_resource",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         }
       ],
       "planRolesClassification": [
@@ -27161,17 +27732,20 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -27188,25 +27762,44 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "economy.generic",
+        "economy.successful_run_credit",
+        "resource.connection",
+        "resource.unique"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
-          "value": "corp_pressure",
+          "value": "connection",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Runner resource subtype/catalog context."
+        },
+        {
+          "value": "resource",
           "category": "legacy_role_only",
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         },
         {
-          "value": "resource",
+          "value": "successful_run_reward",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "unique",
           "category": "legacy_role_only",
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
@@ -27231,16 +27824,18 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -27265,20 +27860,12 @@
       },
       "derivedFunctionSignals": [
         "defense.damage_prevention",
+        "defense.meat_damage_prevention",
+        "defense.next_tag_avoidance",
         "defense.tag_prevention"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "damage_prevention",
@@ -27295,7 +27882,7 @@
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         },
         {
-          "value": "tag_protection",
+          "value": "tag_avoid",
           "category": "function_signal_only",
           "triageCategory": "function_signal_only",
           "mapsTo": [],
@@ -27328,7 +27915,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -27340,12 +27929,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -27364,7 +27949,11 @@
       },
       "derivedFunctionSignals": [
         "economy.counter",
-        "economy.generic"
+        "economy.generic",
+        "economy.high_risk_burst_credit",
+        "economy.turn_start_credit",
+        "risk.debt_loss_condition",
+        "risk.lose_game_debt"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -27377,21 +27966,7 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
-          "value": "persistent",
-          "category": "legacy_role_only",
-          "triageCategory": "legacy_role_only",
-          "mapsTo": [],
-          "rationale": "Persistence/lifecycle context; not a strategy anchor."
-        },
-        {
           "value": "resource",
-          "category": "legacy_role_only",
-          "triageCategory": "legacy_role_only",
-          "mapsTo": [],
-          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
-        },
-        {
-          "value": "runner",
           "category": "legacy_role_only",
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
@@ -27441,23 +28016,22 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "resource.bbs",
+        "setup.prep_resource_search",
+        "setup.search",
+        "setup.search_reveals_to_corp",
+        "setup.stack_filter"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
-        {
-          "value": "hidden_zone_tool",
-          "category": "descriptor_gap",
-          "triageCategory": "descriptor_gap",
-          "mapsTo": [],
-          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
-        },
         {
           "value": "resource",
           "category": "legacy_role_only",
@@ -27473,6 +28047,13 @@
             "runner.search.breaker"
           ],
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "utility_resource",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         }
       ],
       "planRolesClassification": [
@@ -27495,17 +28076,20 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "descriptor_gap",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -27529,27 +28113,20 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.tag_prevention"
+        "defense.next_tag_avoidance",
+        "defense.tag_clear_support",
+        "defense.tag_prevention",
+        "resource.connection"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
-          "value": "remove_tag",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
+          "value": "connection",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
           "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+          "rationale": "Runner resource subtype/catalog context."
         },
         {
           "value": "resource",
@@ -27560,6 +28137,13 @@
         },
         {
           "value": "tag_avoid",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "tag_removal",
           "category": "function_signal_only",
           "triageCategory": "function_signal_only",
           "mapsTo": [],
@@ -27601,7 +28185,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -27613,12 +28199,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -27629,22 +28211,39 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "action.extra_action",
+        "resource.connection",
+        "risk.brain_damage_self_inflicted",
+        "risk.unpreventable_brain_damage",
+        "run.extra_action"
+      ],
+      "derivedStrategyAnchors": [
+        "runner.run_event_tempo"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
-          "value": "action",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
+          "value": "connection",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
           "mapsTo": [],
-          "rationale": "Generic action economy or action use context; not a StrategyGoal source."
+          "rationale": "Runner resource subtype/catalog context."
+        },
+        {
+          "value": "damage",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
           "value": "resource",
@@ -27654,11 +28253,11 @@
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         },
         {
-          "value": "runner",
-          "category": "legacy_role_only",
-          "triageCategory": "legacy_role_only",
+          "value": "run_action",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
           "mapsTo": [],
-          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
       "planRolesClassification": [
@@ -27670,16 +28269,18 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -27696,22 +28297,35 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "action.delayed_extra_action_engine",
+        "action.random_extra_action",
+        "resource.random",
+        "risk.delayed_failure",
+        "risk.random_action",
+        "risk.self_brain_damage",
+        "risk.unpreventable_brain_damage",
+        "run.extra_action"
+      ],
+      "derivedStrategyAnchors": [
+        "runner.run_event_tempo"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
-          "value": "persistent",
-          "category": "legacy_role_only",
-          "triageCategory": "legacy_role_only",
-          "mapsTo": [],
-          "rationale": "Persistence/lifecycle context; not a strategy anchor."
+          "value": "damage",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
           "value": "random",
@@ -27728,11 +28342,11 @@
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         },
         {
-          "value": "runner",
-          "category": "legacy_role_only",
-          "triageCategory": "legacy_role_only",
+          "value": "run_action",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
           "mapsTo": [],
-          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
       "planRolesClassification": [
@@ -27751,16 +28365,18 @@
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -27781,12 +28397,16 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "fort.install_ice_tax",
+        "remote.install_ice_tax",
         "setup.install_discount"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "runner.remote_contest"
+      ],
       "lineSupportClassification": [
         {
           "value": "runner.remote_contest",
@@ -27800,18 +28420,18 @@
       ],
       "rolesClassification": [
         {
-          "value": "install_cost_modifier",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
           "value": "resource",
           "category": "legacy_role_only",
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "server_ice_install",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
       "planRolesClassification": [
@@ -27835,7 +28455,6 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
         "function_signal_descriptor_gap"
       ],
       "descriptorGaps": [
@@ -27857,11 +28476,11 @@
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
-          "conditions"
+          "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
           "effects",
-          "conditions"
+          "targetProfiles"
         ],
         "generatedFactFields": [
           "effects"
@@ -27889,21 +28508,17 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.counter"
+        "economy.counter",
+        "economy.generic",
+        "economy.installment_credit",
+        "economy.turn_start_credit"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
-        {
-          "value": "counter",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
         {
           "value": "economy",
           "category": "function_signal_only",
@@ -27930,15 +28545,15 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects"
         ],
@@ -27964,21 +28579,19 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "info.expose"
+        "info.expose",
+        "resource.bbs",
+        "setup.hardware_search",
+        "setup.search",
+        "setup.search_reveals_to_corp",
+        "setup.stack_filter"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
-        {
-          "value": "hidden_zone_tool",
-          "category": "descriptor_gap",
-          "triageCategory": "descriptor_gap",
-          "mapsTo": [],
-          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
-        },
         {
           "value": "resource",
           "category": "legacy_role_only",
@@ -27987,11 +28600,20 @@
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         },
         {
-          "value": "stack_reorder",
-          "category": "descriptor_gap",
-          "triageCategory": "descriptor_gap",
+          "value": "stack_search",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "runner.search.breaker"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "utility_resource",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
           "mapsTo": [],
-          "rationale": "Stack reorder needs a structured hidden-zone descriptor before strategy use."
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         }
       ],
       "planRolesClassification": [
@@ -28014,17 +28636,19 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "descriptor_gap"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
         "compiledMechanicalFactFields": [
-          "effects"
+          "effects",
+          "targetProfiles"
         ],
         "generatedFactFields": [
           "effects"
@@ -28048,10 +28672,16 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "setup.install_discount"
+        "setup.delayed_install",
+        "setup.hardware_install",
+        "setup.install_countdown",
+        "setup.install_discount",
+        "setup.install_from_hand_staged",
+        "setup.program_install",
+        "setup.search"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -28076,20 +28706,6 @@
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
-        },
-        {
-          "value": "set_aside_install",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "shell_counter",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
       "planRolesClassification": [
@@ -28110,18 +28726,20 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
-          "conditions"
+          "conditions",
+          "targetProfiles"
         ],
         "generatedFactFields": [
           "effects",
@@ -28143,30 +28761,39 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "setup.search"
+        "resource.bbs",
+        "setup.card_search",
+        "setup.program_search",
+        "setup.search",
+        "setup.search_reveals_to_corp"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "runner.search.breaker",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.search.breaker"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
-          "value": "hidden_zone_tool",
-          "category": "descriptor_gap",
-          "triageCategory": "descriptor_gap",
-          "mapsTo": [],
-          "rationale": "Hidden-zone tool is broad ontology context and must not feed Planner strategy directly."
-        },
-        {
-          "value": "repeatable_resource_ability",
-          "category": "legacy_role_only",
-          "triageCategory": "legacy_role_only",
-          "mapsTo": [],
-          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+          "value": "program_search",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "runner.search.breaker"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
           "value": "resource",
@@ -28176,13 +28803,11 @@
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         },
         {
-          "value": "stack_search",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.search.breaker"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+          "value": "utility_resource",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
+          "mapsTo": [],
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         }
       ],
       "planRolesClassification": [
@@ -28205,10 +28830,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "descriptor_gap"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -28216,18 +28838,26 @@
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
-          "conditions"
+          "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
           "effects",
+          "conditions",
+          "targetProfiles"
+        ],
+        "generatedFactFields": [
+          "effects",
           "conditions"
         ],
-        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "enabler"
+        ],
+        "validValues": [
+          "enabler"
+        ],
         "unknownValues": []
       }
     },
@@ -28246,33 +28876,16 @@
       },
       "derivedFunctionSignals": [
         "economy.action",
+        "economy.action_credit",
         "economy.counter",
-        "economy.finite_pool"
+        "economy.finite_pool",
+        "economy.generic",
+        "economy.temporary_resource_bank",
+        "resource.position"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
-        {
-          "value": "bit_depot",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Legacy bit/credit storage vocabulary; economy function context only."
-        },
-        {
-          "value": "click_economy",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "drip_economy",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
         {
           "value": "economy",
           "category": "function_signal_only",
@@ -28356,8 +28969,11 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.action_credit",
         "economy.generic",
-        "setup.draw"
+        "resource.position",
+        "setup.draw",
+        "setup.search"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -28375,13 +28991,6 @@
           "triageCategory": "function_signal_only",
           "mapsTo": [],
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "position",
-          "category": "legacy_role_only",
-          "triageCategory": "legacy_role_only",
-          "mapsTo": [],
-          "rationale": "Runner resource subtype/catalog context."
         },
         {
           "value": "resource",
@@ -28415,7 +29024,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects"
         ],
@@ -28437,22 +29048,28 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "economy.generic",
+        "economy.trash_for_credit",
+        "resource.connection",
+        "resource.unique",
+        "risk.installed_card_trash_cost"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
-          "value": "economy",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
+          "value": "connection",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
           "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+          "rationale": "Runner resource subtype/catalog context."
         },
         {
           "value": "resource",
@@ -28460,13 +29077,6 @@
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
-        },
-        {
-          "value": "start_of_turn",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Timing context only."
         },
         {
           "value": "trash_for_value",
@@ -28505,17 +29115,18 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -28539,20 +29150,12 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.trace_defense"
+        "defense.trace_boost",
+        "defense.trace_defense",
+        "resource.bbs"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "link",
@@ -28562,14 +29165,14 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
-          "value": "post_bid_link",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
+          "value": "resource",
+          "category": "legacy_role_only",
+          "triageCategory": "legacy_role_only",
           "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+          "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
         },
         {
-          "value": "resource",
+          "value": "utility_resource",
           "category": "legacy_role_only",
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
@@ -28607,7 +29210,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -28619,12 +29224,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -28642,28 +29243,18 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.trace_defense"
+        "defense.base_link",
+        "defense.trace_boost",
+        "defense.trace_defense",
+        "resource.base_link",
+        "run.ends_run_after_effect",
+        "run.event_tempo"
       ],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
+      "derivedStrategyAnchors": [
+        "runner.run_event_tempo"
       ],
+      "lineSupportClassification": [],
       "rolesClassification": [
-        {
-          "value": "counter",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
         {
           "value": "link",
           "category": "function_signal_only",
@@ -28677,6 +29268,13 @@
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
+        },
+        {
+          "value": "run_drawback",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
       "planRolesClassification": [
@@ -28703,7 +29301,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -28715,12 +29315,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -28731,22 +29327,26 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 3
+        "legacyFallbackOnly": false,
+        "warningCount": 2
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "info.rnd_information"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
-          "value": "information",
-          "category": "descriptor_gap",
-          "triageCategory": "descriptor_gap",
-          "mapsTo": [],
-          "rationale": "Broad information pressure is not stable enough to map without a narrower descriptor."
+          "value": "rd_pressure",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "runner.rnd_pressure"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
         },
         {
           "value": "resource",
@@ -28776,8 +29376,7 @@
       ],
       "warningCategories": [
         "descriptor_gap",
-        "function_signal_descriptor_gap",
-        "legacy_fallback_only"
+        "function_signal_descriptor_gap"
       ],
       "descriptorGaps": [
         {
@@ -28797,8 +29396,12 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -28819,10 +29422,12 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "economy.generic"
+        "economy.generic",
+        "economy.turn_start_credit",
+        "risk.ends_on_run"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -28870,7 +29475,6 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
         "function_signal_descriptor_gap"
       ],
       "descriptorGaps": [
@@ -28890,7 +29494,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects"
         ],
@@ -28919,20 +29525,11 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.damage_prevention"
+        "defense.damage_prevention",
+        "defense.meat_damage_prevention"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "runner.survival_defense",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "counter",
@@ -28982,7 +29579,9 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
@@ -28994,12 +29593,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "defensive_tool"
-        ],
-        "validValues": [
-          "defensive_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -29016,7 +29611,12 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "defense.installed_card_trash_prevention",
+        "setup.program_protection",
+        "setup.program_trash_prevention",
+        "setup.search"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -29059,10 +29659,14 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "targetProfiles"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
-          "conditions"
+          "conditions",
+          "targetProfiles"
         ],
         "generatedFactFields": [
           "effects",
@@ -29087,13 +29691,20 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "action.extra_run_action",
         "defense.damage_prevention",
-        "defense.tag_prevention"
+        "defense.meat_damage_prevention",
+        "defense.next_tag_avoidance",
+        "defense.tag_prevention",
+        "risk.run_spend_limit",
+        "run.extra_action"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "runner.run_event_tempo"
+      ],
       "lineSupportClassification": [
         {
           "value": "runner.survival_defense",
@@ -29173,15 +29784,15 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"

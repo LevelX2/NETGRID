@@ -10293,8 +10293,8 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
-        "link"
+        "link",
+        "resource"
       ],
       "planRoles": [
         "build_rig",
@@ -10315,13 +10315,34 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
       ],
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.base_link",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.base_link",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_defense",
+          "timing": "persistent"
+        },
         {
           "amount": 9,
           "kind": "base_link",
@@ -10348,8 +10369,8 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
-        "link"
+        "link",
+        "resource"
       ],
       "planRoles": [
         "build_rig",
@@ -10370,19 +10391,39 @@
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.base_link",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.base_link",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_defense",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_boost",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "link",
@@ -10416,8 +10457,8 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
-        "link"
+        "link",
+        "resource"
       ],
       "planRoles": [
         "build_rig",
@@ -10437,13 +10478,40 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
       ],
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.base_link",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.base_link",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_defense",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_boost",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "base_link",
@@ -10477,9 +10545,9 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
+        "program_search",
         "resource",
-        "hidden_zone_tool",
-        "stack_search"
+        "utility_resource"
       ],
       "planRoles": [
         "build_rig",
@@ -10504,6 +10572,57 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_installed_hidden_zone_helpers"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.bbs"
+        },
+        {
+          "kind": "search",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "setup.stack_filter"
+        },
+        {
+          "kind": "search",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "setup.program_search"
+        },
+        {
+          "kind": "search",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "setup.search_reveals_to_corp"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "program",
+          "purpose": "top_five_program_choice",
+          "preferences": [
+            "program_repairs_missing_coverage"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ]
     },
     {
@@ -10511,8 +10630,8 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
-        "link"
+        "link",
+        "resource"
       ],
       "planRoles": [
         "build_rig",
@@ -10533,19 +10652,39 @@
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.base_link",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.base_link",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_defense",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_boost",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "link",
@@ -10579,8 +10718,8 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
-        "link"
+        "link",
+        "resource"
       ],
       "planRoles": [
         "build_rig",
@@ -10600,13 +10739,40 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
       ],
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.base_link",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.base_link",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_defense",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_boost",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "link",
@@ -10640,10 +10806,9 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
-        "tag_risk",
-        "recursion",
-        "trash_recovery"
+        "connection",
+        "economy",
+        "resource"
       ],
       "planRoles": [
         "build_rig",
@@ -10669,13 +10834,33 @@
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.connection",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.action_credit",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.temporary_resource_bank",
+          "timing": "persistent"
+        },
         {
           "amount": 3,
           "kind": "finite_economy_pool",
@@ -10730,6 +10915,41 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_virus_purge_replacement"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "virus.counter_protection"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "virus.purge_resistance"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "virus.counter_retention"
+        },
+        {
+          "kind": "persistent_counter_effect",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "virus.support"
+        }
       ]
     },
     {
@@ -10737,8 +10957,8 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "agenda_modifier",
         "connection",
+        "remote_upgrade_tax",
         "resource",
         "unique"
       ],
@@ -10764,7 +10984,46 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_resource_econ_tag_tools"
       ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "lineSupport": [
+        "runner.remote_contest"
+      ],
+      "strategicRole": [
+        "scoring_tool"
+      ],
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.connection",
+          "timing": "persistent"
+        },
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.unique",
+          "timing": "persistent"
+        },
+        {
+          "kind": "remote_tax",
+          "scope": "runner",
+          "target": "remote.agenda_difficulty_tax",
+          "timing": "persistent"
+        },
+        {
+          "kind": "action_penalty",
+          "scope": "runner",
+          "target": "cost.agenda_point_penalty",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "global_modifier",
@@ -10786,8 +11045,10 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
+        "connection",
+        "draw",
         "resource",
-        "draw"
+        "unique"
       ],
       "planRoles": [
         "build_rig",
@@ -10807,7 +11068,40 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"
       ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.connection",
+          "timing": "persistent"
+        },
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.unique",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.draw",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.stack_filter",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "draw",
@@ -10830,8 +11124,7 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "tag_removal",
-        "utility_resource"
+        "tag_removal"
       ],
       "planRoles": [
         "build_rig",
@@ -10852,7 +11145,22 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_resource_econ_tag_tools"
       ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.tag_clear_support",
+          "timing": "persistent"
+        },
         {
           "kind": "survival_payoff",
           "resource": "tags",
@@ -10893,6 +11201,35 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_resource_econ_tag_tools"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.connection"
+        },
+        {
+          "kind": "economy",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "economy.high_risk_burst_credit"
+        },
+        {
+          "kind": "action_penalty",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "cost.agenda_point_penalty"
+        }
       ]
     },
     {
@@ -10900,10 +11237,9 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "runner",
+        "meat_damage",
         "resource",
-        "prevention",
-        "agenda_point_cancel"
+        "unique"
       ],
       "planRoles": [
         "remote_upgrade_modifier"
@@ -10931,7 +11267,40 @@
       "strategicRole": [
         "defensive_tool"
       ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.unique",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.all_meat_damage_prevention",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.meat_damage_prevention",
+          "timing": "persistent"
+        },
+        {
+          "kind": "action_penalty",
+          "scope": "runner",
+          "target": "cost.agenda_point_penalty",
+          "timing": "persistent"
+        },
         {
           "damageTypes": [
             "meat"
@@ -10990,19 +11359,27 @@
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
       "effects": [
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.tag_prevention",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.next_tag_avoidance",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "tag_prevention",
@@ -11022,8 +11399,8 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
-        "information"
+        "economy",
+        "resource"
       ],
       "planRoles": [
         "build_rig",
@@ -11042,6 +11419,29 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.position"
+        },
+        {
+          "kind": "economy",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "economy.conditional_burst_credit"
+        }
       ]
     },
     {
@@ -11049,9 +11449,9 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
         "economy",
-        "start_of_turn"
+        "resource",
+        "utility_resource"
       ],
       "planRoles": [
         "recover_economy"
@@ -11071,7 +11471,40 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#runner_start_of_turn_economy"
       ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.bbs",
+          "timing": "persistent"
+        },
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.position",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.turn_start_credit",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.recurring",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "economy",
@@ -11086,10 +11519,8 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
-        "trace",
-        "link",
-        "recurring"
+        "link_recurring_credit",
+        "resource"
       ],
       "planRoles": [
         "build_rig",
@@ -11118,12 +11549,33 @@
       ],
       "effects": [
         {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.recurring_link_credit",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_defense",
+          "timing": "persistent"
+        },
+        {
           "kind": "trash_credit",
           "resource": "trash_credits",
           "scope": "runner",
           "timing": "persistent"
         }
-      ]
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_165_junkyard-bbs",
@@ -11131,7 +11583,8 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "tag_risk"
+        "trash_recovery",
+        "utility_resource"
       ],
       "planRoles": [
         "build_rig",
@@ -11152,20 +11605,58 @@
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.bbs"
+        },
+        {
+          "kind": "search",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "setup.top_trash_recovery"
+        },
+        {
+          "kind": "search",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "setup.recovery"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "card",
+          "purpose": "top_trash_recovery",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_166_karl-de-veres-corporate-stooge",
       "side": "runner",
       "cardType": "resource",
       "roles": [
+        "connection",
         "resource",
-        "corp_pressure"
+        "successful_run_reward",
+        "unique"
       ],
       "planRoles": [
         "build_rig",
@@ -11184,6 +11675,35 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.connection"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.unique"
+        },
+        {
+          "kind": "economy",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "economy.successful_run_credit"
+        }
       ]
     },
     {
@@ -11191,9 +11711,9 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
+        "damage_prevention",
         "resource",
-        "tag_protection",
-        "damage_prevention"
+        "tag_avoid"
       ],
       "planRoles": [
         "build_rig",
@@ -11214,13 +11734,40 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"
       ],
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.meat_damage_prevention",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.damage_prevention",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.tag_prevention",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.next_tag_avoidance",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "damageTypes": [
@@ -11268,10 +11815,8 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "runner",
-        "resource",
         "economy",
-        "persistent"
+        "resource"
       ],
       "planRoles": [
         "credit_swing"
@@ -11295,22 +11840,38 @@
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_root_modifier_upgrade"
       ],
       "quality": {
-        "benchmarkCovered": true,
+        "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
         {
-          "amount": 12,
-          "finite": true,
           "kind": "economy",
-          "resource": "credits",
           "scope": "runner",
-          "timing": "action"
+          "target": "economy.high_risk_burst_credit",
+          "timing": "persistent"
+        },
+        {
+          "kind": "delayed_penalty",
+          "scope": "runner",
+          "target": "risk.debt_loss_condition",
+          "timing": "persistent"
+        },
+        {
+          "kind": "delayed_penalty",
+          "scope": "runner",
+          "target": "risk.lose_game_debt",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.turn_start_credit",
+          "timing": "persistent"
         },
         {
           "amount": 1,
@@ -11357,8 +11918,8 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "hidden_zone_tool",
-        "stack_search"
+        "stack_search",
+        "utility_resource"
       ],
       "planRoles": [
         "build_rig",
@@ -11382,6 +11943,55 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_installed_hidden_zone_helpers"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.bbs"
+        },
+        {
+          "kind": "search",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "setup.stack_filter"
+        },
+        {
+          "kind": "search",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "setup.prep_resource_search"
+        },
+        {
+          "kind": "search",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "setup.search_reveals_to_corp"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "card",
+          "purpose": "top_four_prep_or_resource_choice",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ]
     },
     {
@@ -11389,9 +11999,10 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
+        "connection",
         "resource",
         "tag_avoid",
-        "remove_tag"
+        "tag_removal"
       ],
       "planRoles": [
         "build_rig",
@@ -11415,13 +12026,40 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
       ],
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.connection",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.tag_clear_support",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.tag_prevention",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.next_tag_avoidance",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "tag_prevention",
@@ -11450,9 +12088,10 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "runner",
+        "connection",
+        "damage",
         "resource",
-        "action"
+        "run_action"
       ],
       "planRoles": [
         "remote_upgrade_modifier"
@@ -11474,6 +12113,41 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_root_modifier_upgrade"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.connection"
+        },
+        {
+          "kind": "extra_action",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "action.extra_action"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "risk.brain_damage_self_inflicted"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "risk.unpreventable_brain_damage"
+        }
       ]
     },
     {
@@ -11481,10 +12155,10 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "runner",
-        "resource",
+        "damage",
         "random",
-        "persistent"
+        "resource",
+        "run_action"
       ],
       "planRoles": [
         "runner_install_resource",
@@ -11507,6 +12181,59 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1921-smokes.json#runner_v1921_random_event_resource"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.random"
+        },
+        {
+          "kind": "extra_action",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "action.delayed_extra_action_engine"
+        },
+        {
+          "kind": "extra_action",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "action.random_extra_action"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "risk.random_action"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "risk.self_brain_damage"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "risk.unpreventable_brain_damage"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "risk.delayed_failure"
+        }
       ]
     },
     {
@@ -11515,7 +12242,7 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "install_cost_modifier"
+        "server_ice_install"
       ],
       "planRoles": [
         "contest_remote",
@@ -11538,11 +12265,15 @@
       ],
       "effects": [
         {
-          "amount": 2,
-          "kind": "run_tax",
-          "repeatable": true,
-          "resource": "credits",
-          "scope": "remote",
+          "kind": "remote_tax",
+          "scope": "runner",
+          "target": "remote.install_ice_tax",
+          "timing": "persistent"
+        },
+        {
+          "kind": "remote_tax",
+          "scope": "runner",
+          "target": "fort.install_ice_tax",
           "timing": "persistent"
         },
         {
@@ -11553,11 +12284,6 @@
           "timing": "persistent"
         }
       ],
-      "conditions": [
-        {
-          "kind": "requires_remote_server"
-        }
-      ],
       "lineSupport": [
         "runner.remote_contest"
       ],
@@ -11566,12 +12292,26 @@
         "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "medium",
-        "needsHumanReview": true,
-        "reviewedDate": "2026-05-25",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "strategicRole": [
         "tax_tool"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "install_target",
+          "timing": "on_use",
+          "targetType": "server",
+          "purpose": "chosen_fort_ice_tax",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ]
     },
     {
@@ -11579,9 +12319,8 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
         "economy",
-        "counter"
+        "resource"
       ],
       "planRoles": [
         "build_economy"
@@ -11604,13 +12343,27 @@
         "data/scenarios/ai-deck-legal-v1912-smokes.json#runner_v1912_counter_recurring"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.installment_credit",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.turn_start_credit",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "counter_economy",
@@ -11626,8 +12379,8 @@
       "cardType": "resource",
       "roles": [
         "resource",
-        "hidden_zone_tool",
-        "stack_reorder"
+        "stack_search",
+        "utility_resource"
       ],
       "planRoles": [
         "build_rig",
@@ -11650,11 +12403,58 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_installed_hidden_zone_helpers"
       ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.bbs",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.stack_filter",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.hardware_search",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.search_reveals_to_corp",
+          "timing": "persistent"
+        },
         {
           "kind": "expose_info",
           "scope": "installed_card",
           "timing": "action"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "card",
+          "purpose": "top_five_hardware_choice",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
         }
       ]
     },
@@ -11663,11 +12463,9 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
         "counter",
-        "set_aside_install",
-        "shell_counter",
-        "delayed_install"
+        "delayed_install",
+        "resource"
       ],
       "planRoles": [
         "build_rig",
@@ -11693,18 +12491,64 @@
         "data/scenarios/ai-deck-legal-v1912-smokes.json#runner_v1912_shell_traders_completion"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.delayed_install",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.install_countdown",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.install_from_hand_staged",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.program_install",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.hardware_install",
+          "timing": "persistent"
+        },
         {
           "kind": "install_discount",
           "resource": "credits",
           "scope": "runner",
           "timing": "persistent"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "card",
+          "purpose": "staged_program_or_hardware_install",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
         }
       ],
       "conditions": [
@@ -11721,10 +12565,9 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
+        "program_search",
         "resource",
-        "hidden_zone_tool",
-        "stack_search",
-        "repeatable_resource_ability"
+        "utility_resource"
       ],
       "planRoles": [
         "build_rig",
@@ -11750,18 +12593,66 @@
         "data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_installed_hidden_zone_helpers"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.bbs",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.program_search",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.card_search",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.search_reveals_to_corp",
+          "timing": "persistent"
+        },
         {
           "kind": "search",
           "resource": "cards",
           "scope": "stack",
           "timing": "action"
+        }
+      ],
+      "lineSupport": [
+        "runner.search.breaker"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "program",
+          "purpose": "program_search_to_hand",
+          "preferences": [
+            "program_repairs_missing_coverage"
+          ],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
         }
       ],
       "conditions": [
@@ -11778,11 +12669,8 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
         "economy",
-        "bit_depot",
-        "click_economy",
-        "drip_economy"
+        "resource"
       ],
       "planRoles": [
         "build_rig",
@@ -11809,23 +12697,32 @@
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"
       ],
       "quality": {
-        "benchmarkCovered": true,
+        "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
         {
-          "amount": 2,
-          "finite": true,
-          "kind": "counter_economy",
-          "repeatable": true,
-          "resource": "credits",
+          "kind": "global_modifier",
           "scope": "runner",
-          "timing": "action"
+          "target": "resource.position",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.action_credit",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.temporary_resource_bank",
+          "timing": "persistent"
         },
         {
           "amount": 12,
@@ -11867,7 +12764,6 @@
       "roles": [
         "draw",
         "economy",
-        "position",
         "resource"
       ],
       "planRoles": [
@@ -11890,7 +12786,34 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_resource_econ_tag_tools"
       ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.position",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.action_credit",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.draw",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "draw",
@@ -11912,11 +12835,10 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
+        "connection",
         "resource",
-        "unique",
-        "economy",
-        "start_of_turn",
-        "trash_for_value"
+        "trash_for_value",
+        "unique"
       ],
       "planRoles": [
         "recover_economy",
@@ -11942,21 +12864,49 @@
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#runner_start_of_turn_economy"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.connection"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.unique"
+        },
+        {
+          "kind": "economy",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "economy.trash_for_credit"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "risk.installed_card_trash_cost"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_181_the-springboard",
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
         "link",
-        "post_bid_link"
+        "resource",
+        "utility_resource"
       ],
       "planRoles": [
         "build_rig",
@@ -11980,13 +12930,34 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_trace_link_tools"
       ],
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.bbs",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_boost",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_defense",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "link",
@@ -12013,9 +12984,9 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
         "link",
-        "counter"
+        "resource",
+        "run_drawback"
       ],
       "planRoles": [
         "build_rig",
@@ -12036,13 +13007,46 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1916-smokes.json#runner_v1916_link_stealth_tools"
       ],
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.base_link",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.base_link",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_defense",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_boost",
+          "timing": "persistent"
+        },
+        {
+          "kind": "future_run_effect",
+          "scope": "runner",
+          "target": "run.ends_run_after_effect",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "link",
@@ -12076,8 +13080,8 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
-        "information"
+        "rd_pressure",
+        "resource"
       ],
       "planRoles": [
         "build_rig",
@@ -12096,6 +13100,23 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "info.rnd_information"
+        }
       ]
     },
     {
@@ -12103,8 +13124,8 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
         "economy",
+        "resource",
         "run_drawback"
       ],
       "planRoles": [
@@ -12128,13 +13149,27 @@
         "data/scenarios/ai-deck-legal-v191-v194-smokes.json#runner_v192_run_events_and_resource_lifecycle"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.turn_start_credit",
+          "timing": "persistent"
+        },
+        {
+          "kind": "delayed_penalty",
+          "scope": "runner",
+          "target": "risk.ends_on_run",
+          "timing": "persistent"
+        },
         {
           "amount": 2,
           "kind": "economy",
@@ -12149,9 +13184,9 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
+        "counter",
         "damage_prevention",
-        "counter"
+        "resource"
       ],
       "planRoles": [
         "build_rig",
@@ -12174,13 +13209,28 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
       ],
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.meat_damage_prevention",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.damage_prevention",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "damageTypes": [
@@ -12243,11 +13293,52 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
       ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.installed_card_trash_prevention",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.program_protection",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.program_trash_prevention",
+          "timing": "persistent"
+        },
         {
           "kind": "program_trash_prevention",
           "scope": "installed_program",
           "timing": "prevention_window"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "replacement_target",
+          "timing": "on_use",
+          "targetType": "card",
+          "purpose": "prevent_program_or_hardware_trash",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
         }
       ],
       "conditions": [
@@ -12267,10 +13358,10 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource",
-        "tag_avoid",
         "damage_prevention",
-        "run_action"
+        "resource",
+        "run_action",
+        "tag_avoid"
       ],
       "planRoles": [
         "build_rig",
@@ -12300,11 +13391,13 @@
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "lineSupport": [
         "runner.survival_defense"
@@ -12313,6 +13406,42 @@
         "defensive_tool"
       ],
       "effects": [
+        {
+          "kind": "extra_action",
+          "scope": "runner",
+          "target": "action.extra_run_action",
+          "timing": "persistent"
+        },
+        {
+          "kind": "delayed_penalty",
+          "scope": "runner",
+          "target": "risk.run_spend_limit",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.tag_prevention",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.next_tag_avoidance",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.meat_damage_prevention",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.damage_prevention",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "tag_prevention",
@@ -30821,6 +31950,8 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
+        "hidden_zone_tool",
+        "program_search",
         "resource"
       ],
       "planRoles": [
@@ -30844,10 +31975,46 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-01",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.hidden",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.runner_resource",
+          "timing": "persistent"
+        },
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.hidden_one_shot",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.one_shot_resource",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.reveals_on_use",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.reveals_on_trash",
+          "timing": "persistent"
+        },
         {
           "kind": "search",
           "scope": "runner",
@@ -30859,6 +32026,30 @@
           "scope": "runner",
           "target": "program",
           "timing": "during_ice_encounter"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.search",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.program_search",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.program_install",
+          "timing": "persistent"
+        },
+        {
+          "kind": "search",
+          "scope": "runner",
+          "target": "setup.install_during_run",
+          "timing": "persistent"
         },
         {
           "kind": "search",
@@ -30886,7 +32077,7 @@
             "hidden_info_dependent_choice",
             "unaffordable_after_install"
           ],
-          "hiddenInfoPolicy": "legal_targets_only",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
           "kind": "search_install_target",
           "preferences": [
             "program_affordable_after_install",
@@ -30913,7 +32104,10 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource"
+        "corp_pressure",
+        "hidden_zone_tool",
+        "resource",
+        "trace_tag_ice"
       ],
       "planRoles": [
         "build_rig",
@@ -30934,19 +32128,90 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.runner_resource"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden_one_shot"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.one_shot_resource"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_use"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_trash"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "defense.trace_cancel"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "defense.trace_cancel_bad_publicity"
+        },
+        {
+          "kind": "tag_punish_payoff",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "corp.bad_publicity_pressure"
+        },
+        {
+          "kind": "tag_punish_payoff",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "corp.bad_publicity_on_trace_cancel"
+        },
+        {
+          "kind": "tag_punish_payoff",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "corp.trace_effect_bad_publicity"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_130_back-door-to-rivals",
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "economy",
-        "resource"
+        "link",
+        "resource",
+        "successful_run_reward"
       ],
       "planRoles": [
         "recover_economy"
@@ -30964,18 +32229,44 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.base_link",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.base_link",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_defense",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_boost",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.trace_success_credit",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "link",
@@ -31009,7 +32300,7 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "economy",
+        "random",
         "resource"
       ],
       "planRoles": [
@@ -31026,17 +32317,77 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.random"
+        },
+        {
+          "kind": "extra_action",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "action.random_extra_action"
+        },
+        {
+          "kind": "extra_action",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "action.mandatory_extra_action"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "risk.random_action"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "risk.mandatory_action"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "risk.random_hand_reveal"
+        },
+        {
+          "kind": "search",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "setup.draw"
+        },
+        {
+          "kind": "economy",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "economy.action_credit"
+        },
+        {
+          "kind": "future_run_effect",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "run.make_run"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_132_bolt-hole",
       "side": "runner",
       "cardType": "resource",
       "roles": [
+        "damage_prevention",
+        "hidden_zone_tool",
         "resource"
       ],
       "planRoles": [
@@ -31057,18 +32408,62 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.hidden",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.runner_resource",
+          "timing": "persistent"
+        },
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.hidden_one_shot",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.one_shot_resource",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.reveals_on_use",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.reveals_on_trash",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.meat_damage_prevention",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.damage_prevention",
+          "timing": "persistent"
+        },
         {
           "amount": 2,
           "damageTypes": [
@@ -31110,6 +32505,7 @@
       "cardType": "resource",
       "roles": [
         "economy",
+        "hidden_zone_tool",
         "resource"
       ],
       "planRoles": [
@@ -31128,12 +32524,68 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.hidden",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.runner_resource",
+          "timing": "persistent"
+        },
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.hidden_one_shot",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.one_shot_resource",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.reveals_on_use",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.reveals_on_trash",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.hidden_burst_credit",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.cost_window_credit",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.burst_credit",
+          "timing": "persistent"
+        },
         {
           "amount": 4,
           "kind": "economy",
@@ -31314,6 +32766,9 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
+        "access_trash",
+        "hidden_zone_tool",
+        "hq_pressure",
         "resource"
       ],
       "planRoles": [
@@ -31333,17 +32788,84 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "lineSupport": [
+        "runner.hq_pressure"
+      ],
+      "strategicRole": [
+        "punish_payoff"
+      ],
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.runner_resource"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden_one_shot"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.one_shot_resource"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_use"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_trash"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.sabotage"
+        },
+        {
+          "kind": "tag_punish_payoff",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "corp.economy_pressure"
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "access.hq_sabotage_credit_loss"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_137_death-from-above",
       "side": "runner",
       "cardType": "resource",
       "roles": [
+        "access_trash",
+        "hidden_zone_tool",
+        "remote_support",
         "resource"
       ],
       "planRoles": [
@@ -31363,11 +32885,102 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "lineSupport": [
+        "runner.remote_contest",
+        "runner.remote_trash"
+      ],
+      "strategicRole": [
+        "punish_payoff"
+      ],
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.runner_resource"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden_one_shot"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.one_shot_resource"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_use"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_trash"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.sabotage"
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "access.remote_full_trash"
+        },
+        {
+          "kind": "remote_tax",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "remote.full_fort_trash"
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "access.trash_untrashable"
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "access.remote_sabotage_payoff"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "server",
+          "purpose": "successful_remote_run_before_access",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_138_deck-the",
@@ -31551,7 +33164,9 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource"
+        "hidden_zone_tool",
+        "resource",
+        "tag_avoid"
       ],
       "planRoles": [
         "build_rig",
@@ -31571,18 +33186,62 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.hidden",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.runner_resource",
+          "timing": "persistent"
+        },
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.hidden_one_shot",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.one_shot_resource",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.reveals_on_use",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.reveals_on_trash",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.tag_prevention",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.next_tag_avoidance",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "tag_prevention",
@@ -31602,6 +33261,9 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
+        "connection",
+        "hidden_zone_tool",
+        "random_discard_pressure",
         "resource"
       ],
       "planRoles": [
@@ -31622,17 +33284,83 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.runner_resource"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden_one_shot"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.one_shot_resource"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_use"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_trash"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.connection"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "defense.damage_retaliation"
+        },
+        {
+          "kind": "tag_punish_payoff",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "corp.random_discard_pressure"
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "access.hq_random_discard_retaliation"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_142_hq-mole",
       "side": "runner",
       "cardType": "resource",
       "roles": [
+        "hidden_zone_tool",
+        "multiaccess",
         "resource"
       ],
       "planRoles": [
@@ -31652,11 +33380,70 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "lineSupport": [
+        "runner.hq_pressure",
+        "runner.interface_closeout"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ],
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.runner_resource"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden_one_shot"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.one_shot_resource"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_use"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_trash"
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "access.hq_multiaccess"
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "access.hq_hidden_multiaccess"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_143_liberated-savings-account",
@@ -31664,6 +33451,7 @@
       "cardType": "resource",
       "roles": [
         "economy",
+        "hidden_zone_tool",
         "resource"
       ],
       "planRoles": [
@@ -31682,12 +33470,68 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.hidden",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.runner_resource",
+          "timing": "persistent"
+        },
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.hidden_one_shot",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.one_shot_resource",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.reveals_on_use",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.reveals_on_trash",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.hidden_burst_credit",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.cost_window_credit",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.burst_credit",
+          "timing": "persistent"
+        },
         {
           "amount": 11,
           "kind": "economy",
@@ -31755,6 +33599,8 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
+        "access_trash",
+        "hidden_zone_tool",
         "resource"
       ],
       "planRoles": [
@@ -31774,18 +33620,98 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.runner_resource"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden_one_shot"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.one_shot_resource"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_use"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_trash"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.sabotage"
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "access.free_trash"
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "access.trash_untrashable"
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "access.current_access_trash"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "card",
+          "purpose": "currently_accessed_card_trash",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_146_precision-bribery",
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource"
+        "remote_support",
+        "resource",
+        "unique"
       ],
       "planRoles": [
         "build_rig",
@@ -31802,17 +33728,41 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "lineSupport": [
+        "runner.remote_contest"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.unique"
+        },
+        {
+          "kind": "remote_tax",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "fort.creation_lock"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_147_r-and-d-mole",
       "side": "runner",
       "cardType": "resource",
       "roles": [
+        "hidden_zone_tool",
+        "rd_multiaccess",
         "resource"
       ],
       "planRoles": [
@@ -31832,19 +33782,79 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "lineSupport": [
+        "runner.rnd_pressure",
+        "runner.interface_closeout"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ],
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.runner_resource"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden_one_shot"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.one_shot_resource"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_use"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_trash"
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "access.rnd_multiaccess"
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "access.rnd_hidden_multiaccess"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_148_runner-sensei",
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "economy",
-        "resource"
+        "link",
+        "resource",
+        "successful_run_reward"
       ],
       "planRoles": [
         "recover_economy"
@@ -31862,18 +33872,50 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.position",
+          "timing": "persistent"
+        },
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.base_link",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.base_link",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_defense",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_boost",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.trace_success_credit",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "link",
@@ -31907,7 +33949,10 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource"
+        "connection",
+        "hidden_zone_tool",
+        "resource",
+        "run_bypass"
       ],
       "planRoles": [
         "build_rig",
@@ -31926,11 +33971,75 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.runner_resource"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden_one_shot"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.one_shot_resource"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_use"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_trash"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.connection"
+        },
+        {
+          "kind": "future_run_effect",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "run.bypass_ap_ice"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "defense.ap_ice_bypass"
+        },
+        {
+          "kind": "future_run_effect",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "run.encounter_escape"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_150_streetware-distributor",
@@ -31938,7 +34047,8 @@
       "cardType": "resource",
       "roles": [
         "economy",
-        "resource"
+        "resource",
+        "utility_resource"
       ],
       "planRoles": [
         "recover_economy"
@@ -31954,12 +34064,44 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.bbs",
+          "timing": "persistent"
+        },
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.position",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.turn_start_credit",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.action_credit",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.temporary_resource_bank",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "counter_economy",
@@ -32054,6 +34196,7 @@
       "cardType": "resource",
       "roles": [
         "economy",
+        "hidden_zone_tool",
         "resource"
       ],
       "planRoles": [
@@ -32072,12 +34215,68 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.hidden",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.runner_resource",
+          "timing": "persistent"
+        },
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.hidden_one_shot",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.one_shot_resource",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.reveals_on_use",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.reveals_on_trash",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.hidden_burst_credit",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.cost_window_credit",
+          "timing": "persistent"
+        },
+        {
+          "kind": "economy",
+          "scope": "runner",
+          "target": "economy.burst_credit",
+          "timing": "persistent"
+        },
         {
           "amount": 2,
           "kind": "economy",
@@ -32092,7 +34291,9 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
-        "resource"
+        "hidden_zone_tool",
+        "resource",
+        "trash_prevention"
       ],
       "planRoles": [
         "build_rig",
@@ -32111,11 +34312,71 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
+      "effects": [
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.runner_resource"
+        },
+        {
+          "kind": "global_modifier",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "resource.hidden_one_shot"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.one_shot_resource"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_use"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "hidden.reveals_on_trash"
+        },
+        {
+          "kind": "prevention_replacement",
+          "timing": "persistent",
+          "scope": "runner",
+          "target": "defense.resource_trash_prevention"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "replacement_target",
+          "timing": "on_use",
+          "targetType": "card",
+          "purpose": "prevent_resource_trash_during_corp_turn",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ],
       "conditions": [
         {
           "kind": "requires_prevention_window"
@@ -32130,6 +34391,8 @@
       "side": "runner",
       "cardType": "resource",
       "roles": [
+        "hidden_zone_tool",
+        "post_bid_link",
         "resource"
       ],
       "planRoles": [
@@ -32150,18 +34413,62 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
       "effects": [
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.hidden",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.runner_resource",
+          "timing": "persistent"
+        },
+        {
+          "kind": "global_modifier",
+          "scope": "runner",
+          "target": "resource.hidden_one_shot",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.one_shot_resource",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.reveals_on_use",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "hidden.reveals_on_trash",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_boost",
+          "timing": "persistent"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "defense.trace_defense",
+          "timing": "persistent"
+        },
         {
           "amount": 3,
           "kind": "link",

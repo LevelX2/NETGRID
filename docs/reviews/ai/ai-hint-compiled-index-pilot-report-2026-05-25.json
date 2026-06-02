@@ -15,17 +15,17 @@
   "overlayCardCount": 6,
   "cardsWithoutOverlay": 187,
   "hardErrorCount": 0,
-  "warningCount": 667,
+  "warningCount": 673,
   "warningCountsByKind": {
-    "active_monolith_mechanical_duplication": 221,
-    "generated_fact_missing_from_active_monolith": 316,
+    "active_monolith_mechanical_duplication": 224,
+    "generated_fact_missing_from_active_monolith": 318,
     "manual_overlay_strategy_field_missing_from_active": 6,
-    "overlay_missing_for_manual_gap": 124
+    "overlay_missing_for_manual_gap": 125
   },
   "warningClassificationCounts": {
-    "generated_fact_absent_from_monolith": 316,
-    "manual_review_candidate": 124,
-    "monolith_mechanical_duplication_candidate": 221,
+    "generated_fact_absent_from_monolith": 318,
+    "manual_review_candidate": 125,
+    "monolith_mechanical_duplication_candidate": 224,
     "overlay_strategy_field_not_in_monolith": 6
   },
   "warningClassificationByCard": [
@@ -739,7 +739,8 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
       "info": []
     },
@@ -750,7 +751,8 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 1,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
       "info": []
     },
@@ -761,7 +763,8 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
       "info": []
     },
@@ -784,19 +787,22 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
       "info": []
     },
     {
       "cardId": "onr_v1_177_the-short-circuit",
       "title": "The Short Circuit",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
-        "monolith_mechanical_duplication_candidate": 2
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
-      "info": ["info_no_overlay_needed"]
+      "info": []
     },
     {
       "cardId": "onr_v1_178_short-term-contract",
@@ -2762,7 +2768,7 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_157_crash-everett-inventive-fixer",
@@ -2771,7 +2777,7 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["effects"],
       "generatedOnlyFields": ["effects"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_161_fall-guy",
@@ -2780,7 +2786,7 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_168_loan-from-chiba",
@@ -2798,16 +2804,16 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_177_the-short-circuit",
       "title": "The Short Circuit",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
-      "generatedOnlyFields": [],
-      "duplicatedActiveMechanicalFields": ["conditions", "effects"]
+      "generatedOnlyFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_178_short-term-contract",
@@ -4268,7 +4274,9 @@
         "condition:requires_installed_resource",
         "effect:action_economy",
         "effect:counter_economy",
-        "effect:finite_economy_pool"
+        "effect:economy",
+        "effect:finite_economy_pool",
+        "effect:global_modifier"
       ]
     },
     {
@@ -4276,7 +4284,12 @@
       "title": "Crash Everett, Inventive Fixer",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["effect:draw", "effect:survival_payoff"]
+      "missingManualOverlay": [
+        "effect:draw",
+        "effect:global_modifier",
+        "effect:search",
+        "effect:survival_payoff"
+      ]
     },
     {
       "cardId": "onr_v1_161_fall-guy",
@@ -4285,6 +4298,7 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_prevention_window",
+        "effect:prevention_replacement",
         "effect:tag_prevention"
       ]
     },
@@ -4295,8 +4309,7 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_start_of_turn",
-        "effect:counter_economy",
-        "effect:delayed_penalty"
+        "effect:counter_economy"
       ]
     },
     {
@@ -4307,7 +4320,19 @@
       "missingManualOverlay": [
         "condition:requires_grip_card",
         "condition:requires_installed_resource",
-        "effect:install_discount"
+        "effect:install_discount",
+        "effect:search"
+      ]
+    },
+    {
+      "cardId": "onr_v1_177_the-short-circuit",
+      "title": "The Short Circuit",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_runner_action",
+        "condition:requires_stack_search",
+        "effect:global_modifier"
       ]
     },
     {
@@ -4318,7 +4343,10 @@
       "missingManualOverlay": [
         "condition:requires_installed_resource",
         "effect:action_economy",
-        "effect:finite_economy_pool"
+        "effect:counter_economy",
+        "effect:economy",
+        "effect:finite_economy_pool",
+        "effect:global_modifier"
       ]
     },
     {
@@ -5975,8 +6003,8 @@
     {
       "cardId": "onr_v1_177_the-short-circuit",
       "title": "The Short Circuit",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "mechanicalFactsFromGenerated": [
         "condition:requires_runner_action",
         "condition:requires_stack_search",
@@ -7801,7 +7829,9 @@
         "condition:requires_installed_resource",
         "effect:action_economy",
         "effect:counter_economy",
-        "effect:finite_economy_pool"
+        "effect:economy",
+        "effect:finite_economy_pool",
+        "effect:global_modifier"
       ]
     },
     {
@@ -7809,7 +7839,12 @@
       "title": "Crash Everett, Inventive Fixer",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["effect:draw", "effect:survival_payoff"]
+      "missingManualOverlay": [
+        "effect:draw",
+        "effect:global_modifier",
+        "effect:search",
+        "effect:survival_payoff"
+      ]
     },
     {
       "cardId": "onr_v1_161_fall-guy",
@@ -7818,6 +7853,7 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_prevention_window",
+        "effect:prevention_replacement",
         "effect:tag_prevention"
       ]
     },
@@ -7828,8 +7864,7 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_start_of_turn",
-        "effect:counter_economy",
-        "effect:delayed_penalty"
+        "effect:counter_economy"
       ]
     },
     {
@@ -7840,7 +7875,19 @@
       "missingManualOverlay": [
         "condition:requires_grip_card",
         "condition:requires_installed_resource",
-        "effect:install_discount"
+        "effect:install_discount",
+        "effect:search"
+      ]
+    },
+    {
+      "cardId": "onr_v1_177_the-short-circuit",
+      "title": "The Short Circuit",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_runner_action",
+        "condition:requires_stack_search",
+        "effect:global_modifier"
       ]
     },
     {
@@ -7851,7 +7898,10 @@
       "missingManualOverlay": [
         "condition:requires_installed_resource",
         "effect:action_economy",
-        "effect:finite_economy_pool"
+        "effect:counter_economy",
+        "effect:economy",
+        "effect:finite_economy_pool",
+        "effect:global_modifier"
       ]
     },
     {
@@ -8886,7 +8936,7 @@
     }
   ],
   "infoCounts": {
-    "info_no_overlay_needed": 65,
+    "info_no_overlay_needed": 64,
     "info_overlay_present": 6
   },
   "cards": [
@@ -14602,13 +14652,15 @@
         "condition:requires_installed_resource",
         "effect:action_economy",
         "effect:counter_economy",
-        "effect:finite_economy_pool"
+        "effect:economy",
+        "effect:finite_economy_pool",
+        "effect:global_modifier"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_154_broker",
         "side": "runner",
         "cardType": "resource",
-        "roles": ["recursion", "resource", "tag_risk", "trash_recovery"],
+        "roles": ["connection", "economy", "resource"],
         "planRoles": ["build_rig", "recover_key_card", "resource_value_engine"],
         "aiSupportStatus": "ai_supported",
         "effects": [
@@ -14654,7 +14706,7 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
         "quality",
         "requiredMechanics",
@@ -14666,6 +14718,14 @@
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_154_broker",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -14703,12 +14763,17 @@
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
-      "missingManualOverlay": ["effect:draw", "effect:survival_payoff"],
+      "missingManualOverlay": [
+        "effect:draw",
+        "effect:global_modifier",
+        "effect:search",
+        "effect:survival_payoff"
+      ],
       "compiledPreview": {
         "cardId": "onr_v1_157_crash-everett-inventive-fixer",
         "side": "runner",
         "cardType": "resource",
-        "roles": ["draw", "resource"],
+        "roles": ["connection", "draw", "resource", "unique"],
         "planRoles": ["build_rig", "draw"],
         "aiSupportStatus": "ai_supported",
         "effects": [
@@ -14735,8 +14800,9 @@
       "mechanicalFactsFromGenerated": ["effect:draw", "effect:survival_payoff"],
       "generatedFields": ["effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
@@ -14746,6 +14812,14 @@
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -14777,6 +14851,7 @@
       "needsManualReview": true,
       "missingManualOverlay": [
         "condition:requires_prevention_window",
+        "effect:prevention_replacement",
         "effect:tag_prevention"
       ],
       "compiledPreview": {
@@ -14811,20 +14886,26 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_161_fall-guy",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -14864,14 +14945,13 @@
       "needsManualReview": true,
       "missingManualOverlay": [
         "condition:requires_start_of_turn",
-        "effect:counter_economy",
-        "effect:delayed_penalty"
+        "effect:counter_economy"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_168_loan-from-chiba",
         "side": "runner",
         "cardType": "resource",
-        "roles": ["economy", "persistent", "resource", "runner"],
+        "roles": ["economy", "resource"],
         "planRoles": ["credit_swing"],
         "aiSupportStatus": "ai_supported",
         "effects": [
@@ -14988,19 +15068,14 @@
       "missingManualOverlay": [
         "condition:requires_grip_card",
         "condition:requires_installed_resource",
-        "effect:install_discount"
+        "effect:install_discount",
+        "effect:search"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_176_the-shell-traders",
         "side": "runner",
         "cardType": "resource",
-        "roles": [
-          "counter",
-          "delayed_install",
-          "resource",
-          "set_aside_install",
-          "shell_counter"
-        ],
+        "roles": ["counter", "delayed_install", "resource"],
         "planRoles": ["build_rig", "delayed_install"],
         "aiSupportStatus": "ai_supported",
         "effects": [
@@ -15033,18 +15108,27 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_176_the-shell-traders",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -15081,18 +15165,17 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": false,
-      "missingManualOverlay": [],
+      "needsManualReview": true,
+      "missingManualOverlay": [
+        "condition:requires_runner_action",
+        "condition:requires_stack_search",
+        "effect:global_modifier"
+      ],
       "compiledPreview": {
         "cardId": "onr_v1_177_the-short-circuit",
         "side": "runner",
         "cardType": "resource",
-        "roles": [
-          "hidden_zone_tool",
-          "repeatable_resource_ability",
-          "resource",
-          "stack_search"
-        ],
+        "roles": ["program_search", "resource", "utility_resource"],
         "planRoles": ["build_rig", "recover_rig"],
         "aiSupportStatus": "ai_supported",
         "effects": [
@@ -15125,15 +15208,18 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
+        "targetProfiles",
         "valueHints"
       ],
-      "generatedOnlyFields": [],
+      "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
@@ -15141,21 +15227,36 @@
           "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
           "kind": "active_monolith_mechanical_duplication",
-          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_177_the-short-circuit",
+          "field": "effects"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
           "cardId": "onr_v1_177_the-short-circuit",
           "field": "conditions"
         },
         {
-          "classification": "monolith_mechanical_duplication_candidate",
+          "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
-          "kind": "active_monolith_mechanical_duplication",
-          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_177_the-short-circuit",
           "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_177_the-short-circuit"
         }
       ],
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready"
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
     },
     {
       "cardId": "onr_v1_178_short-term-contract",
@@ -15170,19 +15271,16 @@
       "missingManualOverlay": [
         "condition:requires_installed_resource",
         "effect:action_economy",
-        "effect:finite_economy_pool"
+        "effect:counter_economy",
+        "effect:economy",
+        "effect:finite_economy_pool",
+        "effect:global_modifier"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_178_short-term-contract",
         "side": "runner",
         "cardType": "resource",
-        "roles": [
-          "bit_depot",
-          "click_economy",
-          "drip_economy",
-          "economy",
-          "resource"
-        ],
+        "roles": ["economy", "resource"],
         "planRoles": [
           "build_rig",
           "click_for_credits_when_safe",
@@ -30583,6 +30681,14 @@
       "cardId": "onr_v1_135_nasuko-cycle"
     },
     {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_154_broker",
+      "field": "effects"
+    },
+    {
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
@@ -30606,6 +30712,14 @@
       "cardId": "onr_v1_154_broker"
     },
     {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_157_crash-everett-inventive-fixer",
+      "field": "effects"
+    },
+    {
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
@@ -30619,6 +30733,14 @@
       "kind": "overlay_missing_for_manual_gap",
       "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
       "cardId": "onr_v1_157_crash-everett-inventive-fixer"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_161_fall-guy",
+      "field": "effects"
     },
     {
       "classification": "generated_fact_absent_from_monolith",
@@ -30675,6 +30797,14 @@
       "cardId": "onr_v1_168_loan-from-chiba"
     },
     {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_176_the-shell-traders",
+      "field": "effects"
+    },
+    {
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
@@ -30701,17 +30831,32 @@
       "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
       "kind": "active_monolith_mechanical_duplication",
-      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_177_the-short-circuit",
+      "field": "effects"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
       "cardId": "onr_v1_177_the-short-circuit",
       "field": "conditions"
     },
     {
-      "classification": "monolith_mechanical_duplication_candidate",
+      "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
-      "kind": "active_monolith_mechanical_duplication",
-      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_177_the-short-circuit",
       "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_177_the-short-circuit"
     },
     {
       "classification": "monolith_mechanical_duplication_candidate",

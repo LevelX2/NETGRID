@@ -1,8 +1,8 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI021",
+  "taskId": "AI022",
   "generatedAt": "2026-06-02",
-  "description": "Controlled V1 tactic-signal catalog. AI021 adds Runner-Prep one-shot semantics for runs, access replacement, score effects, burst economy, search/recovery/install, ICE/fort sabotage, expose/scouting, bad publicity, defense and drawback risk without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
+  "description": "Controlled V1 tactic-signal catalog. AI022 adds Runner-Resource semantics for hidden resources, trace/link support, economy, search/recovery/install, access payoffs, remote sabotage, survival, virus support and action/random resources without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
   "signalPolicy": {
     "tacticSignal": "Functional card utility: what the AI can use the card for.",
     "strategyAnchor": "Large deck line: which strategy the card can anchor or materially support.",
@@ -13,6 +13,21 @@
     ]
   },
   "signals": [
+    {
+      "signalId": "access.current_access_trash",
+      "group": "access",
+      "sideScope": "runner",
+      "description": "Trash one or more currently accessed cards.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
     {
       "signalId": "access.free_trash",
       "group": "ai019_access",
@@ -46,6 +61,24 @@
       "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
     },
     {
+      "signalId": "access.hq_hidden_multiaccess",
+      "group": "access",
+      "sideScope": "runner",
+      "description": "Hidden Resource HQ multiaccess payoff.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.hq_pressure",
+        "runner.interface_closeout"
+      ],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "access.hq_multiaccess",
       "group": "access_multiaccess",
       "sideScope": "runner",
@@ -65,6 +98,21 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable because it directly changes central access payoff."
+    },
+    {
+      "signalId": "access.hq_random_discard_retaliation",
+      "group": "access",
+      "sideScope": "runner",
+      "description": "HQ random discard retaliation linked to meat damage.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "access.hq_random_reveal",
@@ -114,6 +162,23 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "access.hq_sabotage_credit_loss",
+      "group": "access",
+      "sideScope": "runner",
+      "description": "HQ successful-run sabotage that makes the Corp lose credits.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "access.hq_to_rnd_conversion",
@@ -219,6 +284,60 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Persistent runner tax is represented by separate tax.runner_* support signals."
+    },
+    {
+      "signalId": "access.remote_full_trash",
+      "group": "access",
+      "sideScope": "runner",
+      "description": "Trash all cards in a subsidiary fort before access.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.remote_contest",
+        "runner.remote_trash"
+      ],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "access.remote_sabotage_payoff",
+      "group": "access",
+      "sideScope": "runner",
+      "description": "Remote access sabotage payoff.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.remote_contest",
+        "runner.remote_trash"
+      ],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "access.rnd_hidden_multiaccess",
+      "group": "access",
+      "sideScope": "runner",
+      "description": "Hidden Resource R&D multiaccess payoff.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.interface_closeout",
+        "runner.rnd_pressure"
+      ],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "access.rnd_multiaccess",
@@ -342,6 +461,81 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "action.delayed_extra_action_engine",
+      "group": "action",
+      "sideScope": "runner",
+      "description": "Delayed permanent extra-action engine.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "action.extra_action",
+      "group": "action",
+      "sideScope": "runner",
+      "description": "Optional extra Runner action.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "action.extra_run_action",
+      "group": "action",
+      "sideScope": "runner",
+      "description": "Optional extra action restricted to making a run.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "action.mandatory_extra_action",
+      "group": "action",
+      "sideScope": "runner",
+      "description": "Mandatory extra-action engine.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "action.random_extra_action",
+      "group": "action",
+      "sideScope": "runner",
+      "description": "Random extra-action engine.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "action.recurring_extra_action",
@@ -1031,6 +1225,21 @@
       "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
+      "signalId": "corp.bad_publicity_on_trace_cancel",
+      "group": "corp",
+      "sideScope": "runner",
+      "description": "Corp Bad Publicity caused by trace cancellation.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "corp.bad_publicity_pressure",
       "group": "ai019_corp",
       "sideScope": "runner",
@@ -1181,6 +1390,21 @@
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "corp.trace_effect_bad_publicity",
+      "group": "corp",
+      "sideScope": "runner",
+      "description": "Bad Publicity pressure attached to a trace effect.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "cost.agenda_point_penalty",
       "group": "ai020_hardware_cost_risk",
       "sideScope": "runner",
@@ -1218,6 +1442,23 @@
       "notes": "Damage anchor requires Corp side and Runner scope."
     },
     {
+      "signalId": "defense.all_meat_damage_prevention",
+      "group": "defense",
+      "sideScope": "runner",
+      "description": "Prevents all meat damage.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.survival_defense"
+      ],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "defense.ap_damage_mitigation",
       "group": "ai020_hardware_ap",
       "sideScope": "runner",
@@ -1233,6 +1474,21 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
+      "signalId": "defense.ap_ice_bypass",
+      "group": "defense",
+      "sideScope": "runner",
+      "description": "AP ICE bypass or escape support.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "defense.ap_subroutine_mitigation",
@@ -1351,6 +1607,21 @@
       "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
+      "signalId": "defense.damage_retaliation",
+      "group": "defense",
+      "sideScope": "runner",
+      "description": "Retaliates after damage is dealt to the Runner.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "defense.finite_damage_prevention",
       "group": "ai020_hardware_defense",
       "sideScope": "runner",
@@ -1386,6 +1657,21 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
+    },
+    {
+      "signalId": "defense.installed_card_trash_prevention",
+      "group": "defense",
+      "sideScope": "runner",
+      "description": "Prevent installed program/hardware/resource trash.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "defense.meat_damage_immunity",
@@ -1467,6 +1753,21 @@
       "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
+      "signalId": "defense.resource_trash_prevention",
+      "group": "defense",
+      "sideScope": "runner",
+      "description": "Prevent one or more Resource cards from being trashed.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "defense.tag_clear_support",
       "group": "ai020_hardware_defense",
       "sideScope": "runner",
@@ -1517,6 +1818,36 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "defense.trace_cancel",
+      "group": "defense",
+      "sideScope": "runner",
+      "description": "Cancels the effect of a successful trace.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "defense.trace_cancel_bad_publicity",
+      "group": "defense",
+      "sideScope": "runner",
+      "description": "Cancels trace effect and can assign Bad Publicity.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "defense.trace_defense",
@@ -1652,6 +1983,21 @@
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "economy.cost_window_credit",
+      "group": "economy",
+      "sideScope": "runner",
+      "description": "Credit source usable in cost or penalty windows.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "economy.counter",
       "group": "economy",
       "sideScope": "neutral",
@@ -1718,6 +2064,21 @@
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "economy.hidden_burst_credit",
+      "group": "economy",
+      "sideScope": "runner",
+      "description": "Hidden Resource burst-credit effect.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "economy.high_risk_burst_credit",
       "group": "ai021_prep_economy",
       "sideScope": "runner",
@@ -1731,6 +2092,21 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "economy.installment_credit",
+      "group": "economy",
+      "sideScope": "runner",
+      "description": "Deferred/installment credit payout over turns.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "economy.node_trash_credit",
@@ -1938,6 +2314,36 @@
       "notes": "Timing detail stays mechanical."
     },
     {
+      "signalId": "economy.successful_run_credit",
+      "group": "economy",
+      "sideScope": "runner",
+      "description": "Credit gained after a successful run.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "economy.temporary_resource_bank",
+      "group": "economy",
+      "sideScope": "runner",
+      "description": "Resource stores finite credits for later withdrawal.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "economy.trace_credit",
       "group": "economy_trace_support",
       "sideScope": "neutral",
@@ -1953,6 +2359,21 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Trace payment preference remains a tactical choice."
+    },
+    {
+      "signalId": "economy.trace_success_credit",
+      "group": "economy",
+      "sideScope": "runner",
+      "description": "Credit gained when a trace is avoided by a link resource.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "economy.trash_credit",
@@ -1986,6 +2407,21 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "economy.turn_start_credit",
+      "group": "economy",
+      "sideScope": "runner",
+      "description": "Credit gained at the start of the Runner turn.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "economy.upgrade_trash_credit",
@@ -2033,6 +2469,40 @@
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "fort.creation_lock",
+      "group": "fort",
+      "sideScope": "runner",
+      "description": "Prevents or locks creation of new data forts.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.remote_contest"
+      ],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "fort.install_ice_tax",
+      "group": "fort",
+      "sideScope": "runner",
+      "description": "Chosen-fort ICE install tax.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.remote_contest"
+      ],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "fort.reorder_ice",
       "group": "ai021_prep_fort",
       "sideScope": "runner",
@@ -2046,6 +2516,66 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "hidden.one_shot_resource",
+      "group": "hidden",
+      "sideScope": "runner",
+      "description": "Hidden one-shot Resource use marker.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "hidden.reveals_on_trash",
+      "group": "hidden",
+      "sideScope": "runner",
+      "description": "Hidden Resource is public when trashed.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "hidden.reveals_on_use",
+      "group": "hidden",
+      "sideScope": "runner",
+      "description": "Hidden Resource becomes public as part of use/reveal semantics.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "hidden.runner_resource",
+      "group": "hidden",
+      "sideScope": "runner",
+      "description": "Side-aware hidden Runner Resource marker; Corp-facing runtime inputs must not infer card identity from it.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "ice.derez",
@@ -2589,6 +3119,41 @@
       "notes": "Reserved but controlled remote-role signal."
     },
     {
+      "signalId": "remote.full_fort_trash",
+      "group": "remote",
+      "sideScope": "runner",
+      "description": "Full remote fort trash payoff.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.remote_contest",
+        "runner.remote_trash"
+      ],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "remote.install_ice_tax",
+      "group": "remote",
+      "sideScope": "runner",
+      "description": "Tax on installing ICE on a chosen fort.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.remote_contest"
+      ],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "remote.install_tax",
       "group": "ai019_remote",
       "sideScope": "runner",
@@ -2623,6 +3188,141 @@
       "notes": "Anchor-capable through Corp remote-role gate."
     },
     {
+      "signalId": "resource.base_link",
+      "group": "resource",
+      "sideScope": "runner",
+      "description": "Runner Resource that provides base link or link boost support.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "resource.bbs",
+      "group": "resource",
+      "sideScope": "runner",
+      "description": "Runner Resource with BBS subtype, usually stack filtering, recovery, draw or economy support.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "resource.connection",
+      "group": "resource",
+      "sideScope": "runner",
+      "description": "Runner Resource with Connection subtype or connection-like permanent utility.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "resource.hidden",
+      "group": "resource",
+      "sideScope": "runner",
+      "description": "Installed Runner Resource whose identity can be hidden from the Corp until reveal or trash.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "resource.hidden_one_shot",
+      "group": "resource",
+      "sideScope": "runner",
+      "description": "Hidden Runner Resource with one-shot tap/reveal utility.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "resource.position",
+      "group": "resource",
+      "sideScope": "runner",
+      "description": "Runner Resource with Position subtype.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "resource.random",
+      "group": "resource",
+      "sideScope": "runner",
+      "description": "Runner Resource with deterministic random-action or random-outcome semantics.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "resource.sabotage",
+      "group": "resource",
+      "sideScope": "runner",
+      "description": "Runner Resource that sabotages Corp board, HQ, R&D or current access.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "resource.unique",
+      "group": "resource",
+      "sideScope": "runner",
+      "description": "Runner Resource with unique restriction.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "risk.action_loss",
       "group": "ai021_prep_risk",
       "sideScope": "runner",
@@ -2653,6 +3353,51 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
+      "signalId": "risk.debt_loss_condition",
+      "group": "risk",
+      "sideScope": "runner",
+      "description": "Resource debt creates a loss condition if not repaid.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "risk.delayed_failure",
+      "group": "risk",
+      "sideScope": "runner",
+      "description": "Delayed failure or damage condition.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "risk.ends_on_run",
+      "group": "risk",
+      "sideScope": "runner",
+      "description": "Resource is trashed or ends when the Runner makes a run.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "risk.hand_trash_cost",
@@ -2700,6 +3445,36 @@
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "risk.lose_game_debt",
+      "group": "risk",
+      "sideScope": "runner",
+      "description": "Debt effect can directly lose the game.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "risk.mandatory_action",
+      "group": "risk",
+      "sideScope": "runner",
+      "description": "Mandatory action requirement generated by a card.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "risk.meat_damage_shortfall",
       "group": "ai021_prep_risk",
       "sideScope": "runner",
@@ -2745,6 +3520,21 @@
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "risk.random_action",
+      "group": "risk",
+      "sideScope": "runner",
+      "description": "Random action/outcome risk.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "risk.random_economy",
       "group": "ai021_prep_risk",
       "sideScope": "runner",
@@ -2758,6 +3548,36 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.random_hand_reveal",
+      "group": "risk",
+      "sideScope": "runner",
+      "description": "Random reveal/play/install risk from the Runner grip.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "risk.run_spend_limit",
+      "group": "risk",
+      "sideScope": "runner",
+      "description": "Run action has a spending cap.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "risk.self_brain_damage",
@@ -2803,6 +3623,21 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.unpreventable_brain_damage",
+      "group": "risk",
+      "sideScope": "runner",
+      "description": "Brain damage from the card cannot be prevented.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "run.any_server",
@@ -2876,6 +3711,21 @@
       "notes": "Break-cost support only; normal breaker coverage remains separate and support-only."
     },
     {
+      "signalId": "run.bypass_ap_ice",
+      "group": "run",
+      "sideScope": "runner",
+      "description": "Pass or bypass AP ICE during an encounter.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "run.bypass_chosen_ice",
       "group": "ai021_prep_run",
       "sideScope": "runner",
@@ -2934,6 +3784,21 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "run.encounter_escape",
+      "group": "run",
+      "sideScope": "runner",
+      "description": "Encounter escape or pass effect without icebreaker coverage.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "run.ends_run_after_effect",
@@ -3393,6 +4258,21 @@
       "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
+      "signalId": "setup.delayed_install",
+      "group": "setup",
+      "sideScope": "runner",
+      "description": "Staged or delayed install support.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "setup.draw",
       "group": "setup_draw_search",
       "sideScope": "runner",
@@ -3487,6 +4367,21 @@
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "setup.hardware_search",
+      "group": "setup",
+      "sideScope": "runner",
+      "description": "Search/filter for Runner Hardware cards.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "setup.hosted_program_loss_risk",
       "group": "ai019_setup",
       "sideScope": "runner",
@@ -3515,6 +4410,21 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.install_countdown",
+      "group": "setup",
+      "sideScope": "runner",
+      "description": "Install countdown counters.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "setup.install_credit",
@@ -3562,6 +4472,21 @@
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "setup.install_from_hand_staged",
+      "group": "setup",
+      "sideScope": "runner",
+      "description": "Set aside a card from hand for later install.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "setup.install_support",
       "group": "setup_install",
       "sideScope": "runner",
@@ -3595,6 +4520,21 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Memory support is diagnostic setup information and does not alter deck profile defaults."
+    },
+    {
+      "signalId": "setup.prep_resource_search",
+      "group": "setup",
+      "sideScope": "runner",
+      "description": "Search/filter for Prep or Resource cards.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "setup.program_backup",
@@ -3787,6 +4727,21 @@
       "notes": "Anchor-capable only when the structured effect is narrowed to program search for breaker/toolbox setup; generic any-card search remains support-only."
     },
     {
+      "signalId": "setup.search_reveals_to_corp",
+      "group": "setup",
+      "sideScope": "runner",
+      "description": "Search result is shown to the Corp.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "setup.self_bounce",
       "group": "ai019_setup",
       "sideScope": "runner",
@@ -3896,6 +4851,21 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.top_trash_recovery",
+      "group": "setup",
+      "sideScope": "runner",
+      "description": "Recover the top card of the Runner trash.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "tag.payoff",
@@ -4065,6 +5035,51 @@
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "virus.counter_protection",
+      "group": "virus",
+      "sideScope": "runner",
+      "description": "Protects selected virus counters during purge.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "virus.counter_retention",
+      "group": "virus",
+      "sideScope": "runner",
+      "description": "Retains virus counters through purge.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "virus.purge_resistance",
+      "group": "virus",
+      "sideScope": "runner",
+      "description": "Resists Corp purge effects.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
       "signalId": "virus.purge_tax",
       "group": "ai019_virus",
       "sideScope": "runner",
@@ -4093,6 +5108,21 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "virus.support",
+      "group": "virus",
+      "sideScope": "runner",
+      "description": "Virus support without introducing a generic Runner virus strategy.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI022 reviewed Runner-Resource structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
       "signalId": "virus.trigger_any_successful_run",

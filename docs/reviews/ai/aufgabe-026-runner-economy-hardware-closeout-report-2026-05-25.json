@@ -17,11 +17,11 @@
   "includedCardCount": 18,
   "excludedCardCount": 17,
   "confirmedGeneratedFactCount": 45,
-  "previewAddedFactCount": 22,
+  "previewAddedFactCount": 24,
   "hardErrorCount": 0,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 27,
+  "normalizedDifferenceCount": 35,
   "remainingDifferenceCount": 0,
   "paymentContextInfoCount": 3,
   "actionContextInfoCount": 1,
@@ -29,7 +29,7 @@
   "handSizeContextInfoCount": 2,
   "hiddenZoneContextInfoCount": 8,
   "delayedPenaltyContextInfoCount": 1,
-  "descriptorFollowupCount": 22,
+  "descriptorFollowupCount": 28,
   "readiness": "ready_read_only_split_subbatches",
   "subBatchReadiness": {
     "runner_action_economy": {
@@ -72,12 +72,12 @@
   "normalizationRuleCounts": {
     "hidden_zone_context_normalization": 2,
     "runner_action_economy_normalization": 2,
-    "runner_economy_strategy_overlay_split": 12,
+    "runner_economy_strategy_overlay_split": 19,
     "runner_finite_pool_economy_normalization": 2,
     "runner_install_discount_context_normalization": 1,
-    "runner_loan_debt_normalization": 3,
+    "runner_loan_debt_normalization": 2,
     "runner_resource_economy_risk_split": 1,
-    "runner_search_recovery_normalization": 4
+    "runner_search_recovery_normalization": 6
   },
   "normalizationRules": [
     "runner_burst_economy_normalization",
@@ -665,8 +665,18 @@
           "status": "normalized"
         },
         {
+          "kind": "effect:economy",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        },
+        {
           "kind": "effect:finite_economy_pool",
           "rule": "runner_finite_pool_economy_normalization",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:global_modifier",
+          "rule": "runner_economy_strategy_overlay_split",
           "status": "normalized"
         }
       ],
@@ -683,7 +693,8 @@
       "hiddenZoneContextInfos": [],
       "delayedPenaltyContextInfos": [],
       "descriptorFollowups": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "remainingIssues": [],
       "readiness": "ready_read_only_with_context_followup"
@@ -707,8 +718,7 @@
       ],
       "previewAdds": [
         "condition:requires_start_of_turn",
-        "effect:counter_economy",
-        "effect:delayed_penalty"
+        "effect:counter_economy"
       ],
       "normalizedDifferences": [
         {
@@ -718,11 +728,6 @@
         },
         {
           "kind": "effect:counter_economy",
-          "rule": "runner_loan_debt_normalization",
-          "status": "normalized"
-        },
-        {
-          "kind": "effect:delayed_penalty",
           "rule": "runner_loan_debt_normalization",
           "status": "normalized"
         }
@@ -781,6 +786,11 @@
           "kind": "effect:install_discount",
           "rule": "runner_install_discount_context_normalization",
           "status": "normalized"
+        },
+        {
+          "kind": "effect:search",
+          "rule": "runner_search_recovery_normalization",
+          "status": "normalized"
         }
       ],
       "paymentContextInfos": [],
@@ -796,7 +806,8 @@
       ],
       "delayedPenaltyContextInfos": [],
       "descriptorFollowups": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "remainingIssues": [],
       "readiness": "ready_read_only_with_context_followup"
@@ -817,8 +828,27 @@
         "condition:requires_stack_search",
         "effect:search"
       ],
-      "previewAdds": [],
-      "normalizedDifferences": [],
+      "previewAdds": [
+        "condition:requires_runner_action",
+        "condition:requires_stack_search"
+      ],
+      "normalizedDifferences": [
+        {
+          "kind": "condition:requires_runner_action",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        },
+        {
+          "kind": "condition:requires_stack_search",
+          "rule": "runner_search_recovery_normalization",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:global_modifier",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        }
+      ],
       "paymentContextInfos": [],
       "actionContextInfos": [
         {
@@ -837,9 +867,13 @@
         }
       ],
       "delayedPenaltyContextInfos": [],
-      "descriptorFollowups": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable.",
+        "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
+      ],
       "remainingIssues": [],
-      "readiness": "ready_read_only_with_payment_memory_context"
+      "readiness": "ready_read_only_with_context_followup"
     },
     {
       "cardId": "onr_v1_178_short-term-contract",
@@ -861,6 +895,7 @@
       "previewAdds": [
         "condition:requires_installed_resource",
         "effect:action_economy",
+        "effect:counter_economy",
         "effect:finite_economy_pool"
       ],
       "normalizedDifferences": [
@@ -875,8 +910,23 @@
           "status": "normalized"
         },
         {
+          "kind": "effect:counter_economy",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:economy",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
+        },
+        {
           "kind": "effect:finite_economy_pool",
           "rule": "runner_finite_pool_economy_normalization",
+          "status": "normalized"
+        },
+        {
+          "kind": "effect:global_modifier",
+          "rule": "runner_economy_strategy_overlay_split",
           "status": "normalized"
         }
       ],
@@ -893,7 +943,8 @@
       "hiddenZoneContextInfos": [],
       "delayedPenaltyContextInfos": [],
       "descriptorFollowups": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "remainingIssues": [],
       "readiness": "ready_read_only_with_context_followup"

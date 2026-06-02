@@ -253,7 +253,7 @@ describe("AI003 strategy goal taxonomy", () => {
 
     expect(report.hardErrorCount).toBe(0);
     expect(tacticSignalCatalogData.schemaVersion).toBe("ai-tactic-signals-v1");
-    expect(report.taxonomy.tacticSignalCatalogCount).toBe(251);
+    expect(report.taxonomy.tacticSignalCatalogCount).toBe(318);
     expect(new Set(signalIds).size).toBe(signalIds.length);
     expect([...signalIds].sort()).toEqual(derivationSignalIds);
     expect(signalIds.some((signalId) => signalId.startsWith("anti.ice."))).toBe(
@@ -740,7 +740,7 @@ describe("AI003 strategy goal taxonomy", () => {
       ...report.ai004Triage.planRoles,
     ].filter((entry) => entry.triageSource === "ai004_explicit");
 
-    expect(explicitTriage).toHaveLength(52);
+    expect(explicitTriage).toHaveLength(45);
     expect(
       report.warnings.some(
         (warning) => warning.kind === "unknown_role_or_planRole_values_warn_only",
