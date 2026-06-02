@@ -3954,7 +3954,7 @@
               "cardId": "onr_v1_301_punitive-counterstrike",
               "quantity": 1,
               "source": "strategicRole",
-              "role": "punish_payoff",
+              "role": "punish_payoff,win_condition",
               "strategyId": "corp.damage_kill",
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
@@ -4744,7 +4744,7 @@
               "cardId": "onr_v1_301_punitive-counterstrike",
               "quantity": 1,
               "source": "strategicRole",
-              "role": "punish_payoff",
+              "role": "punish_payoff,win_condition",
               "strategyId": "corp.tag_trace_punish",
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
@@ -4956,6 +4956,13 @@
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_293_netwatch-credit-voucher",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "tag.payoff",
+              "reason": "support:damageOrTagPayoff"
             },
             {
               "cardId": "onr_v1_295_night-shift",
@@ -6192,14 +6199,6 @@
               "reason": "normalized_lineSupport_strategy_goal"
             },
             {
-              "cardId": "onr_v1_287_datapool-by-zetatech",
-              "quantity": 1,
-              "source": "strategicRole",
-              "role": "punish_payoff",
-              "strategyId": "corp.tag_trace_punish",
-              "reason": "valid_strategicRole_reinforces_existing_anchor"
-            },
-            {
               "cardId": "onr_v1_293_netwatch-credit-voucher",
               "quantity": 1,
               "source": "derivedStrategyAnchor",
@@ -6290,6 +6289,13 @@
               "cardId": "onr_v1_293_netwatch-credit-voucher",
               "quantity": 1,
               "source": "functionSignal",
+              "signal": "tag.payoff",
+              "reason": "support:punishPayoff"
+            },
+            {
+              "cardId": "onr_v1_293_netwatch-credit-voucher",
+              "quantity": 1,
+              "source": "functionSignal",
               "signal": "tag.source",
               "reason": "support:tagSource"
             },
@@ -6328,7 +6334,7 @@
         "economy.rez_discount": 1,
         "ice.etr": 6,
         "ice.strength_modifier": 1,
-        "tag.payoff": 3,
+        "tag.payoff": 4,
         "tag.source": 4,
         "tax.runner_credit": 2,
         "trace.source": 2
@@ -6393,7 +6399,7 @@
         },
         "punishProfile": {
           "tagSources": 4,
-          "tagPayoff": 3,
+          "tagPayoff": 4,
           "damagePayoff": 0,
           "traceDensity": 2
         },
@@ -6447,6 +6453,6 @@
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 2
     },
-    "contentSha256": "1646eac935685764d0bbf8c54ca1e6866b9d62a78da19130bc186812b208747b"
+    "contentSha256": "4d038f554cdc275abd0ce6f7637296e68a3222baa95433a26e7a786e8fddc688"
   }
 }

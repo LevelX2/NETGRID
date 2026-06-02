@@ -363,13 +363,13 @@
   "sourceSummary": {
     "derivedFacts": {
       "hardErrorCount": 0,
-      "warningCount": 995,
-      "cardsNeedingManualOverlay": 132
+      "warningCount": 1000,
+      "cardsNeedingManualOverlay": 135
     },
     "compiledIndex": {
       "hardErrorCount": 0,
-      "warningCount": 715,
-      "reviewCandidates": 128
+      "warningCount": 719,
+      "reviewCandidates": 131
     },
     "migrationPriority": {
       "candidateCount": 193,
@@ -386,8 +386,8 @@
       }
     },
     "batchOneRollup": {
-      "batchOneStatus": "future_migration_ready_read_only",
-      "confirmedGeneratedFactCount": 40
+      "batchOneStatus": "needs_followup",
+      "confirmedGeneratedFactCount": 39
     },
     "batchTwoDryRun": {
       "warningCount": 48,

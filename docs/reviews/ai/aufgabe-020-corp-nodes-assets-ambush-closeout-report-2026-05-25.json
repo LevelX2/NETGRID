@@ -14,10 +14,10 @@
   "includedCardCount": 45,
   "excludedCardCount": 3,
   "confirmedGeneratedFactCount": 131,
-  "previewAddedFactCount": 79,
+  "previewAddedFactCount": 78,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 325,
+  "normalizedDifferenceCount": 326,
   "remainingDifferenceCount": 0,
   "remoteContextInfoCount": 23,
   "accessContextInfoCount": 11,
@@ -59,7 +59,7 @@
     "remote_capacity_or_portfolio_normalization": 8,
     "trace_credit_support_normalization": 1,
     "hidden_zone_or_rearrange_context_normalization": 7,
-    "remote_strategy_overlay_split_normalization": 212,
+    "remote_strategy_overlay_split_normalization": 213,
     "access_context_required_classification": 16,
     "trace_success_context_required_classification": 2,
     "runner_tagged_context_required_classification": 23,
@@ -188,7 +188,7 @@
         "condition:requires_runner_tagged",
         "effect:tag_source"
       ],
-      "previewAdds": ["effect:tag_source"],
+      "previewAdds": [],
       "normalizedDifferences": [
         {
           "field": "condition:requires_runner_tagged",
@@ -319,6 +319,13 @@
         {
           "field": "effects",
           "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "remote_strategy_overlay_split_normalized",
+          "rule": "remote_strategy_overlay_split_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-9 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
           "classification": "remote_strategy_overlay_split_normalized",
           "rule": "remote_strategy_overlay_split_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-9 comparator path; active hints and runtime behavior are unchanged."

@@ -1,7 +1,7 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI024-1",
-  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022/AI024/AI024/AI024/AI025/AI025/AI025/AI026/AI026/AI026/AI026/AI024-1",
+  "taskId": "AI024-1/AI025-1/AI025-1/AI025-1/AI025-1",
+  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022/AI024/AI024/AI024/AI025/AI025/AI025/AI026/AI026/AI026/AI026/AI024-1/AI025-1/AI025-1/AI025-1/AI025-1",
   "generatedAt": "2026-06-02",
   "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI024-1 sharpens selected Corp-ICE semantics while keeping Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default and UI-derivation effects unchanged.",
   "manualHintFieldPolicy": {
@@ -1781,6 +1781,58 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "condition.multiple_runs_last_turn",
+      "source": "effects",
+      "match": {
+        "target": "condition.multiple_runs_last_turn"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "condition.multiple_runs_last_turn"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "condition.node_trashed_last_turn",
+      "source": "effects",
+      "match": {
+        "target": "condition.node_trashed_last_turn"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "condition.node_trashed_last_turn"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "condition.resource_installed_last_turn",
+      "source": "effects",
+      "match": {
+        "target": "condition.resource_installed_last_turn"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "condition.resource_installed_last_turn"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "condition.run_this_game",
+      "source": "effects",
+      "match": {
+        "target": "condition.run_this_game"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "condition.run_this_game"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "corp_ice.brain_damage",
       "source": "effects",
       "match": {
@@ -2701,6 +2753,21 @@
       ]
     },
     {
+      "signalId": "damage.meat_source",
+      "source": "effects",
+      "match": {
+        "target": "damage.meat_source"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "damage.meat_source"
+      },
+      "strategyAnchorFor": [
+        "corp.damage_kill"
+      ]
+    },
+    {
       "signalId": "damage.payoff",
       "source": "effects",
       "match": {
@@ -2748,6 +2815,22 @@
       },
       "strategyAnchorFor": [
         "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "damage.tagged_meat_payoff",
+      "source": "effects",
+      "match": {
+        "target": "damage.tagged_meat_payoff"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "damage.tagged_meat_payoff"
+      },
+      "strategyAnchorFor": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
       ]
     },
     {
@@ -4493,6 +4576,19 @@
         "corp.economy_rez_reserve",
         "corp.ice_tax_glacier"
       ]
+    },
+    {
+      "signalId": "ice.corp_installment_rez",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_installment_rez"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "ice.corp_installment_rez"
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "ice.corp_rearrange_conceal",
@@ -8753,6 +8849,21 @@
         "cardType": "resource"
       },
       "strategyAnchorFor": []
+    },
+    {
+      "signalId": "tag.additional_tag_followup",
+      "source": "effects",
+      "match": {
+        "target": "tag.additional_tag_followup"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "tag.additional_tag_followup"
+      },
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
     },
     {
       "signalId": "tag.corp_persistent_source",

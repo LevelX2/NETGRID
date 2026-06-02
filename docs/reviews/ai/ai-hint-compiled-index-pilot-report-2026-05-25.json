@@ -15,16 +15,16 @@
   "overlayCardCount": 6,
   "cardsWithoutOverlay": 187,
   "hardErrorCount": 0,
-  "warningCount": 715,
+  "warningCount": 719,
   "warningCountsByKind": {
     "active_monolith_mechanical_duplication": 266,
-    "generated_fact_missing_from_active_monolith": 316,
+    "generated_fact_missing_from_active_monolith": 317,
     "manual_overlay_strategy_field_missing_from_active": 6,
-    "overlay_missing_for_manual_gap": 127
+    "overlay_missing_for_manual_gap": 130
   },
   "warningClassificationCounts": {
-    "generated_fact_absent_from_monolith": 316,
-    "manual_review_candidate": 127,
+    "generated_fact_absent_from_monolith": 317,
+    "manual_review_candidate": 130,
     "monolith_mechanical_duplication_candidate": 266,
     "overlay_strategy_field_not_in_monolith": 6
   },
@@ -1464,13 +1464,14 @@
     {
       "cardId": "onr_v1_283_audit-of-call-records",
       "title": "Audit of Call Records",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 1,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1,
         "monolith_mechanical_duplication_candidate": 2
       },
-      "info": ["info_no_overlay_needed"]
+      "info": []
     },
     {
       "cardId": "onr_v1_284_chance-observation",
@@ -1486,13 +1487,14 @@
     {
       "cardId": "onr_v1_285_closed-accounts",
       "title": "Closed Accounts",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1,
         "monolith_mechanical_duplication_candidate": 2
       },
-      "info": ["info_no_overlay_needed"]
+      "info": []
     },
     {
       "cardId": "onr_v1_286_corporate-detective-agency",
@@ -1520,13 +1522,14 @@
     {
       "cardId": "onr_v1_293_netwatch-credit-voucher",
       "title": "Netwatch Credit Voucher",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1,
         "monolith_mechanical_duplication_candidate": 2
       },
-      "info": ["info_no_overlay_needed"]
+      "info": []
     },
     {
       "cardId": "onr_v1_294_new-blood",
@@ -3375,10 +3378,10 @@
     {
       "cardId": "onr_v1_283_audit-of-call-records",
       "title": "Audit of Call Records",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
@@ -3393,8 +3396,8 @@
     {
       "cardId": "onr_v1_285_closed-accounts",
       "title": "Closed Accounts",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects"],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"]
@@ -3420,8 +3423,8 @@
     {
       "cardId": "onr_v1_293_netwatch-credit-voucher",
       "title": "Netwatch Credit Voucher",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects"],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"]
@@ -4901,23 +4904,39 @@
       ]
     },
     {
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "title": "Audit of Call Records",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["condition:requires_runner_action"]
+    },
+    {
+      "cardId": "onr_v1_285_closed-accounts",
+      "title": "Closed Accounts",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["effect:counter_economy"]
+    },
+    {
       "cardId": "onr_v1_287_datapool-by-zetatech",
       "title": "Datapool by Zetatech",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["effect:tag_punish_payoff", "effect:tag_source"]
+      "missingManualOverlay": ["effect:tag_punish_payoff"]
+    },
+    {
+      "cardId": "onr_v1_293_netwatch-credit-voucher",
+      "title": "Netwatch Credit Voucher",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["effect:tag_punish_payoff"]
     },
     {
       "cardId": "onr_v1_296_off-site-backups",
       "title": "Off-Site Backups",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_archives_card",
-        "effect:card_recovery",
-        "effect:draw",
-        "effect:zone_shuffle"
-      ]
+      "missingManualOverlay": ["condition:requires_archives_card"]
     },
     {
       "cardId": "onr_v1_298_planning-consultants",
@@ -4942,7 +4961,8 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
-        "condition:requires_advancement_counter",
+        "condition:requires_installed_card",
+        "condition:requires_score_window",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ]
@@ -4953,7 +4973,8 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
-        "condition:requires_advancement_counter",
+        "condition:requires_installed_card",
+        "condition:requires_score_window",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ]
@@ -6780,8 +6801,8 @@
     {
       "cardId": "onr_v1_283_audit-of-call-records",
       "title": "Audit of Call Records",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "mechanicalFactsFromGenerated": [
         "condition:requires_trace_success",
         "effect:tag_source",
@@ -6802,8 +6823,8 @@
     {
       "cardId": "onr_v1_285_closed-accounts",
       "title": "Closed Accounts",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "mechanicalFactsFromGenerated": [
         "condition:requires_runner_tagged",
         "effect:counter_economy",
@@ -6834,8 +6855,8 @@
     {
       "cardId": "onr_v1_293_netwatch-credit-voucher",
       "title": "Netwatch Credit Voucher",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "mechanicalFactsFromGenerated": [
         "condition:requires_runner_tagged",
         "effect:economy",
@@ -8454,23 +8475,39 @@
       ]
     },
     {
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "title": "Audit of Call Records",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["condition:requires_runner_action"]
+    },
+    {
+      "cardId": "onr_v1_285_closed-accounts",
+      "title": "Closed Accounts",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["effect:counter_economy"]
+    },
+    {
       "cardId": "onr_v1_287_datapool-by-zetatech",
       "title": "Datapool by Zetatech",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["effect:tag_punish_payoff", "effect:tag_source"]
+      "missingManualOverlay": ["effect:tag_punish_payoff"]
+    },
+    {
+      "cardId": "onr_v1_293_netwatch-credit-voucher",
+      "title": "Netwatch Credit Voucher",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["effect:tag_punish_payoff"]
     },
     {
       "cardId": "onr_v1_296_off-site-backups",
       "title": "Off-Site Backups",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_archives_card",
-        "effect:card_recovery",
-        "effect:draw",
-        "effect:zone_shuffle"
-      ]
+      "missingManualOverlay": ["condition:requires_archives_card"]
     },
     {
       "cardId": "onr_v1_298_planning-consultants",
@@ -8495,7 +8532,8 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
-        "condition:requires_advancement_counter",
+        "condition:requires_installed_card",
+        "condition:requires_score_window",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ]
@@ -8506,7 +8544,8 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
-        "condition:requires_advancement_counter",
+        "condition:requires_installed_card",
+        "condition:requires_score_window",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ]
@@ -8950,7 +8989,7 @@
     }
   ],
   "infoCounts": {
-    "info_no_overlay_needed": 62,
+    "info_no_overlay_needed": 59,
     "info_overlay_present": 6
   },
   "cards": [
@@ -21908,8 +21947,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": false,
-      "missingManualOverlay": [],
+      "needsManualReview": true,
+      "missingManualOverlay": ["condition:requires_runner_action"],
       "compiledPreview": {
         "cardId": "onr_v1_283_audit-of-call-records",
         "side": "corp",
@@ -21967,7 +22006,7 @@
         "tacticSignals",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
@@ -21991,13 +22030,28 @@
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
           "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_283_audit-of-call-records",
+          "field": "conditions"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_283_audit-of-call-records",
           "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_283_audit-of-call-records"
         }
       ],
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready"
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
     },
     {
       "cardId": "onr_v1_284_chance-observation",
@@ -22108,8 +22162,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": false,
-      "missingManualOverlay": [],
+      "needsManualReview": true,
+      "missingManualOverlay": ["effect:counter_economy"],
       "compiledPreview": {
         "cardId": "onr_v1_285_closed-accounts",
         "side": "corp",
@@ -22189,10 +22243,17 @@
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_285_closed-accounts",
           "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_285_closed-accounts"
         }
       ],
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready"
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
     },
     {
       "cardId": "onr_v1_286_corporate-detective-agency",
@@ -22302,7 +22363,7 @@
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
-      "missingManualOverlay": ["effect:tag_punish_payoff", "effect:tag_source"],
+      "missingManualOverlay": ["effect:tag_punish_payoff"],
       "compiledPreview": {
         "cardId": "onr_v1_287_datapool-by-zetatech",
         "side": "corp",
@@ -22394,8 +22455,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": false,
-      "missingManualOverlay": [],
+      "needsManualReview": true,
+      "missingManualOverlay": ["effect:tag_punish_payoff"],
       "compiledPreview": {
         "cardId": "onr_v1_293_netwatch-credit-voucher",
         "side": "corp",
@@ -22482,10 +22543,17 @@
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_293_netwatch-credit-voucher",
           "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_293_netwatch-credit-voucher"
         }
       ],
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready"
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
     },
     {
       "cardId": "onr_v1_294_new-blood",
@@ -22638,12 +22706,7 @@
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
-      "missingManualOverlay": [
-        "condition:requires_archives_card",
-        "effect:card_recovery",
-        "effect:draw",
-        "effect:zone_shuffle"
-      ],
+      "missingManualOverlay": ["condition:requires_archives_card"],
       "compiledPreview": {
         "cardId": "onr_v1_296_off-site-backups",
         "side": "corp",
@@ -23013,7 +23076,8 @@
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
       "missingManualOverlay": [
-        "condition:requires_advancement_counter",
+        "condition:requires_installed_card",
+        "condition:requires_score_window",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ],
@@ -23437,7 +23501,8 @@
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
       "missingManualOverlay": [
-        "condition:requires_advancement_counter",
+        "condition:requires_installed_card",
+        "condition:requires_score_window",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ],
@@ -32882,11 +32947,26 @@
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_283_audit-of-call-records",
       "field": "effects"
     },
     {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_283_audit-of-call-records"
+    },
+    {
       "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
       "kind": "active_monolith_mechanical_duplication",
@@ -32933,6 +33013,13 @@
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_285_closed-accounts",
       "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_285_closed-accounts"
     },
     {
       "classification": "monolith_mechanical_duplication_candidate",
@@ -33012,6 +33099,13 @@
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_293_netwatch-credit-voucher",
       "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_293_netwatch-credit-voucher"
     },
     {
       "classification": "monolith_mechanical_duplication_candidate",

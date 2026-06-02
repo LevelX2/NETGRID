@@ -4359,10 +4359,12 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
-          "effects"
+          "effects",
+          "conditions"
         ],
         "compiledMechanicalFactFields": [
-          "effects"
+          "effects",
+          "conditions"
         ],
         "generatedFactFields": [
           "effects"
@@ -4432,10 +4434,12 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
-          "effects"
+          "effects",
+          "conditions"
         ],
         "compiledMechanicalFactFields": [
-          "effects"
+          "effects",
+          "conditions"
         ],
         "generatedFactFields": [],
         "overlayFields": []
@@ -4573,10 +4577,12 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
-          "effects"
+          "effects",
+          "conditions"
         ],
         "compiledMechanicalFactFields": [
-          "effects"
+          "effects",
+          "conditions"
         ],
         "generatedFactFields": [],
         "overlayFields": []
@@ -4681,7 +4687,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "tag.source"
+        "tag.source",
+        "trace.source"
       ],
       "derivedStrategyAnchors": [
         "corp.tag_trace_punish"
@@ -4724,15 +4731,15 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
-          "effects"
+          "effects",
+          "conditions"
         ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
         ],
         "generatedFactFields": [
-          "effects",
-          "conditions"
+          "effects"
         ],
         "overlayFields": []
       },
@@ -40231,10 +40238,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "punish_payoff"
+          "enabler"
         ],
         "validValues": [
-          "punish_payoff"
+          "enabler"
         ],
         "unknownValues": []
       }
@@ -40666,6 +40673,7 @@
       },
       "derivedFunctionSignals": [
         "economy.generic",
+        "tag.payoff",
         "tag.source"
       ],
       "derivedStrategyAnchors": [
@@ -41325,6 +41333,7 @@
         ],
         "generatedFactFields": [
           "effects",
+          "conditions",
           "remoteRole"
         ],
         "overlayFields": []
@@ -41441,10 +41450,12 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "punish_payoff"
+          "punish_payoff",
+          "win_condition"
         ],
         "validValues": [
-          "punish_payoff"
+          "punish_payoff",
+          "win_condition"
         ],
         "unknownValues": []
       }
@@ -41551,11 +41562,9 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "punish_payoff",
           "win_condition"
         ],
         "validValues": [
-          "punish_payoff",
           "win_condition"
         ],
         "unknownValues": []
@@ -41729,6 +41738,7 @@
         ],
         "generatedFactFields": [
           "effects",
+          "conditions",
           "remoteRole"
         ],
         "overlayFields": []
@@ -42045,11 +42055,9 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "punish_payoff",
           "win_condition"
         ],
         "validValues": [
-          "punish_payoff",
           "win_condition"
         ],
         "unknownValues": []

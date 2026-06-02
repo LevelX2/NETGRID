@@ -14,8 +14,8 @@
   "batch": "batch_1_scored_agenda_tag_punish",
   "mode": "read-only rollup; no active hint migration, no runtime compile, no planner or consumer binding",
   "batchCardCount": 11,
-  "confirmedGeneratedFactCount": 40,
-  "previewAddedFactCount": 0,
+  "confirmedGeneratedFactCount": 39,
+  "previewAddedFactCount": 1,
   "hardErrorCount": 0,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
@@ -24,16 +24,17 @@
   "remainingShapeDifferenceCount": 0,
   "monolithOnlyMechanicalFactCount": 0,
   "deriverFollowupCandidateCount": 0,
-  "descriptorGapRemainingCount": 0,
-  "humanReviewCandidateCount": 0,
+  "descriptorGapRemainingCount": 4,
+  "humanReviewCandidateCount": 2,
   "boardContextRequiredCount": 31,
   "consumerActiveForFactTypeCount": 40,
   "legacyKeepForCompatCount": 11,
-  "futureMigrationReadyCardCount": 11,
+  "futureMigrationReadyCardCount": 10,
   "readinessCounts": {
-    "ready_but_board_context_required": 11
+    "needs_review": 1,
+    "ready_but_board_context_required": 10
   },
-  "batchOneStatus": "future_migration_ready_read_only",
+  "batchOneStatus": "needs_followup",
   "boardContextRules": [
     {
       "kind": "scored_agenda",
@@ -314,28 +315,23 @@
     {
       "cardId": "onr_v1_285_closed-accounts",
       "title": "Closed Accounts",
-      "factGroups": ["draw_economy_extra_action", "tag_punish"],
+      "factGroups": ["tag_punish"],
       "confirmedGeneratedFacts": [
         "condition:requires_runner_tagged",
-        "effect:counter_economy",
         "effect:tag_punish_payoff"
       ],
       "generatedFactsAlreadyPresent": [
         "condition:requires_runner_tagged",
-        "effect:counter_economy",
         "effect:tag_punish_payoff"
       ],
       "boardContextRequired": [
         "condition:requires_runner_tagged",
         "effect:tag_punish_payoff"
       ],
-      "activeConsumers": [
-        "economy_draw_action_hint_consumer",
-        "tag_punish_consumer"
-      ],
-      "remainingIssues": [],
-      "futureMigrationReady": true,
-      "readiness": "ready_but_board_context_required"
+      "activeConsumers": ["tag_punish_consumer"],
+      "remainingIssues": ["generated_fact_added_in_preview"],
+      "futureMigrationReady": false,
+      "readiness": "needs_review"
     },
     {
       "cardId": "onr_v1_302_scorched-earth",
@@ -395,13 +391,13 @@
   "sourceSummary": {
     "derivedFacts": {
       "hardErrorCount": 0,
-      "warningCount": 995,
-      "cardsNeedingManualOverlay": 132
+      "warningCount": 1000,
+      "cardsNeedingManualOverlay": 135
     },
     "compiledIndex": {
       "hardErrorCount": 0,
-      "warningCount": 715,
-      "reviewCandidates": 128
+      "warningCount": 719,
+      "reviewCandidates": 131
     },
     "migrationPriority": {
       "candidateCount": 193,
@@ -422,12 +418,13 @@
       "warningCountsByKind": {
         "board_context_required": 31,
         "consumer_active_for_fact_type": 40,
-        "generated_fact_already_present": 33,
+        "generated_fact_added_in_preview": 1,
+        "generated_fact_already_present": 32,
         "shape_difference": 7
       },
       "infoCountsByKind": {
         "legacy_keep_for_compat": 11,
-        "no_change_needed": 11,
+        "no_change_needed": 10,
         "preview_only": 11
       }
     }

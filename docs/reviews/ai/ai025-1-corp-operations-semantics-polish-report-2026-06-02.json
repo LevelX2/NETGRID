@@ -1,0 +1,2592 @@
+{
+  "schemaVersion": "ai025-1-corp-operations-semantics-polish-report-v1",
+  "taskId": "AI025-1",
+  "generatedAt": "2026-06-02",
+  "status": "complete",
+  "scope": "corp_operations_polish",
+  "sourceCommit": "ae855f2c",
+  "correctsCommit": "feea9709",
+  "countsBefore": {
+    "activeCompiledCorpOperations": 40,
+    "productionOriginalsetOperations": 27,
+    "productionProteusOperations": 8,
+    "activeTestOperations": 5,
+    "inactiveClassicOperations": 4,
+    "strategySupportPairCount": 25,
+    "targetProfileCandidateCount": 15
+  },
+  "countsAfter": {
+    "activeCompiledCorpOperations": 40,
+    "productionOriginalsetOperations": 27,
+    "productionProteusOperations": 8,
+    "activeTestOperations": 5,
+    "inactiveClassicOperations": 4,
+    "changedCardCount": 20,
+    "addedSignalCount": 8,
+    "newStrategyIdCount": 0,
+    "strategySupportPairCount": 25,
+    "targetProfileCandidateCount": 15,
+    "testOnlyStrategySupportPairCount": 1,
+    "plannerEffect": false,
+    "actionScoreEffect": false,
+    "planWeightEffect": false,
+    "targetingAiEffect": false,
+    "engineEffect": false,
+    "legalEffect": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivationEffect": false,
+    "hiddenInfoLeakEffect": false
+  },
+  "changedCards": [
+    {
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "title": "Audit of Call Records",
+      "tacticSignals": [
+        "condition.multiple_runs_last_turn",
+        "tag.source",
+        "trace.source"
+      ],
+      "conditions": [
+        "requires_multiple_runs_last_turn",
+        "requires_trace_success"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "targetProfileStatus": "not_required",
+      "rationale": "Requires two or more runs during the Runner's last turn, then trace-success tag. The prior generic run-last-turn condition was too broad. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_285_closed-accounts",
+      "title": "Closed Accounts",
+      "tacticSignals": [
+        "risk.requires_tagged_runner",
+        "tag.payoff"
+      ],
+      "conditions": [
+        "requires_runner_tagged"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "targetProfileStatus": "not_required",
+      "rationale": "Runner loses all bits while tagged; this is not Corp credit gain or conditional Corp economy. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_287_datapool-by-zetatech",
+      "title": "Datapool by Zetatech",
+      "tacticSignals": [
+        "risk.requires_tagged_runner",
+        "tag.additional_tag_followup",
+        "tag.payoff"
+      ],
+      "conditions": [
+        "requires_runner_tagged"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "targetProfileStatus": "not_required",
+      "rationale": "Adds more tags only to an already tagged Runner; modeled as tag snowball/follow-up rather than an initial tag source. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_291_falsified-transactions-expert",
+      "title": "Falsified-Transactions Expert",
+      "tacticSignals": [
+        "advance.corp_counter_transfer",
+        "advance.score_window_support"
+      ],
+      "conditions": [
+        "requires_source_advancement_counters",
+        "requires_target_can_be_advanced"
+      ],
+      "strategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "targetProfileStatus": "candidate",
+      "rationale": "Moves counters between installed cards; it reallocates existing advancement counters and does not create new counters. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_292_management-shake-up",
+      "title": "Management Shake-Up",
+      "tacticSignals": [
+        "advance.agenda_counter",
+        "advance.overadvance_support",
+        "advance.score_window_support"
+      ],
+      "conditions": [
+        "requires_target_can_be_advanced"
+      ],
+      "strategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "targetProfileStatus": "candidate",
+      "rationale": "Adds new advancement counters to installed advanceable cards and does not require pre-existing counters. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_293_netwatch-credit-voucher",
+      "title": "Netwatch Credit Voucher",
+      "tacticSignals": [
+        "economy.corp_credit_burst",
+        "risk.requires_tagged_runner",
+        "tag.additional_tag_followup",
+        "tag.payoff"
+      ],
+      "conditions": [
+        "requires_runner_tagged"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "targetProfileStatus": "not_required",
+      "rationale": "Adds an extra tag only after the Runner is already tagged, plus a small Corp credit burst. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_294_new-blood",
+      "title": "New Blood",
+      "tacticSignals": [
+        "ice.corp_rearrange_conceal"
+      ],
+      "conditions": [],
+      "strategyAnchors": [],
+      "targetProfileStatus": "schema_gap",
+      "rationale": "Conceal/rearrange operation has no run-last-turn play condition in the repo card text. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_296_off-site-backups",
+      "title": "Off-Site Backups",
+      "tacticSignals": [
+        "archives.corp_recovery"
+      ],
+      "conditions": [],
+      "strategyAnchors": [],
+      "targetProfileStatus": "schema_gap",
+      "rationale": "Returns a card from Archives to HQ; no draw occurs. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_300_project-consultants",
+      "title": "Project Consultants",
+      "tacticSignals": [
+        "advance.agenda_counter",
+        "advance.overadvance_support",
+        "advance.score_window_support"
+      ],
+      "conditions": [
+        "requires_target_can_be_advanced"
+      ],
+      "strategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "targetProfileStatus": "candidate",
+      "rationale": "Adds new advancement counters to installed advanceable cards and does not require pre-existing counters. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_301_punitive-counterstrike",
+      "title": "Punitive Counterstrike",
+      "tacticSignals": [
+        "damage.meat_source",
+        "damage.tagged_meat_payoff",
+        "risk.requires_tagged_runner",
+        "tag.payoff"
+      ],
+      "conditions": [
+        "requires_runner_tagged"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ],
+      "targetProfileStatus": "not_required",
+      "rationale": "Tagged Runner payoff dealing 2 meat damage; precise damage type is carried separately from generic tag payoff. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_302_scorched-earth",
+      "title": "Scorched Earth",
+      "tacticSignals": [
+        "damage.meat_source",
+        "damage.tagged_meat_payoff",
+        "risk.requires_tagged_runner",
+        "tag.payoff"
+      ],
+      "conditions": [
+        "requires_runner_tagged"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ],
+      "targetProfileStatus": "not_required",
+      "rationale": "Tagged Runner payoff dealing 4 meat damage; a kill-capable meat-damage payoff. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_303_silver-lining-recovery-protocol",
+      "title": "Silver Lining Recovery Protocol",
+      "tacticSignals": [
+        "condition.agenda_stolen_last_turn",
+        "economy.corp_conditional_credit"
+      ],
+      "conditions": [
+        "requires_stolen_agenda_last_turn"
+      ],
+      "strategyAnchors": [],
+      "targetProfileStatus": "not_required",
+      "rationale": "Conditional agenda-stolen credit recovery; no active overadvance-support signal is warranted. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_304_systematic-layoffs",
+      "title": "Systematic Layoffs",
+      "tacticSignals": [
+        "advance.agenda_counter",
+        "advance.overadvance_support",
+        "advance.score_window_support"
+      ],
+      "conditions": [
+        "requires_target_can_be_advanced"
+      ],
+      "strategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "targetProfileStatus": "candidate",
+      "rationale": "Adds new advancement counters to installed advanceable cards and does not require pre-existing counters. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_307_urban-renewal",
+      "title": "Urban Renewal",
+      "tacticSignals": [
+        "damage.meat_source",
+        "damage.tagged_meat_payoff",
+        "risk.requires_tagged_runner",
+        "tag.payoff"
+      ],
+      "conditions": [
+        "requires_runner_tagged"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ],
+      "targetProfileStatus": "not_required",
+      "rationale": "Tagged Runner payoff dealing 5 meat damage; a kill-capable meat-damage payoff. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_proteus_048_data-sifters",
+      "title": "Data Sifters",
+      "tacticSignals": [
+        "condition.node_trashed_last_turn",
+        "tag.source"
+      ],
+      "conditions": [
+        "requires_node_trashed_last_turn"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "targetProfileStatus": "not_required",
+      "rationale": "Requires Runner trashed a node last turn; not a generic run-last-turn condition. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_proteus_049_emergency-rig",
+      "title": "Emergency Rig",
+      "tacticSignals": [
+        "ice.corp_free_rez",
+        "ice.corp_temporary_rez",
+        "risk.temporary_rez_liability"
+      ],
+      "conditions": [
+        "requires_x_lifetime_choice"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "targetProfileStatus": "candidate",
+      "rationale": "Free rez with explicit Kludge lifetime and trash liability; target candidate records ICE choice and X lifetime schema need. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_proteus_051_rent-to-own-contract",
+      "title": "Rent-to-Own Contract",
+      "tacticSignals": [
+        "ice.corp_deferred_rez",
+        "ice.corp_installment_rez"
+      ],
+      "conditions": [
+        "requires_installed_ice_choice"
+      ],
+      "strategyAnchors": [],
+      "targetProfileStatus": "candidate",
+      "rationale": "Deferred/installment rez with term counters and payment risk; not temporary rez and not a Kludge-style lifetime. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_proteus_052_schlaghund-pointers",
+      "title": "Schlaghund Pointers",
+      "tacticSignals": [
+        "condition.run_this_game",
+        "tag.source",
+        "trace.source"
+      ],
+      "conditions": [
+        "requires_run_this_game",
+        "requires_trace_success"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "targetProfileStatus": "not_required",
+      "rationale": "Requires a run this game and has trace-cost scaling above base trace; not a last-turn run condition. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_proteus_053_underworld-mole",
+      "title": "Underworld Mole",
+      "tacticSignals": [
+        "condition.resource_installed_last_turn",
+        "resource.trash_payoff",
+        "tag.source",
+        "trace.source"
+      ],
+      "conditions": [
+        "requires_resource_installed_last_turn",
+        "requires_trace_success"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "targetProfileStatus": "candidate",
+      "rationale": "Trace-success trashes a recently installed resource and gives a tag; condition is resource-installed-last-turn, not generic run-last-turn. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "v08_archive_planning_operation",
+      "title": "Archive Planning Operation",
+      "tacticSignals": [
+        "economy.corp_draw"
+      ],
+      "conditions": [],
+      "strategyAnchors": [],
+      "targetProfileStatus": "not_required",
+      "rationale": "The active V08 test operation text says draw 3 cards; it is not Archives recovery. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    }
+  ],
+  "addedSignals": [
+    {
+      "signalId": "condition.multiple_runs_last_turn",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "condition.node_trashed_last_turn",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "condition.run_this_game",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "condition.resource_installed_last_turn",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "damage.meat_source",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "damage.tagged_meat_payoff",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "signalId": "ice.corp_installment_rez",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "tag.additional_tag_followup",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ]
+    }
+  ],
+  "changedSignals": [
+    {
+      "signalId": "advance.corp_counter_transfer",
+      "change": "reused_for_operation_counter_transfer"
+    }
+  ],
+  "removedSignals": [
+    {
+      "cardId": "onr_v1_296_off-site-backups",
+      "removed": [
+        "economy.corp_draw"
+      ]
+    },
+    {
+      "cardId": "onr_v1_294_new-blood",
+      "removed": [
+        "condition.last_turn_run"
+      ]
+    },
+    {
+      "cardId": "onr_v1_303_silver-lining-recovery-protocol",
+      "removed": [
+        "advance.overadvance_support"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_051_rent-to-own-contract",
+      "removed": [
+        "ice.corp_temporary_rez",
+        "risk.temporary_rez_liability"
+      ]
+    }
+  ],
+  "changedStrategySupportPairs": [
+    {
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "title": "Audit of Call Records",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "tag_source_enabler",
+      "evidence": [
+        "trace.source",
+        "tag.source"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_284_chance-observation",
+      "title": "Chance Observation",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "tag_source_enabler",
+      "evidence": [
+        "trace.source",
+        "tag.source"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_285_closed-accounts",
+      "title": "Closed Accounts",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "tag_payoff",
+      "evidence": [
+        "tag.payoff"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_286_corporate-detective-agency",
+      "title": "Corporate Detective Agency",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "resource_payoff",
+      "evidence": [
+        "tag.payoff",
+        "resource.trash_payoff"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_287_datapool-by-zetatech",
+      "title": "Datapool by Zetatech",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "tag_snowball_followup",
+      "evidence": [
+        "tag.additional_tag_followup",
+        "tag.payoff"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_291_falsified-transactions-expert",
+      "title": "Falsified-Transactions Expert",
+      "strategyId": "corp.fast_advance",
+      "role": "fast_advance_enabler",
+      "evidence": [
+        "advance.corp_counter_transfer",
+        "advance.score_window_support"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_292_management-shake-up",
+      "title": "Management Shake-Up",
+      "strategyId": "corp.fast_advance",
+      "role": "fast_advance_enabler",
+      "evidence": [
+        "advance.agenda_counter",
+        "advance.overadvance_support"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_293_netwatch-credit-voucher",
+      "title": "Netwatch Credit Voucher",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "tag_snowball_followup",
+      "evidence": [
+        "tag.additional_tag_followup",
+        "tag.payoff"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_299_power-grid-overload",
+      "title": "Power Grid Overload",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "hardware_payoff",
+      "evidence": [
+        "tag.payoff",
+        "hardware.trash_payoff"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_300_project-consultants",
+      "title": "Project Consultants",
+      "strategyId": "corp.fast_advance",
+      "role": "fast_advance_enabler",
+      "evidence": [
+        "advance.agenda_counter",
+        "advance.overadvance_support"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_301_punitive-counterstrike",
+      "title": "Punitive Counterstrike",
+      "strategyId": "corp.damage_kill",
+      "role": "tagged_minor_damage_payoff",
+      "evidence": [
+        "damage.tagged_meat_payoff",
+        "damage.meat_source"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_301_punitive-counterstrike",
+      "title": "Punitive Counterstrike",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "tagged_damage_payoff",
+      "evidence": [
+        "damage.tagged_meat_payoff",
+        "tag.payoff"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_302_scorched-earth",
+      "title": "Scorched Earth",
+      "strategyId": "corp.damage_kill",
+      "role": "tagged_damage_payoff",
+      "evidence": [
+        "damage.tagged_meat_payoff",
+        "damage.meat_source"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_302_scorched-earth",
+      "title": "Scorched Earth",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "tagged_damage_payoff",
+      "evidence": [
+        "damage.tagged_meat_payoff",
+        "tag.payoff"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_304_systematic-layoffs",
+      "title": "Systematic Layoffs",
+      "strategyId": "corp.fast_advance",
+      "role": "fast_advance_enabler",
+      "evidence": [
+        "advance.agenda_counter",
+        "advance.overadvance_support"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_305_team-restructuring",
+      "title": "Team Restructuring",
+      "strategyId": "corp.fast_advance",
+      "role": "fast_advance_enabler",
+      "evidence": [
+        "advance.agenda_counter",
+        "advance.score_window_support"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_306_trojan-horse",
+      "title": "Trojan Horse",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "tag_source_enabler",
+      "evidence": [
+        "tag.source"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_307_urban-renewal",
+      "title": "Urban Renewal",
+      "strategyId": "corp.damage_kill",
+      "role": "tagged_damage_payoff",
+      "evidence": [
+        "damage.tagged_meat_payoff",
+        "damage.meat_source"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_307_urban-renewal",
+      "title": "Urban Renewal",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "tagged_damage_payoff",
+      "evidence": [
+        "damage.tagged_meat_payoff",
+        "tag.payoff"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_proteus_048_data-sifters",
+      "title": "Data Sifters",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "tag_source_enabler",
+      "evidence": [
+        "tag.source"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_049_emergency-rig",
+      "title": "Emergency Rig",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "free_rez_enabler",
+      "evidence": [
+        "ice.corp_free_rez"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_050_manhunt",
+      "title": "Manhunt",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "tag_source_enabler",
+      "evidence": [
+        "trace.source",
+        "tag.source"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_052_schlaghund-pointers",
+      "title": "Schlaghund Pointers",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "tag_source_enabler",
+      "evidence": [
+        "trace.source",
+        "tag.source"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_053_underworld-mole",
+      "title": "Underworld Mole",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "tag_source_enabler",
+      "evidence": [
+        "trace.source",
+        "tag.source"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "simple_tag_punishment_operation",
+      "title": "Simple Tag Punishment Operation",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "tag_payoff",
+      "evidence": [
+        "tag.payoff"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "changedTargetProfiles": [
+    {
+      "cardId": "onr_v1_291_falsified-transactions-expert",
+      "title": "Falsified-Transactions Expert",
+      "status": "candidate",
+      "targetProfileKinds": [
+        "use_target:advancement_counter_reallocation"
+      ]
+    },
+    {
+      "cardId": "onr_v1_292_management-shake-up",
+      "title": "Management Shake-Up",
+      "status": "candidate",
+      "targetProfileKinds": [
+        "use_target:installed_agenda_or_overadvance_card"
+      ]
+    },
+    {
+      "cardId": "onr_v1_294_new-blood",
+      "title": "New Blood",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "private_ice_rearrange_or_conceal"
+      ]
+    },
+    {
+      "cardId": "onr_v1_296_off-site-backups",
+      "title": "Off-Site Backups",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "private_archives_recovery_choice"
+      ]
+    },
+    {
+      "cardId": "onr_v1_300_project-consultants",
+      "title": "Project Consultants",
+      "status": "candidate",
+      "targetProfileKinds": [
+        "use_target:installed_agenda_or_overadvance_card"
+      ]
+    },
+    {
+      "cardId": "onr_v1_304_systematic-layoffs",
+      "title": "Systematic Layoffs",
+      "status": "candidate",
+      "targetProfileKinds": [
+        "use_target:installed_agenda_or_overadvance_card"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_049_emergency-rig",
+      "title": "Emergency Rig",
+      "status": "candidate",
+      "targetProfileKinds": [
+        "use_target:installed_ice_rez_choice",
+        "use_target:x_kludge_lifetime_choice"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_051_rent-to-own-contract",
+      "title": "Rent-to-Own Contract",
+      "status": "candidate",
+      "targetProfileKinds": [
+        "use_target:installed_ice_deferred_rez_choice"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_053_underworld-mole",
+      "title": "Underworld Mole",
+      "status": "candidate",
+      "targetProfileKinds": [
+        "use_target:recently_installed_resource"
+      ]
+    }
+  ],
+  "testOperationSeparation": {
+    "productionOriginalsetOperations": 27,
+    "productionProteusOperations": 8,
+    "activeTestOperations": 5,
+    "testStrategySupportPairsExcludedFromProductionAggregation": true
+  },
+  "retainedDeferredItems": [
+    {
+      "topic": "target_profile_v1_for_private_operation_choices",
+      "decision": "retained_schema_gap_or_candidate_only",
+      "rationale": "Archives recovery, ICE rearrange/conceal, counter reallocation, X lifetime and installment-rez choices remain report-only candidates or schema gaps."
+    },
+    {
+      "topic": "prefix_compatibility",
+      "decision": "no_renaming",
+      "rationale": "AI025-1 adds precise condition, tag-snowball and damage signals but does not rename legacy `economy.corp_draw` or existing AI025 signals."
+    }
+  ],
+  "hiddenInfoSafetyReview": [
+    {
+      "topic": "operation_visibility",
+      "result": "pass",
+      "notes": "Operations remain public when played; private choices such as Archives recovery, ICE rearrange or target selection stay side-safe and report-only until resolved by existing rules."
+    },
+    {
+      "topic": "runtime_consumption",
+      "result": "pass",
+      "notes": "AI025-1 updates only AI hint data, signal catalog, derivation metadata and review artifacts. It adds no planner, action-score, plan-weight, targeting-AI, engine, legal, UI or hidden-info projection path."
+    }
+  ],
+  "verification": [
+    {
+      "command": "node scripts/check-ai025-1-corp-operations-semantics-polish.mjs",
+      "result": "pending_after_apply"
+    }
+  ],
+  "postReviewAssignments": [
+    {
+      "cardId": "onr_v1_281_accounts-receivable",
+      "title": "Accounts Receivable",
+      "cardType": "operation",
+      "subtypes": [
+        "transactions"
+      ],
+      "mechanicalFamily": "economy",
+      "functionalEffects": [
+        "economy.corp_credit_burst"
+      ],
+      "conditions": [],
+      "risks": [],
+      "tacticSignals": [
+        "economy.corp_credit_burst"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "economy.corp_credit_burst"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Credits-only Transaction support; no strategy anchor from economy alone. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_282_annual-reviews",
+      "title": "Annual Reviews",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "draw",
+      "functionalEffects": [
+        "economy.corp_draw"
+      ],
+      "conditions": [],
+      "risks": [],
+      "tacticSignals": [
+        "economy.corp_draw"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "economy.corp_draw"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Corp draw support; no strategy anchor from card flow alone. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_283_audit-of-call-records",
+      "title": "Audit of Call Records",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "trace_tag_source",
+      "functionalEffects": [
+        "tag.source",
+        "trace.source"
+      ],
+      "conditions": [
+        "requires_multiple_runs_last_turn",
+        "requires_trace_success"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "condition.multiple_runs_last_turn",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "tag_source_enabler",
+          "evidence": [
+            "trace.source",
+            "tag.source"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "tag.source",
+        "trace.source"
+      ],
+      "supportingEvidence": [
+        "condition.multiple_runs_last_turn"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Requires two or more runs during the Runner's last turn, then trace-success tag. The prior generic run-last-turn condition was too broad. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_284_chance-observation",
+      "title": "Chance Observation",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "trace_tag_source",
+      "functionalEffects": [
+        "tag.source",
+        "trace.source"
+      ],
+      "conditions": [
+        "requires_trace_success"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "condition.last_turn_run",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "tag_source_enabler",
+          "evidence": [
+            "trace.source",
+            "tag.source"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "tag.source",
+        "trace.source"
+      ],
+      "supportingEvidence": [
+        "condition.last_turn_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Run-history trace tag source; not a damage or payoff operation. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_285_closed-accounts",
+      "title": "Closed Accounts",
+      "cardType": "operation",
+      "subtypes": [
+        "gray ops"
+      ],
+      "mechanicalFamily": "tagged_runner_credit_loss",
+      "functionalEffects": [
+        "tag.payoff"
+      ],
+      "conditions": [
+        "requires_runner_tagged"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "risk.requires_tagged_runner",
+        "tag.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "tag_payoff",
+          "evidence": [
+            "tag.payoff"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "tag.payoff"
+      ],
+      "supportingEvidence": [
+        "risk.requires_tagged_runner"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Runner loses all bits while tagged; this is not Corp credit gain or conditional Corp economy. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_286_corporate-detective-agency",
+      "title": "Corporate Detective Agency",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "resource_trash",
+      "functionalEffects": [
+        "resource.trash_payoff",
+        "tag.payoff"
+      ],
+      "conditions": [
+        "requires_runner_tagged"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "resource.trash_payoff",
+        "risk.requires_tagged_runner",
+        "tag.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "resource_payoff",
+          "evidence": [
+            "tag.payoff",
+            "resource.trash_payoff"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "resource.trash_payoff",
+        "tag.payoff"
+      ],
+      "supportingEvidence": [
+        "risk.requires_tagged_runner"
+      ],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "use_target:installed_resource"
+      ],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Tagged resource trash is a Tag/Punish payoff; resource type remains target data. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_287_datapool-by-zetatech",
+      "title": "Datapool by Zetatech",
+      "cardType": "operation",
+      "subtypes": [
+        "gray ops"
+      ],
+      "mechanicalFamily": "tag_snowball_followup",
+      "functionalEffects": [
+        "tag.additional_tag_followup",
+        "tag.payoff"
+      ],
+      "conditions": [
+        "requires_runner_tagged"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "risk.requires_tagged_runner",
+        "tag.additional_tag_followup",
+        "tag.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "tag_snowball_followup",
+          "evidence": [
+            "tag.additional_tag_followup",
+            "tag.payoff"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "tag.additional_tag_followup",
+        "tag.payoff"
+      ],
+      "supportingEvidence": [
+        "risk.requires_tagged_runner"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Adds more tags only to an already tagged Runner; modeled as tag snowball/follow-up rather than an initial tag source. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_288_day-shift",
+      "title": "Day Shift",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "economy_draw",
+      "functionalEffects": [
+        "economy.corp_credit_burst",
+        "economy.corp_draw"
+      ],
+      "conditions": [],
+      "risks": [],
+      "tacticSignals": [
+        "economy.corp_credit_burst",
+        "economy.corp_draw"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "economy.corp_credit_burst",
+        "economy.corp_draw"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Corp draw plus small credit support; no strategy anchor. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_289_edgerunner-inc-temps",
+      "title": "Edgerunner, Inc., Temps",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "install_only_actions",
+      "functionalEffects": [
+        "action.corp_install_action_bundle"
+      ],
+      "conditions": [],
+      "risks": [],
+      "tacticSignals": [
+        "action.corp_install_action_bundle"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "action.corp_install_action_bundle"
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "multi_install_action_bundle"
+      ],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Install-action support is not Fast Advance without scoring evidence. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_290_efficiency-experts",
+      "title": "Efficiency Experts",
+      "cardType": "operation",
+      "subtypes": [
+        "transactions"
+      ],
+      "mechanicalFamily": "economy",
+      "functionalEffects": [
+        "economy.corp_credit_burst"
+      ],
+      "conditions": [],
+      "risks": [],
+      "tacticSignals": [
+        "economy.corp_credit_burst"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "economy.corp_credit_burst"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Credits-only Transaction support; no strategy anchor. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_291_falsified-transactions-expert",
+      "title": "Falsified-Transactions Expert",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "advancement_counter_transfer",
+      "functionalEffects": [
+        "advance.corp_counter_transfer"
+      ],
+      "conditions": [
+        "requires_source_advancement_counters",
+        "requires_target_can_be_advanced"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "advance.corp_counter_transfer",
+        "advance.score_window_support"
+      ],
+      "strategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "legacyStrategicRole": [
+        "scoring_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "fast_advance_enabler",
+          "evidence": [
+            "advance.corp_counter_transfer",
+            "advance.score_window_support"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "advance.corp_counter_transfer",
+        "advance.score_window_support"
+      ],
+      "supportingEvidence": [],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "use_target:advancement_counter_reallocation"
+      ],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Moves counters between installed cards; it reallocates existing advancement counters and does not create new counters. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_292_management-shake-up",
+      "title": "Management Shake-Up",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "advancement",
+      "functionalEffects": [
+        "advance.overadvance_support"
+      ],
+      "conditions": [
+        "requires_target_can_be_advanced"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "advance.agenda_counter",
+        "advance.overadvance_support",
+        "advance.score_window_support"
+      ],
+      "strategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "legacyStrategicRole": [
+        "scoring_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "fast_advance_enabler",
+          "evidence": [
+            "advance.agenda_counter",
+            "advance.overadvance_support"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "advance.agenda_counter",
+        "advance.overadvance_support"
+      ],
+      "supportingEvidence": [
+        "advance.score_window_support"
+      ],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "use_target:installed_agenda_or_overadvance_card"
+      ],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Adds new advancement counters to installed advanceable cards and does not require pre-existing counters. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_293_netwatch-credit-voucher",
+      "title": "Netwatch Credit Voucher",
+      "cardType": "operation",
+      "subtypes": [
+        "gray ops"
+      ],
+      "mechanicalFamily": "tag_snowball_followup",
+      "functionalEffects": [
+        "economy.corp_credit_burst",
+        "tag.additional_tag_followup",
+        "tag.payoff"
+      ],
+      "conditions": [
+        "requires_runner_tagged"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "economy.corp_credit_burst",
+        "risk.requires_tagged_runner",
+        "tag.additional_tag_followup",
+        "tag.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "tag_snowball_followup",
+          "evidence": [
+            "tag.additional_tag_followup",
+            "tag.payoff"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "tag.additional_tag_followup",
+        "tag.payoff"
+      ],
+      "supportingEvidence": [
+        "economy.corp_credit_burst",
+        "risk.requires_tagged_runner"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Adds an extra tag only after the Runner is already tagged, plus a small Corp credit burst. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_294_new-blood",
+      "title": "New Blood",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "ice_rearrange_conceal",
+      "functionalEffects": [
+        "ice.corp_rearrange_conceal"
+      ],
+      "conditions": [],
+      "risks": [],
+      "tacticSignals": [
+        "ice.corp_rearrange_conceal"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "ice.corp_rearrange_conceal"
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "private_ice_rearrange_or_conceal"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_resolved",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Conceal/rearrange operation has no run-last-turn play condition in the repo card text. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_295_night-shift",
+      "title": "Night Shift",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "economy_draw",
+      "functionalEffects": [
+        "economy.corp_credit_burst",
+        "economy.corp_draw"
+      ],
+      "conditions": [],
+      "risks": [],
+      "tacticSignals": [
+        "economy.corp_credit_burst",
+        "economy.corp_draw"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "economy.corp_credit_burst",
+        "economy.corp_draw"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Corp economy plus draw support; no strategy anchor. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_296_off-site-backups",
+      "title": "Off-Site Backups",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "archives_recovery",
+      "functionalEffects": [
+        "archives.corp_recovery"
+      ],
+      "conditions": [],
+      "risks": [],
+      "tacticSignals": [
+        "archives.corp_recovery"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "archives.corp_recovery"
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "private_archives_recovery_choice"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_resolved",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Returns a card from Archives to HQ; no draw occurs. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_297_overtime-incentives",
+      "title": "Overtime Incentives",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "extra_actions",
+      "functionalEffects": [
+        "action.corp_extra_action_support"
+      ],
+      "conditions": [],
+      "risks": [],
+      "tacticSignals": [
+        "action.corp_extra_action_support"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "action.corp_extra_action_support"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Tempo/action support, not automatically a Fast-Advance anchor. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_298_planning-consultants",
+      "title": "Planning Consultants",
+      "cardType": "operation",
+      "subtypes": [
+        "gray ops"
+      ],
+      "mechanicalFamily": "rnd_topdeck_setup",
+      "functionalEffects": [
+        "rnd.corp_topdeck_reorder"
+      ],
+      "conditions": [],
+      "risks": [],
+      "tacticSignals": [
+        "rnd.corp_topdeck_reorder",
+        "rnd.corp_topdeck_setup"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "rnd.corp_topdeck_reorder",
+        "rnd.corp_topdeck_setup"
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "private_rnd_top5_reorder"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_resolved",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "R&D topdeck planning is support-only and hidden-zone side-safe. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_299_power-grid-overload",
+      "title": "Power Grid Overload",
+      "cardType": "operation",
+      "subtypes": [
+        "gray ops"
+      ],
+      "mechanicalFamily": "hardware_trash",
+      "functionalEffects": [
+        "hardware.trash_payoff",
+        "tag.payoff"
+      ],
+      "conditions": [
+        "requires_installed_hardware",
+        "requires_runner_tagged"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "hardware.trash_payoff",
+        "risk.requires_tagged_runner",
+        "tag.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "hardware_payoff",
+          "evidence": [
+            "tag.payoff",
+            "hardware.trash_payoff"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "hardware.trash_payoff",
+        "tag.payoff"
+      ],
+      "supportingEvidence": [
+        "risk.requires_tagged_runner"
+      ],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "use_target:installed_hardware"
+      ],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Tagged hardware trash is a Tag/Punish payoff. Cybernetics remains subtype/constraint data, not a signal. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_300_project-consultants",
+      "title": "Project Consultants",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "advancement",
+      "functionalEffects": [
+        "advance.overadvance_support"
+      ],
+      "conditions": [
+        "requires_target_can_be_advanced"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "advance.agenda_counter",
+        "advance.overadvance_support",
+        "advance.score_window_support"
+      ],
+      "strategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "legacyStrategicRole": [
+        "scoring_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "fast_advance_enabler",
+          "evidence": [
+            "advance.agenda_counter",
+            "advance.overadvance_support"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "advance.agenda_counter",
+        "advance.overadvance_support"
+      ],
+      "supportingEvidence": [
+        "advance.score_window_support"
+      ],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "use_target:installed_agenda_or_overadvance_card"
+      ],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Adds new advancement counters to installed advanceable cards and does not require pre-existing counters. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_301_punitive-counterstrike",
+      "title": "Punitive Counterstrike",
+      "cardType": "operation",
+      "subtypes": [
+        "black ops"
+      ],
+      "mechanicalFamily": "tagged_meat_damage",
+      "functionalEffects": [
+        "damage.meat_source",
+        "damage.tagged_meat_payoff",
+        "tag.payoff"
+      ],
+      "conditions": [
+        "requires_runner_tagged"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "damage.meat_source",
+        "damage.tagged_meat_payoff",
+        "risk.requires_tagged_runner",
+        "tag.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff",
+        "win_condition"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "tagged_minor_damage_payoff",
+          "evidence": [
+            "damage.tagged_meat_payoff",
+            "damage.meat_source"
+          ],
+          "confidence": "medium"
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "tagged_damage_payoff",
+          "evidence": [
+            "damage.tagged_meat_payoff",
+            "tag.payoff"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "damage.meat_source",
+        "damage.tagged_meat_payoff",
+        "tag.payoff"
+      ],
+      "supportingEvidence": [
+        "risk.requires_tagged_runner"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Tagged Runner payoff dealing 2 meat damage; precise damage type is carried separately from generic tag payoff. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_302_scorched-earth",
+      "title": "Scorched Earth",
+      "cardType": "operation",
+      "subtypes": [
+        "black ops"
+      ],
+      "mechanicalFamily": "tagged_meat_damage",
+      "functionalEffects": [
+        "damage.meat_source",
+        "damage.tagged_meat_payoff",
+        "tag.payoff"
+      ],
+      "conditions": [
+        "requires_runner_tagged"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "damage.meat_source",
+        "damage.tagged_meat_payoff",
+        "risk.requires_tagged_runner",
+        "tag.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "win_condition"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "tagged_damage_payoff",
+          "evidence": [
+            "damage.tagged_meat_payoff",
+            "damage.meat_source"
+          ],
+          "confidence": "high"
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "tagged_damage_payoff",
+          "evidence": [
+            "damage.tagged_meat_payoff",
+            "tag.payoff"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "damage.meat_source",
+        "damage.tagged_meat_payoff",
+        "tag.payoff"
+      ],
+      "supportingEvidence": [
+        "risk.requires_tagged_runner"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Tagged Runner payoff dealing 4 meat damage; a kill-capable meat-damage payoff. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_303_silver-lining-recovery-protocol",
+      "title": "Silver Lining Recovery Protocol",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "agenda_stolen_recovery",
+      "functionalEffects": [
+        "economy.corp_conditional_credit"
+      ],
+      "conditions": [
+        "requires_stolen_agenda_last_turn"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "condition.agenda_stolen_last_turn",
+        "economy.corp_conditional_credit"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "condition.agenda_stolen_last_turn",
+        "economy.corp_conditional_credit"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Conditional agenda-stolen credit recovery; no active overadvance-support signal is warranted. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_304_systematic-layoffs",
+      "title": "Systematic Layoffs",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "advancement",
+      "functionalEffects": [
+        "advance.overadvance_support"
+      ],
+      "conditions": [
+        "requires_target_can_be_advanced"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "advance.agenda_counter",
+        "advance.overadvance_support",
+        "advance.score_window_support"
+      ],
+      "strategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "legacyStrategicRole": [
+        "scoring_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "fast_advance_enabler",
+          "evidence": [
+            "advance.agenda_counter",
+            "advance.overadvance_support"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "advance.agenda_counter",
+        "advance.overadvance_support"
+      ],
+      "supportingEvidence": [
+        "advance.score_window_support"
+      ],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "use_target:installed_agenda_or_overadvance_card"
+      ],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Adds new advancement counters to installed advanceable cards and does not require pre-existing counters. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_305_team-restructuring",
+      "title": "Team Restructuring",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "advancement",
+      "functionalEffects": [
+        "advance.agenda_counter"
+      ],
+      "conditions": [
+        "requires_score_window"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "advance.agenda_counter",
+        "advance.score_window_support"
+      ],
+      "strategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "legacyStrategicRole": [
+        "scoring_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "fast_advance_enabler",
+          "evidence": [
+            "advance.agenda_counter",
+            "advance.score_window_support"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "advance.agenda_counter",
+        "advance.score_window_support"
+      ],
+      "supportingEvidence": [],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "use_target:installed_agenda_or_score_window"
+      ],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Agenda counter support is Fast-Advance evidence. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_306_trojan-horse",
+      "title": "Trojan Horse",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "tag_source",
+      "functionalEffects": [
+        "tag.source"
+      ],
+      "conditions": [
+        "requires_stolen_agenda_last_turn"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "condition.agenda_stolen_last_turn",
+        "tag.source"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "tag_source_enabler",
+          "evidence": [
+            "tag.source"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "tag.source"
+      ],
+      "supportingEvidence": [
+        "condition.agenda_stolen_last_turn"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Agenda-stolen tag source; enabler, not a payoff. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_v1_307_urban-renewal",
+      "title": "Urban Renewal",
+      "cardType": "operation",
+      "subtypes": [
+        "black ops"
+      ],
+      "mechanicalFamily": "tagged_meat_damage",
+      "functionalEffects": [
+        "damage.meat_source",
+        "damage.tagged_meat_payoff",
+        "tag.payoff"
+      ],
+      "conditions": [
+        "requires_runner_tagged"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "damage.meat_source",
+        "damage.tagged_meat_payoff",
+        "risk.requires_tagged_runner",
+        "tag.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "win_condition"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "tagged_damage_payoff",
+          "evidence": [
+            "damage.tagged_meat_payoff",
+            "damage.meat_source"
+          ],
+          "confidence": "high"
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "tagged_damage_payoff",
+          "evidence": [
+            "damage.tagged_meat_payoff",
+            "tag.payoff"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "damage.meat_source",
+        "damage.tagged_meat_payoff",
+        "tag.payoff"
+      ],
+      "supportingEvidence": [
+        "risk.requires_tagged_runner"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Tagged Runner payoff dealing 5 meat damage; a kill-capable meat-damage payoff. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_proteus_046_corporate-guard-r-temps",
+      "title": "Corporate Guard(R) Temps",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "future_extra_actions",
+      "functionalEffects": [
+        "action.corp_future_extra_action"
+      ],
+      "conditions": [],
+      "risks": [],
+      "tacticSignals": [
+        "action.corp_future_extra_action",
+        "risk.agenda_forfeit_drawback"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "action.corp_future_extra_action",
+        "risk.agenda_forfeit_drawback"
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "x_value_future_turns_and_forfeit_drawback"
+      ],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Future extra actions plus agenda/credit forfeit drawback; tempo support, not automatic Fast Advance. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_proteus_047_credit-consolidation",
+      "title": "Credit Consolidation",
+      "cardType": "operation",
+      "subtypes": [
+        "transactions"
+      ],
+      "mechanicalFamily": "economy",
+      "functionalEffects": [
+        "economy.corp_credit_burst"
+      ],
+      "conditions": [],
+      "risks": [],
+      "tacticSignals": [
+        "economy.corp_credit_burst"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "economy.corp_credit_burst"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Transaction economy support; no strategy anchor. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_proteus_048_data-sifters",
+      "title": "Data Sifters",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "tag_source",
+      "functionalEffects": [
+        "tag.source"
+      ],
+      "conditions": [
+        "requires_node_trashed_last_turn"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "condition.node_trashed_last_turn",
+        "tag.source"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "tag_source_enabler",
+          "evidence": [
+            "tag.source"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "tag.source"
+      ],
+      "supportingEvidence": [
+        "condition.node_trashed_last_turn"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Requires Runner trashed a node last turn; not a generic run-last-turn condition. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_proteus_049_emergency-rig",
+      "title": "Emergency Rig",
+      "cardType": "operation",
+      "subtypes": [
+        "transactions"
+      ],
+      "mechanicalFamily": "ice_rez_tempo",
+      "functionalEffects": [
+        "ice.corp_free_rez",
+        "ice.corp_temporary_rez",
+        "risk.temporary_rez_liability"
+      ],
+      "conditions": [
+        "requires_x_lifetime_choice"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "ice.corp_free_rez",
+        "ice.corp_temporary_rez",
+        "risk.temporary_rez_liability"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "free_rez_enabler",
+          "evidence": [
+            "ice.corp_free_rez"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "ice.corp_free_rez"
+      ],
+      "supportingEvidence": [
+        "ice.corp_temporary_rez",
+        "risk.temporary_rez_liability"
+      ],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "use_target:installed_ice_rez_choice",
+        "use_target:x_kludge_lifetime_choice"
+      ],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Free rez with explicit Kludge lifetime and trash liability; target candidate records ICE choice and X lifetime schema need. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_proteus_050_manhunt",
+      "title": "Manhunt",
+      "cardType": "operation",
+      "subtypes": [
+        "gray_ops"
+      ],
+      "mechanicalFamily": "trace_tag_source",
+      "functionalEffects": [
+        "tag.source",
+        "trace.source"
+      ],
+      "conditions": [
+        "requires_trace_success"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "condition.last_turn_run",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "tag_source_enabler",
+          "evidence": [
+            "trace.source",
+            "tag.source"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "tag.source",
+        "trace.source"
+      ],
+      "supportingEvidence": [
+        "condition.last_turn_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Trace/tag enabler, not a payoff. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_proteus_051_rent-to-own-contract",
+      "title": "Rent-to-Own Contract",
+      "cardType": "operation",
+      "subtypes": [
+        "transactions"
+      ],
+      "mechanicalFamily": "ice_rez_tempo",
+      "functionalEffects": [
+        "ice.corp_deferred_rez",
+        "ice.corp_installment_rez"
+      ],
+      "conditions": [
+        "requires_installed_ice_choice"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "ice.corp_deferred_rez",
+        "ice.corp_installment_rez"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "ice.corp_deferred_rez",
+        "ice.corp_installment_rez"
+      ],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "use_target:installed_ice_deferred_rez_choice"
+      ],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Deferred/installment rez with term counters and payment risk; not temporary rez and not a Kludge-style lifetime. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_proteus_052_schlaghund-pointers",
+      "title": "Schlaghund Pointers",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "trace_tag_source",
+      "functionalEffects": [
+        "tag.source",
+        "trace.source"
+      ],
+      "conditions": [
+        "requires_run_this_game",
+        "requires_trace_success"
+      ],
+      "risks": [
+        "trace_cost_scales_above_zero"
+      ],
+      "tacticSignals": [
+        "condition.run_this_game",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "tag_source_enabler",
+          "evidence": [
+            "trace.source",
+            "tag.source"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "tag.source",
+        "trace.source"
+      ],
+      "supportingEvidence": [
+        "condition.run_this_game"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Requires a run this game and has trace-cost scaling above base trace; not a last-turn run condition. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "onr_proteus_053_underworld-mole",
+      "title": "Underworld Mole",
+      "cardType": "operation",
+      "subtypes": [
+        "gray_ops"
+      ],
+      "mechanicalFamily": "trace_tag_resource_trash",
+      "functionalEffects": [
+        "resource.trash_payoff",
+        "tag.source",
+        "trace.source"
+      ],
+      "conditions": [
+        "requires_resource_installed_last_turn",
+        "requires_trace_success"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "condition.resource_installed_last_turn",
+        "resource.trash_payoff",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "tag_source_enabler",
+          "evidence": [
+            "trace.source",
+            "tag.source"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "tag.source",
+        "trace.source"
+      ],
+      "supportingEvidence": [
+        "condition.resource_installed_last_turn",
+        "resource.trash_payoff"
+      ],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "use_target:recently_installed_resource"
+      ],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Trace-success trashes a recently installed resource and gives a tag; condition is resource-installed-last-turn, not generic run-last-turn. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "simple_draw_operation",
+      "title": "Simple Draw Operation",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "draw",
+      "functionalEffects": [
+        "economy.corp_draw"
+      ],
+      "conditions": [],
+      "risks": [],
+      "tacticSignals": [
+        "economy.corp_draw"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "economy.corp_draw"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Test draw operation stays support-only. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "simple_economy_operation",
+      "title": "Simple Economy Operation",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "economy",
+      "functionalEffects": [
+        "economy.corp_credit_burst"
+      ],
+      "conditions": [],
+      "risks": [],
+      "tacticSignals": [
+        "economy.corp_credit_burst"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "economy.corp_credit_burst"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Test economy operation stays support-only. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "simple_tag_punishment_operation",
+      "title": "Simple Tag Punishment Operation",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "tagged_runner_payoff",
+      "functionalEffects": [
+        "tag.payoff"
+      ],
+      "conditions": [
+        "requires_runner_tagged"
+      ],
+      "risks": [],
+      "tacticSignals": [
+        "risk.requires_tagged_runner",
+        "tag.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "tag_payoff",
+          "evidence": [
+            "tag.payoff"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "tag.payoff"
+      ],
+      "supportingEvidence": [
+        "risk.requires_tagged_runner"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Test tagged payoff operation receives the same controlled tag payoff semantics. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "v08_archive_planning_operation",
+      "title": "Archive Planning Operation",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "draw",
+      "functionalEffects": [
+        "economy.corp_draw"
+      ],
+      "conditions": [],
+      "risks": [],
+      "tacticSignals": [
+        "economy.corp_draw"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "economy.corp_draw"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "The active V08 test operation text says draw 3 cards; it is not Archives recovery. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    },
+    {
+      "cardId": "v08_credit_surge_operation",
+      "title": "Credit Surge Operation",
+      "cardType": "operation",
+      "subtypes": [],
+      "mechanicalFamily": "economy",
+      "functionalEffects": [
+        "economy.corp_credit_burst"
+      ],
+      "conditions": [],
+      "risks": [],
+      "tacticSignals": [
+        "economy.corp_credit_burst"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "economy.corp_credit_burst"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_played",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Test credit operation stays support-only. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    }
+  ]
+}

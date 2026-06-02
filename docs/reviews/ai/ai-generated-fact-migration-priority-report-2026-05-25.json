@@ -5602,14 +5602,15 @@
       ],
       "monolithFields": ["effects", "conditions", "costProfile"],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
-        "generated_fact_absent_from_monolith": 1
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 1,
       "rationale": "Trace/tag operation facts are clear generated candidates, with trace success remaining runtime context.",
       "doNotMigrateFields": [
@@ -5688,10 +5689,11 @@
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
-        "generated_fact_absent_from_monolith": 1
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 1,
       "rationale": "Tagged-runner counter-economy payoff is exact, consumer-relevant and low ambiguity.",
       "doNotMigrateFields": [
@@ -5814,10 +5816,11 @@
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
-        "generated_fact_absent_from_monolith": 1
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 9,
       "rationale": "Tagged-runner tag plus economy is derivable, while playability remains LegalAction context.",
       "doNotMigrateFields": [

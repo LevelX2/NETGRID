@@ -1,6 +1,6 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI024-1",
+  "taskId": "AI024-1/AI025-1/AI025-1/AI025-1/AI025-1",
   "generatedAt": "2026-06-02",
   "description": "Controlled V1 tactic-signal catalog. AI024-1 sharpens selected Corp-ICE function signals without subtype-only or card-specific signals and without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
   "signalPolicy": {
@@ -898,11 +898,12 @@
         "corp.remote_scoring"
       ],
       "sourceKinds": [
+        "AI025-1 Corp-operation counter-transfer reuse",
         "AI026 reviewed Corp node/asset structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": true,
-      "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+      "notes": "Read-only counter-transfer signal reused by AI025-1 for Falsified-Transactions Expert; it does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
       "signalId": "advance.overadvance_support",
@@ -1588,6 +1589,66 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "condition.multiple_runs_last_turn",
+      "group": "ai025_1_corp_operations_conditions",
+      "sideScope": "corp",
+      "description": "AI025-1 Corp operation polish signal: condition.multiple runs last turn.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025-1 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI025-1 Corp-operation polish signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "condition.node_trashed_last_turn",
+      "group": "ai025_1_corp_operations_conditions",
+      "sideScope": "corp",
+      "description": "AI025-1 Corp operation polish signal: condition.node trashed last turn.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025-1 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI025-1 Corp-operation polish signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "condition.resource_installed_last_turn",
+      "group": "ai025_1_corp_operations_conditions",
+      "sideScope": "corp",
+      "description": "AI025-1 Corp operation polish signal: condition.resource installed last turn.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025-1 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI025-1 Corp-operation polish signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "condition.run_this_game",
+      "group": "ai025_1_corp_operations_conditions",
+      "sideScope": "corp",
+      "description": "AI025-1 Corp operation polish signal: condition.run this game.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025-1 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI025-1 Corp-operation polish signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
       "signalId": "corp_ice.brain_damage",
@@ -2442,6 +2503,23 @@
       "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "damage.meat_source",
+      "group": "ai025_1_corp_operations_damage",
+      "sideScope": "corp",
+      "description": "AI025-1 Corp operation polish signal: damage.meat source.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "sourceKinds": [
+        "AI025-1 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI025-1 Corp-operation polish signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
       "signalId": "damage.payoff",
       "group": "damage_kill",
       "sideScope": "corp",
@@ -2460,6 +2538,24 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Damage anchor requires Corp side and Runner scope."
+    },
+    {
+      "signalId": "damage.tagged_meat_payoff",
+      "group": "ai025_1_corp_operations_damage",
+      "sideScope": "corp",
+      "description": "AI025-1 Corp operation polish signal: damage.tagged meat payoff.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "AI025-1 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI025-1 Corp-operation polish signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
       "signalId": "defense.all_meat_damage_prevention",
@@ -3838,6 +3934,21 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "ice.corp_installment_rez",
+      "group": "ai025_1_corp_operations_ice",
+      "sideScope": "corp",
+      "description": "AI025-1 Corp operation polish signal: ice.corp installment rez.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025-1 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI025-1 Corp-operation polish signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
       "signalId": "ice.corp_rearrange_conceal",
@@ -7364,6 +7475,23 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "tag.additional_tag_followup",
+      "group": "ai025_1_corp_operations_tag_snowball",
+      "sideScope": "corp",
+      "description": "AI025-1 Corp operation polish signal: tag.additional tag followup.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "AI025-1 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI025-1 Corp-operation polish signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
       "signalId": "tag.corp_persistent_source",

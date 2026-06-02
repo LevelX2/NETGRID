@@ -14,7 +14,7 @@
   "includedCardCount": 30,
   "excludedCardCount": 0,
   "confirmedGeneratedFactCount": 101,
-  "previewAddedFactCount": 71,
+  "previewAddedFactCount": 72,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
   "normalizedDifferenceCount": 204,
@@ -2432,10 +2432,7 @@
         "condition:requires_archives_card",
         "effect:card_recovery"
       ],
-      "previewAdds": [
-        "condition:requires_archives_card",
-        "effect:card_recovery"
-      ],
+      "previewAdds": ["condition:requires_archives_card"],
       "normalizedDifferences": [
         {
           "field": "condition:requires_archives_card",
@@ -2671,7 +2668,10 @@
         "effect:advance_burst",
         "effect:score_acceleration"
       ],
-      "previewAdds": ["effect:score_acceleration"],
+      "previewAdds": [
+        "condition:requires_score_window",
+        "effect:score_acceleration"
+      ],
       "normalizedDifferences": [
         {
           "field": "condition:requires_score_window",
@@ -2875,7 +2875,10 @@
         "effect:advance_burst",
         "effect:score_acceleration"
       ],
-      "previewAdds": ["effect:score_acceleration"],
+      "previewAdds": [
+        "condition:requires_score_window",
+        "effect:score_acceleration"
+      ],
       "normalizedDifferences": [
         {
           "field": "condition:requires_score_window",

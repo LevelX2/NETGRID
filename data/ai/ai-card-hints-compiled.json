@@ -20948,6 +20948,9 @@
       ],
       "conditions": [
         {
+          "kind": "requires_runner_action"
+        },
+        {
           "kind": "requires_trace_success"
         }
       ],
@@ -20963,7 +20966,7 @@
         "enabler"
       ],
       "tacticSignals": [
-        "condition.last_turn_run",
+        "condition.multiple_runs_last_turn",
         "tag.source",
         "trace.source"
       ]
@@ -21101,13 +21104,6 @@
       "effects": [
         {
           "finite": true,
-          "kind": "counter_economy",
-          "resource": "credits",
-          "scope": "runner",
-          "timing": "action"
-        },
-        {
-          "finite": true,
           "kind": "tag_punish_payoff",
           "resource": "credits",
           "scope": "runner",
@@ -21143,7 +21139,6 @@
         "punish_payoff"
       ],
       "tacticSignals": [
-        "economy.corp_conditional_credit",
         "risk.requires_tagged_runner",
         "tag.payoff"
       ]
@@ -21277,8 +21272,18 @@
       },
       "effects": [
         {
+          "amount": 2,
+          "finite": true,
+          "kind": "tag_source",
+          "resource": "tags",
+          "scope": "runner",
+          "timing": "action"
+        },
+        {
+          "amount": 2,
           "finite": true,
           "kind": "tag_punish_payoff",
+          "resource": "tags",
           "scope": "runner",
           "timing": "action"
         },
@@ -21299,10 +21304,11 @@
         "corp.tag_trace_punish"
       ],
       "strategicRole": [
-        "punish_payoff"
+        "enabler"
       ],
       "tacticSignals": [
         "risk.requires_tagged_runner",
+        "tag.additional_tag_followup",
         "tag.payoff"
       ]
     },
@@ -21521,22 +21527,25 @@
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_operation_counter"
       ],
       "tacticSignals": [
-        "advance.agenda_counter",
+        "advance.corp_counter_transfer",
         "advance.score_window_support"
       ],
       "effects": [
         {
           "kind": "advance",
           "timing": "action",
-          "scope": "score_area",
+          "scope": "installed_card",
           "resource": "advancement_counters",
-          "amount": 1,
+          "amount": 3,
           "finite": true
         }
       ],
       "conditions": [
         {
-          "kind": "requires_score_window"
+          "kind": "requires_advancement_counter"
+        },
+        {
+          "kind": "requires_installed_card"
         }
       ],
       "lineSupport": [
@@ -21613,10 +21622,7 @@
       ],
       "conditions": [
         {
-          "kind": "requires_score_window"
-        },
-        {
-          "kind": "requires_advancement_counter"
+          "kind": "requires_installed_card"
         }
       ],
       "quality": {
@@ -21691,6 +21697,14 @@
         {
           "amount": 1,
           "finite": true,
+          "kind": "tag_punish_payoff",
+          "resource": "tags",
+          "scope": "runner",
+          "timing": "action"
+        },
+        {
+          "amount": 1,
+          "finite": true,
           "kind": "economy",
           "resource": "credits",
           "scope": "corp",
@@ -21730,7 +21744,8 @@
       "tacticSignals": [
         "economy.corp_credit_burst",
         "risk.requires_tagged_runner",
-        "tag.source"
+        "tag.additional_tag_followup",
+        "tag.payoff"
       ]
     },
     {
@@ -21761,7 +21776,6 @@
         "data/scenarios/ai-deck-legal-v1915-smokes.json#corp_v1915_run_pressure"
       ],
       "tacticSignals": [
-        "condition.last_turn_run",
         "ice.corp_rearrange_conceal"
       ],
       "effects": [
@@ -21907,16 +21921,8 @@
       "effects": [
         {
           "finite": true,
-          "kind": "zone_shuffle",
+          "kind": "card_recovery",
           "scope": "archives",
-          "timing": "action"
-        },
-        {
-          "amount": 1,
-          "finite": true,
-          "kind": "draw",
-          "resource": "cards",
-          "scope": "corp",
           "timing": "action"
         },
         {
@@ -21932,8 +21938,7 @@
         "opportunityCost": "medium"
       },
       "tacticSignals": [
-        "archives.corp_recovery",
-        "economy.corp_draw"
+        "archives.corp_recovery"
       ],
       "conditions": [
         {
@@ -22211,10 +22216,10 @@
       ],
       "conditions": [
         {
-          "kind": "requires_score_window"
+          "kind": "requires_installed_card"
         },
         {
-          "kind": "requires_advancement_counter"
+          "kind": "requires_score_window"
         }
       ],
       "quality": {
@@ -22318,10 +22323,12 @@
         "corp.tag_trace_punish"
       ],
       "strategicRole": [
-        "punish_payoff"
+        "punish_payoff",
+        "win_condition"
       ],
       "tacticSignals": [
-        "damage.payoff",
+        "damage.meat_source",
+        "damage.tagged_meat_payoff",
         "risk.requires_tagged_runner",
         "tag.payoff"
       ]
@@ -22410,11 +22417,11 @@
         "corp.tag_trace_punish"
       ],
       "strategicRole": [
-        "punish_payoff",
         "win_condition"
       ],
       "tacticSignals": [
-        "damage.payoff",
+        "damage.meat_source",
+        "damage.tagged_meat_payoff",
         "risk.requires_tagged_runner",
         "tag.payoff"
       ]
@@ -22448,7 +22455,6 @@
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_operation_counter"
       ],
       "tacticSignals": [
-        "advance.overadvance_support",
         "condition.agenda_stolen_last_turn",
         "economy.corp_conditional_credit"
       ],
@@ -22560,10 +22566,10 @@
       ],
       "conditions": [
         {
-          "kind": "requires_score_window"
+          "kind": "requires_installed_card"
         },
         {
-          "kind": "requires_advancement_counter"
+          "kind": "requires_score_window"
         }
       ],
       "costProfile": {},
@@ -22814,11 +22820,11 @@
         "corp.tag_trace_punish"
       ],
       "strategicRole": [
-        "punish_payoff",
         "win_condition"
       ],
       "tacticSignals": [
-        "damage.payoff",
+        "damage.meat_source",
+        "damage.tagged_meat_payoff",
         "risk.requires_tagged_runner",
         "tag.payoff"
       ]
@@ -30184,7 +30190,7 @@
         "enabler"
       ],
       "tacticSignals": [
-        "condition.last_turn_run",
+        "condition.node_trashed_last_turn",
         "tag.source"
       ],
       "effects": [
@@ -30202,6 +30208,11 @@
           "resource": "tags",
           "scope": "runner",
           "timing": "action"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_installed_card"
         }
       ]
     },
@@ -30251,6 +30262,11 @@
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "conditions": [
+        {
+          "kind": "requires_installed_ice"
+        }
       ]
     },
     {
@@ -30352,8 +30368,7 @@
       },
       "tacticSignals": [
         "ice.corp_deferred_rez",
-        "ice.corp_temporary_rez",
-        "risk.temporary_rez_liability"
+        "ice.corp_installment_rez"
       ],
       "effects": [
         {
@@ -30361,6 +30376,17 @@
           "timing": "action",
           "scope": "ice",
           "finite": true
+        },
+        {
+          "kind": "rez",
+          "timing": "corp_turn",
+          "scope": "ice",
+          "finite": false
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_installed_ice"
         }
       ]
     },
@@ -30402,6 +30428,7 @@
         "enabler"
       ],
       "tacticSignals": [
+        "condition.run_this_game",
         "tag.source",
         "trace.source"
       ],
@@ -30434,6 +30461,9 @@
         }
       ],
       "conditions": [
+        {
+          "kind": "requires_runner_action"
+        },
         {
           "kind": "requires_trace_success"
         }
@@ -30471,17 +30501,32 @@
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "condition.last_turn_run",
-        "tag.source"
+        "condition.resource_installed_last_turn",
+        "resource.trash_payoff",
+        "tag.source",
+        "trace.source"
       ],
       "effects": [
+        {
+          "amount": 4,
+          "finite": true,
+          "kind": "trace",
+          "scope": "runner",
+          "timing": "action"
+        },
+        {
+          "finite": true,
+          "kind": "resource_trash",
+          "scope": "runner",
+          "timing": "trace_success"
+        },
         {
           "amount": 1,
           "finite": true,
           "kind": "tag_source",
           "resource": "tags",
           "scope": "runner",
-          "timing": "action"
+          "timing": "trace_success"
         },
         {
           "kind": "trace",
@@ -30496,6 +30541,9 @@
         "enabler"
       ],
       "conditions": [
+        {
+          "kind": "requires_installed_resource"
+        },
         {
           "kind": "requires_trace_success"
         }
@@ -38007,21 +38055,15 @@
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "archives.corp_recovery",
         "economy.corp_draw"
       ],
       "effects": [
-        {
-          "kind": "zone_shuffle",
-          "timing": "action",
-          "scope": "archives",
-          "finite": true
-        },
         {
           "kind": "draw",
           "timing": "action",
           "scope": "corp",
           "resource": "cards",
+          "amount": 3,
           "finite": true
         }
       ]

@@ -81,7 +81,7 @@ describe("generated fact Batch-8 Corp economy closeout", () => {
   it("keeps included cards ready read-only with no conflicts or gaps", () => {
     const report = readReport();
     expect(report.confirmedGeneratedFactCount).toBe(101);
-    expect(report.previewAddedFactCount).toBe(71);
+    expect(report.previewAddedFactCount).toBe(72);
     expect(report.hardErrorCount).toBe(0);
     expect(report.realSemanticConflictCount).toBe(0);
     expect(report.normalizedDifferenceCount).toBe(204);
