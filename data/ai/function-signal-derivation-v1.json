@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI024",
-  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022/AI024/AI024/AI024",
+  "taskId": "AI025",
+  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022/AI024/AI024/AI024/AI025/AI025/AI025",
   "generatedAt": "2026-06-02",
-  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI024 adds Corp-ICE semantics while keeping Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default and UI-derivation effects unchanged.",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI025 adds Corp-operation semantics while keeping Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default and UI-derivation effects unchanged.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -834,6 +834,45 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "action.corp_extra_action_support",
+      "source": "effects",
+      "match": {
+        "target": "action.corp_extra_action_support"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "action.corp_extra_action_support"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "action.corp_future_extra_action",
+      "source": "effects",
+      "match": {
+        "target": "action.corp_future_extra_action"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "action.corp_future_extra_action"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "action.corp_install_action_bundle",
+      "source": "effects",
+      "match": {
+        "target": "action.corp_install_action_bundle"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "action.corp_install_action_bundle"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "action.delayed_extra_action_engine",
       "source": "effects",
       "match": {
@@ -938,6 +977,64 @@
         "effectScope": [
           "runner"
         ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "advance.agenda_counter",
+      "source": "effects",
+      "match": {
+        "target": "advance.agenda_counter"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "advance.agenda_counter"
+      },
+      "strategyAnchorFor": [
+        "corp.fast_advance"
+      ]
+    },
+    {
+      "signalId": "advance.overadvance_support",
+      "source": "effects",
+      "match": {
+        "target": "advance.overadvance_support"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "advance.overadvance_support"
+      },
+      "strategyAnchorFor": [
+        "corp.fast_advance"
+      ]
+    },
+    {
+      "signalId": "advance.score_window_support",
+      "source": "effects",
+      "match": {
+        "target": "advance.score_window_support"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "advance.score_window_support"
+      },
+      "strategyAnchorFor": [
+        "corp.fast_advance"
+      ]
+    },
+    {
+      "signalId": "archives.corp_recovery",
+      "source": "effects",
+      "match": {
+        "target": "archives.corp_recovery"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "archives.corp_recovery"
       },
       "strategyAnchorFor": []
     },
@@ -1532,6 +1629,32 @@
         "breakerProfileRestrictionAbsent": [
           "pit_bull_hellhound_bloodhound_watchdog_only"
         ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "condition.agenda_stolen_last_turn",
+      "source": "effects",
+      "match": {
+        "target": "condition.agenda_stolen_last_turn"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "condition.agenda_stolen_last_turn"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "condition.last_turn_run",
+      "source": "effects",
+      "match": {
+        "target": "condition.last_turn_run"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "condition.last_turn_run"
       },
       "strategyAnchorFor": []
     },
@@ -3277,6 +3400,45 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "economy.corp_conditional_credit",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_conditional_credit"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "economy.corp_conditional_credit"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.corp_credit_burst",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_credit_burst"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "economy.corp_credit_burst"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.corp_draw",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_draw"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "economy.corp_draw"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "economy.cost_window_credit",
       "source": "effects",
       "match": {
@@ -3867,6 +4029,21 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "hardware.trash_payoff",
+      "source": "effects",
+      "match": {
+        "target": "hardware.trash_payoff"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "hardware.trash_payoff"
+      },
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
       "signalId": "hidden.one_shot_resource",
       "source": "effects",
       "match": {
@@ -3915,6 +4092,61 @@
       "gates": {
         "side": "runner",
         "cardType": "resource"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "ice.corp_deferred_rez",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_deferred_rez"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "ice.corp_deferred_rez"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "ice.corp_free_rez",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_free_rez"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "ice.corp_free_rez"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "signalId": "ice.corp_rearrange_conceal",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_rearrange_conceal"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "ice.corp_rearrange_conceal"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "ice.corp_temporary_rez",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_temporary_rez"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "ice.corp_temporary_rez"
       },
       "strategyAnchorFor": []
     },
@@ -4871,6 +5103,21 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "resource.trash_payoff",
+      "source": "effects",
+      "match": {
+        "target": "resource.trash_payoff"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "resource.trash_payoff"
+      },
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
       "signalId": "resource.unique",
       "source": "effects",
       "match": {
@@ -4897,6 +5144,19 @@
         "cardType": [
           "event"
         ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "risk.agenda_forfeit_drawback",
+      "source": "effects",
+      "match": {
+        "target": "risk.agenda_forfeit_drawback"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "risk.agenda_forfeit_drawback"
       },
       "strategyAnchorFor": []
     },
@@ -5347,6 +5607,19 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "risk.temporary_rez_liability",
+      "source": "effects",
+      "match": {
+        "target": "risk.temporary_rez_liability"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "risk.temporary_rez_liability"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "risk.unpreventable_brain_damage",
       "source": "effects",
       "match": {
@@ -5356,6 +5629,32 @@
       "gates": {
         "side": "runner",
         "cardType": "resource"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "rnd.corp_topdeck_reorder",
+      "source": "effects",
+      "match": {
+        "target": "rnd.corp_topdeck_reorder"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "rnd.corp_topdeck_reorder"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "rnd.corp_topdeck_setup",
+      "source": "effects",
+      "match": {
+        "target": "rnd.corp_topdeck_setup"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "operation",
+        "target": "rnd.corp_topdeck_setup"
       },
       "strategyAnchorFor": []
     },

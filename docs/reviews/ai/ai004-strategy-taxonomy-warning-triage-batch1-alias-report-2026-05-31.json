@@ -5076,7 +5076,7 @@
   "lineSupport": [
     {
       "value": "corp.ice_tax_glacier",
-      "count": 44,
+      "count": 45,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5097,7 +5097,7 @@
     },
     {
       "value": "corp.tag_trace_punish",
-      "count": 30,
+      "count": 33,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5265,7 +5265,7 @@
     },
     {
       "value": "corp.fast_advance",
-      "count": 8,
+      "count": 9,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5277,11 +5277,11 @@
         "onr_v1_189_artificial-security-directors",
         "onr_v1_201_executive-extraction",
         "onr_v1_202_genetics-visionary-acquisition",
+        "onr_v1_291_falsified-transactions-expert",
         "onr_v1_292_management-shake-up",
         "onr_v1_300_project-consultants",
         "onr_v1_304_systematic-layoffs",
-        "onr_v1_305_team-restructuring",
-        "onr_v1_312_chicago-branch"
+        "onr_v1_305_team-restructuring"
       ]
     },
     {

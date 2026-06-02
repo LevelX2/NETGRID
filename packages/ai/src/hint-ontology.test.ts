@@ -42,6 +42,7 @@ describe("AI hint ontology validation", () => {
     const strategyCoveredPilotCardIds = new Set([
       "onr_v1_274_tutor",
       "onr_v1_277_virizz",
+      "onr_v1_302_scorched-earth",
     ]);
 
     for (const cardId of pilotCardIds) {

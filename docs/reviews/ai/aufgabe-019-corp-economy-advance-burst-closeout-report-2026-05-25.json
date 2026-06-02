@@ -14,10 +14,10 @@
   "includedCardCount": 30,
   "excludedCardCount": 0,
   "confirmedGeneratedFactCount": 101,
-  "previewAddedFactCount": 80,
+  "previewAddedFactCount": 71,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 198,
+  "normalizedDifferenceCount": 204,
   "remainingDifferenceCount": 0,
   "scoreContextInfoCount": 18,
   "legalActionContextInfoCount": 11,
@@ -2513,9 +2513,9 @@
       "subBatch": "corp_operation_economy",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects"],
       "generatedFactsConfirmed": ["effect:extra_action"],
-      "previewAdds": ["effect:extra_action"],
+      "previewAdds": [],
       "normalizedDifferences": [
         {
           "field": "effect:extra_action",
@@ -2526,13 +2526,13 @@
         },
         {
           "field": "effects",
-          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "rule": "simple_ice_baseline_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
         },
         {
-          "field": "overlay_missing_for_manual_gap",
-          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
           "rule": "simple_ice_baseline_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
         }
@@ -2574,17 +2574,13 @@
       "subBatch": "corp_operation_draw_or_recovery",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects"],
       "generatedFactsConfirmed": [
         "condition:requires_rnd_top",
         "effect:topdeck_info",
         "effect:zone_shuffle"
       ],
-      "previewAdds": [
-        "condition:requires_rnd_top",
-        "effect:topdeck_info",
-        "effect:zone_shuffle"
-      ],
+      "previewAdds": ["condition:requires_rnd_top", "effect:zone_shuffle"],
       "normalizedDifferences": [
         {
           "field": "condition:requires_rnd_top",
@@ -2612,6 +2608,12 @@
           "classification": "shuffle_draw_hidden_zone_context_normalized",
           "rule": "shuffle_draw_or_rnd_reset_normalization",
           "rationale": "Shuffle/draw/R&D reset facts never expose actual hidden zone order."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -2663,17 +2665,13 @@
       "subBatch": "corp_advance_burst",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects", "conditions"],
       "generatedFactsConfirmed": [
         "condition:requires_score_window",
         "effect:advance_burst",
         "effect:score_acceleration"
       ],
-      "previewAdds": [
-        "condition:requires_score_window",
-        "effect:advance_burst",
-        "effect:score_acceleration"
-      ],
+      "previewAdds": ["effect:score_acceleration"],
       "normalizedDifferences": [
         {
           "field": "condition:requires_score_window",
@@ -2681,6 +2679,12 @@
           "classification": "score_context_classified",
           "rule": "score_context_required_classification",
           "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "conditions",
@@ -2707,6 +2711,12 @@
           "classification": "advance_burst_context_normalized",
           "rule": "advance_burst_operation_normalization",
           "rationale": "Advance-burst facts describe counter placement only and do not assert a score window."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -2776,15 +2786,12 @@
       "subBatch": "corp_operation_economy",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects", "conditions"],
       "generatedFactsConfirmed": [
         "condition:requires_stolen_agenda_last_turn",
         "effect:economy"
       ],
-      "previewAdds": [
-        "condition:requires_stolen_agenda_last_turn",
-        "effect:economy"
-      ],
+      "previewAdds": [],
       "normalizedDifferences": [
         {
           "field": "condition:requires_stolen_agenda_last_turn",
@@ -2795,7 +2802,7 @@
         },
         {
           "field": "conditions",
-          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "rule": "simple_ice_baseline_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
         },
@@ -2808,13 +2815,13 @@
         },
         {
           "field": "effects",
-          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "rule": "simple_ice_baseline_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
         },
         {
-          "field": "overlay_missing_for_manual_gap",
-          "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
           "rule": "simple_ice_baseline_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
         }
@@ -2862,17 +2869,13 @@
       "subBatch": "corp_advance_burst",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects", "conditions"],
       "generatedFactsConfirmed": [
         "condition:requires_score_window",
         "effect:advance_burst",
         "effect:score_acceleration"
       ],
-      "previewAdds": [
-        "condition:requires_score_window",
-        "effect:advance_burst",
-        "effect:score_acceleration"
-      ],
+      "previewAdds": ["effect:score_acceleration"],
       "normalizedDifferences": [
         {
           "field": "condition:requires_score_window",
@@ -2880,6 +2883,12 @@
           "classification": "score_context_classified",
           "rule": "score_context_required_classification",
           "rationale": "Score and when-scored requirements remain LegalAction/engine context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "conditions",
@@ -2906,6 +2915,12 @@
           "classification": "advance_burst_context_normalized",
           "rule": "advance_burst_operation_normalization",
           "rationale": "Advance-burst facts describe counter placement only and do not assert a score window."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -2975,17 +2990,13 @@
       "subBatch": "corp_advance_burst",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects", "conditions"],
       "generatedFactsConfirmed": [
         "condition:requires_score_window",
         "effect:advance_burst",
         "effect:score_acceleration"
       ],
-      "previewAdds": [
-        "condition:requires_score_window",
-        "effect:advance_burst",
-        "effect:score_acceleration"
-      ],
+      "previewAdds": ["effect:advance_burst", "effect:score_acceleration"],
       "normalizedDifferences": [
         {
           "field": "condition:requires_score_window",
@@ -2996,7 +3007,7 @@
         },
         {
           "field": "conditions",
-          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "rule": "simple_ice_baseline_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
         },
@@ -3019,6 +3030,12 @@
           "classification": "advance_burst_context_normalized",
           "rule": "advance_burst_operation_normalization",
           "rationale": "Advance-burst facts describe counter placement only and do not assert a score window."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "rule": "simple_ice_baseline_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-8 comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",

@@ -89,10 +89,10 @@ describe("generated fact Batch-9 Corp nodes/assets/ambush closeout", () => {
   it("keeps included cards ready read-only with no conflicts or gaps", () => {
     const report = readReport();
     expect(report.confirmedGeneratedFactCount).toBe(131);
-    expect(report.previewAddedFactCount).toBe(106);
+    expect(report.previewAddedFactCount).toBe(104);
     expect(report.hardErrorCount).toBe(0);
     expect(report.realSemanticConflictCount).toBe(0);
-    expect(report.normalizedDifferenceCount).toBe(291);
+    expect(report.normalizedDifferenceCount).toBe(292);
     expect(report.remainingDifferenceCount).toBe(0);
     expect(report.descriptorFollowupCount).toBe(0);
     expect(report.readiness).toBe("ready_read_only_split_subbatches");

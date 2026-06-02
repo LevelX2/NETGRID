@@ -1,8 +1,8 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI024",
+  "taskId": "AI025",
   "generatedAt": "2026-06-02",
-  "description": "Controlled V1 tactic-signal catalog. AI024 adds Corp-ICE function signals without subtype-only or card-specific signals and without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
+  "description": "Controlled V1 tactic-signal catalog. AI025 adds Corp-operation function signals without type-only, subtype-only or card-specific signals and without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
   "signalPolicy": {
     "tacticSignal": "Functional card utility: what the AI can use the card for.",
     "strategyAnchor": "Large deck line: which strategy the card can anchor or materially support.",
@@ -598,6 +598,51 @@
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "action.corp_extra_action_support",
+      "group": "ai025_corp_operations",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: action.corp extra action support.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "action.corp_future_extra_action",
+      "group": "ai025_corp_operations",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: action.corp future extra action.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "action.corp_install_action_bundle",
+      "group": "ai025_corp_operations",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: action.corp install action bundle.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "action.delayed_extra_action_engine",
       "group": "action",
       "sideScope": "runner",
@@ -703,6 +748,72 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "advance.agenda_counter",
+      "group": "ai025_corp_operations_advancement",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: advance.agenda counter.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "advance.overadvance_support",
+      "group": "ai025_corp_operations_advancement",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: advance.overadvance support.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "advance.score_window_support",
+      "group": "ai025_corp_operations_advancement",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: advance.score window support.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.fast_advance"
+      ],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "archives.corp_recovery",
+      "group": "ai025_corp_operations_zone_setup",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: archives.corp recovery.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "breaker.ap",
@@ -1309,6 +1420,36 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "General Watchdog coverage signal only; Dogcatcher uses subtype-limited Sentry signals instead."
+    },
+    {
+      "signalId": "condition.agenda_stolen_last_turn",
+      "group": "ai025_corp_operations_risk_condition",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: condition.agenda stolen last turn.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "condition.last_turn_run",
+      "group": "ai025_corp_operations_risk_condition",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: condition.last turn run.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "corp_ice.brain_damage",
@@ -2589,6 +2730,51 @@
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "economy.corp_conditional_credit",
+      "group": "ai025_corp_operations_economy",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: economy.corp conditional credit.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "economy.corp_credit_burst",
+      "group": "ai025_corp_operations_economy",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: economy.corp credit burst.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "economy.corp_draw",
+      "group": "ai025_corp_operations_economy",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: economy.corp draw.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "economy.cost_window_credit",
       "group": "economy",
       "sideScope": "runner",
@@ -3124,6 +3310,23 @@
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "hardware.trash_payoff",
+      "group": "ai025_corp_operations_tag_payoff",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: hardware.trash payoff.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "hidden.one_shot_resource",
       "group": "hidden",
       "sideScope": "runner",
@@ -3182,6 +3385,69 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "ice.corp_deferred_rez",
+      "group": "ai025_corp_operations_ice",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: ice.corp deferred rez.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "ice.corp_free_rez",
+      "group": "ai025_corp_operations_ice",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: ice.corp free rez.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "ice.corp_rearrange_conceal",
+      "group": "ai025_corp_operations_ice",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: ice.corp rearrange conceal.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "ice.corp_temporary_rez",
+      "group": "ai025_corp_operations_ice",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: ice.corp temporary rez.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "ice.derez",
@@ -3932,6 +4198,23 @@
       "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
     },
     {
+      "signalId": "resource.trash_payoff",
+      "group": "ai025_corp_operations_tag_payoff",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: resource.trash payoff.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "resource.unique",
       "group": "resource",
       "sideScope": "runner",
@@ -3960,6 +4243,21 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.agenda_forfeit_drawback",
+      "group": "ai025_corp_operations_risk_condition",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: risk.agenda forfeit drawback.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "risk.bad_publicity",
@@ -4354,6 +4652,21 @@
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "risk.temporary_rez_liability",
+      "group": "ai025_corp_operations_risk_condition",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: risk.temporary rez liability.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "risk.unpreventable_brain_damage",
       "group": "risk",
       "sideScope": "runner",
@@ -4367,6 +4680,36 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI022 Runner-Resource signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Hidden-resource signals are side-safe and must not be inferred for Corp hidden slots."
+    },
+    {
+      "signalId": "rnd.corp_topdeck_reorder",
+      "group": "ai025_corp_operations_zone_setup",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: rnd.corp topdeck reorder.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "rnd.corp_topdeck_setup",
+      "group": "ai025_corp_operations_zone_setup",
+      "sideScope": "corp",
+      "description": "AI025 Corp operation tactic signal: rnd.corp topdeck setup.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI025 reviewed Corp-operation structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "run.any_server",

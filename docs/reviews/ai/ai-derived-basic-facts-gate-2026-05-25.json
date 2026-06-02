@@ -9,8 +9,8 @@
   "pilotCardCount": 193,
   "implementationFoundCount": 193,
   "cardsWithDerivedFacts": 193,
-  "cardsWithManualOntologyOverlap": 124,
-  "cardsNeedingManualOverlay": 130,
+  "cardsWithManualOntologyOverlap": 131,
+  "cardsNeedingManualOverlay": 127,
   "effectKindCounts": {
     "access_punish": 5,
     "access_replacement": 3,
@@ -128,7 +128,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 999,
+  "warningCount": 984,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -3431,11 +3431,6 @@
       "cardId": "onr_v1_286_corporate-detective-agency"
     },
     {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence medium.",
-      "cardId": "onr_v1_287_datapool-by-zetatech"
-    },
-    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_287_datapool-by-zetatech"
@@ -3471,21 +3466,6 @@
       "cardId": "onr_v1_293_netwatch-credit-voucher"
     },
     {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Generated facts contain fields not currently mirrored manually.",
-      "cardId": "onr_v1_294_new-blood"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:zone_shuffle has no manual ontology match.",
-      "cardId": "onr_v1_294_new-blood"
-    },
-    {
-      "kind": "manual_overlay_expectation_mismatch",
-      "cardId": "onr_v1_294_new-blood",
-      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
-    },
-    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_294_new-blood"
@@ -3494,11 +3474,6 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_295_night-shift"
-    },
-    {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence medium.",
-      "cardId": "onr_v1_296_off-site-backups"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -3541,26 +3516,6 @@
       "cardId": "onr_v1_296_off-site-backups"
     },
     {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence low.",
-      "cardId": "onr_v1_297_overtime-incentives"
-    },
-    {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Generated facts contain fields not currently mirrored manually.",
-      "cardId": "onr_v1_297_overtime-incentives"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:extra_action has no manual ontology match.",
-      "cardId": "onr_v1_297_overtime-incentives"
-    },
-    {
-      "kind": "manual_overlay_expectation_mismatch",
-      "cardId": "onr_v1_297_overtime-incentives",
-      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
-    },
-    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_297_overtime-incentives"
@@ -3573,11 +3528,6 @@
     {
       "kind": "generated_fact_without_manual_match",
       "message": "Generated condition:requires_rnd_top has no manual ontology match.",
-      "cardId": "onr_v1_298_planning-consultants"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:topdeck_info has no manual ontology match.",
       "cardId": "onr_v1_298_planning-consultants"
     },
     {
@@ -3596,6 +3546,21 @@
       "cardId": "onr_v1_298_planning-consultants"
     },
     {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Manual ontology contains fields not currently derivable.",
+      "cardId": "onr_v1_299_power-grid-overload"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual condition:requires_installed_hardware has no generated basic fact match.",
+      "cardId": "onr_v1_299_power-grid-overload"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_299_power-grid-overload",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_299_power-grid-overload"
@@ -3606,13 +3571,8 @@
       "cardId": "onr_v1_300_project-consultants"
     },
     {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated condition:requires_score_window has no manual ontology match.",
-      "cardId": "onr_v1_300_project-consultants"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:advance_burst has no manual ontology match.",
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Manual ontology contains fields not currently derivable.",
       "cardId": "onr_v1_300_project-consultants"
     },
     {
@@ -3623,6 +3583,11 @@
     {
       "kind": "generated_fact_without_manual_match",
       "message": "Generated remoteRole:asset_economy has no manual ontology match.",
+      "cardId": "onr_v1_300_project-consultants"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual condition:requires_advancement_counter has no generated basic fact match.",
       "cardId": "onr_v1_300_project-consultants"
     },
     {
@@ -3646,48 +3611,18 @@
       "cardId": "onr_v1_302_scorched-earth"
     },
     {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Generated facts contain fields not currently mirrored manually.",
-      "cardId": "onr_v1_303_silver-lining-recovery-protocol"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated condition:requires_stolen_agenda_last_turn has no manual ontology match.",
-      "cardId": "onr_v1_303_silver-lining-recovery-protocol"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:economy has no manual ontology match.",
-      "cardId": "onr_v1_303_silver-lining-recovery-protocol"
-    },
-    {
-      "kind": "manual_overlay_expectation_mismatch",
-      "cardId": "onr_v1_303_silver-lining-recovery-protocol",
-      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
-    },
-    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_303_silver-lining-recovery-protocol"
     },
     {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence low.",
-      "cardId": "onr_v1_304_systematic-layoffs"
-    },
-    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
       "cardId": "onr_v1_304_systematic-layoffs"
     },
     {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated condition:requires_score_window has no manual ontology match.",
-      "cardId": "onr_v1_304_systematic-layoffs"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:advance_burst has no manual ontology match.",
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Manual ontology contains fields not currently derivable.",
       "cardId": "onr_v1_304_systematic-layoffs"
     },
     {
@@ -3698,6 +3633,11 @@
     {
       "kind": "generated_fact_without_manual_match",
       "message": "Generated remoteRole:asset_economy has no manual ontology match.",
+      "cardId": "onr_v1_304_systematic-layoffs"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual condition:requires_advancement_counter has no generated basic fact match.",
       "cardId": "onr_v1_304_systematic-layoffs"
     },
     {
@@ -3716,8 +3656,8 @@
       "cardId": "onr_v1_305_team-restructuring"
     },
     {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated condition:requires_score_window has no manual ontology match.",
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Manual ontology contains fields not currently derivable.",
       "cardId": "onr_v1_305_team-restructuring"
     },
     {
@@ -3736,6 +3676,11 @@
       "cardId": "onr_v1_305_team-restructuring"
     },
     {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual effect:advance has no generated basic fact match.",
+      "cardId": "onr_v1_305_team-restructuring"
+    },
+    {
       "kind": "manual_overlay_expectation_mismatch",
       "cardId": "onr_v1_305_team-restructuring",
       "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
@@ -3744,26 +3689,6 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_305_team-restructuring"
-    },
-    {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence medium.",
-      "cardId": "onr_v1_306_trojan-horse"
-    },
-    {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Generated facts contain fields not currently mirrored manually.",
-      "cardId": "onr_v1_306_trojan-horse"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated condition:requires_stolen_agenda_last_turn has no manual ontology match.",
-      "cardId": "onr_v1_306_trojan-horse"
-    },
-    {
-      "kind": "manual_overlay_expectation_mismatch",
-      "cardId": "onr_v1_306_trojan-horse",
-      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
     },
     {
       "kind": "text_pattern_derivation",
@@ -21195,7 +21120,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -21307,7 +21232,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -21416,7 +21341,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -21524,7 +21449,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -21613,10 +21538,10 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "medium",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -21640,10 +21565,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -21755,7 +21676,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -21820,33 +21741,34 @@
           "economy",
           "run_punish"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "zone_shuffle",
+            "timing": "action",
+            "scope": "ice"
+          }
+        ],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "effect:zone_shuffle"
         ],
+        "generatedOnly": [],
         "manualOnly": []
       },
-      "missingManualOverlay": [
-        "effect:zone_shuffle"
-      ],
-      "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:zone_shuffle has no manual ontology match."
-        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -22010,7 +21932,7 @@
           {
             "kind": "zone_shuffle",
             "timing": "action",
-            "scope": "corp"
+            "scope": "archives"
           }
         ],
         "conditions": [],
@@ -22024,7 +21946,7 @@
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "medium",
+          "confidence": "high",
           "needsHumanReview": false
         }
       },
@@ -22051,10 +21973,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -22123,44 +22041,35 @@
         "planRoles": [
           "recover_economy"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "extra_action",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "actions"
+          }
+        ],
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "effect:extra_action"
         ],
+        "generatedOnly": [],
         "manualOnly": []
       },
-      "missingManualOverlay": [
-        "effect:extra_action"
-      ],
-      "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:extra_action has no manual ontology match."
-        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -22225,22 +22134,35 @@
           "corp_operation_choice",
           "corp_play_operation"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "topdeck_info",
+            "timing": "action",
+            "scope": "rnd"
+          }
+        ],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [],
+        "matches": [
+          "effect:topdeck_info"
+        ],
         "generatedOnly": [
           "condition:requires_rnd_top",
-          "effect:topdeck_info",
           "effect:zone_shuffle"
         ],
         "manualOnly": []
       },
       "missingManualOverlay": [
         "condition:requires_rnd_top",
-        "effect:topdeck_info",
         "effect:zone_shuffle"
       ],
       "descriptorGaps": [
@@ -22255,10 +22177,6 @@
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_rnd_top has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:topdeck_info has no manual ontology match."
         },
         {
           "kind": "generated_fact_without_manual_match",
@@ -22336,6 +22254,9 @@
         ],
         "conditions": [
           {
+            "kind": "requires_installed_hardware"
+          },
+          {
             "kind": "requires_runner_tagged"
           }
         ],
@@ -22349,7 +22270,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -22362,12 +22283,26 @@
           "effect:tag_punish_payoff"
         ],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_installed_hardware"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_installed_hardware"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_installed_hardware has no generated basic fact match."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -22439,30 +22374,54 @@
         "planRoles": [
           "corp_agenda_operation"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "advance_burst",
+            "timing": "action",
+            "scope": "score_area",
+            "resource": "advancement_counters"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_advancement_counter"
+          },
+          {
+            "kind": "requires_score_window"
+          }
+        ],
         "lineSupport": [
           "corp.fast_advance"
-        ]
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "condition:requires_score_window",
-          "effect:advance_burst",
+          "effect:advance_burst"
+        ],
+        "generatedOnly": [
           "effect:score_acceleration",
           "remoteRole:asset_economy"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_advancement_counter"
+        ]
       },
       "missingManualOverlay": [
-        "condition:requires_score_window",
-        "effect:advance_burst",
+        "condition:requires_advancement_counter",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
@@ -22471,12 +22430,8 @@
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_score_window has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:advance_burst has no manual ontology match."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "generated_fact_without_manual_match",
@@ -22485,6 +22440,10 @@
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated remoteRole:asset_economy has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_advancement_counter has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -22579,7 +22538,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -22691,7 +22650,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -22764,39 +22723,40 @@
         "planRoles": [
           "corp_agenda_operation"
         ],
-        "effects": [],
-        "conditions": [],
-        "lineSupport": []
+        "effects": [
+          {
+            "kind": "economy",
+            "timing": "action",
+            "scope": "corp",
+            "resource": "credits"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_stolen_agenda_last_turn"
+          }
+        ],
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "condition:requires_stolen_agenda_last_turn",
           "effect:economy"
         ],
+        "generatedOnly": [],
         "manualOnly": []
       },
-      "missingManualOverlay": [
-        "condition:requires_stolen_agenda_last_turn",
-        "effect:economy"
-      ],
-      "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_stolen_agenda_last_turn has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:economy has no manual ontology match."
-        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -22869,55 +22829,65 @@
         "planRoles": [
           "corp_agenda_operation"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "advance_burst",
+            "timing": "action",
+            "scope": "score_area",
+            "resource": "advancement_counters",
+            "amount": 2
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_advancement_counter"
+          },
+          {
+            "kind": "requires_score_window"
+          }
+        ],
         "lineSupport": [
           "corp.fast_advance"
         ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "high",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "condition:requires_score_window",
-          "effect:advance_burst",
+          "effect:advance_burst"
+        ],
+        "generatedOnly": [
           "effect:score_acceleration",
           "remoteRole:asset_economy"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_advancement_counter"
+        ]
       },
       "missingManualOverlay": [
-        "condition:requires_score_window",
-        "effect:advance_burst",
+        "condition:requires_advancement_counter",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_score_window has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:advance_burst has no manual ontology match."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "generated_fact_without_manual_match",
@@ -22926,6 +22896,10 @@
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated remoteRole:asset_economy has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_advancement_counter has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -22998,30 +22972,52 @@
         "planRoles": [
           "corp_agenda_operation"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "advance",
+            "timing": "action",
+            "scope": "score_area",
+            "resource": "advancement_counters"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_score_window"
+          }
+        ],
         "lineSupport": [
           "corp.fast_advance"
-        ]
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [],
+        "matches": [
+          "condition:requires_score_window"
+        ],
         "generatedOnly": [
-          "condition:requires_score_window",
           "effect:advance_burst",
           "effect:score_acceleration",
           "remoteRole:asset_economy"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "effect:advance"
+        ]
       },
       "missingManualOverlay": [
-        "condition:requires_score_window",
+        "effect:advance",
         "effect:advance_burst",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
@@ -23030,8 +23026,8 @@
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_score_window has no manual ontology match."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "generated_fact_without_manual_match",
@@ -23044,6 +23040,10 @@
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated remoteRole:asset_economy has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:advance has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -23106,7 +23106,11 @@
             "amount": 1
           }
         ],
-        "conditions": [],
+        "conditions": [
+          {
+            "kind": "requires_stolen_agenda_last_turn"
+          }
+        ],
         "costProfile": {
           "clicks": 1,
           "reserveRisk": "low",
@@ -23117,41 +23121,24 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "medium",
+          "confidence": "high",
           "needsHumanReview": false
         }
       },
       "overlap": {
         "matches": [
+          "condition:requires_stolen_agenda_last_turn",
           "effect:tag_source"
         ],
-        "generatedOnly": [
-          "condition:requires_stolen_agenda_last_turn"
-        ],
+        "generatedOnly": [],
         "manualOnly": []
       },
-      "missingManualOverlay": [
-        "condition:requires_stolen_agenda_last_turn"
-      ],
-      "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_stolen_agenda_last_turn has no manual ontology match."
-        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -23245,7 +23232,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false

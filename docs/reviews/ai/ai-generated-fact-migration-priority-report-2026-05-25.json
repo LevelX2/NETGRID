@@ -5846,16 +5846,16 @@
       ],
       "generatedFields": ["effects"],
       "generatedMechanicalFacts": ["effect:zone_shuffle"],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 1,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 1
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 9,
       "rationale": "Conceal/reorder installed ICE is derivable as hidden-zone context only.",
       "doNotMigrateFields": [
@@ -5964,16 +5964,16 @@
       ],
       "generatedFields": ["effects"],
       "generatedMechanicalFacts": ["effect:extra_action"],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 1,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 1,
+        "generated_fact_absent_from_monolith": 1
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 8,
       "rationale": "Operation extra actions are derivable, while action use remains LegalAction context.",
       "doNotMigrateFields": [
@@ -6006,11 +6006,12 @@
         "effect:topdeck_info",
         "effect:zone_shuffle"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -6050,14 +6051,15 @@
       ],
       "monolithFields": ["effects", "conditions", "costProfile"],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
-        "generated_fact_absent_from_monolith": 1
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 9,
       "rationale": "Tagged-runner hardware trash is derivable, with target selection staying runtime-owned.",
       "doNotMigrateFields": [
@@ -6092,8 +6094,8 @@
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "generatedOnlyFields": [
         "conditions",
         "costProfile",
@@ -6102,6 +6104,7 @@
       ],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
         "generated_fact_absent_from_monolith": 4,
         "manual_review_candidate": 1
       },
@@ -6221,16 +6224,16 @@
         "condition:requires_stolen_agenda_last_turn",
         "effect:economy"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects"],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 8,
       "rationale": "Variable recovery economy is derivable, with prior stolen-agenda counters remaining history context.",
       "doNotMigrateFields": [
@@ -6265,8 +6268,8 @@
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "generatedOnlyFields": [
         "conditions",
         "costProfile",
@@ -6275,6 +6278,7 @@
       ],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
         "generated_fact_absent_from_monolith": 4,
         "manual_review_candidate": 1
       },
@@ -6314,17 +6318,13 @@
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": [
-        "conditions",
-        "costProfile",
-        "effects",
-        "remoteRole"
-      ],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["costProfile", "effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 4,
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 3,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",
@@ -6360,17 +6360,16 @@
         "condition:requires_stolen_agenda_last_turn",
         "effect:tag_source"
       ],
-      "monolithFields": ["effects", "costProfile"],
-      "duplicatedActiveMechanicalFields": ["effects"],
-      "generatedOnlyFields": ["conditions", "effects"],
+      "monolithFields": ["effects", "conditions", "costProfile"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
-        "monolith_mechanical_duplication_candidate": 1,
-        "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 9,
       "rationale": "Tagged-runner punish operation is derivable, while playability remains LegalAction context.",
       "doNotMigrateFields": [

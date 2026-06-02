@@ -18,10 +18,10 @@
   "excludedCardCount": 0,
   "crossBatchCardCount": 38,
   "confirmedGeneratedFactCount": 190,
-  "previewAddedFactCount": 123,
+  "previewAddedFactCount": 122,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 293,
+  "normalizedDifferenceCount": 294,
   "remainingDifferenceCount": 0,
   "tagSourceCount": 15,
   "punishPayoffCount": 23,
@@ -67,7 +67,7 @@
     "persistent_tag_pressure_normalization": 13,
     "pay_or_take_tag_normalization": 4,
     "tag_punish_funnel_pairing_normalization": 165,
-    "terminal_window_context_normalization": 204,
+    "terminal_window_context_normalization": 205,
     "runner_survival_countercontext_normalization": 11,
     "legalaction_context_required_classification": 38,
     "board_context_required_classification": 0
@@ -3338,6 +3338,13 @@
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
         },
         {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "terminal_window_context_normalized",
+          "rule": "terminal_window_context_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
           "field": "effect:hardware_trash",
           "sourceWarningKind": "generated_fact_shape_or_context",
           "classification": "visible_tag_payoff_context_normalized",
@@ -3361,6 +3368,13 @@
         {
           "field": "effects",
           "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "terminal_window_context_normalized",
+          "rule": "terminal_window_context_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "overlay_missing_for_manual_gap",
+          "sourceWarningKind": "overlay_missing_for_manual_gap",
           "classification": "terminal_window_context_normalized",
           "rule": "terminal_window_context_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
@@ -3663,12 +3677,12 @@
       "subBatch": "direct_tag_sources",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": ["effects", "costProfile"],
+      "activeMechanicalFields": ["effects", "conditions", "costProfile"],
       "generatedFactsConfirmed": [
         "condition:requires_stolen_agenda_last_turn",
         "effect:tag_source"
       ],
-      "previewAdds": ["condition:requires_stolen_agenda_last_turn"],
+      "previewAdds": [],
       "normalizedDifferences": [
         {
           "field": "condition:requires_stolen_agenda_last_turn",
@@ -3679,7 +3693,7 @@
         },
         {
           "field": "conditions",
-          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "classification": "terminal_window_context_normalized",
           "rule": "terminal_window_context_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
@@ -3701,13 +3715,6 @@
         {
           "field": "effects",
           "sourceWarningKind": "generated_fact_missing_from_active_monolith",
-          "classification": "terminal_window_context_normalized",
-          "rule": "terminal_window_context_normalization",
-          "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
-        },
-        {
-          "field": "overlay_missing_for_manual_gap",
-          "sourceWarningKind": "overlay_missing_for_manual_gap",
           "classification": "terminal_window_context_normalized",
           "rule": "terminal_window_context_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."

@@ -15,17 +15,17 @@
   "overlayCardCount": 6,
   "cardsWithoutOverlay": 187,
   "hardErrorCount": 0,
-  "warningCount": 673,
+  "warningCount": 680,
   "warningCountsByKind": {
-    "active_monolith_mechanical_duplication": 224,
-    "generated_fact_missing_from_active_monolith": 318,
+    "active_monolith_mechanical_duplication": 236,
+    "generated_fact_missing_from_active_monolith": 316,
     "manual_overlay_strategy_field_missing_from_active": 6,
-    "overlay_missing_for_manual_gap": 125
+    "overlay_missing_for_manual_gap": 122
   },
   "warningClassificationCounts": {
-    "generated_fact_absent_from_monolith": 318,
-    "manual_review_candidate": 125,
-    "monolith_mechanical_duplication_candidate": 224,
+    "generated_fact_absent_from_monolith": 316,
+    "manual_review_candidate": 122,
+    "monolith_mechanical_duplication_candidate": 236,
     "overlay_strategy_field_not_in_monolith": 6
   },
   "warningClassificationByCard": [
@@ -1531,13 +1531,13 @@
     {
       "cardId": "onr_v1_294_new-blood",
       "title": "New Blood",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 1,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 1
       },
-      "info": []
+      "info": ["info_no_overlay_needed"]
     },
     {
       "cardId": "onr_v1_295_night-shift",
@@ -1565,13 +1565,13 @@
     {
       "cardId": "onr_v1_297_overtime-incentives",
       "title": "Overtime Incentives",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 1,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 1
       },
-      "info": []
+      "info": ["info_no_overlay_needed"]
     },
     {
       "cardId": "onr_v1_298_planning-consultants",
@@ -1580,20 +1580,22 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
       "info": []
     },
     {
       "cardId": "onr_v1_299_power-grid-overload",
       "title": "Power Grid Overload",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 1,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1,
         "monolith_mechanical_duplication_candidate": 2
       },
-      "info": ["info_no_overlay_needed"]
+      "info": []
     },
     {
       "cardId": "onr_v1_300_project-consultants",
@@ -1602,7 +1604,8 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 4,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 2
       },
       "info": []
     },
@@ -1631,13 +1634,13 @@
     {
       "cardId": "onr_v1_303_silver-lining-recovery-protocol",
       "title": "Silver Lining Recovery Protocol",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "generated_fact_absent_from_monolith": 1,
+        "monolith_mechanical_duplication_candidate": 2
       },
-      "info": []
+      "info": ["info_no_overlay_needed"]
     },
     {
       "cardId": "onr_v1_304_systematic-layoffs",
@@ -1646,7 +1649,8 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 4,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 2
       },
       "info": []
     },
@@ -1656,22 +1660,22 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 4,
-        "manual_review_candidate": 1
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 2
       },
       "info": []
     },
     {
       "cardId": "onr_v1_306_trojan-horse",
       "title": "Trojan Horse",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1,
-        "monolith_mechanical_duplication_candidate": 1
+        "generated_fact_absent_from_monolith": 1,
+        "monolith_mechanical_duplication_candidate": 2
       },
-      "info": []
+      "info": ["info_no_overlay_needed"]
     },
     {
       "cardId": "onr_v1_307_urban-renewal",
@@ -3394,11 +3398,11 @@
     {
       "cardId": "onr_v1_294_new-blood",
       "title": "New Blood",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "generatedFields": ["effects"],
       "generatedOnlyFields": ["effects"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_295_night-shift",
@@ -3421,11 +3425,11 @@
     {
       "cardId": "onr_v1_297_overtime-incentives",
       "title": "Overtime Incentives",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "generatedFields": ["effects"],
       "generatedOnlyFields": ["effects"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_298_planning-consultants",
@@ -3434,15 +3438,15 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_299_power-grid-overload",
       "title": "Power Grid Overload",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
@@ -3457,7 +3461,7 @@
         "costProfile",
         "remoteRole"
       ],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
       "cardId": "onr_v1_301_punitive-counterstrike",
@@ -3480,11 +3484,11 @@
     {
       "cardId": "onr_v1_303_silver-lining-recovery-protocol",
       "title": "Silver Lining Recovery Protocol",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "generatedFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "generatedOnlyFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
       "cardId": "onr_v1_304_systematic-layoffs",
@@ -3498,7 +3502,7 @@
         "costProfile",
         "remoteRole"
       ],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
       "cardId": "onr_v1_305_team-restructuring",
@@ -3506,22 +3510,17 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "costProfile", "effects", "remoteRole"],
-      "generatedOnlyFields": [
-        "effects",
-        "conditions",
-        "costProfile",
-        "remoteRole"
-      ],
-      "duplicatedActiveMechanicalFields": []
+      "generatedOnlyFields": ["effects", "costProfile", "remoteRole"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
       "cardId": "onr_v1_306_trojan-horse",
       "title": "Trojan Horse",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "generatedFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": ["effects"]
+      "generatedOnlyFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
       "cardId": "onr_v1_307_urban-renewal",
@@ -4890,13 +4889,6 @@
       "missingManualOverlay": ["effect:tag_punish_payoff", "effect:tag_source"]
     },
     {
-      "cardId": "onr_v1_294_new-blood",
-      "title": "New Blood",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["effect:zone_shuffle"]
-    },
-    {
       "cardId": "onr_v1_296_off-site-backups",
       "title": "Off-Site Backups",
       "recommendedNextAction": "manual_review_candidate",
@@ -4909,22 +4901,21 @@
       ]
     },
     {
-      "cardId": "onr_v1_297_overtime-incentives",
-      "title": "Overtime Incentives",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["effect:extra_action"]
-    },
-    {
       "cardId": "onr_v1_298_planning-consultants",
       "title": "Planning Consultants",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_rnd_top",
-        "effect:topdeck_info",
         "effect:zone_shuffle"
       ]
+    },
+    {
+      "cardId": "onr_v1_299_power-grid-overload",
+      "title": "Power Grid Overload",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["condition:requires_installed_hardware"]
     },
     {
       "cardId": "onr_v1_300_project-consultants",
@@ -4932,20 +4923,9 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
-        "condition:requires_score_window",
-        "effect:advance_burst",
+        "condition:requires_advancement_counter",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
-      ]
-    },
-    {
-      "cardId": "onr_v1_303_silver-lining-recovery-protocol",
-      "title": "Silver Lining Recovery Protocol",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_stolen_agenda_last_turn",
-        "effect:economy"
       ]
     },
     {
@@ -4954,8 +4934,7 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
-        "condition:requires_score_window",
-        "effect:advance_burst",
+        "condition:requires_advancement_counter",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ]
@@ -4966,18 +4945,11 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
-        "condition:requires_score_window",
+        "effect:advance",
         "effect:advance_burst",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ]
-    },
-    {
-      "cardId": "onr_v1_306_trojan-horse",
-      "title": "Trojan Horse",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["condition:requires_stolen_agenda_last_turn"]
     },
     {
       "cardId": "onr_v1_308_acme-savings-and-loan",
@@ -6829,8 +6801,8 @@
     {
       "cardId": "onr_v1_294_new-blood",
       "title": "New Blood",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "mechanicalFactsFromGenerated": ["effect:zone_shuffle"]
     },
     {
@@ -6853,8 +6825,8 @@
     {
       "cardId": "onr_v1_297_overtime-incentives",
       "title": "Overtime Incentives",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "mechanicalFactsFromGenerated": ["effect:extra_action"]
     },
     {
@@ -6871,8 +6843,8 @@
     {
       "cardId": "onr_v1_299_power-grid-overload",
       "title": "Power Grid Overload",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "mechanicalFactsFromGenerated": [
         "condition:requires_runner_tagged",
         "effect:hardware_trash",
@@ -6917,8 +6889,8 @@
     {
       "cardId": "onr_v1_303_silver-lining-recovery-protocol",
       "title": "Silver Lining Recovery Protocol",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "mechanicalFactsFromGenerated": [
         "condition:requires_stolen_agenda_last_turn",
         "effect:economy"
@@ -6953,8 +6925,8 @@
     {
       "cardId": "onr_v1_306_trojan-horse",
       "title": "Trojan Horse",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "mechanicalFactsFromGenerated": [
         "condition:requires_stolen_agenda_last_turn",
         "effect:tag_source"
@@ -8445,13 +8417,6 @@
       "missingManualOverlay": ["effect:tag_punish_payoff", "effect:tag_source"]
     },
     {
-      "cardId": "onr_v1_294_new-blood",
-      "title": "New Blood",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["effect:zone_shuffle"]
-    },
-    {
       "cardId": "onr_v1_296_off-site-backups",
       "title": "Off-Site Backups",
       "recommendedNextAction": "manual_review_candidate",
@@ -8464,22 +8429,21 @@
       ]
     },
     {
-      "cardId": "onr_v1_297_overtime-incentives",
-      "title": "Overtime Incentives",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["effect:extra_action"]
-    },
-    {
       "cardId": "onr_v1_298_planning-consultants",
       "title": "Planning Consultants",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_rnd_top",
-        "effect:topdeck_info",
         "effect:zone_shuffle"
       ]
+    },
+    {
+      "cardId": "onr_v1_299_power-grid-overload",
+      "title": "Power Grid Overload",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["condition:requires_installed_hardware"]
     },
     {
       "cardId": "onr_v1_300_project-consultants",
@@ -8487,20 +8451,9 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
-        "condition:requires_score_window",
-        "effect:advance_burst",
+        "condition:requires_advancement_counter",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
-      ]
-    },
-    {
-      "cardId": "onr_v1_303_silver-lining-recovery-protocol",
-      "title": "Silver Lining Recovery Protocol",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_stolen_agenda_last_turn",
-        "effect:economy"
       ]
     },
     {
@@ -8509,8 +8462,7 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
-        "condition:requires_score_window",
-        "effect:advance_burst",
+        "condition:requires_advancement_counter",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ]
@@ -8521,18 +8473,11 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
-        "condition:requires_score_window",
+        "effect:advance",
         "effect:advance_burst",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ]
-    },
-    {
-      "cardId": "onr_v1_306_trojan-horse",
-      "title": "Trojan Horse",
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["condition:requires_stolen_agenda_last_turn"]
     },
     {
       "cardId": "onr_v1_308_acme-savings-and-loan",
@@ -8936,7 +8881,7 @@
     }
   ],
   "infoCounts": {
-    "info_no_overlay_needed": 64,
+    "info_no_overlay_needed": 67,
     "info_overlay_present": 6
   },
   "cards": [
@@ -21944,6 +21889,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -22043,6 +21989,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -22137,6 +22084,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -22234,6 +22182,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -22319,6 +22268,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -22427,6 +22377,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -22470,8 +22421,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": true,
-      "missingManualOverlay": ["effect:zone_shuffle"],
+      "needsManualReview": false,
+      "missingManualOverlay": [],
       "compiledPreview": {
         "cardId": "onr_v1_294_new-blood",
         "side": "corp",
@@ -22493,11 +22444,13 @@
       "mechanicalFactsFromGenerated": ["effect:zone_shuffle"],
       "generatedFields": ["effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -22505,23 +22458,24 @@
       "conflicts": [],
       "warnings": [
         {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_294_new-blood",
+          "field": "effects"
+        },
+        {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
           "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_294_new-blood",
           "field": "effects"
-        },
-        {
-          "classification": "manual_review_candidate",
-          "blocking": false,
-          "kind": "overlay_missing_for_manual_gap",
-          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-          "cardId": "onr_v1_294_new-blood"
         }
       ],
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review"
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
     },
     {
       "cardId": "onr_v1_295_night-shift",
@@ -22572,6 +22526,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -22652,6 +22607,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -22702,8 +22658,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": true,
-      "missingManualOverlay": ["effect:extra_action"],
+      "needsManualReview": false,
+      "missingManualOverlay": [],
       "compiledPreview": {
         "cardId": "onr_v1_297_overtime-incentives",
         "side": "corp",
@@ -22726,12 +22682,13 @@
       "mechanicalFactsFromGenerated": ["effect:extra_action"],
       "generatedFields": ["effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -22739,23 +22696,24 @@
       "conflicts": [],
       "warnings": [
         {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_297_overtime-incentives",
+          "field": "effects"
+        },
+        {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
           "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_297_overtime-incentives",
           "field": "effects"
-        },
-        {
-          "classification": "manual_review_candidate",
-          "blocking": false,
-          "kind": "overlay_missing_for_manual_gap",
-          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-          "cardId": "onr_v1_297_overtime-incentives"
         }
       ],
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review"
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
     },
     {
       "cardId": "onr_v1_298_planning-consultants",
@@ -22769,7 +22727,6 @@
       "needsManualReview": true,
       "missingManualOverlay": [
         "condition:requires_rnd_top",
-        "effect:topdeck_info",
         "effect:zone_shuffle"
       ],
       "compiledPreview": {
@@ -22813,17 +22770,27 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_298_planning-consultants",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -22860,8 +22827,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": false,
-      "missingManualOverlay": [],
+      "needsManualReview": true,
+      "missingManualOverlay": ["condition:requires_installed_hardware"],
       "compiledPreview": {
         "cardId": "onr_v1_299_power-grid-overload",
         "side": "corp",
@@ -22910,9 +22877,10 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
@@ -22936,13 +22904,28 @@
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
           "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_299_power-grid-overload",
+          "field": "conditions"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_299_power-grid-overload",
           "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_299_power-grid-overload"
         }
       ],
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready"
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
     },
     {
       "cardId": "onr_v1_300_project-consultants",
@@ -22955,8 +22938,7 @@
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
       "missingManualOverlay": [
-        "condition:requires_score_window",
-        "effect:advance_burst",
+        "condition:requires_advancement_counter",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ],
@@ -23014,13 +22996,15 @@
       ],
       "generatedFields": ["conditions", "costProfile", "effects", "remoteRole"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
         "lineSupport",
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": [
@@ -23032,6 +23016,22 @@
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_300_project-consultants",
+          "field": "conditions"
+        },
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_300_project-consultants",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -23136,6 +23136,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -23231,6 +23232,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -23274,11 +23276,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": true,
-      "missingManualOverlay": [
-        "condition:requires_stolen_agenda_last_turn",
-        "effect:economy"
-      ],
+      "needsManualReview": false,
+      "missingManualOverlay": [],
       "compiledPreview": {
         "cardId": "onr_v1_303_silver-lining-recovery-protocol",
         "side": "corp",
@@ -23311,24 +23310,34 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "tacticSignals",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects", "conditions"],
+      "generatedOnlyFields": ["effects"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
           "cardId": "onr_v1_303_silver-lining-recovery-protocol",
           "field": "conditions"
+        },
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_303_silver-lining-recovery-protocol",
+          "field": "effects"
         },
         {
           "classification": "generated_fact_absent_from_monolith",
@@ -23337,17 +23346,10 @@
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_303_silver-lining-recovery-protocol",
           "field": "effects"
-        },
-        {
-          "classification": "manual_review_candidate",
-          "blocking": false,
-          "kind": "overlay_missing_for_manual_gap",
-          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-          "cardId": "onr_v1_303_silver-lining-recovery-protocol"
         }
       ],
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review"
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
     },
     {
       "cardId": "onr_v1_304_systematic-layoffs",
@@ -23360,8 +23362,7 @@
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
       "missingManualOverlay": [
-        "condition:requires_score_window",
-        "effect:advance_burst",
+        "condition:requires_advancement_counter",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
       ],
@@ -23419,7 +23420,7 @@
       ],
       "generatedFields": ["conditions", "costProfile", "effects", "remoteRole"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
         "lineSupport",
         "quality",
@@ -23427,6 +23428,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": [
@@ -23438,6 +23440,22 @@
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_304_systematic-layoffs",
+          "field": "conditions"
+        },
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_304_systematic-layoffs",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -23492,7 +23510,7 @@
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
       "missingManualOverlay": [
-        "condition:requires_score_window",
+        "effect:advance",
         "effect:advance_burst",
         "effect:score_acceleration",
         "remoteRole:asset_economy"
@@ -23551,31 +23569,36 @@
       ],
       "generatedFields": ["conditions", "costProfile", "effects", "remoteRole"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
         "lineSupport",
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
-      "generatedOnlyFields": [
-        "effects",
-        "conditions",
-        "costProfile",
-        "remoteRole"
-      ],
+      "generatedOnlyFields": ["effects", "costProfile", "remoteRole"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
           "cardId": "onr_v1_305_team-restructuring",
           "field": "conditions"
+        },
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_305_team-restructuring",
+          "field": "effects"
         },
         {
           "classification": "generated_fact_absent_from_monolith",
@@ -23621,8 +23644,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": true,
-      "missingManualOverlay": ["condition:requires_stolen_agenda_last_turn"],
+      "needsManualReview": false,
+      "missingManualOverlay": [],
       "compiledPreview": {
         "cardId": "onr_v1_306_trojan-horse",
         "side": "corp",
@@ -23654,7 +23677,7 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
         "lineSupport",
@@ -23663,12 +23686,21 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects", "conditions"],
+      "generatedOnlyFields": ["effects"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_306_trojan-horse",
+          "field": "conditions"
+        },
         {
           "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
@@ -23681,28 +23713,13 @@
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
           "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
-          "cardId": "onr_v1_306_trojan-horse",
-          "field": "conditions"
-        },
-        {
-          "classification": "generated_fact_absent_from_monolith",
-          "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_306_trojan-horse",
           "field": "effects"
-        },
-        {
-          "classification": "manual_review_candidate",
-          "blocking": false,
-          "kind": "overlay_missing_for_manual_gap",
-          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-          "cardId": "onr_v1_306_trojan-horse"
         }
       ],
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review"
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready"
     },
     {
       "cardId": "onr_v1_307_urban-renewal",
@@ -23765,6 +23782,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "tacticSignals",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects"],
@@ -32610,19 +32628,20 @@
       "field": "effects"
     },
     {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_294_new-blood",
+      "field": "effects"
+    },
+    {
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_294_new-blood",
       "field": "effects"
-    },
-    {
-      "classification": "manual_review_candidate",
-      "blocking": false,
-      "kind": "overlay_missing_for_manual_gap",
-      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-      "cardId": "onr_v1_294_new-blood"
     },
     {
       "classification": "monolith_mechanical_duplication_candidate",
@@ -32672,6 +32691,14 @@
       "cardId": "onr_v1_296_off-site-backups"
     },
     {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_297_overtime-incentives",
+      "field": "effects"
+    },
+    {
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
@@ -32680,11 +32707,12 @@
       "field": "effects"
     },
     {
-      "classification": "manual_review_candidate",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "overlay_missing_for_manual_gap",
-      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-      "cardId": "onr_v1_297_overtime-incentives"
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_298_planning-consultants",
+      "field": "effects"
     },
     {
       "classification": "generated_fact_absent_from_monolith",
@@ -32729,8 +32757,39 @@
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_299_power-grid-overload",
+      "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_299_power-grid-overload",
+      "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_299_power-grid-overload"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_300_project-consultants",
+      "field": "conditions"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_300_project-consultants",
       "field": "effects"
     },
     {
@@ -32821,12 +32880,20 @@
       "field": "effects"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
       "cardId": "onr_v1_303_silver-lining-recovery-protocol",
       "field": "conditions"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_303_silver-lining-recovery-protocol",
+      "field": "effects"
     },
     {
       "classification": "generated_fact_absent_from_monolith",
@@ -32837,11 +32904,20 @@
       "field": "effects"
     },
     {
-      "classification": "manual_review_candidate",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "overlay_missing_for_manual_gap",
-      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-      "cardId": "onr_v1_303_silver-lining-recovery-protocol"
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_304_systematic-layoffs",
+      "field": "conditions"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_304_systematic-layoffs",
+      "field": "effects"
     },
     {
       "classification": "generated_fact_absent_from_monolith",
@@ -32883,12 +32959,20 @@
       "cardId": "onr_v1_304_systematic-layoffs"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
       "cardId": "onr_v1_305_team-restructuring",
       "field": "conditions"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_305_team-restructuring",
+      "field": "effects"
     },
     {
       "classification": "generated_fact_absent_from_monolith",
@@ -32925,6 +33009,14 @@
       "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
       "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_306_trojan-horse",
+      "field": "conditions"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
       "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
       "cardId": "onr_v1_306_trojan-horse",
       "field": "effects"
@@ -32933,24 +33025,9 @@
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
-      "cardId": "onr_v1_306_trojan-horse",
-      "field": "conditions"
-    },
-    {
-      "classification": "generated_fact_absent_from_monolith",
-      "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_306_trojan-horse",
       "field": "effects"
-    },
-    {
-      "classification": "manual_review_candidate",
-      "blocking": false,
-      "kind": "overlay_missing_for_manual_gap",
-      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
-      "cardId": "onr_v1_306_trojan-horse"
     },
     {
       "classification": "monolith_mechanical_duplication_candidate",

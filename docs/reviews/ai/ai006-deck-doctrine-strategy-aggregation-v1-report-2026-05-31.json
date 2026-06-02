@@ -3954,7 +3954,7 @@
               "cardId": "onr_v1_301_punitive-counterstrike",
               "quantity": 1,
               "source": "strategicRole",
-              "role": "punish_payoff,win_condition",
+              "role": "punish_payoff",
               "strategyId": "corp.damage_kill",
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
@@ -4760,7 +4760,7 @@
               "cardId": "onr_v1_301_punitive-counterstrike",
               "quantity": 1,
               "source": "strategicRole",
-              "role": "punish_payoff,win_condition",
+              "role": "punish_payoff",
               "strategyId": "corp.tag_trace_punish",
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
@@ -4879,7 +4879,6 @@
         "role:upgrade": 1
       },
       "warnings": [
-        "inspector:deferred_requires_human_review",
         "inspector:legacy_fallback_only"
       ],
       "corpProfile": {
@@ -6246,14 +6245,6 @@
               "signal": "corp.tag_trace_punish",
               "strategyId": "corp.tag_trace_punish",
               "reason": "normalized_lineSupport_strategy_goal"
-            },
-            {
-              "cardId": "onr_v1_293_netwatch-credit-voucher",
-              "quantity": 1,
-              "source": "strategicRole",
-              "role": "punish_payoff",
-              "strategyId": "corp.tag_trace_punish",
-              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -6407,7 +6398,6 @@
         "role:upgrade": 1
       },
       "warnings": [
-        "inspector:deferred_requires_human_review",
         "inspector:legacy_fallback_only"
       ],
       "corpProfile": {
@@ -6485,10 +6475,10 @@
       "runner.run_event_tempo": 1
     },
     "warningCounts": {
-      "inspector:deferred_requires_human_review": 5,
+      "inspector:deferred_requires_human_review": 3,
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 2
     },
-    "contentSha256": "691822128ee524713572ac034a46356fb3fc6ad828a408f7f4ecbd5f7ea1ae0a"
+    "contentSha256": "e7fb3e92784d458a346168793b782628fc92f648e9a47654cd4dd5a0489ed6cc"
   }
 }
