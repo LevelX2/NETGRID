@@ -17,7 +17,7 @@
     "cardsWithMechanicalFacts": 426,
     "cardsWithGeneratedFacts": 318,
     "cardsWithOverlays": 6,
-    "cardsWithFunctionSignals": 384,
+    "cardsWithFunctionSignals": 379,
     "cardsWithStrategyAnchors": 202,
     "cardsWithWarnings": 316,
     "warningCategoryCounts": {
@@ -5409,9 +5409,7 @@
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [
-        "setup.draw"
-      ],
+      "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -7897,6 +7895,7 @@
       },
       "derivedFunctionSignals": [
         "corp.action_denial",
+        "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_multi_central"
       ],
@@ -13920,7 +13919,6 @@
         "defense.flatline_prevention",
         "defense.meat_damage_immunity",
         "defense.meat_damage_prevention",
-        "setup.hand_size",
         "setup.hand_size_penalty"
       ],
       "derivedStrategyAnchors": [
@@ -16559,15 +16557,6 @@
       ],
       "lineSupportClassification": [
         {
-          "value": "runner.interface_closeout",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.interface_closeout"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
           "value": "runner.rnd_pressure",
           "category": "exact_strategy_goal",
           "triageCategory": "normalized_strategy_id",
@@ -16664,10 +16653,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "payoff_anchor"
+          "enabler"
         ],
         "validValues": [
-          "payoff_anchor"
+          "enabler"
         ],
         "unknownValues": []
       }
@@ -17959,7 +17948,6 @@
       },
       "derivedFunctionSignals": [
         "corp.draw_pressure",
-        "setup.draw",
         "virus.counter_engine",
         "virus.purge_tax",
         "virus.trigger_rnd"
@@ -24039,9 +24027,7 @@
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [
-        "setup.hand_size"
-      ],
+      "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -28871,8 +28857,7 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "score.agenda_action",
-        "setup.draw"
+        "score.agenda_action"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -29885,8 +29870,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "score.agenda_action",
-        "setup.draw"
+        "score.agenda_action"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -38656,9 +38640,7 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [
-        "setup.draw"
-      ],
+      "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -39294,8 +39276,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.generic",
-        "setup.draw"
+        "economy.generic"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -39871,8 +39852,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.generic",
-        "setup.draw"
+        "economy.generic"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -39950,9 +39930,7 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [
-        "setup.draw"
-      ],
+      "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -42404,8 +42382,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "remote.asset_economy",
-        "setup.draw"
+        "remote.asset_economy"
       ],
       "derivedStrategyAnchors": [
         "corp.asset_economy"
@@ -42482,8 +42459,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "remote.asset_economy",
-        "setup.draw"
+        "remote.asset_economy"
       ],
       "derivedStrategyAnchors": [
         "corp.asset_economy"
@@ -43718,9 +43694,7 @@
         "legacyFallbackOnly": false,
         "warningCount": 2
       },
-      "derivedFunctionSignals": [
-        "setup.draw"
-      ],
+      "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [

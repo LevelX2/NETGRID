@@ -57,7 +57,7 @@ describe("AI hint ontology doctrine diagnostics", () => {
     expect(summary.effectCounts.byKind.topdeck_info).toBe(2);
     expect(summary.lineSupportCounts.byKind["runner.search.breaker"]).toBe(2);
     expect(summary.lineSupportCounts.byKind["runner.rnd_pressure"]).toBe(1);
-    expect(summary.lineSupportCounts.byKind["runner.interface_closeout"]).toBe(1);
+    expect(summary.lineSupportCounts.byKind["runner.interface_closeout"] ?? 0).toBe(0);
     expect(summary.lineSupportCounts.byKind["runner.remote_trash"] ?? 0).toBe(0);
   });
 

@@ -4553,7 +4553,6 @@
         "ice.etr": 8,
         "ice.strength_modifier": 1,
         "score.advance_burst": 1,
-        "setup.draw": 4,
         "tag.payoff": 2,
         "tax.runner_credit": 1
       },
@@ -6122,7 +6121,6 @@
         "economy.rez_discount": 1,
         "ice.etr": 6,
         "ice.strength_modifier": 1,
-        "setup.draw": 4,
         "tag.payoff": 3,
         "tag.source": 4,
         "tax.runner_credit": 2,
@@ -6244,6 +6242,6 @@
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 5
     },
-    "contentSha256": "6f936e0f6335de8493c0e19eeb7ad9c67fcf59f138636d9dd444bee2be06ab9b"
+    "contentSha256": "553294f6b625a6f7107f30ff0655171bab4351edc0a3ed0265a8f39d4c1976dc"
   }
 }

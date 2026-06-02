@@ -28412,7 +28412,6 @@
           }
         ],
         "lineSupport": [
-          "runner.interface_closeout",
           "runner.rnd_pressure"
         ],
         "quality": {

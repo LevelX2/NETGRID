@@ -5460,25 +5460,6 @@
       ]
     },
     {
-      "value": "runner.interface_closeout",
-      "count": 6,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.interface_closeout"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_041_microtech-ai-interface",
-        "onr_v1_050_r-and-d-protocol-files",
-        "onr_v1_081_custodial-position",
-        "onr_v1_085_executive-wiretaps",
-        "onr_proteus_101_all-hands",
-        "onr_proteus_122_rush-hour"
-      ]
-    },
-    {
       "value": "runner.search.breaker",
       "count": 6,
       "mappingCategory": "exact_strategy_goal",
@@ -5495,6 +5476,24 @@
         "onr_v1_110_sneak-preview",
         "onr_v1_114_temple-microcode-outlet",
         "onr_proteus_128_airport-locker"
+      ]
+    },
+    {
+      "value": "runner.interface_closeout",
+      "count": 5,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "runner.interface_closeout"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_041_microtech-ai-interface",
+        "onr_v1_081_custodial-position",
+        "onr_v1_085_executive-wiretaps",
+        "onr_proteus_101_all-hands",
+        "onr_proteus_122_rush-hour"
       ]
     },
     {

@@ -1,8 +1,8 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI019",
-  "generatedAt": "2026-06-01",
-  "description": "Controlled V1 tactic-signal catalog. AI019 adds read-only Runner-program semantic signals for non-Icebreaker programs, viruses, access payoffs, trace/damage support, program search/install/protection and ICE/server manipulation without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
+  "taskId": "AI019a",
+  "generatedAt": "2026-06-02",
+  "description": "Controlled V1 tactic-signal catalog. AI019a keeps the AI019 Runner-program signal set and narrows read-only derivation semantics for draw, hand-size and multi-central virus counter effects without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
   "signalPolicy": {
     "tacticSignal": "Functional card utility: what the AI can use the card for.",
     "strategyAnchor": "Large deck line: which strategy the card can anchor or materially support.",
@@ -2185,8 +2185,8 @@
     {
       "signalId": "setup.draw",
       "group": "setup_draw_search",
-      "sideScope": "neutral",
-      "description": "Draw or shuffle-draw setup support.",
+      "sideScope": "runner",
+      "description": "Runner draw or shuffle-draw setup support.",
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
@@ -2196,13 +2196,13 @@
       ],
       "examples": [],
       "targetProfileRelevant": false,
-      "notes": "Draw is support-only in this catalog."
+      "notes": "Draw is support-only in this catalog. AI019a gates this to Runner-scope draw so Corp draw pressure does not become Runner setup."
     },
     {
       "signalId": "setup.hand_size",
       "group": "runner_setup",
       "sideScope": "runner",
-      "description": "Increases or modifies Runner hand size as part of setup.",
+      "description": "Increases Runner hand size as part of setup.",
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
@@ -2214,7 +2214,7 @@
         "Sunburst Cranial Interface"
       ],
       "targetProfileRelevant": false,
-      "notes": "Setup support only; not a rig or survival strategy anchor by itself."
+      "notes": "Setup support only; not a rig or survival strategy anchor by itself. AI019a keeps negative hand-size effects on setup.hand_size_penalty instead."
     },
     {
       "signalId": "setup.hand_size_penalty",
@@ -2643,7 +2643,8 @@
       ],
       "examples": [
         "Boardwalk",
-        "Highlighter"
+        "Highlighter",
+        "Viral Pipeline"
       ],
       "targetProfileRelevant": false,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."

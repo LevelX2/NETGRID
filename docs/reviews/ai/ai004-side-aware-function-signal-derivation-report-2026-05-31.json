@@ -61,7 +61,7 @@
       "utility",
       "win_condition"
     ],
-    "functionSignalRuleCount": 180,
+    "functionSignalRuleCount": 182,
     "functionSignalCount": 161,
     "functionSignalIds": [
       "access.free_trash",
@@ -720,8 +720,8 @@
       "run.safe_jackout_window": 1,
       "score.advance_burst": 13,
       "score.agenda_action": 12,
-      "setup.draw": 20,
-      "setup.hand_size": 5,
+      "setup.draw": 9,
+      "setup.hand_size": 3,
       "setup.hand_size_penalty": 1,
       "setup.hosted_program_loss_risk": 3,
       "setup.install_discount": 7,
@@ -746,7 +746,7 @@
       "tax.runner_persistent": 5,
       "trace.source": 9,
       "virus.counter_amplification": 1,
-      "virus.counter_engine": 18,
+      "virus.counter_engine": 19,
       "virus.purge_tax": 19,
       "virus.random_payload": 3,
       "virus.trigger_any_successful_run": 3,
@@ -772,7 +772,7 @@
       "runner.survival_defense": 27
     },
     "totalDerivedStrategyAnchors": 246,
-    "cardsWithDerivedSignals": 384,
+    "cardsWithDerivedSignals": 379,
     "cardsWithStrategyAnchors": 202,
     "descriptorGaps": [
       {
@@ -1360,10 +1360,10 @@
   },
   "ai004Triage": {
     "lineSupport": {
-      "totalOccurrences": 225,
+      "totalOccurrences": 224,
       "legacyOccurrences": 0,
       "categoryCounts": {
-        "normalized_strategy_id": 225
+        "normalized_strategy_id": 224
       },
       "valueCounts": [
         {
@@ -1411,12 +1411,12 @@
           "count": 6
         },
         {
-          "value": "runner.interface_closeout",
+          "value": "runner.search.breaker",
           "count": 6
         },
         {
-          "value": "runner.search.breaker",
-          "count": 6
+          "value": "runner.interface_closeout",
+          "count": 5
         },
         {
           "value": "runner.remote_contest",
@@ -1924,8 +1924,7 @@
           "value": "runner.rnd_pressure",
           "evidence": {
             "lineSupport": [
-              "runner.rnd_pressure",
-              "runner.interface_closeout"
+              "runner.rnd_pressure"
             ],
             "effects": [
               {
@@ -1975,67 +1974,6 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.rnd_pressure"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_v1_050_r-and-d-protocol-files",
-          "side": "runner",
-          "cardType": "program",
-          "value": "runner.interface_closeout",
-          "evidence": {
-            "lineSupport": [
-              "runner.rnd_pressure",
-              "runner.interface_closeout"
-            ],
-            "effects": [
-              {
-                "kind": "access_replacement",
-                "scope": "rnd",
-                "timing": "successful_run"
-              },
-              {
-                "kind": "topdeck_info",
-                "scope": "rnd",
-                "timing": "successful_run",
-                "resource": "cards"
-              },
-              {
-                "kind": "access_replacement",
-                "scope": "rnd",
-                "timing": "action"
-              },
-              {
-                "kind": "topdeck_info",
-                "scope": "rnd",
-                "timing": "action",
-                "resource": "cards"
-              },
-              {
-                "kind": "topdeck_info",
-                "scope": "rnd",
-                "timing": "successful_run",
-                "resource": "cards"
-              }
-            ],
-            "conditions": [
-              "requires_successful_run"
-            ],
-            "cardType": "program",
-            "side": "runner",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-06-01",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.interface_closeout"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },

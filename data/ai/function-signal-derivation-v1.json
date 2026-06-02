@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI019",
-  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c",
-  "generatedAt": "2026-06-01",
-  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI019 adds controlled Runner-program semantics for non-Icebreaker programs without planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default or UI-derivation effects.",
+  "taskId": "AI019a",
+  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019",
+  "generatedAt": "2026-06-02",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI019a narrows Runner-program semantic derivation after AI019: multi-central virus counter effects count as counter engines, setup.draw is runner-scope only, and setup.hand_size only covers positive Runner hand-size support. No planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default or UI-derivation effects.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -2684,6 +2684,14 @@
       "match": {
         "kind": "draw"
       },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
       "strategyAnchorFor": []
     },
     {
@@ -2691,6 +2699,14 @@
       "source": "effects",
       "match": {
         "kind": "shuffle_draw"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "runner"
+        ]
       },
       "strategyAnchorFor": []
     },
@@ -2720,7 +2736,26 @@
       "source": "effects",
       "match": {
         "kind": "hand_size_modifier",
-        "resource": "hand_size"
+        "resource": "hand_size",
+        "amount": 1
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.hand_size",
+      "source": "effects",
+      "match": {
+        "kind": "hand_size_modifier",
+        "resource": "hand_size",
+        "amount": 2
       },
       "gates": {
         "side": [
@@ -3289,6 +3324,26 @@
         ],
         "target": [
           "virus"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "virus.counter_engine",
+      "source": "effects",
+      "match": {
+        "kind": "persistent_counter_effect",
+        "target": "virus_multi_central"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "virus_multi_central"
         ]
       },
       "strategyAnchorFor": []

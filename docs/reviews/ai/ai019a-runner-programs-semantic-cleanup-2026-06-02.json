@@ -1,0 +1,285 @@
+{
+  "schemaVersion": "ai019a-runner-programs-semantic-cleanup-report-v1",
+  "taskId": "AI019a",
+  "generatedAt": "2026-06-02",
+  "status": "complete",
+  "sourceCommit": "f8e27751967e4ba27e6bddd02055903779de47c1",
+  "scope": "minor_ai019_runner_program_semantic_cleanup",
+  "summary": {
+    "reviewedFindingCount": 4,
+    "correctedFindingCount": 4,
+    "changedActiveHintCardCount": 1,
+    "changedDerivationRuleCount": 5,
+    "changedTacticSignalCatalogEntryCount": 3,
+    "newTacticSignalCount": 0,
+    "tacticSignalCatalogCount": 161,
+    "newStrategyIdCount": 0,
+    "plannerEffect": false,
+    "actionScoreEffect": false,
+    "planWeightEffect": false,
+    "targetingAiEffect": false,
+    "engineEffect": false,
+    "legalEffect": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivationEffect": false
+  },
+  "affectedCards": [
+    {
+      "cardId": "onr_proteus_099_viral-pipeline",
+      "title": "Viral Pipeline",
+      "finding": "Missing virus.counter_engine for multi-central Socket/Pipe counter engine.",
+      "decision": "Corrected by deriving virus.counter_engine from persistent_counter_effect target=virus_multi_central.",
+      "tacticSignals": [
+        "corp.action_denial",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.trigger_multi_central"
+      ],
+      "strategyAnchors": [],
+      "activeLineSupport": [],
+      "activeStrategicRole": []
+    },
+    {
+      "cardId": "onr_v1_064_skivviss",
+      "title": "Skivviss",
+      "finding": "Corp draw pressure was also producing setup.draw through an ungated draw rule.",
+      "decision": "Corrected by gating setup.draw to Runner-side and Runner-scope draw/shuffle-draw effects.",
+      "tacticSignals": [
+        "corp.draw_pressure",
+        "virus.counter_engine",
+        "virus.purge_tax",
+        "virus.trigger_rnd"
+      ],
+      "strategyAnchors": [],
+      "activeLineSupport": [],
+      "activeStrategicRole": []
+    },
+    {
+      "cardId": "onr_v1_022_emergency-self-construct",
+      "title": "Emergency Self-Construct",
+      "finding": "Negative hand-size modifier was producing both setup.hand_size and setup.hand_size_penalty.",
+      "decision": "Corrected by keeping negative hand-size on setup.hand_size_penalty and limiting setup.hand_size to positive current +1/+2 Runner support facts.",
+      "tacticSignals": [
+        "action.turn_limit_penalty",
+        "defense.brain_damage_reset",
+        "defense.damage_prevention",
+        "defense.flatline_prevention",
+        "defense.meat_damage_immunity",
+        "defense.meat_damage_prevention",
+        "setup.hand_size_penalty"
+      ],
+      "strategyAnchors": [
+        "runner.survival_defense"
+      ],
+      "activeLineSupport": [
+        "runner.survival_defense"
+      ],
+      "activeStrategicRole": [
+        "emergency_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.survival_defense",
+          "role": "emergency_tool",
+          "evidence": [
+            "defense.flatline_prevention",
+            "defense.brain_damage_reset",
+            "defense.meat_damage_immunity"
+          ],
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_050_r-and-d-protocol-files",
+      "title": "R&D-Protocol Files",
+      "finding": "runner.interface_closeout/payoff_anchor was too strong for a replacement-access scouting card.",
+      "decision": "Corrected by keeping runner.rnd_pressure and narrowing the active role to enabler; no interface_closeout pair remains.",
+      "tacticSignals": [
+        "access.rnd_top_cards",
+        "info.rnd_information",
+        "info.rnd_topdeck",
+        "run.replacement_access",
+        "run.rnd_scout_run"
+      ],
+      "strategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "derivedStrategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "activeLineSupport": [
+        "runner.rnd_pressure"
+      ],
+      "activeStrategicRole": [
+        "enabler"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.rnd_pressure",
+          "role": "enabler",
+          "evidence": [
+            "access.rnd_top_cards",
+            "run.rnd_scout_run"
+          ],
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_041_microtech-ai-interface",
+      "title": "Microtech AI Interface",
+      "finding": "runner.interface_closeout was reviewed as soft but acceptable for topdeck manipulation.",
+      "decision": "Confirmed unchanged: R&D pressure remains high; interface_closeout remains a medium report-only support pair in AI019 evidence.",
+      "tacticSignals": [
+        "access.rnd_top_reorder",
+        "info.rnd_information",
+        "info.rnd_manipulation",
+        "info.rnd_topdeck",
+        "run.replacement_access"
+      ],
+      "strategyAnchors": [
+        "runner.rnd_pressure",
+        "runner.interface_closeout"
+      ],
+      "derivedStrategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "activeLineSupport": [
+        "runner.rnd_pressure",
+        "runner.interface_closeout"
+      ],
+      "activeStrategicRole": [
+        "payoff_anchor"
+      ]
+    }
+  ],
+  "derivationChanges": [
+    {
+      "signalId": "virus.counter_engine",
+      "change": "Added derivation for persistent_counter_effect target=virus_multi_central."
+    },
+    {
+      "signalId": "setup.draw",
+      "change": "Added side=runner and effectScope=runner gates for draw."
+    },
+    {
+      "signalId": "setup.draw",
+      "change": "Added side=runner and effectScope=runner gates for shuffle_draw."
+    },
+    {
+      "signalId": "setup.hand_size",
+      "change": "Limited positive support derivation to current +1 Runner hand-size modifiers."
+    },
+    {
+      "signalId": "setup.hand_size",
+      "change": "Limited positive support derivation to current +2 Runner hand-size modifiers."
+    }
+  ],
+  "catalogChanges": [
+    {
+      "signalId": "setup.draw",
+      "change": "sideScope changed to runner and notes clarify that Corp draw pressure must not become Runner setup."
+    },
+    {
+      "signalId": "setup.hand_size",
+      "change": "description/notes clarify positive Runner hand-size support; negative effects remain setup.hand_size_penalty."
+    },
+    {
+      "signalId": "virus.counter_engine",
+      "change": "Viral Pipeline added as an example."
+    }
+  ],
+  "verification": [
+    {
+      "command": "corepack pnpm build:ai-compiled-hints",
+      "status": "passed",
+      "result": "AI_COMPILED_HINTS OK cards=564 generated=391 overlays=6 fallback=136 errors=0 warnings=1792"
+    },
+    {
+      "command": "corepack pnpm check:ai-strategy-taxonomy",
+      "status": "passed",
+      "result": "AI_STRATEGY_TAXONOMY OK strategies=20 strategicRoles=11 functionSignals=161 lineSupport=14 errors=0 warnings=63"
+    },
+    {
+      "command": "corepack pnpm build:ai-hint-inspector-index",
+      "status": "passed",
+      "result": "AI_HINT_INSPECTOR_INDEX OK cards=564 mechanical=426 generated=318 overlays=6 signals=379 anchors=202 warnings=316"
+    },
+    {
+      "command": "node scripts/check-ai-hint-compiled-index.mjs --write",
+      "status": "passed",
+      "result": "AI_HINT_COMPILED_INDEX OK cards=193 errors=0 warnings=657"
+    },
+    {
+      "command": "node scripts/check-ai-derived-facts.mjs --write",
+      "status": "passed",
+      "result": "AI_DERIVED_FACTS OK pilotCards=193 implementations=193 derivedFacts=193 overlaps=119 manualOverlay=126 errors=0 warnings=978"
+    },
+    {
+      "command": "node scripts/check-ai-derived-facts-full.mjs --write",
+      "status": "passed",
+      "result": "AI_DERIVED_FACTS_FULL OK active=564 implementations=527 generated=391 overlays=6 fallback=136 errors=0 warnings=1792"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai test",
+      "status": "passed",
+      "result": "32 files, 624 tests passed"
+    },
+    {
+      "command": "corepack pnpm check:ai-compiled-hints",
+      "status": "passed",
+      "result": "AI_COMPILED_HINTS OK cards=564 generated=391 overlays=6 fallback=136 errors=0 warnings=1792"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-inspector-index",
+      "status": "passed",
+      "result": "AI_HINT_INSPECTOR_INDEX OK cards=564 mechanical=426 generated=318 overlays=6 signals=379 anchors=202 warnings=316"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-compiled-index",
+      "status": "passed",
+      "result": "AI_HINT_COMPILED_INDEX OK cards=193 errors=0 warnings=657"
+    },
+    {
+      "command": "corepack pnpm check:ai-manual-overlays",
+      "status": "passed",
+      "result": "AI_MANUAL_OVERLAYS OK overlayFiles=2 overlayCards=6 errors=0 warnings=24"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-quality",
+      "status": "passed",
+      "result": "AI_HINT_QUALITY OK hints=564 roles=251 planRoles=102 errors=0 warnings=150 benchmarkCards=308"
+    },
+    {
+      "command": "corepack pnpm check:ai-approval-consistency",
+      "status": "passed",
+      "result": "CONSISTENCY_OK 564 ai_supported cards"
+    },
+    {
+      "command": "corepack pnpm check:ai-deck-doctrine-strategy",
+      "status": "passed",
+      "result": "AI006 DeckDoctrine strategy aggregation check passed: 5 deck profiles"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit",
+      "status": "passed",
+      "result": "passed with no diagnostics"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/web exec tsc -p tsconfig.json --noEmit",
+      "status": "passed",
+      "result": "passed with no diagnostics"
+    },
+    {
+      "command": "node <ai019a custom invariant check>",
+      "status": "passed",
+      "result": "status=ok; Viral Pipeline has counter_engine; Skivviss lacks setup.draw; Emergency lacks setup.hand_size; R&D Protocol Files narrowed to runner.rnd_pressure/enabler"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "result": "passed with no whitespace errors"
+    }
+  ]
+}

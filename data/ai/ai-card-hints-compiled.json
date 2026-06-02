@@ -3589,11 +3589,10 @@
         }
       ],
       "lineSupport": [
-        "runner.rnd_pressure",
-        "runner.interface_closeout"
+        "runner.rnd_pressure"
       ],
       "strategicRole": [
-        "payoff_anchor"
+        "enabler"
       ]
     },
     {
