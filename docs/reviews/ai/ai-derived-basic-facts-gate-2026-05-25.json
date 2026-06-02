@@ -128,7 +128,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 996,
+  "warningCount": 995,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -3309,11 +3309,6 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_260_pocket-virtual-reality"
-    },
-    {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence medium.",
-      "cardId": "onr_v1_268_shock-r"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -16961,10 +16956,12 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -17285,12 +17282,10 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": true,
+          "strategyCovered": false,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -18554,12 +18549,10 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": true,
+          "strategyCovered": false,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -18862,10 +18855,12 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -19017,10 +19012,12 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -19955,10 +19952,12 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -20662,12 +20661,14 @@
             "kind": "requires_during_run"
           }
         ],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "medium",
+          "confidence": "high",
           "needsHumanReview": false
         }
       },
@@ -20700,10 +20701,6 @@
       ],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."

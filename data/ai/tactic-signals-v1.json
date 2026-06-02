@@ -1,8 +1,8 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI026",
+  "taskId": "AI024-1",
   "generatedAt": "2026-06-02",
-  "description": "Controlled V1 tactic-signal catalog. AI026 adds Corp node/asset function signals without type-only, subtype-only or card-specific signals and without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
+  "description": "Controlled V1 tactic-signal catalog. AI024-1 sharpens selected Corp-ICE function signals without subtype-only or card-specific signals and without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
   "signalPolicy": {
     "tacticSignal": "Functional card utility: what the AI can use the card for.",
     "strategyAnchor": "Large deck line: which strategy the card can anchor or materially support.",
@@ -1656,6 +1656,23 @@
       "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "corp_ice.encounter_paid_subroutine_add",
+      "group": "ai024_1_corp_ice_paid_subroutine",
+      "sideScope": "corp",
+      "description": "AI024-1 Corp ICE polish tactic signal: corp ice.encounter paid subroutine add.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024-1 corrected Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI024-1 Corp-ICE polish signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "corp_ice.encounter_tax",
       "group": "ai024_corp_ice_tax",
       "sideScope": "corp",
@@ -1739,6 +1756,23 @@
       "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "corp_ice.jackout_lock",
+      "group": "ai024_1_corp_ice_lock_tax",
+      "sideScope": "corp",
+      "description": "AI024-1 Corp ICE polish tactic signal: corp ice.jackout lock.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024-1 corrected Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI024-1 Corp-ICE polish signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "corp_ice.jackout_tax",
       "group": "ai024_corp_ice_tax",
       "sideScope": "corp",
@@ -1820,6 +1854,38 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.next_ice_break_lock",
+      "group": "ai024_1_corp_ice_lock_tax",
+      "sideScope": "corp",
+      "description": "AI024-1 Corp ICE polish tactic signal: corp ice.next ice break lock.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024-1 corrected Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI024-1 Corp-ICE polish signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.optional_self_bounce_gain",
+      "group": "ai024_1_corp_ice_bounce",
+      "sideScope": "corp",
+      "description": "AI024-1 Corp ICE polish tactic signal: corp ice.optional self bounce gain.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI024-1 corrected Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024-1 Corp-ICE polish signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "corp_ice.other_utility",
@@ -1984,6 +2050,23 @@
       "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "corp_ice.runner_action_loss",
+      "group": "ai024_1_corp_ice_lock_tax",
+      "sideScope": "corp",
+      "description": "AI024-1 Corp ICE polish tactic signal: corp ice.runner action loss.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024-1 corrected Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024-1 Corp-ICE polish signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "corp_ice.runner_pay_or_end_run",
       "group": "ai024_corp_ice_tax",
       "sideScope": "corp",
@@ -1999,6 +2082,23 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.runner_pay_or_program_trash",
+      "group": "ai024_1_corp_ice_program_trash",
+      "sideScope": "corp",
+      "description": "AI024-1 Corp ICE polish tactic signal: corp ice.runner pay or program trash.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024-1 corrected Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI024-1 Corp-ICE polish signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "corp_ice.self_bounce_or_maintenance_drawback",

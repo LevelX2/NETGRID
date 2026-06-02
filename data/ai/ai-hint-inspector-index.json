@@ -1408,7 +1408,17 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "ice",
@@ -1463,8 +1473,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -2444,7 +2458,17 @@
         "corp.damage_kill",
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "barrier_ice",
@@ -2515,8 +2539,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -3114,7 +3142,17 @@
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "code_gate_ice",
@@ -3174,8 +3212,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -3466,7 +3508,17 @@
         "economy.generic"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "barrier_ice",
@@ -3530,8 +3582,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -3714,17 +3770,7 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "barrier_ice",
@@ -3788,12 +3834,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -33387,7 +33429,17 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "ice",
@@ -33449,8 +33501,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -33597,17 +33653,7 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "etr_ice",
@@ -33689,12 +33735,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -34763,17 +34805,7 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "etr_ice",
@@ -34844,12 +34876,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -34953,17 +34981,7 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "etr_ice",
@@ -35043,12 +35061,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -35282,17 +35296,7 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "barrier_ice",
@@ -35356,12 +35360,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -35472,7 +35472,17 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "end_run",
@@ -35541,8 +35551,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -35565,7 +35579,17 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "ice",
@@ -35627,8 +35651,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -36456,17 +36484,7 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "hidden_zone_tool",
@@ -36546,12 +36564,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -36574,7 +36588,17 @@
       "derivedStrategyAnchors": [
         "corp.tag_trace_punish"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "ice",
@@ -36652,8 +36676,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -37757,17 +37785,7 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "barrier_ice",
@@ -37831,12 +37849,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -37859,7 +37873,17 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "ice",
@@ -37921,8 +37945,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -38121,17 +38149,7 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "etr_ice",
@@ -38204,12 +38222,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -38232,7 +38246,17 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "ap_ice",
@@ -38304,8 +38328,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -38513,7 +38541,17 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "action_loss_ice",
@@ -38593,8 +38631,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -38715,17 +38757,7 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "etr_ice",
@@ -38796,12 +38828,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -39222,6 +39250,15 @@
             "corp.damage_kill"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -39297,10 +39334,12 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "punish_payoff"
+          "punish_payoff",
+          "tax_tool"
         ],
         "validValues": [
-          "punish_payoff"
+          "punish_payoff",
+          "tax_tool"
         ],
         "unknownValues": []
       }
@@ -39414,7 +39453,17 @@
         "corp.damage_kill",
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.damage_kill",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "corp",
@@ -39476,8 +39525,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "punish_payoff"
+        ],
+        "validValues": [
+          "punish_payoff"
+        ],
         "unknownValues": []
       }
     },

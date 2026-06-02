@@ -18577,10 +18577,12 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "tacticSignals",
         "valueHints"
       ],
@@ -18824,12 +18826,10 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
         "tacticSignals",
         "valueHints"
       ],
@@ -19871,12 +19871,10 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
         "tacticSignals",
         "valueHints"
       ],
@@ -20133,10 +20131,12 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "tacticSignals",
         "valueHints"
       ],
@@ -20259,10 +20259,12 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "tacticSignals",
         "valueHints"
       ],
@@ -21030,10 +21032,12 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": [],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "tacticSignals",
         "valueHints"
       ],
@@ -21560,10 +21564,12 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
+        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "strategicRole",
         "tacticSignals",
         "valueHints"
       ],

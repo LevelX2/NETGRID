@@ -395,7 +395,7 @@
   "sourceSummary": {
     "derivedFacts": {
       "hardErrorCount": 0,
-      "warningCount": 996,
+      "warningCount": 995,
       "cardsNeedingManualOverlay": 132
     },
     "compiledIndex": {

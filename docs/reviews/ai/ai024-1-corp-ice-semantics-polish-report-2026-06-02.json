@@ -1,0 +1,1146 @@
+{
+  "schemaVersion": "ai024-1-corp-ice-semantics-polish-report-v1",
+  "taskId": "AI024-1",
+  "generatedAt": "2026-06-02",
+  "status": "complete",
+  "sourceCommit": "cf7753c3",
+  "correctsCommit": "466bf28d",
+  "countsBefore": {
+    "activeCompiledCorpIce": 95,
+    "inactiveCheckedCorpIce": 11
+  },
+  "countsAfter": {
+    "activeCompiledCorpIce": 95,
+    "inactiveCheckedCorpIce": 11,
+    "changedCardCount": 38,
+    "addedSignalCount": 6,
+    "newStrategyIdCount": 0,
+    "plannerEffect": false,
+    "actionScoreEffect": false,
+    "planWeightEffect": false,
+    "targetingAiEffect": false,
+    "engineEffect": false,
+    "legalEffect": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivationEffect": false,
+    "hiddenInfoLeakEffect": false
+  },
+  "changedCards": [
+    {
+      "cardId": "onr_v1_221_asp",
+      "title": "Asp",
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.run_lock",
+        "corp_ice.trace_source",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "rationale": "Trace-success end-run plus post-run action payment lock; no tag text."
+    },
+    {
+      "cardId": "onr_v1_240_fang",
+      "title": "Fang",
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.end_run",
+        "corp_ice.run_lock",
+        "corp_ice.trace_source",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "rationale": "Trace-success end-run plus run lock; no tag text."
+    },
+    {
+      "cardId": "onr_v1_241_fang-2-0",
+      "title": "Fang 2.0",
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.run_lock",
+        "corp_ice.trace_source",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "rationale": "Trace-success end-run plus run lock; no tag text."
+    },
+    {
+      "cardId": "onr_v1_249_hunter",
+      "title": "Hunter",
+      "tacticSignals": [
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [],
+      "rationale": "Trace-success tag source only; no end-run text."
+    },
+    {
+      "cardId": "onr_v1_264_rex",
+      "title": "Rex",
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.run_lock",
+        "corp_ice.trace_source",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "rationale": "Trace-success end-run plus action-payment run lock; no tag text."
+    },
+    {
+      "cardId": "onr_v1_246_fragmentation-storm",
+      "title": "Fragmentation Storm",
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.program_trash",
+        "corp_ice.run_lock",
+        "corp_ice.trace_source",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "rationale": "Trace-success end-run, program trash and run lock; removes false net-damage semantics."
+    },
+    {
+      "cardId": "onr_v1_251_jack-attack",
+      "title": "Jack Attack",
+      "tacticSignals": [
+        "corp_ice.jackout_lock",
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "rationale": "Explicit jack-out lock plus trace-success tag."
+    },
+    {
+      "cardId": "onr_v1_268_shock-r",
+      "title": "Shock.r",
+      "tacticSignals": [
+        "corp_ice.jackout_lock",
+        "corp_ice.next_ice_break_lock"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "rationale": "Next-ICE break lock and temporary jack-out lock replace generic other_utility."
+    },
+    {
+      "cardId": "onr_v1_271_tko-2-0",
+      "title": "TKO 2.0",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.runner_action_loss"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "rationale": "End-run plus explicit next-action loss."
+    },
+    {
+      "cardId": "onr_v1_272_too-many-doors",
+      "title": "Too Many Doors",
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.random_or_guessing"
+      ],
+      "strategyAnchors": [],
+      "rationale": "Secret bid can end the run; removes false R&D reorder signal."
+    },
+    {
+      "cardId": "onr_v1_280_zombie",
+      "title": "Zombie",
+      "tacticSignals": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "rationale": "Two brain damage subroutines plus end-run; no generic other_utility."
+    },
+    {
+      "cardId": "onr_proteus_014_chihuahua",
+      "title": "Chihuahua",
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "corp_ice.rez_economy",
+        "corp_ice.trace_source",
+        "damage.payoff",
+        "trace.source"
+      ],
+      "strategyAnchors": [],
+      "rationale": "Trace-success net damage plus on-rez economy."
+    },
+    {
+      "cardId": "onr_proteus_015_colonel-failure",
+      "title": "Colonel Failure",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run",
+        "corp_ice.program_trash"
+      ],
+      "strategyAnchors": [],
+      "rationale": "Three program-trash and two end-run subroutines; removes false self-bounce/maintenance drawback."
+    },
+    {
+      "cardId": "onr_proteus_016_coyote",
+      "title": "Coyote",
+      "tacticSignals": [
+        "corp_ice.future_strength_buff",
+        "corp_ice.rez_economy"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "rationale": "Future ICE strength buff plus on-rez economy."
+    },
+    {
+      "cardId": "onr_proteus_018_datacomb",
+      "title": "Datacomb",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.self_bounce_or_maintenance_drawback"
+      ],
+      "strategyAnchors": [],
+      "rationale": "End-run plus pass-triggered pay-or-uninstall drawback; no rez economy."
+    },
+    {
+      "cardId": "onr_proteus_019_death-yo-yo",
+      "title": "Death Yo-Yo",
+      "tacticSignals": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.optional_self_bounce_gain",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "rationale": "Brain damage/end-run plus optional pass-triggered self-bounce gain."
+    },
+    {
+      "cardId": "onr_proteus_025_homing-missile",
+      "title": "Homing Missile",
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.rez_paid_scaling",
+        "corp_ice.run_lock",
+        "corp_ice.trace_source",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "rationale": "Rez-paid trace scaling, conditional ETR and run lock."
+    },
+    {
+      "cardId": "onr_proteus_027_iceberg",
+      "title": "Iceberg",
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.encounter_paid_subroutine_add",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "rationale": "Net damage plus encounter-paid end-run subroutine add."
+    },
+    {
+      "cardId": "onr_proteus_029_marionette",
+      "title": "Marionette",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash",
+        "corp_ice.self_bounce_or_maintenance_drawback"
+      ],
+      "strategyAnchors": [],
+      "rationale": "Program trash/end-run plus pass-triggered pay-or-uninstall drawback, support-only."
+    },
+    {
+      "cardId": "onr_proteus_032_misleading-access-menus",
+      "title": "Misleading Access Menus",
+      "tacticSignals": [
+        "corp_ice.encounter_tax",
+        "corp_ice.rez_economy",
+        "corp_ice.runner_pay_or_end_run"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "rationale": "Runner pay-or-end-run plus on-rez economy; no run_lock."
+    },
+    {
+      "cardId": "onr_proteus_034_riddler",
+      "title": "Riddler",
+      "tacticSignals": [
+        "corp_ice.encounter_paid_subroutine_add"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "rationale": "Encounter-paid end-run subroutine add, not vanilla ETR."
+    },
+    {
+      "cardId": "onr_proteus_037_scaffolding",
+      "title": "Scaffolding",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.optional_self_bounce_gain"
+      ],
+      "strategyAnchors": [],
+      "rationale": "End-run plus optional pass-triggered self-bounce gain."
+    },
+    {
+      "cardId": "onr_proteus_038_snowbank",
+      "title": "Snowbank",
+      "tacticSignals": [
+        "corp_ice.encounter_tax",
+        "corp_ice.rez_economy",
+        "corp_ice.runner_pay_or_end_run"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "rationale": "Runner pay-or-end-run plus on-rez economy; no run_lock."
+    },
+    {
+      "cardId": "onr_proteus_042_tumblers",
+      "title": "Tumblers",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.optional_self_bounce_gain"
+      ],
+      "strategyAnchors": [],
+      "rationale": "End-run plus optional pass-triggered self-bounce gain."
+    },
+    {
+      "cardId": "onr_proteus_043_twisty-passages",
+      "title": "Twisty Passages",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.self_bounce_or_maintenance_drawback"
+      ],
+      "strategyAnchors": [],
+      "rationale": "End-run plus pass-triggered pay-or-uninstall drawback."
+    },
+    {
+      "cardId": "onr_proteus_045_washed-up-solo-construct",
+      "title": "Washed-Up Solo Construct",
+      "tacticSignals": [
+        "corp_ice.program_trash",
+        "corp_ice.rez_economy",
+        "corp_ice.runner_pay_or_program_trash"
+      ],
+      "strategyAnchors": [],
+      "rationale": "Runner pay-or-program-trash plus on-rez economy; support-only to avoid over-broad program-trash anchoring."
+    },
+    {
+      "cardId": "onr_v1_230_cortical-scanner",
+      "title": "Cortical Scanner",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run"
+      ],
+      "strategyAnchors": [],
+      "rationale": "Three real end-run subroutines."
+    },
+    {
+      "cardId": "onr_v1_239_endless-corridor",
+      "title": "Endless Corridor",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run"
+      ],
+      "strategyAnchors": [],
+      "rationale": "Two real end-run subroutines."
+    },
+    {
+      "cardId": "onr_v1_263_reinforced-wall",
+      "title": "Reinforced Wall",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run"
+      ],
+      "strategyAnchors": [],
+      "rationale": "Two real end-run subroutines."
+    },
+    {
+      "cardId": "onr_v1_278_wall-of-ice",
+      "title": "Wall of Ice",
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "rationale": "Two net damage and two end-run subroutines."
+    },
+    {
+      "cardId": "onr_proteus_041_toughoniumtm-wall",
+      "title": "Toughonium Wall",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run"
+      ],
+      "strategyAnchors": [],
+      "rationale": "Four real end-run subroutines."
+    },
+    {
+      "cardId": "onr_v1_238_data-wall-2-0",
+      "title": "Data Wall 2.0",
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "rationale": "Repo text has a single end-run subroutine."
+    },
+    {
+      "cardId": "onr_v1_223_banpei",
+      "title": "onr_v1_223_banpei",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ],
+      "strategyAnchors": [],
+      "rationale": "Simple program-trash plus ETR ICE stays support-only and no longer auto-anchors Corp ICE Tax/Glacier."
+    },
+    {
+      "cardId": "onr_v1_233_d-arc-knight",
+      "title": "onr_v1_233_d-arc-knight",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ],
+      "strategyAnchors": [],
+      "rationale": "Simple program-trash plus ETR ICE stays support-only and no longer auto-anchors Corp ICE Tax/Glacier."
+    },
+    {
+      "cardId": "onr_v1_235_data-naga",
+      "title": "onr_v1_235_data-naga",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ],
+      "strategyAnchors": [],
+      "rationale": "Simple program-trash plus ETR ICE stays support-only and no longer auto-anchors Corp ICE Tax/Glacier."
+    },
+    {
+      "cardId": "onr_v1_250_ice-pick-willie",
+      "title": "onr_v1_250_ice-pick-willie",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ],
+      "strategyAnchors": [],
+      "rationale": "Simple program-trash plus ETR ICE stays support-only and no longer auto-anchors Corp ICE Tax/Glacier."
+    },
+    {
+      "cardId": "onr_v1_267_sentinels-prime",
+      "title": "onr_v1_267_sentinels-prime",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ],
+      "strategyAnchors": [],
+      "rationale": "Simple program-trash plus ETR ICE stays support-only and no longer auto-anchors Corp ICE Tax/Glacier."
+    },
+    {
+      "cardId": "onr_v1_273_triggerman",
+      "title": "onr_v1_273_triggerman",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ],
+      "strategyAnchors": [],
+      "rationale": "Simple program-trash plus ETR ICE stays support-only and no longer auto-anchors Corp ICE Tax/Glacier."
+    }
+  ],
+  "changedSignals": [
+    {
+      "cardId": "onr_v1_221_asp",
+      "title": "Asp",
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.run_lock",
+        "corp_ice.trace_source",
+        "trace.source"
+      ]
+    },
+    {
+      "cardId": "onr_v1_240_fang",
+      "title": "Fang",
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.end_run",
+        "corp_ice.run_lock",
+        "corp_ice.trace_source",
+        "trace.source"
+      ]
+    },
+    {
+      "cardId": "onr_v1_241_fang-2-0",
+      "title": "Fang 2.0",
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.run_lock",
+        "corp_ice.trace_source",
+        "trace.source"
+      ]
+    },
+    {
+      "cardId": "onr_v1_249_hunter",
+      "title": "Hunter",
+      "tacticSignals": [
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ]
+    },
+    {
+      "cardId": "onr_v1_264_rex",
+      "title": "Rex",
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.run_lock",
+        "corp_ice.trace_source",
+        "trace.source"
+      ]
+    },
+    {
+      "cardId": "onr_v1_246_fragmentation-storm",
+      "title": "Fragmentation Storm",
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.program_trash",
+        "corp_ice.run_lock",
+        "corp_ice.trace_source",
+        "trace.source"
+      ]
+    },
+    {
+      "cardId": "onr_v1_251_jack-attack",
+      "title": "Jack Attack",
+      "tacticSignals": [
+        "corp_ice.jackout_lock",
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ]
+    },
+    {
+      "cardId": "onr_v1_268_shock-r",
+      "title": "Shock.r",
+      "tacticSignals": [
+        "corp_ice.jackout_lock",
+        "corp_ice.next_ice_break_lock"
+      ]
+    },
+    {
+      "cardId": "onr_v1_271_tko-2-0",
+      "title": "TKO 2.0",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.runner_action_loss"
+      ]
+    },
+    {
+      "cardId": "onr_v1_272_too-many-doors",
+      "title": "Too Many Doors",
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.random_or_guessing"
+      ]
+    },
+    {
+      "cardId": "onr_v1_280_zombie",
+      "title": "Zombie",
+      "tacticSignals": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "damage.payoff"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_014_chihuahua",
+      "title": "Chihuahua",
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "corp_ice.rez_economy",
+        "corp_ice.trace_source",
+        "damage.payoff",
+        "trace.source"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_015_colonel-failure",
+      "title": "Colonel Failure",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run",
+        "corp_ice.program_trash"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_016_coyote",
+      "title": "Coyote",
+      "tacticSignals": [
+        "corp_ice.future_strength_buff",
+        "corp_ice.rez_economy"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_018_datacomb",
+      "title": "Datacomb",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.self_bounce_or_maintenance_drawback"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_019_death-yo-yo",
+      "title": "Death Yo-Yo",
+      "tacticSignals": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.optional_self_bounce_gain",
+        "damage.payoff"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_025_homing-missile",
+      "title": "Homing Missile",
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.rez_paid_scaling",
+        "corp_ice.run_lock",
+        "corp_ice.trace_source",
+        "trace.source"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_027_iceberg",
+      "title": "Iceberg",
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.encounter_paid_subroutine_add",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_029_marionette",
+      "title": "Marionette",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash",
+        "corp_ice.self_bounce_or_maintenance_drawback"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_032_misleading-access-menus",
+      "title": "Misleading Access Menus",
+      "tacticSignals": [
+        "corp_ice.encounter_tax",
+        "corp_ice.rez_economy",
+        "corp_ice.runner_pay_or_end_run"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_034_riddler",
+      "title": "Riddler",
+      "tacticSignals": [
+        "corp_ice.encounter_paid_subroutine_add"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_037_scaffolding",
+      "title": "Scaffolding",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.optional_self_bounce_gain"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_038_snowbank",
+      "title": "Snowbank",
+      "tacticSignals": [
+        "corp_ice.encounter_tax",
+        "corp_ice.rez_economy",
+        "corp_ice.runner_pay_or_end_run"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_042_tumblers",
+      "title": "Tumblers",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.optional_self_bounce_gain"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_043_twisty-passages",
+      "title": "Twisty Passages",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.self_bounce_or_maintenance_drawback"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_045_washed-up-solo-construct",
+      "title": "Washed-Up Solo Construct",
+      "tacticSignals": [
+        "corp_ice.program_trash",
+        "corp_ice.rez_economy",
+        "corp_ice.runner_pay_or_program_trash"
+      ]
+    },
+    {
+      "cardId": "onr_v1_230_cortical-scanner",
+      "title": "Cortical Scanner",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run"
+      ]
+    },
+    {
+      "cardId": "onr_v1_239_endless-corridor",
+      "title": "Endless Corridor",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run"
+      ]
+    },
+    {
+      "cardId": "onr_v1_263_reinforced-wall",
+      "title": "Reinforced Wall",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run"
+      ]
+    },
+    {
+      "cardId": "onr_v1_278_wall-of-ice",
+      "title": "Wall of Ice",
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_041_toughoniumtm-wall",
+      "title": "Toughonium Wall",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run"
+      ]
+    },
+    {
+      "cardId": "onr_v1_238_data-wall-2-0",
+      "title": "Data Wall 2.0",
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ]
+    },
+    {
+      "cardId": "onr_v1_223_banpei",
+      "title": "onr_v1_223_banpei",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ]
+    },
+    {
+      "cardId": "onr_v1_233_d-arc-knight",
+      "title": "onr_v1_233_d-arc-knight",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ]
+    },
+    {
+      "cardId": "onr_v1_235_data-naga",
+      "title": "onr_v1_235_data-naga",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ]
+    },
+    {
+      "cardId": "onr_v1_250_ice-pick-willie",
+      "title": "onr_v1_250_ice-pick-willie",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ]
+    },
+    {
+      "cardId": "onr_v1_267_sentinels-prime",
+      "title": "onr_v1_267_sentinels-prime",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ]
+    },
+    {
+      "cardId": "onr_v1_273_triggerman",
+      "title": "onr_v1_273_triggerman",
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ]
+    }
+  ],
+  "removedSignals": [
+    {
+      "signalId": "corp_ice.rnd_reorder",
+      "removedFrom": [
+        "Too Many Doors"
+      ],
+      "rationale": "No R&D reorder text."
+    },
+    {
+      "signalId": "corp_ice.net_damage",
+      "removedFrom": [
+        "Fragmentation Storm"
+      ],
+      "rationale": "No net-damage text."
+    },
+    {
+      "signalId": "corp_ice.tag_source",
+      "removedFrom": [
+        "Asp",
+        "Fang",
+        "Fang 2.0",
+        "Rex"
+      ],
+      "rationale": "Trace locks end runs; no tag text."
+    },
+    {
+      "signalId": "tag.source",
+      "removedFrom": [
+        "Asp",
+        "Fang",
+        "Fang 2.0",
+        "Rex"
+      ],
+      "rationale": "No tag text."
+    },
+    {
+      "signalId": "corp_ice.self_bounce_or_maintenance_drawback",
+      "removedFrom": [
+        "Colonel Failure"
+      ],
+      "rationale": "No self-bounce or maintenance drawback text."
+    }
+  ],
+  "addedSignals": [
+    {
+      "signalId": "corp_ice.jackout_lock",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.runner_action_loss",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.next_ice_break_lock",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.encounter_paid_subroutine_add",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.optional_self_bounce_gain",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "corp_ice.runner_pay_or_program_trash",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    }
+  ],
+  "changedStrategySupportPairs": [
+    {
+      "cardId": "onr_v1_221_asp",
+      "title": "Asp",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.run_lock"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_240_fang",
+      "title": "Fang",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.end_run",
+        "corp_ice.run_lock"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_241_fang-2-0",
+      "title": "Fang 2.0",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.run_lock"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_264_rex",
+      "title": "Rex",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.run_lock"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_246_fragmentation-storm",
+      "title": "Fragmentation Storm",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.program_trash",
+        "corp_ice.run_lock"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_251_jack-attack",
+      "title": "Jack Attack",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.jackout_lock"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_268_shock-r",
+      "title": "Shock.r",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.jackout_lock",
+        "corp_ice.next_ice_break_lock"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_271_tko-2-0",
+      "title": "TKO 2.0",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.end_run",
+        "corp_ice.runner_action_loss"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_280_zombie",
+      "title": "Zombie",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_pressure",
+      "evidence": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "damage.payoff"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_016_coyote",
+      "title": "Coyote",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.future_strength_buff",
+        "corp_ice.rez_economy"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_019_death-yo-yo",
+      "title": "Death Yo-Yo",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_pressure",
+      "evidence": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "damage.payoff"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_025_homing-missile",
+      "title": "Homing Missile",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.rez_paid_scaling",
+        "corp_ice.run_lock"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_027_iceberg",
+      "title": "Iceberg",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.encounter_paid_subroutine_add"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_032_misleading-access-menus",
+      "title": "Misleading Access Menus",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.encounter_tax",
+        "corp_ice.rez_economy",
+        "corp_ice.runner_pay_or_end_run"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_034_riddler",
+      "title": "Riddler",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.encounter_paid_subroutine_add"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_038_snowbank",
+      "title": "Snowbank",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.encounter_tax",
+        "corp_ice.rez_economy",
+        "corp_ice.runner_pay_or_end_run"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_278_wall-of-ice",
+      "title": "Wall of Ice",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_pressure",
+      "evidence": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_278_wall-of-ice",
+      "title": "Wall of Ice",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "retainedDeferredItems": [
+    {
+      "topic": "target_profile_activation",
+      "decision": "deferred",
+      "rationale": "Paid scaling, secret bids, action locks and program trash targets remain diagnostic/read-only until side-safe TargetProfile consumption exists."
+    }
+  ],
+  "hiddenInfoSafetyReview": [
+    {
+      "topic": "corp_ice_hidden_semantics",
+      "result": "pass",
+      "notes": "Corp-ICE semantics remain corp_side_only_until_rezzed until ICE is rezzed, exposed or otherwise legally known."
+    },
+    {
+      "topic": "runtime_visibility",
+      "result": "pass",
+      "notes": "AI024-1 adds no WebSocket, reconnect, undo-preview, replay, PublicEvents, log, client-error, planner or Targeting-AI projection path."
+    }
+  ],
+  "verification": [
+    {
+      "command": "node scripts/check-ai024-1-corp-ice-semantics-polish.mjs",
+      "result": "pending_after_apply"
+    }
+  ]
+}

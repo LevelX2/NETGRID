@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI026",
-  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022/AI024/AI024/AI024/AI025/AI025/AI025/AI026/AI026/AI026/AI026",
+  "taskId": "AI024-1",
+  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022/AI024/AI024/AI024/AI025/AI025/AI025/AI026/AI026/AI026/AI026/AI024-1",
   "generatedAt": "2026-06-02",
-  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI026 adds Corp node/asset semantics while keeping Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default and UI-derivation effects unchanged.",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI024-1 sharpens selected Corp-ICE semantics while keeping Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default and UI-derivation effects unchanged.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -1839,6 +1839,21 @@
       ]
     },
     {
+      "signalId": "corp_ice.encounter_paid_subroutine_add",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.encounter_paid_subroutine_add"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.encounter_paid_subroutine_add"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
       "signalId": "corp_ice.encounter_tax",
       "source": "effects",
       "match": {
@@ -1906,6 +1921,21 @@
         "side": "corp",
         "cardType": "ice",
         "target": "corp_ice.hardware_trash"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.jackout_lock",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.jackout_lock"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.jackout_lock"
       },
       "strategyAnchorFor": [
         "corp.ice_tax_glacier"
@@ -1983,6 +2013,34 @@
       "strategyAnchorFor": [
         "corp.damage_kill"
       ]
+    },
+    {
+      "signalId": "corp_ice.next_ice_break_lock",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.next_ice_break_lock"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.next_ice_break_lock"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.optional_self_bounce_gain",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.optional_self_bounce_gain"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.optional_self_bounce_gain"
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "corp_ice.other_utility",
@@ -2127,6 +2185,21 @@
       ]
     },
     {
+      "signalId": "corp_ice.runner_action_loss",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.runner_action_loss"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.runner_action_loss"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
       "signalId": "corp_ice.runner_pay_or_end_run",
       "source": "effects",
       "match": {
@@ -2136,6 +2209,21 @@
         "side": "corp",
         "cardType": "ice",
         "target": "corp_ice.runner_pay_or_end_run"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.runner_pay_or_program_trash",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.runner_pay_or_program_trash"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.runner_pay_or_program_trash"
       },
       "strategyAnchorFor": [
         "corp.ice_tax_glacier"

@@ -16123,20 +16123,25 @@
       ],
       "tacticSignals": [
         "corp_ice.conditional_end_run",
-        "corp_ice.tag_source",
+        "corp_ice.run_lock",
         "corp_ice.trace_source",
-        "tag.source",
         "trace.source"
       ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "kind": "etr",
@@ -16306,7 +16311,7 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
@@ -16328,12 +16333,6 @@
           "scope": "run_path",
           "timing": "encounter"
         }
-      ],
-      "lineSupport": [
-        "corp.ice_tax_glacier"
-      ],
-      "strategicRole": [
-        "tax_tool"
       ],
       "tacticSignals": [
         "corp_ice.end_run",
@@ -16957,7 +16956,7 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
@@ -16983,7 +16982,8 @@
         }
       ],
       "tacticSignals": [
-        "corp_ice.end_run"
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run"
       ]
     },
     {
@@ -17170,12 +17170,6 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_program_trash_ice"
       ],
-      "lineSupport": [
-        "corp.ice_tax_glacier"
-      ],
-      "strategicRole": [
-        "tax_tool"
-      ],
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.program_trash"
@@ -17183,7 +17177,7 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
@@ -17322,12 +17316,6 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v191-v194-smokes.json#corp_v192_agenda_economy_and_program_trash_ice"
       ],
-      "lineSupport": [
-        "corp.ice_tax_glacier"
-      ],
-      "strategicRole": [
-        "tax_tool"
-      ],
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.program_trash"
@@ -17335,7 +17323,7 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
@@ -17566,8 +17554,8 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": true,
-        "confidence": "medium",
+        "strategyCovered": false,
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
@@ -17593,14 +17581,7 @@
         }
       ],
       "tacticSignals": [
-        "corp_ice.end_run",
-        "corp_ice.multi_end_run"
-      ],
-      "lineSupport": [
-        "corp.ice_tax_glacier"
-      ],
-      "strategicRole": [
-        "tax_tool"
+        "corp_ice.end_run"
       ]
     },
     {
@@ -17636,7 +17617,7 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
@@ -17662,7 +17643,8 @@
         }
       ],
       "tacticSignals": [
-        "corp_ice.end_run"
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run"
       ]
     },
     {
@@ -17699,20 +17681,25 @@
       "tacticSignals": [
         "corp_ice.conditional_end_run",
         "corp_ice.end_run",
-        "corp_ice.tag_source",
+        "corp_ice.run_lock",
         "corp_ice.trace_source",
-        "tag.source",
         "trace.source"
       ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "kind": "etr",
@@ -17779,20 +17766,25 @@
       ],
       "tacticSignals": [
         "corp_ice.conditional_end_run",
-        "corp_ice.tag_source",
+        "corp_ice.run_lock",
         "corp_ice.trace_source",
-        "tag.source",
         "trace.source"
       ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "kind": "etr",
@@ -18164,11 +18156,10 @@
         "tax_tool"
       ],
       "tacticSignals": [
-        "corp_ice.damage_source",
-        "corp_ice.net_damage",
+        "corp_ice.conditional_end_run",
         "corp_ice.program_trash",
+        "corp_ice.run_lock",
         "corp_ice.trace_source",
-        "damage.payoff",
         "trace.source"
       ],
       "quality": {
@@ -18476,7 +18467,6 @@
         }
       ],
       "tacticSignals": [
-        "corp_ice.conditional_end_run",
         "corp_ice.tag_source",
         "corp_ice.trace_source",
         "tag.source",
@@ -18547,16 +18537,10 @@
         "corp_ice.end_run",
         "corp_ice.program_trash"
       ],
-      "lineSupport": [
-        "corp.ice_tax_glacier"
-      ],
-      "strategicRole": [
-        "tax_tool"
-      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
@@ -18599,6 +18583,7 @@
         "data/scenarios/ai-deck-legal-v191-v194-smokes.json#corp_v193_trace_tag_and_run_lock_windows"
       ],
       "tacticSignals": [
+        "corp_ice.jackout_lock",
         "corp_ice.tag_source",
         "corp_ice.trace_source",
         "tag.source",
@@ -18607,12 +18592,18 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -19512,8 +19503,8 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": true,
-        "confidence": "medium",
+        "strategyCovered": false,
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
@@ -19541,12 +19532,6 @@
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.multi_end_run"
-      ],
-      "lineSupport": [
-        "corp.ice_tax_glacier"
-      ],
-      "strategicRole": [
-        "tax_tool"
       ]
     },
     {
@@ -19579,20 +19564,26 @@
         "data/scenarios/ai-deck-legal-v1914-smokes.json#corp_v1914_trace_ice"
       ],
       "tacticSignals": [
-        "corp_ice.tag_source",
+        "corp_ice.conditional_end_run",
+        "corp_ice.run_lock",
         "corp_ice.trace_source",
-        "tag.source",
         "trace.source"
       ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "kind": "etr",
@@ -19801,21 +19792,15 @@
           "timing": "encounter"
         }
       ],
-      "lineSupport": [
-        "corp.ice_tax_glacier"
-      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
-      "strategicRole": [
-        "tax_tool"
-      ],
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.program_trash"
@@ -19865,8 +19850,8 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "medium",
+        "strategyCovered": true,
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
@@ -19901,7 +19886,14 @@
         }
       ],
       "tacticSignals": [
-        "corp_ice.other_utility"
+        "corp_ice.jackout_lock",
+        "corp_ice.next_ice_break_lock"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ]
     },
     {
@@ -20076,17 +20068,24 @@
         "data/scenarios/ai-deck-legal-v191-v194-smokes.json#corp_v193_trace_tag_and_run_lock_windows"
       ],
       "tacticSignals": [
-        "corp_ice.end_run"
+        "corp_ice.end_run",
+        "corp_ice.runner_action_loss"
       ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
         {
           "kind": "etr",
@@ -20145,8 +20144,8 @@
         "data/scenarios/ai-deck-legal-v1911-smokes.json#corp_v1911_rd_reveal_and_reorder"
       ],
       "tacticSignals": [
-        "corp_ice.random_or_guessing",
-        "corp_ice.rnd_reorder"
+        "corp_ice.conditional_end_run",
+        "corp_ice.random_or_guessing"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -20198,12 +20197,6 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_program_trash_ice"
       ],
-      "lineSupport": [
-        "corp.ice_tax_glacier"
-      ],
-      "strategicRole": [
-        "tax_tool"
-      ],
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.program_trash"
@@ -20211,7 +20204,7 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
@@ -20603,14 +20596,17 @@
         }
       ],
       "lineSupport": [
-        "corp.damage_kill"
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
       ],
       "strategicRole": [
-        "punish_payoff"
+        "punish_payoff",
+        "tax_tool"
       ],
       "tacticSignals": [
         "corp_ice.damage_source",
         "corp_ice.end_run",
+        "corp_ice.multi_end_run",
         "corp_ice.net_damage",
         "damage.payoff"
       ],
@@ -20716,17 +20712,26 @@
         "data/scenarios/ai-deck-legal-v1922-smokes.json#corp_v1922_ice_longtail"
       ],
       "tacticSignals": [
-        "corp_ice.other_utility"
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "damage.payoff"
       ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
+      "lineSupport": [
+        "corp.damage_kill"
+      ],
+      "strategicRole": [
+        "punish_payoff"
+      ],
       "effects": [
         {
           "amount": 1,
@@ -28323,7 +28328,7 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
@@ -28331,7 +28336,10 @@
       "tacticSignals": [
         "corp_ice.damage_source",
         "corp_ice.net_damage",
-        "damage.payoff"
+        "corp_ice.rez_economy",
+        "corp_ice.trace_source",
+        "damage.payoff",
+        "trace.source"
       ],
       "effects": [
         {
@@ -28387,14 +28395,15 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "corp_ice.end_run",
-        "corp_ice.self_bounce_or_maintenance_drawback"
+        "corp_ice.multi_end_run",
+        "corp_ice.program_trash"
       ],
       "effects": [
         {
@@ -28448,14 +28457,21 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "medium",
+        "strategyCovered": true,
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "corp_ice.other_utility"
+        "corp_ice.future_strength_buff",
+        "corp_ice.rez_economy"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ],
       "effects": [
         {
@@ -28557,7 +28573,7 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
@@ -28584,7 +28600,7 @@
       ],
       "tacticSignals": [
         "corp_ice.end_run",
-        "corp_ice.rez_economy"
+        "corp_ice.self_bounce_or_maintenance_drawback"
       ]
     },
     {
@@ -28617,7 +28633,7 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
@@ -28632,6 +28648,7 @@
         "corp_ice.brain_damage",
         "corp_ice.damage_source",
         "corp_ice.end_run",
+        "corp_ice.optional_self_bounce_gain",
         "damage.payoff"
       ],
       "effects": [
@@ -28918,14 +28935,17 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "corp_ice.end_run",
-        "corp_ice.rez_paid_scaling"
+        "corp_ice.conditional_end_run",
+        "corp_ice.rez_paid_scaling",
+        "corp_ice.run_lock",
+        "corp_ice.trace_source",
+        "trace.source"
       ],
       "lineSupport": [
         "corp.ice_tax_glacier"
@@ -29013,17 +29033,23 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "medium",
+        "strategyCovered": true,
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "corp_ice.damage_source",
-        "corp_ice.end_run",
+        "corp_ice.encounter_paid_subroutine_add",
         "corp_ice.net_damage",
         "damage.payoff"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ],
       "effects": [
         {
@@ -29119,13 +29145,15 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "corp_ice.end_run"
+        "corp_ice.end_run",
+        "corp_ice.program_trash",
+        "corp_ice.self_bounce_or_maintenance_drawback"
       ],
       "effects": [
         {
@@ -29298,15 +29326,15 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": true,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "corp_ice.encounter_tax",
-        "corp_ice.end_run",
-        "corp_ice.run_lock"
+        "corp_ice.rez_economy",
+        "corp_ice.runner_pay_or_end_run"
       ],
       "lineSupport": [
         "corp.ice_tax_glacier"
@@ -29429,14 +29457,20 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "medium",
+        "strategyCovered": true,
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "corp_ice.end_run"
+        "corp_ice.encounter_paid_subroutine_add"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ]
     },
     {
@@ -29569,7 +29603,7 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
@@ -29595,7 +29629,8 @@
         }
       ],
       "tacticSignals": [
-        "corp_ice.end_run"
+        "corp_ice.end_run",
+        "corp_ice.optional_self_bounce_gain"
       ]
     },
     {
@@ -29625,14 +29660,22 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "medium",
+        "strategyCovered": true,
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "corp_ice.end_run"
+        "corp_ice.encounter_tax",
+        "corp_ice.rez_economy",
+        "corp_ice.runner_pay_or_end_run"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
       ],
       "effects": [
         {
@@ -29755,18 +29798,12 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": true,
-        "confidence": "medium",
+        "strategyCovered": false,
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "corp.ice_tax_glacier"
-      ],
-      "strategicRole": [
-        "tax_tool"
-      ],
       "tacticSignals": [
         "corp_ice.end_run",
         "corp_ice.multi_end_run"
@@ -29820,7 +29857,7 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
@@ -29846,7 +29883,8 @@
         }
       ],
       "tacticSignals": [
-        "corp_ice.end_run"
+        "corp_ice.end_run",
+        "corp_ice.optional_self_bounce_gain"
       ]
     },
     {
@@ -29877,7 +29915,7 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
@@ -29903,7 +29941,8 @@
         }
       ],
       "tacticSignals": [
-        "corp_ice.end_run"
+        "corp_ice.end_run",
+        "corp_ice.self_bounce_or_maintenance_drawback"
       ]
     },
     {
@@ -29991,13 +30030,15 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "corp_ice.self_bounce_or_maintenance_drawback"
+        "corp_ice.program_trash",
+        "corp_ice.rez_economy",
+        "corp_ice.runner_pay_or_program_trash"
       ],
       "effects": [
         {
