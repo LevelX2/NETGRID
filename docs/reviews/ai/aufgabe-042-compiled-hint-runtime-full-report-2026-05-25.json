@@ -7,13 +7,13 @@
   "generatedFactsCardCount": 391,
   "legacyFallbackOnlyCount": 136,
   "manualOverlayCardCount": 6,
-  "descriptorOrSchemaGapCount": 285,
+  "descriptorOrSchemaGapCount": 282,
   "manualOverlayRequiredCount": 0,
   "blockedMissingImplementationCount": 37,
   "coverageClassCounts": {
     "blocked_missing_implementation": 37,
-    "descriptor_or_schema_gap": 285,
-    "generated_mechanical_clean": 100,
+    "descriptor_or_schema_gap": 282,
+    "generated_mechanical_clean": 103,
     "generated_plus_overlay": 6,
     "legacy_fallback_only": 136
   },
@@ -30,7 +30,7 @@
     "runner:program": 105,
     "runner:resource": 61
   },
-  "warningCount": 1927,
+  "warningCount": 1910,
   "hardErrorCount": 0,
   "legacyCompatibility": {
     "legacyFieldsChecked": [

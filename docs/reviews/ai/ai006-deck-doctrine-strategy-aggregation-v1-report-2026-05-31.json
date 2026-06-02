@@ -1224,8 +1224,7 @@
         "economy.burst_credit": 4,
         "economy.generic": 4,
         "setup.draw": 4,
-        "setup.memory": 1,
-        "setup.memory_chip": 1
+        "setup.memory": 1
       },
       "legacySignalCounts": {
         "planRole:build_rig": 11,
@@ -2461,7 +2460,6 @@
         "setup.draw": 4,
         "setup.full_deck_reset": 2,
         "setup.memory": 1,
-        "setup.memory_chip": 1,
         "setup.stack_shuffle": 2
       },
       "legacySignalCounts": {
@@ -3604,7 +3602,6 @@
         "setup.draw": 4,
         "setup.full_deck_reset": 1,
         "setup.memory": 2,
-        "setup.memory_chip": 2,
         "setup.stack_shuffle": 1
       },
       "legacySignalCounts": {
@@ -6560,6 +6557,6 @@
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 2
     },
-    "contentSha256": "4e558924b35b714b5ef7b889f1cf6d3e3b0d29b8a9c12ea6e9571560d6f2c2e3"
+    "contentSha256": "e7a96f134d53d58f27bbbaad1fb82cc26a863d953de68e9dd63ae78cba830a67"
   }
 }

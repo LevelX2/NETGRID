@@ -10524,7 +10524,6 @@
       "derivedFunctionSignals": [
         "economy.recurring",
         "economy.recurring_breaker_credit",
-        "setup.cybernetics",
         "setup.deck_exclusive",
         "setup.hand_size",
         "setup.memory"
@@ -10606,8 +10605,7 @@
       "derivedFunctionSignals": [
         "defense.brain_damage_prevention",
         "defense.damage_prevention",
-        "defense.net_damage_prevention",
-        "setup.cybernetics"
+        "defense.net_damage_prevention"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -10894,7 +10892,6 @@
       "derivedFunctionSignals": [
         "economy.recurring",
         "economy.recurring_breaker_credit",
-        "setup.memory_chip",
         "setup.program_host"
       ],
       "derivedStrategyAnchors": [],
@@ -11744,7 +11741,6 @@
         "economy.recurring",
         "economy.recurring_breaker_credit",
         "economy.recurring_non_noisy_breaker_credit",
-        "setup.cybernetics",
         "setup.deck_exclusive",
         "setup.hand_size",
         "setup.memory"
@@ -23274,8 +23270,7 @@
         "defense.meat_damage_prevention",
         "defense.tag_clear_support",
         "economy.recurring",
-        "economy.recurring_tag_clear_credit",
-        "setup.vehicle"
+        "economy.recurring_tag_clear_credit"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -23611,8 +23606,7 @@
       },
       "derivedFunctionSignals": [
         "economy.recurring",
-        "economy.recurring_killer_credit",
-        "setup.memory_chip"
+        "economy.recurring_killer_credit"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -23684,8 +23678,7 @@
       },
       "derivedFunctionSignals": [
         "defense.damage_prevention",
-        "defense.meat_damage_prevention",
-        "setup.cybernetics"
+        "defense.meat_damage_prevention"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -23773,8 +23766,7 @@
       "derivedFunctionSignals": [
         "defense.tag_clear_support",
         "economy.recurring",
-        "economy.recurring_tag_clear_credit",
-        "setup.vehicle"
+        "economy.recurring_tag_clear_credit"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -23853,8 +23845,7 @@
       "derivedFunctionSignals": [
         "defense.damage_prevention",
         "defense.meat_damage_prevention",
-        "defense.pay_through_prevention",
-        "setup.cybernetics"
+        "defense.pay_through_prevention"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [
@@ -24401,8 +24392,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "setup.cybernetics",
-        "setup.memory_chip"
+        "setup.hand_size"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -24476,9 +24466,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "setup.cybernetics",
-        "setup.hand_size",
-        "setup.memory_chip"
+        "setup.hand_size"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -24552,8 +24540,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "defense.tag_prevention",
-        "setup.vehicle"
+        "defense.tag_prevention"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -25333,8 +25320,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "setup.memory",
-        "setup.memory_chip"
+        "setup.memory"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -25423,8 +25409,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "setup.memory",
-        "setup.memory_chip"
+        "setup.memory"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -25499,8 +25484,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "setup.memory",
-        "setup.memory_chip"
+        "setup.memory"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -25590,8 +25574,7 @@
       },
       "derivedFunctionSignals": [
         "economy.recurring",
-        "economy.recurring_killer_credit",
-        "setup.memory_chip"
+        "economy.recurring_killer_credit"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],

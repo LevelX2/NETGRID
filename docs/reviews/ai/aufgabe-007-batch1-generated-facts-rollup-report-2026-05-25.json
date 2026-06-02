@@ -395,12 +395,12 @@
   "sourceSummary": {
     "derivedFacts": {
       "hardErrorCount": 0,
-      "warningCount": 993,
+      "warningCount": 987,
       "cardsNeedingManualOverlay": 129
     },
     "compiledIndex": {
       "hardErrorCount": 0,
-      "warningCount": 669,
+      "warningCount": 667,
       "reviewCandidates": 125
     },
     "migrationPriority": {

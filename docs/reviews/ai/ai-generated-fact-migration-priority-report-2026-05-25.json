@@ -2664,11 +2664,11 @@
       ],
       "monolithFields": ["effects"],
       "duplicatedActiveMechanicalFields": ["effects"],
-      "generatedOnlyFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["conditions"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 1,
-        "generated_fact_absent_from_monolith": 2,
+        "generated_fact_absent_from_monolith": 1,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",
@@ -2706,11 +2706,11 @@
       ],
       "monolithFields": ["effects"],
       "duplicatedActiveMechanicalFields": ["effects"],
-      "generatedOnlyFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["conditions"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 1,
-        "generated_fact_absent_from_monolith": 2,
+        "generated_fact_absent_from_monolith": 1,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",

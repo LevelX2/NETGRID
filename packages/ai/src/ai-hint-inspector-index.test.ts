@@ -440,7 +440,13 @@ describe("AI005 hint inspector index", () => {
       expect.arrayContaining([
         "defense.damage_prevention",
         "defense.pay_through_prevention",
+      ]),
+    );
+    expect(fullBodyConversion.derivedFunctionSignals).not.toEqual(
+      expect.arrayContaining([
         "setup.cybernetics",
+        "setup.memory_chip",
+        "setup.vehicle",
       ]),
     );
     expect(fullBodyConversion.derivedStrategyAnchors).toEqual([]);

@@ -102,7 +102,7 @@ describe("generated fact Batch-10 Runner prevention/survival closeout", () => {
     expect(report.previewAddedFactCount).toBe(38);
     expect(report.hardErrorCount).toBe(0);
     expect(report.realSemanticConflictCount).toBe(0);
-    expect(report.normalizedDifferenceCount).toBe(115);
+    expect(report.normalizedDifferenceCount).toBe(113);
     expect(report.remainingDifferenceCount).toBe(0);
     expect(report.descriptorFollowupCount).toBe(0);
     expect(report.readiness).toBe("ready_read_only_split_subbatches");

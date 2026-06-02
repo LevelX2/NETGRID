@@ -1,0 +1,1169 @@
+{
+  "schemaVersion": "ai020-1-runner-hardware-tactic-signal-cleanup-report-v1",
+  "taskId": "AI020-1",
+  "generatedAt": "2026-06-02",
+  "status": "complete",
+  "scope": "runner_hardware_tactic_signal_cleanup",
+  "correctsCommit": "459dd3e7",
+  "summary": {
+    "activeRunnerHardwareCount": 35,
+    "inactiveCheckedHardwareCount": 5,
+    "reviewedHardwareCount": 35,
+    "changedHardwareHintCount": 16,
+    "removedHardwareTraitEffectCount": 18,
+    "removedCatalogSignalCount": 3,
+    "removedDerivationRuleCount": 3,
+    "addedDerivationRuleCount": 1,
+    "ai020NewCatalogSignalsBeforeCleanup": 27,
+    "ai020NewCatalogSignalsRetainedAfterCleanup": 24,
+    "ai020InvariantRequiredSignalsAfterCleanup": 23,
+    "activeRunnerHardwareUniqueFunctionSignals": 41,
+    "newStrategyIdCount": 0,
+    "strategySupportPairCount": 5,
+    "plannerEffect": false,
+    "actionScoreEffect": false,
+    "planWeightEffect": false,
+    "targetingAiEffect": false,
+    "engineEffect": false,
+    "legalEffect": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivationEffect": false
+  },
+  "inventory": {
+    "activeCompiledHardwareCardIds": [
+      "onr_proteus_134_cortical-cybermodem",
+      "onr_proteus_135_cortical-stimulators",
+      "onr_proteus_138_deck-the",
+      "onr_proteus_139_eurocorpse-tm-spin-chip",
+      "onr_proteus_144_lucidrinetm-drip-feed",
+      "onr_proteus_151_sunburst-cranial-interface",
+      "onr_v1_119_arasaka-portable-prototype",
+      "onr_v1_120_armadillo-armored-road-home",
+      "onr_v1_121_armored-fridge",
+      "onr_v1_122_artemis-2020",
+      "onr_v1_123_bodyweight-data-creche",
+      "onr_v1_124_corolla-speed-chip",
+      "onr_v1_125_dermatech-bodyplating",
+      "onr_v1_126_drifter-mobile-environment",
+      "onr_v1_127_full-body-conversion",
+      "onr_v1_128_green-knight-surge-buffers",
+      "onr_v1_129_hq-interface",
+      "onr_v1_130_lifesaver-nanosurgeons",
+      "onr_v1_131_microtech-backup-drive",
+      "onr_v1_132_microtech-trode-set",
+      "onr_v1_133_militech-mram-chip",
+      "onr_v1_134_mram-chip",
+      "onr_v1_135_nasuko-cycle",
+      "onr_v1_136_pandoras-deck",
+      "onr_v1_137_parraline-5750",
+      "onr_v1_138_pk-6089a",
+      "onr_v1_139_r-and-d-interface",
+      "onr_v1_140_raven-microcyb-eagle",
+      "onr_v1_141_raven-microcyb-owl",
+      "onr_v1_142_record-reconstructor",
+      "onr_v1_143_techtronica-utility-suit",
+      "onr_v1_144_tycho-mem-chip",
+      "onr_v1_145_wutech-mem-chip",
+      "onr_v1_146_zetatech-mem-chip",
+      "onr_v1_147_zz22-speed-chip"
+    ],
+    "inactiveCheckedHardwareCardIds": [
+      "onr_classic_047_little-black-box",
+      "onr_classic_048_omnitech-spinal-tap-cybermodem",
+      "onr_classic_049_omnitech-wet-drive",
+      "onr_classic_051_vintage-camaro",
+      "onr_classic_052_zetatech-portastation"
+    ],
+    "countDiscrepancies": [
+      {
+        "source": "prompt_proteus_hardware_count",
+        "expected": 7,
+        "repoActiveCompiled": 6,
+        "repoKnown": 6,
+        "decision": "Repo truth is leading: proteus-cards.json contains six Runner hardware cards and all six are active/compiled."
+      },
+      {
+        "source": "classic_originalset_wording",
+        "expected": 29,
+        "repoOriginalsetActiveCompiled": 29,
+        "repoClassicInactiveKnown": 5,
+        "decision": "The 29-card count matches originalset-v1 active/compiled hardware; classic-cards.json contributes five additional known inactive hardware cards."
+      }
+    ]
+  },
+  "removedSignals": [
+    {
+      "signalId": "setup.cybernetics",
+      "reason": "Cybernetics ist Subtyp/Targeting-Merkmal, kein taktischer Nutzen."
+    },
+    {
+      "signalId": "setup.memory_chip",
+      "reason": "Chip/Memory-Chip-Typisierung ist Kartendatum; MU-Erhöhung bleibt setup.memory."
+    },
+    {
+      "signalId": "setup.vehicle",
+      "reason": "Vehicle ist Subtyp; Tag-/Meat-Funktionen bleiben als funktionale Signale."
+    }
+  ],
+  "changedSignals": [
+    {
+      "signalId": "setup.hand_size",
+      "change": "Derivation ergänzt amount=3, damit Militech MRAM Chip funktional als Hand-size-Support sichtbar bleibt."
+    },
+    {
+      "signalId": "setup.deck_exclusive",
+      "change": "Bewusst behalten: kein bloßes Deck-Typsignal, sondern funktionaler Only-one-deck-Slot-/Exklusivitäts-Constraint."
+    },
+    {
+      "signalId": "setup.program_host",
+      "change": "Eurocorpse Spin Chip bleibt funktional als Hosting-Support plus hosted_install_target, ohne Chip-Typsignal."
+    }
+  ],
+  "retainedFunctionalSignals": [
+    "setup.deck_exclusive",
+    "setup.memory",
+    "setup.hand_size",
+    "setup.program_host",
+    "economy.recurring_breaker_credit",
+    "economy.recurring_non_noisy_breaker_credit",
+    "economy.recurring_killer_credit",
+    "economy.recurring_tag_clear_credit",
+    "defense.tag_prevention",
+    "defense.tag_clear_support",
+    "defense.meat_damage_prevention",
+    "defense.net_damage_prevention",
+    "defense.brain_damage_prevention",
+    "defense.damage_recovery_draw",
+    "run.extra_run_after_success",
+    "action.recurring_extra_action",
+    "risk.brain_damage_self_inflicted",
+    "run.break_cost_penalty",
+    "defense.ap_subroutine_mitigation"
+  ],
+  "subtypeInformationPolicy": {
+    "cardDataSubtypesRemainSourceOfTruth": [
+      "chip",
+      "vehicle",
+      "cybernetics",
+      "deck"
+    ],
+    "removedFromTacticSignals": [
+      "chip",
+      "vehicle",
+      "cybernetics"
+    ],
+    "deckHandling": "Deck remains a card subtype; setup.deck_exclusive is retained only as functional one-deck-slot/exclusivity constraint."
+  },
+  "strategyAnchors": [
+    {
+      "cardId": "onr_v1_127_full-body-conversion",
+      "title": "Full Body Conversion",
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.survival_defense",
+          "role": "defensive_tool",
+          "confidence": "medium"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_129_hq-interface",
+      "title": "HQ Interface",
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.hq_pressure",
+          "role": "payoff_anchor",
+          "confidence": "high"
+        },
+        {
+          "strategyId": "runner.interface_closeout",
+          "role": "payoff_anchor",
+          "confidence": "high"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_v1_139_r-and-d-interface",
+      "title": "R&D Interface",
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.rnd_pressure",
+          "role": "payoff_anchor",
+          "confidence": "high"
+        },
+        {
+          "strategyId": "runner.interface_closeout",
+          "role": "payoff_anchor",
+          "confidence": "high"
+        }
+      ]
+    }
+  ],
+  "targetProfiles": [
+    {
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "title": "Microtech Backup Drive",
+      "status": "active",
+      "kinds": [
+        "replacement_target"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
+      "title": "Eurocorpse (TM) Spin Chip",
+      "status": "active",
+      "kinds": [
+        "hosted_install_target"
+      ]
+    },
+    {
+      "cardId": "onr_v1_142_record-reconstructor",
+      "title": "Record Reconstructor",
+      "status": "candidate_deferred",
+      "kinds": [],
+      "reason": "LegalAction Semantic Bridge remains deferred; no active TargetProfile forced."
+    }
+  ],
+  "postReviewAssignments": [
+    {
+      "cardId": "onr_proteus_134_cortical-cybermodem",
+      "title": "Cortical Cybermodem",
+      "cardType": "hardware",
+      "subtypes": [
+        "cybernetics",
+        "deck"
+      ],
+      "mechanicalFamily": "deck_memory_console",
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit",
+        "setup.deck_exclusive",
+        "setup.hand_size",
+        "setup.memory"
+      ],
+      "removedSubtypeSignals": [
+        "setup.cybernetics"
+      ],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed_by_ai020_1"
+    },
+    {
+      "cardId": "onr_proteus_135_cortical-stimulators",
+      "title": "Cortical Stimulators",
+      "cardType": "hardware",
+      "subtypes": [
+        "cybernetics"
+      ],
+      "mechanicalFamily": "damage_prevention_survival",
+      "tacticSignals": [
+        "defense.brain_damage_prevention",
+        "defense.damage_prevention",
+        "defense.net_damage_prevention"
+      ],
+      "removedSubtypeSignals": [
+        "setup.cybernetics"
+      ],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed_by_ai020_1"
+    },
+    {
+      "cardId": "onr_proteus_138_deck-the",
+      "title": "Deck, The",
+      "cardType": "hardware",
+      "subtypes": [
+        "base_link",
+        "deck"
+      ],
+      "mechanicalFamily": "deck_memory_console",
+      "tacticSignals": [
+        "defense.base_link",
+        "defense.trace_boost",
+        "defense.trace_defense",
+        "setup.deck_exclusive",
+        "setup.memory"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_proteus_139_eurocorpse-tm-spin-chip",
+      "title": "Eurocorpse (TM) Spin Chip",
+      "cardType": "hardware",
+      "subtypes": [
+        "chip"
+      ],
+      "mechanicalFamily": "program_backup_or_recovery",
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit",
+        "setup.program_host"
+      ],
+      "removedSubtypeSignals": [
+        "setup.memory_chip"
+      ],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "active",
+      "targetProfileKinds": [
+        "hosted_install_target"
+      ],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed_by_ai020_1"
+    },
+    {
+      "cardId": "onr_proteus_144_lucidrinetm-drip-feed",
+      "title": "Lucidrine™ Drip Feed",
+      "cardType": "hardware",
+      "subtypes": [],
+      "mechanicalFamily": "extra_run_or_action_engine",
+      "tacticSignals": [
+        "action.recurring_extra_action",
+        "economy.action",
+        "risk.brain_damage_self_inflicted"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_proteus_151_sunburst-cranial-interface",
+      "title": "Sunburst Cranial Interface",
+      "cardType": "hardware",
+      "subtypes": [
+        "cybernetics",
+        "deck",
+        "stealth"
+      ],
+      "mechanicalFamily": "deck_memory_console",
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit",
+        "economy.recurring_non_noisy_breaker_credit",
+        "setup.deck_exclusive",
+        "setup.hand_size",
+        "setup.memory"
+      ],
+      "removedSubtypeSignals": [
+        "setup.cybernetics"
+      ],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed_by_ai020_1"
+    },
+    {
+      "cardId": "onr_v1_119_arasaka-portable-prototype",
+      "title": "Arasaka Portable Prototype",
+      "cardType": "hardware-deck",
+      "subtypes": [
+        "deck"
+      ],
+      "mechanicalFamily": "deck_memory_console",
+      "tacticSignals": [
+        "cost.agenda_point_penalty",
+        "economy.recurring",
+        "economy.recurring_breaker_credit",
+        "setup.deck_exclusive",
+        "setup.memory"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_v1_120_armadillo-armored-road-home",
+      "title": "“Armadillo” Armored Road Home",
+      "cardType": "hardware",
+      "subtypes": [
+        "vehicle"
+      ],
+      "mechanicalFamily": "tag_prevention_or_tag_clear",
+      "tacticSignals": [
+        "defense.damage_prevention",
+        "defense.finite_damage_prevention",
+        "defense.meat_damage_prevention",
+        "defense.tag_clear_support",
+        "economy.recurring",
+        "economy.recurring_tag_clear_credit"
+      ],
+      "removedSubtypeSignals": [
+        "setup.vehicle"
+      ],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed_by_ai020_1"
+    },
+    {
+      "cardId": "onr_v1_121_armored-fridge",
+      "title": "Armored Fridge",
+      "cardType": "hardware",
+      "subtypes": [],
+      "mechanicalFamily": "damage_prevention_survival",
+      "tacticSignals": [
+        "defense.damage_prevention",
+        "defense.finite_damage_prevention",
+        "defense.meat_damage_prevention"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_v1_122_artemis-2020",
+      "title": "Artemis 2020",
+      "cardType": "hardware-deck",
+      "subtypes": [
+        "deck"
+      ],
+      "mechanicalFamily": "deck_memory_console",
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit",
+        "setup.deck_exclusive",
+        "setup.memory"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_v1_123_bodyweight-data-creche",
+      "title": "Bodyweight™ Data Crèche",
+      "cardType": "hardware-deck",
+      "subtypes": [
+        "deck"
+      ],
+      "mechanicalFamily": "extra_run_or_action_engine",
+      "tacticSignals": [
+        "run.extra_run_after_success",
+        "setup.deck_exclusive",
+        "setup.memory"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_v1_124_corolla-speed-chip",
+      "title": "Corolla Speed Chip",
+      "cardType": "hardware-chip",
+      "subtypes": [
+        "chip"
+      ],
+      "mechanicalFamily": "recurring_killer_credit",
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_killer_credit"
+      ],
+      "removedSubtypeSignals": [
+        "setup.memory_chip"
+      ],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed_by_ai020_1"
+    },
+    {
+      "cardId": "onr_v1_125_dermatech-bodyplating",
+      "title": "Dermatech Bodyplating",
+      "cardType": "hardware",
+      "subtypes": [
+        "cybernetics"
+      ],
+      "mechanicalFamily": "damage_prevention_survival",
+      "tacticSignals": [
+        "defense.damage_prevention",
+        "defense.meat_damage_prevention"
+      ],
+      "removedSubtypeSignals": [
+        "setup.cybernetics"
+      ],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed_by_ai020_1"
+    },
+    {
+      "cardId": "onr_v1_126_drifter-mobile-environment",
+      "title": "“Drifter” Mobile Environment",
+      "cardType": "hardware",
+      "subtypes": [
+        "vehicle"
+      ],
+      "mechanicalFamily": "tag_prevention_or_tag_clear",
+      "tacticSignals": [
+        "defense.tag_clear_support",
+        "economy.recurring",
+        "economy.recurring_tag_clear_credit"
+      ],
+      "removedSubtypeSignals": [
+        "setup.vehicle"
+      ],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed_by_ai020_1"
+    },
+    {
+      "cardId": "onr_v1_127_full-body-conversion",
+      "title": "Full Body Conversion",
+      "cardType": "hardware",
+      "subtypes": [
+        "cybernetics"
+      ],
+      "mechanicalFamily": "damage_prevention_survival",
+      "tacticSignals": [
+        "defense.damage_prevention",
+        "defense.meat_damage_prevention",
+        "defense.pay_through_prevention"
+      ],
+      "removedSubtypeSignals": [
+        "setup.cybernetics"
+      ],
+      "strategyAnchors": [
+        "runner.survival_defense"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.survival_defense",
+          "role": "defensive_tool",
+          "confidence": "medium"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed_by_ai020_1"
+    },
+    {
+      "cardId": "onr_v1_128_green-knight-surge-buffers",
+      "title": "“Green Knight” Surge Buffers",
+      "cardType": "hardware",
+      "subtypes": [],
+      "mechanicalFamily": "damage_prevention_survival",
+      "tacticSignals": [
+        "defense.damage_prevention",
+        "defense.net_damage_prevention"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_v1_129_hq-interface",
+      "title": "HQ Interface",
+      "cardType": "hardware",
+      "subtypes": [],
+      "mechanicalFamily": "access_interface",
+      "tacticSignals": [
+        "access.hq_multiaccess"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [
+        "runner.hq_pressure",
+        "runner.interface_closeout"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.hq_pressure",
+          "role": "payoff_anchor",
+          "confidence": "high"
+        },
+        {
+          "strategyId": "runner.interface_closeout",
+          "role": "payoff_anchor",
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_v1_130_lifesaver-nanosurgeons",
+      "title": "Lifesaver™ Nanosurgeons",
+      "cardType": "hardware",
+      "subtypes": [
+        "cybernetics"
+      ],
+      "mechanicalFamily": "damage_prevention_survival",
+      "tacticSignals": [
+        "defense.brain_damage_prevention",
+        "defense.damage_prevention",
+        "defense.damage_recovery_draw",
+        "defense.finite_damage_prevention",
+        "setup.draw"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_v1_131_microtech-backup-drive",
+      "title": "Microtech Backup Drive",
+      "cardType": "hardware",
+      "subtypes": [],
+      "mechanicalFamily": "program_backup_or_recovery",
+      "tacticSignals": [
+        "setup.program_backup",
+        "setup.program_recovery",
+        "setup.program_trash_replacement",
+        "setup.recovery",
+        "setup.stored_program_reclaim"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "active",
+      "targetProfileKinds": [
+        "replacement_target"
+      ],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_v1_132_microtech-trode-set",
+      "title": "Microtech ’Trode Set",
+      "cardType": "hardware",
+      "subtypes": [],
+      "mechanicalFamily": "ap_or_break_cost_modification",
+      "tacticSignals": [
+        "defense.ap_subroutine_mitigation",
+        "defense.net_damage_prevention",
+        "run.break_cost_penalty"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_v1_133_militech-mram-chip",
+      "title": "Militech MRAM Chip",
+      "cardType": "hardware",
+      "subtypes": [
+        "chip",
+        "cybernetics"
+      ],
+      "mechanicalFamily": "hand_size_cybernetics",
+      "tacticSignals": [
+        "setup.hand_size"
+      ],
+      "removedSubtypeSignals": [
+        "setup.cybernetics",
+        "setup.memory_chip"
+      ],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed_by_ai020_1"
+    },
+    {
+      "cardId": "onr_v1_134_mram-chip",
+      "title": "MRAM Chip",
+      "cardType": "hardware",
+      "subtypes": [
+        "chip",
+        "cybernetics"
+      ],
+      "mechanicalFamily": "hand_size_cybernetics",
+      "tacticSignals": [
+        "setup.hand_size"
+      ],
+      "removedSubtypeSignals": [
+        "setup.cybernetics",
+        "setup.memory_chip"
+      ],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed_by_ai020_1"
+    },
+    {
+      "cardId": "onr_v1_135_nasuko-cycle",
+      "title": "Nasuko Cycle",
+      "cardType": "hardware",
+      "subtypes": [
+        "vehicle"
+      ],
+      "mechanicalFamily": "tag_prevention_or_tag_clear",
+      "tacticSignals": [
+        "defense.tag_prevention"
+      ],
+      "removedSubtypeSignals": [
+        "setup.vehicle"
+      ],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed_by_ai020_1"
+    },
+    {
+      "cardId": "onr_v1_136_pandoras-deck",
+      "title": "Pandora’s Deck",
+      "cardType": "hardware-deck",
+      "subtypes": [
+        "deck"
+      ],
+      "mechanicalFamily": "recurring_link_credit",
+      "tacticSignals": [
+        "defense.trace_defense",
+        "economy.recurring",
+        "economy.recurring_link_credit",
+        "setup.deck_exclusive",
+        "setup.memory"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_v1_137_parraline-5750",
+      "title": "Parraline 5750",
+      "cardType": "hardware-deck",
+      "subtypes": [
+        "deck"
+      ],
+      "mechanicalFamily": "deck_memory_console",
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit",
+        "setup.deck_exclusive",
+        "setup.memory"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_v1_138_pk-6089a",
+      "title": "PK-6089a",
+      "cardType": "hardware-deck",
+      "subtypes": [
+        "deck"
+      ],
+      "mechanicalFamily": "recurring_link_credit",
+      "tacticSignals": [
+        "defense.trace_defense",
+        "economy.recurring",
+        "economy.recurring_link_credit",
+        "setup.deck_exclusive",
+        "setup.memory"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_v1_139_r-and-d-interface",
+      "title": "R&D Interface",
+      "cardType": "hardware",
+      "subtypes": [],
+      "mechanicalFamily": "access_interface",
+      "tacticSignals": [
+        "access.rnd_multiaccess"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [
+        "runner.rnd_pressure",
+        "runner.interface_closeout"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "runner.rnd_pressure",
+          "role": "payoff_anchor",
+          "confidence": "high"
+        },
+        {
+          "strategyId": "runner.interface_closeout",
+          "role": "payoff_anchor",
+          "confidence": "high"
+        }
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_v1_140_raven-microcyb-eagle",
+      "title": "Raven Microcyb Eagle",
+      "cardType": "hardware",
+      "subtypes": [
+        "deck"
+      ],
+      "mechanicalFamily": "deck_memory_console",
+      "tacticSignals": [
+        "defense.damage_prevention",
+        "defense.net_damage_prevention",
+        "economy.recurring",
+        "economy.recurring_breaker_credit",
+        "setup.deck_exclusive",
+        "setup.memory"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_v1_141_raven-microcyb-owl",
+      "title": "Raven Microcyb Owl",
+      "cardType": "hardware",
+      "subtypes": [
+        "deck",
+        "stealth"
+      ],
+      "mechanicalFamily": "recurring_breaker_credit",
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_breaker_credit",
+        "economy.recurring_non_noisy_breaker_credit",
+        "setup.deck_exclusive",
+        "setup.memory"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_v1_142_record-reconstructor",
+      "title": "Record Reconstructor",
+      "cardType": "hardware",
+      "subtypes": [],
+      "mechanicalFamily": "archives_or_rnd_manipulation",
+      "tacticSignals": [
+        "access.rnd_topdeck_setup",
+        "corp.archives_to_rnd_pressure",
+        "run.archives_replacement_access",
+        "run.replacement_access"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "medium",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_v1_143_techtronica-utility-suit",
+      "title": "Techtronica™ Utility Suit",
+      "cardType": "hardware",
+      "subtypes": [
+        "deck"
+      ],
+      "mechanicalFamily": "recurring_link_credit",
+      "tacticSignals": [
+        "defense.damage_prevention",
+        "defense.meat_damage_prevention",
+        "defense.trace_defense",
+        "economy.recurring",
+        "economy.recurring_link_credit",
+        "setup.deck_exclusive",
+        "setup.memory"
+      ],
+      "removedSubtypeSignals": [],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "unchanged_from_ai020_functional_semantics"
+    },
+    {
+      "cardId": "onr_v1_144_tycho-mem-chip",
+      "title": "Tycho Mem Chip",
+      "cardType": "hardware",
+      "subtypes": [
+        "chip"
+      ],
+      "mechanicalFamily": "memory_chip",
+      "tacticSignals": [
+        "setup.memory"
+      ],
+      "removedSubtypeSignals": [
+        "setup.memory_chip"
+      ],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed_by_ai020_1"
+    },
+    {
+      "cardId": "onr_v1_145_wutech-mem-chip",
+      "title": "WuTech Mem Chip",
+      "cardType": "hardware",
+      "subtypes": [
+        "chip"
+      ],
+      "mechanicalFamily": "memory_chip",
+      "tacticSignals": [
+        "setup.memory"
+      ],
+      "removedSubtypeSignals": [
+        "setup.memory_chip"
+      ],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed_by_ai020_1"
+    },
+    {
+      "cardId": "onr_v1_146_zetatech-mem-chip",
+      "title": "Zetatech Mem Chip",
+      "cardType": "hardware",
+      "subtypes": [
+        "chip"
+      ],
+      "mechanicalFamily": "memory_chip",
+      "tacticSignals": [
+        "setup.memory"
+      ],
+      "removedSubtypeSignals": [
+        "setup.memory_chip"
+      ],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed_by_ai020_1"
+    },
+    {
+      "cardId": "onr_v1_147_zz22-speed-chip",
+      "title": "ZZ22 Speed Chip",
+      "cardType": "hardware-chip",
+      "subtypes": [
+        "chip"
+      ],
+      "mechanicalFamily": "recurring_killer_credit",
+      "tacticSignals": [
+        "economy.recurring",
+        "economy.recurring_killer_credit"
+      ],
+      "removedSubtypeSignals": [
+        "setup.memory_chip"
+      ],
+      "strategyAnchors": [],
+      "strategySupportPairs": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed_by_ai020_1"
+    }
+  ],
+  "countClarification": {
+    "ai020ReviewNewTacticSignalCount": 27,
+    "ai020CheckRequiredSignals": 26,
+    "explanation": "AI020 documented 27 newly cataloged hardware-scope tactic signals. The AI020 invariant checked 26 required active hardware signals and intentionally did not include risk.hardware_trash_target because it was catalog/derivation-alignment only and had no active Runner-hardware use. AI020-1 removes three descriptive subtype signals, leaving 24 AI020 catalog additions and 23 AI020 invariant-required active signals."
+  },
+  "deferredItems": [
+    "No generic runner.hardware, hardware.chip, hardware.cybernetics, setup.vehicle or setup.memory_chip tactic signal.",
+    "Record Reconstructor remains a TargetProfile candidate until the LegalAction Semantic Bridge exists.",
+    "Action-economy/tempo strategy anchoring for Bodyweight Data Crèche and Lucidrine Drip Feed remains deferred.",
+    "No new consumers for cleaned tactic signals."
+  ],
+  "verification": [
+    {
+      "command": "node scripts/check-ai020-runner-hardware-semantics.mjs",
+      "status": "passed",
+      "summary": "AI020_RUNNER_HARDWARE_SEMANTICS OK active=35 inactive=5 postReview=35 requiredSignals=23 removedSubtypeSignals=3"
+    },
+    {
+      "command": "node scripts/check-ai020-1-runner-hardware-tactic-signal-cleanup.mjs",
+      "status": "passed",
+      "summary": "AI020_RUNNER_HARDWARE_SEMANTICS OK active=35 inactive=5 postReview=35 requiredSignals=23 removedSubtypeSignals=3"
+    },
+    {
+      "command": "corepack pnpm check:ai-strategy-taxonomy",
+      "status": "passed",
+      "summary": "functionSignals=251 errors=0 warnings=69"
+    },
+    {
+      "command": "corepack pnpm check:ai-compiled-hints",
+      "status": "passed",
+      "summary": "cards=564 generated=391 overlays=6 fallback=136 errors=0 warnings=1910"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-inspector-index",
+      "status": "passed",
+      "summary": "cards=564 mechanical=472 generated=323 overlays=6 signals=433 anchors=202 warnings=253"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-compiled-index",
+      "status": "passed",
+      "summary": "cards=193 errors=0 warnings=667"
+    },
+    {
+      "command": "corepack pnpm check:ai-manual-overlays",
+      "status": "passed",
+      "summary": "overlayFiles=2 overlayCards=6 errors=0 warnings=24"
+    },
+    {
+      "command": "corepack pnpm check:ai-approval-consistency",
+      "status": "passed",
+      "summary": "CONSISTENCY_OK 564 ai_supported cards"
+    },
+    {
+      "command": "corepack pnpm check:ai-derived-facts",
+      "status": "passed",
+      "summary": "pilotCards=193 implementations=193 derivedFacts=193 overlaps=125 manualOverlay=129 errors=0 warnings=987"
+    },
+    {
+      "command": "corepack pnpm check:ai-derived-facts-full",
+      "status": "passed",
+      "summary": "active=564 implementations=527 generated=391 overlays=6 fallback=136 errors=0 warnings=1910"
+    },
+    {
+      "command": "corepack pnpm check:ai-hint-quality",
+      "status": "passed",
+      "summary": "hints=564 roles=251 planRoles=102 errors=0 warnings=150"
+    },
+    {
+      "command": "corepack pnpm check:ai-deck-doctrine-strategy",
+      "status": "passed",
+      "summary": "5 deck profiles, report updated"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai test",
+      "status": "passed",
+      "summary": "32 files, 625 tests passed"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit",
+      "status": "passed",
+      "summary": "exit 0"
+    },
+    {
+      "command": "corepack pnpm --filter @netgrid/web exec tsc -p tsconfig.json --noEmit",
+      "status": "passed",
+      "summary": "exit 0"
+    },
+    {
+      "command": "git diff --check",
+      "status": "passed",
+      "summary": "no whitespace errors; Git emitted one CRLF warning for scripts/check-ai020-runner-hardware-semantics.mjs"
+    }
+  ]
+}

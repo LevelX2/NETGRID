@@ -128,7 +128,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 993,
+  "warningCount": 987,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -1266,18 +1266,8 @@
       "cardId": "onr_v1_133_militech-mram-chip"
     },
     {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Manual ontology contains fields not currently derivable.",
-      "cardId": "onr_v1_133_militech-mram-chip"
-    },
-    {
       "kind": "generated_fact_without_manual_match",
       "message": "Generated condition:requires_installed_card has no manual ontology match.",
-      "cardId": "onr_v1_133_militech-mram-chip"
-    },
-    {
-      "kind": "manual_ontology_without_generated_match",
-      "message": "Manual effect:hardware_trait has no generated basic fact match.",
       "cardId": "onr_v1_133_militech-mram-chip"
     },
     {
@@ -1296,18 +1286,8 @@
       "cardId": "onr_v1_134_mram-chip"
     },
     {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Manual ontology contains fields not currently derivable.",
-      "cardId": "onr_v1_134_mram-chip"
-    },
-    {
       "kind": "generated_fact_without_manual_match",
       "message": "Generated condition:requires_installed_card has no manual ontology match.",
-      "cardId": "onr_v1_134_mram-chip"
-    },
-    {
-      "kind": "manual_ontology_without_generated_match",
-      "message": "Manual effect:hardware_trait has no generated basic fact match.",
       "cardId": "onr_v1_134_mram-chip"
     },
     {
@@ -1326,18 +1306,8 @@
       "cardId": "onr_v1_135_nasuko-cycle"
     },
     {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Manual ontology contains fields not currently derivable.",
-      "cardId": "onr_v1_135_nasuko-cycle"
-    },
-    {
       "kind": "generated_fact_without_manual_match",
       "message": "Generated condition:requires_prevention_window has no manual ontology match.",
-      "cardId": "onr_v1_135_nasuko-cycle"
-    },
-    {
-      "kind": "manual_ontology_without_generated_match",
-      "message": "Manual effect:hardware_trait has no generated basic fact match.",
       "cardId": "onr_v1_135_nasuko-cycle"
     },
     {
@@ -11882,16 +11852,6 @@
             "scope": "runner",
             "resource": "hand_size",
             "amount": 3
-          },
-          {
-            "kind": "hardware_trait",
-            "timing": "persistent",
-            "scope": "hardware"
-          },
-          {
-            "kind": "hardware_trait",
-            "timing": "persistent",
-            "scope": "hardware"
           }
         ],
         "conditions": [],
@@ -11911,17 +11871,13 @@
         "generatedOnly": [
           "condition:requires_installed_card"
         ],
-        "manualOnly": [
-          "effect:hardware_trait"
-        ]
+        "manualOnly": []
       },
       "missingManualOverlay": [
-        "condition:requires_installed_card",
-        "effect:hardware_trait"
+        "condition:requires_installed_card"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually.",
-        "Manual ontology contains fields not currently derivable."
+        "Generated facts contain fields not currently mirrored manually."
       ],
       "confidence": "high",
       "warnings": [
@@ -11930,16 +11886,8 @@
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Manual ontology contains fields not currently derivable."
-        },
-        {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_installed_card has no manual ontology match."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -12000,16 +11948,6 @@
             "scope": "runner",
             "resource": "hand_size",
             "amount": 2
-          },
-          {
-            "kind": "hardware_trait",
-            "timing": "persistent",
-            "scope": "hardware"
-          },
-          {
-            "kind": "hardware_trait",
-            "timing": "persistent",
-            "scope": "hardware"
           }
         ],
         "conditions": [],
@@ -12029,17 +11967,13 @@
         "generatedOnly": [
           "condition:requires_installed_card"
         ],
-        "manualOnly": [
-          "effect:hardware_trait"
-        ]
+        "manualOnly": []
       },
       "missingManualOverlay": [
-        "condition:requires_installed_card",
-        "effect:hardware_trait"
+        "condition:requires_installed_card"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually.",
-        "Manual ontology contains fields not currently derivable."
+        "Generated facts contain fields not currently mirrored manually."
       ],
       "confidence": "high",
       "warnings": [
@@ -12048,16 +11982,8 @@
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Manual ontology contains fields not currently derivable."
-        },
-        {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_installed_card has no manual ontology match."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -12115,11 +12041,6 @@
         ],
         "effects": [
           {
-            "kind": "hardware_trait",
-            "timing": "persistent",
-            "scope": "hardware"
-          },
-          {
             "kind": "tag_prevention",
             "timing": "prevention_window",
             "scope": "runner",
@@ -12143,17 +12064,13 @@
         "generatedOnly": [
           "condition:requires_prevention_window"
         ],
-        "manualOnly": [
-          "effect:hardware_trait"
-        ]
+        "manualOnly": []
       },
       "missingManualOverlay": [
-        "condition:requires_prevention_window",
-        "effect:hardware_trait"
+        "condition:requires_prevention_window"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually.",
-        "Manual ontology contains fields not currently derivable."
+        "Generated facts contain fields not currently mirrored manually."
       ],
       "confidence": "high",
       "warnings": [
@@ -12162,16 +12079,8 @@
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Manual ontology contains fields not currently derivable."
-        },
-        {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated condition:requires_prevention_window has no manual ontology match."
-        },
-        {
-          "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:hardware_trait has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",

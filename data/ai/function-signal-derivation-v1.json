@@ -4377,29 +4377,6 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "setup.cybernetics",
-      "source": "effects",
-      "match": {
-        "kind": "hardware_trait",
-        "target": "cybernetics"
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "hardware"
-        ],
-        "effectScope": [
-          "hardware"
-        ],
-        "target": [
-          "cybernetics"
-        ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
       "signalId": "setup.deck_exclusive",
       "source": "effects",
       "match": {
@@ -4516,6 +4493,24 @@
         "kind": "hand_size_modifier",
         "resource": "hand_size",
         "amount": 1
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.hand_size",
+      "source": "effects",
+      "match": {
+        "kind": "hand_size_modifier",
+        "resource": "hand_size",
+        "amount": 3
       },
       "gates": {
         "side": [
@@ -4663,29 +4658,6 @@
         ],
         "target": [
           "program"
-        ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "setup.memory_chip",
-      "source": "effects",
-      "match": {
-        "kind": "hardware_trait",
-        "target": "memory_chip"
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "hardware"
-        ],
-        "effectScope": [
-          "hardware"
-        ],
-        "target": [
-          "memory_chip"
         ]
       },
       "strategyAnchorFor": []
@@ -5139,29 +5111,6 @@
       "strategyAnchorFor": [
         "runner.search.breaker"
       ]
-    },
-    {
-      "signalId": "setup.vehicle",
-      "source": "effects",
-      "match": {
-        "kind": "hardware_trait",
-        "target": "vehicle"
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "hardware"
-        ],
-        "effectScope": [
-          "hardware"
-        ],
-        "target": [
-          "vehicle"
-        ]
-      },
-      "strategyAnchorFor": []
     },
     {
       "signalId": "tag.payoff",

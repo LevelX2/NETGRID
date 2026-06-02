@@ -164,9 +164,9 @@ describe("compiled hint index pilot report", () => {
 
   it("classifies compiled-index warnings into non-blocking comparison groups", () => {
     const report = readReport();
-    expect(report.warningCount).toBe(669);
+    expect(report.warningCount).toBe(667);
     expect(report.warningClassificationCounts).toEqual({
-      generated_fact_absent_from_monolith: 318,
+      generated_fact_absent_from_monolith: 316,
       manual_review_candidate: 124,
       monolith_mechanical_duplication_candidate: 221,
       overlay_strategy_field_not_in_monolith: 6,

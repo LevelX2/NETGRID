@@ -253,7 +253,7 @@ describe("AI003 strategy goal taxonomy", () => {
 
     expect(report.hardErrorCount).toBe(0);
     expect(tacticSignalCatalogData.schemaVersion).toBe("ai-tactic-signals-v1");
-    expect(report.taxonomy.tacticSignalCatalogCount).toBe(254);
+    expect(report.taxonomy.tacticSignalCatalogCount).toBe(251);
     expect(new Set(signalIds).size).toBe(signalIds.length);
     expect([...signalIds].sort()).toEqual(derivationSignalIds);
     expect(signalIds.some((signalId) => signalId.startsWith("anti.ice."))).toBe(

@@ -21,7 +21,7 @@
   "hardErrorCount": 0,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 29,
+  "normalizedDifferenceCount": 27,
   "remainingDifferenceCount": 0,
   "paymentContextInfoCount": 3,
   "actionContextInfoCount": 1,
@@ -29,7 +29,7 @@
   "handSizeContextInfoCount": 2,
   "hiddenZoneContextInfoCount": 8,
   "delayedPenaltyContextInfoCount": 1,
-  "descriptorFollowupCount": 24,
+  "descriptorFollowupCount": 22,
   "readiness": "ready_read_only_split_subbatches",
   "subBatchReadiness": {
     "runner_action_economy": {
@@ -72,7 +72,7 @@
   "normalizationRuleCounts": {
     "hidden_zone_context_normalization": 2,
     "runner_action_economy_normalization": 2,
-    "runner_economy_strategy_overlay_split": 14,
+    "runner_economy_strategy_overlay_split": 12,
     "runner_finite_pool_economy_normalization": 2,
     "runner_install_discount_context_normalization": 1,
     "runner_loan_debt_normalization": 3,
@@ -552,11 +552,6 @@
           "kind": "condition:requires_installed_card",
           "rule": "runner_economy_strategy_overlay_split",
           "status": "normalized"
-        },
-        {
-          "kind": "effect:hardware_trait",
-          "rule": "runner_economy_strategy_overlay_split",
-          "status": "normalized"
         }
       ],
       "paymentContextInfos": [],
@@ -578,8 +573,7 @@
       "hiddenZoneContextInfos": [],
       "delayedPenaltyContextInfos": [],
       "descriptorFollowups": [
-        "Generated facts contain fields not currently mirrored manually.",
-        "Manual ontology contains fields not currently derivable."
+        "Generated facts contain fields not currently mirrored manually."
       ],
       "remainingIssues": [],
       "readiness": "ready_read_only_with_context_followup"
@@ -605,11 +599,6 @@
           "kind": "condition:requires_installed_card",
           "rule": "runner_economy_strategy_overlay_split",
           "status": "normalized"
-        },
-        {
-          "kind": "effect:hardware_trait",
-          "rule": "runner_economy_strategy_overlay_split",
-          "status": "normalized"
         }
       ],
       "paymentContextInfos": [],
@@ -631,8 +620,7 @@
       "hiddenZoneContextInfos": [],
       "delayedPenaltyContextInfos": [],
       "descriptorFollowups": [
-        "Generated facts contain fields not currently mirrored manually.",
-        "Manual ontology contains fields not currently derivable."
+        "Generated facts contain fields not currently mirrored manually."
       ],
       "remainingIssues": [],
       "readiness": "ready_read_only_with_context_followup"

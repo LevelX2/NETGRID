@@ -8277,7 +8277,7 @@
         "benchmarkCovered": true,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
@@ -8320,12 +8320,6 @@
         "reviewedBy": "codex"
       },
       "effects": [
-        {
-          "kind": "hardware_trait",
-          "scope": "hardware",
-          "target": "vehicle",
-          "timing": "persistent"
-        },
         {
           "amount": 2,
           "kind": "recurring_economy",
@@ -8641,12 +8635,6 @@
       ],
       "effects": [
         {
-          "kind": "hardware_trait",
-          "scope": "hardware",
-          "target": "memory_chip",
-          "timing": "persistent"
-        },
-        {
           "amount": 1,
           "kind": "recurring_economy",
           "repeatable": true,
@@ -8697,12 +8685,6 @@
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#runner_damage_prevention_tools"
       ],
       "effects": [
-        {
-          "kind": "hardware_trait",
-          "scope": "hardware",
-          "target": "cybernetics",
-          "timing": "persistent"
-        },
         {
           "amount": 1,
           "kind": "meat_damage_prevention",
@@ -8785,12 +8767,6 @@
       ],
       "effects": [
         {
-          "kind": "hardware_trait",
-          "scope": "hardware",
-          "target": "vehicle",
-          "timing": "persistent"
-        },
-        {
           "amount": 2,
           "kind": "recurring_economy",
           "repeatable": true,
@@ -8853,12 +8829,6 @@
         "defensive_tool"
       ],
       "effects": [
-        {
-          "kind": "hardware_trait",
-          "scope": "hardware",
-          "target": "cybernetics",
-          "timing": "persistent"
-        },
         {
           "kind": "damage_prevention",
           "resource": "meat_damage",
@@ -9346,18 +9316,6 @@
       },
       "effects": [
         {
-          "kind": "hardware_trait",
-          "scope": "hardware",
-          "target": "memory_chip",
-          "timing": "persistent"
-        },
-        {
-          "kind": "hardware_trait",
-          "scope": "hardware",
-          "target": "cybernetics",
-          "timing": "persistent"
-        },
-        {
           "amount": 3,
           "kind": "hand_size_modifier",
           "resource": "hand_size",
@@ -9412,18 +9370,6 @@
       },
       "effects": [
         {
-          "kind": "hardware_trait",
-          "scope": "hardware",
-          "target": "memory_chip",
-          "timing": "persistent"
-        },
-        {
-          "kind": "hardware_trait",
-          "scope": "hardware",
-          "target": "cybernetics",
-          "timing": "persistent"
-        },
-        {
           "amount": 2,
           "kind": "hand_size_modifier",
           "resource": "hand_size",
@@ -9468,12 +9414,6 @@
         "data/scenarios/ai-deck-legal-v1913-smokes.json#runner_v1913_damage_prevention"
       ],
       "effects": [
-        {
-          "kind": "hardware_trait",
-          "scope": "hardware",
-          "target": "vehicle",
-          "timing": "persistent"
-        },
         {
           "kind": "tag_prevention",
           "resource": "tags",
@@ -10177,12 +10117,6 @@
       },
       "effects": [
         {
-          "kind": "hardware_trait",
-          "timing": "persistent",
-          "scope": "hardware",
-          "target": "memory_chip"
-        },
-        {
           "kind": "global_modifier",
           "timing": "persistent",
           "scope": "runner",
@@ -10230,12 +10164,6 @@
         "reviewedBy": "codex"
       },
       "effects": [
-        {
-          "kind": "hardware_trait",
-          "timing": "persistent",
-          "scope": "hardware",
-          "target": "memory_chip"
-        },
         {
           "kind": "global_modifier",
           "timing": "persistent",
@@ -10291,12 +10219,6 @@
       },
       "effects": [
         {
-          "kind": "hardware_trait",
-          "timing": "persistent",
-          "scope": "hardware",
-          "target": "memory_chip"
-        },
-        {
           "kind": "global_modifier",
           "timing": "persistent",
           "scope": "runner",
@@ -10343,12 +10265,6 @@
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_hardware_longtail"
       ],
       "effects": [
-        {
-          "kind": "hardware_trait",
-          "scope": "hardware",
-          "target": "memory_chip",
-          "timing": "persistent"
-        },
         {
           "amount": 2,
           "kind": "recurring_economy",
@@ -31265,12 +31181,6 @@
           "timing": "persistent"
         },
         {
-          "kind": "hardware_trait",
-          "scope": "hardware",
-          "target": "cybernetics",
-          "timing": "persistent"
-        },
-        {
           "amount": 2,
           "kind": "global_modifier",
           "resource": "memory",
@@ -31335,12 +31245,6 @@
         "reviewedBy": "codex"
       },
       "effects": [
-        {
-          "kind": "hardware_trait",
-          "scope": "hardware",
-          "target": "cybernetics",
-          "timing": "persistent"
-        },
         {
           "amount": 1,
           "kind": "net_damage_prevention",
@@ -31581,12 +31485,6 @@
         "reviewedBy": "codex"
       },
       "effects": [
-        {
-          "kind": "hardware_trait",
-          "scope": "hardware",
-          "target": "memory_chip",
-          "timing": "persistent"
-        },
         {
           "amount": 1,
           "kind": "program_host",
@@ -32106,12 +32004,6 @@
           "kind": "hardware_trait",
           "scope": "hardware",
           "target": "deck_exclusive",
-          "timing": "persistent"
-        },
-        {
-          "kind": "hardware_trait",
-          "scope": "hardware",
-          "target": "cybernetics",
           "timing": "persistent"
         },
         {

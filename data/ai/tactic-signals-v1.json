@@ -3375,24 +3375,6 @@
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
-      "signalId": "setup.cybernetics",
-      "group": "ai020_hardware_setup",
-      "sideScope": "runner",
-      "description": "Runner cybernetics hardware typing that may matter for later vulnerability or deckbuilding analysis.",
-      "supportOnly": true,
-      "mayAnchorStrategy": false,
-      "allowedStrategyAnchors": [],
-      "sourceKinds": [
-        "effects.kind=hardware_trait scope=hardware target=cybernetics"
-      ],
-      "examples": [
-        "Full Body Conversion",
-        "Cortical Cybermodem"
-      ],
-      "targetProfileRelevant": false,
-      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
-    },
-    {
       "signalId": "setup.deck_exclusive",
       "group": "ai020_hardware_setup",
       "sideScope": "runner",
@@ -3613,24 +3595,6 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Memory support is diagnostic setup information and does not alter deck profile defaults."
-    },
-    {
-      "signalId": "setup.memory_chip",
-      "group": "ai020_hardware_setup",
-      "sideScope": "runner",
-      "description": "Runner hardware chip or memory-chip support.",
-      "supportOnly": true,
-      "mayAnchorStrategy": false,
-      "allowedStrategyAnchors": [],
-      "sourceKinds": [
-        "effects.kind=hardware_trait scope=hardware target=memory_chip"
-      ],
-      "examples": [
-        "Tycho Mem Chip",
-        "MRAM Chip"
-      ],
-      "targetProfileRelevant": false,
-      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
       "signalId": "setup.program_backup",
@@ -3932,24 +3896,6 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
-    },
-    {
-      "signalId": "setup.vehicle",
-      "group": "ai020_hardware_setup",
-      "sideScope": "runner",
-      "description": "Runner vehicle hardware typing for support classification.",
-      "supportOnly": true,
-      "mayAnchorStrategy": false,
-      "allowedStrategyAnchors": [],
-      "sourceKinds": [
-        "effects.kind=hardware_trait scope=hardware target=vehicle"
-      ],
-      "examples": [
-        "Nasuko Cycle",
-        "Drifter Mobile Environment"
-      ],
-      "targetProfileRelevant": false,
-      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
       "signalId": "tag.payoff",

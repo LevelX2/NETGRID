@@ -15,15 +15,15 @@
   "overlayCardCount": 6,
   "cardsWithoutOverlay": 187,
   "hardErrorCount": 0,
-  "warningCount": 669,
+  "warningCount": 667,
   "warningCountsByKind": {
     "active_monolith_mechanical_duplication": 221,
-    "generated_fact_missing_from_active_monolith": 318,
+    "generated_fact_missing_from_active_monolith": 316,
     "manual_overlay_strategy_field_missing_from_active": 6,
     "overlay_missing_for_manual_gap": 124
   },
   "warningClassificationCounts": {
-    "generated_fact_absent_from_monolith": 318,
+    "generated_fact_absent_from_monolith": 316,
     "manual_review_candidate": 124,
     "monolith_mechanical_duplication_candidate": 221,
     "overlay_strategy_field_not_in_monolith": 6
@@ -702,7 +702,7 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 2,
+        "generated_fact_absent_from_monolith": 1,
         "manual_review_candidate": 1,
         "monolith_mechanical_duplication_candidate": 1
       },
@@ -714,7 +714,7 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 2,
+        "generated_fact_absent_from_monolith": 1,
         "manual_review_candidate": 1,
         "monolith_mechanical_duplication_candidate": 1
       },
@@ -2734,7 +2734,7 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects", "conditions"],
+      "generatedOnlyFields": ["conditions"],
       "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
@@ -2743,7 +2743,7 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects", "conditions"],
+      "generatedOnlyFields": ["conditions"],
       "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
@@ -4243,30 +4243,21 @@
       "title": "Militech MRAM Chip",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_installed_card",
-        "effect:hardware_trait"
-      ]
+      "missingManualOverlay": ["condition:requires_installed_card"]
     },
     {
       "cardId": "onr_v1_134_mram-chip",
       "title": "MRAM Chip",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_installed_card",
-        "effect:hardware_trait"
-      ]
+      "missingManualOverlay": ["condition:requires_installed_card"]
     },
     {
       "cardId": "onr_v1_135_nasuko-cycle",
       "title": "Nasuko Cycle",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_prevention_window",
-        "effect:hardware_trait"
-      ]
+      "missingManualOverlay": ["condition:requires_prevention_window"]
     },
     {
       "cardId": "onr_v1_154_broker",
@@ -7785,30 +7776,21 @@
       "title": "Militech MRAM Chip",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_installed_card",
-        "effect:hardware_trait"
-      ]
+      "missingManualOverlay": ["condition:requires_installed_card"]
     },
     {
       "cardId": "onr_v1_134_mram-chip",
       "title": "MRAM Chip",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_installed_card",
-        "effect:hardware_trait"
-      ]
+      "missingManualOverlay": ["condition:requires_installed_card"]
     },
     {
       "cardId": "onr_v1_135_nasuko-cycle",
       "title": "Nasuko Cycle",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_prevention_window",
-        "effect:hardware_trait"
-      ]
+      "missingManualOverlay": ["condition:requires_prevention_window"]
     },
     {
       "cardId": "onr_v1_154_broker",
@@ -14359,10 +14341,7 @@
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
-      "missingManualOverlay": [
-        "condition:requires_installed_card",
-        "effect:hardware_trait"
-      ],
+      "missingManualOverlay": ["condition:requires_installed_card"],
       "compiledPreview": {
         "cardId": "onr_v1_133_militech-mram-chip",
         "side": "runner",
@@ -14404,7 +14383,7 @@
         "scenarioRefs",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects", "conditions"],
+      "generatedOnlyFields": ["conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
@@ -14423,14 +14402,6 @@
           "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
           "cardId": "onr_v1_133_militech-mram-chip",
           "field": "conditions"
-        },
-        {
-          "classification": "generated_fact_absent_from_monolith",
-          "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
-          "cardId": "onr_v1_133_militech-mram-chip",
-          "field": "effects"
         },
         {
           "classification": "manual_review_candidate",
@@ -14453,10 +14424,7 @@
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
-      "missingManualOverlay": [
-        "condition:requires_installed_card",
-        "effect:hardware_trait"
-      ],
+      "missingManualOverlay": ["condition:requires_installed_card"],
       "compiledPreview": {
         "cardId": "onr_v1_134_mram-chip",
         "side": "runner",
@@ -14498,7 +14466,7 @@
         "scenarioRefs",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects", "conditions"],
+      "generatedOnlyFields": ["conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
@@ -14517,14 +14485,6 @@
           "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
           "cardId": "onr_v1_134_mram-chip",
           "field": "conditions"
-        },
-        {
-          "classification": "generated_fact_absent_from_monolith",
-          "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field effects is absent from or differs from active monolith.",
-          "cardId": "onr_v1_134_mram-chip",
-          "field": "effects"
         },
         {
           "classification": "manual_review_candidate",
@@ -14547,10 +14507,7 @@
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
-      "missingManualOverlay": [
-        "condition:requires_prevention_window",
-        "effect:hardware_trait"
-      ],
+      "missingManualOverlay": ["condition:requires_prevention_window"],
       "compiledPreview": {
         "cardId": "onr_v1_135_nasuko-cycle",
         "side": "runner",
@@ -30565,14 +30522,6 @@
       "field": "conditions"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
-      "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
-      "cardId": "onr_v1_133_militech-mram-chip",
-      "field": "effects"
-    },
-    {
       "classification": "manual_review_candidate",
       "blocking": false,
       "kind": "overlay_missing_for_manual_gap",
@@ -30594,14 +30543,6 @@
       "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
       "cardId": "onr_v1_134_mram-chip",
       "field": "conditions"
-    },
-    {
-      "classification": "generated_fact_absent_from_monolith",
-      "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
-      "cardId": "onr_v1_134_mram-chip",
-      "field": "effects"
     },
     {
       "classification": "manual_review_candidate",
