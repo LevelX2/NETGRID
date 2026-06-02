@@ -1,8 +1,8 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI023",
+  "taskId": "AI022-1",
   "generatedAt": "2026-06-02",
-  "description": "Controlled V1 tactic-signal catalog. AI023 adds Corp-Agenda semantics for scoring value, agenda difficulty, economy, action, draw, ICE/fort setup, tag/trace, damage, access punish and bad-publicity risk without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
+  "description": "Controlled V1 tactic-signal catalog. AI022-1 clarifies taxonomy semantics, support-only and broad-support behavior, prefix convention and known card corrections without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
   "signalPolicy": {
     "tacticSignal": "Functional card utility: what the AI can use the card for.",
     "strategyAnchor": "Large deck line: which strategy the card can anchor or materially support.",
@@ -10,7 +10,10 @@
     "runtimeEffect": "none",
     "forbiddenStaticSignals": [
       "anti.ice.*"
-    ]
+    ],
+    "prefixConvention": "The first segment is semantic domain unless a signal has a side prefix. sideScope is the acting/owning card side. corp.* on runner-side signals denotes the affected Corp state/zone, not Corp as the acting side.",
+    "broadSignalPolicy": "Generic aggregation and legacy signals such as economy.generic, economy.recurring, setup.search, setup.recovery, setup.draw, defense.damage_prevention and run.make_run are broad_support/not_for_direct_scoring unless a precise signal or reviewed strategy evidence also exists.",
+    "supportOnlyAnchorPolicy": "supportOnly=true signals cannot cause strategy anchors; reports must distinguish card-level strategy anchors observed from signalMayAnchorStrategy."
   },
   "signals": [
     {
@@ -1354,7 +1357,7 @@
         "Record Reconstructor"
       ],
       "targetProfileRelevant": true,
-      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+      "notes": "Support-only AI020 Runner-hardware signal; corp.* here means the affected Corp zone/state, not the acting side. It has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect and does not imply an R&D-pressure strategy anchor."
     },
     {
       "signalId": "corp.bad_publicity_on_trace_cancel",
@@ -1384,7 +1387,7 @@
       ],
       "examples": [],
       "targetProfileRelevant": false,
-      "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+      "notes": "Support-only pressure on Corp bad-publicity state. The corp.* prefix denotes the affected Corp state/zone, not Corp as acting side; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "corp.bad_publicity_self_damage_cost",
@@ -1704,7 +1707,7 @@
         "Bolt-Hole"
       ],
       "targetProfileRelevant": false,
-      "notes": "AI020 narrows generic damage prevention to support-only. Strategy anchors require a separate reviewed lineSupport/role decision or a more specific anchor-capable signal such as flatline prevention."
+      "notes": "AI020/AI022-1 narrows generic damage prevention to support-only broad_support/not_for_direct_scoring. Strategy anchors require a separate reviewed lineSupport/role decision or a more specific anchor-capable signal such as flatline prevention."
     },
     {
       "signalId": "defense.damage_prevention_during_run",
@@ -2021,7 +2024,7 @@
       "signalId": "economy.action",
       "group": "economy",
       "sideScope": "neutral",
-      "description": "Generates credits or economy through an action.",
+      "description": "Generates credits or credit economy through an action.",
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
@@ -2033,7 +2036,7 @@
         "Short-Term Contract"
       ],
       "targetProfileRelevant": false,
-      "notes": "Economy support signal only."
+      "notes": "Economy support signal only. AI022-1 narrows this to credit resources; extra actions use action.* signals such as action.recurring_extra_action and must not be scored as credit economy."
     },
     {
       "signalId": "economy.action_credit",
@@ -2178,7 +2181,7 @@
         "ACME Savings and Loan"
       ],
       "targetProfileRelevant": false,
-      "notes": "Generic economy deliberately does not create a strategy anchor."
+      "notes": "Broad economy aggregation/legacy signal. AI022-1 keeps it as broad_support/not_for_direct_scoring; precise credit, recurring or pool signals should drive later evaluation."
     },
     {
       "signalId": "economy.hidden_bid_mindgame",
@@ -2270,7 +2273,7 @@
         "Investment Firm"
       ],
       "targetProfileRelevant": false,
-      "notes": "Recurring economy stays support-only."
+      "notes": "Recurring economy aggregation/legacy signal. AI022-1 keeps it as broad_support/not_for_direct_scoring; precise recurring credit signals should drive later evaluation."
     },
     {
       "signalId": "economy.recurring_breaker_credit",
@@ -2511,7 +2514,7 @@
       "signalId": "economy.trash_credit",
       "group": "remote_trash_economy",
       "sideScope": "runner",
-      "description": "Runner trash-credit support for access trash costs; support-only and not an automatic remote-trash strategy anchor.",
+      "description": "Runner credit or credit-pool support for access trash costs; support-only and not an automatic remote-trash strategy anchor.",
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
@@ -2523,7 +2526,7 @@
         "Scatter Shot"
       ],
       "targetProfileRelevant": false,
-      "notes": "Support-only trash-credit signal. AI020 keeps Runner hardware recurring tag/link/breaker credits out of trash-credit strategy semantics by card-type gating the derivation."
+      "notes": "Support-only trash-credit signal. AI022-1 narrows this to actual credit support and keeps free-trash/cost-waiver effects on access.* signals instead of credit economy."
     },
     {
       "signalId": "economy.trash_for_credit",
@@ -2725,6 +2728,24 @@
       ],
       "targetProfileRelevant": true,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "ice.derez_black_ice",
+      "group": "ice_control",
+      "sideScope": "runner",
+      "description": "Derezzes a rezzed Black Ice target.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "effects.kind=rez target=derez_black_ice"
+      ],
+      "examples": [
+        "Anonymous Tip",
+        "Senatorial Field Trip"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Support-only ICE-control signal. It records public Black Ice derez utility and does not create planner, engine, legality, targeting-AI, profile/default, action-score, plan-weight or UI behavior."
     },
     {
       "signalId": "ice.etr",
@@ -4067,7 +4088,7 @@
       ],
       "examples": [],
       "targetProfileRelevant": false,
-      "notes": "Anchor-capable but currently rare."
+      "notes": "Anchor-capable only as a broad run-event structure signal. AI022-1 keeps it as legacy/aggregation and requires concrete run creation, payoff, risk coverage and density evidence before treating runner.run_event_tempo as a real deck line."
     },
     {
       "signalId": "run.extra_action",
@@ -4163,7 +4184,7 @@
       ],
       "examples": [],
       "targetProfileRelevant": false,
-      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+      "notes": "AI021 Runner-Prep signal; broad run-structure broad_support/not_for_direct_scoring only. It must not replace concrete payoff signals and does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "run.multi_run_sequence",
@@ -5368,7 +5389,7 @@
       ],
       "examples": [],
       "targetProfileRelevant": false,
-      "notes": "Draw is support-only in this catalog. AI019a gates this to Runner-scope draw so Corp draw pressure does not become Runner setup."
+      "notes": "Broad draw/setup aggregation signal. AI022-1 keeps it only as broad_support/not_for_direct_scoring unless paired with a precise draw or setup effect."
     },
     {
       "signalId": "setup.end_of_turn_bounce",
@@ -5785,7 +5806,7 @@
         "Forgotten Backup Chip"
       ],
       "targetProfileRelevant": true,
-      "notes": "Generic recovery is support-only until a dedicated program-recovery or generic recovery strategy exists."
+      "notes": "Broad recovery aggregation/legacy signal. AI022-1 keeps it only as broad_support/not_for_direct_scoring; precise recovery signals should drive later evaluation."
     },
     {
       "signalId": "setup.search",
@@ -5806,7 +5827,7 @@
         "Airport Locker"
       ],
       "targetProfileRelevant": true,
-      "notes": "Anchor-capable only when the structured effect is narrowed to program search for breaker/toolbox setup; generic any-card search remains support-only."
+      "notes": "Broad search aggregation/legacy signal. AI022-1 keeps it only as broad_support/not_for_direct_scoring; precise signals such as setup.program_search or setup.card_recovery should drive later evaluation."
     },
     {
       "signalId": "setup.search_reveals_to_corp",

@@ -17,7 +17,7 @@
     "cardsWithMechanicalFacts": 493,
     "cardsWithGeneratedFacts": 325,
     "cardsWithOverlays": 6,
-    "cardsWithFunctionSignals": 458,
+    "cardsWithFunctionSignals": 459,
     "cardsWithStrategyAnchors": 215,
     "cardsWithWarnings": 215,
     "warningCategoryCounts": {
@@ -8950,7 +8950,8 @@
       },
       "derivedFunctionSignals": [
         "corp.bad_publicity_pressure",
-        "defense.damage_prevention"
+        "defense.damage_prevention",
+        "defense.meat_damage_prevention"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -9750,7 +9751,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "corp.bad_publicity_pressure"
+        "corp.bad_publicity_pressure",
+        "ice.derez_black_ice"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -9781,10 +9783,14 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
-          "effects"
+          "effects",
+          "conditions",
+          "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
-          "effects"
+          "effects",
+          "conditions",
+          "targetProfiles"
         ],
         "generatedFactFields": [],
         "overlayFields": []
@@ -11658,7 +11664,6 @@
       },
       "derivedFunctionSignals": [
         "action.recurring_extra_action",
-        "economy.action",
         "risk.brain_damage_self_inflicted"
       ],
       "derivedStrategyAnchors": [],
@@ -19858,8 +19863,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "info.expose",
-        "info.expose_installed_cards"
+        "ice.derez_black_ice"
       ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
@@ -20112,7 +20116,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "ice.trash_rezzed"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -21679,7 +21685,7 @@
       "derivedFunctionSignals": [
         "access.free_trash",
         "access.rnd_trash_pressure",
-        "economy.trash_credit"
+        "access.trash_untrashable"
       ],
       "derivedStrategyAnchors": [
         "runner.rnd_pressure"
@@ -22660,7 +22666,7 @@
       "derivedFunctionSignals": [
         "access.free_trash",
         "access.hq_trash_pressure",
-        "economy.trash_credit"
+        "access.trash_untrashable"
       ],
       "derivedStrategyAnchors": [
         "runner.hq_pressure"

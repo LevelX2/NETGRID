@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI023",
-  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022",
+  "taskId": "AI022-1",
+  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022/AI023",
   "generatedAt": "2026-06-02",
-  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI023 adds Corp-Agenda semantics while keeping Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default and UI-derivation effects unchanged.",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI022-1 clarifies tactic-signal taxonomy, narrows misleading action/trash economy derivations and adds known ICE-control/free-trash corrections without Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default or UI-derivation effects.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -787,6 +787,29 @@
       "gates": {
         "side": "runner",
         "cardType": "resource"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "access.trash_untrashable",
+      "source": "effects",
+      "match": {
+        "kind": "access_replacement",
+        "target": "access.trash_untrashable"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event"
+        ],
+        "effectScope": [
+          "accessed_card"
+        ],
+        "target": [
+          "access.trash_untrashable"
+        ]
       },
       "strategyAnchorFor": []
     },
@@ -2364,6 +2387,25 @@
       "signalId": "defense.meat_damage_prevention",
       "source": "effects",
       "match": {
+        "kind": "meat_damage_prevention"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "defense.meat_damage_prevention",
+      "source": "effects",
+      "match": {
         "kind": "prevention_replacement",
         "target": "defense.meat_damage_prevention"
       },
@@ -2728,7 +2770,8 @@
       "signalId": "economy.action",
       "source": "effects",
       "match": {
-        "kind": "action_economy"
+        "kind": "action_economy",
+        "resource": "credits"
       },
       "strategyAnchorFor": []
     },
@@ -3247,7 +3290,8 @@
       "signalId": "economy.trash_credit",
       "source": "effects",
       "match": {
-        "kind": "trash_credit"
+        "kind": "trash_credit",
+        "resource": "trash_credits"
       },
       "gates": {
         "side": [
@@ -3255,8 +3299,7 @@
         ],
         "effectScope": [
           "runner",
-          "remote",
-          "accessed_card"
+          "remote"
         ],
         "cardType": [
           "event",
@@ -3459,6 +3502,29 @@
       "gates": {
         "side": "runner",
         "cardType": "resource"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "ice.derez_black_ice",
+      "source": "effects",
+      "match": {
+        "kind": "rez",
+        "target": "derez_black_ice"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event"
+        ],
+        "effectScope": [
+          "ice"
+        ],
+        "target": [
+          "derez_black_ice"
+        ]
       },
       "strategyAnchorFor": []
     },
@@ -3741,6 +3807,23 @@
         ],
         "target": [
           "post_full_break"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "ice.trash_rezzed",
+      "source": "effects",
+      "match": {
+        "kind": "ice_trash",
+        "target": "rezzed_ice"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event"
         ]
       },
       "strategyAnchorFor": []
@@ -7450,28 +7533,6 @@
     },
     {
       "signalId": "tag.payoff",
-      "source": "remoteRole",
-      "match": {
-        "kind": "tag_punish_asset"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "asset",
-          "upgrade"
-        ],
-        "remoteRole": [
-          "tag_punish_asset"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.tag_trace_punish"
-      ]
-    },
-    {
-      "signalId": "tag.payoff",
       "source": "effects",
       "match": {
         "kind": "tag_punish_payoff"
@@ -7488,6 +7549,28 @@
         ],
         "effectScope": [
           "runner"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "signalId": "tag.payoff",
+      "source": "remoteRole",
+      "match": {
+        "kind": "tag_punish_asset"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "upgrade"
+        ],
+        "remoteRole": [
+          "tag_punish_asset"
         ]
       },
       "strategyAnchorFor": [

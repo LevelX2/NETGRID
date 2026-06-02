@@ -5369,10 +5369,10 @@
       },
       "effects": [
         {
-          "kind": "expose_info",
+          "kind": "rez",
           "timing": "action",
           "scope": "ice",
-          "target": "installed_ice"
+          "target": "derez_black_ice"
         }
       ],
       "targetProfiles": [
@@ -5381,7 +5381,7 @@
           "kind": "use_target",
           "timing": "on_play",
           "targetType": "installed_ice",
-          "purpose": "black_ice_recon",
+          "purpose": "black_ice_derez",
           "preferences": [],
           "avoid": [],
           "hiddenInfoPolicy": "public_or_controller_known_only"
@@ -6702,6 +6702,12 @@
           "resource": "trash_credits",
           "target": "free_trash",
           "repeatable": true
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "on_access",
+          "scope": "accessed_card",
+          "target": "access.trash_untrashable"
         }
       ],
       "conditions": [
@@ -7409,6 +7415,12 @@
           "resource": "trash_credits",
           "target": "free_trash",
           "repeatable": true
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "on_access",
+          "scope": "accessed_card",
+          "target": "access.trash_untrashable"
         }
       ],
       "conditions": [
@@ -32074,10 +32086,33 @@
       },
       "effects": [
         {
+          "kind": "rez",
+          "timing": "action",
+          "scope": "ice",
+          "target": "derez_black_ice"
+        },
+        {
           "kind": "run_tax",
           "timing": "action",
           "scope": "corp",
           "target": "bad_publicity_pressure"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_rezzed_ice"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "installed_ice",
+          "purpose": "same_turn_rezzed_black_ice_derez_or_bad_publicity",
+          "preferences": [],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
         }
       ]
     },
