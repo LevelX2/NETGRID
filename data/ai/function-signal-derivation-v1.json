@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI025",
-  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022/AI024/AI024/AI024/AI025/AI025/AI025",
+  "taskId": "AI026",
+  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022/AI024/AI024/AI024/AI025/AI025/AI025/AI026/AI026/AI026/AI026",
   "generatedAt": "2026-06-02",
-  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI025 adds Corp-operation semantics while keeping Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default and UI-derivation effects unchanged.",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI026 adds Corp node/asset semantics while keeping Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default and UI-derivation effects unchanged.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -105,6 +105,52 @@
         "target": "access.archives_safe_exception"
       },
       "strategyAnchorFor": []
+    },
+    {
+      "signalId": "access.corp_counter_punish",
+      "source": "effects",
+      "match": {
+        "target": "access.corp_counter_punish"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "access.corp_counter_punish"
+      },
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "access.corp_hardware_trash",
+      "source": "effects",
+      "match": {
+        "target": "access.corp_hardware_trash"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "access.corp_hardware_trash"
+      },
+      "strategyAnchorFor": [
+        "corp.ambush_bluff",
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "signalId": "access.corp_program_trash",
+      "source": "effects",
+      "match": {
+        "target": "access.corp_program_trash"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "access.corp_program_trash"
+      },
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
     },
     {
       "signalId": "access.current_access_trash",
@@ -834,6 +880,21 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "action.corp_counter_to_action",
+      "source": "effects",
+      "match": {
+        "target": "action.corp_counter_to_action"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "action.corp_counter_to_action"
+      },
+      "strategyAnchorFor": [
+        "corp.fast_advance"
+      ]
+    },
+    {
       "signalId": "action.corp_extra_action_support",
       "source": "effects",
       "match": {
@@ -871,6 +932,22 @@
         "target": "action.corp_install_action_bundle"
       },
       "strategyAnchorFor": []
+    },
+    {
+      "signalId": "action.corp_repeatable_extra_action",
+      "source": "effects",
+      "match": {
+        "target": "action.corp_repeatable_extra_action"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "action.corp_repeatable_extra_action"
+      },
+      "strategyAnchorFor": [
+        "corp.fast_advance",
+        "corp.remote_scoring"
+      ]
     },
     {
       "signalId": "action.delayed_extra_action_engine",
@@ -993,6 +1070,51 @@
       },
       "strategyAnchorFor": [
         "corp.fast_advance"
+      ]
+    },
+    {
+      "signalId": "advance.corp_counter_bank",
+      "source": "effects",
+      "match": {
+        "target": "advance.corp_counter_bank"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "advance.corp_counter_bank"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "advance.corp_counter_placement",
+      "source": "effects",
+      "match": {
+        "target": "advance.corp_counter_placement"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "advance.corp_counter_placement"
+      },
+      "strategyAnchorFor": [
+        "corp.fast_advance",
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "signalId": "advance.corp_counter_transfer",
+      "source": "effects",
+      "match": {
+        "target": "advance.corp_counter_transfer"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "advance.corp_counter_transfer"
+      },
+      "strategyAnchorFor": [
+        "corp.fast_advance",
+        "corp.remote_scoring"
       ]
     },
     {
@@ -2460,6 +2582,37 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "damage.corp_damage_amplifier",
+      "source": "effects",
+      "match": {
+        "target": "damage.corp_damage_amplifier"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "damage.corp_damage_amplifier"
+      },
+      "strategyAnchorFor": [
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "damage.corp_tagged_meat_payoff",
+      "source": "effects",
+      "match": {
+        "target": "damage.corp_tagged_meat_payoff"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "damage.corp_tagged_meat_payoff"
+      },
+      "strategyAnchorFor": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
       "signalId": "damage.payoff",
       "source": "effects",
       "match": {
@@ -3400,6 +3553,22 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "economy.corp_asset_cashout",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_asset_cashout"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "economy.corp_asset_cashout"
+      },
+      "strategyAnchorFor": [
+        "corp.asset_economy",
+        "corp.economy_rez_reserve"
+      ]
+    },
+    {
       "signalId": "economy.corp_conditional_credit",
       "source": "effects",
       "match": {
@@ -3409,6 +3578,19 @@
         "side": "corp",
         "cardType": "operation",
         "target": "economy.corp_conditional_credit"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.corp_counter_bank",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_counter_bank"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "economy.corp_counter_bank"
       },
       "strategyAnchorFor": []
     },
@@ -3437,6 +3619,64 @@
         "target": "economy.corp_draw"
       },
       "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.corp_install_rez_credit",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_install_rez_credit"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "economy.corp_install_rez_credit"
+      },
+      "strategyAnchorFor": [
+        "corp.economy_rez_reserve"
+      ]
+    },
+    {
+      "signalId": "economy.corp_installed_credit_drip",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_installed_credit_drip"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "economy.corp_installed_credit_drip"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.corp_run_temporary_credit",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_run_temporary_credit"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "economy.corp_run_temporary_credit"
+      },
+      "strategyAnchorFor": [
+        "corp.economy_rez_reserve"
+      ]
+    },
+    {
+      "signalId": "economy.corp_trace_credit_support",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_trace_credit_support"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "economy.corp_trace_credit_support"
+      },
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
     },
     {
       "signalId": "economy.cost_window_credit",
@@ -3948,6 +4188,19 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "expose.corp_prevention",
+      "source": "effects",
+      "match": {
+        "target": "expose.corp_prevention"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "expose.corp_prevention"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "fort.all_rezzed_ice_trash_tag_risk",
       "source": "effects",
       "match": {
@@ -4096,6 +4349,19 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "hq.corp_hand_filter",
+      "source": "effects",
+      "match": {
+        "target": "hq.corp_hand_filter"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "hq.corp_hand_filter"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "ice.corp_deferred_rez",
       "source": "effects",
       "match": {
@@ -4125,6 +4391,22 @@
       ]
     },
     {
+      "signalId": "ice.corp_install_discount",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_install_discount"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "ice.corp_install_discount"
+      },
+      "strategyAnchorFor": [
+        "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
       "signalId": "ice.corp_rearrange_conceal",
       "source": "effects",
       "match": {
@@ -4136,6 +4418,52 @@
         "target": "ice.corp_rearrange_conceal"
       },
       "strategyAnchorFor": []
+    },
+    {
+      "signalId": "ice.corp_rez_discount",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_rez_discount"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "ice.corp_rez_discount"
+      },
+      "strategyAnchorFor": [
+        "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "ice.corp_strength_support",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_strength_support"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "ice.corp_strength_support"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "ice.corp_subroutine_support",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_subroutine_support"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "ice.corp_subroutine_support"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
     },
     {
       "signalId": "ice.corp_temporary_rez",
@@ -5161,6 +5489,19 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "risk.agenda_point_cost",
+      "source": "effects",
+      "match": {
+        "target": "risk.agenda_point_cost"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "risk.agenda_point_cost"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "risk.bad_publicity",
       "source": "effects",
       "match": {
@@ -5345,6 +5686,19 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "risk.leaves_play_loss",
+      "source": "effects",
+      "match": {
+        "target": "risk.leaves_play_loss"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "risk.leaves_play_loss"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "risk.lose_game_debt",
       "source": "effects",
       "match": {
@@ -5474,6 +5828,19 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "risk.random_discard_cost",
+      "source": "effects",
+      "match": {
+        "target": "risk.random_discard_cost"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "risk.random_discard_cost"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "risk.random_economy",
       "source": "effects",
       "match": {
@@ -5590,6 +5957,19 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "risk.temporary_credit_drawback",
+      "source": "effects",
+      "match": {
+        "target": "risk.temporary_credit_drawback"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "risk.temporary_credit_drawback"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "risk.temporary_program_loss",
       "source": "effects",
       "match": {
@@ -5629,6 +6009,19 @@
       "gates": {
         "side": "runner",
         "cardType": "resource"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "rnd.corp_self_shuffle_access",
+      "source": "effects",
+      "match": {
+        "target": "rnd.corp_self_shuffle_access"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "rnd.corp_self_shuffle_access"
       },
       "strategyAnchorFor": []
     },
@@ -5878,6 +6271,36 @@
         ]
       },
       "strategyAnchorFor": []
+    },
+    {
+      "signalId": "run.corp_redirect",
+      "source": "effects",
+      "match": {
+        "target": "run.corp_redirect"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "run.corp_redirect"
+      },
+      "strategyAnchorFor": [
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "signalId": "run.corp_start_tax",
+      "source": "effects",
+      "match": {
+        "target": "run.corp_start_tax"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "run.corp_start_tax"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
     },
     {
       "signalId": "run.damage_prevention_during_run",
@@ -8244,6 +8667,21 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "tag.corp_persistent_source",
+      "source": "effects",
+      "match": {
+        "target": "tag.corp_persistent_source"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "tag.corp_persistent_source"
+      },
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
       "signalId": "tag.payoff",
       "source": "remoteRole",
       "match": {
@@ -8429,6 +8867,21 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "trace.corp_credit_support",
+      "source": "effects",
+      "match": {
+        "target": "trace.corp_credit_support"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "trace.corp_credit_support"
+      },
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
       "signalId": "trace.source",
       "source": "effects",
       "match": {
@@ -8452,6 +8905,19 @@
       "strategyAnchorFor": [
         "corp.tag_trace_punish"
       ]
+    },
+    {
+      "signalId": "virus.corp_counter_prevention",
+      "source": "effects",
+      "match": {
+        "target": "virus.corp_counter_prevention"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "asset",
+        "target": "virus.corp_counter_prevention"
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "virus.counter_amplification",

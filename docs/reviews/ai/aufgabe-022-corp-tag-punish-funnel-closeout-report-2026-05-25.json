@@ -18,10 +18,10 @@
   "excludedCardCount": 0,
   "crossBatchCardCount": 38,
   "confirmedGeneratedFactCount": 190,
-  "previewAddedFactCount": 122,
+  "previewAddedFactCount": 100,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 294,
+  "normalizedDifferenceCount": 307,
   "remainingDifferenceCount": 0,
   "tagSourceCount": 15,
   "punishPayoffCount": 23,
@@ -67,7 +67,7 @@
     "persistent_tag_pressure_normalization": 13,
     "pay_or_take_tag_normalization": 4,
     "tag_punish_funnel_pairing_normalization": 165,
-    "terminal_window_context_normalization": 205,
+    "terminal_window_context_normalization": 218,
     "runner_survival_countercontext_normalization": 11,
     "legalaction_context_required_classification": 38,
     "board_context_required_classification": 0
@@ -3901,19 +3901,14 @@
       "subBatch": "trace_tag_sources",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects", "conditions"],
       "generatedFactsConfirmed": [
         "condition:requires_trace_success",
         "effect:tag_source",
         "effect:trace",
         "remoteRole:tag_punish_asset"
       ],
-      "previewAdds": [
-        "condition:requires_trace_success",
-        "effect:tag_source",
-        "effect:trace",
-        "remoteRole:tag_punish_asset"
-      ],
+      "previewAdds": ["remoteRole:tag_punish_asset"],
       "normalizedDifferences": [
         {
           "field": "condition:requires_trace_success",
@@ -3924,7 +3919,7 @@
         },
         {
           "field": "conditions",
-          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "classification": "terminal_window_context_normalized",
           "rule": "terminal_window_context_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
@@ -3942,6 +3937,13 @@
           "classification": "trace_tag_context_normalized",
           "rule": "trace_tag_condition_normalization",
           "rationale": "Trace-based tags keep trace-success context visible and never become guaranteed tags."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "terminal_window_context_normalized",
+          "rule": "terminal_window_context_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -4037,7 +4039,7 @@
       "subBatch": "direct_tag_sources",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects", "conditions"],
       "generatedFactsConfirmed": [
         "condition:requires_runner_draw",
         "condition:requires_runner_pay_or_take_tag",
@@ -4047,9 +4049,7 @@
       ],
       "previewAdds": [
         "condition:requires_runner_draw",
-        "condition:requires_runner_pay_or_take_tag",
         "effect:remote_tax",
-        "effect:tag_source",
         "remoteRole:tag_punish_asset"
       ],
       "normalizedDifferences": [
@@ -4066,6 +4066,13 @@
           "classification": "pay_or_take_tag_context_normalized",
           "rule": "pay_or_take_tag_normalization",
           "rationale": "Pay-or-take-tag effects keep payment context visible and do not assert a guaranteed tag."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "terminal_window_context_normalized",
+          "rule": "terminal_window_context_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "conditions",
@@ -4087,6 +4094,13 @@
           "classification": "tag_source_window_normalized",
           "rule": "tag_source_window_normalization",
           "rationale": "Tag sources are grouped by timing window; generated facts do not assert that a tag survives until the next Corp decision."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "terminal_window_context_normalized",
+          "rule": "terminal_window_context_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -4182,7 +4196,7 @@
       "subBatch": "ambush_access_punish",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects", "conditions"],
       "generatedFactsConfirmed": [
         "condition:requires_accessed_card",
         "condition:requires_advancement_counter",
@@ -4193,12 +4207,9 @@
         "remoteRole:ambush"
       ],
       "previewAdds": [
-        "condition:requires_accessed_card",
-        "condition:requires_advancement_counter",
         "effect:access_punish",
         "effect:advanceable_economy",
         "effect:ambush",
-        "effect:hardware_trash",
         "remoteRole:ambush"
       ],
       "normalizedDifferences": [
@@ -4211,7 +4222,7 @@
         },
         {
           "field": "conditions",
-          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "classification": "terminal_window_context_normalized",
           "rule": "terminal_window_context_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
@@ -4236,6 +4247,13 @@
           "classification": "visible_tag_payoff_context_normalized",
           "rule": "visible_tag_payoff_normalization",
           "rationale": "Tagged-runner payoffs keep visible Runner-tag context and do not create current playability."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "terminal_window_context_normalized",
+          "rule": "terminal_window_context_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -4336,7 +4354,7 @@
       "subBatch": "ambush_access_punish",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects", "conditions"],
       "generatedFactsConfirmed": [
         "condition:requires_accessed_card",
         "condition:requires_advancement_counter",
@@ -4347,12 +4365,9 @@
         "remoteRole:ambush"
       ],
       "previewAdds": [
-        "condition:requires_accessed_card",
-        "condition:requires_advancement_counter",
         "effect:access_punish",
         "effect:advanceable_economy",
         "effect:ambush",
-        "effect:program_trash",
         "remoteRole:ambush"
       ],
       "normalizedDifferences": [
@@ -4365,7 +4380,7 @@
         },
         {
           "field": "conditions",
-          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "classification": "terminal_window_context_normalized",
           "rule": "terminal_window_context_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
@@ -4390,6 +4405,13 @@
           "classification": "visible_tag_payoff_context_normalized",
           "rule": "visible_tag_payoff_normalization",
           "rationale": "Tagged-runner payoffs keep visible Runner-tag context and do not create current playability."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "terminal_window_context_normalized",
+          "rule": "terminal_window_context_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -4490,13 +4512,20 @@
       "subBatch": "persistent_tag_or_punish",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects"],
       "generatedFactsConfirmed": [
         "effect:trace_credit",
         "remoteRole:tag_punish_asset"
       ],
-      "previewAdds": ["effect:trace_credit", "remoteRole:tag_punish_asset"],
+      "previewAdds": ["remoteRole:tag_punish_asset"],
       "normalizedDifferences": [
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "terminal_window_context_normalized",
+          "rule": "terminal_window_context_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
+        },
         {
           "field": "effects",
           "sourceWarningKind": "generated_fact_missing_from_active_monolith",
@@ -4579,7 +4608,7 @@
       "subBatch": "tag_punish_damage",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects", "conditions"],
       "generatedFactsConfirmed": [
         "condition:requires_runner_tagged",
         "effect:damage",
@@ -4587,8 +4616,6 @@
         "remoteRole:tag_punish_asset"
       ],
       "previewAdds": [
-        "condition:requires_runner_tagged",
-        "effect:damage",
         "effect:tag_punish_payoff",
         "remoteRole:tag_punish_asset"
       ],
@@ -4599,6 +4626,13 @@
           "classification": "visible_tag_payoff_context_normalized",
           "rule": "visible_tag_payoff_normalization",
           "rationale": "Tagged-runner payoffs keep visible Runner-tag context and do not create current playability."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "terminal_window_context_normalized",
+          "rule": "terminal_window_context_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "conditions",
@@ -4620,6 +4654,13 @@
           "classification": "visible_tag_payoff_context_normalized",
           "rule": "visible_tag_payoff_normalization",
           "rationale": "Tagged-runner payoffs keep visible Runner-tag context and do not create current playability."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "terminal_window_context_normalized",
+          "rule": "terminal_window_context_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -4715,17 +4756,13 @@
       "subBatch": "direct_tag_sources",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects", "conditions"],
       "generatedFactsConfirmed": [
         "condition:requires_runner_tagged",
         "effect:tag_source",
         "remoteRole:tag_punish_asset"
       ],
-      "previewAdds": [
-        "condition:requires_runner_tagged",
-        "effect:tag_source",
-        "remoteRole:tag_punish_asset"
-      ],
+      "previewAdds": ["remoteRole:tag_punish_asset"],
       "normalizedDifferences": [
         {
           "field": "condition:requires_runner_tagged",
@@ -4736,7 +4773,7 @@
         },
         {
           "field": "conditions",
-          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "classification": "terminal_window_context_normalized",
           "rule": "terminal_window_context_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
@@ -4747,6 +4784,13 @@
           "classification": "tag_source_window_normalized",
           "rule": "tag_source_window_normalization",
           "rationale": "Tag sources are grouped by timing window; generated facts do not assert that a tag survives until the next Corp decision."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "terminal_window_context_normalized",
+          "rule": "terminal_window_context_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -4842,7 +4886,7 @@
       "subBatch": "tag_punish_damage",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects", "conditions"],
       "generatedFactsConfirmed": [
         "condition:requires_runner_tagged",
         "effect:damage",
@@ -4850,8 +4894,6 @@
         "remoteRole:tag_punish_asset"
       ],
       "previewAdds": [
-        "condition:requires_runner_tagged",
-        "effect:damage",
         "effect:tag_punish_payoff",
         "remoteRole:tag_punish_asset"
       ],
@@ -4865,7 +4907,7 @@
         },
         {
           "field": "conditions",
-          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "classification": "terminal_window_context_normalized",
           "rule": "terminal_window_context_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
@@ -4883,6 +4925,13 @@
           "classification": "visible_tag_payoff_context_normalized",
           "rule": "visible_tag_payoff_normalization",
           "rationale": "Tagged-runner payoffs keep visible Runner-tag context and do not create current playability."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "terminal_window_context_normalized",
+          "rule": "terminal_window_context_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -4978,7 +5027,7 @@
       "subBatch": "ambush_access_punish",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects", "conditions"],
       "generatedFactsConfirmed": [
         "condition:requires_accessed_card",
         "effect:access_punish",
@@ -4987,10 +5036,8 @@
         "remoteRole:ambush"
       ],
       "previewAdds": [
-        "condition:requires_accessed_card",
         "effect:access_punish",
         "effect:ambush",
-        "effect:damage",
         "remoteRole:ambush"
       ],
       "normalizedDifferences": [
@@ -5000,6 +5047,13 @@
           "classification": "ambush_access_punish_normalized",
           "rule": "ambush_tag_punish_normalization",
           "rationale": "Ambush/access-punish facts describe trigger classes and never assert a guaranteed hit."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "terminal_window_context_normalized",
+          "rule": "terminal_window_context_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "conditions",
@@ -5028,6 +5082,13 @@
           "classification": "visible_tag_payoff_context_normalized",
           "rule": "visible_tag_payoff_normalization",
           "rationale": "Tagged-runner payoffs keep visible Runner-tag context and do not create current playability."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "terminal_window_context_normalized",
+          "rule": "terminal_window_context_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",
@@ -5128,7 +5189,7 @@
       "subBatch": "tag_punish_damage",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects", "conditions"],
       "generatedFactsConfirmed": [
         "condition:requires_runner_tagged",
         "effect:damage",
@@ -5136,8 +5197,6 @@
         "remoteRole:tag_punish_asset"
       ],
       "previewAdds": [
-        "condition:requires_runner_tagged",
-        "effect:damage",
         "effect:tag_punish_payoff",
         "remoteRole:tag_punish_asset"
       ],
@@ -5151,7 +5210,7 @@
         },
         {
           "field": "conditions",
-          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "classification": "terminal_window_context_normalized",
           "rule": "terminal_window_context_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
@@ -5169,6 +5228,13 @@
           "classification": "visible_tag_payoff_context_normalized",
           "rule": "visible_tag_payoff_normalization",
           "rationale": "Tagged-runner payoffs keep visible Runner-tag context and do not create current playability."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "terminal_window_context_normalized",
+          "rule": "terminal_window_context_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-11 funnel comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",

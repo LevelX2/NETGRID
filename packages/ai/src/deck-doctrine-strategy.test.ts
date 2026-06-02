@@ -98,7 +98,7 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     expect(profile.strategyScores["corp.remote_scoring"]?.anchorEvidence).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          cardId: "onr_v1_317_data-masons",
+          cardId: "onr_v1_350_antiquated-interface-routines",
           source: "lineSupport",
         }),
       ]),

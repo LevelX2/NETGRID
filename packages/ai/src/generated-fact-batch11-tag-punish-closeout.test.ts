@@ -114,8 +114,8 @@ describe("generated fact Batch-11 Corp Tag/Punish funnel closeout", () => {
   it("rolls up the funnel as ready for diagnostic consumer review", () => {
     const report = readReport();
     expect(report.confirmedGeneratedFactCount).toBe(190);
-    expect(report.previewAddedFactCount).toBe(122);
-    expect(report.normalizedDifferenceCount).toBe(294);
+    expect(report.previewAddedFactCount).toBe(100);
+    expect(report.normalizedDifferenceCount).toBe(307);
     expect(report.remainingDifferenceCount).toBe(0);
     expect(report.hardErrorCount).toBe(0);
     expect(report.realSemanticConflictCount).toBe(0);

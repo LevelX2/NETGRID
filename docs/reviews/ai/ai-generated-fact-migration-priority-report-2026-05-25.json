@@ -6532,12 +6532,13 @@
         "effect:trace",
         "remoteRole:tag_punish_asset"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 3,
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",
@@ -6629,10 +6630,11 @@
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 3,
-        "generated_fact_absent_from_monolith": 2
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 5,
       "rationale": "Activated advancement-counter placement is a stable mechanical score-acceleration fact; closeout valuation stays strategic.",
       "doNotMigrateFields": [
@@ -6667,11 +6669,12 @@
         "effect:tag_source",
         "remoteRole:tag_punish_asset"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
         "generated_fact_absent_from_monolith": 3,
         "manual_review_candidate": 1
       },
@@ -6708,12 +6711,12 @@
         "condition:requires_start_of_turn",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": ["effects", "costProfile", "remoteRole"],
-      "duplicatedActiveMechanicalFields": ["remoteRole"],
+      "monolithFields": ["effects", "conditions", "costProfile", "remoteRole"],
+      "duplicatedActiveMechanicalFields": ["conditions", "remoteRole"],
       "generatedOnlyFields": ["conditions"],
       "overlayFields": [],
       "warningGroups": {
-        "monolith_mechanical_duplication_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 2,
         "generated_fact_absent_from_monolith": 1,
         "manual_review_candidate": 1
       },
@@ -6755,12 +6758,13 @@
         "effect:hardware_trash",
         "remoteRole:ambush"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 3,
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",
@@ -6793,11 +6797,12 @@
       ],
       "generatedFields": ["effects"],
       "generatedMechanicalFacts": ["effect:zone_shuffle"],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 1,
         "manual_review_candidate": 1
       },
@@ -6834,16 +6839,17 @@
         "effect:rez_discount",
         "remoteRole:ice_modifier"
       ],
-      "monolithFields": ["effects", "remoteRole"],
+      "monolithFields": ["effects", "conditions", "remoteRole"],
       "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
       "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
-        "generated_fact_absent_from_monolith": 1
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 5,
       "rationale": "Wall rez discount and wall strength modifiers are stable generated ICE-modifier facts.",
       "doNotMigrateFields": [
@@ -6874,10 +6880,11 @@
       "generatedMechanicalFacts": ["effect:draw", "remoteRole:asset_economy"],
       "monolithFields": ["effects", "remoteRole"],
       "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
-      "generatedOnlyFields": [],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
-        "monolith_mechanical_duplication_candidate": 2
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1
       },
       "recommendedNextAction": "ready_for_generated_mechanical_fields",
       "migrationReadiness": "ready",
@@ -6914,19 +6921,17 @@
         "effect:remote_protection",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": ["effects", "conditions", "remoteRole"],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects",
-        "remoteRole"
-      ],
-      "generatedOnlyFields": [],
+      "monolithFields": ["effects", "remoteRole"],
+      "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
+      "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
-        "monolith_mechanical_duplication_candidate": 3
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 9,
       "rationale": "Draw and hand-size support are derivable, with rezzed board context explicit.",
       "doNotMigrateFields": [
@@ -6963,12 +6968,13 @@
         "effect:program_trash",
         "remoteRole:ambush"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 3,
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",
@@ -7005,19 +7011,17 @@
         "effect:install_discount",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": ["effects", "conditions", "remoteRole"],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects",
-        "remoteRole"
-      ],
-      "generatedOnlyFields": [],
+      "monolithFields": ["effects", "remoteRole"],
+      "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
+      "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
-        "monolith_mechanical_duplication_candidate": 3
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 9,
       "rationale": "ICE install discount is derivable, with rezzed board context explicit.",
       "doNotMigrateFields": [
@@ -7049,11 +7053,12 @@
         "effect:trace_credit",
         "remoteRole:tag_punish_asset"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -7094,11 +7099,12 @@
         "effect:start_of_turn_economy",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 3,
         "manual_review_candidate": 1
       },
@@ -7137,11 +7143,12 @@
         "effect:tag_punish_payoff",
         "remoteRole:tag_punish_asset"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
         "generated_fact_absent_from_monolith": 3,
         "manual_review_candidate": 1
       },
@@ -7180,11 +7187,12 @@
         "effect:economy",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 3,
         "manual_review_candidate": 1
       },
@@ -7222,11 +7230,12 @@
         "effect:recurring_economy",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -7265,11 +7274,12 @@
         "effect:run_tax",
         "remoteRole:run_tax"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 3,
         "manual_review_candidate": 1
       },
@@ -7307,12 +7317,13 @@
         "effect:tag_source",
         "remoteRole:tag_punish_asset"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 3,
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",
@@ -7350,11 +7361,12 @@
         "effect:extra_action",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 3,
         "manual_review_candidate": 1
       },
@@ -7392,11 +7404,12 @@
         "effect:extra_action",
         "remoteRole:remote_capacity"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 3,
         "manual_review_candidate": 1
       },
@@ -7430,11 +7443,12 @@
       ],
       "generatedFields": ["effects"],
       "generatedMechanicalFacts": ["effect:draw", "effect:zone_shuffle"],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 1,
         "manual_review_candidate": 1
       },
@@ -7473,11 +7487,12 @@
         "effect:finite_economy_pool",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -7515,19 +7530,17 @@
         "effect:remote_protection",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": ["effects", "conditions", "remoteRole"],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects",
-        "remoteRole"
-      ],
-      "generatedOnlyFields": [],
+      "monolithFields": ["effects", "remoteRole"],
+      "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
+      "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
-        "monolith_mechanical_duplication_candidate": 3
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 9,
       "rationale": "Corp hand-size support is derivable, with rezzed board context explicit.",
       "doNotMigrateFields": [
@@ -7561,12 +7574,13 @@
         "effect:tag_punish_payoff",
         "remoteRole:tag_punish_asset"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 3,
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",
@@ -7605,11 +7619,12 @@
         "effect:damage",
         "remoteRole:ambush"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 2,
         "generated_fact_absent_from_monolith": 3,
         "manual_review_candidate": 1
       },
@@ -7648,12 +7663,13 @@
         "effect:tag_punish_payoff",
         "remoteRole:tag_punish_asset"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 3,
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",
@@ -7690,11 +7706,12 @@
         "effect:economy",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -7736,11 +7753,12 @@
         "effect:start_of_turn_economy",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 3,
         "manual_review_candidate": 1
       },
@@ -7782,12 +7800,13 @@
         "effect:damage",
         "remoteRole:ambush"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 3,
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",

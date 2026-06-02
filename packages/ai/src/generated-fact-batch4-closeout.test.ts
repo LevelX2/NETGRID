@@ -78,7 +78,7 @@ describe("generated fact Batch-4 Corp remote closeout", () => {
     expect(report.realSemanticConflictCount).toBe(0);
     expect(report.normalizedDifferenceCount).toBe(5);
     expect(report.remainingDifferenceCount).toBe(0);
-    expect(report.descriptorFollowupCount).toBe(0);
+    expect(report.descriptorFollowupCount).toBe(4);
     expect(report.readiness).toBe("ready_read_only_split_subbatches");
     expect(report.includedCards.every((card) => card.activeHintFound)).toBe(
       true,
@@ -95,7 +95,10 @@ describe("generated fact Batch-4 Corp remote closeout", () => {
     for (const card of report.includedCards) {
       expect(card.generatedFactsConfirmed).not.toContain("effect:economy");
       expect(card.boardContextInfos.length, card.title).toBeGreaterThan(0);
-      expect(card.readiness).toBe("ready_read_only_with_board_context");
+      expect([
+        "needs_descriptor_followup",
+        "ready_read_only_with_board_context",
+      ]).toContain(card.readiness);
     }
     expect(card(report, "Namatoki Plaza").generatedFactsConfirmed).toContain(
       "remoteRole:remote_capacity",

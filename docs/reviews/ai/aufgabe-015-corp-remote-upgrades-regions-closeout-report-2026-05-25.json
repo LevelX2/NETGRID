@@ -20,7 +20,7 @@
   "normalizedDifferenceCount": 5,
   "remainingDifferenceCount": 0,
   "boardContextInfoCount": 21,
-  "descriptorFollowupCount": 0,
+  "descriptorFollowupCount": 4,
   "readiness": "ready_read_only_split_subbatches",
   "subBatchReadiness": {
     "global_ice_or_remote_support": 2,
@@ -30,7 +30,8 @@
     "score_acceleration_or_fast_advance_support": 1
   },
   "readinessCounts": {
-    "ready_read_only_with_board_context": 8
+    "needs_descriptor_followup": 2,
+    "ready_read_only_with_board_context": 6
   },
   "normalizationRuleCounts": {
     "remote_capacity_normalization": 0,
@@ -100,13 +101,16 @@
           "rationale": "Advancement/score support describes card function; actual score legality remains Engine/LegalAction context."
         }
       ],
-      "descriptorFollowups": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
+      ],
       "activeConsumers": [
         "remote_role_consumer",
         "score_conversion_diagnostics"
       ],
       "remainingIssues": [],
-      "readiness": "ready_read_only_with_board_context"
+      "readiness": "needs_descriptor_followup"
     },
     {
       "cardId": "onr_v1_317_data-masons",
@@ -157,14 +161,17 @@
           "rationale": "RemoteRole describes static card function; active/rezzed/server placement stays board state."
         }
       ],
-      "descriptorFollowups": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
+      ],
       "activeConsumers": [
         "remote_role_consumer",
         "remote_safety_diagnostics",
         "rez_cost_context_diagnostics"
       ],
       "remainingIssues": [],
-      "readiness": "ready_read_only_with_board_context"
+      "readiness": "needs_descriptor_followup"
     },
     {
       "cardId": "onr_v1_350_antiquated-interface-routines",

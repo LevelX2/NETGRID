@@ -4018,7 +4018,7 @@
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
               "source": "strategicRole",
-              "role": "engine_anchor",
+              "role": "tax_tool",
               "strategyId": "corp.economy_rez_reserve",
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
@@ -4315,7 +4315,7 @@
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
               "source": "strategicRole",
-              "role": "engine_anchor",
+              "role": "tax_tool",
               "strategyId": "corp.ice_tax_glacier",
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
@@ -4435,26 +4435,10 @@
           "confidence": "high"
         },
         "corp.remote_scoring": {
-          "anchorScore": 80,
+          "anchorScore": 40,
           "supportScore": 100,
-          "finalScore": 88,
+          "finalScore": 64,
           "anchorEvidence": [
-            {
-              "cardId": "onr_v1_317_data-masons",
-              "quantity": 1,
-              "source": "lineSupport",
-              "signal": "corp.remote_scoring",
-              "strategyId": "corp.remote_scoring",
-              "reason": "normalized_lineSupport_strategy_goal"
-            },
-            {
-              "cardId": "onr_v1_317_data-masons",
-              "quantity": 1,
-              "source": "strategicRole",
-              "role": "engine_anchor",
-              "strategyId": "corp.remote_scoring",
-              "reason": "valid_strategicRole_reinforces_existing_anchor"
-            },
             {
               "cardId": "onr_v1_350_antiquated-interface-routines",
               "quantity": 1,
@@ -4587,7 +4571,7 @@
             }
           ],
           "supportGaps": [],
-          "confidence": "high"
+          "confidence": "medium"
         },
         "corp.rush_score": {
           "anchorScore": 0,
@@ -4825,11 +4809,11 @@
       },
       "primaryStrategies": [
         "corp.ice_tax_glacier",
-        "corp.remote_scoring",
-        "corp.tag_trace_punish"
+        "corp.tag_trace_punish",
+        "corp.economy_rez_reserve"
       ],
       "secondaryStrategies": [
-        "corp.economy_rez_reserve",
+        "corp.remote_scoring",
         "corp.damage_kill",
         "corp.fast_advance",
         "corp.central_stabilize",
@@ -4849,7 +4833,7 @@
       "legacySignalCounts": {
         "lineSupport:corp.damage_kill": 1,
         "lineSupport:corp.ice_tax_glacier": 2,
-        "lineSupport:corp.remote_scoring": 2,
+        "lineSupport:corp.remote_scoring": 1,
         "lineSupport:corp.tag_trace_punish": 2,
         "planRole:bait_runner": 3,
         "planRole:build_scoring_remote": 6,
@@ -4894,7 +4878,7 @@
         "scoreProfile": {
           "scoreAcceleration": 1,
           "agendaInstallAdvanceScoreSupport": 6,
-          "remoteScoringProtection": 3,
+          "remoteScoringProtection": 1,
           "stealTax": 0
         },
         "economyProfile": {
@@ -5307,7 +5291,7 @@
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
               "source": "strategicRole",
-              "role": "engine_anchor",
+              "role": "tax_tool",
               "strategyId": "corp.economy_rez_reserve",
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
@@ -5656,7 +5640,7 @@
               "cardId": "onr_v1_317_data-masons",
               "quantity": 1,
               "source": "strategicRole",
-              "role": "engine_anchor",
+              "role": "tax_tool",
               "strategyId": "corp.ice_tax_glacier",
               "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
@@ -5818,26 +5802,10 @@
           "confidence": "high"
         },
         "corp.remote_scoring": {
-          "anchorScore": 80,
+          "anchorScore": 40,
           "supportScore": 100,
-          "finalScore": 88,
+          "finalScore": 64,
           "anchorEvidence": [
-            {
-              "cardId": "onr_v1_317_data-masons",
-              "quantity": 1,
-              "source": "lineSupport",
-              "signal": "corp.remote_scoring",
-              "strategyId": "corp.remote_scoring",
-              "reason": "normalized_lineSupport_strategy_goal"
-            },
-            {
-              "cardId": "onr_v1_317_data-masons",
-              "quantity": 1,
-              "source": "strategicRole",
-              "role": "engine_anchor",
-              "strategyId": "corp.remote_scoring",
-              "reason": "valid_strategicRole_reinforces_existing_anchor"
-            },
             {
               "cardId": "onr_v1_350_antiquated-interface-routines",
               "quantity": 1,
@@ -6005,7 +5973,7 @@
             }
           ],
           "supportGaps": [],
-          "confidence": "high"
+          "confidence": "medium"
         },
         "corp.rush_score": {
           "anchorScore": 0,
@@ -6347,10 +6315,10 @@
       "primaryStrategies": [
         "corp.tag_trace_punish",
         "corp.ice_tax_glacier",
-        "corp.remote_scoring"
+        "corp.economy_rez_reserve"
       ],
       "secondaryStrategies": [
-        "corp.economy_rez_reserve",
+        "corp.remote_scoring",
         "corp.central_stabilize",
         "corp.rush_score"
       ],
@@ -6367,7 +6335,7 @@
       },
       "legacySignalCounts": {
         "lineSupport:corp.ice_tax_glacier": 2,
-        "lineSupport:corp.remote_scoring": 2,
+        "lineSupport:corp.remote_scoring": 1,
         "lineSupport:corp.tag_trace_punish": 4,
         "planRole:bait_runner": 5,
         "planRole:build_scoring_remote": 5,
@@ -6413,7 +6381,7 @@
         "scoreProfile": {
           "scoreAcceleration": 0,
           "agendaInstallAdvanceScoreSupport": 4,
-          "remoteScoringProtection": 3,
+          "remoteScoringProtection": 1,
           "stealTax": 0
         },
         "economyProfile": {
@@ -6464,8 +6432,8 @@
       "onr_origin_runner_ai_snapshot_v1"
     ],
     "primaryStrategyCounts": {
+      "corp.economy_rez_reserve": 2,
       "corp.ice_tax_glacier": 2,
-      "corp.remote_scoring": 2,
       "corp.tag_trace_punish": 2,
       "runner.economy_first": 2,
       "runner.hq_pressure": 1,
@@ -6479,6 +6447,6 @@
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 2
     },
-    "contentSha256": "e7fb3e92784d458a346168793b782628fc92f648e9a47654cd4dd5a0489ed6cc"
+    "contentSha256": "1646eac935685764d0bbf8c54ca1e6866b9d62a78da19130bc186812b208747b"
   }
 }

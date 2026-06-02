@@ -5076,7 +5076,7 @@
   "lineSupport": [
     {
       "value": "corp.ice_tax_glacier",
-      "count": 45,
+      "count": 49,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5097,7 +5097,7 @@
     },
     {
       "value": "corp.tag_trace_punish",
-      "count": 33,
+      "count": 36,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5139,7 +5139,7 @@
     },
     {
       "value": "corp.remote_scoring",
-      "count": 16,
+      "count": 17,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5153,9 +5153,30 @@
         "onr_v1_215_security-net-optimization",
         "onr_v1_216_security-purge",
         "onr_v1_312_chicago-branch",
-        "onr_v1_317_data-masons",
-        "onr_v1_320_encoder-inc",
+        "onr_v1_331_nevinyrral",
+        "onr_v1_335_remote-facility",
         "onr_v1_350_antiquated-interface-routines"
+      ]
+    },
+    {
+      "value": "corp.ambush_bluff",
+      "count": 14,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "corp.ambush_bluff"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_315_corprunners-shattered-remains",
+        "onr_v1_323_experimental-ai",
+        "onr_v1_340_setup",
+        "onr_v1_345_trap",
+        "onr_v1_346_vacant-soulkiller",
+        "onr_v1_348_virus-test-site",
+        "onr_v1_354_crybaby",
+        "onr_proteus_004_fetal-ai"
       ]
     },
     {
@@ -5180,6 +5201,27 @@
       ]
     },
     {
+      "value": "corp.fast_advance",
+      "count": 13,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "corp.fast_advance"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_189_artificial-security-directors",
+        "onr_v1_201_executive-extraction",
+        "onr_v1_202_genetics-visionary-acquisition",
+        "onr_v1_291_falsified-transactions-expert",
+        "onr_v1_292_management-shake-up",
+        "onr_v1_300_project-consultants",
+        "onr_v1_304_systematic-layoffs",
+        "onr_v1_305_team-restructuring"
+      ]
+    },
+    {
       "value": "corp.asset_economy",
       "count": 11,
       "mappingCategory": "exact_strategy_goal",
@@ -5193,11 +5235,11 @@
         "onr_v1_308_acme-savings-and-loan",
         "onr_v1_309_bbs-whispering-campaign",
         "onr_v1_311_braindance-campaign",
-        "onr_v1_314_corporate-negotiating-center",
+        "onr_v1_318_department-of-truth-enhancement",
         "onr_v1_326_holovid-campaign",
         "onr_v1_328_information-laundering",
         "onr_v1_329_investment-firm",
-        "onr_v1_334_pacifica-regional-ai"
+        "onr_v1_337_rockerboy-promotion"
       ]
     },
     {
@@ -5243,48 +5285,6 @@
       ]
     },
     {
-      "value": "corp.ambush_bluff",
-      "count": 9,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "corp.ambush_bluff"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_315_corprunners-shattered-remains",
-        "onr_v1_323_experimental-ai",
-        "onr_v1_340_setup",
-        "onr_v1_345_trap",
-        "onr_v1_346_vacant-soulkiller",
-        "onr_v1_354_crybaby",
-        "onr_proteus_004_fetal-ai",
-        "onr_proteus_005_marked-accounts"
-      ]
-    },
-    {
-      "value": "corp.fast_advance",
-      "count": 9,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "corp.fast_advance"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_189_artificial-security-directors",
-        "onr_v1_201_executive-extraction",
-        "onr_v1_202_genetics-visionary-acquisition",
-        "onr_v1_291_falsified-transactions-expert",
-        "onr_v1_292_management-shake-up",
-        "onr_v1_300_project-consultants",
-        "onr_v1_304_systematic-layoffs",
-        "onr_v1_305_team-restructuring"
-      ]
-    },
-    {
       "value": "runner.search.breaker",
       "count": 8,
       "mappingCategory": "exact_strategy_goal",
@@ -5325,6 +5325,24 @@
       ]
     },
     {
+      "value": "corp.economy_rez_reserve",
+      "count": 5,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "corp.economy_rez_reserve"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_324_fortress-architects",
+        "onr_v1_360_jerusalem-city-grid",
+        "onr_proteus_058_executive-boot-camp",
+        "onr_proteus_059_government-contract",
+        "onr_proteus_076_syd-meyer-superstores"
+      ]
+    },
+    {
       "value": "runner.remote_contest",
       "count": 4,
       "mappingCategory": "exact_strategy_goal",
@@ -5339,22 +5357,6 @@
         "onr_v1_173_restrictive-net-zoning",
         "onr_proteus_137_death-from-above",
         "onr_proteus_146_precision-bribery"
-      ]
-    },
-    {
-      "value": "corp.economy_rez_reserve",
-      "count": 3,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "corp.economy_rez_reserve"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_320_encoder-inc",
-        "onr_v1_341_skalderviken-sa-beta-test-site",
-        "onr_v1_360_jerusalem-city-grid"
       ]
     },
     {
