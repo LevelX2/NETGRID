@@ -1221,6 +1221,7 @@
       "functionSignalCounts": {
         "breaker.code_gate": 5,
         "breaker.sentry": 5,
+        "economy.burst_credit": 4,
         "economy.generic": 4,
         "setup.draw": 4,
         "setup.memory": 1,
@@ -1323,8 +1324,8 @@
       "strategyScores": {
         "runner.economy_first": {
           "anchorScore": 0,
-          "supportScore": 43,
-          "finalScore": 28,
+          "supportScore": 50,
+          "finalScore": 33,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -1398,6 +1399,13 @@
               "reason": "support:searchOrDraw"
             },
             {
+              "cardId": "onr_v1_101_mit-west-tier",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
+            },
+            {
               "cardId": "onr_v1_129_hq-interface",
               "quantity": 1,
               "source": "functionSignal",
@@ -1413,8 +1421,8 @@
         },
         "runner.hq_pressure": {
           "anchorScore": 100,
-          "supportScore": 48,
-          "finalScore": 79,
+          "supportScore": 55,
+          "finalScore": 82,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_085_executive-wiretaps",
@@ -1515,6 +1523,13 @@
             },
             {
               "cardId": "onr_v1_095_jack-n-joe",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
+            },
+            {
+              "cardId": "onr_v1_101_mit-west-tier",
               "quantity": 2,
               "source": "functionSignal",
               "signal": "setup.draw",
@@ -1682,8 +1697,8 @@
         },
         "runner.remote_contest": {
           "anchorScore": 0,
-          "supportScore": 42,
-          "finalScore": 17,
+          "supportScore": 45,
+          "finalScore": 18,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -1741,6 +1756,13 @@
               "source": "functionSignal",
               "signal": "setup.draw",
               "reason": "support:searchOrDraw"
+            },
+            {
+              "cardId": "onr_v1_101_mit-west-tier",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
             }
           ],
           "supportGaps": [
@@ -1752,8 +1774,8 @@
         },
         "runner.remote_trash": {
           "anchorScore": 0,
-          "supportScore": 62,
-          "finalScore": 25,
+          "supportScore": 65,
+          "finalScore": 26,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -1827,6 +1849,13 @@
               "reason": "support:searchOrDraw"
             },
             {
+              "cardId": "onr_v1_101_mit-west-tier",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
+            },
+            {
               "cardId": "onr_v1_129_hq-interface",
               "quantity": 1,
               "source": "functionSignal",
@@ -1841,8 +1870,8 @@
         },
         "runner.rig_first": {
           "anchorScore": 0,
-          "supportScore": 63,
-          "finalScore": 41,
+          "supportScore": 70,
+          "finalScore": 46,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -1944,6 +1973,13 @@
               "reason": "support:searchOrDraw"
             },
             {
+              "cardId": "onr_v1_101_mit-west-tier",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
+            },
+            {
               "cardId": "onr_v1_145_wutech-mem-chip",
               "quantity": 1,
               "source": "compiledHint",
@@ -1959,8 +1995,8 @@
         },
         "runner.rnd_pressure": {
           "anchorScore": 100,
-          "supportScore": 58,
-          "finalScore": 83,
+          "supportScore": 65,
+          "finalScore": 86,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_081_custodial-position",
@@ -2086,6 +2122,13 @@
               "reason": "support:searchOrDraw"
             },
             {
+              "cardId": "onr_v1_101_mit-west-tier",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
+            },
+            {
               "cardId": "onr_v1_145_wutech-mem-chip",
               "quantity": 1,
               "source": "compiledHint",
@@ -2100,10 +2143,41 @@
           "confidence": "high"
         },
         "runner.run_event_tempo": {
-          "anchorScore": 0,
+          "anchorScore": 100,
           "supportScore": 60,
-          "finalScore": 24,
-          "anchorEvidence": [],
+          "finalScore": 84,
+          "anchorEvidence": [
+            {
+              "cardId": "onr_v1_081_custodial-position",
+              "quantity": 2,
+              "source": "derivedStrategyAnchor",
+              "strategyId": "runner.run_event_tempo",
+              "reason": "derived_strategy_anchor_from_inspector_index"
+            },
+            {
+              "cardId": "onr_v1_081_custodial-position",
+              "quantity": 2,
+              "source": "strategicRole",
+              "role": "payoff_anchor",
+              "strategyId": "runner.run_event_tempo",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
+            },
+            {
+              "cardId": "onr_v1_085_executive-wiretaps",
+              "quantity": 2,
+              "source": "derivedStrategyAnchor",
+              "strategyId": "runner.run_event_tempo",
+              "reason": "derived_strategy_anchor_from_inspector_index"
+            },
+            {
+              "cardId": "onr_v1_085_executive-wiretaps",
+              "quantity": 2,
+              "source": "strategicRole",
+              "role": "payoff_anchor",
+              "strategyId": "runner.run_event_tempo",
+              "reason": "valid_strategicRole_reinforces_existing_anchor"
+            }
+          ],
           "supportEvidence": [
             {
               "cardId": "onr_v1_014_codecracker",
@@ -2187,12 +2261,12 @@
             "low_economy_support",
             "weak_tag_damage_defense"
           ],
-          "confidence": "low"
+          "confidence": "high"
         },
         "runner.search.breaker": {
           "anchorScore": 0,
-          "supportScore": 63,
-          "finalScore": 25,
+          "supportScore": 75,
+          "finalScore": 30,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -2294,6 +2368,13 @@
               "reason": "support:searchOrDraw"
             },
             {
+              "cardId": "onr_v1_101_mit-west-tier",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
+            },
+            {
               "cardId": "onr_v1_145_wutech-mem-chip",
               "quantity": 1,
               "source": "compiledHint",
@@ -2308,8 +2389,8 @@
         },
         "runner.survival_defense": {
           "anchorScore": 0,
-          "supportScore": 25,
-          "finalScore": 14,
+          "supportScore": 30,
+          "finalScore": 17,
           "anchorEvidence": [],
           "supportEvidence": [
             {
@@ -2334,6 +2415,13 @@
               "reason": "support:searchOrDraw"
             },
             {
+              "cardId": "onr_v1_101_mit-west-tier",
+              "quantity": 2,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
+            },
+            {
               "cardId": "onr_v1_129_hq-interface",
               "quantity": 1,
               "source": "functionSignal",
@@ -2351,10 +2439,13 @@
       "primaryStrategies": [
         "runner.interface_closeout",
         "runner.rnd_pressure",
-        "runner.hq_pressure"
+        "runner.run_event_tempo"
       ],
       "secondaryStrategies": [
-        "runner.rig_first"
+        "runner.hq_pressure",
+        "runner.rig_first",
+        "runner.economy_first",
+        "runner.search.breaker"
       ],
       "functionSignalCounts": {
         "access.hq_multiaccess": 3,
@@ -2364,9 +2455,14 @@
         "breaker.sentry": 3,
         "breaker.universal": 2,
         "breaker.wall": 4,
-        "setup.draw": 2,
+        "run.event_tempo": 4,
+        "run.server_specific_hq": 2,
+        "run.server_specific_rnd": 2,
+        "setup.draw": 4,
+        "setup.full_deck_reset": 2,
         "setup.memory": 1,
-        "setup.memory_chip": 1
+        "setup.memory_chip": 1,
+        "setup.stack_shuffle": 2
       },
       "legacySignalCounts": {
         "lineSupport:runner.hq_pressure": 3,
@@ -2398,8 +2494,7 @@
         "role:setup": 3
       },
       "warnings": [
-        "inspector:deferred_requires_human_review",
-        "inspector:legacy_fallback_only"
+        "inspector:deferred_requires_human_review"
       ],
       "runnerProfile": {
         "coverageProfile": {
@@ -2434,7 +2529,7 @@
         },
         "setupProfile": {
           "search": 0,
-          "draw": 2,
+          "draw": 4,
           "recovery": 0,
           "installSupport": 0,
           "memoryHandSize": 11
@@ -2530,6 +2625,13 @@
               "reason": "support:economy"
             },
             {
+              "cardId": "onr_v1_101_mit-west-tier",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
+            },
+            {
               "cardId": "onr_v1_108_score",
               "quantity": 2,
               "source": "functionSignal",
@@ -2554,6 +2656,13 @@
           "supportScore": 85,
           "finalScore": 94,
           "anchorEvidence": [
+            {
+              "cardId": "onr_v1_084_edited-shipping-manifests",
+              "quantity": 1,
+              "source": "derivedStrategyAnchor",
+              "strategyId": "runner.hq_pressure",
+              "reason": "derived_strategy_anchor_from_inspector_index"
+            },
             {
               "cardId": "onr_v1_084_edited-shipping-manifests",
               "quantity": 1,
@@ -2650,6 +2759,13 @@
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_101_mit-west-tier",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
             },
             {
               "cardId": "onr_v1_108_score",
@@ -2826,6 +2942,13 @@
               "reason": "support:economy"
             },
             {
+              "cardId": "onr_v1_101_mit-west-tier",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
+            },
+            {
               "cardId": "onr_v1_108_score",
               "quantity": 2,
               "source": "functionSignal",
@@ -2900,6 +3023,13 @@
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_101_mit-west-tier",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
             },
             {
               "cardId": "onr_v1_108_score",
@@ -3008,6 +3138,13 @@
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_101_mit-west-tier",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
             },
             {
               "cardId": "onr_v1_108_score",
@@ -3125,6 +3262,13 @@
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
+            },
+            {
+              "cardId": "onr_v1_101_mit-west-tier",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
             },
             {
               "cardId": "onr_v1_108_score",
@@ -3347,6 +3491,13 @@
               "reason": "support:economy"
             },
             {
+              "cardId": "onr_v1_101_mit-west-tier",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
+            },
+            {
               "cardId": "onr_v1_108_score",
               "quantity": 2,
               "source": "functionSignal",
@@ -3399,6 +3550,13 @@
               "reason": "support:economy"
             },
             {
+              "cardId": "onr_v1_101_mit-west-tier",
+              "quantity": 1,
+              "source": "functionSignal",
+              "signal": "setup.draw",
+              "reason": "support:searchOrDraw"
+            },
+            {
               "cardId": "onr_v1_108_score",
               "quantity": 2,
               "source": "functionSignal",
@@ -3433,14 +3591,21 @@
       ],
       "functionSignalCounts": {
         "access.hq_multiaccess": 2,
+        "access.hq_replacement_economy": 1,
         "breaker.scaling_strength": 2,
         "breaker.sentry": 2,
         "breaker.universal": 2,
         "breaker.wall": 4,
+        "economy.burst_credit": 4,
+        "economy.conditional_burst_credit": 1,
         "economy.generic": 5,
-        "setup.draw": 3,
+        "fort.all_rezzed_ice_trash_tag_risk": 1,
+        "risk.self_tag": 1,
+        "setup.draw": 4,
+        "setup.full_deck_reset": 1,
         "setup.memory": 2,
-        "setup.memory_chip": 2
+        "setup.memory_chip": 2,
+        "setup.stack_shuffle": 1
       },
       "legacySignalCounts": {
         "lineSupport:runner.hq_pressure": 3,
@@ -3480,8 +3645,7 @@
       },
       "warnings": [
         "inspector:deferred_requires_human_review",
-        "inspector:function_signal_descriptor_gap",
-        "inspector:legacy_fallback_only"
+        "inspector:function_signal_descriptor_gap"
       ],
       "runnerProfile": {
         "coverageProfile": {
@@ -3516,7 +3680,7 @@
         },
         "setupProfile": {
           "search": 0,
-          "draw": 3,
+          "draw": 4,
           "recovery": 0,
           "installSupport": 0,
           "memoryHandSize": 10
@@ -6385,16 +6549,17 @@
       "corp.remote_scoring": 1,
       "corp.tag_trace_punish": 1,
       "runner.economy_first": 2,
-      "runner.hq_pressure": 2,
+      "runner.hq_pressure": 1,
       "runner.interface_closeout": 2,
       "runner.rig_first": 1,
-      "runner.rnd_pressure": 1
+      "runner.rnd_pressure": 1,
+      "runner.run_event_tempo": 1
     },
     "warningCounts": {
       "inspector:deferred_requires_human_review": 5,
       "inspector:function_signal_descriptor_gap": 1,
-      "inspector:legacy_fallback_only": 4
+      "inspector:legacy_fallback_only": 2
     },
-    "contentSha256": "321ec6bd0e71cf7bb6ed807cc29c1335af3aa5fdfa5b984982c0e6dc728c3076"
+    "contentSha256": "4e558924b35b714b5ef7b889f1cf6d3e3b0d29b8a9c12ea6e9571560d6f2c2e3"
   }
 }

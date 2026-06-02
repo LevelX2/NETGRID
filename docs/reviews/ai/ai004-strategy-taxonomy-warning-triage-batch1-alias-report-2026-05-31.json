@@ -5296,7 +5296,7 @@
     },
     {
       "value": "runner.survival_defense",
-      "count": 24,
+      "count": 22,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5308,11 +5308,11 @@
         "onr_v1_022_emergency-self-construct",
         "onr_v1_023_evil-twin",
         "onr_v1_078_arasaka-owns-you",
-        "onr_v1_116_total-genetic-retrofit",
         "onr_v1_127_full-body-conversion",
         "onr_v1_148_access-through-alpha",
         "onr_v1_149_access-to-arasaka",
-        "onr_v1_150_access-to-kiribati"
+        "onr_v1_150_access-to-kiribati",
+        "onr_v1_152_back-door-to-hilliard"
       ]
     },
     {
@@ -5334,6 +5334,27 @@
         "onr_v1_350_antiquated-interface-routines",
         "onr_v1_355_crystal-palace-station-grid",
         "onr_v1_359_jenny-jett"
+      ]
+    },
+    {
+      "value": "runner.hq_pressure",
+      "count": 12,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "runner.hq_pressure"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_008_boardwalk",
+        "onr_v1_024_expert-schedule-analyzer",
+        "onr_v1_062_shredder-uplink-protocol",
+        "onr_v1_084_edited-shipping-manifests",
+        "onr_v1_085_executive-wiretaps",
+        "onr_v1_105_priority-wreck",
+        "onr_v1_107_romp-through-hq",
+        "onr_v1_129_hq-interface"
       ]
     },
     {
@@ -5379,29 +5400,8 @@
       ]
     },
     {
-      "value": "runner.hq_pressure",
-      "count": 9,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.hq_pressure"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_008_boardwalk",
-        "onr_v1_024_expert-schedule-analyzer",
-        "onr_v1_062_shredder-uplink-protocol",
-        "onr_v1_084_edited-shipping-manifests",
-        "onr_v1_085_executive-wiretaps",
-        "onr_v1_129_hq-interface",
-        "onr_proteus_084_crumble",
-        "onr_proteus_098_vienna-22"
-      ]
-    },
-    {
       "value": "runner.rnd_pressure",
-      "count": 9,
+      "count": 10,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5415,9 +5415,30 @@
         "onr_v1_050_r-and-d-protocol-files",
         "onr_v1_081_custodial-position",
         "onr_v1_096_kilroy-was-here",
+        "onr_v1_106_private-ldl-access",
         "onr_v1_139_r-and-d-interface",
-        "onr_proteus_089_garbage-in",
-        "onr_proteus_090_highlighter"
+        "onr_proteus_089_garbage-in"
+      ]
+    },
+    {
+      "value": "runner.interface_closeout",
+      "count": 9,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "runner.interface_closeout"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_041_microtech-ai-interface",
+        "onr_v1_081_custodial-position",
+        "onr_v1_085_executive-wiretaps",
+        "onr_v1_129_hq-interface",
+        "onr_v1_139_r-and-d-interface",
+        "onr_proteus_101_all-hands",
+        "onr_proteus_102_blackmail",
+        "onr_proteus_119_promises-promises"
       ]
     },
     {
@@ -5441,23 +5462,23 @@
       ]
     },
     {
-      "value": "runner.interface_closeout",
+      "value": "runner.search.breaker",
       "count": 7,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
       "mapsTo": [
-        "runner.interface_closeout"
+        "runner.search.breaker"
       ],
       "rationale": "Already uses a normalized strategy ID.",
       "examples": [
-        "onr_v1_041_microtech-ai-interface",
-        "onr_v1_081_custodial-position",
-        "onr_v1_085_executive-wiretaps",
-        "onr_v1_129_hq-interface",
-        "onr_v1_139_r-and-d-interface",
-        "onr_proteus_101_all-hands",
-        "onr_proteus_122_rush-hour"
+        "onr_v1_043_mystery-box",
+        "onr_v1_059_self-modifying-code",
+        "onr_v1_087_forgotten-backup-chip",
+        "onr_v1_110_sneak-preview",
+        "onr_v1_114_temple-microcode-outlet",
+        "onr_proteus_126_test-spin",
+        "onr_proteus_128_airport-locker"
       ]
     },
     {
@@ -5477,25 +5498,6 @@
         "onr_v1_345_trap",
         "onr_v1_346_vacant-soulkiller",
         "onr_v1_354_crybaby"
-      ]
-    },
-    {
-      "value": "runner.search.breaker",
-      "count": 6,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.search.breaker"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_043_mystery-box",
-        "onr_v1_059_self-modifying-code",
-        "onr_v1_087_forgotten-backup-chip",
-        "onr_v1_110_sneak-preview",
-        "onr_v1_114_temple-microcode-outlet",
-        "onr_proteus_128_airport-locker"
       ]
     },
     {

@@ -2076,14 +2076,15 @@
       ],
       "monolithFields": ["effects", "conditions"],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
-        "generated_fact_absent_from_monolith": 1
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 6,
       "rationale": "R&D multiaccess is mechanically derivable, while access value and hidden-zone state remain runtime/consumer context.",
       "doNotMigrateFields": [
@@ -2119,14 +2120,15 @@
       ],
       "monolithFields": ["effects", "conditions"],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
-        "generated_fact_absent_from_monolith": 1
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 6,
       "rationale": "HQ access replacement, economy and self-tag are derivable, but must not be normalized to normal access or automatic value.",
       "doNotMigrateFields": [
@@ -2159,14 +2161,15 @@
       ],
       "monolithFields": ["effects", "conditions"],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
-        "generated_fact_absent_from_monolith": 1
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 6,
       "rationale": "HQ multiaccess is mechanically derivable, while successful-run/access legality remains engine context.",
       "doNotMigrateFields": [
@@ -2199,13 +2202,18 @@
         "effect:card_recovery",
         "effect:search"
       ],
-      "monolithFields": ["effects", "costProfile"],
-      "duplicatedActiveMechanicalFields": ["effects"],
-      "generatedOnlyFields": ["conditions", "effects"],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "costProfile",
+        "targetProfiles"
+      ],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
-        "monolith_mechanical_duplication_candidate": 1,
-        "generated_fact_absent_from_monolith": 2,
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",
@@ -2242,13 +2250,13 @@
         "effect:card_recovery",
         "effect:search"
       ],
-      "monolithFields": ["effects"],
-      "duplicatedActiveMechanicalFields": ["effects"],
-      "generatedOnlyFields": ["conditions", "effects"],
+      "monolithFields": ["effects", "conditions", "targetProfiles"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
-        "monolith_mechanical_duplication_candidate": 1,
-        "generated_fact_absent_from_monolith": 2,
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",
@@ -2284,7 +2292,7 @@
         "condition:requires_stack_search",
         "effect:search"
       ],
-      "monolithFields": ["effects"],
+      "monolithFields": ["effects", "targetProfiles"],
       "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
@@ -2402,7 +2410,7 @@
         "condition:requires_stack_search",
         "effect:search"
       ],
-      "monolithFields": ["effects", "costProfile"],
+      "monolithFields": ["effects", "costProfile", "targetProfiles"],
       "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
@@ -2444,11 +2452,12 @@
         "condition:requires_grip_card",
         "effect:economy"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
+      "monolithFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
+        "monolith_mechanical_duplication_candidate": 1,
         "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
@@ -2523,7 +2532,7 @@
         "condition:requires_stack_search",
         "effect:search"
       ],
-      "monolithFields": ["effects", "costProfile"],
+      "monolithFields": ["effects", "costProfile", "targetProfiles"],
       "duplicatedActiveMechanicalFields": ["effects"],
       "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
@@ -2567,12 +2576,13 @@
         "effect:survival_payoff",
         "effect:tag_prevention"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects"],
+      "monolithFields": ["effects", "conditions"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 2,
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 1,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",

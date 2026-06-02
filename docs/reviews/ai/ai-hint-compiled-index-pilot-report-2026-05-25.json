@@ -15,17 +15,17 @@
   "overlayCardCount": 6,
   "cardsWithoutOverlay": 187,
   "hardErrorCount": 0,
-  "warningCount": 661,
+  "warningCount": 669,
   "warningCountsByKind": {
-    "active_monolith_mechanical_duplication": 216,
+    "active_monolith_mechanical_duplication": 221,
     "generated_fact_missing_from_active_monolith": 318,
     "manual_overlay_strategy_field_missing_from_active": 6,
-    "overlay_missing_for_manual_gap": 121
+    "overlay_missing_for_manual_gap": 124
   },
   "warningClassificationCounts": {
     "generated_fact_absent_from_monolith": 318,
-    "manual_review_candidate": 121,
-    "monolith_mechanical_duplication_candidate": 216,
+    "manual_review_candidate": 124,
+    "monolith_mechanical_duplication_candidate": 221,
     "overlay_strategy_field_not_in_monolith": 6
   },
   "warningClassificationByCard": [
@@ -534,35 +534,38 @@
     {
       "cardId": "onr_v1_081_custodial-position",
       "title": "Custodial Position",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 1,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1,
         "monolith_mechanical_duplication_candidate": 2
       },
-      "info": ["info_no_overlay_needed"]
+      "info": []
     },
     {
       "cardId": "onr_v1_084_edited-shipping-manifests",
       "title": "Edited Shipping Manifests",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 1,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1,
         "monolith_mechanical_duplication_candidate": 2
       },
-      "info": ["info_no_overlay_needed"]
+      "info": []
     },
     {
       "cardId": "onr_v1_085_executive-wiretaps",
       "title": "Executive Wiretaps",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 1,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1,
         "monolith_mechanical_duplication_candidate": 2
       },
-      "info": ["info_no_overlay_needed"]
+      "info": []
     },
     {
       "cardId": "onr_v1_087_forgotten-backup-chip",
@@ -570,9 +573,9 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 2,
+        "generated_fact_absent_from_monolith": 1,
         "manual_review_candidate": 1,
-        "monolith_mechanical_duplication_candidate": 1
+        "monolith_mechanical_duplication_candidate": 2
       },
       "info": []
     },
@@ -582,9 +585,9 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 2,
+        "generated_fact_absent_from_monolith": 1,
         "manual_review_candidate": 1,
-        "monolith_mechanical_duplication_candidate": 1
+        "monolith_mechanical_duplication_candidate": 2
       },
       "info": []
     },
@@ -641,7 +644,8 @@
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 1
       },
       "info": []
     },
@@ -674,8 +678,9 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 2,
-        "manual_review_candidate": 1
+        "generated_fact_absent_from_monolith": 1,
+        "manual_review_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 2
       },
       "info": []
     },
@@ -2600,28 +2605,28 @@
     {
       "cardId": "onr_v1_081_custodial-position",
       "title": "Custodial Position",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
       "cardId": "onr_v1_084_edited-shipping-manifests",
       "title": "Edited Shipping Manifests",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
       "cardId": "onr_v1_085_executive-wiretaps",
       "title": "Executive Wiretaps",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
       "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
@@ -2630,8 +2635,8 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": ["effects"]
+      "generatedOnlyFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
       "cardId": "onr_v1_089_gideons-pawnshop",
@@ -2639,8 +2644,8 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": ["effects"]
+      "generatedOnlyFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
       "cardId": "onr_v1_093_if-you-want-it-done-right",
@@ -2685,7 +2690,7 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
       "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "duplicatedActiveMechanicalFields": ["effects"]
     },
     {
       "cardId": "onr_v1_108_score",
@@ -2711,8 +2716,8 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects"],
-      "generatedOnlyFields": ["effects", "conditions"],
-      "duplicatedActiveMechanicalFields": []
+      "generatedOnlyFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"]
     },
     {
       "cardId": "onr_v1_131_microtech-backup-drive",
@@ -4139,32 +4144,55 @@
       ]
     },
     {
+      "cardId": "onr_v1_081_custodial-position",
+      "title": "Custodial Position",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_rnd_pressure",
+        "effect:future_run_effect"
+      ]
+    },
+    {
+      "cardId": "onr_v1_084_edited-shipping-manifests",
+      "title": "Edited Shipping Manifests",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["condition:requires_hq_pressure"]
+    },
+    {
+      "cardId": "onr_v1_085_executive-wiretaps",
+      "title": "Executive Wiretaps",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_hq_pressure",
+        "effect:future_run_effect"
+      ]
+    },
+    {
       "cardId": "onr_v1_087_forgotten-backup-chip",
       "title": "Forgotten Backup Chip",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_heap_card",
-        "effect:card_recovery",
-        "effect:zone_shuffle"
-      ]
+      "missingManualOverlay": ["effect:zone_shuffle"]
     },
     {
       "cardId": "onr_v1_089_gideons-pawnshop",
       "title": "Gideon's Pawnshop",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_heap_card",
-        "effect:card_recovery"
-      ]
+      "missingManualOverlay": ["effect:search"]
     },
     {
       "cardId": "onr_v1_093_if-you-want-it-done-right",
       "title": "If You Want It Done Right . . .",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["condition:requires_stack_search"]
+      "missingManualOverlay": [
+        "condition:requires_stack_search",
+        "effect:topdeck_info"
+      ]
     },
     {
       "cardId": "onr_v1_099_mantis-fixer-at-large",
@@ -4178,7 +4206,10 @@
       "title": "Organ Donor",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["condition:requires_grip_card", "effect:economy"]
+      "missingManualOverlay": [
+        "condition:requires_grip_card",
+        "effect:resource_trash"
+      ]
     },
     {
       "cardId": "onr_v1_114_temple-microcode-outlet",
@@ -4193,10 +4224,8 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
-        "condition:requires_prevention_window",
-        "condition:requires_runner_tagged",
-        "effect:survival_payoff",
-        "effect:tag_prevention"
+        "effect:prevention_replacement",
+        "effect:survival_payoff"
       ]
     },
     {
@@ -5734,8 +5763,8 @@
     {
       "cardId": "onr_v1_081_custodial-position",
       "title": "Custodial Position",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "mechanicalFactsFromGenerated": [
         "condition:requires_successful_run",
         "effect:multiaccess"
@@ -5744,8 +5773,8 @@
     {
       "cardId": "onr_v1_084_edited-shipping-manifests",
       "title": "Edited Shipping Manifests",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "mechanicalFactsFromGenerated": [
         "condition:requires_successful_run",
         "effect:access_replacement",
@@ -5756,8 +5785,8 @@
     {
       "cardId": "onr_v1_085_executive-wiretaps",
       "title": "Executive Wiretaps",
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "mechanicalFactsFromGenerated": [
         "condition:requires_successful_run",
         "effect:multiaccess"
@@ -7657,32 +7686,55 @@
       ]
     },
     {
+      "cardId": "onr_v1_081_custodial-position",
+      "title": "Custodial Position",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_rnd_pressure",
+        "effect:future_run_effect"
+      ]
+    },
+    {
+      "cardId": "onr_v1_084_edited-shipping-manifests",
+      "title": "Edited Shipping Manifests",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": ["condition:requires_hq_pressure"]
+    },
+    {
+      "cardId": "onr_v1_085_executive-wiretaps",
+      "title": "Executive Wiretaps",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
+      "missingManualOverlay": [
+        "condition:requires_hq_pressure",
+        "effect:future_run_effect"
+      ]
+    },
+    {
       "cardId": "onr_v1_087_forgotten-backup-chip",
       "title": "Forgotten Backup Chip",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_heap_card",
-        "effect:card_recovery",
-        "effect:zone_shuffle"
-      ]
+      "missingManualOverlay": ["effect:zone_shuffle"]
     },
     {
       "cardId": "onr_v1_089_gideons-pawnshop",
       "title": "Gideon's Pawnshop",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "condition:requires_heap_card",
-        "effect:card_recovery"
-      ]
+      "missingManualOverlay": ["effect:search"]
     },
     {
       "cardId": "onr_v1_093_if-you-want-it-done-right",
       "title": "If You Want It Done Right . . .",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["condition:requires_stack_search"]
+      "missingManualOverlay": [
+        "condition:requires_stack_search",
+        "effect:topdeck_info"
+      ]
     },
     {
       "cardId": "onr_v1_099_mantis-fixer-at-large",
@@ -7696,7 +7748,10 @@
       "title": "Organ Donor",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": ["condition:requires_grip_card", "effect:economy"]
+      "missingManualOverlay": [
+        "condition:requires_grip_card",
+        "effect:resource_trash"
+      ]
     },
     {
       "cardId": "onr_v1_114_temple-microcode-outlet",
@@ -7711,10 +7766,8 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
-        "condition:requires_prevention_window",
-        "condition:requires_runner_tagged",
-        "effect:survival_payoff",
-        "effect:tag_prevention"
+        "effect:prevention_replacement",
+        "effect:survival_payoff"
       ]
     },
     {
@@ -8851,7 +8904,7 @@
     }
   ],
   "infoCounts": {
-    "info_no_overlay_needed": 68,
+    "info_no_overlay_needed": 65,
     "info_overlay_present": 6
   },
   "cards": [
@@ -12981,8 +13034,11 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": false,
-      "missingManualOverlay": [],
+      "needsManualReview": true,
+      "missingManualOverlay": [
+        "condition:requires_rnd_pressure",
+        "effect:future_run_effect"
+      ],
       "compiledPreview": {
         "cardId": "onr_v1_081_custodial-position",
         "side": "runner",
@@ -13025,7 +13081,7 @@
         "strategicRole",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
@@ -13049,13 +13105,28 @@
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
           "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_081_custodial-position",
+          "field": "conditions"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_081_custodial-position",
           "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_081_custodial-position"
         }
       ],
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready"
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
     },
     {
       "cardId": "onr_v1_084_edited-shipping-manifests",
@@ -13066,8 +13137,8 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": false,
-      "missingManualOverlay": [],
+      "needsManualReview": true,
+      "missingManualOverlay": ["condition:requires_hq_pressure"],
       "compiledPreview": {
         "cardId": "onr_v1_084_edited-shipping-manifests",
         "side": "runner",
@@ -13134,7 +13205,7 @@
         "strategicRole",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
@@ -13158,13 +13229,28 @@
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
           "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_084_edited-shipping-manifests",
+          "field": "conditions"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_084_edited-shipping-manifests",
           "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_084_edited-shipping-manifests"
         }
       ],
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready"
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
     },
     {
       "cardId": "onr_v1_085_executive-wiretaps",
@@ -13175,8 +13261,11 @@
       "derivedFactsFound": true,
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
-      "needsManualReview": false,
-      "missingManualOverlay": [],
+      "needsManualReview": true,
+      "missingManualOverlay": [
+        "condition:requires_hq_pressure",
+        "effect:future_run_effect"
+      ],
       "compiledPreview": {
         "cardId": "onr_v1_085_executive-wiretaps",
         "side": "runner",
@@ -13219,7 +13308,7 @@
         "strategicRole",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["effects", "conditions"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
@@ -13243,13 +13332,28 @@
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
           "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "cardId": "onr_v1_085_executive-wiretaps",
+          "field": "conditions"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_085_executive-wiretaps",
           "field": "effects"
+        },
+        {
+          "classification": "manual_review_candidate",
+          "blocking": false,
+          "kind": "overlay_missing_for_manual_gap",
+          "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+          "cardId": "onr_v1_085_executive-wiretaps"
         }
       ],
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready"
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review"
     },
     {
       "cardId": "onr_v1_087_forgotten-backup-chip",
@@ -13261,11 +13365,7 @@
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
-      "missingManualOverlay": [
-        "condition:requires_heap_card",
-        "effect:card_recovery",
-        "effect:zone_shuffle"
-      ],
+      "missingManualOverlay": ["effect:zone_shuffle"],
       "compiledPreview": {
         "cardId": "onr_v1_087_forgotten-backup-chip",
         "side": "runner",
@@ -13306,7 +13406,7 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
         "costProfile",
         "lineSupport",
@@ -13315,9 +13415,10 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "targetProfiles",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects", "conditions"],
+      "generatedOnlyFields": ["effects"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
@@ -13325,17 +13426,17 @@
           "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
           "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_087_forgotten-backup-chip",
+          "field": "conditions"
+        },
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
           "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_087_forgotten-backup-chip",
           "field": "effects"
-        },
-        {
-          "classification": "generated_fact_absent_from_monolith",
-          "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
-          "cardId": "onr_v1_087_forgotten-backup-chip",
-          "field": "conditions"
         },
         {
           "classification": "generated_fact_absent_from_monolith",
@@ -13366,10 +13467,7 @@
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
-      "missingManualOverlay": [
-        "condition:requires_heap_card",
-        "effect:card_recovery"
-      ],
+      "missingManualOverlay": ["effect:search"],
       "compiledPreview": {
         "cardId": "onr_v1_089_gideons-pawnshop",
         "side": "runner",
@@ -13410,17 +13508,17 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
         "manualNotes",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
+        "targetProfiles",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects", "conditions"],
+      "generatedOnlyFields": ["effects"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
@@ -13428,17 +13526,17 @@
           "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
           "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+          "cardId": "onr_v1_089_gideons-pawnshop",
+          "field": "conditions"
+        },
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
           "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_089_gideons-pawnshop",
           "field": "effects"
-        },
-        {
-          "classification": "generated_fact_absent_from_monolith",
-          "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
-          "cardId": "onr_v1_089_gideons-pawnshop",
-          "field": "conditions"
         },
         {
           "classification": "generated_fact_absent_from_monolith",
@@ -13469,7 +13567,10 @@
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
-      "missingManualOverlay": ["condition:requires_stack_search"],
+      "missingManualOverlay": [
+        "condition:requires_stack_search",
+        "effect:topdeck_info"
+      ],
       "compiledPreview": {
         "cardId": "onr_v1_093_if-you-want-it-done-right",
         "side": "runner",
@@ -13509,7 +13610,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -13734,7 +13835,7 @@
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -13788,7 +13889,7 @@
       "needsManualReview": true,
       "missingManualOverlay": [
         "condition:requires_grip_card",
-        "effect:economy"
+        "effect:resource_trash"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_103_organ-donor",
@@ -13822,8 +13923,9 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
@@ -13833,6 +13935,14 @@
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_103_organ-donor",
+          "field": "effects"
+        },
         {
           "classification": "generated_fact_absent_from_monolith",
           "blocking": false,
@@ -13980,6 +14090,7 @@
         "riskTags",
         "scenarioRefs",
         "strategicRole",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["effects", "conditions"],
@@ -14032,10 +14143,8 @@
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
       "missingManualOverlay": [
-        "condition:requires_prevention_window",
-        "condition:requires_runner_tagged",
-        "effect:survival_payoff",
-        "effect:tag_prevention"
+        "effect:prevention_replacement",
+        "effect:survival_payoff"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_116_total-genetic-retrofit",
@@ -14084,26 +14193,33 @@
       ],
       "generatedFields": ["conditions", "effects"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": [],
+      "duplicatedActiveMechanicalFields": ["conditions", "effects"],
       "activeMonolithOnlyFields": [
-        "lineSupport",
+        "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects", "conditions"],
+      "generatedOnlyFields": ["effects"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
         {
-          "classification": "generated_fact_absent_from_monolith",
+          "classification": "monolith_mechanical_duplication_candidate",
           "blocking": false,
-          "kind": "generated_fact_missing_from_active_monolith",
-          "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
           "cardId": "onr_v1_116_total-genetic-retrofit",
           "field": "conditions"
+        },
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+          "cardId": "onr_v1_116_total-genetic-retrofit",
+          "field": "effects"
         },
         {
           "classification": "generated_fact_absent_from_monolith",
@@ -30039,11 +30155,26 @@
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_081_custodial-position",
+      "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_081_custodial-position",
       "field": "effects"
     },
     {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_081_custodial-position"
+    },
+    {
       "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
       "kind": "active_monolith_mechanical_duplication",
@@ -30057,46 +30188,6 @@
       "kind": "active_monolith_mechanical_duplication",
       "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
       "cardId": "onr_v1_084_edited-shipping-manifests",
-      "field": "effects"
-    },
-    {
-      "classification": "generated_fact_absent_from_monolith",
-      "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
-      "cardId": "onr_v1_084_edited-shipping-manifests",
-      "field": "effects"
-    },
-    {
-      "classification": "monolith_mechanical_duplication_candidate",
-      "blocking": false,
-      "kind": "active_monolith_mechanical_duplication",
-      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
-      "cardId": "onr_v1_085_executive-wiretaps",
-      "field": "conditions"
-    },
-    {
-      "classification": "monolith_mechanical_duplication_candidate",
-      "blocking": false,
-      "kind": "active_monolith_mechanical_duplication",
-      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
-      "cardId": "onr_v1_085_executive-wiretaps",
-      "field": "effects"
-    },
-    {
-      "classification": "generated_fact_absent_from_monolith",
-      "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
-      "cardId": "onr_v1_085_executive-wiretaps",
-      "field": "effects"
-    },
-    {
-      "classification": "monolith_mechanical_duplication_candidate",
-      "blocking": false,
-      "kind": "active_monolith_mechanical_duplication",
-      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
-      "cardId": "onr_v1_087_forgotten-backup-chip",
       "field": "effects"
     },
     {
@@ -30104,8 +30195,78 @@
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
       "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_084_edited-shipping-manifests",
+      "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_084_edited-shipping-manifests",
+      "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_084_edited-shipping-manifests"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_085_executive-wiretaps",
+      "field": "conditions"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_085_executive-wiretaps",
+      "field": "effects"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "cardId": "onr_v1_085_executive-wiretaps",
+      "field": "conditions"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field effects is absent from or differs from active monolith.",
+      "cardId": "onr_v1_085_executive-wiretaps",
+      "field": "effects"
+    },
+    {
+      "classification": "manual_review_candidate",
+      "blocking": false,
+      "kind": "overlay_missing_for_manual_gap",
+      "message": "Pilot card has manual overlay need or derived manual gap but no overlay file entry.",
+      "cardId": "onr_v1_085_executive-wiretaps"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
       "cardId": "onr_v1_087_forgotten-backup-chip",
       "field": "conditions"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_087_forgotten-backup-chip",
+      "field": "effects"
     },
     {
       "classification": "generated_fact_absent_from_monolith",
@@ -30126,17 +30287,17 @@
       "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
       "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
+      "cardId": "onr_v1_089_gideons-pawnshop",
+      "field": "conditions"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
       "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
       "cardId": "onr_v1_089_gideons-pawnshop",
       "field": "effects"
-    },
-    {
-      "classification": "generated_fact_absent_from_monolith",
-      "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
-      "cardId": "onr_v1_089_gideons-pawnshop",
-      "field": "conditions"
     },
     {
       "classification": "generated_fact_absent_from_monolith",
@@ -30248,6 +30409,14 @@
       "cardId": "onr_v1_099_mantis-fixer-at-large"
     },
     {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_103_organ-donor",
+      "field": "effects"
+    },
+    {
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
@@ -30318,12 +30487,20 @@
       "cardId": "onr_v1_114_temple-microcode-outlet"
     },
     {
-      "classification": "generated_fact_absent_from_monolith",
+      "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
-      "kind": "generated_fact_missing_from_active_monolith",
-      "message": "Generated mechanical field conditions is absent from or differs from active monolith.",
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field conditions; long-term source should be generated facts.",
       "cardId": "onr_v1_116_total-genetic-retrofit",
       "field": "conditions"
+    },
+    {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
+      "cardId": "onr_v1_116_total-genetic-retrofit",
+      "field": "effects"
     },
     {
       "classification": "generated_fact_absent_from_monolith",

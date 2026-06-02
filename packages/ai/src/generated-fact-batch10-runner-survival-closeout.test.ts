@@ -99,10 +99,10 @@ describe("generated fact Batch-10 Runner prevention/survival closeout", () => {
   it("keeps included cards ready read-only with no conflicts or gaps", () => {
     const report = readReport();
     expect(report.confirmedGeneratedFactCount).toBe(62);
-    expect(report.previewAddedFactCount).toBe(41);
+    expect(report.previewAddedFactCount).toBe(38);
     expect(report.hardErrorCount).toBe(0);
     expect(report.realSemanticConflictCount).toBe(0);
-    expect(report.normalizedDifferenceCount).toBe(114);
+    expect(report.normalizedDifferenceCount).toBe(115);
     expect(report.remainingDifferenceCount).toBe(0);
     expect(report.descriptorFollowupCount).toBe(0);
     expect(report.readiness).toBe("ready_read_only_split_subbatches");

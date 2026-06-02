@@ -5271,9 +5271,9 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
+        "bonus_run",
         "event",
-        "run_event",
-        "bonus_run"
+        "run_event"
       ],
       "planRoles": [
         "pressure_hq",
@@ -5298,21 +5298,43 @@
         "data/scenarios/ai-deck-legal-v191-v194-smokes.json#runner_v192_run_events_and_resource_lifecycle"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "server",
+          "target": "make_run"
+        },
+        {
+          "kind": "future_run_effect",
+          "timing": "successful_run",
+          "scope": "runner",
+          "target": "followup_run"
+        },
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "runner",
+          "target": "multi_run_sequence"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_077_anonymous-tip",
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "runner",
         "event",
-        "per_card_longtail"
+        "per_card_longtail",
+        "runner"
       ],
       "planRoles": [
         "runner_play_event",
@@ -5335,6 +5357,35 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "expose_info",
+          "timing": "action",
+          "scope": "ice",
+          "target": "installed_ice"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "installed_ice",
+          "purpose": "black_ice_recon",
+          "preferences": [],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ]
     },
     {
@@ -5342,10 +5393,10 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
+        "agenda",
         "event",
         "prevention",
-        "tag",
-        "agenda"
+        "tag"
       ],
       "planRoles": [
         "runner_defensive_event"
@@ -5373,7 +5424,54 @@
       "strategicRole": [
         "emergency_tool"
       ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "flatline_prevention",
+          "scope": "runner",
+          "target": "flatline",
+          "timing": "prevention_window"
+        },
+        {
+          "kind": "remove_brain_damage",
+          "scope": "runner",
+          "target": "brain_damage",
+          "timing": "prevention_window"
+        },
+        {
+          "kind": "tag_prevention",
+          "scope": "runner",
+          "target": "tags",
+          "timing": "prevention_window"
+        },
+        {
+          "finite": true,
+          "kind": "economy",
+          "resource": "credits",
+          "scope": "runner",
+          "target": "high_risk_burst",
+          "timing": "action"
+        },
+        {
+          "kind": "action_penalty",
+          "scope": "runner",
+          "target": "action_loss",
+          "timing": "action"
+        },
+        {
+          "kind": "survival_payoff",
+          "scope": "runner",
+          "target": "flatline",
+          "timing": "prevention_window"
+        },
         {
           "kind": "flatline_prevention",
           "resource": "damage",
@@ -5423,18 +5521,19 @@
         "data/scenarios/ai-kotr-runner-approval-smokes.json#draw_for_answers"
       ],
       "quality": {
-        "benchmarkCovered": true,
+        "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true,
-        "reviewedDate": "2026-05-25",
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
         {
           "kind": "draw",
           "scope": "runner",
+          "target": "draw",
           "timing": "action"
         },
         {
@@ -5451,9 +5550,9 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "runner",
         "event",
-        "per_card_longtail"
+        "per_card_longtail",
+        "runner"
       ],
       "planRoles": [
         "runner_play_event",
@@ -5479,14 +5578,18 @@
       ],
       "effects": [
         {
-          "kind": "program_trash",
+          "kind": "ice_trash",
           "timing": "action",
-          "scope": "ice"
+          "scope": "ice",
+          "target": "rezzed_ice"
         }
       ],
       "conditions": [
         {
           "kind": "requires_successful_run"
+        },
+        {
+          "kind": "requires_rezzed_ice"
         }
       ],
       "quality": {
@@ -5495,9 +5598,21 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
-      }
+      },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "installed_ice",
+          "purpose": "successful_hq_run_ice_trash",
+          "preferences": [],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_081_custodial-position",
@@ -5525,12 +5640,12 @@
         "data/scenarios/ai-deck-legal-legacy-open64-smokes.json#runner_v123_multiaccess_and_reset"
       ],
       "quality": {
-        "benchmarkCovered": true,
+        "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -5543,6 +5658,12 @@
           "timing": "successful_run"
         },
         {
+          "kind": "future_run_effect",
+          "scope": "rnd",
+          "target": "server_specific_rnd",
+          "timing": "action"
+        },
+        {
           "amount": 3,
           "kind": "multiaccess",
           "resource": "cards",
@@ -5553,6 +5674,9 @@
       "conditions": [
         {
           "kind": "requires_successful_run"
+        },
+        {
+          "kind": "requires_rnd_pressure"
         }
       ],
       "lineSupport": [
@@ -5568,8 +5692,8 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "event",
         "agenda_reward",
+        "event",
         "icebreaker_support"
       ],
       "planRoles": [
@@ -5600,25 +5724,34 @@
           "resource": "strength",
           "amount": 1,
           "target": "icebreaker"
+        },
+        {
+          "kind": "breaker",
+          "timing": "action",
+          "scope": "installed_program",
+          "target": "strength_boost"
         }
       ],
       "conditions": [
         {
           "kind": "requires_stolen_agenda_last_turn"
+        },
+        {
+          "kind": "requires_installed_program"
         }
       ],
-      "strategicRole": [
-        "support_tool"
-      ],
       "quality": {
-        "benchmarkCovered": true,
+        "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-01",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
-      }
+      },
+      "strategicRole": [
+        "support_tool"
+      ]
     },
     {
       "cardId": "onr_v1_083_desperate-competitor",
@@ -5649,6 +5782,28 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_agenda_point_conversion"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "scored_agenda_action",
+          "timing": "action",
+          "scope": "runner",
+          "target": "conditional_agenda_point"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_scored_agenda"
+        }
       ]
     },
     {
@@ -5656,10 +5811,10 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "event",
-        "hq_run",
         "access_replacement",
         "economy",
+        "event",
+        "hq_run",
         "tag_self"
       ],
       "planRoles": [
@@ -5686,18 +5841,19 @@
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_run_event_pressure"
       ],
       "quality": {
-        "benchmarkCovered": true,
+        "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
         {
           "kind": "access_replacement",
           "scope": "hq",
+          "target": "hq_replacement_economy",
           "timing": "successful_run"
         },
         {
@@ -5706,6 +5862,7 @@
           "kind": "economy",
           "resource": "credits",
           "scope": "runner",
+          "target": "conditional_burst",
           "timing": "successful_run"
         },
         {
@@ -5714,6 +5871,7 @@
           "kind": "tag",
           "resource": "tags",
           "scope": "runner",
+          "target": "self_tag",
           "timing": "successful_run"
         },
         {
@@ -5728,12 +5886,20 @@
           "kind": "economy",
           "resource": "credits",
           "scope": "runner",
+          "timing": "successful_run"
+        },
+        {
+          "kind": "access_replacement",
+          "scope": "hq",
           "timing": "successful_run"
         }
       ],
       "conditions": [
         {
           "kind": "requires_successful_run"
+        },
+        {
+          "kind": "requires_hq_pressure"
         }
       ],
       "lineSupport": [
@@ -5770,12 +5936,12 @@
         "data/scenarios/ai-deck-legal-legacy-open64-smokes.json#runner_v123_multiaccess_and_reset"
       ],
       "quality": {
-        "benchmarkCovered": true,
+        "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -5788,6 +5954,12 @@
           "timing": "successful_run"
         },
         {
+          "kind": "future_run_effect",
+          "scope": "hq",
+          "target": "server_specific_hq",
+          "timing": "action"
+        },
+        {
           "amount": 3,
           "kind": "multiaccess",
           "resource": "cards",
@@ -5798,6 +5970,9 @@
       "conditions": [
         {
           "kind": "requires_successful_run"
+        },
+        {
+          "kind": "requires_hq_pressure"
         }
       ],
       "lineSupport": [
@@ -5813,9 +5988,9 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "runner",
         "event",
-        "per_card_longtail"
+        "per_card_longtail",
+        "runner"
       ],
       "planRoles": [
         "runner_play_event",
@@ -5838,6 +6013,40 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "ice_trash",
+          "timing": "action",
+          "scope": "ice",
+          "target": "rez_or_trash_choice"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_installed_ice"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "installed_ice",
+          "purpose": "force_rez_or_trash_choice",
+          "preferences": [],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ]
     },
     {
@@ -5873,23 +6082,31 @@
         "data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_stack_search_and_reveal"
       ],
       "quality": {
-        "benchmarkCovered": true,
+        "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
         {
           "kind": "search",
           "scope": "runner",
+          "target": "program_in_trash",
+          "timing": "action"
+        },
+        {
+          "kind": "card_recovery",
+          "scope": "runner",
+          "target": "program",
           "timing": "action"
         },
         {
           "kind": "zone_shuffle",
           "scope": "runner",
+          "target": "stack_shuffle",
           "timing": "action"
         },
         {
@@ -5920,6 +6137,21 @@
         {
           "kind": "requires_heap_card"
         }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "replacement_target",
+          "timing": "on_play",
+          "targetType": "program",
+          "purpose": "recover_program",
+          "preferences": [
+            "program_repairs_missing_coverage",
+            "program_preserves_run_goal"
+          ],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ]
     },
     {
@@ -5928,8 +6160,8 @@
       "cardType": "event",
       "roles": [
         "event",
-        "hidden_zone_tool",
-        "expose_helper"
+        "expose_helper",
+        "hidden_zone_tool"
       ],
       "planRoles": [
         "contest_remote",
@@ -5951,6 +6183,35 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_expose_and_preview"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "server",
+          "target": "fort_reorder"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "server",
+          "purpose": "fort_reorder",
+          "preferences": [],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ]
     },
     {
@@ -5983,18 +6244,19 @@
         "data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_trash_recovery"
       ],
       "quality": {
-        "benchmarkCovered": true,
+        "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "medium",
-        "needsHumanReview": true,
-        "reviewedDate": "2026-06-01",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
         {
-          "kind": "search",
+          "kind": "card_recovery",
           "scope": "runner",
+          "target": "card_in_trash",
           "timing": "action"
         },
         {
@@ -6010,15 +6272,24 @@
           "timing": "action"
         }
       ],
-      "strategicRole": [
-        "enabler"
-      ],
       "manualNotes": [
         "AI018 review adjustment: generic any-card search/recovery is deferred until a non-breaker search/recovery strategy exists."
       ],
       "conditions": [
         {
           "kind": "requires_heap_card"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "card",
+          "purpose": "generic_heap_recovery",
+          "preferences": [],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
         }
       ]
     },
@@ -6051,6 +6322,28 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_agenda_point_conversion"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "scored_agenda_action",
+          "timing": "action",
+          "scope": "runner",
+          "target": "black_ops_agenda_condition"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_scored_agenda"
+        }
       ]
     },
     {
@@ -6079,6 +6372,35 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1912-smokes.json#runner_v1912_hidden_zone_counter"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "expose_info",
+          "timing": "action",
+          "scope": "installed_card",
+          "target": "expose_multiple"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "card",
+          "purpose": "multi_expose",
+          "preferences": [],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ]
     },
     {
@@ -6087,8 +6409,8 @@
       "cardType": "event",
       "roles": [
         "event",
-        "hidden_zone_tool",
-        "expose_helper"
+        "expose_helper",
+        "hidden_zone_tool"
       ],
       "planRoles": [
         "safe_probe_run",
@@ -6109,6 +6431,35 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_expose_and_preview"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "expose_info",
+          "timing": "action",
+          "scope": "server",
+          "target": "expose_outermost_ice"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "server",
+          "purpose": "outermost_ice_report",
+          "preferences": [],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ]
     },
     {
@@ -6116,9 +6467,9 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "runner",
         "event",
-        "per_card_longtail"
+        "per_card_longtail",
+        "runner"
       ],
       "planRoles": [
         "runner_play_event",
@@ -6142,18 +6493,31 @@
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
       ],
       "quality": {
-        "benchmarkCovered": true,
+        "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "medium",
-        "needsHumanReview": true,
-        "reviewedDate": "2026-06-01",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
         {
           "kind": "search",
           "scope": "runner",
+          "target": "card_search",
+          "timing": "action"
+        },
+        {
+          "kind": "topdeck_info",
+          "scope": "runner",
+          "target": "stack_filter",
+          "timing": "action"
+        },
+        {
+          "kind": "topdeck_info",
+          "scope": "runner",
+          "target": "stack_reorder",
           "timing": "action"
         },
         {
@@ -6164,11 +6528,20 @@
           "timing": "action"
         }
       ],
-      "strategicRole": [
-        "enabler"
-      ],
       "manualNotes": [
         "AI018 review adjustment: generic any-card search/recovery is deferred until a non-breaker search/recovery strategy exists."
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "card",
+          "purpose": "top_five_choice_and_reorder",
+          "preferences": [],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ],
       "conditions": [
         {
@@ -6208,12 +6581,28 @@
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_run_event_pressure"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "server",
+          "target": "make_run"
+        },
+        {
+          "kind": "future_encounter_effect",
+          "timing": "during_run",
+          "scope": "ice",
+          "target": "bypass_first_ice"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_095_jack-n-joe",
@@ -6242,18 +6631,19 @@
         "data/scenarios/ai-kotr-runner-approval-smokes.json#draw_for_answers"
       ],
       "quality": {
-        "benchmarkCovered": true,
+        "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true,
-        "reviewedDate": "2026-05-25",
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
         {
           "kind": "draw",
           "scope": "runner",
+          "target": "draw",
           "timing": "action"
         },
         {
@@ -6270,10 +6660,10 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
+        "access_trash",
         "event",
-        "run_event",
         "rd_pressure",
-        "access_trash"
+        "run_event"
       ],
       "planRoles": [
         "pressure_rnd",
@@ -6302,19 +6692,24 @@
         {
           "kind": "access_replacement",
           "timing": "successful_run",
-          "scope": "rnd"
+          "scope": "rnd",
+          "target": "rnd_trash_pressure"
         },
         {
           "kind": "trash_credit",
           "timing": "on_access",
           "scope": "accessed_card",
           "resource": "trash_credits",
+          "target": "free_trash",
           "repeatable": true
         }
       ],
       "conditions": [
         {
           "kind": "requires_successful_run"
+        },
+        {
+          "kind": "requires_rnd_pressure"
         }
       ],
       "lineSupport": [
@@ -6327,9 +6722,9 @@
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       }
     },
@@ -6359,18 +6754,20 @@
         "data/scenarios/ai-kotr-runner-approval-smokes.json#recover_economy"
       ],
       "quality": {
-        "benchmarkCovered": true,
+        "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true,
-        "reviewedDate": "2026-05-25",
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
         {
+          "finite": true,
           "kind": "economy",
           "scope": "runner",
+          "target": "burst_credit",
           "timing": "action"
         },
         {
@@ -6406,6 +6803,35 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1915-smokes.json#runner_v1915_run_events"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "server",
+          "target": "make_run"
+        },
+        {
+          "kind": "finite_economy_pool",
+          "timing": "during_run",
+          "scope": "runner",
+          "target": "run_credit_pool"
+        },
+        {
+          "kind": "damage",
+          "timing": "action",
+          "scope": "runner",
+          "target": "self_brain_damage"
+        }
       ]
     },
     {
@@ -6413,8 +6839,8 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "event",
         "connection",
+        "event",
         "hidden_zone_tool",
         "stack_search"
       ],
@@ -6442,18 +6868,19 @@
         "data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_stack_search_and_reveal"
       ],
       "quality": {
-        "benchmarkCovered": true,
+        "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
         "confidence": "medium",
-        "needsHumanReview": true,
-        "reviewedDate": "2026-06-01",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
         {
           "kind": "search",
           "scope": "runner",
+          "target": "card_search",
           "timing": "action"
         },
         {
@@ -6462,6 +6889,7 @@
           "kind": "draw",
           "resource": "cards",
           "scope": "runner",
+          "target": "draw",
           "timing": "action"
         },
         {
@@ -6476,11 +6904,20 @@
         "reserveRisk": "low",
         "opportunityCost": "medium"
       },
-      "strategicRole": [
-        "enabler"
-      ],
       "manualNotes": [
         "AI018 review adjustment: generic any-card search/recovery is deferred until a non-breaker search/recovery strategy exists."
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "card",
+          "purpose": "generic_card_tutor",
+          "preferences": [],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ],
       "conditions": [
         {
@@ -6493,9 +6930,9 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "runner",
         "event",
-        "per_card_longtail"
+        "per_card_longtail",
+        "runner"
       ],
       "planRoles": [
         "runner_play_event",
@@ -6517,6 +6954,30 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "economy",
+          "timing": "action",
+          "scope": "runner",
+          "target": "trash_for_credit",
+          "finite": true
+        },
+        {
+          "kind": "resource_trash",
+          "timing": "action",
+          "scope": "runner",
+          "target": "installed_card_trash_cost"
+        }
       ]
     },
     {
@@ -6524,8 +6985,8 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "event",
         "draw_cards",
+        "event",
         "recycle_zones"
       ],
       "planRoles": [
@@ -6547,21 +7008,43 @@
         "data/scenarios/ai-deck-legal-legacy-open64-smokes.json#runner_v123_multiaccess_and_reset"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "shuffle_draw",
+          "timing": "action",
+          "scope": "runner",
+          "target": "full_deck_reset"
+        },
+        {
+          "kind": "draw",
+          "timing": "action",
+          "scope": "runner",
+          "target": "draw"
+        },
+        {
+          "kind": "zone_shuffle",
+          "timing": "action",
+          "scope": "runner",
+          "target": "stack_shuffle"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_102_open-ended-mileage-program",
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "runner",
         "event",
-        "per_card_longtail"
+        "per_card_longtail",
+        "runner"
       ],
       "planRoles": [
         "runner_play_event",
@@ -6584,7 +7067,28 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
       ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "tag_prevention",
+          "scope": "runner",
+          "target": "tag_clear_support",
+          "timing": "action"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "self_bounce",
+          "timing": "action"
+        },
         {
           "kind": "survival_payoff",
           "resource": "tags",
@@ -6603,9 +7107,9 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "runner",
         "event",
-        "per_card_longtail"
+        "per_card_longtail",
+        "runner"
       ],
       "planRoles": [
         "runner_play_event",
@@ -6628,7 +7132,29 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
       ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "finite": true,
+          "kind": "economy",
+          "scope": "runner",
+          "target": "trash_for_credit",
+          "timing": "action"
+        },
+        {
+          "kind": "resource_trash",
+          "scope": "runner",
+          "target": "hand_trash_cost",
+          "timing": "action"
+        },
         {
           "amount": 2,
           "kind": "economy",
@@ -6648,9 +7174,9 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "runner",
         "event",
-        "random"
+        "random",
+        "runner"
       ],
       "planRoles": [
         "runner_play_event",
@@ -6674,12 +7200,23 @@
         "data/scenarios/ai-deck-legal-v1921-smokes.json#runner_v1921_random_event_resource"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "economy",
+          "timing": "action",
+          "scope": "runner",
+          "target": "random_economy",
+          "finite": true
+        }
+      ]
     },
     {
       "cardId": "onr_v1_105_priority-wreck",
@@ -6707,7 +7244,34 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1915-smokes.json#runner_v1915_run_events"
       ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "lineSupport": [
+        "runner.hq_pressure"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ],
       "effects": [
+        {
+          "kind": "access_replacement",
+          "scope": "hq",
+          "target": "corp_economy_pressure",
+          "timing": "successful_run"
+        },
+        {
+          "kind": "run_tax",
+          "scope": "corp",
+          "target": "economy_pressure",
+          "timing": "successful_run"
+        },
         {
           "kind": "access_replacement",
           "scope": "hq",
@@ -6717,6 +7281,9 @@
       "conditions": [
         {
           "kind": "requires_successful_run"
+        },
+        {
+          "kind": "requires_hq_pressure"
         }
       ]
     },
@@ -6749,22 +7316,46 @@
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_run_event_pressure"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "lineSupport": [
+        "runner.rnd_pressure"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
+      "effects": [
+        {
+          "kind": "access_replacement",
+          "timing": "successful_run",
+          "scope": "hq",
+          "target": "hq_to_rnd_conversion"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        },
+        {
+          "kind": "requires_hq_pressure"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_107_romp-through-hq",
       "side": "runner",
       "cardType": "event",
       "roles": [
+        "access_trash",
         "event",
-        "run_event",
         "hq_pressure",
-        "access_trash"
+        "run_event"
       ],
       "planRoles": [
         "pressure_hq",
@@ -6788,6 +7379,45 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v191-v194-smokes.json#runner_v192_run_events_and_resource_lifecycle"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "lineSupport": [
+        "runner.hq_pressure"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ],
+      "effects": [
+        {
+          "kind": "access_replacement",
+          "timing": "successful_run",
+          "scope": "hq",
+          "target": "hq_trash_pressure"
+        },
+        {
+          "kind": "trash_credit",
+          "timing": "on_access",
+          "scope": "accessed_card",
+          "resource": "trash_credits",
+          "target": "free_trash",
+          "repeatable": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        },
+        {
+          "kind": "requires_hq_pressure"
+        }
       ]
     },
     {
@@ -6819,12 +7449,12 @@
         "data/scenarios/ai-kotr-runner-approval-smokes.json#pressure_rnd"
       ],
       "quality": {
-        "benchmarkCovered": true,
+        "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -6834,6 +7464,7 @@
           "kind": "economy",
           "resource": "credits",
           "scope": "runner",
+          "target": "burst_credit",
           "timing": "action"
         },
         {
@@ -6855,9 +7486,9 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "runner",
         "event",
-        "per_card_longtail"
+        "per_card_longtail",
+        "runner"
       ],
       "planRoles": [
         "runner_play_event",
@@ -6880,6 +7511,40 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "ice_trash",
+          "timing": "action",
+          "scope": "ice",
+          "target": "unrezzed_ice"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_installed_ice"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "installed_ice",
+          "purpose": "unrezzed_ice_trash",
+          "preferences": [],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ]
     },
     {
@@ -6919,24 +7584,38 @@
         "data/scenarios/ai-deck-legal-v1911-smokes.json#runner_v1911_sneak_preview_heap_stack_install"
       ],
       "quality": {
-        "benchmarkCovered": true,
+        "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
         {
           "kind": "search",
           "timing": "action",
-          "scope": "runner"
+          "scope": "runner",
+          "target": "program_search"
+        },
+        {
+          "kind": "install",
+          "timing": "action",
+          "scope": "installed_card",
+          "target": "program"
         },
         {
           "kind": "install_discount",
           "timing": "action",
-          "scope": "installed_card"
+          "scope": "installed_card",
+          "target": "temporary_program_install"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "runner_turn",
+          "scope": "runner",
+          "target": "end_of_turn_bounce"
         }
       ],
       "costProfile": {
@@ -6949,6 +7628,21 @@
       ],
       "strategicRole": [
         "enabler"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "search_install_target",
+          "timing": "on_play",
+          "targetType": "program",
+          "purpose": "temporary_program_install",
+          "preferences": [
+            "program_repairs_missing_coverage",
+            "program_preserves_run_goal"
+          ],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ]
     },
     {
@@ -6956,8 +7650,8 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "event",
-        "access"
+        "access",
+        "event"
       ],
       "planRoles": [
         "run_pressure"
@@ -6978,21 +7672,55 @@
         "data/scenarios/ai-deck-legal-v1915-smokes.json#runner_v1915_run_events"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "server",
+          "target": "make_run"
+        },
+        {
+          "kind": "future_encounter_effect",
+          "timing": "during_run",
+          "scope": "ice",
+          "target": "bypass_chosen_ice"
+        },
+        {
+          "kind": "run_tax",
+          "timing": "action",
+          "scope": "runner",
+          "target": "opponent_guessing_game"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "installed_ice",
+          "purpose": "bypass_chosen_ice",
+          "preferences": [],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_112_stumble-through-wilderspace",
       "side": "runner",
       "cardType": "event",
       "roles": [
+        "access",
         "event",
-        "trace",
-        "access"
+        "trace"
       ],
       "planRoles": [
         "run_pressure",
@@ -7014,6 +7742,29 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1915-smokes.json#runner_v1915_run_events"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "server",
+          "target": "make_run"
+        },
+        {
+          "kind": "trace_defense",
+          "timing": "during_run",
+          "scope": "runner",
+          "target": "trace_boost_during_run"
+        }
       ]
     },
     {
@@ -7021,9 +7772,9 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "runner",
         "event",
-        "per_card_longtail"
+        "per_card_longtail",
+        "runner"
       ],
       "planRoles": [
         "runner_play_event",
@@ -7045,6 +7796,37 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "hq",
+          "target": "server_specific_hq"
+        },
+        {
+          "kind": "run_tax",
+          "timing": "successful_run",
+          "scope": "corp",
+          "target": "random_discard_pressure"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        },
+        {
+          "kind": "requires_hq_pressure"
+        }
       ]
     },
     {
@@ -7053,8 +7835,8 @@
       "cardType": "event",
       "roles": [
         "event",
-        "program_search",
-        "hidden_zone_tool"
+        "hidden_zone_tool",
+        "program_search"
       ],
       "planRoles": [
         "build_rig",
@@ -7077,18 +7859,19 @@
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_tutor_and_setup"
       ],
       "quality": {
-        "benchmarkCovered": true,
+        "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "high",
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
         {
           "kind": "search",
           "scope": "runner",
+          "target": "program_search",
           "timing": "action"
         },
         {
@@ -7097,6 +7880,7 @@
           "kind": "draw",
           "resource": "cards",
           "scope": "runner",
+          "target": "draw",
           "timing": "action"
         },
         {
@@ -7116,6 +7900,21 @@
       ],
       "strategicRole": [
         "enabler"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "program",
+          "purpose": "program_search",
+          "preferences": [
+            "program_repairs_missing_coverage",
+            "program_preserves_run_goal"
+          ],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
       ],
       "conditions": [
         {
@@ -7154,6 +7953,37 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v190-smokes.json#runner_v190_random_breakers_and_black_ops_punish"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "hq",
+          "target": "server_specific_hq"
+        },
+        {
+          "kind": "run_tax",
+          "timing": "successful_run",
+          "scope": "corp",
+          "target": "random_discard_pressure"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        },
+        {
+          "kind": "requires_hq_pressure"
+        }
       ]
     },
     {
@@ -7181,13 +8011,28 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1914-smokes.json#runner_v1914_tag_resource_tools"
       ],
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "defensive_tool"
-      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "tag_prevention",
+          "scope": "runner",
+          "target": "tag_clear_support",
+          "timing": "action"
+        },
+        {
+          "kind": "prevention_replacement",
+          "scope": "runner",
+          "target": "next_tag_avoidance",
+          "timing": "prevention_window"
+        },
         {
           "amount": 1,
           "kind": "tag_prevention",
@@ -7204,10 +8049,10 @@
       ],
       "conditions": [
         {
-          "kind": "requires_prevention_window"
+          "kind": "requires_runner_tagged"
         },
         {
-          "kind": "requires_runner_tagged"
+          "kind": "requires_prevention_window"
         }
       ]
     },
@@ -7216,9 +8061,9 @@
       "side": "runner",
       "cardType": "event",
       "roles": [
-        "runner",
         "event",
-        "per_card_longtail"
+        "per_card_longtail",
+        "runner"
       ],
       "planRoles": [
         "runner_play_event",
@@ -7243,12 +8088,50 @@
         "data/scenarios/ai-deck-legal-v1922-smokes.json#runner_v1922_event_longtail"
       ],
       "quality": {
-        "benchmarkCovered": true,
-        "hintReviewed": false,
+        "benchmarkCovered": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "install",
+          "timing": "action",
+          "scope": "installed_card",
+          "target": "program"
+        },
+        {
+          "kind": "install_discount",
+          "timing": "action",
+          "scope": "installed_card",
+          "target": "install_action_burst"
+        },
+        {
+          "kind": "economy",
+          "timing": "action",
+          "scope": "runner",
+          "target": "install_credit",
+          "finite": true
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "search_install_target",
+          "timing": "on_play",
+          "targetType": "program",
+          "purpose": "program_install_bundle",
+          "preferences": [
+            "program_affordable_after_install",
+            "program_repairs_missing_coverage"
+          ],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_118_weather-to-finance-pipe",
@@ -7281,7 +8164,28 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v171-v181-open64-smokes.json#runner_run_event_pressure"
       ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
       "effects": [
+        {
+          "kind": "access_replacement",
+          "scope": "hq",
+          "target": "corp_economy_pressure",
+          "timing": "successful_run"
+        },
+        {
+          "kind": "run_tax",
+          "scope": "corp",
+          "target": "economy_pressure",
+          "timing": "successful_run"
+        },
         {
           "kind": "access_replacement",
           "scope": "hq",
@@ -7291,6 +8195,9 @@
       "conditions": [
         {
           "kind": "requires_successful_run"
+        },
+        {
+          "kind": "requires_hq_pressure"
         }
       ]
     },
@@ -28533,10 +29440,12 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "lineSupport": [
         "runner.hq_pressure",
@@ -28546,6 +29455,26 @@
         "payoff_anchor"
       ],
       "effects": [
+        {
+          "finite": true,
+          "kind": "multiaccess",
+          "resource": "cards",
+          "scope": "hq",
+          "target": "hq_multiaccess",
+          "timing": "successful_run"
+        },
+        {
+          "kind": "future_run_effect",
+          "scope": "hq",
+          "target": "server_specific_hq",
+          "timing": "action"
+        },
+        {
+          "kind": "run_lock",
+          "scope": "runner",
+          "target": "noisy_breaker_restriction",
+          "timing": "during_run"
+        },
         {
           "amount": 4,
           "kind": "multiaccess",
@@ -28557,6 +29486,9 @@
       "conditions": [
         {
           "kind": "requires_successful_run"
+        },
+        {
+          "kind": "requires_hq_pressure"
         }
       ]
     },
@@ -28582,12 +29514,33 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
+      "lineSupport": [
+        "runner.hq_pressure",
+        "runner.interface_closeout"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ],
       "effects": [
+        {
+          "kind": "access_replacement",
+          "scope": "hq",
+          "target": "score_agenda_point_gain",
+          "timing": "successful_run"
+        },
+        {
+          "kind": "scored_agenda_action",
+          "scope": "runner",
+          "target": "agenda_point_gain",
+          "timing": "successful_run"
+        },
         {
           "kind": "access_replacement",
           "scope": "hq",
@@ -28597,6 +29550,9 @@
       "conditions": [
         {
           "kind": "requires_successful_run"
+        },
+        {
+          "kind": "requires_hq_pressure"
         }
       ]
     },
@@ -28623,12 +29579,27 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "finite": true,
+          "kind": "economy",
+          "scope": "runner",
+          "target": "burst_credit",
+          "timing": "action"
+        },
+        {
+          "kind": "draw",
+          "scope": "runner",
+          "target": "draw",
+          "timing": "action"
+        },
         {
           "amount": 1,
           "kind": "economy",
@@ -28667,11 +29638,33 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "server",
+          "target": "make_run"
+        },
+        {
+          "kind": "expose_info",
+          "timing": "during_run",
+          "scope": "ice",
+          "target": "ice_approach_expose"
+        },
+        {
+          "kind": "future_run_effect",
+          "timing": "during_run",
+          "scope": "runner",
+          "target": "safe_jackout_window"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_105_demolition-run",
@@ -28697,12 +29690,33 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "kind": "future_run_effect",
+          "scope": "remote",
+          "target": "server_specific_remote",
+          "timing": "action"
+        },
+        {
+          "kind": "ice_trash",
+          "scope": "server",
+          "target": "all_rezzed_ice_trash",
+          "timing": "successful_run"
+        },
+        {
+          "finite": true,
+          "kind": "tag",
+          "scope": "runner",
+          "target": "self_tag",
+          "timing": "successful_run"
+        },
         {
           "amount": 3,
           "kind": "tag",
@@ -28719,6 +29733,9 @@
       "conditions": [
         {
           "kind": "requires_successful_run"
+        },
+        {
+          "kind": "requires_remote_server"
         }
       ]
     },
@@ -28744,11 +29761,26 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "ice_trash",
+          "timing": "action",
+          "scope": "ice",
+          "target": "trash_rezzed"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_rezzed_ice"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_107_drone-for-a-day",
@@ -28774,12 +29806,28 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "finite": true,
+          "kind": "economy",
+          "scope": "runner",
+          "target": "burst_credit",
+          "timing": "action"
+        },
+        {
+          "finite": true,
+          "kind": "tag",
+          "scope": "runner",
+          "target": "self_tag",
+          "timing": "action"
+        },
         {
           "amount": 1,
           "kind": "tag_source",
@@ -28819,12 +29867,20 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "kind": "run_tax",
+          "scope": "corp",
+          "target": "bad_publicity_pressure",
+          "timing": "action"
+        },
         {
           "amount": 2,
           "kind": "damage",
@@ -28856,11 +29912,32 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "hq",
+          "target": "server_specific_hq"
+        },
+        {
+          "kind": "run_tax",
+          "timing": "successful_run",
+          "scope": "corp",
+          "target": "bad_publicity_pressure"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_110_hijack",
@@ -28884,11 +29961,34 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "install",
+          "timing": "action",
+          "scope": "installed_card",
+          "target": "program"
+        },
+        {
+          "kind": "install",
+          "timing": "action",
+          "scope": "installed_card",
+          "target": "hardware"
+        },
+        {
+          "kind": "economy",
+          "timing": "action",
+          "scope": "runner",
+          "target": "install_credit",
+          "finite": true
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_111_ice-and-data-special-report",
@@ -28911,11 +30011,35 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "expose_info",
+          "timing": "action",
+          "scope": "server",
+          "target": "run_recon"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_play",
+          "targetType": "server",
+          "purpose": "server_recon",
+          "preferences": [
+            "relevant_server_ice"
+          ],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_112_identity-donor",
@@ -28940,18 +30064,26 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
-      "lineSupport": [
-        "runner.survival_defense"
-      ],
-      "strategicRole": [
-        "emergency_tool"
-      ],
       "effects": [
+        {
+          "kind": "meat_damage_prevention",
+          "scope": "runner",
+          "target": "meat_damage",
+          "timing": "prevention_window"
+        },
+        {
+          "kind": "run_tax",
+          "scope": "corp",
+          "target": "bad_publicity_pressure",
+          "timing": "prevention_window"
+        },
         {
           "kind": "flatline_prevention",
           "resource": "damage",
@@ -28967,10 +30099,13 @@
       ],
       "conditions": [
         {
-          "kind": "requires_flatline"
+          "kind": "requires_meat_damage"
         },
         {
           "kind": "requires_prevention_window"
+        },
+        {
+          "kind": "requires_flatline"
         }
       ]
     },
@@ -28998,11 +30133,21 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "run_tax",
+          "timing": "action",
+          "scope": "corp",
+          "target": "bad_publicity_win_pressure"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_114_on-the-fast-track",
@@ -29026,11 +30171,28 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "economy",
+          "timing": "action",
+          "scope": "runner",
+          "target": "conditional_burst",
+          "finite": true
+        },
+        {
+          "kind": "run_tax",
+          "timing": "action",
+          "scope": "corp",
+          "target": "advertisement_punish"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_115_personal-touch-the",
@@ -29057,7 +30219,7 @@
         "strategyCovered": false,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-01",
+        "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -29068,15 +30230,18 @@
           "resource": "strength",
           "amount": 1,
           "target": "icebreaker"
+        },
+        {
+          "kind": "breaker",
+          "timing": "action",
+          "scope": "installed_program",
+          "target": "strength_boost"
         }
       ],
       "conditions": [
         {
           "kind": "requires_installed_program"
         }
-      ],
-      "strategicRole": [
-        "support_tool"
       ],
       "targetProfiles": [
         {
@@ -29095,6 +30260,9 @@
           ],
           "hiddenInfoPolicy": "public_or_controller_known_only"
         }
+      ],
+      "strategicRole": [
+        "support_tool"
       ]
     },
     {
@@ -29119,11 +30287,33 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "runner",
+          "target": "multi_run_sequence"
+        },
+        {
+          "kind": "scored_agenda_action",
+          "timing": "successful_run",
+          "scope": "runner",
+          "target": "conditional_agenda_point"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "runner_turn",
+          "scope": "runner",
+          "target": "multi_run_failure_penalty"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_117_poisoned-water-supply",
@@ -29146,11 +30336,21 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "run_tax",
+          "timing": "action",
+          "scope": "corp",
+          "target": "bad_publicity_self_damage_cost"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_118_prearranged-drop",
@@ -29174,11 +30374,28 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "economy",
+          "timing": "on_access",
+          "scope": "runner",
+          "target": "next_agenda_credit",
+          "finite": true
+        },
+        {
+          "kind": "scored_agenda_action",
+          "timing": "on_access",
+          "scope": "runner",
+          "target": "next_agenda_credit"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_119_promises-promises",
@@ -29201,11 +30418,33 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "lineSupport": [
+        "runner.interface_closeout"
+      ],
+      "strategicRole": [
+        "payoff_anchor"
+      ],
+      "effects": [
+        {
+          "kind": "scored_agenda_action",
+          "timing": "on_access",
+          "scope": "runner",
+          "target": "bonus_agenda_point"
+        },
+        {
+          "kind": "access_replacement",
+          "timing": "on_access",
+          "scope": "runner",
+          "target": "next_agenda_bonus"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_120_reconnaissance",
@@ -29231,11 +30470,34 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "server",
+          "target": "make_run"
+        },
+        {
+          "kind": "expose_info",
+          "timing": "during_run",
+          "scope": "server",
+          "target": "run_recon"
+        },
+        {
+          "kind": "economy",
+          "timing": "during_run",
+          "scope": "runner",
+          "target": "run_restricted_credit",
+          "finite": true
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_121_remote-detonator",
@@ -29261,11 +30523,36 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "ice_trash",
+          "timing": "successful_run",
+          "scope": "server",
+          "target": "all_rezzed_ice_trash"
+        },
+        {
+          "kind": "tag",
+          "timing": "successful_run",
+          "scope": "runner",
+          "target": "self_tag",
+          "finite": true
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_successful_run"
+        },
+        {
+          "kind": "requires_remote_server"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_122_rush-hour",
@@ -29289,10 +30576,12 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "lineSupport": [
         "runner.rnd_pressure",
@@ -29302,6 +30591,26 @@
         "payoff_anchor"
       ],
       "effects": [
+        {
+          "finite": true,
+          "kind": "multiaccess",
+          "resource": "cards",
+          "scope": "rnd",
+          "target": "rnd_multiaccess",
+          "timing": "successful_run"
+        },
+        {
+          "kind": "future_run_effect",
+          "scope": "rnd",
+          "target": "server_specific_rnd",
+          "timing": "action"
+        },
+        {
+          "kind": "run_lock",
+          "scope": "runner",
+          "target": "noisy_breaker_restriction",
+          "timing": "during_run"
+        },
         {
           "amount": 4,
           "kind": "multiaccess",
@@ -29313,6 +30622,9 @@
       "conditions": [
         {
           "kind": "requires_successful_run"
+        },
+        {
+          "kind": "requires_rnd_pressure"
         }
       ]
     },
@@ -29337,11 +30649,21 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "run_tax",
+          "timing": "action",
+          "scope": "corp",
+          "target": "bad_publicity_pressure"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_124_stakeout",
@@ -29366,12 +30688,27 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
       },
       "effects": [
+        {
+          "finite": true,
+          "kind": "economy",
+          "scope": "runner",
+          "target": "burst_credit",
+          "timing": "action"
+        },
+        {
+          "kind": "draw",
+          "scope": "runner",
+          "target": "draw",
+          "timing": "action"
+        },
         {
           "amount": 1,
           "kind": "draw",
@@ -29410,11 +30747,21 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "run_tax",
+          "timing": "action",
+          "scope": "corp",
+          "target": "bad_publicity_pressure"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_126_test-spin",
@@ -29440,11 +30787,72 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "lineSupport": [
+        "runner.search.breaker"
+      ],
+      "strategicRole": [
+        "enabler"
+      ],
+      "effects": [
+        {
+          "kind": "search",
+          "timing": "action",
+          "scope": "runner",
+          "target": "program_search"
+        },
+        {
+          "kind": "install",
+          "timing": "action",
+          "scope": "installed_card",
+          "target": "program"
+        },
+        {
+          "kind": "install_discount",
+          "timing": "action",
+          "scope": "installed_card",
+          "target": "temporary_program_install"
+        },
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "server",
+          "target": "make_run"
+        },
+        {
+          "kind": "delayed_penalty",
+          "timing": "runner_turn",
+          "scope": "runner",
+          "target": "temporary_program_loss"
+        },
+        {
+          "kind": "damage",
+          "timing": "runner_turn",
+          "scope": "runner",
+          "target": "meat_damage_shortfall"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "search_install_target",
+          "timing": "on_play",
+          "targetType": "program",
+          "purpose": "temporary_program_install_run",
+          "preferences": [
+            "program_repairs_missing_coverage",
+            "program_preserves_run_goal"
+          ],
+          "avoid": [],
+          "hiddenInfoPolicy": "public_or_controller_known_only"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_127_weefle-initiation",
@@ -29470,11 +30878,27 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-02",
+        "reviewedBy": "codex"
+      },
+      "effects": [
+        {
+          "kind": "future_run_effect",
+          "timing": "action",
+          "scope": "server",
+          "target": "make_run"
+        },
+        {
+          "kind": "damage_prevention",
+          "timing": "during_run",
+          "scope": "runner",
+          "target": "damage_prevention_during_run"
+        }
+      ]
     },
     {
       "cardId": "onr_proteus_128_airport-locker",

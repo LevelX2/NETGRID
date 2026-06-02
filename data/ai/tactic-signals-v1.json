@@ -1,8 +1,8 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI020",
+  "taskId": "AI021",
   "generatedAt": "2026-06-02",
-  "description": "Controlled V1 tactic-signal catalog. AI020 adds Runner-hardware semantics for Decks, chips, cybernetics, recurring hardware credits, tag/link support, prevention, program backup, access interfaces, extra-run/action risk and Archives/R&D manipulation without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
+  "description": "Controlled V1 tactic-signal catalog. AI021 adds Runner-Prep one-shot semantics for runs, access replacement, score effects, burst economy, search/recovery/install, ICE/fort sabotage, expose/scouting, bad publicity, defense and drawback risk without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
   "signalPolicy": {
     "tacticSignal": "Functional card utility: what the AI can use the card for.",
     "strategyAnchor": "Large deck line: which strategy the card can anchor or materially support.",
@@ -84,6 +84,55 @@
       "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
     },
     {
+      "signalId": "access.hq_replacement_corp_loss",
+      "group": "ai021_prep_access",
+      "sideScope": "runner",
+      "description": "Replaces HQ access with Corp resource loss.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "access.hq_replacement_economy",
+      "group": "ai021_prep_access",
+      "sideScope": "runner",
+      "description": "Replaces HQ access with Runner economy payoff.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.hq_pressure"
+      ],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "access.hq_to_rnd_conversion",
+      "group": "ai021_prep_access",
+      "sideScope": "runner",
+      "description": "Converts a successful HQ context into R&D access.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.rnd_pressure"
+      ],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "access.hq_trash_pressure",
       "group": "ai019_access",
       "sideScope": "runner",
@@ -118,6 +167,38 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "Anchor-capable only through the explicit AI019 derivation rule and per-card strategySupportPairs review evidence."
+    },
+    {
+      "signalId": "access.next_agenda_bonus",
+      "group": "ai021_prep_access",
+      "sideScope": "runner",
+      "description": "Modifies the next agenda access this turn with a bonus.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.interface_closeout"
+      ],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "access.next_agenda_credit",
+      "group": "ai021_prep_access",
+      "sideScope": "runner",
+      "description": "Gives credits on the next agenda access this turn.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "access.punish",
@@ -918,6 +999,21 @@
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "corp.advertisement_punish",
+      "group": "ai021_prep_bad_publicity",
+      "sideScope": "runner",
+      "description": "Punishes Corp advertisement context.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "corp.archives_to_rnd_pressure",
       "group": "ai020_hardware_archives_rnd",
       "sideScope": "runner",
@@ -948,6 +1044,36 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp.bad_publicity_self_damage_cost",
+      "group": "ai021_prep_bad_publicity",
+      "sideScope": "runner",
+      "description": "Bad-publicity pressure with Runner self-damage cost.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp.bad_publicity_win_pressure",
+      "group": "ai021_prep_bad_publicity",
+      "sideScope": "runner",
+      "description": "Bad-publicity pressure tied to win or score pressure.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "corp.draw_pressure",
@@ -1193,6 +1319,21 @@
       "notes": "AI020 narrows generic damage prevention to support-only. Strategy anchors require a separate reviewed lineSupport/role decision or a more specific anchor-capable signal such as flatline prevention."
     },
     {
+      "signalId": "defense.damage_prevention_during_run",
+      "group": "ai021_prep_defense",
+      "sideScope": "runner",
+      "description": "Damage prevention scoped to the current run.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "defense.damage_recovery_draw",
       "group": "ai020_hardware_defense",
       "sideScope": "runner",
@@ -1292,6 +1433,21 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "defense.next_tag_avoidance",
+      "group": "ai021_prep_defense",
+      "sideScope": "runner",
+      "description": "Avoid the next tag or tag source.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "defense.pay_through_prevention",
@@ -1466,6 +1622,36 @@
       "notes": "Burst economy is not by itself fast advance."
     },
     {
+      "signalId": "economy.burst_credit",
+      "group": "ai021_prep_economy",
+      "sideScope": "runner",
+      "description": "One-shot Runner credit burst.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "economy.conditional_burst_credit",
+      "group": "ai021_prep_economy",
+      "sideScope": "runner",
+      "description": "Conditional one-shot Runner credit burst.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "economy.counter",
       "group": "economy",
       "sideScope": "neutral",
@@ -1515,6 +1701,36 @@
       ],
       "targetProfileRelevant": false,
       "notes": "Generic economy deliberately does not create a strategy anchor."
+    },
+    {
+      "signalId": "economy.hidden_bid_mindgame",
+      "group": "ai021_prep_economy",
+      "sideScope": "runner",
+      "description": "Hidden bid or guessing-game economy/mindgame context.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "economy.high_risk_burst_credit",
+      "group": "ai021_prep_economy",
+      "sideScope": "runner",
+      "description": "Credit burst attached to severe Runner risk.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "economy.node_trash_credit",
@@ -1690,6 +1906,21 @@
       "notes": "Target choice for what to rez is not encoded as a signal."
     },
     {
+      "signalId": "economy.run_restricted_credit",
+      "group": "ai021_prep_economy",
+      "sideScope": "runner",
+      "description": "Credits restricted to run use.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "economy.start_of_turn",
       "group": "economy",
       "sideScope": "neutral",
@@ -1742,6 +1973,21 @@
       "notes": "Support-only trash-credit signal. AI020 keeps Runner hardware recurring tag/link/breaker credits out of trash-credit strategy semantics by card-type gating the derivation."
     },
     {
+      "signalId": "economy.trash_for_credit",
+      "group": "ai021_prep_economy",
+      "sideScope": "runner",
+      "description": "Runner trashes cards as a cost for credits.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "economy.upgrade_trash_credit",
       "group": "ai019_economy",
       "sideScope": "runner",
@@ -1755,6 +2001,51 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "fort.all_rezzed_ice_trash",
+      "group": "ai021_prep_fort",
+      "sideScope": "runner",
+      "description": "Trash all rezzed ICE on a fort/server.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "fort.all_rezzed_ice_trash_tag_risk",
+      "group": "ai021_prep_fort",
+      "sideScope": "runner",
+      "description": "Fort ICE trash with self-tag drawback.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "fort.reorder_ice",
+      "group": "ai021_prep_fort",
+      "sideScope": "runner",
+      "description": "Reorder ICE protecting a server.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "ice.derez",
@@ -1857,6 +2148,21 @@
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "ice.rez_or_trash_choice",
+      "group": "ai021_prep_ice",
+      "sideScope": "runner",
+      "description": "Forces Corp into a rez-or-trash ICE choice.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "ice.strength_modifier",
       "group": "corp_ice_modifier",
       "sideScope": "corp",
@@ -1930,6 +2236,36 @@
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "ice.trash_rezzed",
+      "group": "ai021_prep_ice",
+      "sideScope": "runner",
+      "description": "Trash rezzed ICE.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "ice.trash_unrezzed",
+      "group": "ai021_prep_ice",
+      "sideScope": "runner",
+      "description": "Trash unrezzed ICE without hidden guessing.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "info.expose",
       "group": "information",
       "sideScope": "neutral",
@@ -1975,6 +2311,51 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "info.expose_installed_cards",
+      "group": "ai021_prep_info",
+      "sideScope": "runner",
+      "description": "Expose several installed cards.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "info.expose_multiple",
+      "group": "ai021_prep_info",
+      "sideScope": "runner",
+      "description": "Expose multiple legal targets.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "info.expose_outermost_ice",
+      "group": "ai021_prep_info",
+      "sideScope": "runner",
+      "description": "Expose outermost ICE protecting a server.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "info.hq",
@@ -2104,6 +2485,21 @@
       "notes": "Does not expose hidden order in the signal."
     },
     {
+      "signalId": "info.run_recon",
+      "group": "ai021_prep_info",
+      "sideScope": "runner",
+      "description": "Gather run-relevant public/controller-known information.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "remote.agenda_difficulty_tax",
       "group": "ai019_remote",
       "sideScope": "runner",
@@ -2227,6 +2623,21 @@
       "notes": "Anchor-capable through Corp remote-role gate."
     },
     {
+      "signalId": "risk.action_loss",
+      "group": "ai021_prep_risk",
+      "sideScope": "runner",
+      "description": "Runner loses actions as cost or drawback.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "risk.brain_damage_self_inflicted",
       "group": "ai020_hardware_risk",
       "sideScope": "runner",
@@ -2244,6 +2655,21 @@
       "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
+      "signalId": "risk.hand_trash_cost",
+      "group": "ai021_prep_risk",
+      "sideScope": "runner",
+      "description": "Runner trashes cards from grip as cost.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "risk.hardware_trash_target",
       "group": "ai020_hardware_cost_risk",
       "sideScope": "runner",
@@ -2257,6 +2683,141 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
+      "signalId": "risk.installed_card_trash_cost",
+      "group": "ai021_prep_risk",
+      "sideScope": "runner",
+      "description": "Runner trashes installed cards as cost.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.meat_damage_shortfall",
+      "group": "ai021_prep_risk",
+      "sideScope": "runner",
+      "description": "Runner risks meat damage if a temporary run plan fails.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.multi_run_failure_penalty",
+      "group": "ai021_prep_risk",
+      "sideScope": "runner",
+      "description": "Runner is punished if a multi-run sequence fails.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.opponent_guessing_game",
+      "group": "ai021_prep_risk",
+      "sideScope": "runner",
+      "description": "Opponent guessing-game risk or bid context.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.random_economy",
+      "group": "ai021_prep_risk",
+      "sideScope": "runner",
+      "description": "Randomized economy outcome.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.self_brain_damage",
+      "group": "ai021_prep_risk",
+      "sideScope": "runner",
+      "description": "Runner suffers brain damage as cost or drawback.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.self_tag",
+      "group": "ai021_prep_risk",
+      "sideScope": "runner",
+      "description": "Runner takes a tag as cost or drawback.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "risk.temporary_program_loss",
+      "group": "ai021_prep_risk",
+      "sideScope": "runner",
+      "description": "Runner loses or bounces a temporary program.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "run.any_server",
+      "group": "ai021_prep_run",
+      "sideScope": "runner",
+      "description": "A Prep can target any server run without hidden target inference.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "run.archives_replacement_access",
@@ -2315,6 +2876,36 @@
       "notes": "Break-cost support only; normal breaker coverage remains separate and support-only."
     },
     {
+      "signalId": "run.bypass_chosen_ice",
+      "group": "ai021_prep_run",
+      "sideScope": "runner",
+      "description": "Bypasses a chosen ICE during a run.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "run.bypass_first_ice",
+      "group": "ai021_prep_run",
+      "sideScope": "runner",
+      "description": "Bypasses the first ICE encountered during a run.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "run.central_access_conversion",
       "group": "ai019_run",
       "sideScope": "runner",
@@ -2328,6 +2919,21 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "run.damage_prevention_during_run",
+      "group": "ai021_prep_run",
+      "sideScope": "runner",
+      "description": "Prevents damage only during a run.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "run.ends_run_after_effect",
@@ -2396,6 +3002,21 @@
       "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
+      "signalId": "run.followup_run",
+      "group": "ai021_prep_run",
+      "sideScope": "runner",
+      "description": "Creates or rewards a follow-up run after a prior run.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "run.jackout_vs_node_upgrade",
       "group": "ai019_run",
       "sideScope": "runner",
@@ -2428,6 +3049,51 @@
       "notes": "Target server details belong in structured descriptors."
     },
     {
+      "signalId": "run.make_run",
+      "group": "ai021_prep_run",
+      "sideScope": "runner",
+      "description": "Starts or requires a Runner run as a one-shot Prep effect.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "run.multi_run_sequence",
+      "group": "ai021_prep_run",
+      "sideScope": "runner",
+      "description": "Structures several runs in one turn or one Prep sequence.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "run.noisy_breaker_restriction",
+      "group": "ai021_prep_run",
+      "sideScope": "runner",
+      "description": "The Prep limits breaker use to noisy or similar constrained breakers.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "run.replacement_access",
       "group": "ai019_run",
       "sideScope": "runner",
@@ -2458,6 +3124,36 @@
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "run.run_credit_pool",
+      "group": "ai021_prep_run",
+      "sideScope": "runner",
+      "description": "Provides credits restricted to the current run.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "run.run_credit_pool_brain_damage_risk",
+      "group": "ai021_prep_run",
+      "sideScope": "runner",
+      "description": "Run credit support with brain-damage risk.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "run.safe_jackout_window",
       "group": "ai019_run",
       "sideScope": "runner",
@@ -2471,6 +3167,66 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "run.server_specific_hq",
+      "group": "ai021_prep_run",
+      "sideScope": "runner",
+      "description": "A Prep points its run or payoff at HQ.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "run.server_specific_remote",
+      "group": "ai021_prep_run",
+      "sideScope": "runner",
+      "description": "A Prep points its run or payoff at a remote server.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "run.server_specific_rnd",
+      "group": "ai021_prep_run",
+      "sideScope": "runner",
+      "description": "A Prep points its run or payoff at R&D.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "run.trace_boost_during_run",
+      "group": "ai021_prep_run",
+      "sideScope": "runner",
+      "description": "Provides trace defense or trace boost during a run.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "score.advance_burst",
@@ -2508,6 +3264,115 @@
       ],
       "targetProfileRelevant": false,
       "notes": "AI016 intentionally removed automatic fast-advance anchoring."
+    },
+    {
+      "signalId": "score.agenda_point_gain",
+      "group": "ai021_prep_score",
+      "sideScope": "runner",
+      "description": "Runner gains agenda points through a Prep effect.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.interface_closeout"
+      ],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.black_ops_agenda_condition",
+      "group": "ai021_prep_score",
+      "sideScope": "runner",
+      "description": "Runner score effect depends on a Black Ops agenda condition.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.bonus_agenda_point",
+      "group": "ai021_prep_score",
+      "sideScope": "runner",
+      "description": "Bonus agenda point on a later steal or access condition.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.interface_closeout"
+      ],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.conditional_agenda_point",
+      "group": "ai021_prep_score",
+      "sideScope": "runner",
+      "description": "Runner agenda-point effect with a narrow condition.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.gray_ops_agenda_condition",
+      "group": "ai021_prep_score",
+      "sideScope": "runner",
+      "description": "Runner score effect depends on a Gray Ops agenda condition.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.card_recovery",
+      "group": "ai021_prep_setup",
+      "sideScope": "runner",
+      "description": "Generic card recovery from heap/trash.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.card_search",
+      "group": "ai021_prep_setup",
+      "sideScope": "runner",
+      "description": "Generic card search or tutor from a Prep.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "setup.cybernetics",
@@ -2562,6 +3427,36 @@
       "notes": "Draw is support-only in this catalog. AI019a gates this to Runner-scope draw so Corp draw pressure does not become Runner setup."
     },
     {
+      "signalId": "setup.end_of_turn_bounce",
+      "group": "ai021_prep_setup",
+      "sideScope": "runner",
+      "description": "End-of-turn return/bounce drawback for temporary installs.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.full_deck_reset",
+      "group": "ai021_prep_setup",
+      "sideScope": "runner",
+      "description": "Reset or recycle Runner deck/heap/hand structure.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "setup.hand_size",
       "group": "runner_setup",
       "sideScope": "runner",
@@ -2595,6 +3490,21 @@
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "setup.hardware_install",
+      "group": "ai021_prep_setup",
+      "sideScope": "runner",
+      "description": "Install hardware through a Prep support effect.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "setup.hosted_program_loss_risk",
       "group": "ai019_setup",
       "sideScope": "runner",
@@ -2608,6 +3518,36 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.install_action_burst",
+      "group": "ai021_prep_setup",
+      "sideScope": "runner",
+      "description": "Install action compression from a Prep.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.install_credit",
+      "group": "ai021_prep_setup",
+      "sideScope": "runner",
+      "description": "Install credit or install-only economy from a Prep.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "setup.install_discount",
@@ -2780,20 +3720,20 @@
     },
     {
       "signalId": "setup.program_recovery",
-      "group": "ai020_hardware_program_backup",
+      "group": "ai021_prep_setup",
       "sideScope": "runner",
-      "description": "Recovers a program from a hardware backup or protected pile.",
-      "supportOnly": true,
-      "mayAnchorStrategy": false,
-      "allowedStrategyAnchors": [],
+      "description": "Recover a program from heap/trash.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.search.breaker"
+      ],
       "sourceKinds": [
-        "effects.kind=card_recovery target=stored_program"
+        "AI021 reviewed Runner-Prep structured hint effects"
       ],
-      "examples": [
-        "Microtech Backup Drive"
-      ],
+      "examples": [],
       "targetProfileRelevant": true,
-      "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "setup.program_search",
@@ -2898,6 +3838,51 @@
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "setup.stack_filter",
+      "group": "ai021_prep_setup",
+      "sideScope": "runner",
+      "description": "Filter the top of the Runner stack.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.stack_reorder",
+      "group": "ai021_prep_setup",
+      "sideScope": "runner",
+      "description": "Reorder known Runner stack cards.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.stack_shuffle",
+      "group": "ai021_prep_setup",
+      "sideScope": "runner",
+      "description": "Shuffle Runner stack after search/recovery.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "setup.stack_top_program_install",
       "group": "ai019_setup",
       "sideScope": "runner",
@@ -2930,6 +3915,23 @@
       ],
       "targetProfileRelevant": true,
       "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
+    },
+    {
+      "signalId": "setup.temporary_program_install",
+      "group": "ai021_prep_setup",
+      "sideScope": "runner",
+      "description": "Temporary program installation with later bounce/loss.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "runner.search.breaker"
+      ],
+      "sourceKinds": [
+        "AI021 reviewed Runner-Prep structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "setup.vehicle",

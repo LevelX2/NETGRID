@@ -14,10 +14,10 @@
   "includedCardCount": 15,
   "excludedCardCount": 16,
   "confirmedGeneratedFactCount": 62,
-  "previewAddedFactCount": 41,
+  "previewAddedFactCount": 38,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 114,
+  "normalizedDifferenceCount": 115,
   "remainingDifferenceCount": 0,
   "preventionWindowContextInfoCount": 8,
   "damageWindowContextInfoCount": 4,
@@ -55,7 +55,7 @@
     "prevention_window_context_normalization": 16,
     "breaker_survival_overlap_normalization": 2,
     "payment_context_normalization": 0,
-    "survival_strategy_overlay_split_normalization": 61,
+    "survival_strategy_overlay_split_normalization": 62,
     "damage_window_context_required_classification": 12,
     "flatline_replacement_context_required_classification": 2,
     "trash_prevention_context_required_classification": 3,
@@ -1238,19 +1238,14 @@
       "subBatch": "tag_survival_or_tag_prevention",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": [],
+      "activeMechanicalFields": ["effects", "conditions"],
       "generatedFactsConfirmed": [
         "condition:requires_prevention_window",
         "condition:requires_runner_tagged",
         "effect:survival_payoff",
         "effect:tag_prevention"
       ],
-      "previewAdds": [
-        "condition:requires_prevention_window",
-        "condition:requires_runner_tagged",
-        "effect:survival_payoff",
-        "effect:tag_prevention"
-      ],
+      "previewAdds": ["effect:survival_payoff"],
       "normalizedDifferences": [
         {
           "field": "condition:requires_prevention_window",
@@ -1268,7 +1263,7 @@
         },
         {
           "field": "conditions",
-          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "classification": "survival_strategy_overlay_split_normalized",
           "rule": "survival_strategy_overlay_split_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-10 comparator path; active hints and runtime behavior are unchanged."
@@ -1286,6 +1281,13 @@
           "classification": "tag_survival_context_normalized",
           "rule": "tag_survival_context_normalization",
           "rationale": "Tag prevention and tag survival facts keep tag/prevention context visible and never assert the Runner is currently untagged."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "survival_strategy_overlay_split_normalized",
+          "rule": "survival_strategy_overlay_split_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-10 comparator path; active hints and runtime behavior are unchanged."
         },
         {
           "field": "effects",

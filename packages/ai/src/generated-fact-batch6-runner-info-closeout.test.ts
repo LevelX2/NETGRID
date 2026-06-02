@@ -81,7 +81,7 @@ describe("generated fact Batch-6 runner info closeout", () => {
     expect(report.previewAddedFactCount).toBe(4);
     expect(report.hardErrorCount).toBe(0);
     expect(report.realSemanticConflictCount).toBe(0);
-    expect(report.normalizedDifferenceCount).toBe(36);
+    expect(report.normalizedDifferenceCount).toBe(39);
     expect(report.remainingDifferenceCount).toBe(0);
     expect(report.descriptorFollowupCount).toBe(0);
     expect(report.readiness).toBe("ready_read_only_split_subbatches");

@@ -17,7 +17,7 @@
   "previewAddedFactCount": 4,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 36,
+  "normalizedDifferenceCount": 39,
   "remainingDifferenceCount": 0,
   "successfulRunContextInfoCount": 7,
   "accessContextInfoCount": 7,
@@ -38,8 +38,8 @@
   "normalizationRuleCounts": {
     "rd_topdeck_info_normalization": 2,
     "hq_info_normalization": 6,
-    "central_access_replacement_normalization": 9,
-    "central_multiaccess_or_interface_normalization": 6,
+    "central_access_replacement_normalization": 10,
+    "central_multiaccess_or_interface_normalization": 8,
     "successful_run_context_normalization": 7,
     "access_context_normalization": 7,
     "expose_or_remote_info_context_normalization": 10,
@@ -763,6 +763,13 @@
           "rationale": "Multiaccess count is normalized as a successful-run mechanical fact; actual access legality and value stay engine/board context."
         },
         {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "central_multiaccess_context_normalized",
+          "rule": "central_multiaccess_or_interface_normalization",
+          "rationale": "Multiaccess count is normalized as a successful-run mechanical fact; actual access legality and value stay engine/board context."
+        },
+        {
           "field": "effects",
           "sourceWarningKind": "active_monolith_mechanical_duplication",
           "classification": "central_multiaccess_context_normalized",
@@ -839,6 +846,13 @@
           "rationale": "Access replacement is normalized as a distinct mechanical fact and is not treated as normal access or automatic steal/trash value."
         },
         {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "central_access_replacement_context_normalized",
+          "rule": "central_access_replacement_normalization",
+          "rationale": "Access replacement is normalized as a distinct mechanical fact and is not treated as normal access or automatic steal/trash value."
+        },
+        {
           "field": "effects",
           "sourceWarningKind": "active_monolith_mechanical_duplication",
           "classification": "central_access_replacement_context_normalized",
@@ -908,6 +922,13 @@
         {
           "field": "conditions",
           "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "central_multiaccess_context_normalized",
+          "rule": "central_multiaccess_or_interface_normalization",
+          "rationale": "Multiaccess count is normalized as a successful-run mechanical fact; actual access legality and value stay engine/board context."
+        },
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
           "classification": "central_multiaccess_context_normalized",
           "rule": "central_multiaccess_or_interface_normalization",
           "rationale": "Multiaccess count is normalized as a successful-run mechanical fact; actual access legality and value stay engine/board context."

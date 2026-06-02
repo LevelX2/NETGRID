@@ -5,7 +5,7 @@
   "generatedAt": "2026-05-31",
   "status": "pass_with_warnings",
   "hardErrorCount": 0,
-  "warningCount": 63,
+  "warningCount": 69,
   "source": {
     "activeHintsPath": "data/ai/ai-card-hints-active.json",
     "compiledHintsPath": "data/ai/ai-card-hints-compiled.json",
@@ -61,15 +61,20 @@
       "utility",
       "win_condition"
     ],
-    "functionSignalRuleCount": 212,
-    "functionSignalCount": 188,
+    "functionSignalRuleCount": 290,
+    "functionSignalCount": 254,
     "functionSignalIds": [
       "access.free_trash",
       "access.hq_full_reveal",
       "access.hq_multiaccess",
       "access.hq_random_reveal",
+      "access.hq_replacement_corp_loss",
+      "access.hq_replacement_economy",
+      "access.hq_to_rnd_conversion",
       "access.hq_trash_pressure",
       "access.hq_via_archives",
+      "access.next_agenda_bonus",
+      "access.next_agenda_credit",
       "access.punish",
       "access.rnd_multiaccess",
       "access.rnd_top_card",
@@ -116,8 +121,11 @@
       "breaker.wall",
       "breaker.watchdog",
       "corp.action_denial",
+      "corp.advertisement_punish",
       "corp.archives_to_rnd_pressure",
       "corp.bad_publicity_pressure",
+      "corp.bad_publicity_self_damage_cost",
+      "corp.bad_publicity_win_pressure",
       "corp.draw_pressure",
       "corp.economy_pressure",
       "corp.hand_size_pressure",
@@ -133,12 +141,14 @@
       "defense.brain_damage_prevention",
       "defense.brain_damage_reset",
       "defense.damage_prevention",
+      "defense.damage_prevention_during_run",
       "defense.damage_recovery_draw",
       "defense.finite_damage_prevention",
       "defense.flatline_prevention",
       "defense.meat_damage_immunity",
       "defense.meat_damage_prevention",
       "defense.net_damage_prevention",
+      "defense.next_tag_avoidance",
       "defense.pay_through_prevention",
       "defense.tag_clear_support",
       "defense.tag_prevention",
@@ -149,9 +159,13 @@
       "economy.action_credit",
       "economy.advanceable",
       "economy.burst",
+      "economy.burst_credit",
+      "economy.conditional_burst_credit",
       "economy.counter",
       "economy.finite_pool",
       "economy.generic",
+      "economy.hidden_bid_mindgame",
+      "economy.high_risk_burst_credit",
       "economy.node_trash_credit",
       "economy.recurring",
       "economy.recurring_breaker_credit",
@@ -162,23 +176,34 @@
       "economy.recurring_tag_clear_credit",
       "economy.recurring_trash_credit",
       "economy.rez_discount",
+      "economy.run_restricted_credit",
       "economy.start_of_turn",
       "economy.trace_credit",
       "economy.trash_credit",
+      "economy.trash_for_credit",
       "economy.upgrade_trash_credit",
+      "fort.all_rezzed_ice_trash",
+      "fort.all_rezzed_ice_trash_tag_risk",
+      "fort.reorder_ice",
       "ice.derez",
       "ice.etr",
       "ice.force_rez",
       "ice.future_pressure",
       "ice.reorder_fort",
       "ice.reverse_fort",
+      "ice.rez_or_trash_choice",
       "ice.strength_modifier",
       "ice.strength_reduction",
       "ice.subroutine_modifier",
       "ice.trash_after_full_break",
+      "ice.trash_rezzed",
+      "ice.trash_unrezzed",
       "info.expose",
       "info.expose_fort",
       "info.expose_installed_card",
+      "info.expose_installed_cards",
+      "info.expose_multiple",
+      "info.expose_outermost_ice",
       "info.hq",
       "info.hq_information",
       "info.ice_approach_expose",
@@ -186,6 +211,7 @@
       "info.rnd_information",
       "info.rnd_manipulation",
       "info.rnd_topdeck",
+      "info.run_recon",
       "remote.agenda_difficulty_tax",
       "remote.agenda_steal_tax",
       "remote.ambush",
@@ -193,29 +219,65 @@
       "remote.bait",
       "remote.install_tax",
       "remote.scoring_protection",
+      "risk.action_loss",
       "risk.brain_damage_self_inflicted",
+      "risk.hand_trash_cost",
       "risk.hardware_trash_target",
+      "risk.installed_card_trash_cost",
+      "risk.meat_damage_shortfall",
+      "risk.multi_run_failure_penalty",
+      "risk.opponent_guessing_game",
+      "risk.random_economy",
+      "risk.self_brain_damage",
+      "risk.self_tag",
+      "risk.temporary_program_loss",
+      "run.any_server",
       "run.archives_replacement_access",
       "run.break_cost_penalty",
       "run.break_cost_support",
+      "run.bypass_chosen_ice",
+      "run.bypass_first_ice",
       "run.central_access_conversion",
+      "run.damage_prevention_during_run",
       "run.ends_run_after_effect",
       "run.event_tempo",
       "run.extra_action",
       "run.extra_run_after_success",
+      "run.followup_run",
       "run.jackout_vs_node_upgrade",
       "run.lock",
+      "run.make_run",
+      "run.multi_run_sequence",
+      "run.noisy_breaker_restriction",
       "run.replacement_access",
       "run.rnd_scout_run",
+      "run.run_credit_pool",
+      "run.run_credit_pool_brain_damage_risk",
       "run.safe_jackout_window",
+      "run.server_specific_hq",
+      "run.server_specific_remote",
+      "run.server_specific_rnd",
+      "run.trace_boost_during_run",
       "score.advance_burst",
       "score.agenda_action",
+      "score.agenda_point_gain",
+      "score.black_ops_agenda_condition",
+      "score.bonus_agenda_point",
+      "score.conditional_agenda_point",
+      "score.gray_ops_agenda_condition",
+      "setup.card_recovery",
+      "setup.card_search",
       "setup.cybernetics",
       "setup.deck_exclusive",
       "setup.draw",
+      "setup.end_of_turn_bounce",
+      "setup.full_deck_reset",
       "setup.hand_size",
       "setup.hand_size_penalty",
+      "setup.hardware_install",
       "setup.hosted_program_loss_risk",
+      "setup.install_action_burst",
+      "setup.install_credit",
       "setup.install_discount",
       "setup.install_during_run",
       "setup.install_support",
@@ -233,8 +295,12 @@
       "setup.recovery",
       "setup.search",
       "setup.self_bounce",
+      "setup.stack_filter",
+      "setup.stack_reorder",
+      "setup.stack_shuffle",
       "setup.stack_top_program_install",
       "setup.stored_program_reclaim",
+      "setup.temporary_program_install",
       "setup.vehicle",
       "tag.payoff",
       "tag.source",
@@ -253,14 +319,19 @@
       "virus.trigger_remote",
       "virus.trigger_rnd"
     ],
-    "tacticSignalCatalogCount": 188,
+    "tacticSignalCatalogCount": 254,
     "tacticSignalCatalogIds": [
       "access.free_trash",
       "access.hq_full_reveal",
       "access.hq_multiaccess",
       "access.hq_random_reveal",
+      "access.hq_replacement_corp_loss",
+      "access.hq_replacement_economy",
+      "access.hq_to_rnd_conversion",
       "access.hq_trash_pressure",
       "access.hq_via_archives",
+      "access.next_agenda_bonus",
+      "access.next_agenda_credit",
       "access.punish",
       "access.rnd_multiaccess",
       "access.rnd_top_card",
@@ -307,8 +378,11 @@
       "breaker.wall",
       "breaker.watchdog",
       "corp.action_denial",
+      "corp.advertisement_punish",
       "corp.archives_to_rnd_pressure",
       "corp.bad_publicity_pressure",
+      "corp.bad_publicity_self_damage_cost",
+      "corp.bad_publicity_win_pressure",
       "corp.draw_pressure",
       "corp.economy_pressure",
       "corp.hand_size_pressure",
@@ -324,12 +398,14 @@
       "defense.brain_damage_prevention",
       "defense.brain_damage_reset",
       "defense.damage_prevention",
+      "defense.damage_prevention_during_run",
       "defense.damage_recovery_draw",
       "defense.finite_damage_prevention",
       "defense.flatline_prevention",
       "defense.meat_damage_immunity",
       "defense.meat_damage_prevention",
       "defense.net_damage_prevention",
+      "defense.next_tag_avoidance",
       "defense.pay_through_prevention",
       "defense.tag_clear_support",
       "defense.tag_prevention",
@@ -340,9 +416,13 @@
       "economy.action_credit",
       "economy.advanceable",
       "economy.burst",
+      "economy.burst_credit",
+      "economy.conditional_burst_credit",
       "economy.counter",
       "economy.finite_pool",
       "economy.generic",
+      "economy.hidden_bid_mindgame",
+      "economy.high_risk_burst_credit",
       "economy.node_trash_credit",
       "economy.recurring",
       "economy.recurring_breaker_credit",
@@ -353,23 +433,34 @@
       "economy.recurring_tag_clear_credit",
       "economy.recurring_trash_credit",
       "economy.rez_discount",
+      "economy.run_restricted_credit",
       "economy.start_of_turn",
       "economy.trace_credit",
       "economy.trash_credit",
+      "economy.trash_for_credit",
       "economy.upgrade_trash_credit",
+      "fort.all_rezzed_ice_trash",
+      "fort.all_rezzed_ice_trash_tag_risk",
+      "fort.reorder_ice",
       "ice.derez",
       "ice.etr",
       "ice.force_rez",
       "ice.future_pressure",
       "ice.reorder_fort",
       "ice.reverse_fort",
+      "ice.rez_or_trash_choice",
       "ice.strength_modifier",
       "ice.strength_reduction",
       "ice.subroutine_modifier",
       "ice.trash_after_full_break",
+      "ice.trash_rezzed",
+      "ice.trash_unrezzed",
       "info.expose",
       "info.expose_fort",
       "info.expose_installed_card",
+      "info.expose_installed_cards",
+      "info.expose_multiple",
+      "info.expose_outermost_ice",
       "info.hq",
       "info.hq_information",
       "info.ice_approach_expose",
@@ -377,6 +468,7 @@
       "info.rnd_information",
       "info.rnd_manipulation",
       "info.rnd_topdeck",
+      "info.run_recon",
       "remote.agenda_difficulty_tax",
       "remote.agenda_steal_tax",
       "remote.ambush",
@@ -384,29 +476,65 @@
       "remote.bait",
       "remote.install_tax",
       "remote.scoring_protection",
+      "risk.action_loss",
       "risk.brain_damage_self_inflicted",
+      "risk.hand_trash_cost",
       "risk.hardware_trash_target",
+      "risk.installed_card_trash_cost",
+      "risk.meat_damage_shortfall",
+      "risk.multi_run_failure_penalty",
+      "risk.opponent_guessing_game",
+      "risk.random_economy",
+      "risk.self_brain_damage",
+      "risk.self_tag",
+      "risk.temporary_program_loss",
+      "run.any_server",
       "run.archives_replacement_access",
       "run.break_cost_penalty",
       "run.break_cost_support",
+      "run.bypass_chosen_ice",
+      "run.bypass_first_ice",
       "run.central_access_conversion",
+      "run.damage_prevention_during_run",
       "run.ends_run_after_effect",
       "run.event_tempo",
       "run.extra_action",
       "run.extra_run_after_success",
+      "run.followup_run",
       "run.jackout_vs_node_upgrade",
       "run.lock",
+      "run.make_run",
+      "run.multi_run_sequence",
+      "run.noisy_breaker_restriction",
       "run.replacement_access",
       "run.rnd_scout_run",
+      "run.run_credit_pool",
+      "run.run_credit_pool_brain_damage_risk",
       "run.safe_jackout_window",
+      "run.server_specific_hq",
+      "run.server_specific_remote",
+      "run.server_specific_rnd",
+      "run.trace_boost_during_run",
       "score.advance_burst",
       "score.agenda_action",
+      "score.agenda_point_gain",
+      "score.black_ops_agenda_condition",
+      "score.bonus_agenda_point",
+      "score.conditional_agenda_point",
+      "score.gray_ops_agenda_condition",
+      "setup.card_recovery",
+      "setup.card_search",
       "setup.cybernetics",
       "setup.deck_exclusive",
       "setup.draw",
+      "setup.end_of_turn_bounce",
+      "setup.full_deck_reset",
       "setup.hand_size",
       "setup.hand_size_penalty",
+      "setup.hardware_install",
       "setup.hosted_program_loss_risk",
+      "setup.install_action_burst",
+      "setup.install_credit",
       "setup.install_discount",
       "setup.install_during_run",
       "setup.install_support",
@@ -424,8 +552,12 @@
       "setup.recovery",
       "setup.search",
       "setup.self_bounce",
+      "setup.stack_filter",
+      "setup.stack_reorder",
+      "setup.stack_shuffle",
       "setup.stack_top_program_install",
       "setup.stored_program_reclaim",
+      "setup.temporary_program_install",
       "setup.vehicle",
       "tag.payoff",
       "tag.source",
@@ -521,8 +653,8 @@
       "breakerProfile.targetedIceBonus": 1,
       "cardId": 564,
       "cardType": 564,
-      "conditions": 291,
-      "conditions[].kind": 510,
+      "conditions": 302,
+      "conditions[].kind": 539,
       "costProfile": 74,
       "costProfile.agendaPoints": 1,
       "costProfile.clicks": 59,
@@ -531,29 +663,29 @@
       "costProfile.memory": 25,
       "costProfile.opportunityCost": 70,
       "costProfile.reserveRisk": 69,
-      "effects": 411,
+      "effects": 449,
       "effects[].amount": 523,
       "effects[].damageTypes": 19,
-      "effects[].finite": 47,
-      "effects[].kind": 1037,
+      "effects[].finite": 65,
+      "effects[].kind": 1156,
       "effects[].perTurnLimit": 36,
-      "effects[].repeatable": 77,
-      "effects[].resource": 670,
-      "effects[].scope": 1037,
-      "effects[].target": 176,
-      "effects[].timing": 1037,
-      "lineSupport": 172,
+      "effects[].repeatable": 78,
+      "effects[].resource": 674,
+      "effects[].scope": 1156,
+      "effects[].target": 314,
+      "effects[].timing": 1156,
+      "lineSupport": 176,
       "manualNotes": 41,
       "planRoles": 564,
-      "quality": 421,
-      "quality.benchmarkCovered": 398,
-      "quality.confidence": 415,
+      "quality": 441,
+      "quality.benchmarkCovered": 418,
+      "quality.confidence": 435,
       "quality.focusedDecisionTest": 3,
-      "quality.hintReviewed": 421,
-      "quality.needsHumanReview": 421,
-      "quality.reviewedBy": 197,
-      "quality.reviewedDate": 197,
-      "quality.strategyCovered": 402,
+      "quality.hintReviewed": 441,
+      "quality.needsHumanReview": 441,
+      "quality.reviewedBy": 250,
+      "quality.reviewedDate": 250,
+      "quality.strategyCovered": 422,
       "remoteRole": 53,
       "remoteRole.kind": 53,
       "remoteRole.serverScope": 53,
@@ -564,23 +696,23 @@
       "scenarioRefs": 564,
       "side": 564,
       "strategicNotes": 3,
-      "strategicRole": 178,
-      "targetProfiles": 23,
-      "targetProfiles[].avoid": 24,
-      "targetProfiles[].hiddenInfoPolicy": 24,
+      "strategicRole": 179,
+      "targetProfiles": 40,
+      "targetProfiles[].avoid": 41,
+      "targetProfiles[].hiddenInfoPolicy": 41,
       "targetProfiles[].installCost": 3,
       "targetProfiles[].installsTarget": 3,
-      "targetProfiles[].kind": 24,
+      "targetProfiles[].kind": 41,
       "targetProfiles[].lookCount": 1,
       "targetProfiles[].oncePerRun": 1,
-      "targetProfiles[].preferences": 19,
-      "targetProfiles[].purpose": 24,
-      "targetProfiles[].schemaVersion": 24,
+      "targetProfiles[].preferences": 36,
+      "targetProfiles[].purpose": 41,
+      "targetProfiles[].schemaVersion": 41,
       "targetProfiles[].showToOpponent": 1,
       "targetProfiles[].shuffleAfter": 3,
       "targetProfiles[].targetCardType": 3,
-      "targetProfiles[].targetType": 24,
-      "targetProfiles[].timing": 24,
+      "targetProfiles[].targetType": 41,
+      "targetProfiles[].timing": 41,
       "targetProfiles[].zone": 3,
       "valueHints": 564,
       "valueHints.access": 8,
@@ -655,19 +787,24 @@
   },
   "functionSignals": {
     "derivedSignalCounts": {
-      "access.free_trash": 2,
+      "access.free_trash": 4,
       "access.hq_full_reveal": 1,
       "access.hq_multiaccess": 4,
       "access.hq_random_reveal": 1,
-      "access.hq_trash_pressure": 1,
+      "access.hq_replacement_corp_loss": 2,
+      "access.hq_replacement_economy": 1,
+      "access.hq_to_rnd_conversion": 1,
+      "access.hq_trash_pressure": 2,
       "access.hq_via_archives": 1,
+      "access.next_agenda_bonus": 1,
+      "access.next_agenda_credit": 1,
       "access.punish": 6,
       "access.rnd_multiaccess": 4,
       "access.rnd_top_card": 1,
       "access.rnd_top_cards": 1,
       "access.rnd_top_reorder": 1,
       "access.rnd_topdeck_setup": 1,
-      "access.rnd_trash_pressure": 1,
+      "access.rnd_trash_pressure": 2,
       "access.trash_untrashable": 2,
       "action.recurring_extra_action": 1,
       "action.turn_limit_penalty": 1,
@@ -703,8 +840,11 @@
       "breaker.universal": 4,
       "breaker.wall": 15,
       "corp.action_denial": 1,
+      "corp.advertisement_punish": 1,
       "corp.archives_to_rnd_pressure": 1,
-      "corp.bad_publicity_pressure": 1,
+      "corp.bad_publicity_pressure": 6,
+      "corp.bad_publicity_self_damage_cost": 1,
+      "corp.bad_publicity_win_pressure": 1,
       "corp.draw_pressure": 1,
       "corp.economy_pressure": 1,
       "corp.hand_size_pressure": 1,
@@ -717,26 +857,32 @@
       "defense.ap_subroutine_mitigation": 1,
       "defense.base_link": 3,
       "defense.brain_damage_prevention": 6,
-      "defense.brain_damage_reset": 1,
-      "defense.damage_prevention": 22,
+      "defense.brain_damage_reset": 2,
+      "defense.damage_prevention": 23,
+      "defense.damage_prevention_during_run": 1,
       "defense.damage_recovery_draw": 1,
       "defense.finite_damage_prevention": 3,
-      "defense.flatline_prevention": 1,
+      "defense.flatline_prevention": 2,
       "defense.meat_damage_immunity": 1,
       "defense.meat_damage_prevention": 6,
       "defense.net_damage_prevention": 9,
+      "defense.next_tag_avoidance": 1,
       "defense.pay_through_prevention": 1,
-      "defense.tag_clear_support": 2,
-      "defense.tag_prevention": 7,
+      "defense.tag_clear_support": 4,
+      "defense.tag_prevention": 9,
       "defense.trace_boost": 3,
-      "defense.trace_defense": 18,
+      "defense.trace_defense": 19,
       "defense.trace_limit_reduction": 1,
       "economy.action": 8,
       "economy.action_credit": 1,
       "economy.burst": 3,
+      "economy.burst_credit": 5,
+      "economy.conditional_burst_credit": 2,
       "economy.counter": 19,
-      "economy.finite_pool": 10,
-      "economy.generic": 42,
+      "economy.finite_pool": 11,
+      "economy.generic": 50,
+      "economy.hidden_bid_mindgame": 1,
+      "economy.high_risk_burst_credit": 1,
       "economy.node_trash_credit": 1,
       "economy.recurring": 26,
       "economy.recurring_breaker_credit": 11,
@@ -747,75 +893,126 @@
       "economy.recurring_tag_clear_credit": 2,
       "economy.recurring_trash_credit": 2,
       "economy.rez_discount": 7,
+      "economy.run_restricted_credit": 1,
       "economy.start_of_turn": 3,
       "economy.trace_credit": 2,
-      "economy.trash_credit": 4,
+      "economy.trash_credit": 5,
+      "economy.trash_for_credit": 2,
       "economy.upgrade_trash_credit": 1,
+      "fort.all_rezzed_ice_trash": 2,
+      "fort.all_rezzed_ice_trash_tag_risk": 4,
+      "fort.reorder_ice": 1,
       "ice.derez": 1,
       "ice.etr": 54,
       "ice.force_rez": 1,
       "ice.future_pressure": 8,
       "ice.reorder_fort": 1,
       "ice.reverse_fort": 1,
+      "ice.rez_or_trash_choice": 1,
       "ice.strength_modifier": 5,
       "ice.strength_reduction": 2,
       "ice.subroutine_modifier": 1,
       "ice.trash_after_full_break": 1,
-      "info.expose": 5,
+      "ice.trash_rezzed": 1,
+      "ice.trash_unrezzed": 1,
+      "info.expose": 11,
       "info.expose_fort": 1,
       "info.expose_installed_card": 2,
+      "info.expose_installed_cards": 1,
+      "info.expose_multiple": 1,
+      "info.expose_outermost_ice": 1,
       "info.hq": 2,
       "info.hq_information": 2,
-      "info.ice_approach_expose": 1,
+      "info.ice_approach_expose": 2,
       "info.persistent_expose": 1,
       "info.rnd_information": 3,
       "info.rnd_manipulation": 1,
       "info.rnd_topdeck": 3,
+      "info.run_recon": 2,
       "remote.agenda_difficulty_tax": 1,
       "remote.agenda_steal_tax": 1,
       "remote.ambush": 5,
       "remote.asset_economy": 16,
       "remote.install_tax": 1,
       "remote.scoring_protection": 5,
+      "risk.action_loss": 1,
       "risk.brain_damage_self_inflicted": 1,
+      "risk.hand_trash_cost": 1,
+      "risk.installed_card_trash_cost": 1,
+      "risk.meat_damage_shortfall": 1,
+      "risk.multi_run_failure_penalty": 1,
+      "risk.opponent_guessing_game": 1,
+      "risk.random_economy": 1,
+      "risk.self_brain_damage": 1,
+      "risk.self_tag": 4,
+      "risk.temporary_program_loss": 1,
+      "run.any_server": 9,
       "run.archives_replacement_access": 1,
       "run.break_cost_penalty": 1,
       "run.break_cost_support": 5,
+      "run.bypass_chosen_ice": 1,
+      "run.bypass_first_ice": 1,
       "run.central_access_conversion": 1,
+      "run.damage_prevention_during_run": 1,
       "run.ends_run_after_effect": 1,
-      "run.event_tempo": 4,
+      "run.event_tempo": 23,
       "run.extra_run_after_success": 1,
+      "run.followup_run": 1,
       "run.jackout_vs_node_upgrade": 1,
+      "run.make_run": 9,
+      "run.multi_run_sequence": 2,
+      "run.noisy_breaker_restriction": 2,
       "run.replacement_access": 4,
       "run.rnd_scout_run": 1,
+      "run.run_credit_pool": 1,
+      "run.run_credit_pool_brain_damage_risk": 1,
       "run.safe_jackout_window": 1,
+      "run.server_specific_hq": 5,
+      "run.server_specific_remote": 1,
+      "run.server_specific_rnd": 2,
+      "run.trace_boost_during_run": 1,
       "score.advance_burst": 13,
       "score.agenda_action": 12,
+      "score.agenda_point_gain": 1,
+      "score.black_ops_agenda_condition": 1,
+      "score.bonus_agenda_point": 1,
+      "score.conditional_agenda_point": 2,
+      "setup.card_recovery": 1,
+      "setup.card_search": 2,
       "setup.cybernetics": 7,
       "setup.deck_exclusive": 12,
-      "setup.draw": 9,
+      "setup.draw": 10,
+      "setup.end_of_turn_bounce": 1,
+      "setup.full_deck_reset": 1,
       "setup.hand_size": 3,
       "setup.hand_size_penalty": 1,
+      "setup.hardware_install": 1,
       "setup.hosted_program_loss_risk": 3,
-      "setup.install_discount": 7,
+      "setup.install_action_burst": 1,
+      "setup.install_credit": 2,
+      "setup.install_discount": 9,
       "setup.install_during_run": 2,
       "setup.install_support": 2,
       "setup.memory": 15,
       "setup.memory_chip": 8,
       "setup.program_backup": 1,
       "setup.program_host": 4,
-      "setup.program_install": 1,
+      "setup.program_install": 5,
       "setup.program_install_credit": 1,
       "setup.program_protection": 1,
-      "setup.program_recovery": 1,
-      "setup.program_search": 2,
+      "setup.program_recovery": 2,
+      "setup.program_search": 5,
       "setup.program_trash_prevention": 1,
       "setup.program_trash_replacement": 1,
       "setup.recovery": 3,
-      "setup.search": 10,
+      "setup.search": 11,
       "setup.self_bounce": 1,
+      "setup.stack_filter": 1,
+      "setup.stack_reorder": 1,
+      "setup.stack_shuffle": 2,
       "setup.stack_top_program_install": 1,
       "setup.stored_program_reclaim": 1,
+      "setup.temporary_program_install": 2,
       "setup.vehicle": 3,
       "tag.payoff": 17,
       "tag.source": 20,
@@ -843,16 +1040,16 @@
       "corp.ice_tax_glacier": 71,
       "corp.remote_scoring": 6,
       "corp.tag_trace_punish": 35,
-      "runner.hq_pressure": 8,
-      "runner.interface_closeout": 8,
-      "runner.rnd_pressure": 8,
-      "runner.run_event_tempo": 4,
-      "runner.search.breaker": 3,
-      "runner.survival_defense": 1
+      "runner.hq_pressure": 10,
+      "runner.interface_closeout": 10,
+      "runner.rnd_pressure": 10,
+      "runner.run_event_tempo": 23,
+      "runner.search.breaker": 6,
+      "runner.survival_defense": 2
     },
-    "totalDerivedStrategyAnchors": 224,
-    "cardsWithDerivedSignals": 389,
-    "cardsWithStrategyAnchors": 178,
+    "totalDerivedStrategyAnchors": 253,
+    "cardsWithDerivedSignals": 433,
+    "cardsWithStrategyAnchors": 202,
     "descriptorGaps": [
       {
         "gapId": "remote_contest_pressure_not_first_class",
@@ -880,7 +1077,7 @@
     ]
   },
   "sideAwareDerivation": {
-    "preventedWrongSideAnchorCount": 31,
+    "preventedWrongSideAnchorCount": 35,
     "preventedWrongSideAnchorExamples": [
       {
         "cardId": "onr_v1_012_clown",
@@ -894,6 +1091,27 @@
         "side": "runner",
         "cardType": "program",
         "signalId": "ice.strength_modifier",
+        "strategyId": "corp.ice_tax_glacier"
+      },
+      {
+        "cardId": "onr_v1_094_inside-job",
+        "side": "runner",
+        "cardType": "event",
+        "signalId": "ice.future_pressure",
+        "strategyId": "corp.ice_tax_glacier"
+      },
+      {
+        "cardId": "onr_v1_098_lucidrine-booster-drug",
+        "side": "runner",
+        "cardType": "event",
+        "signalId": "damage.payoff",
+        "strategyId": "corp.damage_kill"
+      },
+      {
+        "cardId": "onr_v1_111_social-engineering",
+        "side": "runner",
+        "cardType": "event",
+        "signalId": "ice.future_pressure",
         "strategyId": "corp.ice_tax_glacier"
       },
       {
@@ -1087,6 +1305,13 @@
       },
       {
         "cardId": "onr_proteus_108_faked-hit",
+        "side": "runner",
+        "cardType": "event",
+        "signalId": "damage.payoff",
+        "strategyId": "corp.damage_kill"
+      },
+      {
+        "cardId": "onr_proteus_126_test-spin",
         "side": "runner",
         "cardType": "event",
         "signalId": "damage.payoff",
@@ -1446,10 +1671,10 @@
   },
   "ai004Triage": {
     "lineSupport": {
-      "totalOccurrences": 218,
+      "totalOccurrences": 223,
       "legacyOccurrences": 0,
       "categoryCounts": {
-        "normalized_strategy_id": 218
+        "normalized_strategy_id": 223
       },
       "valueCounts": [
         {
@@ -1466,11 +1691,15 @@
         },
         {
           "value": "runner.survival_defense",
-          "count": 24
+          "count": 22
         },
         {
           "value": "corp.remote_scoring",
           "count": 13
+        },
+        {
+          "value": "runner.hq_pressure",
+          "count": 12
         },
         {
           "value": "corp.asset_economy",
@@ -1481,11 +1710,11 @@
           "count": 11
         },
         {
-          "value": "runner.hq_pressure",
-          "count": 9
+          "value": "runner.rnd_pressure",
+          "count": 10
         },
         {
-          "value": "runner.rnd_pressure",
+          "value": "runner.interface_closeout",
           "count": 9
         },
         {
@@ -1493,15 +1722,11 @@
           "count": 7
         },
         {
-          "value": "runner.interface_closeout",
+          "value": "runner.search.breaker",
           "count": 7
         },
         {
           "value": "corp.ambush_bluff",
-          "count": 6
-        },
-        {
-          "value": "runner.search.breaker",
           "count": 6
         },
         {
@@ -2175,6 +2400,37 @@
               {
                 "kind": "flatline_prevention",
                 "scope": "runner",
+                "timing": "prevention_window"
+              },
+              {
+                "kind": "remove_brain_damage",
+                "scope": "runner",
+                "timing": "prevention_window"
+              },
+              {
+                "kind": "tag_prevention",
+                "scope": "runner",
+                "timing": "prevention_window"
+              },
+              {
+                "kind": "economy",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "credits"
+              },
+              {
+                "kind": "action_penalty",
+                "scope": "runner",
+                "timing": "action"
+              },
+              {
+                "kind": "survival_payoff",
+                "scope": "runner",
+                "timing": "prevention_window"
+              },
+              {
+                "kind": "flatline_prevention",
+                "scope": "runner",
                 "timing": "flatline_replacement",
                 "resource": "damage"
               },
@@ -2190,7 +2446,16 @@
               "requires_prevention_window"
             ],
             "cardType": "event",
-            "side": "runner"
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-02",
+              "reviewedBy": "codex"
+            }
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
@@ -2216,6 +2481,11 @@
                 "resource": "cards"
               },
               {
+                "kind": "future_run_effect",
+                "scope": "rnd",
+                "timing": "action"
+              },
+              {
                 "kind": "multiaccess",
                 "scope": "rnd",
                 "timing": "successful_run",
@@ -2223,17 +2493,18 @@
               }
             ],
             "conditions": [
-              "requires_successful_run"
+              "requires_successful_run",
+              "requires_rnd_pressure"
             ],
             "cardType": "event",
             "side": "runner",
             "quality": {
-              "benchmarkCovered": true,
+              "benchmarkCovered": false,
               "hintReviewed": true,
               "strategyCovered": false,
-              "confidence": "high",
+              "confidence": "medium",
               "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
+              "reviewedDate": "2026-06-02",
               "reviewedBy": "codex"
             }
           },
@@ -2261,6 +2532,11 @@
                 "resource": "cards"
               },
               {
+                "kind": "future_run_effect",
+                "scope": "rnd",
+                "timing": "action"
+              },
+              {
                 "kind": "multiaccess",
                 "scope": "rnd",
                 "timing": "successful_run",
@@ -2268,17 +2544,18 @@
               }
             ],
             "conditions": [
-              "requires_successful_run"
+              "requires_successful_run",
+              "requires_rnd_pressure"
             ],
             "cardType": "event",
             "side": "runner",
             "quality": {
-              "benchmarkCovered": true,
+              "benchmarkCovered": false,
               "hintReviewed": true,
               "strategyCovered": false,
-              "confidence": "high",
+              "confidence": "medium",
               "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
+              "reviewedDate": "2026-06-02",
               "reviewedBy": "codex"
             }
           },
@@ -2326,20 +2603,26 @@
                 "scope": "runner",
                 "timing": "successful_run",
                 "resource": "credits"
+              },
+              {
+                "kind": "access_replacement",
+                "scope": "hq",
+                "timing": "successful_run"
               }
             ],
             "conditions": [
-              "requires_successful_run"
+              "requires_successful_run",
+              "requires_hq_pressure"
             ],
             "cardType": "event",
             "side": "runner",
             "quality": {
-              "benchmarkCovered": true,
+              "benchmarkCovered": false,
               "hintReviewed": true,
               "strategyCovered": false,
-              "confidence": "high",
+              "confidence": "medium",
               "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
+              "reviewedDate": "2026-06-02",
               "reviewedBy": "codex"
             }
           },
@@ -2367,6 +2650,11 @@
                 "resource": "cards"
               },
               {
+                "kind": "future_run_effect",
+                "scope": "hq",
+                "timing": "action"
+              },
+              {
                 "kind": "multiaccess",
                 "scope": "hq",
                 "timing": "successful_run",
@@ -2374,17 +2662,18 @@
               }
             ],
             "conditions": [
-              "requires_successful_run"
+              "requires_successful_run",
+              "requires_hq_pressure"
             ],
             "cardType": "event",
             "side": "runner",
             "quality": {
-              "benchmarkCovered": true,
+              "benchmarkCovered": false,
               "hintReviewed": true,
               "strategyCovered": false,
-              "confidence": "high",
+              "confidence": "medium",
               "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
+              "reviewedDate": "2026-06-02",
               "reviewedBy": "codex"
             }
           },
@@ -2412,6 +2701,11 @@
                 "resource": "cards"
               },
               {
+                "kind": "future_run_effect",
+                "scope": "hq",
+                "timing": "action"
+              },
+              {
                 "kind": "multiaccess",
                 "scope": "hq",
                 "timing": "successful_run",
@@ -2419,17 +2713,18 @@
               }
             ],
             "conditions": [
-              "requires_successful_run"
+              "requires_successful_run",
+              "requires_hq_pressure"
             ],
             "cardType": "event",
             "side": "runner",
             "quality": {
-              "benchmarkCovered": true,
+              "benchmarkCovered": false,
               "hintReviewed": true,
               "strategyCovered": false,
-              "confidence": "high",
+              "confidence": "medium",
               "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
+              "reviewedDate": "2026-06-02",
               "reviewedBy": "codex"
             }
           },
@@ -2455,6 +2750,11 @@
                 "timing": "action"
               },
               {
+                "kind": "card_recovery",
+                "scope": "runner",
+                "timing": "action"
+              },
+              {
                 "kind": "zone_shuffle",
                 "scope": "runner",
                 "timing": "action"
@@ -2475,15 +2775,30 @@
             "conditions": [
               "requires_heap_card"
             ],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "replacement_target",
+                "timing": "on_play",
+                "targetType": "program",
+                "purpose": "recover_program",
+                "preferences": [
+                  "program_repairs_missing_coverage",
+                  "program_preserves_run_goal"
+                ],
+                "avoid": [],
+                "hiddenInfoPolicy": "public_or_controller_known_only"
+              }
+            ],
             "cardType": "event",
             "side": "runner",
             "quality": {
-              "benchmarkCovered": true,
+              "benchmarkCovered": false,
               "hintReviewed": true,
               "strategyCovered": false,
               "confidence": "medium",
               "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
+              "reviewedDate": "2026-06-02",
               "reviewedBy": "codex"
             }
           },
@@ -2516,7 +2831,8 @@
               }
             ],
             "conditions": [
-              "requires_successful_run"
+              "requires_successful_run",
+              "requires_rnd_pressure"
             ],
             "cardType": "event",
             "side": "runner",
@@ -2524,15 +2840,145 @@
               "benchmarkCovered": false,
               "hintReviewed": true,
               "strategyCovered": false,
-              "confidence": "high",
+              "confidence": "medium",
               "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
+              "reviewedDate": "2026-06-02",
               "reviewedBy": "codex"
             }
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.rnd_pressure"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_105_priority-wreck",
+          "side": "runner",
+          "cardType": "event",
+          "value": "runner.hq_pressure",
+          "evidence": {
+            "lineSupport": [
+              "runner.hq_pressure"
+            ],
+            "effects": [
+              {
+                "kind": "access_replacement",
+                "scope": "hq",
+                "timing": "successful_run"
+              },
+              {
+                "kind": "run_tax",
+                "scope": "corp",
+                "timing": "successful_run"
+              },
+              {
+                "kind": "access_replacement",
+                "scope": "hq",
+                "timing": "successful_run"
+              }
+            ],
+            "conditions": [
+              "requires_successful_run",
+              "requires_hq_pressure"
+            ],
+            "cardType": "event",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-02",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.hq_pressure"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_106_private-ldl-access",
+          "side": "runner",
+          "cardType": "event",
+          "value": "runner.rnd_pressure",
+          "evidence": {
+            "lineSupport": [
+              "runner.rnd_pressure"
+            ],
+            "effects": [
+              {
+                "kind": "access_replacement",
+                "scope": "hq",
+                "timing": "successful_run"
+              }
+            ],
+            "conditions": [
+              "requires_successful_run",
+              "requires_hq_pressure"
+            ],
+            "cardType": "event",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-02",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.rnd_pressure"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_107_romp-through-hq",
+          "side": "runner",
+          "cardType": "event",
+          "value": "runner.hq_pressure",
+          "evidence": {
+            "lineSupport": [
+              "runner.hq_pressure"
+            ],
+            "effects": [
+              {
+                "kind": "access_replacement",
+                "scope": "hq",
+                "timing": "successful_run"
+              },
+              {
+                "kind": "trash_credit",
+                "scope": "accessed_card",
+                "timing": "on_access",
+                "resource": "trash_credits"
+              }
+            ],
+            "conditions": [
+              "requires_successful_run",
+              "requires_hq_pressure"
+            ],
+            "cardType": "event",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-02",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.hq_pressure"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -2552,21 +2998,46 @@
                 "timing": "action"
               },
               {
+                "kind": "install",
+                "scope": "installed_card",
+                "timing": "action"
+              },
+              {
                 "kind": "install_discount",
                 "scope": "installed_card",
                 "timing": "action"
+              },
+              {
+                "kind": "delayed_penalty",
+                "scope": "runner",
+                "timing": "runner_turn"
               }
             ],
             "conditions": [],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "search_install_target",
+                "timing": "on_play",
+                "targetType": "program",
+                "purpose": "temporary_program_install",
+                "preferences": [
+                  "program_repairs_missing_coverage",
+                  "program_preserves_run_goal"
+                ],
+                "avoid": [],
+                "hiddenInfoPolicy": "public_or_controller_known_only"
+              }
+            ],
             "cardType": "event",
             "side": "runner",
             "quality": {
-              "benchmarkCovered": true,
+              "benchmarkCovered": false,
               "hintReviewed": true,
               "strategyCovered": false,
-              "confidence": "high",
+              "confidence": "medium",
               "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
+              "reviewedDate": "2026-06-02",
               "reviewedBy": "codex"
             }
           },
@@ -2607,57 +3078,36 @@
             "conditions": [
               "requires_stack_search"
             ],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_play",
+                "targetType": "program",
+                "purpose": "program_search",
+                "preferences": [
+                  "program_repairs_missing_coverage",
+                  "program_preserves_run_goal"
+                ],
+                "avoid": [],
+                "hiddenInfoPolicy": "public_or_controller_known_only"
+              }
+            ],
             "cardType": "event",
             "side": "runner",
             "quality": {
-              "benchmarkCovered": true,
+              "benchmarkCovered": false,
               "hintReviewed": true,
               "strategyCovered": false,
-              "confidence": "high",
+              "confidence": "medium",
               "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
+              "reviewedDate": "2026-06-02",
               "reviewedBy": "codex"
             }
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.search.breaker"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_v1_116_total-genetic-retrofit",
-          "side": "runner",
-          "cardType": "event",
-          "value": "runner.survival_defense",
-          "evidence": {
-            "lineSupport": [
-              "runner.survival_defense"
-            ],
-            "effects": [
-              {
-                "kind": "tag_prevention",
-                "scope": "runner",
-                "timing": "prevention_window",
-                "resource": "tags"
-              },
-              {
-                "kind": "survival_payoff",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "tags"
-              }
-            ],
-            "conditions": [
-              "requires_prevention_window",
-              "requires_runner_tagged"
-            ],
-            "cardType": "event",
-            "side": "runner"
-          },
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "runner.survival_defense"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -11641,19 +12091,38 @@
                 "scope": "hq",
                 "timing": "successful_run",
                 "resource": "cards"
+              },
+              {
+                "kind": "future_run_effect",
+                "scope": "hq",
+                "timing": "action"
+              },
+              {
+                "kind": "run_lock",
+                "scope": "runner",
+                "timing": "during_run"
+              },
+              {
+                "kind": "multiaccess",
+                "scope": "hq",
+                "timing": "successful_run",
+                "resource": "cards"
               }
             ],
             "conditions": [
-              "requires_successful_run"
+              "requires_successful_run",
+              "requires_hq_pressure"
             ],
             "cardType": "event",
             "side": "runner",
             "quality": {
               "benchmarkCovered": false,
-              "hintReviewed": false,
+              "hintReviewed": true,
               "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-02",
+              "reviewedBy": "codex"
             }
           },
           "triageCategory": "normalized_strategy_id",
@@ -11678,19 +12147,38 @@
                 "scope": "hq",
                 "timing": "successful_run",
                 "resource": "cards"
+              },
+              {
+                "kind": "future_run_effect",
+                "scope": "hq",
+                "timing": "action"
+              },
+              {
+                "kind": "run_lock",
+                "scope": "runner",
+                "timing": "during_run"
+              },
+              {
+                "kind": "multiaccess",
+                "scope": "hq",
+                "timing": "successful_run",
+                "resource": "cards"
               }
             ],
             "conditions": [
-              "requires_successful_run"
+              "requires_successful_run",
+              "requires_hq_pressure"
             ],
             "cardType": "event",
             "side": "runner",
             "quality": {
               "benchmarkCovered": false,
-              "hintReviewed": false,
+              "hintReviewed": true,
               "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-02",
+              "reviewedBy": "codex"
             }
           },
           "triageCategory": "normalized_strategy_id",
@@ -11700,45 +12188,140 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "cardId": "onr_proteus_112_identity-donor",
+          "cardId": "onr_proteus_102_blackmail",
           "side": "runner",
           "cardType": "event",
-          "value": "runner.survival_defense",
+          "value": "runner.hq_pressure",
           "evidence": {
             "lineSupport": [
-              "runner.survival_defense"
+              "runner.hq_pressure",
+              "runner.interface_closeout"
             ],
             "effects": [
               {
-                "kind": "flatline_prevention",
-                "scope": "runner",
-                "timing": "flatline_replacement",
-                "resource": "damage"
+                "kind": "access_replacement",
+                "scope": "hq",
+                "timing": "successful_run"
               },
               {
-                "kind": "prevention_replacement",
+                "kind": "scored_agenda_action",
                 "scope": "runner",
-                "timing": "flatline_replacement",
-                "resource": "damage"
+                "timing": "successful_run"
+              },
+              {
+                "kind": "access_replacement",
+                "scope": "hq",
+                "timing": "successful_run"
               }
             ],
             "conditions": [
-              "requires_flatline",
-              "requires_prevention_window"
+              "requires_successful_run",
+              "requires_hq_pressure"
             ],
             "cardType": "event",
             "side": "runner",
             "quality": {
               "benchmarkCovered": false,
-              "hintReviewed": false,
+              "hintReviewed": true,
               "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-02",
+              "reviewedBy": "codex"
             }
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
-            "runner.survival_defense"
+            "runner.hq_pressure"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_102_blackmail",
+          "side": "runner",
+          "cardType": "event",
+          "value": "runner.interface_closeout",
+          "evidence": {
+            "lineSupport": [
+              "runner.hq_pressure",
+              "runner.interface_closeout"
+            ],
+            "effects": [
+              {
+                "kind": "access_replacement",
+                "scope": "hq",
+                "timing": "successful_run"
+              },
+              {
+                "kind": "scored_agenda_action",
+                "scope": "runner",
+                "timing": "successful_run"
+              },
+              {
+                "kind": "access_replacement",
+                "scope": "hq",
+                "timing": "successful_run"
+              }
+            ],
+            "conditions": [
+              "requires_successful_run",
+              "requires_hq_pressure"
+            ],
+            "cardType": "event",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-02",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.interface_closeout"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_119_promises-promises",
+          "side": "runner",
+          "cardType": "event",
+          "value": "runner.interface_closeout",
+          "evidence": {
+            "lineSupport": [
+              "runner.interface_closeout"
+            ],
+            "effects": [
+              {
+                "kind": "scored_agenda_action",
+                "scope": "runner",
+                "timing": "on_access"
+              },
+              {
+                "kind": "access_replacement",
+                "scope": "runner",
+                "timing": "on_access"
+              }
+            ],
+            "conditions": [],
+            "cardType": "event",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-02",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.interface_closeout"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -11758,19 +12341,38 @@
                 "scope": "rnd",
                 "timing": "successful_run",
                 "resource": "cards"
+              },
+              {
+                "kind": "future_run_effect",
+                "scope": "rnd",
+                "timing": "action"
+              },
+              {
+                "kind": "run_lock",
+                "scope": "runner",
+                "timing": "during_run"
+              },
+              {
+                "kind": "multiaccess",
+                "scope": "rnd",
+                "timing": "successful_run",
+                "resource": "cards"
               }
             ],
             "conditions": [
-              "requires_successful_run"
+              "requires_successful_run",
+              "requires_rnd_pressure"
             ],
             "cardType": "event",
             "side": "runner",
             "quality": {
               "benchmarkCovered": false,
-              "hintReviewed": false,
+              "hintReviewed": true,
               "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-02",
+              "reviewedBy": "codex"
             }
           },
           "triageCategory": "normalized_strategy_id",
@@ -11795,24 +12397,118 @@
                 "scope": "rnd",
                 "timing": "successful_run",
                 "resource": "cards"
+              },
+              {
+                "kind": "future_run_effect",
+                "scope": "rnd",
+                "timing": "action"
+              },
+              {
+                "kind": "run_lock",
+                "scope": "runner",
+                "timing": "during_run"
+              },
+              {
+                "kind": "multiaccess",
+                "scope": "rnd",
+                "timing": "successful_run",
+                "resource": "cards"
               }
             ],
             "conditions": [
-              "requires_successful_run"
+              "requires_successful_run",
+              "requires_rnd_pressure"
             ],
             "cardType": "event",
             "side": "runner",
             "quality": {
               "benchmarkCovered": false,
-              "hintReviewed": false,
+              "hintReviewed": true,
               "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-02",
+              "reviewedBy": "codex"
             }
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "runner.interface_closeout"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_126_test-spin",
+          "side": "runner",
+          "cardType": "event",
+          "value": "runner.search.breaker",
+          "evidence": {
+            "lineSupport": [
+              "runner.search.breaker"
+            ],
+            "effects": [
+              {
+                "kind": "search",
+                "scope": "runner",
+                "timing": "action"
+              },
+              {
+                "kind": "install",
+                "scope": "installed_card",
+                "timing": "action"
+              },
+              {
+                "kind": "install_discount",
+                "scope": "installed_card",
+                "timing": "action"
+              },
+              {
+                "kind": "future_run_effect",
+                "scope": "server",
+                "timing": "action"
+              },
+              {
+                "kind": "delayed_penalty",
+                "scope": "runner",
+                "timing": "runner_turn"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "runner_turn"
+              }
+            ],
+            "conditions": [],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "search_install_target",
+                "timing": "on_play",
+                "targetType": "program",
+                "purpose": "temporary_program_install_run",
+                "preferences": [
+                  "program_repairs_missing_coverage",
+                  "program_preserves_run_goal"
+                ],
+                "avoid": [],
+                "hiddenInfoPolicy": "public_or_controller_known_only"
+              }
+            ],
+            "cardType": "event",
+            "side": "runner",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": false,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-02",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "runner.search.breaker"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -17342,7 +18038,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[1].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[2].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.hq_full_reveal",
       "strategyAnchorFor": [
@@ -17352,7 +18048,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[3].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[4].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.hq_random_reveal",
       "strategyAnchorFor": [
@@ -17362,7 +18058,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[5].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[10].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.hq_via_archives",
       "strategyAnchorFor": [
@@ -17372,7 +18068,17 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[9].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[11].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "access.next_agenda_bonus",
+      "strategyAnchorFor": [
+        "runner.interface_closeout"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[16].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.rnd_top_card",
       "strategyAnchorFor": [
@@ -17382,7 +18088,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[10].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[17].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.rnd_top_cards",
       "strategyAnchorFor": [
@@ -17392,7 +18098,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[11].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[18].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.rnd_top_reorder",
       "strategyAnchorFor": [
@@ -17402,11 +18108,61 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[132].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[93].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "defense.flatline_prevention",
+      "strategyAnchorFor": [
+        "runner.survival_defense"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[165].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "info.rnd_manipulation",
       "strategyAnchorFor": [
         "runner.rnd_pressure"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[221].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "score.agenda_point_gain",
+      "strategyAnchorFor": [
+        "runner.interface_closeout"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[223].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "score.bonus_agenda_point",
+      "strategyAnchorFor": [
+        "runner.interface_closeout"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[252].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "setup.program_recovery",
+      "strategyAnchorFor": [
+        "runner.search.breaker"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[267].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "setup.temporary_program_install",
+      "strategyAnchorFor": [
+        "runner.search.breaker"
       ]
     },
     {

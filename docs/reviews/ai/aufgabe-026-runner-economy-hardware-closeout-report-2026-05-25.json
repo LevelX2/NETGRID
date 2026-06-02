@@ -17,11 +17,11 @@
   "includedCardCount": 18,
   "excludedCardCount": 17,
   "confirmedGeneratedFactCount": 45,
-  "previewAddedFactCount": 26,
+  "previewAddedFactCount": 22,
   "hardErrorCount": 0,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 31,
+  "normalizedDifferenceCount": 29,
   "remainingDifferenceCount": 0,
   "paymentContextInfoCount": 3,
   "actionContextInfoCount": 1,
@@ -29,7 +29,7 @@
   "handSizeContextInfoCount": 2,
   "hiddenZoneContextInfoCount": 8,
   "delayedPenaltyContextInfoCount": 1,
-  "descriptorFollowupCount": 23,
+  "descriptorFollowupCount": 24,
   "readiness": "ready_read_only_split_subbatches",
   "subBatchReadiness": {
     "runner_action_economy": {
@@ -70,14 +70,14 @@
     }
   },
   "normalizationRuleCounts": {
-    "hidden_zone_context_normalization": 4,
+    "hidden_zone_context_normalization": 2,
     "runner_action_economy_normalization": 2,
-    "runner_economy_strategy_overlay_split": 13,
+    "runner_economy_strategy_overlay_split": 14,
     "runner_finite_pool_economy_normalization": 2,
     "runner_install_discount_context_normalization": 1,
     "runner_loan_debt_normalization": 3,
     "runner_resource_economy_risk_split": 1,
-    "runner_search_recovery_normalization": 5
+    "runner_search_recovery_normalization": 4
   },
   "normalizationRules": [
     "runner_burst_economy_normalization",
@@ -153,18 +153,8 @@
         "effect:card_recovery",
         "effect:search"
       ],
-      "previewAdds": ["condition:requires_heap_card", "effect:card_recovery"],
+      "previewAdds": [],
       "normalizedDifferences": [
-        {
-          "kind": "condition:requires_heap_card",
-          "rule": "hidden_zone_context_normalization",
-          "status": "normalized"
-        },
-        {
-          "kind": "effect:card_recovery",
-          "rule": "runner_search_recovery_normalization",
-          "status": "normalized"
-        },
         {
           "kind": "effect:zone_shuffle",
           "rule": "runner_economy_strategy_overlay_split",
@@ -184,7 +174,6 @@
       ],
       "delayedPenaltyContextInfos": [],
       "descriptorFollowups": [
-        "Generated facts contain fields not currently mirrored manually.",
         "Manual ontology contains fields not currently derivable.",
         "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
       ],
@@ -207,15 +196,10 @@
         "effect:card_recovery",
         "effect:search"
       ],
-      "previewAdds": ["condition:requires_heap_card", "effect:card_recovery"],
+      "previewAdds": ["effect:search"],
       "normalizedDifferences": [
         {
-          "kind": "condition:requires_heap_card",
-          "rule": "hidden_zone_context_normalization",
-          "status": "normalized"
-        },
-        {
-          "kind": "effect:card_recovery",
+          "kind": "effect:search",
           "rule": "runner_search_recovery_normalization",
           "status": "normalized"
         }
@@ -260,6 +244,11 @@
           "kind": "condition:requires_stack_search",
           "rule": "runner_search_recovery_normalization",
           "status": "normalized"
+        },
+        {
+          "kind": "effect:topdeck_info",
+          "rule": "runner_economy_strategy_overlay_split",
+          "status": "normalized"
         }
       ],
       "paymentContextInfos": [],
@@ -276,6 +265,7 @@
       "delayedPenaltyContextInfos": [],
       "descriptorFollowups": [
         "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable.",
         "Search/topdeck target granularity is not fully expressible in the current ontology comparison."
       ],
       "remainingIssues": [],
@@ -392,7 +382,7 @@
         "condition:requires_grip_card",
         "effect:economy"
       ],
-      "previewAdds": ["condition:requires_grip_card", "effect:economy"],
+      "previewAdds": ["condition:requires_grip_card"],
       "normalizedDifferences": [
         {
           "kind": "condition:requires_grip_card",
@@ -400,7 +390,7 @@
           "status": "normalized"
         },
         {
-          "kind": "effect:economy",
+          "kind": "effect:resource_trash",
           "rule": "runner_resource_economy_risk_split",
           "status": "normalized"
         }
@@ -418,7 +408,8 @@
       ],
       "delayedPenaltyContextInfos": [],
       "descriptorFollowups": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "remainingIssues": [],
       "readiness": "ready_read_only_with_context_followup"
