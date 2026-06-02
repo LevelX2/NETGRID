@@ -39,6 +39,10 @@ describe("AI hint ontology validation", () => {
     const hintsByCard = new Map(
       activeAiHintsData.cards.map((hint) => [hint.cardId, hint]),
     );
+    const strategyCoveredPilotCardIds = new Set([
+      "onr_v1_274_tutor",
+      "onr_v1_277_virizz",
+    ]);
 
     for (const cardId of pilotCardIds) {
       const hint = hintsByCard.get(cardId);
@@ -46,7 +50,9 @@ describe("AI hint ontology validation", () => {
       expect(validateAiHintOntologyFields(hint).errors, cardId).toEqual([]);
       expect(hint?.effects?.length, cardId).toBeGreaterThan(0);
       expect(hint?.quality?.hintReviewed, cardId).toBe(true);
-      expect(hint?.quality?.strategyCovered, cardId).toBe(false);
+      expect(hint?.quality?.strategyCovered, cardId).toBe(
+        strategyCoveredPilotCardIds.has(cardId),
+      );
     }
   });
 

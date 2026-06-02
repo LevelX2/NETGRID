@@ -6180,43 +6180,11 @@
               "reason": "derived_strategy_anchor_from_inspector_index"
             },
             {
-              "cardId": "onr_v1_243_fetch-4-0-1",
-              "quantity": 1,
-              "source": "lineSupport",
-              "signal": "corp.tag_trace_punish",
-              "strategyId": "corp.tag_trace_punish",
-              "reason": "normalized_lineSupport_strategy_goal"
-            },
-            {
-              "cardId": "onr_v1_243_fetch-4-0-1",
-              "quantity": 1,
-              "source": "strategicRole",
-              "role": "engine_anchor",
-              "strategyId": "corp.tag_trace_punish",
-              "reason": "valid_strategicRole_reinforces_existing_anchor"
-            },
-            {
               "cardId": "onr_v1_249_hunter",
               "quantity": 1,
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.tag_trace_punish",
               "reason": "derived_strategy_anchor_from_inspector_index"
-            },
-            {
-              "cardId": "onr_v1_249_hunter",
-              "quantity": 1,
-              "source": "lineSupport",
-              "signal": "corp.tag_trace_punish",
-              "strategyId": "corp.tag_trace_punish",
-              "reason": "normalized_lineSupport_strategy_goal"
-            },
-            {
-              "cardId": "onr_v1_249_hunter",
-              "quantity": 1,
-              "source": "strategicRole",
-              "role": "engine_anchor",
-              "strategyId": "corp.tag_trace_punish",
-              "reason": "valid_strategicRole_reinforces_existing_anchor"
             },
             {
               "cardId": "onr_v1_285_closed-accounts",
@@ -6409,7 +6377,7 @@
       "legacySignalCounts": {
         "lineSupport:corp.ice_tax_glacier": 2,
         "lineSupport:corp.remote_scoring": 2,
-        "lineSupport:corp.tag_trace_punish": 6,
+        "lineSupport:corp.tag_trace_punish": 4,
         "planRole:bait_runner": 5,
         "planRole:build_scoring_remote": 5,
         "planRole:protect_hq": 10,
@@ -6521,6 +6489,6 @@
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 2
     },
-    "contentSha256": "0238c2ae4e7d4fd5e8ffc7d4e221e3e90880441608321ee9a608cff38a31083b"
+    "contentSha256": "691822128ee524713572ac034a46356fb3fc6ad828a408f7f4ecbd5f7ea1ae0a"
   }
 }

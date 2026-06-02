@@ -1,0 +1,5808 @@
+{
+  "schemaVersion": "ai024-corp-ice-semantics-review-report-v1",
+  "taskId": "AI024",
+  "generatedAt": "2026-06-02",
+  "status": "complete",
+  "scope": "corp_ice",
+  "sourceCommit": "f2ebeb6d",
+  "summary": {
+    "activeCorpIceCount": 95,
+    "reviewedIceCount": 95,
+    "inactiveCheckedIceCount": 11,
+    "changedIceCount": 95,
+    "unchangedCheckedIceCount": 0,
+    "newTacticSignalCount": 29,
+    "changedExistingTacticSignalCount": 0,
+    "removedOrAvoidedSubtypeSignalCount": 20,
+    "newStrategyIdCount": 0,
+    "strategySupportPairCount": 46,
+    "targetProfileCandidateCount": 14,
+    "schemaGapCount": 9,
+    "plannerEffect": false,
+    "actionScoreEffect": false,
+    "planWeightEffect": false,
+    "targetingAiEffect": false,
+    "engineEffect": false,
+    "legalEffect": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivationEffect": false,
+    "hiddenInfoLeakEffect": false
+  },
+  "inventory": {
+    "activeCompiledIceCardIds": [
+      "onr_v1_221_asp",
+      "onr_v1_222_ball-and-chain",
+      "onr_v1_223_banpei",
+      "onr_v1_224_bolter-cluster",
+      "onr_v1_225_canis-major",
+      "onr_v1_226_canis-minor",
+      "onr_v1_227_cerberus",
+      "onr_v1_228_cinderella",
+      "onr_v1_229_code-corpse",
+      "onr_v1_230_cortical-scanner",
+      "onr_v1_231_cortical-scrub",
+      "onr_v1_232_crystal-wall",
+      "onr_v1_233_d-arc-knight",
+      "onr_v1_234_data-darts",
+      "onr_v1_235_data-naga",
+      "onr_v1_236_data-raven",
+      "onr_v1_237_data-wall",
+      "onr_v1_238_data-wall-2-0",
+      "onr_v1_239_endless-corridor",
+      "onr_v1_240_fang",
+      "onr_v1_241_fang-2-0",
+      "onr_v1_242_fatal-attractor",
+      "onr_v1_243_fetch-4-0-1",
+      "onr_v1_244_filter",
+      "onr_v1_245_fire-wall",
+      "onr_v1_246_fragmentation-storm",
+      "onr_v1_247_haunting-inquisition",
+      "onr_v1_248_homewrecker",
+      "onr_v1_249_hunter",
+      "onr_v1_250_ice-pick-willie",
+      "onr_v1_251_jack-attack",
+      "onr_v1_252_keeper",
+      "onr_v1_253_laser-wire",
+      "onr_v1_254_liche",
+      "onr_v1_255_mastiff",
+      "onr_v1_256_mazer",
+      "onr_v1_257_nerve-labyrinth",
+      "onr_v1_258_neural-blade",
+      "onr_v1_259_in-the-face",
+      "onr_v1_260_pocket-virtual-reality",
+      "onr_v1_261_quandary",
+      "onr_v1_262_razor-wire",
+      "onr_v1_263_reinforced-wall",
+      "onr_v1_264_rex",
+      "onr_v1_265_rock-is-strong",
+      "onr_v1_266_scramble",
+      "onr_v1_267_sentinels-prime",
+      "onr_v1_268_shock-r",
+      "onr_v1_269_shotgun-wire",
+      "onr_v1_270_sleeper",
+      "onr_v1_271_tko-2-0",
+      "onr_v1_272_too-many-doors",
+      "onr_v1_273_triggerman",
+      "onr_v1_274_tutor",
+      "onr_v1_275_vacuum-link",
+      "onr_v1_276_viral-15",
+      "onr_v1_277_virizz",
+      "onr_v1_278_wall-of-ice",
+      "onr_v1_279_wall-of-static",
+      "onr_v1_280_zombie",
+      "onr_proteus_011_brain-wash",
+      "onr_proteus_012_bug-zapper",
+      "onr_proteus_013_caryatid",
+      "onr_proteus_014_chihuahua",
+      "onr_proteus_015_colonel-failure",
+      "onr_proteus_016_coyote",
+      "onr_proteus_017_credit-blocks",
+      "onr_proteus_018_datacomb",
+      "onr_proteus_019_death-yo-yo",
+      "onr_proteus_020_digiconda",
+      "onr_proteus_021_dog-pile",
+      "onr_proteus_022_food-fight",
+      "onr_proteus_023_galatea",
+      "onr_proteus_024_gatekeeper",
+      "onr_proteus_025_homing-missile",
+      "onr_proteus_026_hunting-pack",
+      "onr_proteus_027_iceberg",
+      "onr_proteus_028_lesser-arcana",
+      "onr_proteus_029_marionette",
+      "onr_proteus_030_mastermind",
+      "onr_proteus_031_minotaur",
+      "onr_proteus_032_misleading-access-menus",
+      "onr_proteus_033_mobile-barricade",
+      "onr_proteus_034_riddler",
+      "onr_proteus_035_roadblock",
+      "onr_proteus_036_sandstorm",
+      "onr_proteus_037_scaffolding",
+      "onr_proteus_038_snowbank",
+      "onr_proteus_039_sphinx-2006",
+      "onr_proteus_040_sumo-2008",
+      "onr_proteus_041_toughoniumtm-wall",
+      "onr_proteus_042_tumblers",
+      "onr_proteus_043_twisty-passages",
+      "onr_proteus_044_walking-wall",
+      "onr_proteus_045_washed-up-solo-construct"
+    ],
+    "inactiveCheckedIceCardIds": [
+      "onr_classic_005_baskerville",
+      "onr_classic_006_bolter-swarm",
+      "onr_classic_007_brain-drain",
+      "onr_classic_008_deadeye",
+      "onr_classic_009_dumpster",
+      "onr_classic_010_entrapment",
+      "onr_classic_011_glacier",
+      "onr_classic_012_imperial-guard",
+      "onr_classic_013_puzzle",
+      "onr_classic_014_trapdoor",
+      "onr_classic_015_vortex"
+    ],
+    "countDiscrepancies": [
+      {
+        "setId": "originalset-v1",
+        "expectedSpoilerCount": 60,
+        "activeCompiledRepoCount": 60,
+        "status": "matches"
+      },
+      {
+        "setId": "proteus",
+        "expectedSpoilerCount": 35,
+        "activeCompiledRepoCount": 35,
+        "status": "matches"
+      },
+      {
+        "setId": "classic",
+        "expectedSpoilerCount": 60,
+        "activeCompiledRepoCount": 0,
+        "inactiveKnownRepoCount": 11,
+        "status": "repo_has_inactive_classic_subset_originalset_is_active_classic_line"
+      }
+    ]
+  },
+  "clusterOverview": [
+    {
+      "mechanicalFamily": "brain_damage_ice",
+      "count": 6,
+      "cardIds": [
+        "onr_v1_229_code-corpse",
+        "onr_v1_231_cortical-scrub",
+        "onr_v1_254_liche",
+        "onr_v1_255_mastiff",
+        "onr_proteus_011_brain-wash",
+        "onr_proteus_019_death-yo-yo"
+      ]
+    },
+    {
+      "mechanicalFamily": "conditional_end_run_or_trace_end_run",
+      "count": 4,
+      "cardIds": [
+        "onr_v1_221_asp",
+        "onr_v1_240_fang",
+        "onr_v1_241_fang-2-0",
+        "onr_v1_249_hunter"
+      ]
+    },
+    {
+      "mechanicalFamily": "jackout_lock_or_jackout_tax",
+      "count": 1,
+      "cardIds": [
+        "onr_v1_222_ball-and-chain"
+      ]
+    },
+    {
+      "mechanicalFamily": "meat_damage_ice",
+      "count": 2,
+      "cardIds": [
+        "onr_v1_228_cinderella",
+        "onr_v1_248_homewrecker"
+      ]
+    },
+    {
+      "mechanicalFamily": "mobile_or_position_changing_ice",
+      "count": 1,
+      "cardIds": [
+        "onr_proteus_044_walking-wall"
+      ]
+    },
+    {
+      "mechanicalFamily": "multi_end_run",
+      "count": 3,
+      "cardIds": [
+        "onr_v1_238_data-wall-2-0",
+        "onr_v1_263_reinforced-wall",
+        "onr_proteus_041_toughoniumtm-wall"
+      ]
+    },
+    {
+      "mechanicalFamily": "net_damage_ice",
+      "count": 18,
+      "cardIds": [
+        "onr_v1_224_bolter-cluster",
+        "onr_v1_227_cerberus",
+        "onr_v1_234_data-darts",
+        "onr_v1_242_fatal-attractor",
+        "onr_v1_246_fragmentation-storm",
+        "onr_v1_253_laser-wire",
+        "onr_v1_257_nerve-labyrinth",
+        "onr_v1_258_neural-blade",
+        "onr_v1_262_razor-wire",
+        "onr_v1_269_shotgun-wire",
+        "onr_v1_278_wall-of-ice",
+        "onr_proteus_012_bug-zapper",
+        "onr_proteus_014_chihuahua",
+        "onr_proteus_020_digiconda",
+        "onr_proteus_021_dog-pile",
+        "onr_proteus_027_iceberg",
+        "onr_proteus_030_mastermind",
+        "onr_proteus_033_mobile-barricade"
+      ]
+    },
+    {
+      "mechanicalFamily": "other_ice_utility",
+      "count": 10,
+      "cardIds": [
+        "onr_v1_225_canis-major",
+        "onr_v1_226_canis-minor",
+        "onr_v1_243_fetch-4-0-1",
+        "onr_v1_251_jack-attack",
+        "onr_v1_260_pocket-virtual-reality",
+        "onr_v1_264_rex",
+        "onr_v1_268_shock-r",
+        "onr_v1_280_zombie",
+        "onr_proteus_016_coyote",
+        "onr_proteus_045_washed-up-solo-construct"
+      ]
+    },
+    {
+      "mechanicalFamily": "position_or_outer_ice_scaling",
+      "count": 2,
+      "cardIds": [
+        "onr_proteus_026_hunting-pack",
+        "onr_proteus_031_minotaur"
+      ]
+    },
+    {
+      "mechanicalFamily": "program_trash",
+      "count": 7,
+      "cardIds": [
+        "onr_v1_223_banpei",
+        "onr_v1_233_d-arc-knight",
+        "onr_v1_235_data-naga",
+        "onr_v1_250_ice-pick-willie",
+        "onr_v1_267_sentinels-prime",
+        "onr_v1_273_triggerman",
+        "onr_v1_276_viral-15"
+      ]
+    },
+    {
+      "mechanicalFamily": "random_or_guessing_game",
+      "count": 3,
+      "cardIds": [
+        "onr_v1_272_too-many-doors",
+        "onr_v1_275_vacuum-link",
+        "onr_proteus_035_roadblock"
+      ]
+    },
+    {
+      "mechanicalFamily": "rez_paid_scaling",
+      "count": 4,
+      "cardIds": [
+        "onr_proteus_022_food-fight",
+        "onr_proteus_024_gatekeeper",
+        "onr_proteus_025_homing-missile",
+        "onr_proteus_036_sandstorm"
+      ]
+    },
+    {
+      "mechanicalFamily": "run_lock_or_action_tax",
+      "count": 4,
+      "cardIds": [
+        "onr_v1_247_haunting-inquisition",
+        "onr_v1_274_tutor",
+        "onr_v1_277_virizz",
+        "onr_proteus_032_misleading-access-menus"
+      ]
+    },
+    {
+      "mechanicalFamily": "tag_counter_or_persistent_tag",
+      "count": 1,
+      "cardIds": [
+        "onr_v1_236_data-raven"
+      ]
+    },
+    {
+      "mechanicalFamily": "type_choice_or_mode_choice",
+      "count": 6,
+      "cardIds": [
+        "onr_proteus_013_caryatid",
+        "onr_proteus_017_credit-blocks",
+        "onr_proteus_023_galatea",
+        "onr_proteus_028_lesser-arcana",
+        "onr_proteus_039_sphinx-2006",
+        "onr_proteus_040_sumo-2008"
+      ]
+    },
+    {
+      "mechanicalFamily": "vanilla_end_run",
+      "count": 23,
+      "cardIds": [
+        "onr_v1_230_cortical-scanner",
+        "onr_v1_232_crystal-wall",
+        "onr_v1_237_data-wall",
+        "onr_v1_239_endless-corridor",
+        "onr_v1_244_filter",
+        "onr_v1_245_fire-wall",
+        "onr_v1_252_keeper",
+        "onr_v1_256_mazer",
+        "onr_v1_259_in-the-face",
+        "onr_v1_261_quandary",
+        "onr_v1_265_rock-is-strong",
+        "onr_v1_266_scramble",
+        "onr_v1_270_sleeper",
+        "onr_v1_271_tko-2-0",
+        "onr_v1_279_wall-of-static",
+        "onr_proteus_015_colonel-failure",
+        "onr_proteus_018_datacomb",
+        "onr_proteus_029_marionette",
+        "onr_proteus_034_riddler",
+        "onr_proteus_037_scaffolding",
+        "onr_proteus_038_snowbank",
+        "onr_proteus_042_tumblers",
+        "onr_proteus_043_twisty-passages"
+      ]
+    }
+  ],
+  "newTacticSignals": [
+    {
+      "signalId": "corp_ice.end_run",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "corp_ice.multi_end_run",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.conditional_end_run",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "corp_ice.runner_pay_or_end_run",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.net_damage",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "corp_ice.brain_damage",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "corp_ice.meat_damage",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "corp_ice.damage_source",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "corp_ice.trace_source",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "corp_ice.tag_source",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "corp_ice.persistent_tag_source",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "signalId": "corp_ice.program_trash",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.hardware_trash",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.run_lock",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.jackout_tax",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.encounter_tax",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.break_cost_tax",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.future_strength_buff",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.future_subroutine_modifier",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.position_scaling",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.outer_ice_scaling",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.rez_paid_scaling",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.rez_economy",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "corp_ice.type_choice_or_mode_choice",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "corp_ice.mobile_position_change",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "corp_ice.self_bounce_or_maintenance_drawback",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "corp_ice.random_or_guessing",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "corp_ice.rnd_reorder",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    },
+    {
+      "signalId": "corp_ice.other_utility",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
+    }
+  ],
+  "changedExistingTacticSignals": [],
+  "forbiddenSubtypeSignals": [
+    "corp_ice.ap",
+    "corp_ice.black_ice",
+    "corp_ice.bloodhound",
+    "corp_ice.brainwipe",
+    "corp_ice.code_gate",
+    "corp_ice.dec_krash",
+    "corp_ice.firestarter",
+    "corp_ice.flatline",
+    "corp_ice.hellbolt",
+    "corp_ice.hellhound",
+    "corp_ice.killer",
+    "corp_ice.knockout",
+    "corp_ice.pit_bull",
+    "corp_ice.random",
+    "corp_ice.sentry",
+    "corp_ice.stun",
+    "corp_ice.sword",
+    "corp_ice.wall",
+    "corp_ice.watchdog",
+    "corp_ice.zombie"
+  ],
+  "removedOrAvoidedSubtypeSignals": [
+    "corp_ice.ap",
+    "corp_ice.black_ice",
+    "corp_ice.bloodhound",
+    "corp_ice.brainwipe",
+    "corp_ice.code_gate",
+    "corp_ice.dec_krash",
+    "corp_ice.firestarter",
+    "corp_ice.flatline",
+    "corp_ice.hellbolt",
+    "corp_ice.hellhound",
+    "corp_ice.killer",
+    "corp_ice.knockout",
+    "corp_ice.pit_bull",
+    "corp_ice.random",
+    "corp_ice.sentry",
+    "corp_ice.stun",
+    "corp_ice.sword",
+    "corp_ice.wall",
+    "corp_ice.watchdog",
+    "corp_ice.zombie"
+  ],
+  "newStrategyIds": [],
+  "strategySupportPairs": [
+    {
+      "cardId": "onr_v1_222_ball-and-chain",
+      "title": "Ball and Chain",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.jackout_tax",
+        "corp_ice.multi_end_run"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_223_banpei",
+      "title": "Banpei",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.program_trash"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_224_bolter-cluster",
+      "title": "Bolter Cluster",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.run_lock"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_224_bolter-cluster",
+      "title": "Bolter Cluster",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_pressure",
+      "evidence": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_225_canis-major",
+      "title": "Canis Major",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "ice.strength_modifier"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_226_canis-minor",
+      "title": "Canis Minor",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "ice.strength_modifier"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_227_cerberus",
+      "title": "Cerberus",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_pressure",
+      "evidence": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_228_cinderella",
+      "title": "Cinderella",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.hardware_trash"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_228_cinderella",
+      "title": "Cinderella",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_pressure",
+      "evidence": [
+        "corp_ice.damage_source",
+        "corp_ice.meat_damage",
+        "damage.payoff"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_229_code-corpse",
+      "title": "Code Corpse",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_pressure",
+      "evidence": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "damage.payoff"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_231_cortical-scrub",
+      "title": "Cortical Scrub",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.program_trash"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_231_cortical-scrub",
+      "title": "Cortical Scrub",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_pressure",
+      "evidence": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "damage.payoff"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_233_d-arc-knight",
+      "title": "D'Arc Knight",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.program_trash"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_235_data-naga",
+      "title": "Data Naga",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.program_trash"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_236_data-raven",
+      "title": "Data Raven",
+      "strategyId": "corp.tag_trace_punish",
+      "role": "persistent_tag_source",
+      "evidence": [
+        "corp_ice.persistent_tag_source",
+        "corp_ice.tag_source",
+        "corp_ice.trace_source"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_238_data-wall-2-0",
+      "title": "Data Wall 2.0",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.multi_end_run"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_242_fatal-attractor",
+      "title": "Fatal Attractor",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_pressure",
+      "evidence": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_246_fragmentation-storm",
+      "title": "Fragmentation Storm",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.program_trash"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_247_haunting-inquisition",
+      "title": "Haunting Inquisition",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.run_lock"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_248_homewrecker",
+      "title": "Homewrecker™",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.hardware_trash"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_248_homewrecker",
+      "title": "Homewrecker™",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_pressure",
+      "evidence": [
+        "corp_ice.damage_source",
+        "corp_ice.meat_damage",
+        "damage.payoff"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_250_ice-pick-willie",
+      "title": "Ice Pick Willie",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.program_trash"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_254_liche",
+      "title": "Liche",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_pressure",
+      "evidence": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "damage.payoff"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_255_mastiff",
+      "title": "Mastiff",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_pressure",
+      "evidence": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "damage.payoff"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_v1_263_reinforced-wall",
+      "title": "Reinforced Wall",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.multi_end_run"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_267_sentinels-prime",
+      "title": "Sentinels Prime",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.program_trash"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_273_triggerman",
+      "title": "Triggerman",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.program_trash"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "title": "Tutor",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.jackout_tax",
+        "corp_ice.run_lock"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "title": "Viral 15",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.jackout_tax",
+        "corp_ice.program_trash",
+        "corp_ice.run_lock"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "title": "Virizz",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.break_cost_tax",
+        "corp_ice.run_lock"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_v1_278_wall-of-ice",
+      "title": "Wall of Ice",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_pressure",
+      "evidence": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_proteus_011_brain-wash",
+      "title": "Brain Wash",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_pressure",
+      "evidence": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "damage.payoff"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_proteus_012_bug-zapper",
+      "title": "Bug Zapper",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.outer_ice_scaling",
+        "corp_ice.position_scaling",
+        "ice.strength_modifier"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_019_death-yo-yo",
+      "title": "Death Yo-Yo",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_pressure",
+      "evidence": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "damage.payoff"
+      ],
+      "confidence": "high"
+    },
+    {
+      "cardId": "onr_proteus_020_digiconda",
+      "title": "Digiconda",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.rez_paid_scaling"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_021_dog-pile",
+      "title": "Dog Pile",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.outer_ice_scaling",
+        "corp_ice.position_scaling",
+        "ice.strength_modifier"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_022_food-fight",
+      "title": "Food Fight",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.rez_paid_scaling"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_024_gatekeeper",
+      "title": "Gatekeeper",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.rez_paid_scaling"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_025_homing-missile",
+      "title": "Homing Missile",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.rez_paid_scaling"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_026_hunting-pack",
+      "title": "Hunting Pack",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.outer_ice_scaling",
+        "corp_ice.position_scaling",
+        "ice.strength_modifier"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_030_mastermind",
+      "title": "Mastermind",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.outer_ice_scaling",
+        "corp_ice.position_scaling",
+        "ice.strength_modifier"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_030_mastermind",
+      "title": "Mastermind",
+      "strategyId": "corp.damage_kill",
+      "role": "damage_pressure",
+      "evidence": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_031_minotaur",
+      "title": "Minotaur",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.outer_ice_scaling",
+        "corp_ice.position_scaling",
+        "ice.strength_modifier"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_032_misleading-access-menus",
+      "title": "Misleading Access Menus",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.run_lock"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_036_sandstorm",
+      "title": "Sandstorm",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.rez_paid_scaling"
+      ],
+      "confidence": "medium"
+    },
+    {
+      "cardId": "onr_proteus_041_toughoniumtm-wall",
+      "title": "Toughonium™ Wall",
+      "strategyId": "corp.ice_tax_glacier",
+      "role": "ice_tax_or_lock_piece",
+      "evidence": [
+        "corp_ice.multi_end_run"
+      ],
+      "confidence": "medium"
+    }
+  ],
+  "targetProfileCandidates": [
+    {
+      "cardId": "onr_v1_272_too-many-doors",
+      "title": "Too Many Doors",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "secret_bid_or_guessing_game"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_013_caryatid",
+      "title": "Caryatid",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "on_rez_type_or_mode_choice"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_017_credit-blocks",
+      "title": "Credit Blocks",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "on_rez_type_or_mode_choice"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_020_digiconda",
+      "title": "Digiconda",
+      "status": "candidate",
+      "targetProfileKinds": [
+        "paid_x_or_rez_scaling"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_022_food-fight",
+      "title": "Food Fight",
+      "status": "candidate",
+      "targetProfileKinds": [
+        "paid_x_or_rez_scaling"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_023_galatea",
+      "title": "Galatea",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "on_rez_type_or_mode_choice"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_024_gatekeeper",
+      "title": "Gatekeeper",
+      "status": "candidate",
+      "targetProfileKinds": [
+        "paid_x_or_rez_scaling"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_025_homing-missile",
+      "title": "Homing Missile",
+      "status": "candidate",
+      "targetProfileKinds": [
+        "paid_x_or_rez_scaling"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_028_lesser-arcana",
+      "title": "Lesser Arcana",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "on_rez_type_or_mode_choice"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_033_mobile-barricade",
+      "title": "Mobile Barricade",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "fort_position_change"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_036_sandstorm",
+      "title": "Sandstorm",
+      "status": "candidate",
+      "targetProfileKinds": [
+        "paid_x_or_rez_scaling"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_039_sphinx-2006",
+      "title": "Sphinx 2006",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "on_rez_type_or_mode_choice"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_040_sumo-2008",
+      "title": "Sumo 2008",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "on_rez_type_or_mode_choice"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_044_walking-wall",
+      "title": "Walking Wall",
+      "status": "schema_gap",
+      "targetProfileKinds": [
+        "fort_position_change"
+      ]
+    }
+  ],
+  "hiddenInfoSafetyReview": [
+    {
+      "topic": "corp_ice_hidden_semantics",
+      "result": "pass",
+      "notes": "Corp-ICE semantics remain Corp-side until rezzed, exposed or otherwise legally known. No Runner-side unrezzed ICE projection, UI payload, reconnect, undo, replay, public event, log or client-error path is added."
+    },
+    {
+      "topic": "inspector_and_review_artifacts",
+      "result": "pass",
+      "notes": "Review and Inspector data are diagnostic artifacts. AI024 adds no runtime visibility route and no target selection behavior."
+    }
+  ],
+  "deferredItems": [
+    {
+      "topic": "target_profile_v1_for_ice_mode_paid_position_choices",
+      "decision": "deferred_or_schema_gap",
+      "rationale": "On-rez type/mode choice, paid-X scaling, mobile position changes and secret guessing games are report-only until side-safe TargetProfile schema support exists."
+    },
+    {
+      "topic": "legal_action_semantic_bridge",
+      "decision": "deferred",
+      "rationale": "ICE tactic signals remain read-only and do not generate legality, planner choices, ActionScore or PlanWeight behavior."
+    }
+  ],
+  "postReviewAssignments": [
+    {
+      "cardId": "onr_v1_221_asp",
+      "title": "Asp",
+      "cardType": "ice",
+      "subtypes": [
+        "flatline",
+        "sentry"
+      ],
+      "mechanicalFamily": "conditional_end_run_or_trace_end_run",
+      "functionalEffects": [
+        "conditional_end_run",
+        "tag_source",
+        "trace_source"
+      ],
+      "conditions": [],
+      "risks": [
+        "trace_window"
+      ],
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Asp is reviewed from existing structured ICE hints. Functional signals are corp_ice.conditional_end_run, corp_ice.trace_source, trace.source, corp_ice.tag_source, tag.source. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_222_ball-and-chain",
+      "title": "Ball and Chain",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "mechanicalFamily": "jackout_lock_or_jackout_tax",
+      "functionalEffects": [
+        "encounter_tax",
+        "end_run",
+        "jackout_tax",
+        "multi_end_run"
+      ],
+      "conditions": [
+        "requires_during_run"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.encounter_tax",
+        "corp_ice.end_run",
+        "corp_ice.jackout_tax",
+        "corp_ice.multi_end_run"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.jackout_tax",
+            "corp_ice.multi_end_run"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.jackout_tax",
+        "corp_ice.multi_end_run"
+      ],
+      "supportingEvidence": [
+        "corp_ice.encounter_tax",
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Ball and Chain is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.multi_end_run, corp_ice.encounter_tax, corp_ice.jackout_tax. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_223_banpei",
+      "title": "Banpei",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "mechanicalFamily": "program_trash",
+      "functionalEffects": [
+        "end_run",
+        "program_trash"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice",
+        "program_trash"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.program_trash"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.program_trash"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Banpei is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.program_trash. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_224_bolter-cluster",
+      "title": "Bolter Cluster",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "hellbolt",
+        "sentry"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "encounter_tax",
+        "net_damage",
+        "run_lock"
+      ],
+      "conditions": [
+        "requires_during_run"
+      ],
+      "risks": [
+        "damage_window",
+        "hidden_ice",
+        "next_ice_lock"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.encounter_tax",
+        "corp_ice.net_damage",
+        "corp_ice.run_lock",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff",
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.run_lock"
+          ],
+          "confidence": "medium"
+        },
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_pressure",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.net_damage",
+            "damage.payoff"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "corp_ice.run_lock",
+        "damage.payoff"
+      ],
+      "supportingEvidence": [
+        "corp_ice.encounter_tax"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Bolter Cluster is reviewed from existing structured ICE hints. Functional signals are corp_ice.encounter_tax, corp_ice.run_lock, corp_ice.damage_source, damage.payoff, corp_ice.net_damage. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece, corp.damage_kill/damage_pressure. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_225_canis-major",
+      "title": "Canis Major",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry",
+        "watchdog"
+      ],
+      "mechanicalFamily": "other_ice_utility",
+      "functionalEffects": [
+        "encounter_tax",
+        "strength_modifier"
+      ],
+      "conditions": [
+        "requires_during_run"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.encounter_tax",
+        "ice.strength_modifier"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "ice.strength_modifier"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "ice.strength_modifier"
+      ],
+      "supportingEvidence": [
+        "corp_ice.encounter_tax"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Canis Major is reviewed from existing structured ICE hints. Functional signals are corp_ice.encounter_tax, ice.strength_modifier. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_226_canis-minor",
+      "title": "Canis Minor",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry",
+        "watchdog"
+      ],
+      "mechanicalFamily": "other_ice_utility",
+      "functionalEffects": [
+        "encounter_tax",
+        "strength_modifier"
+      ],
+      "conditions": [
+        "requires_during_run"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.encounter_tax",
+        "ice.strength_modifier"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "ice.strength_modifier"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "ice.strength_modifier"
+      ],
+      "supportingEvidence": [
+        "corp_ice.encounter_tax"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Canis Minor is reviewed from existing structured ICE hints. Functional signals are corp_ice.encounter_tax, ice.strength_modifier. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_227_cerberus",
+      "title": "Cerberus",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black ice",
+        "hellhound",
+        "sentry"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "end_run",
+        "net_damage",
+        "trace_source"
+      ],
+      "conditions": [
+        "requires_trace_success"
+      ],
+      "risks": [
+        "damage_window",
+        "trace_window"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "corp_ice.trace_source",
+        "damage.payoff",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_pressure",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.net_damage",
+            "damage.payoff"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run",
+        "corp_ice.trace_source",
+        "trace.source"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Cerberus is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.net_damage, corp_ice.trace_source, trace.source. Anchors: corp.damage_kill/damage_pressure. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_228_cinderella",
+      "title": "Cinderella",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black ice",
+        "firestarter",
+        "sentry"
+      ],
+      "mechanicalFamily": "meat_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "end_run",
+        "hardware_trash",
+        "meat_damage",
+        "trace_source"
+      ],
+      "conditions": [
+        "requires_trace_success"
+      ],
+      "risks": [
+        "damage_window",
+        "trace_window",
+        "unpreventable_damage"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.hardware_trash",
+        "corp_ice.meat_damage",
+        "corp_ice.trace_source",
+        "damage.payoff",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff",
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.hardware_trash"
+          ],
+          "confidence": "medium"
+        },
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_pressure",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.meat_damage",
+            "damage.payoff"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.hardware_trash",
+        "corp_ice.meat_damage",
+        "damage.payoff"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run",
+        "corp_ice.trace_source",
+        "trace.source"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Cinderella is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.meat_damage, corp_ice.trace_source, trace.source, corp_ice.hardware_trash. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece, corp.damage_kill/damage_pressure. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_229_code-corpse",
+      "title": "Code Corpse",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "ice",
+        "sentry",
+        "zombie"
+      ],
+      "mechanicalFamily": "brain_damage_ice",
+      "functionalEffects": [
+        "brain_damage",
+        "damage_source",
+        "end_run"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_pressure",
+          "evidence": [
+            "corp_ice.brain_damage",
+            "corp_ice.damage_source",
+            "damage.payoff"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "damage.payoff"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Code Corpse is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.brain_damage. Anchors: corp.damage_kill/damage_pressure. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_230_cortical-scanner",
+      "title": "Cortical Scanner",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Cortical Scanner is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_231_cortical-scrub",
+      "title": "Cortical Scrub",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black ice",
+        "brainwipe",
+        "sentry"
+      ],
+      "mechanicalFamily": "brain_damage_ice",
+      "functionalEffects": [
+        "brain_damage",
+        "damage_source",
+        "end_run",
+        "program_trash"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.program_trash",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff",
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.program_trash"
+          ],
+          "confidence": "medium"
+        },
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_pressure",
+          "evidence": [
+            "corp_ice.brain_damage",
+            "corp_ice.damage_source",
+            "damage.payoff"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "corp_ice.program_trash",
+        "damage.payoff"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Cortical Scrub is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.brain_damage, corp_ice.program_trash. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece, corp.damage_kill/damage_pressure. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_232_crystal-wall",
+      "title": "Crystal Wall",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Crystal Wall is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_233_d-arc-knight",
+      "title": "D'Arc Knight",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "mechanicalFamily": "program_trash",
+      "functionalEffects": [
+        "end_run",
+        "program_trash"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.program_trash"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.program_trash"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "D'Arc Knight is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.program_trash. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_234_data-darts",
+      "title": "Data Darts",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "hellbolt",
+        "sentry"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "net_damage"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage_window",
+        "next_encounter_modifier"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Data Darts is reviewed from existing structured ICE hints. Functional signals are corp_ice.damage_source, damage.payoff, corp_ice.net_damage. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_235_data-naga",
+      "title": "Data Naga",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "mechanicalFamily": "program_trash",
+      "functionalEffects": [
+        "end_run",
+        "program_trash"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice",
+        "program_trash"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.program_trash"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.program_trash"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Data Naga is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.program_trash. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_236_data-raven",
+      "title": "Data Raven",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "mechanicalFamily": "tag_counter_or_persistent_tag",
+      "functionalEffects": [
+        "persistent_tag_source",
+        "tag_source",
+        "trace_source"
+      ],
+      "conditions": [
+        "requires_trace_success"
+      ],
+      "risks": [
+        "counter_pressure",
+        "hidden_ice",
+        "runner_removal_window",
+        "tag_window"
+      ],
+      "tacticSignals": [
+        "corp_ice.persistent_tag_source",
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "engine_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "persistent_tag_source",
+          "evidence": [
+            "corp_ice.persistent_tag_source",
+            "corp_ice.tag_source",
+            "corp_ice.trace_source"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.persistent_tag_source",
+        "corp_ice.tag_source",
+        "corp_ice.trace_source"
+      ],
+      "supportingEvidence": [
+        "tag.source",
+        "trace.source"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Data Raven is reviewed from existing structured ICE hints. Functional signals are corp_ice.trace_source, trace.source, corp_ice.tag_source, tag.source, corp_ice.persistent_tag_source. Anchors: corp.tag_trace_punish/persistent_tag_source. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_237_data-wall",
+      "title": "Data Wall",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Data Wall is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_238_data-wall-2-0",
+      "title": "Data Wall 2.0",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "multi_end_run",
+      "functionalEffects": [
+        "end_run",
+        "multi_end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.multi_end_run"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.multi_end_run"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Data Wall 2.0 is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.multi_end_run. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_239_endless-corridor",
+      "title": "Endless Corridor",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Endless Corridor is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_240_fang",
+      "title": "Fang",
+      "cardType": "ice",
+      "subtypes": [
+        "pit bull",
+        "sentry"
+      ],
+      "mechanicalFamily": "conditional_end_run_or_trace_end_run",
+      "functionalEffects": [
+        "conditional_end_run",
+        "end_run",
+        "tag_source",
+        "trace_source"
+      ],
+      "conditions": [],
+      "risks": [
+        "trace_window"
+      ],
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.end_run",
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.end_run",
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Fang is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.conditional_end_run, corp_ice.trace_source, trace.source, corp_ice.tag_source, tag.source. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_241_fang-2-0",
+      "title": "Fang 2.0",
+      "cardType": "ice",
+      "subtypes": [
+        "pit bull",
+        "sentry"
+      ],
+      "mechanicalFamily": "conditional_end_run_or_trace_end_run",
+      "functionalEffects": [
+        "conditional_end_run",
+        "tag_source",
+        "trace_source"
+      ],
+      "conditions": [],
+      "risks": [
+        "trace_window"
+      ],
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Fang 2.0 is reviewed from existing structured ICE hints. Functional signals are corp_ice.conditional_end_run, corp_ice.trace_source, trace.source, corp_ice.tag_source, tag.source. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_242_fatal-attractor",
+      "title": "Fatal Attractor",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black ice",
+        "sentry"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "net_damage"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage",
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_pressure",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.net_damage",
+            "damage.payoff"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "supportingEvidence": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Fatal Attractor is reviewed from existing structured ICE hints. Functional signals are corp_ice.damage_source, damage.payoff, corp_ice.net_damage. Anchors: corp.damage_kill/damage_pressure. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_243_fetch-4-0-1",
+      "title": "Fetch 4.0.1",
+      "cardType": "ice",
+      "subtypes": [
+        "bloodhound",
+        "sentry"
+      ],
+      "mechanicalFamily": "other_ice_utility",
+      "functionalEffects": [
+        "tag_source",
+        "trace_source"
+      ],
+      "conditions": [
+        "requires_trace_success"
+      ],
+      "risks": [
+        "hidden_ice",
+        "tag",
+        "trace"
+      ],
+      "tacticSignals": [
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Fetch 4.0.1 is reviewed from existing structured ICE hints. Functional signals are corp_ice.trace_source, trace.source, corp_ice.tag_source, tag.source. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_244_filter",
+      "title": "Filter",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Filter is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_245_fire-wall",
+      "title": "Fire Wall",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Fire Wall is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_246_fragmentation-storm",
+      "title": "Fragmentation Storm",
+      "cardType": "ice",
+      "subtypes": [
+        "flatline",
+        "sentry"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "net_damage",
+        "program_trash",
+        "trace_source"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage_window",
+        "installed_card_destroy",
+        "trace_window"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "corp_ice.program_trash",
+        "corp_ice.trace_source",
+        "damage.payoff",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.program_trash"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.program_trash"
+      ],
+      "supportingEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "corp_ice.trace_source",
+        "damage.payoff",
+        "trace.source"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Fragmentation Storm is reviewed from existing structured ICE hints. Functional signals are corp_ice.damage_source, damage.payoff, corp_ice.net_damage, corp_ice.trace_source, trace.source, corp_ice.program_trash. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_247_haunting-inquisition",
+      "title": "Haunting Inquisition",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "mechanicalFamily": "run_lock_or_action_tax",
+      "functionalEffects": [
+        "encounter_tax",
+        "run_lock"
+      ],
+      "conditions": [],
+      "risks": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "tacticSignals": [
+        "corp_ice.encounter_tax",
+        "corp_ice.run_lock"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.run_lock"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.run_lock"
+      ],
+      "supportingEvidence": [
+        "corp_ice.encounter_tax"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Haunting Inquisition is reviewed from existing structured ICE hints. Functional signals are corp_ice.encounter_tax, corp_ice.run_lock. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_248_homewrecker",
+      "title": "Homewrecker™",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black ice",
+        "firestarter",
+        "sentry"
+      ],
+      "mechanicalFamily": "meat_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "end_run",
+        "hardware_trash",
+        "meat_damage",
+        "trace_source"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage_window",
+        "trace_window",
+        "unpreventable_damage"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.hardware_trash",
+        "corp_ice.meat_damage",
+        "corp_ice.trace_source",
+        "damage.payoff",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff",
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.hardware_trash"
+          ],
+          "confidence": "medium"
+        },
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_pressure",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.meat_damage",
+            "damage.payoff"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.hardware_trash",
+        "corp_ice.meat_damage",
+        "damage.payoff"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run",
+        "corp_ice.trace_source",
+        "trace.source"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Homewrecker™ is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.meat_damage, corp_ice.trace_source, trace.source, corp_ice.hardware_trash. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece, corp.damage_kill/damage_pressure. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_249_hunter",
+      "title": "Hunter",
+      "cardType": "ice",
+      "subtypes": [
+        "bloodhound",
+        "sentry"
+      ],
+      "mechanicalFamily": "conditional_end_run_or_trace_end_run",
+      "functionalEffects": [
+        "conditional_end_run",
+        "tag_source",
+        "trace_source"
+      ],
+      "conditions": [
+        "requires_trace_success"
+      ],
+      "risks": [
+        "hidden_ice",
+        "tag",
+        "trace"
+      ],
+      "tacticSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Hunter is reviewed from existing structured ICE hints. Functional signals are corp_ice.conditional_end_run, corp_ice.trace_source, trace.source, corp_ice.tag_source, tag.source. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_250_ice-pick-willie",
+      "title": "Ice Pick Willie",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "mechanicalFamily": "program_trash",
+      "functionalEffects": [
+        "end_run",
+        "program_trash"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "public_reveal",
+        "subroutine_bound"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.program_trash"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.program_trash"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Ice Pick Willie is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.program_trash. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_251_jack-attack",
+      "title": "Jack Attack",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "sentry"
+      ],
+      "mechanicalFamily": "other_ice_utility",
+      "functionalEffects": [
+        "tag_source",
+        "trace_source"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice",
+        "tag_window"
+      ],
+      "tacticSignals": [
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Jack Attack is reviewed from existing structured ICE hints. Functional signals are corp_ice.trace_source, trace.source, corp_ice.tag_source, tag.source. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_252_keeper",
+      "title": "Keeper",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Keeper is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_253_laser-wire",
+      "title": "Laser Wire",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "end_run",
+        "net_damage"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage",
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Laser Wire is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.net_damage. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_254_liche",
+      "title": "Liche",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black ice",
+        "sentry"
+      ],
+      "mechanicalFamily": "brain_damage_ice",
+      "functionalEffects": [
+        "brain_damage",
+        "damage_source",
+        "end_run"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_pressure",
+          "evidence": [
+            "corp_ice.brain_damage",
+            "corp_ice.damage_source",
+            "damage.payoff"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "damage.payoff"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Liche is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.brain_damage. Anchors: corp.damage_kill/damage_pressure. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_255_mastiff",
+      "title": "Mastiff",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black ice",
+        "hellhound",
+        "sentry",
+        "watchdog"
+      ],
+      "mechanicalFamily": "brain_damage_ice",
+      "functionalEffects": [
+        "brain_damage",
+        "damage_source",
+        "end_run",
+        "trace_source"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage_window",
+        "trace_window"
+      ],
+      "tacticSignals": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.trace_source",
+        "damage.payoff",
+        "trace.source"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_pressure",
+          "evidence": [
+            "corp_ice.brain_damage",
+            "corp_ice.damage_source",
+            "damage.payoff"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "damage.payoff"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run",
+        "corp_ice.trace_source",
+        "trace.source"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Mastiff is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.brain_damage, corp_ice.trace_source, trace.source. Anchors: corp.damage_kill/damage_pressure. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_256_mazer",
+      "title": "Mazer",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Mazer is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_257_nerve-labyrinth",
+      "title": "Nerve Labyrinth",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "end_run",
+        "net_damage"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage",
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Nerve Labyrinth is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.net_damage. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_258_neural-blade",
+      "title": "Neural Blade",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "sentry",
+        "sword"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "net_damage"
+      ],
+      "conditions": [
+        "requires_during_run"
+      ],
+      "risks": [
+        "damage_window",
+        "hidden_ice",
+        "next_ice_lock"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Neural Blade is reviewed from existing structured ICE hints. Functional signals are corp_ice.damage_source, damage.payoff, corp_ice.net_damage. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_259_in-the-face",
+      "title": "Pi in the 'Face",
+      "cardType": "ice",
+      "subtypes": [
+        "deckrash",
+        "sentry"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Pi in the 'Face is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_260_pocket-virtual-reality",
+      "title": "Pocket Virtual Reality",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "mechanicalFamily": "other_ice_utility",
+      "functionalEffects": [
+        "tag_source",
+        "trace_source"
+      ],
+      "conditions": [],
+      "risks": [
+        "trace_window"
+      ],
+      "tacticSignals": [
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Pocket Virtual Reality is reviewed from existing structured ICE hints. Functional signals are corp_ice.trace_source, trace.source, corp_ice.tag_source, tag.source. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_261_quandary",
+      "title": "Quandary",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Quandary is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_262_razor-wire",
+      "title": "Razor Wire",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "end_run",
+        "net_damage"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage",
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Razor Wire is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.net_damage. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_263_reinforced-wall",
+      "title": "Reinforced Wall",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "multi_end_run",
+      "functionalEffects": [
+        "end_run",
+        "multi_end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.multi_end_run"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.multi_end_run"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Reinforced Wall is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.multi_end_run. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_264_rex",
+      "title": "Rex",
+      "cardType": "ice",
+      "subtypes": [
+        "pit bull",
+        "sentry"
+      ],
+      "mechanicalFamily": "other_ice_utility",
+      "functionalEffects": [
+        "tag_source",
+        "trace_source"
+      ],
+      "conditions": [],
+      "risks": [
+        "trace_window"
+      ],
+      "tacticSignals": [
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
+        "tag.source",
+        "trace.source"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Rex is reviewed from existing structured ICE hints. Functional signals are corp_ice.trace_source, trace.source, corp_ice.tag_source, tag.source. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_265_rock-is-strong",
+      "title": "Rock Is Strong",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Rock Is Strong is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_266_scramble",
+      "title": "Scramble",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Scramble is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_267_sentinels-prime",
+      "title": "Sentinels Prime",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "mechanicalFamily": "program_trash",
+      "functionalEffects": [
+        "end_run",
+        "program_trash"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.program_trash"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.program_trash"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Sentinels Prime is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.program_trash. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_268_shock-r",
+      "title": "Shock.r",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "sentry",
+        "stun"
+      ],
+      "mechanicalFamily": "other_ice_utility",
+      "functionalEffects": [
+        "other_utility"
+      ],
+      "conditions": [
+        "requires_during_run"
+      ],
+      "risks": [
+        "encounter",
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.other_utility"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.other_utility"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Shock.r is reviewed from existing structured ICE hints. Functional signals are corp_ice.other_utility. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_269_shotgun-wire",
+      "title": "Shotgun Wire",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "end_run",
+        "net_damage"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage",
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Shotgun Wire is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.net_damage. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_270_sleeper",
+      "title": "Sleeper",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Sleeper is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_271_tko-2-0",
+      "title": "TKO 2.0",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "knockout",
+        "sentry"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [],
+      "risks": [
+        "action_lock",
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "TKO 2.0 is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_272_too-many-doors",
+      "title": "Too Many Doors",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "mechanicalFamily": "random_or_guessing_game",
+      "functionalEffects": [
+        "random_or_guessing",
+        "rnd_reorder"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_info_barrier",
+        "reorder_updates_memory",
+        "subroutine_bound"
+      ],
+      "tacticSignals": [
+        "corp_ice.random_or_guessing",
+        "corp_ice.rnd_reorder"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.random_or_guessing",
+        "corp_ice.rnd_reorder"
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "secret_bid_or_guessing_game"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Too Many Doors is reviewed from existing structured ICE hints. Functional signals are corp_ice.random_or_guessing, corp_ice.rnd_reorder. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_273_triggerman",
+      "title": "Triggerman",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "mechanicalFamily": "program_trash",
+      "functionalEffects": [
+        "end_run",
+        "program_trash"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.program_trash"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.program_trash"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.program_trash"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Triggerman is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.program_trash. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_274_tutor",
+      "title": "Tutor",
+      "cardType": "ice",
+      "subtypes": [
+        "code gate"
+      ],
+      "mechanicalFamily": "run_lock_or_action_tax",
+      "functionalEffects": [
+        "encounter_tax",
+        "end_run",
+        "jackout_tax",
+        "run_lock"
+      ],
+      "conditions": [
+        "requires_during_run"
+      ],
+      "risks": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "tacticSignals": [
+        "corp_ice.encounter_tax",
+        "corp_ice.end_run",
+        "corp_ice.jackout_tax",
+        "corp_ice.run_lock"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.jackout_tax",
+            "corp_ice.run_lock"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.jackout_tax",
+        "corp_ice.run_lock"
+      ],
+      "supportingEvidence": [
+        "corp_ice.encounter_tax",
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Tutor is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.encounter_tax, corp_ice.jackout_tax, corp_ice.run_lock. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_275_vacuum-link",
+      "title": "Vacuum Link",
+      "cardType": "ice",
+      "subtypes": [
+        "random",
+        "sentry"
+      ],
+      "mechanicalFamily": "random_or_guessing_game",
+      "functionalEffects": [
+        "random_or_guessing"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice",
+        "random_outcome"
+      ],
+      "tacticSignals": [
+        "corp_ice.random_or_guessing"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.random_or_guessing"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Vacuum Link is reviewed from existing structured ICE hints. Functional signals are corp_ice.random_or_guessing. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_276_viral-15",
+      "title": "Viral 15",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "mechanicalFamily": "program_trash",
+      "functionalEffects": [
+        "encounter_tax",
+        "jackout_tax",
+        "program_trash",
+        "run_lock"
+      ],
+      "conditions": [
+        "requires_during_run"
+      ],
+      "risks": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "tacticSignals": [
+        "corp_ice.encounter_tax",
+        "corp_ice.jackout_tax",
+        "corp_ice.program_trash",
+        "corp_ice.run_lock"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.jackout_tax",
+            "corp_ice.program_trash",
+            "corp_ice.run_lock"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.jackout_tax",
+        "corp_ice.program_trash",
+        "corp_ice.run_lock"
+      ],
+      "supportingEvidence": [
+        "corp_ice.encounter_tax"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Viral 15 is reviewed from existing structured ICE hints. Functional signals are corp_ice.encounter_tax, corp_ice.jackout_tax, corp_ice.run_lock, corp_ice.program_trash. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_277_virizz",
+      "title": "Virizz",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "mechanicalFamily": "run_lock_or_action_tax",
+      "functionalEffects": [
+        "break_cost_tax",
+        "encounter_tax",
+        "run_lock"
+      ],
+      "conditions": [
+        "requires_during_run"
+      ],
+      "risks": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "tacticSignals": [
+        "corp_ice.break_cost_tax",
+        "corp_ice.encounter_tax",
+        "corp_ice.run_lock"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.break_cost_tax",
+            "corp_ice.run_lock"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.break_cost_tax",
+        "corp_ice.run_lock"
+      ],
+      "supportingEvidence": [
+        "corp_ice.encounter_tax"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Virizz is reviewed from existing structured ICE hints. Functional signals are corp_ice.encounter_tax, corp_ice.run_lock, corp_ice.break_cost_tax. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_278_wall-of-ice",
+      "title": "Wall of Ice",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "end_run",
+        "net_damage"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage",
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_pressure",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.net_damage",
+            "damage.payoff"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Wall of Ice is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.net_damage. Anchors: corp.damage_kill/damage_pressure. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_279_wall-of-static",
+      "title": "Wall of Static",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Wall of Static is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_v1_280_zombie",
+      "title": "Zombie",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black ice",
+        "sentry",
+        "zombie"
+      ],
+      "mechanicalFamily": "other_ice_utility",
+      "functionalEffects": [
+        "other_utility"
+      ],
+      "conditions": [],
+      "risks": [
+        "legal_actions_only",
+        "public_payload_only",
+        "replay_statehash_required"
+      ],
+      "tacticSignals": [
+        "corp_ice.other_utility"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.other_utility"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "high",
+      "rationale": "Zombie is reviewed from existing structured ICE hints. Functional signals are corp_ice.other_utility. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_011_brain-wash",
+      "title": "Brain Wash",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black_ice",
+        "brainwipe",
+        "sentry"
+      ],
+      "mechanicalFamily": "brain_damage_ice",
+      "functionalEffects": [
+        "brain_damage",
+        "damage_source"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage_window",
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_pressure",
+          "evidence": [
+            "corp_ice.brain_damage",
+            "corp_ice.damage_source",
+            "damage.payoff"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "damage.payoff"
+      ],
+      "supportingEvidence": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Brain Wash is reviewed from existing structured ICE hints. Functional signals are corp_ice.damage_source, damage.payoff, corp_ice.brain_damage. Anchors: corp.damage_kill/damage_pressure. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_012_bug-zapper",
+      "title": "Bug Zapper",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "hellbolt",
+        "sentry"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "end_run",
+        "net_damage",
+        "position_or_outer_scaling",
+        "strength_modifier"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage_window",
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "corp_ice.outer_ice_scaling",
+        "corp_ice.position_scaling",
+        "damage.payoff",
+        "ice.strength_modifier"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.outer_ice_scaling",
+            "corp_ice.position_scaling",
+            "ice.strength_modifier"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.outer_ice_scaling",
+        "corp_ice.position_scaling",
+        "ice.strength_modifier"
+      ],
+      "supportingEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Bug Zapper is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.net_damage, ice.strength_modifier, corp_ice.position_scaling, corp_ice.outer_ice_scaling. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_013_caryatid",
+      "title": "Caryatid",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "type_choice_or_mode_choice",
+      "functionalEffects": [
+        "end_run",
+        "type_or_mode_choice"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "on_rez_type_or_mode_choice"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Caryatid is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.type_choice_or_mode_choice. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_014_chihuahua",
+      "title": "Chihuahua",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "hellhound",
+        "sentry"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "net_damage"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage_window",
+        "hidden_ice",
+        "trace_window"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Chihuahua is reviewed from existing structured ICE hints. Functional signals are corp_ice.damage_source, damage.payoff, corp_ice.net_damage. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_015_colonel-failure",
+      "title": "Colonel Failure",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run",
+        "self_bounce_or_maintenance_drawback"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.self_bounce_or_maintenance_drawback"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run",
+        "corp_ice.self_bounce_or_maintenance_drawback"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Colonel Failure is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.self_bounce_or_maintenance_drawback. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_016_coyote",
+      "title": "Coyote",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry",
+        "watchdog"
+      ],
+      "mechanicalFamily": "other_ice_utility",
+      "functionalEffects": [
+        "other_utility"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.other_utility"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.other_utility"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Coyote is reviewed from existing structured ICE hints. Functional signals are corp_ice.other_utility. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_017_credit-blocks",
+      "title": "Credit Blocks",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "mechanicalFamily": "type_choice_or_mode_choice",
+      "functionalEffects": [
+        "end_run",
+        "rez_economy",
+        "type_or_mode_choice"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.rez_economy",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run",
+        "corp_ice.rez_economy",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "on_rez_type_or_mode_choice"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Credit Blocks is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.type_choice_or_mode_choice, corp_ice.rez_economy. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_018_datacomb",
+      "title": "Datacomb",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run",
+        "rez_economy"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.rez_economy"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run",
+        "corp_ice.rez_economy"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Datacomb is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.rez_economy. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_019_death-yo-yo",
+      "title": "Death Yo-Yo",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black_ice",
+        "brainwipe",
+        "sentry"
+      ],
+      "mechanicalFamily": "brain_damage_ice",
+      "functionalEffects": [
+        "brain_damage",
+        "damage_source",
+        "end_run"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage_window",
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_pressure",
+          "evidence": [
+            "corp_ice.brain_damage",
+            "corp_ice.damage_source",
+            "damage.payoff"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.brain_damage",
+        "corp_ice.damage_source",
+        "damage.payoff"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Death Yo-Yo is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.brain_damage. Anchors: corp.damage_kill/damage_pressure. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_020_digiconda",
+      "title": "Digiconda",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "sentry",
+        "sword"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "end_run",
+        "net_damage",
+        "rez_paid_scaling"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage_window",
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "corp_ice.rez_paid_scaling",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.rez_paid_scaling"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.rez_paid_scaling"
+      ],
+      "supportingEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "paid_x_or_rez_scaling"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Digiconda is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.net_damage, corp_ice.rez_paid_scaling. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_021_dog-pile",
+      "title": "Dog Pile",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "sentry"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "end_run",
+        "net_damage",
+        "position_or_outer_scaling",
+        "strength_modifier"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage_window",
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "corp_ice.outer_ice_scaling",
+        "corp_ice.position_scaling",
+        "damage.payoff",
+        "ice.strength_modifier"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.outer_ice_scaling",
+            "corp_ice.position_scaling",
+            "ice.strength_modifier"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.outer_ice_scaling",
+        "corp_ice.position_scaling",
+        "ice.strength_modifier"
+      ],
+      "supportingEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Dog Pile is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.net_damage, ice.strength_modifier, corp_ice.position_scaling, corp_ice.outer_ice_scaling. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_022_food-fight",
+      "title": "Food Fight",
+      "cardType": "ice",
+      "subtypes": [
+        "deckrash",
+        "sentry"
+      ],
+      "mechanicalFamily": "rez_paid_scaling",
+      "functionalEffects": [
+        "end_run",
+        "rez_paid_scaling"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.rez_paid_scaling"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.rez_paid_scaling"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.rez_paid_scaling"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "paid_x_or_rez_scaling"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Food Fight is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.rez_paid_scaling. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_023_galatea",
+      "title": "Galatea",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "type_choice_or_mode_choice",
+      "functionalEffects": [
+        "end_run",
+        "type_or_mode_choice"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "on_rez_type_or_mode_choice"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Galatea is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.type_choice_or_mode_choice. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_024_gatekeeper",
+      "title": "Gatekeeper",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "mechanicalFamily": "rez_paid_scaling",
+      "functionalEffects": [
+        "end_run",
+        "rez_paid_scaling"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.rez_paid_scaling"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.rez_paid_scaling"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.rez_paid_scaling"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "paid_x_or_rez_scaling"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Gatekeeper is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.rez_paid_scaling. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_025_homing-missile",
+      "title": "Homing Missile",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "mechanicalFamily": "rez_paid_scaling",
+      "functionalEffects": [
+        "end_run",
+        "rez_paid_scaling"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice",
+        "trace_window"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.rez_paid_scaling"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.rez_paid_scaling"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.rez_paid_scaling"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "paid_x_or_rez_scaling"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Homing Missile is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.rez_paid_scaling. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_026_hunting-pack",
+      "title": "Hunting Pack",
+      "cardType": "ice",
+      "subtypes": [
+        "bloodhound",
+        "sentry"
+      ],
+      "mechanicalFamily": "position_or_outer_ice_scaling",
+      "functionalEffects": [
+        "position_or_outer_scaling",
+        "strength_modifier",
+        "tag_source"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice",
+        "tag_window",
+        "trace_window"
+      ],
+      "tacticSignals": [
+        "corp_ice.outer_ice_scaling",
+        "corp_ice.position_scaling",
+        "corp_ice.tag_source",
+        "ice.strength_modifier",
+        "tag.source"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.outer_ice_scaling",
+            "corp_ice.position_scaling",
+            "ice.strength_modifier"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.outer_ice_scaling",
+        "corp_ice.position_scaling",
+        "ice.strength_modifier"
+      ],
+      "supportingEvidence": [
+        "corp_ice.tag_source",
+        "tag.source"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Hunting Pack is reviewed from existing structured ICE hints. Functional signals are corp_ice.tag_source, tag.source, ice.strength_modifier, corp_ice.position_scaling, corp_ice.outer_ice_scaling. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_027_iceberg",
+      "title": "Iceberg",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "end_run",
+        "net_damage"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage_window",
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Iceberg is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.net_damage. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_028_lesser-arcana",
+      "title": "Lesser Arcana",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "mechanicalFamily": "type_choice_or_mode_choice",
+      "functionalEffects": [
+        "end_run",
+        "type_or_mode_choice"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "on_rez_type_or_mode_choice"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Lesser Arcana is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.type_choice_or_mode_choice. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_029_marionette",
+      "title": "Marionette",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Marionette is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_030_mastermind",
+      "title": "Mastermind",
+      "cardType": "ice",
+      "subtypes": [
+        "ap",
+        "black_ice",
+        "sentry",
+        "zombie"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "end_run",
+        "net_damage",
+        "position_or_outer_scaling",
+        "strength_modifier"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage_window",
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.net_damage",
+        "corp_ice.outer_ice_scaling",
+        "corp_ice.position_scaling",
+        "damage.payoff",
+        "ice.strength_modifier"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff",
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.outer_ice_scaling",
+            "corp_ice.position_scaling",
+            "ice.strength_modifier"
+          ],
+          "confidence": "medium"
+        },
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_pressure",
+          "evidence": [
+            "corp_ice.damage_source",
+            "corp_ice.net_damage",
+            "damage.payoff"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.net_damage",
+        "corp_ice.outer_ice_scaling",
+        "corp_ice.position_scaling",
+        "damage.payoff",
+        "ice.strength_modifier"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Mastermind is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.net_damage, ice.strength_modifier, corp_ice.position_scaling, corp_ice.outer_ice_scaling. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece, corp.damage_kill/damage_pressure. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_031_minotaur",
+      "title": "Minotaur",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "mechanicalFamily": "position_or_outer_ice_scaling",
+      "functionalEffects": [
+        "end_run",
+        "position_or_outer_scaling",
+        "strength_modifier"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.outer_ice_scaling",
+        "corp_ice.position_scaling",
+        "ice.strength_modifier"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.outer_ice_scaling",
+            "corp_ice.position_scaling",
+            "ice.strength_modifier"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.outer_ice_scaling",
+        "corp_ice.position_scaling",
+        "ice.strength_modifier"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Minotaur is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, ice.strength_modifier, corp_ice.position_scaling, corp_ice.outer_ice_scaling. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_032_misleading-access-menus",
+      "title": "Misleading Access Menus",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "mechanicalFamily": "run_lock_or_action_tax",
+      "functionalEffects": [
+        "encounter_tax",
+        "end_run",
+        "run_lock"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.encounter_tax",
+        "corp_ice.end_run",
+        "corp_ice.run_lock"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.run_lock"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.run_lock"
+      ],
+      "supportingEvidence": [
+        "corp_ice.encounter_tax",
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Misleading Access Menus is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.encounter_tax, corp_ice.run_lock. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_033_mobile-barricade",
+      "title": "Mobile Barricade",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "net_damage_ice",
+      "functionalEffects": [
+        "damage_source",
+        "end_run",
+        "mobile_position_change",
+        "net_damage"
+      ],
+      "conditions": [],
+      "risks": [
+        "damage_window",
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.mobile_position_change",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.damage_source",
+        "corp_ice.end_run",
+        "corp_ice.mobile_position_change",
+        "corp_ice.net_damage",
+        "damage.payoff"
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "fort_position_change"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Mobile Barricade is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.damage_source, damage.payoff, corp_ice.net_damage, corp_ice.mobile_position_change. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_034_riddler",
+      "title": "Riddler",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Riddler is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_035_roadblock",
+      "title": "Roadblock",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate",
+        "random"
+      ],
+      "mechanicalFamily": "random_or_guessing_game",
+      "functionalEffects": [
+        "end_run",
+        "random_or_guessing"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.random_or_guessing"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run",
+        "corp_ice.random_or_guessing"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Roadblock is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.random_or_guessing. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_036_sandstorm",
+      "title": "Sandstorm",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "rez_paid_scaling",
+      "functionalEffects": [
+        "end_run",
+        "rez_paid_scaling"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.rez_paid_scaling"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.rez_paid_scaling"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.rez_paid_scaling"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "candidate",
+      "targetProfileKinds": [
+        "paid_x_or_rez_scaling"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Sandstorm is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.rez_paid_scaling. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_037_scaffolding",
+      "title": "Scaffolding",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Scaffolding is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_038_snowbank",
+      "title": "Snowbank",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Snowbank is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_039_sphinx-2006",
+      "title": "Sphinx 2006",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "mechanicalFamily": "type_choice_or_mode_choice",
+      "functionalEffects": [
+        "end_run",
+        "type_or_mode_choice"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "on_rez_type_or_mode_choice"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Sphinx 2006 is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.type_choice_or_mode_choice. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_040_sumo-2008",
+      "title": "Sumo 2008",
+      "cardType": "ice",
+      "subtypes": [
+        "sentry"
+      ],
+      "mechanicalFamily": "type_choice_or_mode_choice",
+      "functionalEffects": [
+        "end_run",
+        "type_or_mode_choice"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "on_rez_type_or_mode_choice"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Sumo 2008 is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.type_choice_or_mode_choice. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_041_toughoniumtm-wall",
+      "title": "Toughonium™ Wall",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "multi_end_run",
+      "functionalEffects": [
+        "end_run",
+        "multi_end_run"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.multi_end_run"
+      ],
+      "strategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "legacyStrategicRole": [
+        "tax_tool"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "role": "ice_tax_or_lock_piece",
+          "evidence": [
+            "corp_ice.multi_end_run"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "corp_ice.multi_end_run"
+      ],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Toughonium™ Wall is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.multi_end_run. Anchors: corp.ice_tax_glacier/ice_tax_or_lock_piece. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_042_tumblers",
+      "title": "Tumblers",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Tumblers is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_043_twisty-passages",
+      "title": "Twisty Passages",
+      "cardType": "ice",
+      "subtypes": [
+        "code_gate"
+      ],
+      "mechanicalFamily": "vanilla_end_run",
+      "functionalEffects": [
+        "end_run"
+      ],
+      "conditions": [
+        "requires_encounter",
+        "requires_unbroken_subroutine"
+      ],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Twisty Passages is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_044_walking-wall",
+      "title": "Walking Wall",
+      "cardType": "ice",
+      "subtypes": [
+        "wall"
+      ],
+      "mechanicalFamily": "mobile_or_position_changing_ice",
+      "functionalEffects": [
+        "end_run",
+        "mobile_position_change"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.end_run",
+        "corp_ice.mobile_position_change"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.end_run",
+        "corp_ice.mobile_position_change"
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "fort_position_change"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Walking Wall is reviewed from existing structured ICE hints. Functional signals are corp_ice.end_run, corp_ice.mobile_position_change. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    },
+    {
+      "cardId": "onr_proteus_045_washed-up-solo-construct",
+      "title": "Washed-Up Solo Construct",
+      "cardType": "ice",
+      "subtypes": [
+        "killer",
+        "sentry"
+      ],
+      "mechanicalFamily": "other_ice_utility",
+      "functionalEffects": [
+        "self_bounce_or_maintenance_drawback"
+      ],
+      "conditions": [],
+      "risks": [
+        "hidden_ice"
+      ],
+      "tacticSignals": [
+        "corp_ice.self_bounce_or_maintenance_drawback"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "corp_ice.self_bounce_or_maintenance_drawback"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_rezzed",
+      "confidence": "medium",
+      "rationale": "Washed-Up Solo Construct is reviewed from existing structured ICE hints. Functional signals are corp_ice.self_bounce_or_maintenance_drawback. No canonical strategy anchor is set. Subtypes remain card data, not tactic signals.",
+      "needsHumanReview": false,
+      "postReviewStatus": "changed"
+    }
+  ],
+  "verification": [
+    {
+      "command": "node scripts/check-ai024-corp-ice-semantics.mjs",
+      "result": "pending_after_apply"
+    }
+  ]
+}

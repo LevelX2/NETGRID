@@ -16976,9 +16976,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -17148,7 +17153,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -17300,7 +17305,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -17450,7 +17455,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -17620,7 +17625,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "medium",
           "needsHumanReview": false
@@ -17772,7 +17777,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "medium",
           "needsHumanReview": false
@@ -17947,13 +17952,11 @@
           }
         ],
         "lineSupport": [
-          "corp.damage_kill",
-          "corp.ice_tax_glacier",
-          "corp.tag_trace_punish"
+          "corp.damage_kill"
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -18147,12 +18150,11 @@
         ],
         "lineSupport": [
           "corp.damage_kill",
-          "corp.ice_tax_glacier",
-          "corp.tag_trace_punish"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -18306,13 +18308,16 @@
             "kind": "requires_unbroken_subroutine"
           }
         ],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "medium",
-          "needsHumanReview": true
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -18426,10 +18431,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.damage_kill",
-          "corp.ice_tax_glacier"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -18562,7 +18571,14 @@
         "conditions": [],
         "lineSupport": [
           "corp.ice_tax_glacier"
-        ]
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -18727,7 +18743,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -18861,9 +18877,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -19011,9 +19032,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -19155,9 +19181,15 @@
         "effects": [],
         "conditions": [],
         "lineSupport": [
-          "corp.damage_kill",
-          "corp.ice_tax_glacier"
-        ]
+          "corp.damage_kill"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -19310,9 +19342,7 @@
             "kind": "requires_trace_success"
           }
         ],
-        "lineSupport": [
-          "corp.tag_trace_punish"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -19453,7 +19483,14 @@
         "conditions": [],
         "lineSupport": [
           "corp.ice_tax_glacier"
-        ]
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -19623,7 +19660,14 @@
         "lineSupport": [
           "corp.damage_kill",
           "corp.ice_tax_glacier"
-        ]
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -19788,9 +19832,7 @@
             "kind": "requires_trace_success"
           }
         ],
-        "lineSupport": [
-          "corp.tag_trace_punish"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -19928,9 +19970,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.tag_trace_punish"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -20129,9 +20176,15 @@
         "effects": [],
         "conditions": [],
         "lineSupport": [
-          "corp.damage_kill",
-          "corp.ice_tax_glacier"
-        ]
+          "corp.damage_kill"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -20325,9 +20378,7 @@
             "kind": "requires_during_run"
           }
         ],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -20476,9 +20527,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.tag_trace_punish"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -20621,9 +20677,7 @@
             "kind": "requires_during_run"
           }
         ],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -20778,7 +20832,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -20905,7 +20959,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -21019,7 +21073,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false

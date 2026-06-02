@@ -19,9 +19,9 @@
     "cardsWithOverlays": 6,
     "cardsWithFunctionSignals": 459,
     "cardsWithStrategyAnchors": 215,
-    "cardsWithWarnings": 215,
+    "cardsWithWarnings": 182,
     "warningCategoryCounts": {
-      "deferred_requires_human_review": 149,
+      "deferred_requires_human_review": 100,
       "descriptor_gap": 45,
       "function_signal_descriptor_gap": 28,
       "legacy_fallback_only": 71
@@ -937,7 +937,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "damage.payoff"
@@ -999,9 +999,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -1039,11 +1037,21 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": true,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "damage_ice",
@@ -1097,7 +1105,6 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
         "legacy_fallback_only"
       ],
       "descriptorGaps": [],
@@ -1111,8 +1118,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -1127,7 +1138,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": true,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
@@ -1178,7 +1189,6 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
         "legacy_fallback_only"
       ],
       "descriptorGaps": [],
@@ -1208,7 +1218,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "economy.generic"
@@ -1267,9 +1277,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -1303,7 +1311,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -1311,6 +1319,651 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
+      "lineSupportClassification": [],
+      "rolesClassification": [
+        {
+          "value": "etr_ice",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "sentry_ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        }
+      ],
+      "planRolesClassification": [
+        {
+          "value": "protect_hq",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_rnd",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        }
+      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
+      "legacyStatus": {
+        "rolesPresent": true,
+        "planRolesPresent": true,
+        "legacyLineSupportPresent": false,
+        "activeMechanicalFactFields": [],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "generatedFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "overlayFields": []
+      },
+      "strategicRoleStatus": {
+        "values": [],
+        "validValues": [],
+        "unknownValues": []
+      }
+    },
+    {
+      "cardId": "onr_proteus_016_coyote",
+      "side": "corp",
+      "cardType": "ice",
+      "supportStatus": {
+        "aiSupportStatus": "ai_supported",
+        "compiledHintFound": true,
+        "mechanicalFactsFound": true,
+        "generatedFactsFound": true,
+        "overlayFields": [],
+        "legacyFallbackOnly": false,
+        "warningCount": 0
+      },
+      "derivedFunctionSignals": [
+        "economy.generic",
+        "tax.ice"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "lineSupportClassification": [],
+      "rolesClassification": [
+        {
+          "value": "ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "sentry_ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        }
+      ],
+      "planRolesClassification": [
+        {
+          "value": "protect_hq",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_rnd",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        }
+      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
+      "legacyStatus": {
+        "rolesPresent": true,
+        "planRolesPresent": true,
+        "legacyLineSupportPresent": false,
+        "activeMechanicalFactFields": [],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "generatedFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "overlayFields": []
+      },
+      "strategicRoleStatus": {
+        "values": [],
+        "validValues": [],
+        "unknownValues": []
+      }
+    },
+    {
+      "cardId": "onr_proteus_017_credit-blocks",
+      "side": "corp",
+      "cardType": "ice",
+      "supportStatus": {
+        "aiSupportStatus": "ai_supported",
+        "compiledHintFound": true,
+        "mechanicalFactsFound": false,
+        "generatedFactsFound": false,
+        "overlayFields": [],
+        "legacyFallbackOnly": true,
+        "warningCount": 1
+      },
+      "derivedFunctionSignals": [],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [],
+      "rolesClassification": [
+        {
+          "value": "etr_ice",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "sentry_ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        }
+      ],
+      "planRolesClassification": [
+        {
+          "value": "protect_hq",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_rnd",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        }
+      ],
+      "warningCategories": [
+        "legacy_fallback_only"
+      ],
+      "descriptorGaps": [],
+      "legacyStatus": {
+        "rolesPresent": true,
+        "planRolesPresent": true,
+        "legacyLineSupportPresent": false,
+        "activeMechanicalFactFields": [],
+        "compiledMechanicalFactFields": [],
+        "generatedFactFields": [],
+        "overlayFields": []
+      },
+      "strategicRoleStatus": {
+        "values": [],
+        "validValues": [],
+        "unknownValues": []
+      }
+    },
+    {
+      "cardId": "onr_proteus_018_datacomb",
+      "side": "corp",
+      "cardType": "ice",
+      "supportStatus": {
+        "aiSupportStatus": "ai_supported",
+        "compiledHintFound": true,
+        "mechanicalFactsFound": true,
+        "generatedFactsFound": false,
+        "overlayFields": [],
+        "legacyFallbackOnly": false,
+        "warningCount": 0
+      },
+      "derivedFunctionSignals": [
+        "ice.etr"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "lineSupportClassification": [],
+      "rolesClassification": [
+        {
+          "value": "barrier_ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "etr_ice",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        }
+      ],
+      "planRolesClassification": [
+        {
+          "value": "protect_hq",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_rnd",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        }
+      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
+      "legacyStatus": {
+        "rolesPresent": true,
+        "planRolesPresent": true,
+        "legacyLineSupportPresent": false,
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "generatedFactFields": [],
+        "overlayFields": []
+      },
+      "strategicRoleStatus": {
+        "values": [],
+        "validValues": [],
+        "unknownValues": []
+      }
+    },
+    {
+      "cardId": "onr_proteus_019_death-yo-yo",
+      "side": "corp",
+      "cardType": "ice",
+      "supportStatus": {
+        "aiSupportStatus": "ai_supported",
+        "compiledHintFound": true,
+        "mechanicalFactsFound": true,
+        "generatedFactsFound": true,
+        "overlayFields": [],
+        "legacyFallbackOnly": false,
+        "warningCount": 0
+      },
+      "derivedFunctionSignals": [
+        "damage.payoff",
+        "ice.etr"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "corp.damage_kill",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "rolesClassification": [
+        {
+          "value": "damage_ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "etr_ice",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "sentry_ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        }
+      ],
+      "planRolesClassification": [
+        {
+          "value": "protect_hq",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_rnd",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        }
+      ],
+      "warningCategories": [],
+      "descriptorGaps": [],
+      "legacyStatus": {
+        "rolesPresent": true,
+        "planRolesPresent": true,
+        "legacyLineSupportPresent": false,
+        "activeMechanicalFactFields": [],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "generatedFactFields": [
+          "effects",
+          "conditions"
+        ],
+        "overlayFields": []
+      },
+      "strategicRoleStatus": {
+        "values": [
+          "punish_payoff"
+        ],
+        "validValues": [
+          "punish_payoff"
+        ],
+        "unknownValues": []
+      }
+    },
+    {
+      "cardId": "onr_proteus_020_digiconda",
+      "side": "corp",
+      "cardType": "ice",
+      "supportStatus": {
+        "aiSupportStatus": "ai_supported",
+        "compiledHintFound": true,
+        "mechanicalFactsFound": false,
+        "generatedFactsFound": false,
+        "overlayFields": [],
+        "legacyFallbackOnly": true,
+        "warningCount": 1
+      },
+      "derivedFunctionSignals": [],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "rolesClassification": [
+        {
+          "value": "damage_ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "etr_ice",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "sentry_ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        }
+      ],
+      "planRolesClassification": [
+        {
+          "value": "protect_hq",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_rnd",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        }
+      ],
+      "warningCategories": [
+        "legacy_fallback_only"
+      ],
+      "descriptorGaps": [],
+      "legacyStatus": {
+        "rolesPresent": true,
+        "planRolesPresent": true,
+        "legacyLineSupportPresent": false,
+        "activeMechanicalFactFields": [],
+        "compiledMechanicalFactFields": [],
+        "generatedFactFields": [],
+        "overlayFields": []
+      },
+      "strategicRoleStatus": {
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
+        "unknownValues": []
+      }
+    },
+    {
+      "cardId": "onr_proteus_021_dog-pile",
+      "side": "corp",
+      "cardType": "ice",
+      "supportStatus": {
+        "aiSupportStatus": "ai_supported",
+        "compiledHintFound": true,
+        "mechanicalFactsFound": false,
+        "generatedFactsFound": false,
+        "overlayFields": [],
+        "legacyFallbackOnly": true,
+        "warningCount": 1
+      },
+      "derivedFunctionSignals": [],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "rolesClassification": [
+        {
+          "value": "damage_ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "etr_ice",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "sentry_ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        }
+      ],
+      "planRolesClassification": [
+        {
+          "value": "protect_hq",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_rnd",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        }
+      ],
+      "warningCategories": [
+        "legacy_fallback_only"
+      ],
+      "descriptorGaps": [],
+      "legacyStatus": {
+        "rolesPresent": true,
+        "planRolesPresent": true,
+        "legacyLineSupportPresent": false,
+        "activeMechanicalFactFields": [],
+        "compiledMechanicalFactFields": [],
+        "generatedFactFields": [],
+        "overlayFields": []
+      },
+      "strategicRoleStatus": {
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
+        "unknownValues": []
+      }
+    },
+    {
+      "cardId": "onr_proteus_022_food-fight",
+      "side": "corp",
+      "cardType": "ice",
+      "supportStatus": {
+        "aiSupportStatus": "ai_supported",
+        "compiledHintFound": true,
+        "mechanicalFactsFound": false,
+        "generatedFactsFound": false,
+        "overlayFields": [],
+        "legacyFallbackOnly": true,
+        "warningCount": 1
+      },
+      "derivedFunctionSignals": [],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "corp.ice_tax_glacier",
@@ -1368,7 +2021,7 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review"
+        "legacy_fallback_only"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
@@ -1376,14 +2029,8 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [
-          "effects",
-          "conditions"
-        ],
-        "generatedFactFields": [
-          "effects",
-          "conditions"
-        ],
+        "compiledMechanicalFactFields": [],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -1397,36 +2044,40 @@
       }
     },
     {
-      "cardId": "onr_proteus_016_coyote",
+      "cardId": "onr_proteus_023_galatea",
       "side": "corp",
       "cardType": "ice",
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "mechanicalFactsFound": false,
+        "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": false,
+        "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [
-        "economy.generic",
-        "tax.ice"
-      ],
-      "derivedStrategyAnchors": [
-        "corp.ice_tax_glacier"
-      ],
+      "derivedFunctionSignals": [],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
-          "value": "ice",
+          "value": "barrier_ice",
           "category": "function_signal_only",
           "triageCategory": "function_signal_only",
           "mapsTo": [],
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         },
         {
-          "value": "sentry_ice",
+          "value": "etr_ice",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "ice",
           "category": "function_signal_only",
           "triageCategory": "function_signal_only",
           "mapsTo": [],
@@ -1454,8 +2105,399 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review"
+        "legacy_fallback_only"
       ],
+      "descriptorGaps": [],
+      "legacyStatus": {
+        "rolesPresent": true,
+        "planRolesPresent": true,
+        "legacyLineSupportPresent": false,
+        "activeMechanicalFactFields": [],
+        "compiledMechanicalFactFields": [],
+        "generatedFactFields": [],
+        "overlayFields": []
+      },
+      "strategicRoleStatus": {
+        "values": [],
+        "validValues": [],
+        "unknownValues": []
+      }
+    },
+    {
+      "cardId": "onr_proteus_024_gatekeeper",
+      "side": "corp",
+      "cardType": "ice",
+      "supportStatus": {
+        "aiSupportStatus": "ai_supported",
+        "compiledHintFound": true,
+        "mechanicalFactsFound": false,
+        "generatedFactsFound": false,
+        "overlayFields": [],
+        "legacyFallbackOnly": true,
+        "warningCount": 1
+      },
+      "derivedFunctionSignals": [],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "rolesClassification": [
+        {
+          "value": "code_gate_ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "etr_ice",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        }
+      ],
+      "planRolesClassification": [
+        {
+          "value": "protect_hq",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_rnd",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        }
+      ],
+      "warningCategories": [
+        "legacy_fallback_only"
+      ],
+      "descriptorGaps": [],
+      "legacyStatus": {
+        "rolesPresent": true,
+        "planRolesPresent": true,
+        "legacyLineSupportPresent": false,
+        "activeMechanicalFactFields": [],
+        "compiledMechanicalFactFields": [],
+        "generatedFactFields": [],
+        "overlayFields": []
+      },
+      "strategicRoleStatus": {
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
+        "unknownValues": []
+      }
+    },
+    {
+      "cardId": "onr_proteus_025_homing-missile",
+      "side": "corp",
+      "cardType": "ice",
+      "supportStatus": {
+        "aiSupportStatus": "ai_supported",
+        "compiledHintFound": true,
+        "mechanicalFactsFound": false,
+        "generatedFactsFound": false,
+        "overlayFields": [],
+        "legacyFallbackOnly": true,
+        "warningCount": 1
+      },
+      "derivedFunctionSignals": [],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "rolesClassification": [
+        {
+          "value": "etr_ice",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "sentry_ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "trace_ice",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        }
+      ],
+      "planRolesClassification": [
+        {
+          "value": "protect_hq",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_rnd",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        }
+      ],
+      "warningCategories": [
+        "legacy_fallback_only"
+      ],
+      "descriptorGaps": [],
+      "legacyStatus": {
+        "rolesPresent": true,
+        "planRolesPresent": true,
+        "legacyLineSupportPresent": false,
+        "activeMechanicalFactFields": [],
+        "compiledMechanicalFactFields": [],
+        "generatedFactFields": [],
+        "overlayFields": []
+      },
+      "strategicRoleStatus": {
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
+        "unknownValues": []
+      }
+    },
+    {
+      "cardId": "onr_proteus_026_hunting-pack",
+      "side": "corp",
+      "cardType": "ice",
+      "supportStatus": {
+        "aiSupportStatus": "ai_supported",
+        "compiledHintFound": true,
+        "mechanicalFactsFound": false,
+        "generatedFactsFound": false,
+        "overlayFields": [],
+        "legacyFallbackOnly": true,
+        "warningCount": 1
+      },
+      "derivedFunctionSignals": [],
+      "derivedStrategyAnchors": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "rolesClassification": [
+        {
+          "value": "ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "sentry_ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "tag_ice",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "trace_ice",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        }
+      ],
+      "planRolesClassification": [
+        {
+          "value": "protect_hq",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_rnd",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        }
+      ],
+      "warningCategories": [
+        "legacy_fallback_only"
+      ],
+      "descriptorGaps": [],
+      "legacyStatus": {
+        "rolesPresent": true,
+        "planRolesPresent": true,
+        "legacyLineSupportPresent": false,
+        "activeMechanicalFactFields": [],
+        "compiledMechanicalFactFields": [],
+        "generatedFactFields": [],
+        "overlayFields": []
+      },
+      "strategicRoleStatus": {
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
+        "unknownValues": []
+      }
+    },
+    {
+      "cardId": "onr_proteus_027_iceberg",
+      "side": "corp",
+      "cardType": "ice",
+      "supportStatus": {
+        "aiSupportStatus": "ai_supported",
+        "compiledHintFound": true,
+        "mechanicalFactsFound": true,
+        "generatedFactsFound": true,
+        "overlayFields": [],
+        "legacyFallbackOnly": false,
+        "warningCount": 0
+      },
+      "derivedFunctionSignals": [
+        "damage.payoff",
+        "ice.etr"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.damage_kill",
+        "corp.ice_tax_glacier"
+      ],
+      "lineSupportClassification": [],
+      "rolesClassification": [
+        {
+          "value": "barrier_ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "damage_ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "etr_ice",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        }
+      ],
+      "planRolesClassification": [
+        {
+          "value": "protect_hq",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        },
+        {
+          "value": "protect_rnd",
+          "category": "alias_to_strategy_goal",
+          "triageCategory": "strategy_alias",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Legacy role or planRole aliases to a normalized strategy."
+        }
+      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -1479,7 +2521,7 @@
       }
     },
     {
-      "cardId": "onr_proteus_017_credit-blocks",
+      "cardId": "onr_proteus_028_lesser-arcana",
       "side": "corp",
       "cardType": "ice",
       "supportStatus": {
@@ -1489,7 +2531,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": true,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
@@ -1540,7 +2582,6 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
         "legacy_fallback_only"
       ],
       "descriptorGaps": [],
@@ -1560,17 +2601,17 @@
       }
     },
     {
-      "cardId": "onr_proteus_018_datacomb",
+      "cardId": "onr_proteus_029_marionette",
       "side": "corp",
       "cardType": "ice",
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -1580,13 +2621,6 @@
       ],
       "lineSupportClassification": [],
       "rolesClassification": [
-        {
-          "value": "barrier_ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
         {
           "value": "etr_ice",
           "category": "alias_to_strategy_goal",
@@ -1598,6 +2632,13 @@
         },
         {
           "value": "ice",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "sentry_ice",
           "category": "function_signal_only",
           "triageCategory": "function_signal_only",
           "mapsTo": [],
@@ -1624,23 +2665,21 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [
-          "effects",
-          "conditions"
-        ],
+        "activeMechanicalFactFields": [],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
         ],
-        "generatedFactFields": [],
+        "generatedFactFields": [
+          "effects",
+          "conditions"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -1650,26 +2689,20 @@
       }
     },
     {
-      "cardId": "onr_proteus_019_death-yo-yo",
+      "cardId": "onr_proteus_030_mastermind",
       "side": "corp",
       "cardType": "ice",
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "mechanicalFactsFound": false,
+        "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": false,
+        "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [
-        "damage.payoff",
-        "ice.etr"
-      ],
-      "derivedStrategyAnchors": [
-        "corp.damage_kill",
-        "corp.ice_tax_glacier"
-      ],
+      "derivedFunctionSignals": [],
+      "derivedStrategyAnchors": [],
       "lineSupportClassification": [
         {
           "value": "corp.damage_kill",
@@ -1743,7 +2776,7 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review"
+        "legacy_fallback_only"
       ],
       "descriptorGaps": [],
       "legacyStatus": {
@@ -1751,14 +2784,8 @@
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [
-          "effects",
-          "conditions"
-        ],
-        "generatedFactFields": [
-          "effects",
-          "conditions"
-        ],
+        "compiledMechanicalFactFields": [],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -1770,991 +2797,6 @@
           "punish_payoff",
           "tax_tool"
         ],
-        "unknownValues": []
-      }
-    },
-    {
-      "cardId": "onr_proteus_020_digiconda",
-      "side": "corp",
-      "cardType": "ice",
-      "supportStatus": {
-        "aiSupportStatus": "ai_supported",
-        "compiledHintFound": true,
-        "mechanicalFactsFound": false,
-        "generatedFactsFound": false,
-        "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
-      },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
-      "rolesClassification": [
-        {
-          "value": "damage_ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "etr_ice",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "sentry_ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        }
-      ],
-      "planRolesClassification": [
-        {
-          "value": "protect_hq",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "protect_rnd",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        }
-      ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
-      "descriptorGaps": [],
-      "legacyStatus": {
-        "rolesPresent": true,
-        "planRolesPresent": true,
-        "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
-        "generatedFactFields": [],
-        "overlayFields": []
-      },
-      "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
-        "unknownValues": []
-      }
-    },
-    {
-      "cardId": "onr_proteus_021_dog-pile",
-      "side": "corp",
-      "cardType": "ice",
-      "supportStatus": {
-        "aiSupportStatus": "ai_supported",
-        "compiledHintFound": true,
-        "mechanicalFactsFound": false,
-        "generatedFactsFound": false,
-        "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
-      },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
-      "rolesClassification": [
-        {
-          "value": "damage_ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "etr_ice",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "sentry_ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        }
-      ],
-      "planRolesClassification": [
-        {
-          "value": "protect_hq",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "protect_rnd",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        }
-      ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
-      "descriptorGaps": [],
-      "legacyStatus": {
-        "rolesPresent": true,
-        "planRolesPresent": true,
-        "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
-        "generatedFactFields": [],
-        "overlayFields": []
-      },
-      "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
-        "unknownValues": []
-      }
-    },
-    {
-      "cardId": "onr_proteus_022_food-fight",
-      "side": "corp",
-      "cardType": "ice",
-      "supportStatus": {
-        "aiSupportStatus": "ai_supported",
-        "compiledHintFound": true,
-        "mechanicalFactsFound": false,
-        "generatedFactsFound": false,
-        "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
-      },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
-      "rolesClassification": [
-        {
-          "value": "etr_ice",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "sentry_ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        }
-      ],
-      "planRolesClassification": [
-        {
-          "value": "protect_hq",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "protect_rnd",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        }
-      ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
-      "descriptorGaps": [],
-      "legacyStatus": {
-        "rolesPresent": true,
-        "planRolesPresent": true,
-        "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
-        "generatedFactFields": [],
-        "overlayFields": []
-      },
-      "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
-        "unknownValues": []
-      }
-    },
-    {
-      "cardId": "onr_proteus_023_galatea",
-      "side": "corp",
-      "cardType": "ice",
-      "supportStatus": {
-        "aiSupportStatus": "ai_supported",
-        "compiledHintFound": true,
-        "mechanicalFactsFound": false,
-        "generatedFactsFound": false,
-        "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
-      },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
-      "rolesClassification": [
-        {
-          "value": "barrier_ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "etr_ice",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        }
-      ],
-      "planRolesClassification": [
-        {
-          "value": "protect_hq",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "protect_rnd",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        }
-      ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
-      "descriptorGaps": [],
-      "legacyStatus": {
-        "rolesPresent": true,
-        "planRolesPresent": true,
-        "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
-        "generatedFactFields": [],
-        "overlayFields": []
-      },
-      "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
-        "unknownValues": []
-      }
-    },
-    {
-      "cardId": "onr_proteus_024_gatekeeper",
-      "side": "corp",
-      "cardType": "ice",
-      "supportStatus": {
-        "aiSupportStatus": "ai_supported",
-        "compiledHintFound": true,
-        "mechanicalFactsFound": false,
-        "generatedFactsFound": false,
-        "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
-      },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
-      "rolesClassification": [
-        {
-          "value": "code_gate_ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "etr_ice",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        }
-      ],
-      "planRolesClassification": [
-        {
-          "value": "protect_hq",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "protect_rnd",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        }
-      ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
-      "descriptorGaps": [],
-      "legacyStatus": {
-        "rolesPresent": true,
-        "planRolesPresent": true,
-        "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
-        "generatedFactFields": [],
-        "overlayFields": []
-      },
-      "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
-        "unknownValues": []
-      }
-    },
-    {
-      "cardId": "onr_proteus_025_homing-missile",
-      "side": "corp",
-      "cardType": "ice",
-      "supportStatus": {
-        "aiSupportStatus": "ai_supported",
-        "compiledHintFound": true,
-        "mechanicalFactsFound": false,
-        "generatedFactsFound": false,
-        "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
-      },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
-      "rolesClassification": [
-        {
-          "value": "etr_ice",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "sentry_ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "trace_ice",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.tag_trace_punish"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        }
-      ],
-      "planRolesClassification": [
-        {
-          "value": "protect_hq",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "protect_rnd",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        }
-      ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
-      "descriptorGaps": [],
-      "legacyStatus": {
-        "rolesPresent": true,
-        "planRolesPresent": true,
-        "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
-        "generatedFactFields": [],
-        "overlayFields": []
-      },
-      "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
-        "unknownValues": []
-      }
-    },
-    {
-      "cardId": "onr_proteus_026_hunting-pack",
-      "side": "corp",
-      "cardType": "ice",
-      "supportStatus": {
-        "aiSupportStatus": "ai_supported",
-        "compiledHintFound": true,
-        "mechanicalFactsFound": false,
-        "generatedFactsFound": false,
-        "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
-      },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
-      "rolesClassification": [
-        {
-          "value": "ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "sentry_ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "tag_ice",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.tag_trace_punish"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "trace_ice",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.tag_trace_punish"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        }
-      ],
-      "planRolesClassification": [
-        {
-          "value": "protect_hq",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "protect_rnd",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        }
-      ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
-      "descriptorGaps": [],
-      "legacyStatus": {
-        "rolesPresent": true,
-        "planRolesPresent": true,
-        "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
-        "generatedFactFields": [],
-        "overlayFields": []
-      },
-      "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
-        "unknownValues": []
-      }
-    },
-    {
-      "cardId": "onr_proteus_027_iceberg",
-      "side": "corp",
-      "cardType": "ice",
-      "supportStatus": {
-        "aiSupportStatus": "ai_supported",
-        "compiledHintFound": true,
-        "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
-        "overlayFields": [],
-        "legacyFallbackOnly": false,
-        "warningCount": 1
-      },
-      "derivedFunctionSignals": [
-        "damage.payoff",
-        "ice.etr"
-      ],
-      "derivedStrategyAnchors": [
-        "corp.damage_kill",
-        "corp.ice_tax_glacier"
-      ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
-      "rolesClassification": [
-        {
-          "value": "barrier_ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "damage_ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "etr_ice",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        }
-      ],
-      "planRolesClassification": [
-        {
-          "value": "protect_hq",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "protect_rnd",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        }
-      ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
-      "descriptorGaps": [],
-      "legacyStatus": {
-        "rolesPresent": true,
-        "planRolesPresent": true,
-        "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [
-          "effects",
-          "conditions"
-        ],
-        "generatedFactFields": [
-          "effects",
-          "conditions"
-        ],
-        "overlayFields": []
-      },
-      "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
-        "unknownValues": []
-      }
-    },
-    {
-      "cardId": "onr_proteus_028_lesser-arcana",
-      "side": "corp",
-      "cardType": "ice",
-      "supportStatus": {
-        "aiSupportStatus": "ai_supported",
-        "compiledHintFound": true,
-        "mechanicalFactsFound": false,
-        "generatedFactsFound": false,
-        "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
-      },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
-      "rolesClassification": [
-        {
-          "value": "etr_ice",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "sentry_ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        }
-      ],
-      "planRolesClassification": [
-        {
-          "value": "protect_hq",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "protect_rnd",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        }
-      ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
-      "descriptorGaps": [],
-      "legacyStatus": {
-        "rolesPresent": true,
-        "planRolesPresent": true,
-        "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
-        "generatedFactFields": [],
-        "overlayFields": []
-      },
-      "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
-        "unknownValues": []
-      }
-    },
-    {
-      "cardId": "onr_proteus_029_marionette",
-      "side": "corp",
-      "cardType": "ice",
-      "supportStatus": {
-        "aiSupportStatus": "ai_supported",
-        "compiledHintFound": true,
-        "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
-        "overlayFields": [],
-        "legacyFallbackOnly": false,
-        "warningCount": 1
-      },
-      "derivedFunctionSignals": [
-        "ice.etr"
-      ],
-      "derivedStrategyAnchors": [
-        "corp.ice_tax_glacier"
-      ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
-      "rolesClassification": [
-        {
-          "value": "etr_ice",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "sentry_ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        }
-      ],
-      "planRolesClassification": [
-        {
-          "value": "protect_hq",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "protect_rnd",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        }
-      ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
-      "descriptorGaps": [],
-      "legacyStatus": {
-        "rolesPresent": true,
-        "planRolesPresent": true,
-        "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [
-          "effects",
-          "conditions"
-        ],
-        "generatedFactFields": [
-          "effects",
-          "conditions"
-        ],
-        "overlayFields": []
-      },
-      "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
-        "unknownValues": []
-      }
-    },
-    {
-      "cardId": "onr_proteus_030_mastermind",
-      "side": "corp",
-      "cardType": "ice",
-      "supportStatus": {
-        "aiSupportStatus": "ai_supported",
-        "compiledHintFound": true,
-        "mechanicalFactsFound": false,
-        "generatedFactsFound": false,
-        "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
-      },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
-      "rolesClassification": [
-        {
-          "value": "damage_ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "etr_ice",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        },
-        {
-          "value": "sentry_ice",
-          "category": "function_signal_only",
-          "triageCategory": "function_signal_only",
-          "mapsTo": [],
-          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
-        }
-      ],
-      "planRolesClassification": [
-        {
-          "value": "protect_hq",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "protect_rnd",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "corp.central_stabilize"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        }
-      ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
-      "descriptorGaps": [],
-      "legacyStatus": {
-        "rolesPresent": true,
-        "planRolesPresent": true,
-        "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
-        "generatedFactFields": [],
-        "overlayFields": []
-      },
-      "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
         "unknownValues": []
       }
     },
@@ -2769,7 +2811,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.future_pressure"
@@ -2833,9 +2875,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -2873,13 +2913,23 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "economy.generic"
       ],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "code_gate_ice",
@@ -2925,9 +2975,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -2945,8 +2993,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -2961,7 +3013,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "damage.payoff",
@@ -2971,17 +3023,7 @@
         "corp.damage_kill",
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "barrier_ice",
@@ -3034,9 +3076,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -3054,12 +3094,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -3074,7 +3110,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": true,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
@@ -3125,7 +3161,6 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
         "legacy_fallback_only"
       ],
       "descriptorGaps": [],
@@ -3155,7 +3190,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -3209,9 +3244,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -3245,11 +3278,21 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": true,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "barrier_ice",
@@ -3296,7 +3339,6 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
         "legacy_fallback_only"
       ],
       "descriptorGaps": [],
@@ -3310,8 +3352,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -3326,7 +3372,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -3380,9 +3426,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -3416,7 +3460,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "economy.generic"
@@ -3468,9 +3512,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -3504,7 +3546,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": true,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
@@ -3555,7 +3597,6 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
         "legacy_fallback_only"
       ],
       "descriptorGaps": [],
@@ -3585,7 +3626,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": true,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
@@ -3636,7 +3677,6 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
         "legacy_fallback_only"
       ],
       "descriptorGaps": [],
@@ -3666,7 +3706,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -3730,9 +3770,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -3770,7 +3808,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -3824,9 +3862,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -3860,7 +3896,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -3914,9 +3950,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -3950,7 +3984,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -3958,17 +3992,7 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "barrier_ice",
@@ -4014,9 +4038,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -4034,12 +4056,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -4054,7 +4072,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "economy.generic"
@@ -4097,9 +4115,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -33142,17 +33158,7 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "ice",
@@ -33214,12 +33220,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -33872,24 +33874,6 @@
             "corp.damage_kill"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.tag_trace_punish",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.tag_trace_punish"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -33982,12 +33966,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "punish_payoff",
-          "tax_tool"
+          "punish_payoff"
         ],
         "validValues": [
-          "punish_payoff",
-          "tax_tool"
+          "punish_payoff"
         ],
         "unknownValues": []
       }
@@ -34031,15 +34013,6 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.tag_trace_punish",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.tag_trace_punish"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
@@ -34163,15 +34136,6 @@
             "corp.damage_kill"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -34245,12 +34209,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "punish_payoff",
-          "tax_tool"
+          "punish_payoff"
         ],
         "validValues": [
-          "punish_payoff",
-          "tax_tool"
+          "punish_payoff"
         ],
         "unknownValues": []
       }
@@ -34266,7 +34228,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -34320,9 +34282,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -34356,7 +34316,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "damage.payoff",
@@ -34366,7 +34326,26 @@
         "corp.damage_kill",
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.damage_kill",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.damage_kill"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "core_damage_ice",
@@ -34419,9 +34398,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -34439,8 +34416,14 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "punish_payoff",
+          "tax_tool"
+        ],
+        "validValues": [
+          "punish_payoff",
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -34455,7 +34438,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -34509,9 +34492,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -34664,26 +34645,7 @@
         "corp.damage_kill",
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.damage_kill",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.damage_kill"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "damage",
@@ -34738,14 +34700,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "punish_payoff",
-          "tax_tool"
-        ],
-        "validValues": [
-          "punish_payoff",
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -35089,7 +35045,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -35097,7 +35053,17 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "barrier_ice",
@@ -35143,9 +35109,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -35163,8 +35127,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -35179,7 +35147,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -35233,9 +35201,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -35277,17 +35243,7 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "end_run",
@@ -35356,12 +35312,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -35384,17 +35336,7 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "ice",
@@ -35456,12 +35398,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -35493,15 +35431,6 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.damage_kill"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
@@ -35575,12 +35504,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "punish_payoff",
-          "tax_tool"
+          "punish_payoff"
         ],
         "validValues": [
-          "punish_payoff",
-          "tax_tool"
+          "punish_payoff"
         ],
         "unknownValues": []
       }
@@ -35605,17 +35532,7 @@
       "derivedStrategyAnchors": [
         "corp.tag_trace_punish"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.tag_trace_punish",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.tag_trace_punish"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "sentry_ice",
@@ -35684,12 +35601,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "engine_anchor"
-        ],
-        "validValues": [
-          "engine_anchor"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -35704,7 +35617,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -35758,9 +35671,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -35794,7 +35705,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -35848,9 +35759,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -35989,7 +35898,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -36051,9 +35960,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -36227,17 +36134,7 @@
       "derivedStrategyAnchors": [
         "corp.tag_trace_punish"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.tag_trace_punish",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.tag_trace_punish"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "sentry_ice",
@@ -36306,12 +36203,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "engine_anchor"
-        ],
-        "validValues": [
-          "engine_anchor"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -36334,7 +36227,17 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "hidden_zone_tool",
@@ -36414,8 +36317,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -36438,17 +36345,7 @@
       "derivedStrategyAnchors": [
         "corp.tag_trace_punish"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.tag_trace_punish",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.tag_trace_punish"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "ice",
@@ -36526,12 +36423,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "engine_anchor"
-        ],
-        "validValues": [
-          "engine_anchor"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -36546,7 +36439,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -36600,9 +36493,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -36646,17 +36537,7 @@
         "corp.damage_kill",
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "barrier_ice",
@@ -36727,12 +36608,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -36764,15 +36641,6 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.damage_kill"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
@@ -36848,12 +36716,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "punish_payoff",
-          "tax_tool"
+          "punish_payoff"
         ],
         "validValues": [
-          "punish_payoff",
-          "tax_tool"
+          "punish_payoff"
         ],
         "unknownValues": []
       }
@@ -36888,15 +36754,6 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.damage_kill"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
@@ -36970,12 +36827,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "punish_payoff",
-          "tax_tool"
+          "punish_payoff"
         ],
         "validValues": [
-          "punish_payoff",
-          "tax_tool"
+          "punish_payoff"
         ],
         "unknownValues": []
       }
@@ -37089,26 +36944,7 @@
         "corp.damage_kill",
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.damage_kill",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.damage_kill"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "code_gate_ice",
@@ -37179,14 +37015,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "punish_payoff",
-          "tax_tool"
-        ],
-        "validValues": [
-          "punish_payoff",
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -37211,17 +37041,7 @@
         "corp.damage_kill",
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "ap_ice",
@@ -37317,12 +37137,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -37337,7 +37153,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -37391,9 +37207,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -37436,17 +37250,7 @@
       "derivedStrategyAnchors": [
         "corp.tag_trace_punish"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.tag_trace_punish",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.tag_trace_punish"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "counter",
@@ -37515,12 +37319,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "engine_anchor"
-        ],
-        "validValues": [
-          "engine_anchor"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -37535,7 +37335,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -37589,9 +37389,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -37635,26 +37433,7 @@
         "corp.damage_kill",
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.damage_kill",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.damage_kill"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "barrier_ice",
@@ -37725,14 +37504,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "punish_payoff",
-          "tax_tool"
-        ],
-        "validValues": [
-          "punish_payoff",
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -37747,7 +37520,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -37755,7 +37528,17 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "barrier_ice",
@@ -37801,9 +37584,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -37821,8 +37602,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -37845,17 +37630,7 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "ice",
@@ -37917,12 +37692,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -37937,7 +37708,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
         "ice.etr"
@@ -37991,9 +37762,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -38234,17 +38003,7 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "ap_ice",
@@ -38316,12 +38075,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -38346,26 +38101,7 @@
         "corp.damage_kill",
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.damage_kill",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.damage_kill"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "barrier_ice",
@@ -38436,14 +38172,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "punish_payoff",
-          "tax_tool"
-        ],
-        "validValues": [
-          "punish_payoff",
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -38554,17 +38284,7 @@
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "action_loss_ice",
@@ -38644,12 +38364,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "tax_tool"
-        ],
-        "validValues": [
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -38967,7 +38683,7 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
@@ -39022,9 +38738,7 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -39279,15 +38993,6 @@
             "corp.damage_kill"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -39363,12 +39068,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "punish_payoff",
-          "tax_tool"
+          "punish_payoff"
         ],
         "validValues": [
-          "punish_payoff",
-          "tax_tool"
+          "punish_payoff"
         ],
         "unknownValues": []
       }
@@ -39482,26 +39185,7 @@
         "corp.damage_kill",
         "corp.ice_tax_glacier"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.damage_kill",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.damage_kill"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.ice_tax_glacier",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "corp",
@@ -39563,14 +39247,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "punish_payoff",
-          "tax_tool"
-        ],
-        "validValues": [
-          "punish_payoff",
-          "tax_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },

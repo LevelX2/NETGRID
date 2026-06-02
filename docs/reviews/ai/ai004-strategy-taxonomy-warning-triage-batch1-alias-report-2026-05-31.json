@@ -5076,7 +5076,7 @@
   "lineSupport": [
     {
       "value": "corp.ice_tax_glacier",
-      "count": 55,
+      "count": 44,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5092,12 +5092,12 @@
         "onr_v1_215_security-net-optimization",
         "onr_v1_216_security-purge",
         "onr_v1_219_superior-net-barriers",
-        "onr_v1_221_asp"
+        "onr_v1_222_ball-and-chain"
       ]
     },
     {
       "value": "corp.tag_trace_punish",
-      "count": 36,
+      "count": 30,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5110,15 +5110,15 @@
         "onr_v1_208_on-call-solo-team",
         "onr_v1_213_private-cybernet-police",
         "onr_v1_217_strike-force-kali",
-        "onr_v1_227_cerberus",
-        "onr_v1_228_cinderella",
         "onr_v1_236_data-raven",
-        "onr_v1_243_fetch-4-0-1"
+        "onr_v1_283_audit-of-call-records",
+        "onr_v1_284_chance-observation",
+        "onr_v1_285_closed-accounts"
       ]
     },
     {
       "value": "corp.damage_kill",
-      "count": 31,
+      "count": 28,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5134,7 +5134,7 @@
         "onr_v1_227_cerberus",
         "onr_v1_228_cinderella",
         "onr_v1_229_code-corpse",
-        "onr_v1_234_data-darts"
+        "onr_v1_231_cortical-scrub"
       ]
     },
     {

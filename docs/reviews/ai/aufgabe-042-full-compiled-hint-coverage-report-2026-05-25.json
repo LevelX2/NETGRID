@@ -11284,7 +11284,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/brain-wash.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -11333,11 +11333,11 @@
           "corp.damage_kill"
         ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -11361,7 +11361,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -11393,7 +11393,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/bug-zapper.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -11418,13 +11418,15 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -11437,12 +11439,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         }
       ],
       "fullCoverageScope": true,
@@ -11454,7 +11452,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/caryatid.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -11480,11 +11478,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -11497,12 +11495,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         }
       ],
       "fullCoverageScope": true,
@@ -11514,7 +11508,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/chihuahua.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -11574,11 +11568,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -11606,7 +11600,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -11646,7 +11640,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/colonel-failure.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -11703,15 +11697,13 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ],
+        "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -11739,7 +11731,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -11779,7 +11771,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/coyote.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -11846,11 +11838,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -11879,10 +11871,6 @@
       ],
       "confidence": "medium",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence medium differs from manual confidence low."
-        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Future-run/future-encounter semantics are currently coarse derived facts and remain state-dependent at runtime."
@@ -11929,7 +11917,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/credit-blocks.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -11955,11 +11943,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -11972,12 +11960,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         }
       ],
       "fullCoverageScope": true,
@@ -11989,7 +11973,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/datacomb.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -12059,11 +12043,11 @@
         ],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -12081,12 +12065,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -12102,7 +12082,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/death-yo-yo.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -12163,15 +12143,14 @@
         "effects": [],
         "conditions": [],
         "lineSupport": [
-          "corp.damage_kill",
-          "corp.ice_tax_glacier"
+          "corp.damage_kill"
         ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -12199,7 +12178,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -12239,7 +12218,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/digiconda.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -12264,13 +12243,15 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -12283,12 +12264,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         }
       ],
       "fullCoverageScope": true,
@@ -12300,7 +12277,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/dog-pile.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -12325,13 +12302,15 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -12344,12 +12323,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         }
       ],
       "fullCoverageScope": true,
@@ -12361,7 +12336,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/food-fight.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -12385,13 +12360,15 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -12404,12 +12381,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         }
       ],
       "fullCoverageScope": true,
@@ -12421,7 +12394,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/galatea.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -12447,11 +12420,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -12464,12 +12437,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         }
       ],
       "fullCoverageScope": true,
@@ -12481,7 +12450,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/gatekeeper.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -12505,13 +12474,15 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -12524,12 +12495,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         }
       ],
       "fullCoverageScope": true,
@@ -12541,7 +12508,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/homing-missile.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -12566,13 +12533,15 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -12585,12 +12554,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         }
       ],
       "fullCoverageScope": true,
@@ -12602,7 +12567,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/hunting-pack.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -12627,13 +12592,15 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -12646,12 +12613,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         }
       ],
       "fullCoverageScope": true,
@@ -12663,7 +12626,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/iceberg.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -12723,15 +12686,13 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ],
+        "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -12759,7 +12720,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -12799,7 +12760,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/lesser-arcana.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -12825,11 +12786,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -12842,12 +12803,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         }
       ],
       "fullCoverageScope": true,
@@ -12859,7 +12816,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/marionette.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -12916,15 +12873,13 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ],
+        "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -12952,7 +12907,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -12992,7 +12947,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/mastermind.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -13017,13 +12972,16 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -13036,12 +12994,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         }
       ],
       "fullCoverageScope": true,
@@ -13053,7 +13007,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/minotaur.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -13106,11 +13060,11 @@
           "corp.ice_tax_glacier"
         ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -13134,7 +13088,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -13166,7 +13120,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/misleading-access-menus.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -13211,13 +13165,15 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -13241,7 +13197,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -13273,7 +13229,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/mobile-barricade.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -13333,15 +13289,13 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ],
+        "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -13369,7 +13323,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -13409,7 +13363,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/riddler.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -13435,11 +13389,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -13452,12 +13406,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         }
       ],
       "fullCoverageScope": true,
@@ -13469,7 +13419,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/roadblock.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -13539,11 +13489,11 @@
         ],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -13561,12 +13511,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -13582,7 +13528,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/sandstorm.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -13606,13 +13552,15 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -13625,12 +13573,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         }
       ],
       "fullCoverageScope": true,
@@ -13642,7 +13586,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/scaffolding.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -13712,11 +13656,11 @@
         ],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -13734,12 +13678,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -13755,7 +13695,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/snowbank.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -13802,11 +13742,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -13830,7 +13770,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -13862,7 +13802,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/sphinx-2006.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -13888,11 +13828,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -13905,12 +13845,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         }
       ],
       "fullCoverageScope": true,
@@ -13922,7 +13858,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/sumo-2008.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -13948,11 +13884,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -13965,12 +13901,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         }
       ],
       "fullCoverageScope": true,
@@ -13982,7 +13914,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/toughonium-wall.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -14036,11 +13968,11 @@
           "corp.ice_tax_glacier"
         ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -14066,7 +13998,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -14102,7 +14034,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/tumblers.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -14172,11 +14104,11 @@
         ],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -14194,12 +14126,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -14215,7 +14143,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/twisty-passages.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -14285,11 +14213,11 @@
         ],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -14307,12 +14235,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -14328,7 +14252,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/walking-wall.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -14378,15 +14302,13 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ],
+        "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -14412,7 +14334,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -14448,7 +14370,7 @@
       "implementationPath": "packages/engine/src/card-implementations/proteus/corp/ice/washed-up-solo-construct.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -14494,11 +14416,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -14522,7 +14444,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -51847,9 +51769,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -52021,7 +51948,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -52175,7 +52102,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -52327,7 +52254,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -52499,7 +52426,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "medium",
           "needsHumanReview": false
@@ -52653,7 +52580,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "medium",
           "needsHumanReview": false
@@ -52830,13 +52757,11 @@
           }
         ],
         "lineSupport": [
-          "corp.damage_kill",
-          "corp.ice_tax_glacier",
-          "corp.tag_trace_punish"
+          "corp.damage_kill"
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -53032,12 +52957,11 @@
         ],
         "lineSupport": [
           "corp.damage_kill",
-          "corp.ice_tax_glacier",
-          "corp.tag_trace_punish"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -53159,9 +53083,15 @@
         "effects": [],
         "conditions": [],
         "lineSupport": [
-          "corp.damage_kill",
-          "corp.ice_tax_glacier"
-        ]
+          "corp.damage_kill"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -53224,7 +53154,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/cortical-scanner.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -53294,11 +53224,11 @@
         ],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -53316,12 +53246,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -53432,13 +53358,16 @@
             "kind": "requires_unbroken_subroutine"
           }
         ],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.damage_kill",
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "medium",
-          "needsHumanReview": true
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -53488,7 +53417,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/crystal-wall.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -53558,11 +53487,11 @@
         ],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -53580,12 +53509,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -53661,7 +53586,14 @@
         "conditions": [],
         "lineSupport": [
           "corp.ice_tax_glacier"
-        ]
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -53790,10 +53722,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.damage_kill",
-          "corp.ice_tax_glacier"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -53928,7 +53864,14 @@
         "conditions": [],
         "lineSupport": [
           "corp.ice_tax_glacier"
-        ]
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -54095,7 +54038,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -54260,7 +54203,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/data-wall-2-0.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -54328,13 +54271,15 @@
             "kind": "requires_unbroken_subroutine"
           }
         ],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -54352,12 +54297,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -54373,7 +54314,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/endless-corridor.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -54443,11 +54384,11 @@
         ],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -54465,12 +54406,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -54562,9 +54499,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -54714,9 +54656,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -54860,9 +54807,15 @@
         "effects": [],
         "conditions": [],
         "lineSupport": [
-          "corp.damage_kill",
-          "corp.ice_tax_glacier"
-        ]
+          "corp.damage_kill"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -55017,9 +54970,7 @@
             "kind": "requires_trace_success"
           }
         ],
-        "lineSupport": [
-          "corp.tag_trace_punish"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -55076,7 +55027,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/filter.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -55146,11 +55097,11 @@
         ],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -55168,12 +55119,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -55189,7 +55136,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/fire-wall.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -55259,11 +55206,11 @@
         ],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -55281,12 +55228,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -55388,7 +55331,14 @@
         "conditions": [],
         "lineSupport": [
           "corp.ice_tax_glacier"
-        ]
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -55469,7 +55419,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/haunting-inquisition.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -55523,11 +55473,11 @@
           "corp.ice_tax_glacier"
         ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -55553,7 +55503,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -55680,7 +55630,14 @@
         "lineSupport": [
           "corp.damage_kill",
           "corp.ice_tax_glacier"
-        ]
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -55847,9 +55804,7 @@
             "kind": "requires_trace_success"
           }
         ],
-        "lineSupport": [
-          "corp.tag_trace_punish"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -55988,7 +55943,16 @@
             "kind": "requires_unbroken_subroutine"
           }
         ],
-        "lineSupport": []
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [
@@ -56102,9 +56066,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.tag_trace_punish"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -56194,7 +56163,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/keeper.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -56264,11 +56233,11 @@
         ],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -56286,12 +56255,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -56367,9 +56332,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -56493,9 +56463,15 @@
         "effects": [],
         "conditions": [],
         "lineSupport": [
-          "corp.damage_kill",
-          "corp.ice_tax_glacier"
-        ]
+          "corp.damage_kill"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -56669,9 +56645,15 @@
         "effects": [],
         "conditions": [],
         "lineSupport": [
-          "corp.damage_kill",
-          "corp.ice_tax_glacier"
-        ]
+          "corp.damage_kill"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -56847,7 +56829,14 @@
             "kind": "requires_unbroken_subroutine"
           }
         ],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [
@@ -56937,10 +56926,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.damage_kill",
-          "corp.ice_tax_glacier"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -57091,9 +57084,7 @@
             "kind": "requires_during_run"
           }
         ],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -57172,7 +57163,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/pi-in-the-face.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -57242,11 +57233,11 @@
         ],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -57264,12 +57255,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -57357,9 +57344,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.tag_trace_punish"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -57428,7 +57420,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/quandary.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -57498,11 +57490,11 @@
         ],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -57520,12 +57512,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -57601,10 +57589,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.damage_kill",
-          "corp.ice_tax_glacier"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -57667,7 +57659,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/reinforced-wall.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -57735,13 +57727,15 @@
             "kind": "requires_unbroken_subroutine"
           }
         ],
-        "lineSupport": [],
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -57759,12 +57753,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -57850,9 +57840,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -57927,7 +57922,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/rock-is-strong.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [
@@ -57997,11 +57992,11 @@
         ],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -58019,12 +58014,8 @@
       "confidence": "high",
       "warnings": [
         {
-          "kind": "complex_card_human_review",
-          "message": "Pilot metadata marks this card as needing manual overlay or descriptor review."
-        },
-        {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -58108,7 +58099,14 @@
             "kind": "requires_unbroken_subroutine"
           }
         ],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [
@@ -58212,7 +58210,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -58346,9 +58344,7 @@
             "kind": "requires_during_run"
           }
         ],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
@@ -58496,10 +58492,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.damage_kill",
-          "corp.ice_tax_glacier"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -58630,7 +58630,14 @@
             "kind": "requires_unbroken_subroutine"
           }
         ],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [
@@ -58712,9 +58719,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.ice_tax_glacier"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -58808,7 +58820,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": []
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -58913,7 +58932,14 @@
         "conditions": [],
         "lineSupport": [
           "corp.ice_tax_glacier"
-        ]
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -59045,7 +59071,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -59088,7 +59114,7 @@
       "implementationPath": "packages/engine/src/card-implementations/onr-v1/corp/ice/vacuum-link.ts",
       "implementationFound": true,
       "expectedDerivableKinds": [],
-      "expectedManualOverlayNeeded": true,
+      "expectedManualOverlayNeeded": false,
       "rationale": "Full-coverage inventory entry generated from active AI hint and CardImplementation scan; final coverage class is assigned by the Aufgabe 042 full gate.",
       "derivedFacts": {
         "effects": [],
@@ -59126,11 +59152,11 @@
         "conditions": [],
         "lineSupport": [],
         "quality": {
-          "hintReviewed": false,
+          "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -59152,7 +59178,7 @@
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
@@ -59266,7 +59292,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -59382,7 +59408,7 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -59499,12 +59525,11 @@
         ],
         "conditions": [],
         "lineSupport": [
-          "corp.damage_kill",
-          "corp.ice_tax_glacier"
+          "corp.damage_kill"
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false
@@ -59726,10 +59751,14 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.damage_kill",
-          "corp.ice_tax_glacier"
-        ]
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "high",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],

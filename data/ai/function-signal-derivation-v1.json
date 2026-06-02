@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI023",
-  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022",
+  "taskId": "AI024",
+  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022/AI024/AI024/AI024",
   "generatedAt": "2026-06-02",
-  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI023 adds Corp-Agenda semantics while keeping Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default and UI-derivation effects unchanged.",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI024 adds Corp-ICE semantics while keeping Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default and UI-derivation effects unchanged.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -1532,6 +1532,419 @@
         "breakerProfileRestrictionAbsent": [
           "pit_bull_hellhound_bloodhound_watchdog_only"
         ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp_ice.brain_damage",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.brain_damage"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.brain_damage"
+      },
+      "strategyAnchorFor": [
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "corp_ice.break_cost_tax",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.break_cost_tax"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.break_cost_tax"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.conditional_end_run",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.conditional_end_run"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.conditional_end_run"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp_ice.damage_source",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.damage_source"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.damage_source"
+      },
+      "strategyAnchorFor": [
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "corp_ice.encounter_tax",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.encounter_tax"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.encounter_tax"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.end_run",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.end_run"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.end_run"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp_ice.future_strength_buff",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.future_strength_buff"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.future_strength_buff"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.future_subroutine_modifier",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.future_subroutine_modifier"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.future_subroutine_modifier"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.hardware_trash",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.hardware_trash"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.hardware_trash"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.jackout_tax",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.jackout_tax"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.jackout_tax"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.meat_damage",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.meat_damage"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.meat_damage"
+      },
+      "strategyAnchorFor": [
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "corp_ice.mobile_position_change",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.mobile_position_change"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.mobile_position_change"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp_ice.multi_end_run",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.multi_end_run"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.multi_end_run"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.net_damage",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.net_damage"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.net_damage"
+      },
+      "strategyAnchorFor": [
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "corp_ice.other_utility",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.other_utility"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.other_utility"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp_ice.outer_ice_scaling",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.outer_ice_scaling"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.outer_ice_scaling"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.persistent_tag_source",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.persistent_tag_source"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.persistent_tag_source"
+      },
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "signalId": "corp_ice.position_scaling",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.position_scaling"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.position_scaling"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.program_trash",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.program_trash"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.program_trash"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.random_or_guessing",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.random_or_guessing"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.random_or_guessing"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp_ice.rez_economy",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.rez_economy"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.rez_economy"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp_ice.rez_paid_scaling",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.rez_paid_scaling"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.rez_paid_scaling"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.rnd_reorder",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.rnd_reorder"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.rnd_reorder"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp_ice.run_lock",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.run_lock"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.run_lock"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.runner_pay_or_end_run",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.runner_pay_or_end_run"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.runner_pay_or_end_run"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "corp_ice.self_bounce_or_maintenance_drawback",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.self_bounce_or_maintenance_drawback"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.self_bounce_or_maintenance_drawback"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp_ice.tag_source",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.tag_source"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.tag_source"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp_ice.trace_source",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.trace_source"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.trace_source"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "corp_ice.type_choice_or_mode_choice",
+      "source": "effects",
+      "match": {
+        "target": "corp_ice.type_choice_or_mode_choice"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "ice",
+        "target": "corp_ice.type_choice_or_mode_choice"
       },
       "strategyAnchorFor": []
     },

@@ -1,8 +1,8 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI023",
+  "taskId": "AI024",
   "generatedAt": "2026-06-02",
-  "description": "Controlled V1 tactic-signal catalog. AI023 adds Corp-Agenda semantics for scoring value, agenda difficulty, economy, action, draw, ICE/fort setup, tag/trace, damage, access punish and bad-publicity risk without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
+  "description": "Controlled V1 tactic-signal catalog. AI024 adds Corp-ICE function signals without subtype-only or card-specific signals and without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
   "signalPolicy": {
     "tacticSignal": "Functional card utility: what the AI can use the card for.",
     "strategyAnchor": "Large deck line: which strategy the card can anchor or materially support.",
@@ -1309,6 +1309,477 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "General Watchdog coverage signal only; Dogcatcher uses subtype-limited Sentry signals instead."
+    },
+    {
+      "signalId": "corp_ice.brain_damage",
+      "group": "ai024_corp_ice_damage",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.brain damage.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.break_cost_tax",
+      "group": "ai024_corp_ice_tax",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.break cost tax.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.conditional_end_run",
+      "group": "ai024_corp_ice_tax",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.conditional end run.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.damage_source",
+      "group": "ai024_corp_ice_damage",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.damage source.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.encounter_tax",
+      "group": "ai024_corp_ice_tax",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.encounter tax.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.end_run",
+      "group": "ai024_corp_ice_tax",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.end run.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.future_strength_buff",
+      "group": "ai024_corp_ice",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.future strength buff.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.future_subroutine_modifier",
+      "group": "ai024_corp_ice",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.future subroutine modifier.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.hardware_trash",
+      "group": "ai024_corp_ice",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.hardware trash.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.jackout_tax",
+      "group": "ai024_corp_ice_tax",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.jackout tax.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.meat_damage",
+      "group": "ai024_corp_ice_damage",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.meat damage.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.mobile_position_change",
+      "group": "ai024_corp_ice_utility",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.mobile position change.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.multi_end_run",
+      "group": "ai024_corp_ice_tax",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.multi end run.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.net_damage",
+      "group": "ai024_corp_ice_damage",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.net damage.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.other_utility",
+      "group": "ai024_corp_ice",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.other utility.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.outer_ice_scaling",
+      "group": "ai024_corp_ice",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.outer ice scaling.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.persistent_tag_source",
+      "group": "ai024_corp_ice_tag_trace",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.persistent tag source.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.position_scaling",
+      "group": "ai024_corp_ice_utility",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.position scaling.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.program_trash",
+      "group": "ai024_corp_ice",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.program trash.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.random_or_guessing",
+      "group": "ai024_corp_ice",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.random or guessing.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.rez_economy",
+      "group": "ai024_corp_ice_utility",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.rez economy.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.rez_paid_scaling",
+      "group": "ai024_corp_ice_utility",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.rez paid scaling.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.rnd_reorder",
+      "group": "ai024_corp_ice",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.rnd reorder.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.run_lock",
+      "group": "ai024_corp_ice_tax",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.run lock.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.runner_pay_or_end_run",
+      "group": "ai024_corp_ice_tax",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.runner pay or end run.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.self_bounce_or_maintenance_drawback",
+      "group": "ai024_corp_ice",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.self bounce or maintenance drawback.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.tag_source",
+      "group": "ai024_corp_ice_tag_trace",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.tag source.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.trace_source",
+      "group": "ai024_corp_ice_tag_trace",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.trace source.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "corp_ice.type_choice_or_mode_choice",
+      "group": "ai024_corp_ice_utility",
+      "sideScope": "corp",
+      "description": "AI024 Corp ICE tactic signal: corp ice.type choice or mode choice.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI024 reviewed Corp-ICE structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI024 Corp-ICE signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "corp.action_denial",

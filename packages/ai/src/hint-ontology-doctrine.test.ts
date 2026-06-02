@@ -26,7 +26,7 @@ describe("AI hint ontology doctrine diagnostics", () => {
       "onr_v1_210_political-overthrow",
     ]);
     expect(summary.tagPunish.hasTagSourceAndPayoff).toBe(true);
-    expect(summary.lineSupportCounts.byKind["corp.tag_trace_punish"]).toBe(4);
+    expect(summary.lineSupportCounts.byKind["corp.tag_trace_punish"]).toBe(2);
     expect(summary.remoteRoles.roleCounts.agenda_steal_tax).toBe(1);
   });
 
