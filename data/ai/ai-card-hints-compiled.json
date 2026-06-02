@@ -13691,7 +13691,6 @@
         "data/scenarios/ai-deck-legal-v1920-smokes.json#corp_v1920_scored_modifier_agenda"
       ],
       "tacticSignals": [
-        "damage.payoff",
         "score.damage_amp",
         "score.meat_damage_amp"
       ],
@@ -15595,7 +15594,7 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
@@ -15609,12 +15608,6 @@
           "resource": "advancement_counters",
           "repeatable": false
         }
-      ],
-      "lineSupport": [
-        "corp.fast_advance"
-      ],
-      "strategicRole": [
-        "scoring_tool"
       ],
       "tacticSignals": [
         "score.conditional_bonus_agenda_points",
@@ -26231,7 +26224,7 @@
       "tacticSignals": [
         "damage.payoff",
         "risk.requires_tagged_runner",
-        "score.brain_damage_or_hand_size_pressure",
+        "score.hand_size_pressure",
         "score.meat_damage_source",
         "score.tagged_meat_damage_payoff",
         "tag.payoff"
@@ -26446,7 +26439,7 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
         "reviewedDate": "2026-06-02",
@@ -26456,12 +26449,6 @@
         "score.overadvance_bonus",
         "score.overadvance_scaling",
         "score.recurring_extra_action"
-      ],
-      "lineSupport": [
-        "corp.fast_advance"
-      ],
-      "strategicRole": [
-        "scoring_tool"
       ],
       "conditions": [
         {

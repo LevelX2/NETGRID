@@ -343,7 +343,6 @@
       "score.black_ops_difficulty_discount",
       "score.bonus_agenda_point",
       "score.bonus_agenda_points",
-      "score.brain_damage_or_hand_size_pressure",
       "score.chosen_ice_strength_bonus",
       "score.closeout_agenda",
       "score.code_gate_strength_bonus",
@@ -364,6 +363,7 @@
       "score.gray_ops_agenda_condition",
       "score.gray_ops_difficulty_discount",
       "score.hand_size",
+      "score.hand_size_pressure",
       "score.high_agenda_value",
       "score.hq_agenda_reveal",
       "score.hq_agenda_shuffle",
@@ -733,7 +733,6 @@
       "score.black_ops_difficulty_discount",
       "score.bonus_agenda_point",
       "score.bonus_agenda_points",
-      "score.brain_damage_or_hand_size_pressure",
       "score.chosen_ice_strength_bonus",
       "score.closeout_agenda",
       "score.code_gate_strength_bonus",
@@ -754,6 +753,7 @@
       "score.gray_ops_agenda_condition",
       "score.gray_ops_difficulty_discount",
       "score.hand_size",
+      "score.hand_size_pressure",
       "score.high_agenda_value",
       "score.hq_agenda_reveal",
       "score.hq_agenda_shuffle",
@@ -940,7 +940,7 @@
       "effects[].scope": 1448,
       "effects[].target": 609,
       "effects[].timing": 1448,
-      "lineSupport": 172,
+      "lineSupport": 170,
       "manualNotes": 41,
       "planRoles": 564,
       "quality": 477,
@@ -962,7 +962,7 @@
       "scenarioRefs": 564,
       "side": 564,
       "strategicNotes": 3,
-      "strategicRole": 175,
+      "strategicRole": 173,
       "tacticSignals": 43,
       "targetProfiles": 52,
       "targetProfiles[].avoid": 53,
@@ -2026,10 +2026,10 @@
   },
   "ai004Triage": {
     "lineSupport": {
-      "totalOccurrences": 226,
+      "totalOccurrences": 224,
       "legacyOccurrences": 0,
       "categoryCounts": {
-        "normalized_strategy_id": 226
+        "normalized_strategy_id": 224
       },
       "valueCounts": [
         {
@@ -2065,12 +2065,12 @@
           "count": 11
         },
         {
-          "value": "corp.fast_advance",
-          "count": 10
-        },
-        {
           "value": "corp.ambush_bluff",
           "count": 9
+        },
+        {
+          "value": "corp.fast_advance",
+          "count": 8
         },
         {
           "value": "runner.search.breaker",
@@ -4755,44 +4755,6 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.tag_trace_punish"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_v1_214_project-babylon",
-          "side": "corp",
-          "cardType": "agenda",
-          "value": "corp.fast_advance",
-          "evidence": {
-            "lineSupport": [
-              "corp.fast_advance"
-            ],
-            "effects": [
-              {
-                "kind": "score_acceleration",
-                "scope": "score_area",
-                "timing": "when_scored",
-                "resource": "advancement_counters"
-              }
-            ],
-            "conditions": [
-              "requires_scored_agenda"
-            ],
-            "cardType": "agenda",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": true,
-              "hintReviewed": true,
-              "strategyCovered": true,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-06-02",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.fast_advance"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -11666,37 +11628,6 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ambush_bluff"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_proteus_007_project-venice",
-          "side": "corp",
-          "cardType": "agenda",
-          "value": "corp.fast_advance",
-          "evidence": {
-            "lineSupport": [
-              "corp.fast_advance"
-            ],
-            "effects": [],
-            "conditions": [
-              "requires_scored_agenda"
-            ],
-            "cardType": "agenda",
-            "side": "corp",
-            "quality": {
-              "benchmarkCovered": false,
-              "hintReviewed": true,
-              "strategyCovered": true,
-              "confidence": "high",
-              "needsHumanReview": false,
-              "reviewedDate": "2026-06-02",
-              "reviewedBy": "codex"
-            }
-          },
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.fast_advance"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -19031,16 +18962,6 @@
       "count": 1,
       "path": "data/ai/function-signal-derivation-v1.json.derivationRules[338].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
-      "signalId": "score.brain_damage_or_hand_size_pressure",
-      "strategyAnchorFor": [
-        "corp.damage_kill"
-      ]
-    },
-    {
-      "kind": "strategy_anchor_without_effect_scope_warn_only",
-      "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[339].gates.effectScope",
-      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.chosen_ice_strength_bonus",
       "strategyAnchorFor": [
         "corp.ice_tax_glacier"
@@ -19049,7 +18970,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[340].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[339].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.closeout_agenda",
       "strategyAnchorFor": [
@@ -19059,7 +18980,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[341].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[340].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.code_gate_strength_bonus",
       "strategyAnchorFor": [
@@ -19069,7 +18990,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[344].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[343].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.damage_amp",
       "strategyAnchorFor": [
@@ -19079,7 +19000,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[352].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[351].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.fort_ice_strength_bonus",
       "strategyAnchorFor": [
@@ -19090,7 +19011,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[354].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[353].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.free_install_and_rez_ice",
       "strategyAnchorFor": [
@@ -19101,12 +19022,22 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[355].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[354].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.free_rez_ice",
       "strategyAnchorFor": [
         "corp.ice_tax_glacier",
         "corp.remote_scoring"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[357].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "score.hand_size_pressure",
+      "strategyAnchorFor": [
+        "corp.damage_kill"
       ]
     },
     {

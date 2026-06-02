@@ -31,7 +31,6 @@ const EXPECTED_ANCHOR_CARDS = new Map([
   ["onr_v1_208_on-call-solo-team", [{ strategyId: "corp.damage_kill", role: "damage_payoff" }, { strategyId: "corp.tag_trace_punish", role: "punish_payoff" }]],
   ["onr_v1_212_priority-requisition", [{ strategyId: "corp.ice_tax_glacier", role: "tempo_payoff" }, { strategyId: "corp.remote_scoring", role: "score_window_payoff" }]],
   ["onr_v1_213_private-cybernet-police", [{ strategyId: "corp.tag_trace_punish", role: "tag_source" }]],
-  ["onr_v1_214_project-babylon", [{ strategyId: "corp.fast_advance", role: "overadvance_payoff" }]],
   ["onr_v1_215_security-net-optimization", [{ strategyId: "corp.ice_tax_glacier", role: "fort_tax_anchor" }, { strategyId: "corp.remote_scoring", role: "remote_defense_anchor" }]],
   ["onr_v1_216_security-purge", [{ strategyId: "corp.ice_tax_glacier", role: "setup_payoff" }, { strategyId: "corp.remote_scoring", role: "setup_payoff" }]],
   ["onr_v1_217_strike-force-kali", [{ strategyId: "corp.damage_kill", role: "damage_payoff" }, { strategyId: "corp.tag_trace_punish", role: "punish_payoff" }]],
@@ -41,7 +40,6 @@ const EXPECTED_ANCHOR_CARDS = new Map([
   ["onr_proteus_003_corporate-headhunters", [{ strategyId: "corp.damage_kill", role: "damage_engine" }, { strategyId: "corp.tag_trace_punish", role: "punish_payoff" }]],
   ["onr_proteus_004_fetal-ai", [{ strategyId: "corp.damage_kill", role: "access_punish" }, { strategyId: "corp.ambush_bluff", role: "access_punish" }]],
   ["onr_proteus_005_marked-accounts", [{ strategyId: "corp.tag_trace_punish", role: "access_tag_source" }, { strategyId: "corp.ambush_bluff", role: "access_punish" }]],
-  ["onr_proteus_007_project-venice", [{ strategyId: "corp.fast_advance", role: "overadvance_payoff" }]],
   ["onr_proteus_009_viral-breeding-ground", [{ strategyId: "corp.ambush_bluff", role: "access_punish" }]],
   ["onr_proteus_010_world-domination", [{ strategyId: "corp.remote_scoring", role: "win_condition" }]],
 ]);
@@ -63,9 +61,11 @@ const SUPPORT_ONLY_CARDS = [
   "onr_v1_211_polymer-breakthrough",
   "onr_v1_218_subsidiary-branch",
   "onr_v1_220_tycho-extension",
+  "onr_v1_214_project-babylon",
   "onr_proteus_001_ai-board-member",
   "onr_proteus_002_charity-takeover",
   "onr_proteus_006_please-dont-choke-anyone",
+  "onr_proteus_007_project-venice",
   "onr_proteus_008_project-zurich",
 ];
 
@@ -78,7 +78,7 @@ const REQUIRED_SIGNALS_BY_CARD = new Map([
   ["onr_v1_213_private-cybernet-police", ["score.trace_tag_source", "score.tag_source", "trace.source", "tag.source"]],
   ["onr_v1_208_on-call-solo-team", ["score.tagged_meat_damage_payoff", "score.meat_damage_source", "risk.requires_tagged_runner"]],
   ["onr_v1_217_strike-force-kali", ["score.tagged_meat_damage_payoff", "score.meat_damage_source", "risk.requires_tagged_runner"]],
-  ["onr_proteus_003_corporate-headhunters", ["score.tagged_meat_damage_payoff", "score.brain_damage_or_hand_size_pressure", "risk.requires_tagged_runner"]],
+  ["onr_proteus_003_corporate-headhunters", ["score.tagged_meat_damage_payoff", "score.hand_size_pressure", "risk.requires_tagged_runner"]],
   ["onr_v1_212_priority-requisition", ["score.free_rez_ice"]],
   ["onr_v1_216_security-purge", ["score.free_install_and_rez_ice", "score.rnd_install_and_rez"]],
   ["onr_v1_197_data-fort-reclamation", ["score.remote_fort_creation", "score.remote_install_budget"]],
@@ -99,6 +99,7 @@ const FORBIDDEN_SIGNALS = new Set([
   "agenda.marked_accounts",
   "agenda.viral_breeding_ground",
   "agenda.world_domination",
+  "score.brain_damage_or_hand_size_pressure",
 ]);
 
 const REPORT_FLAGS = [
@@ -242,6 +243,22 @@ function main() {
 
     const anchorSet = new Set(reportCard.strategyAnchors ?? []);
     const pairs = reportCard.strategySupportPairs ?? [];
+    const primaryAnchorEvidence = reportCard.primaryAnchorEvidence ?? [];
+    const supportingEvidence = reportCard.supportingEvidence ?? [];
+    const pairEvidence = [...new Set(pairs.flatMap((pair) => pair.evidence ?? []))].sort();
+    if (JSON.stringify(primaryAnchorEvidence) !== JSON.stringify(pairEvidence)) {
+      fail(errors, `${card.cardId} primaryAnchorEvidence does not match strategySupportPair evidence`);
+    }
+    for (const signal of [...primaryAnchorEvidence, ...supportingEvidence]) {
+      if (!(reportCard.tacticSignals ?? []).includes(signal)) {
+        fail(errors, `${card.cardId} evidence signal ${signal} is not in tacticSignals`);
+      }
+    }
+    for (const signal of reportCard.tacticSignals ?? []) {
+      if (!primaryAnchorEvidence.includes(signal) && !supportingEvidence.includes(signal)) {
+        fail(errors, `${card.cardId} tactic signal ${signal} is neither primary nor supporting evidence`);
+      }
+    }
     if (anchorSet.size === 0) {
       if ((reportCard.legacyStrategicRole ?? []).length !== 0) {
         fail(errors, `${card.cardId} has legacyStrategicRole without strategy anchor`);

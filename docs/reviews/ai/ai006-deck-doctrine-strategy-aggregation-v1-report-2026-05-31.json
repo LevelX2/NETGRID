@@ -4127,9 +4127,9 @@
           "confidence": "high"
         },
         "corp.fast_advance": {
-          "anchorScore": 72,
+          "anchorScore": 32,
           "supportScore": 80,
-          "finalScore": 75,
+          "finalScore": 51,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_214_project-babylon",
@@ -4137,22 +4137,6 @@
               "source": "derivedStrategyAnchor",
               "strategyId": "corp.fast_advance",
               "reason": "derived_strategy_anchor_from_inspector_index"
-            },
-            {
-              "cardId": "onr_v1_214_project-babylon",
-              "quantity": 1,
-              "source": "lineSupport",
-              "signal": "corp.fast_advance",
-              "strategyId": "corp.fast_advance",
-              "reason": "normalized_lineSupport_strategy_goal"
-            },
-            {
-              "cardId": "onr_v1_214_project-babylon",
-              "quantity": 1,
-              "source": "strategicRole",
-              "role": "scoring_tool",
-              "strategyId": "corp.fast_advance",
-              "reason": "valid_strategicRole_reinforces_existing_anchor"
             }
           ],
           "supportEvidence": [
@@ -4277,7 +4261,7 @@
             }
           ],
           "supportGaps": [],
-          "confidence": "high"
+          "confidence": "medium"
         },
         "corp.ice_tax_glacier": {
           "anchorScore": 100,
@@ -4845,9 +4829,9 @@
         "corp.tag_trace_punish"
       ],
       "secondaryStrategies": [
-        "corp.fast_advance",
         "corp.economy_rez_reserve",
         "corp.damage_kill",
+        "corp.fast_advance",
         "corp.central_stabilize",
         "corp.rush_score"
       ],
@@ -4864,7 +4848,6 @@
       },
       "legacySignalCounts": {
         "lineSupport:corp.damage_kill": 1,
-        "lineSupport:corp.fast_advance": 1,
         "lineSupport:corp.ice_tax_glacier": 2,
         "lineSupport:corp.remote_scoring": 2,
         "lineSupport:corp.tag_trace_punish": 2,
@@ -4911,7 +4894,7 @@
         },
         "scoreProfile": {
           "scoreAcceleration": 1,
-          "agendaInstallAdvanceScoreSupport": 7,
+          "agendaInstallAdvanceScoreSupport": 6,
           "remoteScoringProtection": 3,
           "stealTax": 0
         },
@@ -6538,6 +6521,6 @@
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 2
     },
-    "contentSha256": "a74a543a30536c7c368d09e8bc3e9388d2664077c4fcff2f30910af3c69d8605"
+    "contentSha256": "0238c2ae4e7d4fd5e8ffc7d4e221e3e90880441608321ee9a608cff38a31083b"
   }
 }

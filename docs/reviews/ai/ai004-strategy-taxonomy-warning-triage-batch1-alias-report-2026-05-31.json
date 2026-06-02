@@ -5243,27 +5243,6 @@
       ]
     },
     {
-      "value": "corp.fast_advance",
-      "count": 10,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "corp.fast_advance"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_189_artificial-security-directors",
-        "onr_v1_201_executive-extraction",
-        "onr_v1_202_genetics-visionary-acquisition",
-        "onr_v1_214_project-babylon",
-        "onr_v1_292_management-shake-up",
-        "onr_v1_300_project-consultants",
-        "onr_v1_304_systematic-layoffs",
-        "onr_v1_305_team-restructuring"
-      ]
-    },
-    {
       "value": "corp.ambush_bluff",
       "count": 9,
       "mappingCategory": "exact_strategy_goal",
@@ -5282,6 +5261,27 @@
         "onr_v1_354_crybaby",
         "onr_proteus_004_fetal-ai",
         "onr_proteus_005_marked-accounts"
+      ]
+    },
+    {
+      "value": "corp.fast_advance",
+      "count": 8,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "corp.fast_advance"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_189_artificial-security-directors",
+        "onr_v1_201_executive-extraction",
+        "onr_v1_202_genetics-visionary-acquisition",
+        "onr_v1_292_management-shake-up",
+        "onr_v1_300_project-consultants",
+        "onr_v1_304_systematic-layoffs",
+        "onr_v1_305_team-restructuring",
+        "onr_v1_312_chicago-branch"
       ]
     },
     {

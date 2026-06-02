@@ -155,7 +155,7 @@
   },
   "hardErrorCount": 0,
   "hardErrors": [],
-  "warningCount": 2038,
+  "warningCount": 2040,
   "warnings": [
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -2120,6 +2120,16 @@
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_proteus_123_senatorial-field-trip",
+      "message": "Active monolith has condition:requires_rezzed_ice that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_123_senatorial-field-trip",
+      "message": "Active monolith has effect:rez that the current deriver does not reproduce."
+    },
+    {
+      "kind": "monolith_mechanical_duplication_candidate",
+      "cardId": "onr_proteus_123_senatorial-field-trip",
       "message": "Active monolith has effect:run_tax that the current deriver does not reproduce."
     },
     {
@@ -4005,7 +4015,7 @@
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_077_anonymous-tip",
-      "message": "Active monolith has effect:expose_info that the current deriver does not reproduce."
+      "message": "Active monolith has effect:rez that the current deriver does not reproduce."
     },
     {
       "kind": "descriptor_or_schema_gap",
@@ -11002,12 +11012,10 @@
         ],
         "effects": [],
         "conditions": [],
-        "lineSupport": [
-          "corp.fast_advance"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": true,
+          "strategyCovered": false,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -21784,12 +21792,21 @@
         ],
         "effects": [
           {
+            "kind": "rez",
+            "timing": "action",
+            "scope": "ice"
+          },
+          {
             "kind": "run_tax",
             "timing": "action",
             "scope": "corp"
           }
         ],
-        "conditions": [],
+        "conditions": [
+          {
+            "kind": "requires_rezzed_ice"
+          }
+        ],
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
@@ -21803,10 +21820,14 @@
         "matches": [],
         "generatedOnly": [],
         "manualOnly": [
+          "condition:requires_rezzed_ice",
+          "effect:rez",
           "effect:run_tax"
         ]
       },
       "missingManualOverlay": [
+        "condition:requires_rezzed_ice",
+        "effect:rez",
         "effect:run_tax"
       ],
       "descriptorGaps": [
@@ -21821,6 +21842,14 @@
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_rezzed_ice has no generated basic fact match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:rez has no generated basic fact match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -34531,7 +34560,7 @@
         ],
         "effects": [
           {
-            "kind": "expose_info",
+            "kind": "rez",
             "timing": "action",
             "scope": "ice"
           }
@@ -34550,11 +34579,11 @@
         "matches": [],
         "generatedOnly": [],
         "manualOnly": [
-          "effect:expose_info"
+          "effect:rez"
         ]
       },
       "missingManualOverlay": [
-        "effect:expose_info"
+        "effect:rez"
       ],
       "descriptorGaps": [
         "Manual ontology contains fields not currently derivable."
@@ -34571,7 +34600,7 @@
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:expose_info has no generated basic fact match."
+          "message": "Manual effect:rez has no generated basic fact match."
         }
       ],
       "fullCoverageScope": true,
@@ -36523,6 +36552,11 @@
         "effects": [
           {
             "kind": "access_replacement",
+            "timing": "on_access",
+            "scope": "accessed_card"
+          },
+          {
+            "kind": "access_replacement",
             "timing": "successful_run",
             "scope": "rnd"
           },
@@ -37664,6 +37698,11 @@
           "pressure_hq"
         ],
         "effects": [
+          {
+            "kind": "access_replacement",
+            "timing": "on_access",
+            "scope": "accessed_card"
+          },
           {
             "kind": "access_replacement",
             "timing": "successful_run",
@@ -50957,12 +50996,10 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "corp.fast_advance"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": true,
+          "strategyCovered": false,
           "benchmarkCovered": true,
           "confidence": "high",
           "needsHumanReview": false

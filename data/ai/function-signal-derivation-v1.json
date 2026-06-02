@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI022-1",
-  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022/AI023",
+  "taskId": "AI023",
+  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022",
   "generatedAt": "2026-06-02",
-  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI022-1 clarifies tactic-signal taxonomy, narrows misleading action/trash economy derivations and adds known ICE-control/free-trash corrections without Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default or UI-derivation effects.",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI023 adds Corp-Agenda semantics while keeping Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default and UI-derivation effects unchanged.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -5863,21 +5863,6 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "score.brain_damage_or_hand_size_pressure",
-      "source": "effects",
-      "match": {
-        "target": "score.brain_damage_or_hand_size_pressure"
-      },
-      "gates": {
-        "side": "corp",
-        "cardType": "agenda",
-        "target": "score.brain_damage_or_hand_size_pressure"
-      },
-      "strategyAnchorFor": [
-        "corp.damage_kill"
-      ]
-    },
-    {
       "signalId": "score.chosen_ice_strength_bonus",
       "source": "effects",
       "match": {
@@ -6148,6 +6133,21 @@
         "target": "score.gray_ops_difficulty_discount"
       },
       "strategyAnchorFor": []
+    },
+    {
+      "signalId": "score.hand_size_pressure",
+      "source": "effects",
+      "match": {
+        "target": "score.hand_size_pressure"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "agenda",
+        "target": "score.hand_size_pressure"
+      },
+      "strategyAnchorFor": [
+        "corp.damage_kill"
+      ]
     },
     {
       "signalId": "score.hand_size",
@@ -7533,6 +7533,28 @@
     },
     {
       "signalId": "tag.payoff",
+      "source": "remoteRole",
+      "match": {
+        "kind": "tag_punish_asset"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "upgrade"
+        ],
+        "remoteRole": [
+          "tag_punish_asset"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "signalId": "tag.payoff",
       "source": "effects",
       "match": {
         "kind": "tag_punish_payoff"
@@ -7549,28 +7571,6 @@
         ],
         "effectScope": [
           "runner"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.tag_trace_punish"
-      ]
-    },
-    {
-      "signalId": "tag.payoff",
-      "source": "remoteRole",
-      "match": {
-        "kind": "tag_punish_asset"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "asset",
-          "upgrade"
-        ],
-        "remoteRole": [
-          "tag_punish_asset"
         ]
       },
       "strategyAnchorFor": [

@@ -6,6 +6,8 @@ import { fileURLToPath } from "node:url";
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const GENERATED_AT = "2026-06-02";
 const SOURCE_COMMIT = "ddaf36973d682701c4a616c74c582fbb31f992f2";
+const POLISH_SOURCE_COMMIT = "8c488b48719c";
+const POLISH_CORRECTS_COMMIT = "f6fb69f8";
 
 const CARD_FILES = [
   "data/cards/originalset-v1-cards.json",
@@ -17,6 +19,8 @@ const TACTIC_SIGNAL_PATH = "data/ai/tactic-signals-v1.json";
 const DERIVATION_PATH = "data/ai/function-signal-derivation-v1.json";
 const MD_REPORT_PATH = "docs/reviews/ai/ai023-corp-agendas-semantics-review-2026-06-02.md";
 const JSON_REPORT_PATH = "docs/reviews/ai/ai023-corp-agendas-semantics-review-report-2026-06-02.json";
+const MD_POLISH_REPORT_PATH = "docs/reviews/ai/ai023-1-corp-agendas-semantics-polish-2026-06-02.md";
+const JSON_POLISH_REPORT_PATH = "docs/reviews/ai/ai023-1-corp-agendas-semantics-polish-report-2026-06-02.json";
 const README_PATH = "docs/reviews/ai/README.md";
 
 const AI023_SIGNALS = {
@@ -70,7 +74,7 @@ const AI023_SIGNALS = {
   "score.meat_damage_source": [false, ["corp.damage_kill"]],
   "score.meat_damage_amp": [false, ["corp.damage_kill"]],
   "score.damage_amp": [false, ["corp.damage_kill"]],
-  "score.brain_damage_or_hand_size_pressure": [false, ["corp.damage_kill"]],
+  "score.hand_size_pressure": [false, ["corp.damage_kill"]],
   "score.net_damage_access_punish": [false, ["corp.damage_kill", "corp.ambush_bluff"]],
   "score.fort_trash_on_score": [true, []],
   "access.agenda_ambush": [false, ["corp.ambush_bluff"]],
@@ -90,6 +94,7 @@ const AI023_SIGNALS = {
   "risk.requires_tagged_runner": [true, []],
   "risk.high_difficulty_agenda": [true, []],
 };
+const AI023_REMOVED_SIGNALS = new Set(["score.brain_damage_or_hand_size_pressure"]);
 
 function e(kind, timing, scope, target, extra = {}) {
   return { kind, timing, scope, target, ...extra };
@@ -126,7 +131,7 @@ const A = {
   },
   "onr_v1_190_bioweapons-engineering": {
     family: "damage_source_or_damage_amp",
-    signals: ["score.meat_damage_amp", "score.damage_amp", "damage.payoff"],
+    signals: ["score.meat_damage_amp", "score.damage_amp"],
     effects: [e("damage", "persistent", "runner", "score.meat_damage_amp", { resource: "meat_damage", amount: 1 })],
     lineSupport: ["corp.damage_kill"],
     strategicRole: ["engine_anchor"],
@@ -371,12 +376,9 @@ const A = {
     signals: ["score.conditional_bonus_agenda_points", "score.overadvance_bonus", "score.overadvance_scaling"],
     effects: [e("score_acceleration", "when_scored", "score_area", "score.overadvance_bonus", { resource: "advancement_counters" })],
     conditions: ["requires_advancement_counter"],
-    lineSupport: ["corp.fast_advance"],
-    strategicRole: ["scoring_tool"],
-    pairs: [pair("corp.fast_advance", "overadvance_payoff", ["score.overadvance_bonus", "score.overadvance_scaling"], "high")],
     target: ["not_required", []],
     hidden: "public_when_scored",
-    rationale: "Overadvance-Agenda-Point-Payoff stuetzt Fast-Advance/Overadvance, nicht einfache Agenda-Punkte.",
+    rationale: "Overadvance-Agenda-Point-Payoff bleibt funktionale Score-Semantik; ohne separate Overadvance-/Closeout-Strategy-ID wird daraus kein Fast-Advance-Anker.",
   },
   "onr_v1_215_security-net-optimization": {
     family: "ice_strength_or_ice_type_buff",
@@ -458,15 +460,15 @@ const A = {
   },
   "onr_proteus_003_corporate-headhunters": {
     family: "tagged_damage_payoff",
-    signals: ["score.tagged_meat_damage_payoff", "score.meat_damage_source", "score.brain_damage_or_hand_size_pressure", "risk.requires_tagged_runner", "damage.payoff", "tag.payoff"],
-    effects: [e("tag_punish_payoff", "scored_activated", "runner", "score.tagged_meat_damage_payoff", { resource: "damage", amount: 1, repeatable: true }), e("damage", "scored_activated", "runner", "score.meat_damage_source", { resource: "meat_damage", amount: 1, repeatable: true }), e("hand_size_modifier", "damage_window", "runner", "score.brain_damage_or_hand_size_pressure", { resource: "hand_size", amount: 1 })],
+    signals: ["score.tagged_meat_damage_payoff", "score.meat_damage_source", "score.hand_size_pressure", "risk.requires_tagged_runner", "damage.payoff", "tag.payoff"],
+    effects: [e("tag_punish_payoff", "scored_activated", "runner", "score.tagged_meat_damage_payoff", { resource: "damage", amount: 1, repeatable: true }), e("damage", "scored_activated", "runner", "score.meat_damage_source", { resource: "meat_damage", amount: 1, repeatable: true }), e("hand_size_modifier", "damage_window", "runner", "score.hand_size_pressure", { resource: "hand_size", amount: 1 })],
     conditions: ["requires_scored_agenda", "requires_runner_tagged"],
     lineSupport: ["corp.damage_kill", "corp.tag_trace_punish"],
     strategicRole: ["punish_payoff"],
-    pairs: [pair("corp.damage_kill", "damage_engine", ["score.tagged_meat_damage_payoff", "score.meat_damage_source", "score.brain_damage_or_hand_size_pressure"], "high"), pair("corp.tag_trace_punish", "punish_payoff", ["risk.requires_tagged_runner"], "high")],
+    pairs: [pair("corp.damage_kill", "damage_engine", ["score.tagged_meat_damage_payoff", "score.meat_damage_source", "score.hand_size_pressure"], "high"), pair("corp.tag_trace_punish", "punish_payoff", ["risk.requires_tagged_runner"], "high")],
     target: ["not_required", []],
     hidden: "public_when_scored",
-    rationale: "Tagged Damage plus Hand-size-Pressure ist Kill-Engine/Payoff.",
+    rationale: "Tagged Meat-Damage plus Hand-size-Pressure ist Kill-Engine/Payoff; der Kartentext wird nicht als Brain-Damage-Quelle modelliert.",
   },
   "onr_proteus_004_fetal-ai": {
     family: "access_ambush_or_access_punish",
@@ -506,12 +508,9 @@ const A = {
     signals: ["score.overadvance_bonus", "score.recurring_extra_action", "score.overadvance_scaling"],
     effects: [e("score_acceleration", "when_scored", "score_area", "score.overadvance_bonus", { resource: "advancement_counters" }), e("extra_action", "start_of_turn", "corp", "score.recurring_extra_action", { resource: "actions", amount: 1 })],
     conditions: ["requires_advancement_counter"],
-    lineSupport: ["corp.fast_advance"],
-    strategicRole: ["scoring_tool"],
-    pairs: [pair("corp.fast_advance", "overadvance_payoff", ["score.overadvance_bonus", "score.recurring_extra_action", "score.overadvance_scaling"], "medium")],
     target: ["not_required", []],
     hidden: "public_when_scored",
-    rationale: "Overadvance erzeugt wiederkehrende Tempo-Engine; als Fast-Advance/Overadvance-Payoff geankert.",
+    rationale: "Overadvance erzeugt wiederkehrende Tempo-Engine; wie Project Zurich bleibt dies support/candidate und wird nicht als Fast-Advance-Anker modelliert.",
   },
   "onr_proteus_008_project-zurich": {
     family: "overadvance_or_bonus_points",
@@ -602,6 +601,7 @@ function signalDescription(signalId) {
 
 function updateTacticSignals() {
   const catalog = readJson(TACTIC_SIGNAL_PATH);
+  catalog.signals = (catalog.signals ?? []).filter((signal) => !AI023_REMOVED_SIGNALS.has(signal.signalId));
   const existing = new Set((catalog.signals ?? []).map((signal) => signal.signalId));
   const added = [];
   for (const [signalId, [supportOnly, anchors]] of Object.entries(AI023_SIGNALS)) {
@@ -661,6 +661,7 @@ function updateTacticSignals() {
 
 function updateDerivationRules() {
   const data = readJson(DERIVATION_PATH);
+  data.derivationRules = (data.derivationRules ?? []).filter((rule) => !AI023_REMOVED_SIGNALS.has(rule.signalId));
   const existing = new Set(
     (data.derivationRules ?? []).map((rule) => `${rule.signalId}:${JSON.stringify(rule.match)}:${JSON.stringify(rule.gates)}`),
   );
@@ -737,6 +738,12 @@ function buildPostReviewAssignments(activeCards) {
     if (!assignment) throw new Error(`Missing AI023 assignment for ${card.cardId}`);
     const anchors = assignment.lineSupport ?? [];
     const [targetProfileStatus, targetProfileKinds] = assignment.target ?? ["not_required", []];
+    const primaryAnchorEvidence = [
+      ...new Set((assignment.pairs ?? []).flatMap((strategyPair) => strategyPair.evidence ?? [])),
+    ].sort();
+    const supportingEvidence = assignment.signals
+      .filter((signal) => !primaryAnchorEvidence.includes(signal))
+      .sort();
     return {
       cardId: card.cardId,
       title: card.title,
@@ -747,6 +754,8 @@ function buildPostReviewAssignments(activeCards) {
       strategyAnchors: anchors,
       legacyStrategicRole: assignment.strategicRole ?? [],
       strategySupportPairs: assignment.pairs ?? [],
+      primaryAnchorEvidence,
+      supportingEvidence,
       targetProfileStatus,
       targetProfileKinds,
       hiddenInfoPolicy: assignment.hidden,
@@ -779,25 +788,33 @@ function updateReadme() {
   if (!fs.existsSync(repoPath(README_PATH))) return;
   const text = fs.readFileSync(repoPath(README_PATH), "utf8");
   const entry =
-    "- `ai023-corp-agendas-semantics-review-2026-06-02.md` / `ai023-corp-agendas-semantics-review-report-2026-06-02.json`: Aufgabe AI023 prüft 43 aktive/compiled Corp-Agendas aus Originalset und Proteus plus 4 inaktive Classic-Agendas. Reine Economy-, Draw-, Hand-size- und Vanilla-Agendas bleiben ohne pauschalen Strategieanker; echte Anker sind auf Fast-Advance/Difficulty, Damage/Kill, Tag/Punish, ICE-Tax/Glacier, Remote-Setup/Closeout und Ambush/Access-Punish begrenzt. Keine neuen Strategy IDs und keine Planner-, ActionScore-, PlanWeight-, Targeting-KI-, Engine-, Legalitäts-, Profil-/Default-, UI-Derivations- oder Hidden-Info-Leak-Wirkung.";
+    "- `ai023-corp-agendas-semantics-review-2026-06-02.md` / `ai023-corp-agendas-semantics-review-report-2026-06-02.json`: Aufgabe AI023 prüft 43 aktive/compiled Corp-Agendas aus Originalset und Proteus plus 4 inaktive Classic-Agendas. Reine Economy-, Draw-, Hand-size-, Overadvance- und Vanilla-Agendas bleiben ohne pauschalen Strategieanker; echte Anker sind auf Fast-Advance/Difficulty, Damage/Kill, Tag/Punish, ICE-Tax/Glacier, Remote-Setup/Closeout und Ambush/Access-Punish begrenzt. Keine neuen Strategy IDs und keine Planner-, ActionScore-, PlanWeight-, Targeting-KI-, Engine-, Legalitäts-, Profil-/Default-, UI-Derivations- oder Hidden-Info-Leak-Wirkung.";
+  const polishEntry =
+    "- `ai023-1-corp-agendas-semantics-polish-2026-06-02.md` / `ai023-1-corp-agendas-semantics-polish-report-2026-06-02.json`: AI023-1 schärft die Corp-Agenda-Semantik nach. Project Babylon und Project Venice bleiben Overadvance-/Tempo-Support ohne `corp.fast_advance`-Anker, Project Zurich bleibt konsistent support-only, Bioweapons Engineering verliert das breite `damage.payoff`, und Corporate Headhunters nutzt `score.hand_size_pressure` statt Brain-Damage-Mischsignal. Strategy-Support-Pairs trennen primäre Anker-Evidenz und Support-Evidenz; TargetProfile-Kandidaten bleiben inaktiv. Keine neue Strategy-ID und keine Runtime-/Planner-/Engine-/Hidden-Info-Wirkung.";
   if (text.includes("ai023-corp-agendas-semantics-review-2026-06-02.md")) {
-    writeText(
-      README_PATH,
-      text.replace(
-        /^- `ai023-corp-agendas-semantics-review-2026-06-02\.md` \/ `ai023-corp-agendas-semantics-review-report-2026-06-02\.json`: .*$/m,
-        entry,
-      ),
+    let nextText = text.replace(
+      /^- `ai023-corp-agendas-semantics-review-2026-06-02\.md` \/ `ai023-corp-agendas-semantics-review-report-2026-06-02\.json`: .*$/m,
+      entry,
     );
+    if (nextText.includes("ai023-1-corp-agendas-semantics-polish-2026-06-02.md")) {
+      nextText = nextText.replace(
+        /^- `ai023-1-corp-agendas-semantics-polish-2026-06-02\.md` \/ `ai023-1-corp-agendas-semantics-polish-report-2026-06-02\.json`: .*$/m,
+        polishEntry,
+      );
+    } else {
+      nextText = nextText.replace(`${entry}\n`, `${entry}\n${polishEntry}\n`);
+    }
+    writeText(README_PATH, nextText);
     return;
   }
   const marker = "- `ai022-runner-resources-semantics-review-2026-06-02.md`";
   const index = text.indexOf(marker);
   if (index === -1) {
-    writeText(README_PATH, `${text.trimEnd()}\n${entry}\n`);
+    writeText(README_PATH, `${text.trimEnd()}\n${entry}\n${polishEntry}\n`);
     return;
   }
   const lineEnd = text.indexOf("\n", index);
-  writeText(README_PATH, `${text.slice(0, lineEnd + 1)}${entry}\n${text.slice(lineEnd + 1)}`);
+  writeText(README_PATH, `${text.slice(0, lineEnd + 1)}${entry}\n${polishEntry}\n${text.slice(lineEnd + 1)}`);
 }
 
 function buildReport({ activeCards, inactiveCards, postReviewAssignments, newSignals, changedAgendaCount }) {
@@ -934,7 +951,7 @@ function buildMarkdown(report) {
 
 ## Kurzfazit
 
-AI023 prüft alle ${report.summary.activeCorpAgendaCount} aktiven/compiled Corp-Agendas aus Originalset und Proteus sowie ${report.summary.inactiveCheckedAgendaCount} bekannte inaktive Classic-Agendas. Reine Agenda-Punkte, reine Economy, Draw und Hand-size bleiben ohne pauschalen Strategieanker. Echte Strategieanker wurden nur für Difficulty/Fast-Advance, Damage/Kill, Tag/Punish, ICE-Tax/Glacier, Remote-Setup/Closeout und Access-Punish/Ambush gesetzt.
+AI023 prüft alle ${report.summary.activeCorpAgendaCount} aktiven/compiled Corp-Agendas aus Originalset und Proteus sowie ${report.summary.inactiveCheckedAgendaCount} bekannte inaktive Classic-Agendas. Reine Agenda-Punkte, reine Economy, Draw, Hand-size und Overadvance bleiben ohne pauschalen Strategieanker. Echte Strategieanker wurden nur für Difficulty/Fast-Advance, Damage/Kill, Tag/Punish, ICE-Tax/Glacier, Remote-Setup/Closeout und Access-Punish/Ambush gesetzt.
 
 ## Scope / Out-of-Scope
 
@@ -974,7 +991,7 @@ ${anchorRows}
 
 ## Entscheidungen
 
-- Fast-Advance/Overadvance: Difficulty-Reduction-Agendas und Project Babylon/Venice ankern \`corp.fast_advance\`; Tycho Extension und Project Zurich bleiben ohne Strategieanker.
+- Fast-Advance/Overadvance: Difficulty-Reduction-Agendas ankern \`corp.fast_advance\`; Project Babylon, Project Venice, Project Zurich und Tycho Extension bleiben ohne Strategieanker.
 - Damage/Kill: Bioweapons Engineering, On-Call Solo Team, Strike Force Kali, Corporate Headhunters und Fetal AI ankern \`corp.damage_kill\`; Please Don't Choke Anyone nicht.
 - Tag/Punish: Netwatch Operations Office, Private Cybernet Police, Marked Accounts, On-Call Solo Team, Strike Force Kali und Corporate Headhunters trennen Tag-Quelle und Payoff.
 - ICE-Tax/Glacier: Black Ice Quality Assurance, Encryption Breakthrough, Superior Net Barriers, Ice Transmutation, Security Net Optimization, Priority Requisition und Security Purge ankern \`corp.ice_tax_glacier\`.
@@ -999,6 +1016,193 @@ Nach dem Apply-Lauf sind die bestehenden AI-Gates und der AI023-Invariant-Check 
 `;
 }
 
+function assignmentById(report, cardId) {
+  const assignment = report.postReviewAssignments.find((card) => card.cardId === cardId);
+  if (!assignment) throw new Error(`Missing AI023-1 report card ${cardId}`);
+  return assignment;
+}
+
+function buildPolishReport(report) {
+  const cards = [
+    assignmentById(report, "onr_v1_214_project-babylon"),
+    assignmentById(report, "onr_proteus_007_project-venice"),
+    assignmentById(report, "onr_proteus_008_project-zurich"),
+    assignmentById(report, "onr_v1_190_bioweapons-engineering"),
+    assignmentById(report, "onr_proteus_003_corporate-headhunters"),
+    assignmentById(report, "onr_proteus_010_world-domination"),
+    assignmentById(report, "onr_proteus_004_fetal-ai"),
+    assignmentById(report, "onr_proteus_005_marked-accounts"),
+    assignmentById(report, "onr_proteus_009_viral-breeding-ground"),
+  ];
+  return {
+    schemaVersion: "ai023-1-corp-agendas-semantics-polish-report-v1",
+    taskId: "AI023-1",
+    generatedAt: GENERATED_AT,
+    status: "complete",
+    sourceCommit: POLISH_SOURCE_COMMIT,
+    correctsCommit: POLISH_CORRECTS_COMMIT,
+    scope: "corp_agendas_semantics_polish",
+    summary: {
+      activeCorpAgendaCount: report.summary.activeCorpAgendaCount,
+      reviewedAgendaCount: report.summary.reviewedAgendaCount,
+      newStrategyIdCount: 0,
+      changedCardCount: 5,
+      changedSignalCount: 2,
+      changedStrategySupportPairCount: 2,
+      targetProfileCandidateActivationCount: 0,
+      plannerEffect: false,
+      actionScoreEffect: false,
+      planWeightEffect: false,
+      targetingAiEffect: false,
+      engineEffect: false,
+      legalEffect: false,
+      profileOrDefaultSwitch: false,
+      uiDerivationEffect: false,
+      hiddenInfoLeakEffect: false,
+    },
+    changedCards: [
+      {
+        cardId: "onr_v1_214_project-babylon",
+        title: "Project Babylon",
+        change: "removed_fast_advance_anchor",
+        rationale:
+          "Overadvance bonus points remain functional score evidence, but are not treated as Fast Advance without a separate overadvance/closeout strategy decision.",
+      },
+      {
+        cardId: "onr_proteus_007_project-venice",
+        title: "Project Venice",
+        change: "removed_fast_advance_anchor",
+        rationale:
+          "Recurring extra action from overadvance is tempo support only; this keeps Project Venice consistent with Project Zurich.",
+      },
+      {
+        cardId: "onr_proteus_008_project-zurich",
+        title: "Project Zurich",
+        change: "retained_support_only_overadvance_economy",
+        rationale:
+          "Recurring economy from overadvance remains support/candidate and is the comparison point for Project Venice.",
+      },
+      {
+        cardId: "onr_v1_190_bioweapons-engineering",
+        title: "Bioweapons Engineering",
+        change: "removed_broad_damage_payoff_signal",
+        rationale:
+          "The agenda amplifies meat damage but does not deal damage by itself; `score.meat_damage_amp` and `score.damage_amp` are the precise evidence.",
+      },
+      {
+        cardId: "onr_proteus_003_corporate-headhunters",
+        title: "Corporate Headhunters",
+        change: "renamed_brain_damage_mixed_signal_to_hand_size_pressure",
+        rationale:
+          "The agenda is a tagged meat-damage and hand-size pressure payoff, not a Brain Damage source.",
+      },
+      {
+        cardId: "onr_proteus_010_world-domination",
+        title: "World Domination",
+        change: "retained_remote_scoring_closeout_anchor",
+        rationale:
+          "The extreme agenda-point payoff remains a remote scoring closeout/win-condition anchor and not a Fast Advance anchor.",
+      },
+    ],
+    changedSignals: [
+      {
+        signalId: "score.hand_size_pressure",
+        change: "added_precise_agenda_score_signal",
+        replaces: "score.brain_damage_or_hand_size_pressure",
+        supportOnly: false,
+        mayAnchorStrategy: true,
+        allowedStrategyAnchors: ["corp.damage_kill"],
+      },
+      {
+        signalId: "damage.payoff",
+        change: "removed_from_bioweapons_engineering",
+        rationale:
+          "Retained for direct Corp damage sources and true damage payoff effects; not used for pure damage amplification.",
+      },
+    ],
+    changedStrategySupportPairs: [
+      {
+        cardId: "onr_v1_214_project-babylon",
+        title: "Project Babylon",
+        removed: [{ strategyId: "corp.fast_advance", role: "overadvance_payoff" }],
+      },
+      {
+        cardId: "onr_proteus_007_project-venice",
+        title: "Project Venice",
+        removed: [{ strategyId: "corp.fast_advance", role: "overadvance_payoff" }],
+      },
+    ],
+    primaryAndSupportingEvidenceReview: cards.map((card) => ({
+      cardId: card.cardId,
+      title: card.title,
+      strategyAnchors: card.strategyAnchors,
+      primaryAnchorEvidence: card.primaryAnchorEvidence,
+      supportingEvidence: card.supportingEvidence,
+    })),
+    retainedDeferredItems: [
+      {
+        topic: "overadvance_closeout_or_corp_tempo_line",
+        status: "deferred",
+        rationale:
+          "Project Babylon, Project Venice and Project Zurich expose overadvance/tempo/economy support, but no new Strategy ID is introduced in AI023-1.",
+      },
+      {
+        topic: "target_profile_candidates",
+        status: "inactive",
+        rationale:
+          "AI023 target-profile candidates remain report-only; no targeting AI, profile default or runtime projection is activated.",
+      },
+    ],
+    hiddenInfoSafetyReview: report.hiddenInfoSafetyReview.map((item) => ({
+      ...item,
+      result: "pass",
+    })),
+    checkedCards: cards,
+    verification: [
+      {
+        command: "node scripts/check-ai023-corp-agendas-semantics.mjs",
+        result: "pending_after_apply",
+      },
+      {
+        command: "node scripts/check-ai023-1-corp-agendas-semantics-polish.mjs",
+        result: "pending_after_apply",
+      },
+    ],
+  };
+}
+
+function buildPolishMarkdown(polishReport) {
+  return `# AI023-1 Corp-Agenda-Semantik fachlich nachschärfen
+
+## Kurzfazit
+
+AI023-1 korrigiert den AI023-Stand konservativ. Alle ${polishReport.summary.activeCorpAgendaCount} aktiven/compiled Corp-Agendas bleiben abgedeckt, es gibt keine neue Strategy ID und keine Planner-, ActionScore-, PlanWeight-, Engine-, Legalitäts-, Targeting-, Profil-, UI- oder Hidden-Info-Wirkung.
+
+## Änderungen
+
+- Project Babylon: Overadvance-Bonuspunkte bleiben \`score.overadvance_bonus\` / \`score.overadvance_scaling\`, aber ohne \`corp.fast_advance\`-Anker.
+- Project Venice: Overadvance plus wiederkehrende Extra-Aktion bleibt Tempo-Support und wird wie Project Zurich nicht als Fast-Advance-Anker modelliert.
+- Project Zurich: bleibt bewusst support-only; die Venice/Zurich-Konsistenz ist damit hergestellt.
+- World Domination: bleibt \`corp.remote_scoring\` -> \`win_condition\`, weil der extreme Punkte-Payoff ein Closeout-/Win-Condition-Befund ist und kein Fast-Advance-Befund.
+- Bioweapons Engineering: verliert das breite \`damage.payoff\`; \`score.meat_damage_amp\` und \`score.damage_amp\` bleiben die präzise Damage-Amplifier-Evidence.
+- Corporate Headhunters: ersetzt \`score.brain_damage_or_hand_size_pressure\` durch \`score.hand_size_pressure\`; die Karte wird nicht als Brain-Damage-Quelle modelliert.
+
+## Primäre Anker-Evidenz und Support
+
+${polishReport.primaryAndSupportingEvidenceReview.map((card) => `- ${card.title}: anchors=${card.strategyAnchors.join(", ") || "none"}; primary=${card.primaryAnchorEvidence.join(", ") || "none"}; support=${card.supportingEvidence.join(", ") || "none"}`).join("\n")}
+
+## Hidden-Info und TargetProfile
+
+Fetal AI, Marked Accounts und Viral Breeding Ground bleiben hidden-info-safe. Der Review beschreibt diese Karten vollständig, erzeugt aber keine neue Runtime-Projektion, keine Runner-KI-Sicht auf verdeckte Agenda-Semantik, keine Inspector-Leaks und keine WebSocket-/Reconnect-/Undo-/Replay-/Log-Erweiterung.
+
+TargetProfile-Kandidaten bleiben inaktiv und report-only. Das Overadvance-/Closeout- oder Corp-Tempo-Thema bleibt Deferred Item ohne neue Strategy ID.
+
+## JSON-Report
+
+Der maschinenlesbare Delta-Report liegt unter \`ai023-1-corp-agendas-semantics-polish-report-2026-06-02.json\`.
+`;
+}
+
 function main() {
   const { active, inactive, allCards } = activeAgendaInventory();
   const activeIds = new Set(active.map((card) => card.cardId));
@@ -1016,8 +1220,11 @@ function main() {
     newSignals,
     changedAgendaCount: active.length,
   });
+  const polishReport = buildPolishReport(report);
   writeJson(JSON_REPORT_PATH, report);
   writeText(MD_REPORT_PATH, buildMarkdown(report));
+  writeJson(JSON_POLISH_REPORT_PATH, polishReport);
+  writeText(MD_POLISH_REPORT_PATH, buildPolishMarkdown(polishReport));
   updateReadme();
   console.log(`AI023 applied active=${active.length} inactive=${inactive.length} changed=${active.length} fileChanges=${appliedHintChangeCount} newSignals=${newSignals.length}`);
 }

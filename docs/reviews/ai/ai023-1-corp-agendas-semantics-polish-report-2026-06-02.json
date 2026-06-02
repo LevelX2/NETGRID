@@ -1,0 +1,680 @@
+{
+  "schemaVersion": "ai023-1-corp-agendas-semantics-polish-report-v1",
+  "taskId": "AI023-1",
+  "generatedAt": "2026-06-02",
+  "status": "complete",
+  "sourceCommit": "8c488b48719c",
+  "correctsCommit": "f6fb69f8",
+  "scope": "corp_agendas_semantics_polish",
+  "summary": {
+    "activeCorpAgendaCount": 43,
+    "reviewedAgendaCount": 43,
+    "newStrategyIdCount": 0,
+    "changedCardCount": 5,
+    "changedSignalCount": 2,
+    "changedStrategySupportPairCount": 2,
+    "targetProfileCandidateActivationCount": 0,
+    "plannerEffect": false,
+    "actionScoreEffect": false,
+    "planWeightEffect": false,
+    "targetingAiEffect": false,
+    "engineEffect": false,
+    "legalEffect": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivationEffect": false,
+    "hiddenInfoLeakEffect": false
+  },
+  "changedCards": [
+    {
+      "cardId": "onr_v1_214_project-babylon",
+      "title": "Project Babylon",
+      "change": "removed_fast_advance_anchor",
+      "rationale": "Overadvance bonus points remain functional score evidence, but are not treated as Fast Advance without a separate overadvance/closeout strategy decision."
+    },
+    {
+      "cardId": "onr_proteus_007_project-venice",
+      "title": "Project Venice",
+      "change": "removed_fast_advance_anchor",
+      "rationale": "Recurring extra action from overadvance is tempo support only; this keeps Project Venice consistent with Project Zurich."
+    },
+    {
+      "cardId": "onr_proteus_008_project-zurich",
+      "title": "Project Zurich",
+      "change": "retained_support_only_overadvance_economy",
+      "rationale": "Recurring economy from overadvance remains support/candidate and is the comparison point for Project Venice."
+    },
+    {
+      "cardId": "onr_v1_190_bioweapons-engineering",
+      "title": "Bioweapons Engineering",
+      "change": "removed_broad_damage_payoff_signal",
+      "rationale": "The agenda amplifies meat damage but does not deal damage by itself; `score.meat_damage_amp` and `score.damage_amp` are the precise evidence."
+    },
+    {
+      "cardId": "onr_proteus_003_corporate-headhunters",
+      "title": "Corporate Headhunters",
+      "change": "renamed_brain_damage_mixed_signal_to_hand_size_pressure",
+      "rationale": "The agenda is a tagged meat-damage and hand-size pressure payoff, not a Brain Damage source."
+    },
+    {
+      "cardId": "onr_proteus_010_world-domination",
+      "title": "World Domination",
+      "change": "retained_remote_scoring_closeout_anchor",
+      "rationale": "The extreme agenda-point payoff remains a remote scoring closeout/win-condition anchor and not a Fast Advance anchor."
+    }
+  ],
+  "changedSignals": [
+    {
+      "signalId": "score.hand_size_pressure",
+      "change": "added_precise_agenda_score_signal",
+      "replaces": "score.brain_damage_or_hand_size_pressure",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "damage.payoff",
+      "change": "removed_from_bioweapons_engineering",
+      "rationale": "Retained for direct Corp damage sources and true damage payoff effects; not used for pure damage amplification."
+    }
+  ],
+  "changedStrategySupportPairs": [
+    {
+      "cardId": "onr_v1_214_project-babylon",
+      "title": "Project Babylon",
+      "removed": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "overadvance_payoff"
+        }
+      ]
+    },
+    {
+      "cardId": "onr_proteus_007_project-venice",
+      "title": "Project Venice",
+      "removed": [
+        {
+          "strategyId": "corp.fast_advance",
+          "role": "overadvance_payoff"
+        }
+      ]
+    }
+  ],
+  "primaryAndSupportingEvidenceReview": [
+    {
+      "cardId": "onr_v1_214_project-babylon",
+      "title": "Project Babylon",
+      "strategyAnchors": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.conditional_bonus_agenda_points",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_007_project-venice",
+      "title": "Project Venice",
+      "strategyAnchors": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.overadvance_bonus",
+        "score.overadvance_scaling",
+        "score.recurring_extra_action"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_008_project-zurich",
+      "title": "Project Zurich",
+      "strategyAnchors": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.economy_recurring",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling"
+      ]
+    },
+    {
+      "cardId": "onr_v1_190_bioweapons-engineering",
+      "title": "Bioweapons Engineering",
+      "strategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "primaryAnchorEvidence": [
+        "score.damage_amp",
+        "score.meat_damage_amp"
+      ],
+      "supportingEvidence": []
+    },
+    {
+      "cardId": "onr_proteus_003_corporate-headhunters",
+      "title": "Corporate Headhunters",
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ],
+      "primaryAnchorEvidence": [
+        "risk.requires_tagged_runner",
+        "score.hand_size_pressure",
+        "score.meat_damage_source",
+        "score.tagged_meat_damage_payoff"
+      ],
+      "supportingEvidence": [
+        "damage.payoff",
+        "tag.payoff"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_010_world-domination",
+      "title": "World Domination",
+      "strategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "primaryAnchorEvidence": [
+        "score.bonus_agenda_points",
+        "score.closeout_agenda"
+      ],
+      "supportingEvidence": [
+        "risk.high_difficulty_agenda"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_004_fetal-ai",
+      "title": "Fetal AI",
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.ambush_bluff"
+      ],
+      "primaryAnchorEvidence": [
+        "access.agenda_ambush",
+        "access.agenda_net_damage",
+        "access.agenda_steal_tax",
+        "score.net_damage_access_punish"
+      ],
+      "supportingEvidence": [
+        "access.archives_safe_exception",
+        "access.rnd_reveal_requirement",
+        "damage.payoff"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_005_marked-accounts",
+      "title": "Marked Accounts",
+      "strategyAnchors": [
+        "corp.tag_trace_punish",
+        "corp.ambush_bluff"
+      ],
+      "primaryAnchorEvidence": [
+        "access.agenda_ambush",
+        "access.agenda_tag"
+      ],
+      "supportingEvidence": [
+        "access.rnd_reveal_requirement",
+        "tag.source"
+      ]
+    },
+    {
+      "cardId": "onr_proteus_009_viral-breeding-ground",
+      "title": "Viral Breeding Ground",
+      "strategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "primaryAnchorEvidence": [
+        "access.agenda_ambush",
+        "access.runner_program_disruption"
+      ],
+      "supportingEvidence": [
+        "access.runner_program_bounce",
+        "score.fort_trash_on_score"
+      ]
+    }
+  ],
+  "retainedDeferredItems": [
+    {
+      "topic": "overadvance_closeout_or_corp_tempo_line",
+      "status": "deferred",
+      "rationale": "Project Babylon, Project Venice and Project Zurich expose overadvance/tempo/economy support, but no new Strategy ID is introduced in AI023-1."
+    },
+    {
+      "topic": "target_profile_candidates",
+      "status": "inactive",
+      "rationale": "AI023 target-profile candidates remain report-only; no targeting AI, profile default or runtime projection is activated."
+    }
+  ],
+  "hiddenInfoSafetyReview": [
+    {
+      "topic": "corp_agenda_hidden_semantics",
+      "result": "pass",
+      "notes": "Corp-KI darf eigene Agenda-Semantik im bestehenden side-safe Inputkontext kennen; Runner-KI erhaelt keine verdeckte Corp-Agenda-Semantik vor Reveal, Score, Access oder anderer bekannter Sichtbarkeit."
+    },
+    {
+      "topic": "access_ambush_agendas",
+      "result": "pass",
+      "notes": "Fetal AI, Marked Accounts und Viral Breeding Ground bleiben im Report voll beschrieben, aber Runtime-/Inspector-Projektion erhaelt keine neue Runner-seitige Hidden-Info-Quelle."
+    }
+  ],
+  "checkedCards": [
+    {
+      "cardId": "onr_v1_214_project-babylon",
+      "title": "Project Babylon",
+      "cardType": "agenda",
+      "subtypes": [
+        "black-ops"
+      ],
+      "mechanicalFamily": "overadvance_or_bonus_points",
+      "tacticSignals": [
+        "score.conditional_bonus_agenda_points",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.conditional_bonus_agenda_points",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Overadvance-Agenda-Point-Payoff bleibt funktionale Score-Semantik; ohne separate Overadvance-/Closeout-Strategy-ID wird daraus kein Fast-Advance-Anker."
+    },
+    {
+      "cardId": "onr_proteus_007_project-venice",
+      "title": "Project Venice",
+      "cardType": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "mechanicalFamily": "overadvance_or_bonus_points",
+      "tacticSignals": [
+        "score.overadvance_bonus",
+        "score.overadvance_scaling",
+        "score.recurring_extra_action"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.overadvance_bonus",
+        "score.overadvance_scaling",
+        "score.recurring_extra_action"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Overadvance erzeugt wiederkehrende Tempo-Engine; wie Project Zurich bleibt dies support/candidate und wird nicht als Fast-Advance-Anker modelliert."
+    },
+    {
+      "cardId": "onr_proteus_008_project-zurich",
+      "title": "Project Zurich",
+      "cardType": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "mechanicalFamily": "overadvance_or_bonus_points",
+      "tacticSignals": [
+        "score.economy_recurring",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling"
+      ],
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.economy_recurring",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Overadvance-Economy bleibt support/candidate; kein Economy-Strategieanker."
+    },
+    {
+      "cardId": "onr_v1_190_bioweapons-engineering",
+      "title": "Bioweapons Engineering",
+      "cardType": "agenda",
+      "subtypes": [
+        "research"
+      ],
+      "mechanicalFamily": "damage_source_or_damage_amp",
+      "tacticSignals": [
+        "score.damage_amp",
+        "score.meat_damage_amp"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill"
+      ],
+      "legacyStrategicRole": [
+        "engine_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_amp_anchor",
+          "evidence": [
+            "score.meat_damage_amp",
+            "score.damage_amp"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "score.damage_amp",
+        "score.meat_damage_amp"
+      ],
+      "supportingEvidence": [],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Verstaerkt vorhandene Meat-Damage-Quellen und traegt damit echte Kill-Linien, erzeugt aber keinen Schaden allein."
+    },
+    {
+      "cardId": "onr_proteus_003_corporate-headhunters",
+      "title": "Corporate Headhunters",
+      "cardType": "agenda",
+      "subtypes": [
+        "asset"
+      ],
+      "mechanicalFamily": "tagged_damage_payoff",
+      "tacticSignals": [
+        "damage.payoff",
+        "risk.requires_tagged_runner",
+        "score.hand_size_pressure",
+        "score.meat_damage_source",
+        "score.tagged_meat_damage_payoff",
+        "tag.payoff"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "damage_engine",
+          "evidence": [
+            "score.tagged_meat_damage_payoff",
+            "score.meat_damage_source",
+            "score.hand_size_pressure"
+          ],
+          "confidence": "high"
+        },
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "punish_payoff",
+          "evidence": [
+            "risk.requires_tagged_runner"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "risk.requires_tagged_runner",
+        "score.hand_size_pressure",
+        "score.meat_damage_source",
+        "score.tagged_meat_damage_payoff"
+      ],
+      "supportingEvidence": [
+        "damage.payoff",
+        "tag.payoff"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Tagged Meat-Damage plus Hand-size-Pressure ist Kill-Engine/Payoff; der Kartentext wird nicht als Brain-Damage-Quelle modelliert."
+    },
+    {
+      "cardId": "onr_proteus_010_world-domination",
+      "title": "World Domination",
+      "cardType": "agenda",
+      "subtypes": [
+        "black_ops"
+      ],
+      "mechanicalFamily": "vanilla_or_point_dense_agenda",
+      "tacticSignals": [
+        "risk.high_difficulty_agenda",
+        "score.bonus_agenda_points",
+        "score.closeout_agenda"
+      ],
+      "strategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "legacyStrategicRole": [
+        "win_condition"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "role": "win_condition",
+          "evidence": [
+            "score.bonus_agenda_points",
+            "score.closeout_agenda"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "score.bonus_agenda_points",
+        "score.closeout_agenda"
+      ],
+      "supportingEvidence": [
+        "risk.high_difficulty_agenda"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "public_when_scored",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Extrem hoher Score-Payoff ist Closeout/Win-Condition, aber wegen Difficulty kein Fast-Advance-Anker."
+    },
+    {
+      "cardId": "onr_proteus_004_fetal-ai",
+      "title": "Fetal AI",
+      "cardType": "agenda",
+      "subtypes": [
+        "ai",
+        "ambush",
+        "asset"
+      ],
+      "mechanicalFamily": "access_ambush_or_access_punish",
+      "tacticSignals": [
+        "access.agenda_ambush",
+        "access.agenda_net_damage",
+        "access.agenda_steal_tax",
+        "access.archives_safe_exception",
+        "access.rnd_reveal_requirement",
+        "damage.payoff",
+        "score.net_damage_access_punish"
+      ],
+      "strategyAnchors": [
+        "corp.damage_kill",
+        "corp.ambush_bluff"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.damage_kill",
+          "role": "access_punish",
+          "evidence": [
+            "access.agenda_net_damage",
+            "score.net_damage_access_punish"
+          ],
+          "confidence": "high"
+        },
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "access_punish",
+          "evidence": [
+            "access.agenda_ambush",
+            "access.agenda_steal_tax"
+          ],
+          "confidence": "high"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "access.agenda_ambush",
+        "access.agenda_net_damage",
+        "access.agenda_steal_tax",
+        "score.net_damage_access_punish"
+      ],
+      "supportingEvidence": [
+        "access.archives_safe_exception",
+        "access.rnd_reveal_requirement",
+        "damage.payoff"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_revealed",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Access-Ambush mit Net-Damage und Steal-Tax; keine Runner-seitige verdeckte Semantik vor Access/Revealed."
+    },
+    {
+      "cardId": "onr_proteus_005_marked-accounts",
+      "title": "Marked Accounts",
+      "cardType": "agenda",
+      "subtypes": [
+        "ambush",
+        "gray_ops"
+      ],
+      "mechanicalFamily": "access_ambush_or_access_punish",
+      "tacticSignals": [
+        "access.agenda_ambush",
+        "access.agenda_tag",
+        "access.rnd_reveal_requirement",
+        "tag.source"
+      ],
+      "strategyAnchors": [
+        "corp.tag_trace_punish",
+        "corp.ambush_bluff"
+      ],
+      "legacyStrategicRole": [
+        "engine_anchor"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "role": "access_tag_source",
+          "evidence": [
+            "access.agenda_tag"
+          ],
+          "confidence": "high"
+        },
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "access_punish",
+          "evidence": [
+            "access.agenda_ambush",
+            "access.agenda_tag"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "access.agenda_ambush",
+        "access.agenda_tag"
+      ],
+      "supportingEvidence": [
+        "access.rnd_reveal_requirement",
+        "tag.source"
+      ],
+      "targetProfileStatus": "not_required",
+      "targetProfileKinds": [],
+      "hiddenInfoPolicy": "corp_side_only_until_revealed",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Access-Tag-Quelle; Tag-source und spaetere Payoffs bleiben getrennt."
+    },
+    {
+      "cardId": "onr_proteus_009_viral-breeding-ground",
+      "title": "Viral Breeding Ground",
+      "cardType": "agenda",
+      "subtypes": [
+        "ambush",
+        "research",
+        "virus"
+      ],
+      "mechanicalFamily": "access_ambush_or_access_punish",
+      "tacticSignals": [
+        "access.agenda_ambush",
+        "access.runner_program_bounce",
+        "access.runner_program_disruption",
+        "score.fort_trash_on_score"
+      ],
+      "strategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "legacyStrategicRole": [
+        "punish_payoff"
+      ],
+      "strategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "role": "access_punish",
+          "evidence": [
+            "access.agenda_ambush",
+            "access.runner_program_disruption"
+          ],
+          "confidence": "medium"
+        }
+      ],
+      "primaryAnchorEvidence": [
+        "access.agenda_ambush",
+        "access.runner_program_disruption"
+      ],
+      "supportingEvidence": [
+        "access.runner_program_bounce",
+        "score.fort_trash_on_score"
+      ],
+      "targetProfileStatus": "schema_gap",
+      "targetProfileKinds": [
+        "access_choose_programs_by_advancement_counter"
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_revealed",
+      "needsHumanReview": false,
+      "confidence": "high",
+      "postReviewStatus": "changed",
+      "rationale": "Programmbounce/-Disruption ist Access-Punish, kein Damage-Kill; Access-Zielwahl bleibt schema gap."
+    }
+  ],
+  "verification": [
+    {
+      "command": "node scripts/check-ai023-corp-agendas-semantics.mjs",
+      "result": "pending_after_apply"
+    },
+    {
+      "command": "node scripts/check-ai023-1-corp-agendas-semantics-polish.mjs",
+      "result": "pending_after_apply"
+    }
+  ]
+}

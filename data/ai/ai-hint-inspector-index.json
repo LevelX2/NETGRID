@@ -649,17 +649,7 @@
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "corp.fast_advance",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.fast_advance"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "agenda",
@@ -705,12 +695,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "scoring_tool"
-        ],
-        "validValues": [
-          "scoring_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -32423,17 +32409,7 @@
       "derivedStrategyAnchors": [
         "corp.fast_advance"
       ],
-      "lineSupportClassification": [
-        {
-          "value": "corp.fast_advance",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.fast_advance"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "agenda",
@@ -32505,12 +32481,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "scoring_tool"
-        ],
-        "validValues": [
-          "scoring_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },

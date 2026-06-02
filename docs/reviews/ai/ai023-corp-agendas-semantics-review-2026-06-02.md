@@ -2,7 +2,7 @@
 
 ## Kurzfazit
 
-AI023 prüft alle 43 aktiven/compiled Corp-Agendas aus Originalset und Proteus sowie 4 bekannte inaktive Classic-Agendas. Reine Agenda-Punkte, reine Economy, Draw und Hand-size bleiben ohne pauschalen Strategieanker. Echte Strategieanker wurden nur für Difficulty/Fast-Advance, Damage/Kill, Tag/Punish, ICE-Tax/Glacier, Remote-Setup/Closeout und Access-Punish/Ambush gesetzt.
+AI023 prüft alle 43 aktiven/compiled Corp-Agendas aus Originalset und Proteus sowie 4 bekannte inaktive Classic-Agendas. Reine Agenda-Punkte, reine Economy, Draw, Hand-size und Overadvance bleiben ohne pauschalen Strategieanker. Echte Strategieanker wurden nur für Difficulty/Fast-Advance, Damage/Kill, Tag/Punish, ICE-Tax/Glacier, Remote-Setup/Closeout und Access-Punish/Ambush gesetzt.
 
 ## Scope / Out-of-Scope
 
@@ -94,7 +94,7 @@ AI023 ergänzt 69 neue kontrollierte Corp-Agenda-Signale. Wiederverwendet werden
 - `score.meat_damage_source`: supportOnly=false, mayAnchor=true, anchors=corp.damage_kill
 - `score.meat_damage_amp`: supportOnly=false, mayAnchor=true, anchors=corp.damage_kill
 - `score.damage_amp`: supportOnly=false, mayAnchor=true, anchors=corp.damage_kill
-- `score.brain_damage_or_hand_size_pressure`: supportOnly=false, mayAnchor=true, anchors=corp.damage_kill
+- `score.hand_size_pressure`: supportOnly=false, mayAnchor=true, anchors=corp.damage_kill
 - `score.net_damage_access_punish`: supportOnly=false, mayAnchor=true, anchors=corp.ambush_bluff, corp.damage_kill
 - `score.fort_trash_on_score`: supportOnly=true, mayAnchor=false, anchors=none
 - `access.agenda_ambush`: supportOnly=false, mayAnchor=true, anchors=corp.ambush_bluff
@@ -136,7 +136,6 @@ Alle kanonischen Rollen stehen als eindeutige `strategySupportPairs` im JSON-Rep
 - Priority Requisition: `corp.ice_tax_glacier` -> `tempo_payoff` (high)
 - Priority Requisition: `corp.remote_scoring` -> `score_window_payoff` (medium)
 - Private Cybernet Police: `corp.tag_trace_punish` -> `tag_source` (high)
-- Project Babylon: `corp.fast_advance` -> `overadvance_payoff` (high)
 - Security Net Optimization: `corp.ice_tax_glacier` -> `fort_tax_anchor` (high)
 - Security Net Optimization: `corp.remote_scoring` -> `remote_defense_anchor` (medium)
 - Security Purge: `corp.ice_tax_glacier` -> `setup_payoff` (medium)
@@ -150,13 +149,12 @@ Alle kanonischen Rollen stehen als eindeutige `strategySupportPairs` im JSON-Rep
 - Fetal AI: `corp.ambush_bluff` -> `access_punish` (high)
 - Marked Accounts: `corp.tag_trace_punish` -> `access_tag_source` (high)
 - Marked Accounts: `corp.ambush_bluff` -> `access_punish` (medium)
-- Project Venice: `corp.fast_advance` -> `overadvance_payoff` (medium)
 - Viral Breeding Ground: `corp.ambush_bluff` -> `access_punish` (medium)
 - World Domination: `corp.remote_scoring` -> `win_condition` (medium)
 
 ## Entscheidungen
 
-- Fast-Advance/Overadvance: Difficulty-Reduction-Agendas und Project Babylon/Venice ankern `corp.fast_advance`; Tycho Extension und Project Zurich bleiben ohne Strategieanker.
+- Fast-Advance/Overadvance: Difficulty-Reduction-Agendas ankern `corp.fast_advance`; Project Babylon, Project Venice, Project Zurich und Tycho Extension bleiben ohne Strategieanker.
 - Damage/Kill: Bioweapons Engineering, On-Call Solo Team, Strike Force Kali, Corporate Headhunters und Fetal AI ankern `corp.damage_kill`; Please Don't Choke Anyone nicht.
 - Tag/Punish: Netwatch Operations Office, Private Cybernet Police, Marked Accounts, On-Call Solo Team, Strike Force Kali und Corporate Headhunters trennen Tag-Quelle und Payoff.
 - ICE-Tax/Glacier: Black Ice Quality Assurance, Encryption Breakthrough, Superior Net Barriers, Ice Transmutation, Security Net Optimization, Priority Requisition und Security Purge ankern `corp.ice_tax_glacier`.

@@ -14,7 +14,7 @@
     "newTacticSignalCount": 69,
     "changedExistingTacticSignalCount": 0,
     "newStrategyIdCount": 0,
-    "strategySupportPairCount": 31,
+    "strategySupportPairCount": 29,
     "targetProfileCandidateCount": 9,
     "schemaGapCount": 6,
     "plannerEffect": false,
@@ -595,7 +595,7 @@
       ]
     },
     {
-      "signalId": "score.brain_damage_or_hand_size_pressure",
+      "signalId": "score.hand_size_pressure",
       "supportOnly": false,
       "mayAnchorStrategy": true,
       "allowedStrategyAnchors": [
@@ -881,17 +881,6 @@
       "confidence": "high"
     },
     {
-      "cardId": "onr_v1_214_project-babylon",
-      "title": "Project Babylon",
-      "strategyId": "corp.fast_advance",
-      "role": "overadvance_payoff",
-      "evidence": [
-        "score.overadvance_bonus",
-        "score.overadvance_scaling"
-      ],
-      "confidence": "high"
-    },
-    {
       "cardId": "onr_v1_215_security-net-optimization",
       "title": "Security Net Optimization",
       "strategyId": "corp.ice_tax_glacier",
@@ -973,7 +962,7 @@
       "evidence": [
         "score.tagged_meat_damage_payoff",
         "score.meat_damage_source",
-        "score.brain_damage_or_hand_size_pressure"
+        "score.hand_size_pressure"
       ],
       "confidence": "high"
     },
@@ -1027,18 +1016,6 @@
       "evidence": [
         "access.agenda_ambush",
         "access.agenda_tag"
-      ],
-      "confidence": "medium"
-    },
-    {
-      "cardId": "onr_proteus_007_project-venice",
-      "title": "Project Venice",
-      "strategyId": "corp.fast_advance",
-      "role": "overadvance_payoff",
-      "evidence": [
-        "score.overadvance_bonus",
-        "score.recurring_extra_action",
-        "score.overadvance_scaling"
       ],
       "confidence": "medium"
     },
@@ -1181,6 +1158,12 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.draw",
+        "score.hq_archive_to_rnd_shuffle",
+        "score.rnd_archive_recycle"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1218,6 +1201,11 @@
           "confidence": "medium"
         }
       ],
+      "primaryAnchorEvidence": [
+        "score.agenda_difficulty_discount",
+        "score.black_ops_difficulty_discount"
+      ],
+      "supportingEvidence": [],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1235,7 +1223,6 @@
       ],
       "mechanicalFamily": "damage_source_or_damage_amp",
       "tacticSignals": [
-        "damage.payoff",
         "score.damage_amp",
         "score.meat_damage_amp"
       ],
@@ -1256,6 +1243,11 @@
           "confidence": "high"
         }
       ],
+      "primaryAnchorEvidence": [
+        "score.damage_amp",
+        "score.meat_damage_amp"
+      ],
+      "supportingEvidence": [],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1295,6 +1287,13 @@
           "confidence": "high"
         }
       ],
+      "primaryAnchorEvidence": [
+        "score.black_ice_strength_bonus",
+        "score.ice_type_tax_support"
+      ],
+      "supportingEvidence": [
+        "ice.strength_modifier"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1319,6 +1318,12 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.action_counter_bank",
+        "score.action_gain",
+        "score.agenda_action"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1343,6 +1348,12 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.agenda_action",
+        "score.economy_action",
+        "score.economy_counter_bank"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1367,6 +1378,12 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.economy_conditional_burst",
+        "score.hq_agenda_reveal",
+        "score.hq_agenda_shuffle"
+      ],
       "targetProfileStatus": "schema_gap",
       "targetProfileKinds": [
         "choose_hq_agendas_to_reveal_and_shuffle"
@@ -1393,6 +1410,12 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "risk.loses_ability_on_install_or_rez",
+        "score.agenda_action",
+        "score.economy_action"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1417,6 +1440,12 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "risk.economy_crash_on_score",
+        "risk.requires_corp_credit_threshold",
+        "score.economy_conditional_burst"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1454,6 +1483,11 @@
           "confidence": "high"
         }
       ],
+      "primaryAnchorEvidence": [
+        "score.remote_fort_creation",
+        "score.remote_install_budget"
+      ],
+      "supportingEvidence": [],
       "targetProfileStatus": "schema_gap",
       "targetProfileKinds": [
         "multi_card_hq_install_sequence",
@@ -1480,6 +1514,11 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.economy_counter_bank",
+        "score.economy_recurring"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1504,6 +1543,12 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.agenda_action",
+        "score.draw",
+        "score.recurring_draw"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1542,6 +1587,14 @@
           ],
           "confidence": "high"
         }
+      ],
+      "primaryAnchorEvidence": [
+        "score.code_gate_strength_bonus",
+        "score.ice_type_tax_support"
+      ],
+      "supportingEvidence": [
+        "ice.strength_modifier",
+        "score.ice_type_reveal_economy"
       ],
       "targetProfileStatus": "schema_gap",
       "targetProfileKinds": [
@@ -1582,6 +1635,11 @@
           "confidence": "medium"
         }
       ],
+      "primaryAnchorEvidence": [
+        "score.agenda_difficulty_discount",
+        "score.gray_ops_difficulty_discount"
+      ],
+      "supportingEvidence": [],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1619,6 +1677,11 @@
           "confidence": "medium"
         }
       ],
+      "primaryAnchorEvidence": [
+        "score.agenda_difficulty_discount",
+        "score.research_difficulty_discount"
+      ],
+      "supportingEvidence": [],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1641,6 +1704,10 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.economy_burst"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1680,6 +1747,14 @@
           "confidence": "high"
         }
       ],
+      "primaryAnchorEvidence": [
+        "score.chosen_ice_strength_bonus",
+        "score.repeat_ice_subroutines"
+      ],
+      "supportingEvidence": [
+        "ice.strength_modifier",
+        "ice.subroutine_modifier"
+      ],
       "targetProfileStatus": "candidate",
       "targetProfileKinds": [
         "use_target:rezzed_ice"
@@ -1704,6 +1779,10 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.hand_size"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1727,6 +1806,11 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.agenda_action",
+        "score.economy_action"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1765,6 +1849,14 @@
           ],
           "confidence": "high"
         }
+      ],
+      "primaryAnchorEvidence": [
+        "score.tag_source",
+        "score.trace_tag_source"
+      ],
+      "supportingEvidence": [
+        "tag.source",
+        "trace.source"
       ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
@@ -1815,6 +1907,15 @@
           "confidence": "high"
         }
       ],
+      "primaryAnchorEvidence": [
+        "risk.requires_tagged_runner",
+        "score.meat_damage_source",
+        "score.tagged_meat_damage_payoff"
+      ],
+      "supportingEvidence": [
+        "damage.payoff",
+        "tag.payoff"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1839,6 +1940,12 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.agenda_action",
+        "score.economy_action",
+        "score.economy_counter_bank"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1862,6 +1969,11 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.agenda_action",
+        "score.economy_action"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1884,6 +1996,10 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.economy_recurring"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1928,6 +2044,10 @@
           "confidence": "medium"
         }
       ],
+      "primaryAnchorEvidence": [
+        "score.free_rez_ice"
+      ],
+      "supportingEvidence": [],
       "targetProfileStatus": "candidate",
       "targetProfileKinds": [
         "use_target:installed_ice"
@@ -1969,6 +2089,14 @@
           "confidence": "high"
         }
       ],
+      "primaryAnchorEvidence": [
+        "score.tag_source",
+        "score.trace_tag_source"
+      ],
+      "supportingEvidence": [
+        "tag.source",
+        "trace.source"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -1990,22 +2118,14 @@
         "score.overadvance_bonus",
         "score.overadvance_scaling"
       ],
-      "strategyAnchors": [
-        "corp.fast_advance"
-      ],
-      "legacyStrategicRole": [
-        "scoring_tool"
-      ],
-      "strategySupportPairs": [
-        {
-          "strategyId": "corp.fast_advance",
-          "role": "overadvance_payoff",
-          "evidence": [
-            "score.overadvance_bonus",
-            "score.overadvance_scaling"
-          ],
-          "confidence": "high"
-        }
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.conditional_bonus_agenda_points",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling"
       ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
@@ -2013,7 +2133,7 @@
       "needsHumanReview": false,
       "confidence": "high",
       "postReviewStatus": "changed",
-      "rationale": "Overadvance-Agenda-Point-Payoff stuetzt Fast-Advance/Overadvance, nicht einfache Agenda-Punkte."
+      "rationale": "Overadvance-Agenda-Point-Payoff bleibt funktionale Score-Semantik; ohne separate Overadvance-/Closeout-Strategy-ID wird daraus kein Fast-Advance-Anker."
     },
     {
       "cardId": "onr_v1_215_security-net-optimization",
@@ -2051,6 +2171,12 @@
           ],
           "confidence": "medium"
         }
+      ],
+      "primaryAnchorEvidence": [
+        "score.fort_ice_strength_bonus"
+      ],
+      "supportingEvidence": [
+        "ice.strength_modifier"
       ],
       "targetProfileStatus": "candidate",
       "targetProfileKinds": [
@@ -2103,6 +2229,14 @@
           "confidence": "medium"
         }
       ],
+      "primaryAnchorEvidence": [
+        "score.free_install_and_rez_ice",
+        "score.rnd_install_and_rez"
+      ],
+      "supportingEvidence": [
+        "access.rnd_reveal_requirement",
+        "score.rnd_reveal"
+      ],
       "targetProfileStatus": "schema_gap",
       "targetProfileKinds": [
         "top_three_rnd_reveal_install_rez_sequence"
@@ -2154,6 +2288,15 @@
           "confidence": "high"
         }
       ],
+      "primaryAnchorEvidence": [
+        "risk.requires_tagged_runner",
+        "score.meat_damage_source",
+        "score.tagged_meat_damage_payoff"
+      ],
+      "supportingEvidence": [
+        "damage.payoff",
+        "tag.payoff"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -2176,6 +2319,10 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.recurring_extra_action"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -2215,6 +2362,14 @@
           "confidence": "high"
         }
       ],
+      "primaryAnchorEvidence": [
+        "score.ice_type_tax_support",
+        "score.wall_strength_bonus"
+      ],
+      "supportingEvidence": [
+        "ice.strength_modifier",
+        "score.ice_type_reveal_economy"
+      ],
       "targetProfileStatus": "schema_gap",
       "targetProfileKinds": [
         "reveal_walls_if_choice_supported"
@@ -2240,6 +2395,11 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.high_agenda_value",
+        "score.vanilla_points"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -2265,6 +2425,11 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "risk.random_action",
+        "score.random_extra_action"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -2292,6 +2457,14 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "risk.bad_publicity",
+        "risk.loss_condition",
+        "score.bad_publicity_gain",
+        "score.bad_publicity_win_risk",
+        "score.economy_burst"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -2311,7 +2484,7 @@
       "tacticSignals": [
         "damage.payoff",
         "risk.requires_tagged_runner",
-        "score.brain_damage_or_hand_size_pressure",
+        "score.hand_size_pressure",
         "score.meat_damage_source",
         "score.tagged_meat_damage_payoff",
         "tag.payoff"
@@ -2330,7 +2503,7 @@
           "evidence": [
             "score.tagged_meat_damage_payoff",
             "score.meat_damage_source",
-            "score.brain_damage_or_hand_size_pressure"
+            "score.hand_size_pressure"
           ],
           "confidence": "high"
         },
@@ -2343,13 +2516,23 @@
           "confidence": "high"
         }
       ],
+      "primaryAnchorEvidence": [
+        "risk.requires_tagged_runner",
+        "score.hand_size_pressure",
+        "score.meat_damage_source",
+        "score.tagged_meat_damage_payoff"
+      ],
+      "supportingEvidence": [
+        "damage.payoff",
+        "tag.payoff"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
       "needsHumanReview": false,
       "confidence": "high",
       "postReviewStatus": "changed",
-      "rationale": "Tagged Damage plus Hand-size-Pressure ist Kill-Engine/Payoff."
+      "rationale": "Tagged Meat-Damage plus Hand-size-Pressure ist Kill-Engine/Payoff; der Kartentext wird nicht als Brain-Damage-Quelle modelliert."
     },
     {
       "cardId": "onr_proteus_004_fetal-ai",
@@ -2396,6 +2579,17 @@
           ],
           "confidence": "high"
         }
+      ],
+      "primaryAnchorEvidence": [
+        "access.agenda_ambush",
+        "access.agenda_net_damage",
+        "access.agenda_steal_tax",
+        "score.net_damage_access_punish"
+      ],
+      "supportingEvidence": [
+        "access.archives_safe_exception",
+        "access.rnd_reveal_requirement",
+        "damage.payoff"
       ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
@@ -2446,6 +2640,14 @@
           "confidence": "medium"
         }
       ],
+      "primaryAnchorEvidence": [
+        "access.agenda_ambush",
+        "access.agenda_tag"
+      ],
+      "supportingEvidence": [
+        "access.rnd_reveal_requirement",
+        "tag.source"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "corp_side_only_until_revealed",
@@ -2469,6 +2671,11 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.action_counter_bank",
+        "score.damage_conversion_action_engine"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -2490,23 +2697,14 @@
         "score.overadvance_scaling",
         "score.recurring_extra_action"
       ],
-      "strategyAnchors": [
-        "corp.fast_advance"
-      ],
-      "legacyStrategicRole": [
-        "scoring_tool"
-      ],
-      "strategySupportPairs": [
-        {
-          "strategyId": "corp.fast_advance",
-          "role": "overadvance_payoff",
-          "evidence": [
-            "score.overadvance_bonus",
-            "score.recurring_extra_action",
-            "score.overadvance_scaling"
-          ],
-          "confidence": "medium"
-        }
+      "strategyAnchors": [],
+      "legacyStrategicRole": [],
+      "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.overadvance_bonus",
+        "score.overadvance_scaling",
+        "score.recurring_extra_action"
       ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
@@ -2514,7 +2712,7 @@
       "needsHumanReview": false,
       "confidence": "high",
       "postReviewStatus": "changed",
-      "rationale": "Overadvance erzeugt wiederkehrende Tempo-Engine; als Fast-Advance/Overadvance-Payoff geankert."
+      "rationale": "Overadvance erzeugt wiederkehrende Tempo-Engine; wie Project Zurich bleibt dies support/candidate und wird nicht als Fast-Advance-Anker modelliert."
     },
     {
       "cardId": "onr_proteus_008_project-zurich",
@@ -2532,6 +2730,12 @@
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
+      "primaryAnchorEvidence": [],
+      "supportingEvidence": [
+        "score.economy_recurring",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling"
+      ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
       "hiddenInfoPolicy": "public_when_scored",
@@ -2573,6 +2777,14 @@
           "confidence": "medium"
         }
       ],
+      "primaryAnchorEvidence": [
+        "access.agenda_ambush",
+        "access.runner_program_disruption"
+      ],
+      "supportingEvidence": [
+        "access.runner_program_bounce",
+        "score.fort_trash_on_score"
+      ],
       "targetProfileStatus": "schema_gap",
       "targetProfileKinds": [
         "access_choose_programs_by_advancement_counter"
@@ -2612,6 +2824,13 @@
           ],
           "confidence": "medium"
         }
+      ],
+      "primaryAnchorEvidence": [
+        "score.bonus_agenda_points",
+        "score.closeout_agenda"
+      ],
+      "supportingEvidence": [
+        "risk.high_difficulty_agenda"
       ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],

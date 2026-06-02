@@ -1,8 +1,8 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI022-1",
+  "taskId": "AI023",
   "generatedAt": "2026-06-02",
-  "description": "Controlled V1 tactic-signal catalog. AI022-1 clarifies taxonomy semantics, support-only and broad-support behavior, prefix convention and known card corrections without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
+  "description": "Controlled V1 tactic-signal catalog. AI023 adds Corp-Agenda semantics for scoring value, agenda difficulty, economy, action, draw, ICE/fort setup, tag/trace, damage, access punish and bad-publicity risk without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
   "signalPolicy": {
     "tacticSignal": "Functional card utility: what the AI can use the card for.",
     "strategyAnchor": "Large deck line: which strategy the card can anchor or materially support.",
@@ -4562,23 +4562,6 @@
       "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
-      "signalId": "score.brain_damage_or_hand_size_pressure",
-      "group": "ai023_agenda_score",
-      "sideScope": "corp",
-      "description": "AI023 Corp Agenda tactic signal: score.brain damage or hand size pressure.",
-      "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.damage_kill"
-      ],
-      "sourceKinds": [
-        "AI023 reviewed Corp-Agenda structured hint effects"
-      ],
-      "examples": [],
-      "targetProfileRelevant": false,
-      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
-    },
-    {
       "signalId": "score.chosen_ice_strength_bonus",
       "group": "ai023_agenda_score",
       "sideScope": "corp",
@@ -4888,6 +4871,23 @@
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI023 reviewed Corp-Agenda structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "score.hand_size_pressure",
+      "group": "ai023_agenda_score",
+      "sideScope": "corp",
+      "description": "AI023 Corp Agenda tactic signal: score.hand size pressure.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.damage_kill"
+      ],
       "sourceKinds": [
         "AI023 reviewed Corp-Agenda structured hint effects"
       ],
