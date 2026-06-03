@@ -943,14 +943,14 @@ describe("formatChronicleEvent", () => {
       "corp"
     );
 
-    expect(rewound.title).toBe("Du hast Vacuum Link ausgelöst und eine 3 gewürfelt.");
+    expect(rewound.title).toBe("Du hast Vacuum Link ausgelöst und eine 3 gewürfelt: 3 gerezzte ICE zurück, sonst zum ersten ICE; Runner darf ausstöpseln.");
     expect(rewound.description).toBe(
       "Wurf 3: Runner wird um 3 gerezzte ICE zurückgesetzt oder darf ausstöpseln; wenn nicht so viele ICE vorhanden sind, geht es zum ersten ICE. Ziel ist ICE 2."
     );
     expect(rewound.cardDefinitionId).toBe("onr_v1_275_vacuum-link");
     expect(rewound.cardTitle).toBe("Vacuum Link");
     expect(rewound.chips).toEqual(expect.arrayContaining(["Vacuum Link", "Wurf 3", "Run zurückgesetzt", "3 ICE zurück", "Ziel ICE 2"]));
-    expect(noRewind.title).toBe("Der Runner hat Vacuum Link ausgelöst und eine 5 gewürfelt.");
+    expect(noRewind.title).toBe("Der Runner hat Vacuum Link ausgelöst und eine 5 gewürfelt: kein Zurücksetzen.");
     expect(noRewind.description).toBe("Wurf 5: Kein Zurücksetzen; der Run läuft weiter.");
     expect(noRewind.chips).toEqual(expect.arrayContaining(["Vacuum Link", "Wurf 5", "Weiter"]));
     expect(JSON.stringify(rewound)).not.toContain("cardInstances");

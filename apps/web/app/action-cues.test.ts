@@ -135,7 +135,7 @@ describe("deriveOpponentActionCues", () => {
     expect(corpCues).toHaveLength(1);
     expect(runnerCues[0]?.source).toBe("system");
     expect(runnerCues[0]?.actorLabel).toBe("Spiel");
-    expect(runnerCues[0]?.title).toBe("Du hast Vacuum Link ausgelöst und eine 3 gewürfelt.");
+    expect(runnerCues[0]?.title).toBe("Du hast Vacuum Link ausgelöst und eine 3 gewürfelt: 3 gerezzte ICE zurück, sonst zum ersten ICE; Runner darf ausstöpseln.");
     expect(runnerCues[0]?.description).toBe(
       "Wurf 3: Runner wird um 3 gerezzte ICE zurückgesetzt oder darf ausstöpseln; wenn nicht so viele ICE vorhanden sind, geht es zum ersten ICE. Ziel ist ICE 2."
     );
@@ -143,7 +143,7 @@ describe("deriveOpponentActionCues", () => {
     expect(runnerCues[0]?.cardTitle).toBe("Vacuum Link");
     expect(runnerCues[0]?.highlight).toEqual({ kind: "run", serverLabel: "HQ" });
     expect(runnerCues[0]?.sound).toBe("run");
-    expect(corpCues[0]?.title).toBe("Der Runner hat Vacuum Link ausgelöst und eine 3 gewürfelt.");
+    expect(corpCues[0]?.title).toBe("Der Runner hat Vacuum Link ausgelöst und eine 3 gewürfelt: 3 gerezzte ICE zurück, sonst zum ersten ICE; Runner darf ausstöpseln.");
     expect(cueHasHiddenLeak(runnerCues[0]!)).toBe(false);
     expect(cueHasHiddenLeak(corpCues[0]!)).toBe(false);
   });

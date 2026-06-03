@@ -1265,7 +1265,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
           visibility = "public";
           cardDefinitionId = cardDefinitionId ?? sourceDefinitionId ?? VACUUM_LINK_ID;
           cardTitle = cardTitle ?? titleForDefinitionId(cardDefinitionId) ?? "Vacuum Link";
-          title = phrase(subject, `${cardTitle} ausgelöst und eine ${vacuumLinkDieRoll} gewürfelt`);
+          title = phrase(subject, `${cardTitle} ausgelöst und eine ${vacuumLinkDieRoll} gewürfelt${vacuumLinkTitleOutcome(vacuumLinkDieRoll, rewindApplied, rewindBack)}`);
           description = vacuumLinkDescription(vacuumLinkDieRoll, rewindApplied, rewindBack, targetIcePosition);
           chips.push(
             "Vacuum Link",
@@ -2618,6 +2618,17 @@ function playfulAiResolveDescription(
     parts.push("Die Playful-AI-Schleife ist abgeschlossen.");
   }
   return parts.join(" ") || undefined;
+}
+
+function vacuumLinkTitleOutcome(
+  dieRoll: number,
+  rewindApplied: boolean,
+  rewindBack: number | undefined
+): string {
+  if (!rewindApplied) return ": kein Zurücksetzen";
+  const back = rewindBack ?? dieRoll;
+  const backText = back === 1 ? "1 gerezztes ICE" : `${back} gerezzte ICE`;
+  return `: ${backText} zurück, sonst zum ersten ICE; Runner darf ausstöpseln`;
 }
 
 function vacuumLinkDescription(
