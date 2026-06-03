@@ -2,11 +2,232 @@
   "schemaVersion": "ai027-derivation-inspector-guide-v3-alignment-report-v1",
   "taskId": "AI027",
   "generatedAt": "2026-06-03",
-  "status": "complete_verified",
+  "status": "verified",
   "guideVersion": "V3",
   "guidePath": "docs/architecture/ai/taktiksignale-strategieanker-guide-2026-06-02-v3.md",
-  "sourceCommit": "293f2322",
+  "sourceCommit": "ba749c64",
+  "baselineCommit": "293f2322",
+  "promptReferencedCommit": "61cf530a",
+  "postCommitBranch": "main",
+  "postCommitHead": "ba749c64",
   "scope": "Derivation-/Inspector-Cleanup only; no new card review and no new Strategy ID",
+  "verifiedFiles": [
+    "data/ai/tactic-signals-v1.json",
+    "data/ai/function-signal-derivation-v1.json",
+    "data/ai/ai-card-hints-active.json",
+    "data/ai/ai-card-hints-compiled.json",
+    "data/ai/ai-hint-inspector-index.json",
+    "docs/reviews/ai/ai027-derivation-inspector-guide-v3-alignment-2026-06-03.md",
+    "docs/reviews/ai/ai027-derivation-inspector-guide-v3-alignment-report-2026-06-03.json",
+    "scripts/check-ai027-derivation-inspector-guide-v3-alignment.mjs"
+  ],
+  "verifiedSignals": [
+    {
+      "signalId": "damage.payoff",
+      "result": "legacy aggregation support-only; no direct strategy anchors"
+    },
+    {
+      "signalId": "access.corp_net_damage_ambush",
+      "result": "ambush/bluff only; no automatic damage-kill anchor"
+    },
+    {
+      "signalId": "access.corp_brain_damage_ambush",
+      "result": "ambush/bluff plus damage-kill retained for explicit brain-damage pressure"
+    },
+    {
+      "signalId": "access.corp_hardware_trash",
+      "result": "ambush/bluff only; no tag-trace-punish anchor"
+    },
+    {
+      "signalId": "access.corp_tag_ambush",
+      "result": "ambush/bluff plus tag-trace-punish retained for explicit access tag source"
+    },
+    {
+      "signalId": "action.corp_repeatable_extra_action",
+      "result": "support/deferred; no fast-advance or remote-scoring anchors"
+    },
+    {
+      "signalId": "action.corp_counter_to_action",
+      "result": "fast-advance retained for advancement-counter-to-action cards"
+    },
+    {
+      "signalId": "remote.asset_economy",
+      "result": "real asset-economy anchor retained; not-for-strategy remoteRole markers skipped"
+    },
+    {
+      "signalId": "draw.corp_draw",
+      "result": "primary precise Corp draw support signal"
+    },
+    {
+      "signalId": "economy.corp_draw",
+      "result": "legacy aggregation support-only; no strategy anchors"
+    }
+  ],
+  "verifiedDerivationRules": [
+    {
+      "signalId": "damage.payoff",
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "access.corp_net_damage_ambush",
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "access.corp_brain_damage_ambush",
+      "strategyAnchorFor": [
+        "corp.ambush_bluff",
+        "corp.damage_kill"
+      ]
+    },
+    {
+      "signalId": "access.corp_hardware_trash",
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "action.corp_repeatable_extra_action",
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "action.corp_counter_to_action",
+      "strategyAnchorFor": [
+        "corp.fast_advance"
+      ]
+    },
+    {
+      "signalId": "remote.asset_economy",
+      "strategyAnchorFor": [
+        "corp.asset_economy"
+      ],
+      "skipGate": "remoteRoleStrategyDerivationAbsent includes legacy_only and not_for_strategy_derivation"
+    },
+    {
+      "signalId": "draw.corp_draw",
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.corp_draw",
+      "strategyAnchorFor": []
+    }
+  ],
+  "verifiedCards": [
+    {
+      "cardId": "onr_v1_340_setup",
+      "title": "Setup!",
+      "result": "card-level ambush/bluff; no derived damage-kill; damage.payoff supporting evidence only"
+    },
+    {
+      "cardId": "onr_v1_348_virus-test-site",
+      "title": "Virus Test Site",
+      "result": "damage-kill retained only as reviewed card-level support; net-damage ambush does not derive it"
+    },
+    {
+      "cardId": "onr_v1_346_vacant-soulkiller",
+      "title": "Vacant Soulkiller",
+      "result": "brain-damage ambush retains card-level damage-kill; no meat-damage role"
+    },
+    {
+      "cardId": "onr_v1_345_trap",
+      "title": "TRAP!",
+      "result": "tag-trace-punish comes from access tag ambush/tag source, not persistent tag source"
+    },
+    {
+      "cardId": "onr_v1_315_corprunners-shattered-remains",
+      "title": "Corprunner's Shattered Remains",
+      "result": "card-level ambush/bluff only; no derived or reviewed tag-trace-punish"
+    },
+    {
+      "cardId": "onr_v1_335_remote-facility",
+      "title": "Remote Facility",
+      "result": "repeatable extra action is supporting evidence only; no fast-advance or remote-scoring anchors"
+    },
+    {
+      "cardId": "onr_v1_331_nevinyrral",
+      "title": "Nevinyrral",
+      "result": "repeatable extra action and loss risks are supporting evidence only; no strategy anchors"
+    },
+    {
+      "cardId": "onr_v1_334_pacifica-regional-ai",
+      "title": "Pacifica Regional AI",
+      "result": "card-level fast-advance retained; remoteRole asset-economy does not derive asset-economy"
+    },
+    {
+      "cardId": "onr_v1_321_esa-contract",
+      "title": "ESA Contract",
+      "result": "draw.corp_draw support only; no economy.corp_draw primary signal; no asset-economy anchor"
+    },
+    {
+      "cardId": "onr_v1_322_euromarket-consortium",
+      "title": "Euromarket Consortium",
+      "result": "draw plus hand-size support only; no score.hand_size; no asset-economy anchor"
+    },
+    {
+      "cardId": "onr_v1_338_rustbelt-hq-branch",
+      "title": "Rustbelt HQ Branch",
+      "result": "hand-size support only; no score.hand_size; no asset-economy anchor"
+    },
+    {
+      "cardId": "onr_proteus_076_syd-meyer-superstores",
+      "title": "Syd Meyer Superstores",
+      "result": "real reviewed asset-economy anchor retained"
+    },
+    {
+      "cardId": "onr_v1_328_information-laundering",
+      "title": "Information Laundering",
+      "result": "real reviewed asset-economy anchor retained"
+    },
+    {
+      "cardId": "onr_v1_318_department-of-truth-enhancement",
+      "title": "Department of Truth Enhancement",
+      "result": "real reviewed asset-economy anchor retained"
+    },
+    {
+      "cardId": "onr_v1_343_south-african-mining-corp",
+      "title": "South African Mining Corp",
+      "result": "real reviewed asset-economy anchor retained"
+    }
+  ],
+  "verifiedInspectorFields": [
+    "cardLevelStrategyAnchors",
+    "derivedPossibleStrategyAnchors",
+    "reviewedStrategySupportPairs",
+    "supportingEvidenceOnly"
+  ],
+  "staleSnapshotFindings": [
+    {
+      "kind": "prompt_commit_reference_stale_for_ai027",
+      "promptValue": "61cf530a on codex/ai026-1-corp-node-asset-polish",
+      "repoTruth": "61cf530a is present in history, but AI027 is committed as ba749c64 and integrated on main",
+      "resolution": "verified against local repo truth at main/ba749c64"
+    }
+  ],
+  "violationsFound": [],
+  "fixesApplied": [
+    {
+      "kind": "verification_artifact_update",
+      "files": [
+        "scripts/check-ai027-derivation-inspector-guide-v3-alignment.mjs",
+        "docs/reviews/ai/ai027-derivation-inspector-guide-v3-alignment-2026-06-03.md",
+        "docs/reviews/ai/ai027-derivation-inspector-guide-v3-alignment-report-2026-06-03.json"
+      ],
+      "dataChanged": false,
+      "runtimeEffect": false
+    }
+  ],
+  "noEffectFlags": {
+    "plannerEffect": false,
+    "actionScoreEffect": false,
+    "planWeightEffect": false,
+    "targetingAiEffect": false,
+    "engineEffect": false,
+    "legalEffect": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivationEffect": false,
+    "hiddenInfoLeakEffect": false
+  },
   "countsBefore": {
     "tacticSignalCount": 507,
     "derivationRuleCount": 589,
@@ -1022,11 +1243,15 @@
       "result": "passed: 32 test files, 625 tests"
     },
     {
-      "command": "corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit",
+      "command": "corepack pnpm --filter @netgrid/ai typecheck",
       "result": "passed"
     },
     {
-      "command": "corepack pnpm --filter @netgrid/web exec tsc -p tsconfig.json --noEmit",
+      "command": "corepack pnpm --filter @netgrid/web typecheck",
+      "result": "passed"
+    },
+    {
+      "command": "git diff --check",
       "result": "passed"
     }
   ]
