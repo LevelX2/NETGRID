@@ -1219,7 +1219,7 @@ describe("formatChronicleEvent", () => {
             effectId: "run_1.cockroach.successful_run.cockroach",
             kind: "counter_change",
             visibility: "public",
-            side: "runner",
+            side: "corp",
             amount: 2,
             counterType: "cockroach",
             addedCounterAmount: 1,
@@ -1252,9 +1252,9 @@ describe("formatChronicleEvent", () => {
       "runner"
     );
 
-    expect(cockroach.title).toBe("Cockroach erhält 1 Cockroach-Counter.");
+    expect(cockroach.title).toBe("Die Korp hat 1 Cockroach-Counter durch Cockroach erhalten.");
     expect(cockroach.description).toBe("Diese Cockroach-Counter zählen als Virus-Counter, weil Cockroach ein Programm-Virus ist, und werden durch Virus-Purge entfernt.");
-    expect(cockroach.chips).toEqual(expect.arrayContaining(["Cockroach", "+1 Cockroach-Counter", "2 gesamt", "Virus/Purge", "Erfolgreicher HQ-Run"]));
+    expect(cockroach.chips).toEqual(expect.arrayContaining(["Korp", "Cockroach", "+1 Cockroach-Counter", "2 gesamt", "Virus/Purge", "Erfolgreicher HQ-Run"]));
     expect(pattel.title).toBe("Du hast 1 Virus-Counter mit Pattel's Virus auf Wall of Static gelegt.");
     expect(pattel.cardDefinitionId).toBe("onr_v1_279_wall-of-static");
     expect(pattel.chips).toEqual(expect.arrayContaining(["Pattel's Virus", "+1 Virus", "2 auf ICE"]));

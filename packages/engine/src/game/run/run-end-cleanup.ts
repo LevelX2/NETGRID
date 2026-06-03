@@ -974,7 +974,7 @@ function applyV181SuccessfulRunCounterTriggers(
             sourceCardId: cardId,
             sourceDefinitionId: definition.id,
             sourceTitle: definition.title,
-            side: "runner",
+            side: "corp",
             counterType: "cockroach",
             added,
             remainingCounters: host.counters.cardCounter(cardId, "virus"),

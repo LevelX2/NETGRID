@@ -33,6 +33,7 @@ const SUPERIOR_NET_BARRIERS_ID = "onr_v1_219_superior-net-barriers";
 const SECURITY_NET_OPTIMIZATION_ID = "onr_v1_215_security-net-optimization";
 const COCKROACH_ID = "onr_v1_013_cockroach";
 const CORP_PROJECTED_VIRUS_PROGRAM_IDS = new Set<string>([
+  COCKROACH_ID,
   CASCADE_ID,
   SKIVVISS_ID,
 ]);
@@ -182,6 +183,7 @@ export function visibleCorpIdentityCard(state: GameState): VisibleCard {
     ...counterDisplaysField([
       ...(card.counterDisplays ?? []),
       ...(cascadeCorpCounterDisplays(state) ?? []),
+      ...(cockroachCorpCounterDisplays(state) ?? []),
       ...(skivvissCorpCounterDisplays(state) ?? []),
       ...(badPublicityCounterDisplays(state) ?? []),
       ...(purgeableRunnerVirusCounterDisplaysForBucket(
@@ -488,6 +490,22 @@ function skivvissCorpCounterDisplays(state: GameState): VisibleCard["counterDisp
   ];
 }
 
+function cockroachCorpCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
+  const amount = cockroachCounterTotal(state);
+  if (amount <= 0) return undefined;
+  return [
+    {
+      id: "cockroach",
+      amount,
+      displayKind: "virus",
+      label: "Cockroach-Counter",
+      ariaLabel: `${amount} Cockroach-Counter auf der Korp`,
+      counterType: "cockroach",
+      usageHint: "status_marker",
+    },
+  ];
+}
+
 function cascadeCorpCounterDisplays(state: GameState): VisibleCard["counterDisplays"] {
   const amount = cascadeCounterTotal(state);
   if (amount <= 0) return undefined;
@@ -522,6 +540,13 @@ function cascadeCounterTotal(state: GameState): number {
 function skivvissCounterTotal(state: GameState): number {
   return Object.keys(state.cardInstances).reduce((sum, cardId) => {
     if (definitionFor(state, cardId).id !== SKIVVISS_ID) return sum;
+    return sum + cardCounter(state, cardId, "virus");
+  }, 0);
+}
+
+function cockroachCounterTotal(state: GameState): number {
+  return Object.keys(state.cardInstances).reduce((sum, cardId) => {
+    if (definitionFor(state, cardId).id !== COCKROACH_ID) return sum;
     return sum + cardCounter(state, cardId, "virus");
   }, 0);
 }

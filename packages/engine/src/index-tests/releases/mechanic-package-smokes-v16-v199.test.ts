@@ -5975,6 +5975,7 @@ describe("V1.9.1 Mechanikpaket J", () => {
       expect(lastCockroachCounterEvent?.publicPayload.resolvedEffects).toContainEqual(
         expect.objectContaining({
           kind: "counter_change",
+          side: "corp",
           counterType: "cockroach",
           addedCounterAmount: 1,
           remainingCounters: 2,
@@ -5983,10 +5984,27 @@ describe("V1.9.1 Mechanikpaket J", () => {
           sourceTitle: "Cockroach",
         }),
       );
-      const cockroachView = getPlayerView(state, "runner").own.rig?.find(
+      const runnerView = getPlayerView(state, "runner");
+      const corpView = getPlayerView(state, "corp");
+      const cockroachView = runnerView.own.rig?.find(
         (card) => card.definitionId === "onr_v1_013_cockroach",
       );
-      expect(cockroachView?.counterDisplays).toContainEqual(
+      expect(cockroachView?.counters?.virus).toBeUndefined();
+      expect(
+        cockroachView?.counterDisplays?.some(
+          (display) => display.id === "virus" || display.id === "cockroach",
+        ),
+      ).not.toBe(true);
+      expect(runnerView.opponent.identity.counterDisplays).toContainEqual(
+        expect.objectContaining({
+          id: "cockroach",
+          amount: 2,
+          label: "Cockroach-Counter",
+          ariaLabel: "2 Cockroach-Counter auf der Korp",
+          counterType: "cockroach",
+        }),
+      );
+      expect(corpView.own.identity.counterDisplays).toContainEqual(
         expect.objectContaining({
           id: "cockroach",
           amount: 2,

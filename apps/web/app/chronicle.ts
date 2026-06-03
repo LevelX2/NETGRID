@@ -1939,7 +1939,7 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
         const source = sourceTitle ?? "Cockroach";
         category = "run";
         importance = "important";
-        title = `${source} erhält ${added} ${counterText}`;
+        title = phrase(subject, `${added} ${counterText} durch ${source} erhalten`);
         description = `Diese Cockroach-Counter zählen als Virus-Counter, weil Cockroach ein Programm-Virus ist, und werden durch Virus-Purge entfernt.`;
         chips.push(
           source,
