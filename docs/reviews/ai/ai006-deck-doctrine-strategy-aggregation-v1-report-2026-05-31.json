@@ -4297,6 +4297,13 @@
             {
               "cardId": "onr_v1_350_antiquated-interface-routines",
               "quantity": 1,
+              "source": "derivedStrategyAnchor",
+              "strategyId": "corp.ice_tax_glacier",
+              "reason": "derived_strategy_anchor_from_inspector_index"
+            },
+            {
+              "cardId": "onr_v1_350_antiquated-interface-routines",
+              "quantity": 1,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
               "strategyId": "corp.ice_tax_glacier",
@@ -4410,27 +4417,10 @@
           "confidence": "high"
         },
         "corp.remote_scoring": {
-          "anchorScore": 40,
+          "anchorScore": 0,
           "supportScore": 100,
-          "finalScore": 64,
-          "anchorEvidence": [
-            {
-              "cardId": "onr_v1_350_antiquated-interface-routines",
-              "quantity": 1,
-              "source": "lineSupport",
-              "signal": "corp.remote_scoring",
-              "strategyId": "corp.remote_scoring",
-              "reason": "normalized_lineSupport_strategy_goal"
-            },
-            {
-              "cardId": "onr_v1_350_antiquated-interface-routines",
-              "quantity": 1,
-              "source": "strategicRole",
-              "role": "tax_tool",
-              "strategyId": "corp.remote_scoring",
-              "reason": "valid_strategicRole_reinforces_existing_anchor"
-            }
-          ],
+          "finalScore": 40,
+          "anchorEvidence": [],
           "supportEvidence": [
             {
               "cardId": "onr_v1_203_hostile-takeover",
@@ -4788,16 +4778,17 @@
         "corp.economy_rez_reserve"
       ],
       "secondaryStrategies": [
-        "corp.remote_scoring",
         "corp.central_stabilize",
         "corp.damage_kill",
-        "corp.rush_score"
+        "corp.rush_score",
+        "corp.remote_scoring"
       ],
       "functionSignalCounts": {
         "damage.payoff": 1,
         "economy.counter": 1,
         "economy.generic": 5,
         "economy.rez_discount": 1,
+        "ice.corp_strength_support": 1,
         "ice.etr": 8,
         "ice.strength_modifier": 1,
         "score.conditional_bonus_agenda_points": 1,
@@ -4812,7 +4803,6 @@
       "legacySignalCounts": {
         "lineSupport:corp.damage_kill": 1,
         "lineSupport:corp.ice_tax_glacier": 2,
-        "lineSupport:corp.remote_scoring": 1,
         "lineSupport:corp.tag_trace_punish": 2,
         "planRole:bait_runner": 3,
         "planRole:build_scoring_remote": 6,
@@ -4857,7 +4847,7 @@
         "scoreProfile": {
           "scoreAcceleration": 0,
           "agendaInstallAdvanceScoreSupport": 5,
-          "remoteScoringProtection": 1,
+          "remoteScoringProtection": 0,
           "stealTax": 0
         },
         "economyProfile": {
@@ -5633,6 +5623,13 @@
             {
               "cardId": "onr_v1_350_antiquated-interface-routines",
               "quantity": 1,
+              "source": "derivedStrategyAnchor",
+              "strategyId": "corp.ice_tax_glacier",
+              "reason": "derived_strategy_anchor_from_inspector_index"
+            },
+            {
+              "cardId": "onr_v1_350_antiquated-interface-routines",
+              "quantity": 1,
               "source": "lineSupport",
               "signal": "corp.ice_tax_glacier",
               "strategyId": "corp.ice_tax_glacier",
@@ -5788,27 +5785,10 @@
           "confidence": "high"
         },
         "corp.remote_scoring": {
-          "anchorScore": 40,
+          "anchorScore": 0,
           "supportScore": 100,
-          "finalScore": 64,
-          "anchorEvidence": [
-            {
-              "cardId": "onr_v1_350_antiquated-interface-routines",
-              "quantity": 1,
-              "source": "lineSupport",
-              "signal": "corp.remote_scoring",
-              "strategyId": "corp.remote_scoring",
-              "reason": "normalized_lineSupport_strategy_goal"
-            },
-            {
-              "cardId": "onr_v1_350_antiquated-interface-routines",
-              "quantity": 1,
-              "source": "strategicRole",
-              "role": "tax_tool",
-              "strategyId": "corp.remote_scoring",
-              "reason": "valid_strategicRole_reinforces_existing_anchor"
-            }
-          ],
+          "finalScore": 40,
+          "anchorEvidence": [],
           "supportEvidence": [
             {
               "cardId": "onr_v1_203_hostile-takeover",
@@ -6303,14 +6283,15 @@
         "corp.economy_rez_reserve"
       ],
       "secondaryStrategies": [
-        "corp.remote_scoring",
         "corp.central_stabilize",
-        "corp.rush_score"
+        "corp.rush_score",
+        "corp.remote_scoring"
       ],
       "functionSignalCounts": {
         "economy.counter": 2,
         "economy.generic": 6,
         "economy.rez_discount": 1,
+        "ice.corp_strength_support": 1,
         "ice.etr": 6,
         "ice.strength_modifier": 1,
         "score.economy_burst": 3,
@@ -6323,7 +6304,6 @@
       },
       "legacySignalCounts": {
         "lineSupport:corp.ice_tax_glacier": 2,
-        "lineSupport:corp.remote_scoring": 1,
         "lineSupport:corp.tag_trace_punish": 4,
         "planRole:bait_runner": 5,
         "planRole:build_scoring_remote": 5,
@@ -6369,7 +6349,7 @@
         "scoreProfile": {
           "scoreAcceleration": 0,
           "agendaInstallAdvanceScoreSupport": 4,
-          "remoteScoringProtection": 1,
+          "remoteScoringProtection": 0,
           "stealTax": 0
         },
         "economyProfile": {
@@ -6435,6 +6415,6 @@
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 2
     },
-    "contentSha256": "eb93b43cda7060e795f514a392479ddbd9874bc818c275e21bf40b6474f49a62"
+    "contentSha256": "c4681595eca22150a6ee46b2259ee72a84a8b54a0490eadebae139e76e8b02e5"
   }
 }

@@ -14,17 +14,17 @@
   },
   "summary": {
     "cardCount": 564,
-    "cardsWithMechanicalFacts": 511,
-    "cardsWithGeneratedFacts": 331,
+    "cardsWithMechanicalFacts": 524,
+    "cardsWithGeneratedFacts": 334,
     "cardsWithOverlays": 6,
-    "cardsWithFunctionSignals": 486,
-    "cardsWithStrategyAnchors": 212,
-    "cardsWithWarnings": 143,
+    "cardsWithFunctionSignals": 504,
+    "cardsWithStrategyAnchors": 231,
+    "cardsWithWarnings": 123,
     "warningCategoryCounts": {
-      "deferred_requires_human_review": 64,
+      "deferred_requires_human_review": 45,
       "descriptor_gap": 45,
       "function_signal_descriptor_gap": 28,
-      "legacy_fallback_only": 53
+      "legacy_fallback_only": 40
     }
   },
   "cards": [
@@ -6066,18 +6066,22 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "ice.corp_reorder_fort"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [],
+      "supportingEvidenceOnly": [
+        "ice.corp_reorder_fort"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -6106,17 +6110,22 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "targetProfiles"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "targetProfiles"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -6230,19 +6239,48 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
+      "derivedFunctionSignals": [
+        "advance.corp_counter_placement",
+        "advance.remote_score_window_support"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.fast_advance",
+        "corp.remote_scoring"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.fast_advance",
+        "corp.remote_scoring"
+      ],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.remote_scoring",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "supportingEvidenceOnly": [],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.remote_scoring",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "remote_support",
@@ -6270,23 +6308,32 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "targetProfiles"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "targetProfiles"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -6297,19 +6344,48 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [],
-      "lineSupportClassification": [],
+      "derivedFunctionSignals": [
+        "ice.corp_subroutine_repeat",
+        "risk.random_discard_cost"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.ice_tax_glacier",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "supportingEvidenceOnly": [
+        "risk.random_discard_cost"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "remote_support",
@@ -6337,23 +6413,32 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "targetProfiles"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "targetProfiles"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -6364,19 +6449,48 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [],
-      "lineSupportClassification": [],
+      "derivedFunctionSignals": [
+        "ice.corp_subroutine_repeat",
+        "risk.rnd_trash_cost"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.ice_tax_glacier",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "supportingEvidenceOnly": [
+        "risk.rnd_trash_cost"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "remote_support",
@@ -6404,23 +6518,32 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "targetProfiles"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "targetProfiles"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -6435,21 +6558,46 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "score.advance_burst"
+        "remote.agenda_difficulty_discount",
+        "remote.scoring_protection",
+        "score.agenda_difficulty_discount",
+        "score.gray_ops_difficulty_discount"
       ],
       "derivedStrategyAnchors": [
-        "corp.fast_advance"
+        "corp.remote_scoring"
       ],
-      "cardLevelStrategyAnchors": [],
+      "cardLevelStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
       "derivedPossibleStrategyAnchors": [
-        "corp.fast_advance"
+        "corp.remote_scoring"
       ],
-      "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [],
-      "lineSupportClassification": [],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.remote_scoring",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "supportingEvidenceOnly": [
+        "score.gray_ops_difficulty_discount"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "corp.remote_scoring",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "remote_support",
@@ -6477,17 +6625,21 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole"
+        ],
         "compiledMechanicalFactFields": [
-          "effects"
+          "effects",
+          "conditions",
+          "remoteRole"
         ],
         "generatedFactFields": [
           "effects"
@@ -6495,8 +6647,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -6507,19 +6663,48 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [],
-      "lineSupportClassification": [],
+      "derivedFunctionSignals": [
+        "run.corp_spend_cap",
+        "tax.remote"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.ice_tax_glacier",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "supportingEvidenceOnly": [
+        "tax.remote"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "remote_support",
@@ -6547,23 +6732,32 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -6578,14 +6772,18 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "draw.corp_draw"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [],
+      "supportingEvidenceOnly": [
+        "draw.corp_draw"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -6614,17 +6812,19 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "compiledMechanicalFactFields": [
-          "effects"
+          "effects",
+          "conditions"
         ],
         "generatedFactFields": [
           "effects"
@@ -6740,18 +6940,24 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "hq.corp_installed_card_bounce",
+        "install.corp_uninstall_to_hq"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [],
+      "supportingEvidenceOnly": [
+        "hq.corp_installed_card_bounce",
+        "install.corp_uninstall_to_hq"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -6780,17 +6986,22 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "targetProfiles"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "targetProfiles"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -6807,19 +7018,65 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
+      "derivedFunctionSignals": [
+        "remote.scoring_protection",
+        "run.corp_pay_or_end_run"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.ice_tax_glacier",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "strategyId": "corp.remote_scoring",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.remote_scoring",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "supportingEvidenceOnly": [],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "value": "corp.remote_scoring",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "remote_support",
@@ -6847,23 +7104,32 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -6874,19 +7140,52 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [],
-      "lineSupportClassification": [],
+      "derivedFunctionSignals": [
+        "advance.corp_counter_bank",
+        "economy.corp_run_temporary_credit",
+        "economy.generic",
+        "risk.temporary_credit_drawback"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.economy_rez_reserve"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.economy_rez_reserve"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.economy_rez_reserve"
+      ],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.economy_rez_reserve",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.economy_rez_reserve",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "supportingEvidenceOnly": [
+        "advance.corp_counter_bank",
+        "economy.generic",
+        "risk.temporary_credit_drawback"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "corp.economy_rez_reserve",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.economy_rez_reserve"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "remote_support",
@@ -6914,23 +7213,32 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review",
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "targetProfiles"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "targetProfiles"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "support_tool"
+        ],
+        "validValues": [
+          "support_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -6945,21 +7253,46 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "score.advance_burst"
+        "remote.agenda_difficulty_discount",
+        "remote.scoring_protection",
+        "score.agenda_difficulty_discount",
+        "score.research_difficulty_discount"
       ],
       "derivedStrategyAnchors": [
-        "corp.fast_advance"
+        "corp.remote_scoring"
       ],
-      "cardLevelStrategyAnchors": [],
+      "cardLevelStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
       "derivedPossibleStrategyAnchors": [
-        "corp.fast_advance"
+        "corp.remote_scoring"
       ],
-      "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [],
-      "lineSupportClassification": [],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.remote_scoring",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "supportingEvidenceOnly": [
+        "score.research_difficulty_discount"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "corp.remote_scoring",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "remote_support",
@@ -6987,17 +7320,21 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole"
+        ],
         "compiledMechanicalFactFields": [
-          "effects"
+          "effects",
+          "conditions",
+          "remoteRole"
         ],
         "generatedFactFields": [
           "effects"
@@ -7005,8 +7342,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -7018,18 +7359,44 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
+      "derivedFunctionSignals": [
+        "access.corp_central_access_reduction"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.central_stabilize"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.central_stabilize"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.central_stabilize"
+      ],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.central_stabilize",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.central_stabilize",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "supportingEvidenceOnly": [],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.central_stabilize",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.central_stabilize"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "remote_support",
@@ -7057,26 +7424,30 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "compiledMechanicalFactFields": [
+          "effects",
           "conditions"
         ],
-        "generatedFactFields": [
-          "conditions"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "support_tool"
+        ],
+        "validValues": [
+          "support_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -7382,21 +7753,46 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "score.advance_burst"
+        "remote.agenda_difficulty_discount",
+        "remote.scoring_protection",
+        "score.agenda_difficulty_discount",
+        "score.black_ops_difficulty_discount"
       ],
       "derivedStrategyAnchors": [
-        "corp.fast_advance"
+        "corp.remote_scoring"
       ],
-      "cardLevelStrategyAnchors": [],
+      "cardLevelStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
       "derivedPossibleStrategyAnchors": [
-        "corp.fast_advance"
+        "corp.remote_scoring"
       ],
-      "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [],
-      "lineSupportClassification": [],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.remote_scoring",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "supportingEvidenceOnly": [
+        "score.black_ops_difficulty_discount"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "corp.remote_scoring",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "remote_support",
@@ -7424,17 +7820,21 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole"
+        ],
         "compiledMechanicalFactFields": [
-          "effects"
+          "effects",
+          "conditions",
+          "remoteRole"
         ],
         "generatedFactFields": [
           "effects"
@@ -7442,8 +7842,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -52452,18 +52856,22 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "run.corp_worm_lockout"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [],
+      "supportingEvidenceOnly": [
+        "run.corp_worm_lockout"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -52518,8 +52926,7 @@
         }
       ],
       "warningCategories": [
-        "function_signal_descriptor_gap",
-        "legacy_fallback_only"
+        "function_signal_descriptor_gap"
       ],
       "descriptorGaps": [
         {
@@ -52539,8 +52946,16 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "targetProfiles"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "targetProfiles"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -52563,25 +52978,23 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [
-        "corp.ice_tax_glacier",
-        "corp.remote_scoring"
+      "derivedFunctionSignals": [
+        "ice.corp_strength_support"
       ],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.ice_tax_glacier",
           "sourceField": "lineSupport",
           "sourceValue": "corp.ice_tax_glacier",
-          "triageCategory": "normalized_strategy_id",
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "strategyId": "corp.remote_scoring",
-          "sourceField": "lineSupport",
-          "sourceValue": "corp.remote_scoring",
           "triageCategory": "normalized_strategy_id",
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
@@ -52594,15 +53007,6 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.remote_scoring",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.remote_scoring"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
@@ -52667,11 +53071,13 @@
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
-          "remoteRole"
+          "remoteRole",
+          "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
           "effects",
-          "remoteRole"
+          "remoteRole",
+          "targetProfiles"
         ],
         "generatedFactFields": [
           "effects"
@@ -52695,19 +53101,46 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 2
+        "legacyFallbackOnly": false,
+        "warningCount": 1
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
+      "derivedFunctionSignals": [
+        "access.corp_agenda_score_delay",
+        "remote.agenda_steal_tax"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.remote_scoring",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "supportingEvidenceOnly": [],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.remote_scoring",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "agenda_delay",
@@ -52752,8 +53185,7 @@
         }
       ],
       "warningCategories": [
-        "function_signal_descriptor_gap",
-        "legacy_fallback_only"
+        "function_signal_descriptor_gap"
       ],
       "descriptorGaps": [
         {
@@ -52773,14 +53205,26 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -52795,19 +53239,63 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 3
+        "warningCount": 2
       },
       "derivedFunctionSignals": [
+        "ice.corp_install_discount",
         "setup.install_discount"
       ],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
+      "derivedStrategyAnchors": [
+        "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier"
+      ],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.economy_rez_reserve",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.economy_rez_reserve",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.ice_tax_glacier",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "supportingEvidenceOnly": [
         "setup.install_discount"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.economy_rez_reserve",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.economy_rez_reserve"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "install_cost_discount",
@@ -52861,7 +53349,6 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
         "descriptor_gap",
         "function_signal_descriptor_gap"
       ],
@@ -52882,22 +53369,33 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole",
+          "targetProfiles"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions",
-          "remoteRole"
+          "remoteRole",
+          "targetProfiles"
         ],
         "generatedFactFields": [
           "effects",
-          "conditions",
           "remoteRole"
         ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "support_tool",
+          "tax_tool"
+        ],
+        "validValues": [
+          "support_tool",
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -52909,18 +53407,45 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": true,
+        "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
+      "derivedFunctionSignals": [
+        "access.corp_daemon_trash",
+        "access.punish"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.ambush_bluff",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "supportingEvidenceOnly": [],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ambush_bluff",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ambush_bluff"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "access_punisher",
@@ -52970,18 +53495,26 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "targetProfiles"
+        ],
         "compiledMechanicalFactFields": [
-          "conditions"
+          "effects",
+          "conditions",
+          "targetProfiles"
         ],
-        "generatedFactFields": [
-          "conditions"
-        ],
+        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "punish_payoff"
+        ],
+        "validValues": [
+          "punish_payoff"
+        ],
         "unknownValues": []
       }
     },
@@ -53258,10 +53791,12 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "damage.corp_tagged_meat_payoff",
         "damage.payoff",
         "tag.payoff"
       ],
       "derivedStrategyAnchors": [
+        "corp.damage_kill",
         "corp.tag_trace_punish"
       ],
       "cardLevelStrategyAnchors": [
@@ -53269,6 +53804,7 @@
         "corp.tag_trace_punish"
       ],
       "derivedPossibleStrategyAnchors": [
+        "corp.damage_kill",
         "corp.tag_trace_punish"
       ],
       "reviewedStrategySupportPairs": [
@@ -53361,14 +53897,16 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions"
         ],
         "generatedFactFields": [
-          "effects",
-          "conditions"
+          "effects"
         ],
         "overlayFields": []
       },
@@ -53390,22 +53928,48 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "access.corp_net_damage_ambush",
+        "access.punish",
         "damage.payoff"
       ],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
+      "derivedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.ambush_bluff",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.ambush_bluff",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "supportingEvidenceOnly": [
         "damage.payoff"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ambush_bluff",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ambush_bluff"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "ambush",
@@ -53458,12 +54022,18 @@
           "effects",
           "conditions"
         ],
-        "generatedFactFields": [],
+        "generatedFactFields": [
+          "effects"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "punish_payoff"
+        ],
+        "validValues": [
+          "punish_payoff"
+        ],
         "unknownValues": []
       }
     },
@@ -53481,16 +54051,58 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "ice.corp_hq_runpath_insert",
         "tax.remote"
       ],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.ice_tax_glacier",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "strategyId": "corp.remote_scoring",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.remote_scoring",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "supportingEvidenceOnly": [
         "tax.remote"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "value": "corp.remote_scoring",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "counter",
@@ -53529,22 +54141,33 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole",
+          "targetProfiles"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions",
-          "remoteRole"
+          "remoteRole",
+          "targetProfiles"
         ],
         "generatedFactFields": [
           "effects",
-          "conditions",
           "remoteRole"
         ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool",
+          "tax_tool"
+        ],
+        "validValues": [
+          "scoring_tool",
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -53556,24 +54179,35 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "ice.corp_hq_runpath_insert",
         "remote.scoring_protection"
       ],
       "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier",
         "corp.remote_scoring"
       ],
       "cardLevelStrategyAnchors": [
+        "corp.ice_tax_glacier",
         "corp.remote_scoring"
       ],
       "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier",
         "corp.remote_scoring"
       ],
       "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.ice_tax_glacier",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
         {
           "strategyId": "corp.remote_scoring",
           "sourceField": "lineSupport",
@@ -53584,6 +54218,15 @@
       ],
       "supportingEvidenceOnly": [],
       "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
         {
           "value": "corp.remote_scoring",
           "category": "exact_strategy_goal",
@@ -53665,16 +54308,18 @@
         "activeMechanicalFactFields": [
           "effects",
           "conditions",
-          "costProfile",
-          "remoteRole"
+          "remoteRole",
+          "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions",
-          "costProfile",
-          "remoteRole"
+          "remoteRole",
+          "targetProfiles"
         ],
-        "generatedFactFields": [],
+        "generatedFactFields": [
+          "effects"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -53698,20 +54343,24 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.rez_discount"
+        "economy.rez_discount",
+        "ice.corp_rez_discount",
+        "ice.corp_strength_support"
       ],
       "derivedStrategyAnchors": [
-        "corp.economy_rez_reserve"
+        "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier"
       ],
       "cardLevelStrategyAnchors": [
         "corp.economy_rez_reserve",
         "corp.ice_tax_glacier"
       ],
       "derivedPossibleStrategyAnchors": [
-        "corp.economy_rez_reserve"
+        "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier"
       ],
       "reviewedStrategySupportPairs": [
         {
@@ -53782,24 +54431,26 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole",
+          "targetProfiles"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions",
-          "remoteRole"
+          "remoteRole",
+          "targetProfiles"
         ],
         "generatedFactFields": [
-          "effects",
-          "conditions",
-          "remoteRole"
+          "effects"
         ],
         "overlayFields": []
       },
@@ -53823,17 +54474,24 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "remote.capacity_support",
+        "remote.scoring_protection"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
       "cardLevelStrategyAnchors": [
         "corp.remote_scoring"
       ],
-      "derivedPossibleStrategyAnchors": [],
+      "derivedPossibleStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
       "reviewedStrategySupportPairs": [
         {
           "strategyId": "corp.remote_scoring",
@@ -53905,9 +54563,7 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
@@ -53923,7 +54579,9 @@
           "conditions",
           "remoteRole"
         ],
-        "generatedFactFields": [],
+        "generatedFactFields": [
+          "effects"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -53950,6 +54608,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "access.corp_installed_trash_tax",
         "tax.remote"
       ],
       "derivedStrategyAnchors": [],
@@ -53957,6 +54616,7 @@
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
+        "access.corp_installed_trash_tax",
         "tax.remote"
       ],
       "lineSupportClassification": [],
@@ -54012,7 +54672,10 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "remoteRole"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions",
@@ -54020,8 +54683,7 @@
         ],
         "generatedFactFields": [
           "effects",
-          "conditions",
-          "remoteRole"
+          "conditions"
         ],
         "overlayFields": []
       },
@@ -54039,27 +54701,47 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
       "derivedFunctionSignals": [
         "economy.rez_discount",
+        "ice.corp_rez_discount",
+        "ice.corp_temporary_rez",
         "remote.scoring_protection"
       ],
       "derivedStrategyAnchors": [
         "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier",
         "corp.remote_scoring"
       ],
       "cardLevelStrategyAnchors": [
+        "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier",
         "corp.remote_scoring"
       ],
       "derivedPossibleStrategyAnchors": [
         "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier",
         "corp.remote_scoring"
       ],
       "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.economy_rez_reserve",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.economy_rez_reserve",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.ice_tax_glacier",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
         {
           "strategyId": "corp.remote_scoring",
           "sourceField": "lineSupport",
@@ -54068,8 +54750,28 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
-      "supportingEvidenceOnly": [],
+      "supportingEvidenceOnly": [
+        "ice.corp_temporary_rez"
+      ],
       "lineSupportClassification": [
+        {
+          "value": "corp.economy_rez_reserve",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.economy_rez_reserve"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
         {
           "value": "corp.remote_scoring",
           "category": "exact_strategy_goal",
@@ -54121,14 +54823,18 @@
         "activeMechanicalFactFields": [
           "effects",
           "conditions",
-          "remoteRole"
+          "remoteRole",
+          "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions",
-          "remoteRole"
+          "remoteRole",
+          "targetProfiles"
         ],
-        "generatedFactFields": [],
+        "generatedFactFields": [
+          "effects"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -54155,16 +54861,41 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "ice.corp_hq_runpath_insert",
         "tax.remote"
       ],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.ice_tax_glacier",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "supportingEvidenceOnly": [
         "tax.remote"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "economy",
@@ -54203,22 +54934,31 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole",
+          "targetProfiles"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions",
-          "remoteRole"
+          "remoteRole",
+          "targetProfiles"
         ],
         "generatedFactFields": [
           "effects",
-          "conditions",
           "remoteRole"
         ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -54229,19 +54969,51 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [],
-      "lineSupportClassification": [],
+      "derivedFunctionSignals": [
+        "economy.corp_trace_credit_support",
+        "economy.trace_credit",
+        "tax.remote",
+        "trace.corp_credit_support"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.tag_trace_punish"
+      ],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.tag_trace_punish",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.tag_trace_punish",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "supportingEvidenceOnly": [
+        "economy.trace_credit",
+        "tax.remote"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "corp.tag_trace_punish",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "city_grid",
@@ -54288,22 +55060,30 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "remoteRole"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "remoteRole"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "support_tool"
+        ],
+        "validValues": [
+          "support_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -54458,7 +55238,7 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
         "warningCount": 0
@@ -54548,17 +55328,17 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [
-          "effects",
-          "conditions",
-          "remoteRole"
-        ],
+        "activeMechanicalFactFields": [],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions",
           "remoteRole"
         ],
-        "generatedFactFields": [],
+        "generatedFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole"
+        ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -54582,19 +55362,44 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "run.corp_server_lock",
         "tax.remote"
       ],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
+      "derivedStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.remote_scoring",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "supportingEvidenceOnly": [
         "tax.remote"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.remote_scoring",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "advance",
@@ -54631,30 +55436,34 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions",
           "remoteRole"
         ],
         "generatedFactFields": [
-          "effects",
-          "conditions",
-          "remoteRole"
+          "effects"
         ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -54672,16 +55481,41 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "ice.corp_hq_runpath_insert",
         "tax.remote"
       ],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.ice_tax_glacier",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "supportingEvidenceOnly": [
         "tax.remote"
       ],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "city_grid",
@@ -54720,22 +55554,31 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole",
+          "targetProfiles"
+        ],
         "compiledMechanicalFactFields": [
           "effects",
           "conditions",
-          "remoteRole"
+          "remoteRole",
+          "targetProfiles"
         ],
         "generatedFactFields": [
           "effects",
-          "conditions",
           "remoteRole"
         ],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -54753,9 +55596,11 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "ice.corp_subroutine_support",
         "remote.scoring_protection"
       ],
       "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier",
         "corp.remote_scoring"
       ],
       "cardLevelStrategyAnchors": [
@@ -54763,6 +55608,7 @@
         "corp.remote_scoring"
       ],
       "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier",
         "corp.remote_scoring"
       ],
       "reviewedStrategySupportPairs": [
@@ -54871,11 +55717,13 @@
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
-          "remoteRole"
+          "remoteRole",
+          "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
           "effects",
-          "remoteRole"
+          "remoteRole",
+          "targetProfiles"
         ],
         "generatedFactFields": [
           "effects"
@@ -54899,18 +55747,26 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "economy.corp_unsuccessful_run_credit",
+        "economy.generic",
+        "tax.remote"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [],
+      "supportingEvidenceOnly": [
+        "economy.corp_unsuccessful_run_credit",
+        "economy.generic",
+        "tax.remote"
+      ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
@@ -54964,16 +55820,20 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "remoteRole"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "remoteRole"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
@@ -54997,7 +55857,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "tag.source"
+        "tag.source",
+        "trace.source"
       ],
       "derivedStrategyAnchors": [
         "corp.tag_trace_punish"
@@ -55097,19 +55958,48 @@
       "supportStatus": {
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
-        "mechanicalFactsFound": false,
+        "mechanicalFactsFound": true,
         "generatedFactsFound": false,
         "overlayFields": [],
-        "legacyFallbackOnly": true,
-        "warningCount": 1
+        "legacyFallbackOnly": false,
+        "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
-      "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [],
-      "reviewedStrategySupportPairs": [],
-      "supportingEvidenceOnly": [],
-      "lineSupportClassification": [],
+      "derivedFunctionSignals": [
+        "run.corp_stealth_credit_lockout",
+        "tax.remote"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "cardLevelStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "derivedPossibleStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.ice_tax_glacier",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.ice_tax_glacier",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
+      "supportingEvidenceOnly": [
+        "tax.remote"
+      ],
+      "lineSupportClassification": [
+        {
+          "value": "corp.ice_tax_glacier",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "run_tax",
@@ -55142,22 +56032,32 @@
           "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
         }
       ],
-      "warningCategories": [
-        "legacy_fallback_only"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
-        "compiledMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole"
+        ],
+        "compiledMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole"
+        ],
         "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "tax_tool"
+        ],
+        "validValues": [
+          "tax_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -55172,21 +56072,43 @@
         "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "score.advance_burst"
+        "remote.agenda_difficulty_discount",
+        "remote.scoring_protection",
+        "score.agenda_difficulty_discount"
       ],
       "derivedStrategyAnchors": [
-        "corp.fast_advance"
+        "corp.remote_scoring"
       ],
-      "cardLevelStrategyAnchors": [],
+      "cardLevelStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
       "derivedPossibleStrategyAnchors": [
-        "corp.fast_advance"
+        "corp.remote_scoring"
       ],
-      "reviewedStrategySupportPairs": [],
+      "reviewedStrategySupportPairs": [
+        {
+          "strategyId": "corp.remote_scoring",
+          "sourceField": "lineSupport",
+          "sourceValue": "corp.remote_scoring",
+          "triageCategory": "normalized_strategy_id",
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "supportingEvidenceOnly": [],
-      "lineSupportClassification": [],
+      "lineSupportClassification": [
+        {
+          "value": "corp.remote_scoring",
+          "category": "exact_strategy_goal",
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        }
+      ],
       "rolesClassification": [
         {
           "value": "agenda",
@@ -55228,17 +56150,21 @@
           "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "warningCategories": [
-        "deferred_requires_human_review"
-      ],
+      "warningCategories": [],
       "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [],
+        "activeMechanicalFactFields": [
+          "effects",
+          "conditions",
+          "remoteRole"
+        ],
         "compiledMechanicalFactFields": [
-          "effects"
+          "effects",
+          "conditions",
+          "remoteRole"
         ],
         "generatedFactFields": [
           "effects"
@@ -55246,8 +56172,12 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [],
-        "validValues": [],
+        "values": [
+          "scoring_tool"
+        ],
+        "validValues": [
+          "scoring_tool"
+        ],
         "unknownValues": []
       }
     },
@@ -56637,7 +57567,7 @@
         "generatedFactsFound": false,
         "overlayFields": [],
         "legacyFallbackOnly": true,
-        "warningCount": 2
+        "warningCount": 1
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
@@ -56674,7 +57604,6 @@
         }
       ],
       "warningCategories": [
-        "deferred_requires_human_review",
         "legacy_fallback_only"
       ],
       "descriptorGaps": [],

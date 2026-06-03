@@ -191,10 +191,13 @@ describe("AI005 hint inspector index", () => {
       "corp.fast_advance",
     );
     expect(networkedCenter.derivedFunctionSignals).toContain(
-      "score.advance_burst",
+      "score.agenda_difficulty_discount",
     );
-    expect(networkedCenter.derivedStrategyAnchors).toContain(
+    expect(networkedCenter.derivedStrategyAnchors).not.toContain(
       "corp.fast_advance",
+    );
+    expect(networkedCenter.cardLevelStrategyAnchors).toContain(
+      "corp.remote_scoring",
     );
     expect(canisMinor.derivedFunctionSignals).toContain("tax.ice");
     expect(canisMinor.derivedStrategyAnchors).toContain(

@@ -14,13 +14,13 @@
   "includedCardCount": 8,
   "excludedCardCount": 2,
   "confirmedGeneratedFactCount": 27,
-  "previewAddedFactCount": 0,
+  "previewAddedFactCount": 4,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 5,
+  "normalizedDifferenceCount": 12,
   "remainingDifferenceCount": 0,
   "boardContextInfoCount": 21,
-  "descriptorFollowupCount": 4,
+  "descriptorFollowupCount": 6,
   "readiness": "ready_read_only_split_subbatches",
   "subBatchReadiness": {
     "global_ice_or_remote_support": 2,
@@ -30,12 +30,12 @@
     "score_acceleration_or_fast_advance_support": 1
   },
   "readinessCounts": {
-    "needs_descriptor_followup": 2,
-    "ready_read_only_with_board_context": 6
+    "needs_descriptor_followup": 4,
+    "ready_read_only_with_board_context": 4
   },
   "normalizationRuleCounts": {
     "remote_capacity_normalization": 0,
-    "remote_scoring_protection_normalization": 1,
+    "remote_scoring_protection_normalization": 8,
     "sysop_or_region_active_state_normalization": 0,
     "score_acceleration_context_normalization": 3,
     "successful_run_or_access_context_normalization": 1,
@@ -255,7 +255,22 @@
         "remoteRole:scoring_protection"
       ],
       "previewAdds": [],
-      "normalizedDifferences": [],
+      "normalizedDifferences": [
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "remote_scoring_protection_shape_normalized",
+          "rule": "remote_scoring_protection_normalization",
+          "rationale": "Generated remote protection/future encounter shape is semantically compatible with the active monolith and remains board-state scoped."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "remote_scoring_protection_shape_normalized",
+          "rule": "remote_scoring_protection_normalization",
+          "rationale": "Generated remote protection/future encounter shape is semantically compatible with the active monolith and remains board-state scoped."
+        }
+      ],
       "boardContextInfos": [
         {
           "kind": "future_encounter_requires_runpath_context",
@@ -278,13 +293,15 @@
           "rationale": "Jenny Jett only matters after a successful run on this fort and must not expose hidden HQ choices."
         }
       ],
-      "descriptorFollowups": [],
+      "descriptorFollowups": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "activeConsumers": [
         "remote_role_consumer",
         "remote_safety_diagnostics"
       ],
       "remainingIssues": [],
-      "readiness": "ready_read_only_with_board_context"
+      "readiness": "needs_descriptor_followup"
     },
     {
       "cardId": "onr_v1_361_namatoki-plaza",
@@ -315,7 +332,15 @@
         "remoteRole:remote_capacity"
       ],
       "previewAdds": [],
-      "normalizedDifferences": [],
+      "normalizedDifferences": [
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "remote_scoring_protection_shape_normalized",
+          "rule": "remote_scoring_protection_normalization",
+          "rationale": "Generated remote protection/future encounter shape is semantically compatible with the active monolith and remains board-state scoped."
+        }
+      ],
       "boardContextInfos": [
         {
           "kind": "remote_protection_requires_server_context",
@@ -370,7 +395,15 @@
         "remoteRole:scoring_protection"
       ],
       "previewAdds": [],
-      "normalizedDifferences": [],
+      "normalizedDifferences": [
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "remote_scoring_protection_shape_normalized",
+          "rule": "remote_scoring_protection_normalization",
+          "rationale": "Generated remote protection/future encounter shape is semantically compatible with the active monolith and remains board-state scoped."
+        }
+      ],
       "boardContextInfos": [
         {
           "kind": "remote_protection_requires_server_context",
@@ -418,8 +451,35 @@
         "effect:remote_protection",
         "remoteRole:scoring_protection"
       ],
-      "previewAdds": [],
-      "normalizedDifferences": [],
+      "previewAdds": [
+        "condition:requires_during_run",
+        "effect:future_encounter_effect",
+        "effect:remote_protection",
+        "remoteRole:scoring_protection"
+      ],
+      "normalizedDifferences": [
+        {
+          "field": "conditions",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "remote_scoring_protection_shape_normalized",
+          "rule": "remote_scoring_protection_normalization",
+          "rationale": "Generated remote protection/future encounter shape is semantically compatible with the active monolith and remains board-state scoped."
+        },
+        {
+          "field": "effects",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "remote_scoring_protection_shape_normalized",
+          "rule": "remote_scoring_protection_normalization",
+          "rationale": "Generated remote protection/future encounter shape is semantically compatible with the active monolith and remains board-state scoped."
+        },
+        {
+          "field": "remoteRole",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "remote_scoring_protection_shape_normalized",
+          "rule": "remote_scoring_protection_normalization",
+          "rationale": "Generated remote protection/future encounter shape is semantically compatible with the active monolith and remains board-state scoped."
+        }
+      ],
       "boardContextInfos": [
         {
           "kind": "future_encounter_requires_runpath_context",
@@ -437,13 +497,15 @@
           "rationale": "RemoteRole describes static card function; active/rezzed/server placement stays board state."
         }
       ],
-      "descriptorFollowups": [],
+      "descriptorFollowups": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
       "activeConsumers": [
         "remote_role_consumer",
         "remote_safety_diagnostics"
       ],
       "remainingIssues": [],
-      "readiness": "ready_read_only_with_board_context"
+      "readiness": "needs_descriptor_followup"
     },
     {
       "cardId": "onr_v1_370_tesseract-fort-construction",

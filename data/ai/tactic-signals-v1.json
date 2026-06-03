@@ -1,8 +1,8 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI024-1/AI025-1/AI025-1/AI025-1/AI025-1/AI026-1/AI027",
+  "taskId": "AI024-1/AI025-1/AI025-1/AI025-1/AI025-1/AI026-1/AI027/AI030",
   "generatedAt": "2026-06-03",
-  "description": "Controlled V1 tactic-signal catalog. AI027 aligns broad/legacy derivation and inspector semantics with Guide V3 without planner, engine, targeting, action-score, plan-weight, legality, profile/default, UI or hidden-info effects.",
+  "description": "Controlled V1 tactic-signal catalog. AI030 adds reviewed Corp-Upgrade semantics from Guide V3 without planner, engine, targeting, action-score, plan-weight, legality, profile/default, UI or hidden-info effects.",
   "signalPolicy": {
     "tacticSignal": "Functional card utility: what the AI can use the card for.",
     "strategyAnchor": "Large deck line: which strategy the card can anchor or materially support.",
@@ -102,6 +102,23 @@
       "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "access.corp_agenda_score_delay",
+      "group": "ai030_corp_upgrade_access",
+      "sideScope": "corp",
+      "description": "Corp upgrade delays agenda scoring or stealing after access from its protected fort.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI030 Corp-Upgrade signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "access.corp_archives_net_damage_ambush",
       "group": "ai026_1_corp_node_asset_access_ambush",
       "sideScope": "corp",
@@ -135,6 +152,23 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "access.corp_central_access_reduction",
+      "group": "ai030_corp_upgrade_access",
+      "sideScope": "corp",
+      "description": "Corp upgrade reduces additional central accesses during the access step.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.central_stabilize"
+      ],
+      "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI030 Corp-Upgrade signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "access.corp_counter_punish",
@@ -171,6 +205,23 @@
       "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
+      "signalId": "access.corp_daemon_trash",
+      "group": "ai030_corp_upgrade_access",
+      "sideScope": "corp",
+      "description": "Corp upgrade trashes an installed daemon when accessed.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI030 Corp-Upgrade signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "access.corp_hardware_trash",
       "group": "ai026_corp_nodes_assets_access_run",
       "sideScope": "corp",
@@ -205,6 +256,21 @@
       "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
+      "signalId": "access.corp_installed_trash_tax",
+      "group": "ai030_corp_upgrade_access",
+      "sideScope": "corp",
+      "description": "Corp upgrade increases the Runner trash cost for installed cards in its fort.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI030 Corp-Upgrade signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "access.corp_net_damage_ambush",
       "group": "ai026_1_corp_node_asset_access_ambush",
       "sideScope": "corp",
@@ -232,7 +298,8 @@
         "corp.ambush_bluff"
       ],
       "sourceKinds": [
-        "AI026 reviewed Corp node/asset structured hint effects"
+        "AI026 reviewed Corp node/asset structured hint effects",
+        "AI030 reviewed Corp-Upgrade structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": true,
@@ -999,7 +1066,8 @@
         "corp.remote_scoring"
       ],
       "sourceKinds": [
-        "AI026 reviewed Corp node/asset structured hint effects"
+        "AI026 reviewed Corp node/asset structured hint effects",
+        "AI030 reviewed Corp-Upgrade structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": true,
@@ -1042,6 +1110,23 @@
       "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "advance.remote_score_window_support",
+      "group": "ai030_corp_upgrade_advance",
+      "sideScope": "corp",
+      "description": "Corp upgrade places advancement counters in a protected remote run window.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI030 Corp-Upgrade signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "advance.score_window_support",
       "group": "ai025_corp_operations_advancement",
       "sideScope": "corp",
@@ -1052,7 +1137,8 @@
         "corp.fast_advance"
       ],
       "sourceKinds": [
-        "AI025 reviewed Corp-operation structured hint effects"
+        "AI025 reviewed Corp-operation structured hint effects",
+        "AI030 reviewed Corp-Upgrade structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": true,
@@ -2615,7 +2701,8 @@
         "corp.tag_trace_punish"
       ],
       "sourceKinds": [
-        "AI026 reviewed Corp node/asset structured hint effects"
+        "AI026 reviewed Corp node/asset structured hint effects",
+        "AI030 reviewed Corp-Upgrade structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": false,
@@ -3453,7 +3540,8 @@
         "corp.economy_rez_reserve"
       ],
       "sourceKinds": [
-        "AI026 reviewed Corp node/asset structured hint effects"
+        "AI026 reviewed Corp node/asset structured hint effects",
+        "AI030 reviewed Corp-Upgrade structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": false,
@@ -3470,11 +3558,27 @@
         "corp.tag_trace_punish"
       ],
       "sourceKinds": [
-        "AI026 reviewed Corp node/asset structured hint effects"
+        "AI026 reviewed Corp node/asset structured hint effects",
+        "AI030 reviewed Corp-Upgrade structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "economy.corp_unsuccessful_run_credit",
+      "group": "ai030_corp_upgrade_economy",
+      "sideScope": "corp",
+      "description": "Corp upgrade gains credits after an unsuccessful run on its fort.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI030 Corp-Upgrade signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "economy.cost_window_credit",
@@ -4182,6 +4286,23 @@
       "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "ice.corp_hq_runpath_insert",
+      "group": "ai030_corp_upgrade_ice",
+      "sideScope": "corp",
+      "description": "Corp upgrade inserts or swaps HQ ICE into the current run path without exposing HQ contents.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI030 Corp-Upgrade signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "ice.corp_install_discount",
       "group": "ai026_corp_nodes_assets_ice_support",
       "sideScope": "corp",
@@ -4193,7 +4314,8 @@
         "corp.ice_tax_glacier"
       ],
       "sourceKinds": [
-        "AI026 reviewed Corp node/asset structured hint effects"
+        "AI026 reviewed Corp node/asset structured hint effects",
+        "AI030 reviewed Corp-Upgrade structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": true,
@@ -4223,11 +4345,27 @@
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
       "sourceKinds": [
-        "AI025 reviewed Corp-operation structured hint effects"
+        "AI025 reviewed Corp-operation structured hint effects",
+        "AI030 reviewed Corp-Upgrade structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "ice.corp_reorder_fort",
+      "group": "ai030_corp_upgrade_ice",
+      "sideScope": "corp",
+      "description": "Corp upgrade reorders ICE protecting its fort.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI030 Corp-Upgrade signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "ice.corp_rez_discount",
@@ -4241,7 +4379,8 @@
         "corp.ice_tax_glacier"
       ],
       "sourceKinds": [
-        "AI026 reviewed Corp node/asset structured hint effects"
+        "AI026 reviewed Corp node/asset structured hint effects",
+        "AI030 reviewed Corp-Upgrade structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": true,
@@ -4273,11 +4412,29 @@
         "corp.ice_tax_glacier"
       ],
       "sourceKinds": [
-        "AI026 reviewed Corp node/asset structured hint effects"
+        "AI026 reviewed Corp node/asset structured hint effects",
+        "AI030 reviewed Corp-Upgrade structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "ice.corp_subroutine_repeat",
+      "group": "ai030_corp_upgrade_ice",
+      "sideScope": "corp",
+      "description": "Corp upgrade repeats a subroutine on ICE protecting its fort for the run.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI030 Corp-Upgrade signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "ice.corp_subroutine_support",
@@ -4290,7 +4447,8 @@
         "corp.ice_tax_glacier"
       ],
       "sourceKinds": [
-        "AI026 reviewed Corp node/asset structured hint effects"
+        "AI026 reviewed Corp node/asset structured hint effects",
+        "AI030 reviewed Corp-Upgrade structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": true,
@@ -4812,6 +4970,23 @@
       "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
+      "signalId": "remote.agenda_difficulty_discount",
+      "group": "ai030_corp_upgrade_remote",
+      "sideScope": "corp",
+      "description": "Corp upgrade reduces agenda difficulty for agendas in its fort.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI030 Corp-Upgrade signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "remote.agenda_difficulty_tax",
       "group": "ai019_remote",
       "sideScope": "runner",
@@ -4899,6 +5074,23 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "Reserved but controlled remote-role signal."
+    },
+    {
+      "signalId": "remote.capacity_support",
+      "group": "ai030_corp_upgrade_remote",
+      "sideScope": "corp",
+      "description": "Corp upgrade expands the agenda/node capacity of a subsidiary fort.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI030 Corp-Upgrade signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "remote.full_fort_trash",
@@ -5462,7 +5654,8 @@
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
       "sourceKinds": [
-        "AI026 reviewed Corp node/asset structured hint effects"
+        "AI026 reviewed Corp node/asset structured hint effects",
+        "AI030 reviewed Corp-Upgrade structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": false,
@@ -5544,6 +5737,21 @@
       "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
+      "signalId": "risk.rnd_trash_cost",
+      "group": "ai030_corp_upgrade_risk",
+      "sideScope": "corp",
+      "description": "Corp pays for an upgrade effect by trashing cards from the top of R&D without exposing identities.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI030 Corp-Upgrade signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "risk.run_spend_limit",
       "group": "risk",
       "sideScope": "runner",
@@ -5597,7 +5805,8 @@
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": [],
       "sourceKinds": [
-        "AI026 reviewed Corp node/asset structured hint effects"
+        "AI026 reviewed Corp node/asset structured hint effects",
+        "AI030 reviewed Corp-Upgrade structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": false,
@@ -5855,6 +6064,24 @@
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "run.corp_pay_or_end_run",
+      "group": "ai030_corp_upgrade_run",
+      "sideScope": "corp",
+      "description": "Corp upgrade forces the Runner to pay during a run or the run ends.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI030 Corp-Upgrade signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "run.corp_redirect",
       "group": "ai026_corp_nodes_assets_access_run",
       "sideScope": "corp",
@@ -5872,6 +6099,40 @@
       "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "run.corp_server_lock",
+      "group": "ai030_corp_upgrade_run",
+      "sideScope": "corp",
+      "description": "Corp upgrade restricts whether a subsidiary fort can be run.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.remote_scoring"
+      ],
+      "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI030 Corp-Upgrade signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "run.corp_spend_cap",
+      "group": "ai030_corp_upgrade_run",
+      "sideScope": "corp",
+      "description": "Corp upgrade caps the Runner's declared spend during a run on its fort.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI030 Corp-Upgrade signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
       "signalId": "run.corp_start_tax",
       "group": "ai026_corp_nodes_assets_access_run",
       "sideScope": "corp",
@@ -5887,6 +6148,38 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "run.corp_stealth_credit_lockout",
+      "group": "ai030_corp_upgrade_run",
+      "sideScope": "corp",
+      "description": "Corp upgrade prevents Runner stealth-credit spending during runs on its fort.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ice_tax_glacier"
+      ],
+      "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI030 Corp-Upgrade signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "run.corp_worm_lockout",
+      "group": "ai030_corp_upgrade_run",
+      "sideScope": "corp",
+      "description": "Corp upgrade restricts or punishes Worm breaker use during runs on its fort.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI030 Corp-Upgrade signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
       "signalId": "run.damage_prevention_during_run",
@@ -6252,6 +6545,7 @@
         "corp.fast_advance"
       ],
       "sourceKinds": [
+        "AI030 reviewed Corp-Upgrade structured hint effects",
         "effects.kind=advance_burst",
         "effects.kind=score_acceleration resource=advancement_counters"
       ],
@@ -6289,7 +6583,8 @@
         "corp.fast_advance"
       ],
       "sourceKinds": [
-        "AI023 reviewed Corp-Agenda structured hint effects"
+        "AI023 reviewed Corp-Agenda structured hint effects",
+        "AI030 reviewed Corp-Upgrade structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": false,
@@ -8004,7 +8299,8 @@
         "corp.tag_trace_punish"
       ],
       "sourceKinds": [
-        "AI026 reviewed Corp node/asset structured hint effects"
+        "AI026 reviewed Corp node/asset structured hint effects",
+        "AI030 reviewed Corp-Upgrade structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": true,

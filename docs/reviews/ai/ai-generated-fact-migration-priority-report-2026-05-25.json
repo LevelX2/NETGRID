@@ -7844,7 +7844,7 @@
         "effect:remote_protection",
         "remoteRole:ice_modifier"
       ],
-      "monolithFields": ["effects", "remoteRole"],
+      "monolithFields": ["effects", "remoteRole", "targetProfiles"],
       "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
       "generatedOnlyFields": ["effects"],
       "overlayFields": [],
@@ -7886,12 +7886,22 @@
         "effect:install_discount",
         "remoteRole:remote_capacity"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "remoteRole",
+        "targetProfiles"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": ["effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 3,
+        "monolith_mechanical_duplication_candidate": 3,
+        "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",
@@ -8016,16 +8026,25 @@
         "effect:zone_shuffle",
         "remoteRole:run_tax"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "remoteRole",
+        "targetProfiles"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": ["effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 3,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 3,
+        "generated_fact_absent_from_monolith": 2
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 9,
       "rationale": "Temporary HQ-ICE encounter is derivable as run/hidden-zone context only.",
       "doNotMigrateFields": [
@@ -8058,19 +8077,26 @@
         "effect:remote_protection",
         "remoteRole:scoring_protection"
       ],
-      "monolithFields": ["effects", "conditions", "costProfile", "remoteRole"],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "remoteRole",
+        "targetProfiles"
+      ],
       "duplicatedActiveMechanicalFields": [
         "conditions",
         "effects",
         "remoteRole"
       ],
-      "generatedOnlyFields": [],
+      "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
-        "monolith_mechanical_duplication_candidate": 3
+        "monolith_mechanical_duplication_candidate": 3,
+        "generated_fact_absent_from_monolith": 2,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 5,
       "rationale": "Successful-run future-encounter support is mechanically recognizable, but hidden HQ choice and runpath context stay runtime-owned.",
       "doNotMigrateFields": [
@@ -8104,16 +8130,25 @@
         "effect:rez_discount",
         "remoteRole:ice_modifier"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "remoteRole",
+        "targetProfiles"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 3,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 3,
+        "generated_fact_absent_from_monolith": 1
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 9,
       "rationale": "Fort wall rez discount/strength support is derivable, with rezzed board context explicit.",
       "doNotMigrateFields": [
@@ -8152,10 +8187,11 @@
         "effects",
         "remoteRole"
       ],
-      "generatedOnlyFields": [],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
-        "monolith_mechanical_duplication_candidate": 3
+        "monolith_mechanical_duplication_candidate": 3,
+        "generated_fact_absent_from_monolith": 1
       },
       "recommendedNextAction": "ready_for_generated_mechanical_fields",
       "migrationReadiness": "ready",
@@ -8191,12 +8227,13 @@
         "effect:remote_tax",
         "remoteRole:run_tax"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "monolithFields": ["effects", "remoteRole"],
+      "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
+      "generatedOnlyFields": ["conditions", "effects"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 3,
+        "monolith_mechanical_duplication_candidate": 2,
+        "generated_fact_absent_from_monolith": 2,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",
@@ -8233,16 +8270,22 @@
         "effect:rez_discount",
         "remoteRole:scoring_protection"
       ],
-      "monolithFields": ["effects", "conditions", "remoteRole"],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "remoteRole",
+        "targetProfiles"
+      ],
       "duplicatedActiveMechanicalFields": [
         "conditions",
         "effects",
         "remoteRole"
       ],
-      "generatedOnlyFields": [],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
-        "monolith_mechanical_duplication_candidate": 3
+        "monolith_mechanical_duplication_candidate": 3,
+        "generated_fact_absent_from_monolith": 1
       },
       "recommendedNextAction": "ready_for_generated_mechanical_fields",
       "migrationReadiness": "ready",
@@ -8278,16 +8321,25 @@
         "effect:zone_shuffle",
         "remoteRole:run_tax"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "remoteRole",
+        "targetProfiles"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": ["effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 3,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 3,
+        "generated_fact_absent_from_monolith": 2
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 9,
       "rationale": "Fort ICE swap is derivable as run/hidden-zone context only.",
       "doNotMigrateFields": [
@@ -8369,19 +8421,16 @@
         "effect:remote_protection",
         "remoteRole:scoring_protection"
       ],
-      "monolithFields": ["effects", "conditions", "remoteRole"],
-      "duplicatedActiveMechanicalFields": [
-        "conditions",
-        "effects",
-        "remoteRole"
-      ],
-      "generatedOnlyFields": [],
+      "monolithFields": [],
+      "duplicatedActiveMechanicalFields": [],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
-        "monolith_mechanical_duplication_candidate": 3
+        "generated_fact_absent_from_monolith": 3,
+        "manual_review_candidate": 1
       },
-      "recommendedNextAction": "ready_for_generated_mechanical_fields",
-      "migrationReadiness": "ready",
+      "recommendedNextAction": "manual_review_candidate",
+      "migrationReadiness": "needs_review",
       "recommendedMigrationBatch": 5,
       "rationale": "Pass-rezzed-ICE random stop pressure is mechanically derivable, but concrete random outcome and path impact stay runtime context.",
       "doNotMigrateFields": [
@@ -8414,16 +8463,20 @@
         "effect:remote_tax",
         "remoteRole:run_tax"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "monolithFields": ["effects", "conditions", "remoteRole"],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": ["effects"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 3,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 3,
+        "generated_fact_absent_from_monolith": 1
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 9,
       "rationale": "Remote run-window restriction is derivable, but current run legality stays engine-owned.",
       "doNotMigrateFields": [
@@ -8456,16 +8509,25 @@
         "effect:zone_shuffle",
         "remoteRole:run_tax"
       ],
-      "monolithFields": [],
-      "duplicatedActiveMechanicalFields": [],
-      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
+      "monolithFields": [
+        "effects",
+        "conditions",
+        "remoteRole",
+        "targetProfiles"
+      ],
+      "duplicatedActiveMechanicalFields": [
+        "conditions",
+        "effects",
+        "remoteRole"
+      ],
+      "generatedOnlyFields": ["effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
-        "generated_fact_absent_from_monolith": 3,
-        "manual_review_candidate": 1
+        "monolith_mechanical_duplication_candidate": 3,
+        "generated_fact_absent_from_monolith": 2
       },
-      "recommendedNextAction": "manual_review_candidate",
-      "migrationReadiness": "needs_review",
+      "recommendedNextAction": "ready_for_generated_mechanical_fields",
+      "migrationReadiness": "ready",
       "recommendedMigrationBatch": 9,
       "rationale": "Fort ICE swap is derivable as run/hidden-zone context only.",
       "doNotMigrateFields": [
@@ -8497,7 +8559,7 @@
         "effect:remote_protection",
         "remoteRole:scoring_protection"
       ],
-      "monolithFields": ["effects", "remoteRole"],
+      "monolithFields": ["effects", "remoteRole", "targetProfiles"],
       "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
       "generatedOnlyFields": ["effects"],
       "overlayFields": [],

@@ -391,13 +391,13 @@
   "sourceSummary": {
     "derivedFacts": {
       "hardErrorCount": 0,
-      "warningCount": 996,
-      "cardsNeedingManualOverlay": 135
+      "warningCount": 978,
+      "cardsNeedingManualOverlay": 132
     },
     "compiledIndex": {
       "hardErrorCount": 0,
-      "warningCount": 723,
-      "reviewCandidates": 131
+      "warningCount": 735,
+      "reviewCandidates": 128
     },
     "migrationPriority": {
       "candidateCount": 193,

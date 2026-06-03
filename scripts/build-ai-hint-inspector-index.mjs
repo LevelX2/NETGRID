@@ -318,7 +318,12 @@ function reviewedStrategySupportPairsFromLineSupport({
 
 function functionSignalsForInspector({ hint, functionSignals }) {
   const derivedSignals = functionSignals.signals ?? [];
-  if (hint.side !== "corp" || hint.cardType !== "agenda") return derivedSignals;
+  if (
+    hint.side !== "corp" ||
+    !["agenda", "upgrade"].includes(hint.cardType)
+  ) {
+    return derivedSignals;
+  }
   return sortedUnique([
     ...derivedSignals,
     ...(hint.tacticSignals ?? []),

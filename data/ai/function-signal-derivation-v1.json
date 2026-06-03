@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI024-1/AI025-1/AI025-1/AI025-1/AI025-1/AI026-1/AI027",
-  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022/AI024/AI024/AI024/AI025/AI025/AI025/AI026/AI026/AI026/AI026/AI024-1/AI025-1/AI025-1/AI025-1/AI025-1/AI026-1/AI027",
+  "taskId": "AI024-1/AI025-1/AI025-1/AI025-1/AI025-1/AI026-1/AI027/AI030",
+  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022/AI024/AI024/AI024/AI025/AI025/AI025/AI026/AI026/AI026/AI026/AI024-1/AI025-1/AI025-1/AI025-1/AI025-1/AI026-1/AI027/AI030",
   "generatedAt": "2026-06-03",
-  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI027 aligns broad/legacy derivations and inspector anchor separation to Guide V3 while keeping Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default and UI-derivation effects unchanged.",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI030 syncs Corp-Upgrade active hints and inspector semantics with Guide V3 without planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default, UI or hidden-info effects.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -108,6 +108,21 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "access.corp_agenda_score_delay",
+      "source": "effects",
+      "match": {
+        "target": "access.corp_agenda_score_delay"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "access.corp_agenda_score_delay"
+      },
+      "strategyAnchorFor": [
+        "corp.remote_scoring"
+      ]
+    },
+    {
       "signalId": "access.corp_archives_net_damage_ambush",
       "source": "effects",
       "match": {
@@ -137,6 +152,21 @@
       ]
     },
     {
+      "signalId": "access.corp_central_access_reduction",
+      "source": "effects",
+      "match": {
+        "target": "access.corp_central_access_reduction"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "access.corp_central_access_reduction"
+      },
+      "strategyAnchorFor": [
+        "corp.central_stabilize"
+      ]
+    },
+    {
       "signalId": "access.corp_counter_punish",
       "source": "effects",
       "match": {
@@ -160,6 +190,21 @@
       "gates": {
         "side": "corp",
         "target": "access.corp_credit_loss_counter"
+      },
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "access.corp_daemon_trash",
+      "source": "effects",
+      "match": {
+        "target": "access.corp_daemon_trash"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "access.corp_daemon_trash"
       },
       "strategyAnchorFor": [
         "corp.ambush_bluff"
@@ -195,6 +240,19 @@
       ]
     },
     {
+      "signalId": "access.corp_installed_trash_tax",
+      "source": "effects",
+      "match": {
+        "target": "access.corp_installed_trash_tax"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "access.corp_installed_trash_tax"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "access.corp_net_damage_ambush",
       "source": "effects",
       "match": {
@@ -217,6 +275,21 @@
       "gates": {
         "side": "corp",
         "cardType": "asset",
+        "target": "access.corp_program_trash"
+      },
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "access.corp_program_trash",
+      "source": "effects",
+      "match": {
+        "target": "access.corp_program_trash"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
         "target": "access.corp_program_trash"
       },
       "strategyAnchorFor": [
@@ -1199,6 +1272,22 @@
       ]
     },
     {
+      "signalId": "advance.corp_counter_placement",
+      "source": "effects",
+      "match": {
+        "target": "advance.corp_counter_placement"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "advance.corp_counter_placement"
+      },
+      "strategyAnchorFor": [
+        "corp.fast_advance",
+        "corp.remote_scoring"
+      ]
+    },
+    {
       "signalId": "advance.corp_counter_transfer",
       "source": "effects",
       "match": {
@@ -1230,6 +1319,21 @@
       ]
     },
     {
+      "signalId": "advance.remote_score_window_support",
+      "source": "effects",
+      "match": {
+        "target": "advance.remote_score_window_support"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "advance.remote_score_window_support"
+      },
+      "strategyAnchorFor": [
+        "corp.remote_scoring"
+      ]
+    },
+    {
       "signalId": "advance.score_window_support",
       "source": "effects",
       "match": {
@@ -1238,6 +1342,21 @@
       "gates": {
         "side": "corp",
         "cardType": "operation",
+        "target": "advance.score_window_support"
+      },
+      "strategyAnchorFor": [
+        "corp.fast_advance"
+      ]
+    },
+    {
+      "signalId": "advance.score_window_support",
+      "source": "effects",
+      "match": {
+        "target": "advance.score_window_support"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
         "target": "advance.score_window_support"
       },
       "strategyAnchorFor": [
@@ -1258,6 +1377,19 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "breaker.ap",
+      "source": "breakerProfile.coverage",
+      "match": {
+        "coverage": "ap"
+      },
+      "gates": {
+        "breakerProfileRestrictionAbsent": [
+          "stun_hellbolt_knockout_only"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "breaker.ap_subtype_limited",
       "source": "breakerProfile.restrictions",
       "match": {
@@ -1269,19 +1401,6 @@
         ],
         "cardType": [
           "program"
-        ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "breaker.ap",
-      "source": "breakerProfile.coverage",
-      "match": {
-        "coverage": "ap"
-      },
-      "gates": {
-        "breakerProfileRestrictionAbsent": [
-          "stun_hellbolt_knockout_only"
         ]
       },
       "strategyAnchorFor": []
@@ -1555,6 +1674,14 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "breaker.sentry",
+      "source": "breakerProfile.coverage",
+      "match": {
+        "coverage": "sentry"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "breaker.sentry_subtype_limited",
       "source": "breakerProfile.restrictions",
       "match": {
@@ -1567,14 +1694,6 @@
         "cardType": [
           "program"
         ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "breaker.sentry",
-      "source": "breakerProfile.coverage",
-      "match": {
-        "coverage": "sentry"
       },
       "strategyAnchorFor": []
     },
@@ -2850,6 +2969,22 @@
       ]
     },
     {
+      "signalId": "damage.corp_tagged_meat_payoff",
+      "source": "effects",
+      "match": {
+        "target": "damage.corp_tagged_meat_payoff"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "damage.corp_tagged_meat_payoff"
+      },
+      "strategyAnchorFor": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
       "signalId": "damage.meat_source",
       "source": "effects",
       "match": {
@@ -3084,23 +3219,6 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "defense.damage_prevention_during_run",
-      "source": "effects",
-      "match": {
-        "kind": "damage_prevention",
-        "target": "damage_prevention_during_run"
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "event"
-        ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
       "signalId": "defense.damage_prevention",
       "source": "effects",
       "match": {
@@ -3144,6 +3262,23 @@
       "gates": {
         "side": "runner",
         "cardType": "resource"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "defense.damage_prevention_during_run",
+      "source": "effects",
+      "match": {
+        "kind": "damage_prevention",
+        "target": "damage_prevention_during_run"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "event"
+        ]
       },
       "strategyAnchorFor": []
     },
@@ -3570,11 +3705,11 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "defense.trace_cancel_bad_publicity",
+      "signalId": "defense.trace_cancel",
       "source": "effects",
       "match": {
         "kind": "prevention_replacement",
-        "target": "defense.trace_cancel_bad_publicity"
+        "target": "defense.trace_cancel"
       },
       "gates": {
         "side": "runner",
@@ -3583,11 +3718,11 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "defense.trace_cancel",
+      "signalId": "defense.trace_cancel_bad_publicity",
       "source": "effects",
       "match": {
         "kind": "prevention_replacement",
-        "target": "defense.trace_cancel"
+        "target": "defense.trace_cancel_bad_publicity"
       },
       "gates": {
         "side": "runner",
@@ -3699,6 +3834,15 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "economy.action",
+      "source": "effects",
+      "match": {
+        "kind": "action_economy",
+        "resource": "credits"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "economy.action_credit",
       "source": "effects",
       "match": {
@@ -3732,15 +3876,6 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "economy.action",
-      "source": "effects",
-      "match": {
-        "kind": "action_economy",
-        "resource": "credits"
-      },
-      "strategyAnchorFor": []
-    },
-    {
       "signalId": "economy.advanceable",
       "source": "effects",
       "match": {
@@ -3759,6 +3894,14 @@
       "strategyAnchorFor": [
         "corp.economy_rez_reserve"
       ]
+    },
+    {
+      "signalId": "economy.burst",
+      "source": "effects",
+      "match": {
+        "kind": "advance_burst"
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "economy.burst_credit",
@@ -3787,14 +3930,6 @@
       "gates": {
         "side": "runner",
         "cardType": "resource"
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "economy.burst",
-      "source": "effects",
-      "match": {
-        "kind": "advance_burst"
       },
       "strategyAnchorFor": []
     },
@@ -4018,6 +4153,21 @@
       ]
     },
     {
+      "signalId": "economy.corp_run_temporary_credit",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_run_temporary_credit"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "economy.corp_run_temporary_credit"
+      },
+      "strategyAnchorFor": [
+        "corp.economy_rez_reserve"
+      ]
+    },
+    {
       "signalId": "economy.corp_trace_credit_support",
       "source": "effects",
       "match": {
@@ -4031,6 +4181,34 @@
       "strategyAnchorFor": [
         "corp.tag_trace_punish"
       ]
+    },
+    {
+      "signalId": "economy.corp_trace_credit_support",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_trace_credit_support"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "economy.corp_trace_credit_support"
+      },
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "signalId": "economy.corp_unsuccessful_run_credit",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_unsuccessful_run_credit"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "economy.corp_unsuccessful_run_credit"
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "economy.cost_window_credit",
@@ -4159,6 +4337,27 @@
         "target": [
           "node"
         ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.recurring",
+      "source": "effects",
+      "match": {
+        "kind": "economy",
+        "target": "economy.recurring"
+      },
+      "gates": {
+        "side": "runner",
+        "cardType": "resource"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.recurring",
+      "source": "effects",
+      "match": {
+        "kind": "recurring_economy"
       },
       "strategyAnchorFor": []
     },
@@ -4339,27 +4538,6 @@
         "target": [
           "trash_cost"
         ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "economy.recurring",
-      "source": "effects",
-      "match": {
-        "kind": "economy",
-        "target": "economy.recurring"
-      },
-      "gates": {
-        "side": "runner",
-        "cardType": "resource"
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "economy.recurring",
-      "source": "effects",
-      "match": {
-        "kind": "recurring_economy"
       },
       "strategyAnchorFor": []
     },
@@ -4555,11 +4733,11 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "fort.all_rezzed_ice_trash_tag_risk",
+      "signalId": "fort.all_rezzed_ice_trash",
       "source": "effects",
       "match": {
-        "kind": "tag",
-        "target": "self_tag"
+        "kind": "ice_trash",
+        "target": "all_rezzed_ice_trash"
       },
       "gates": {
         "side": [
@@ -4572,11 +4750,11 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "fort.all_rezzed_ice_trash",
+      "signalId": "fort.all_rezzed_ice_trash_tag_risk",
       "source": "effects",
       "match": {
-        "kind": "ice_trash",
-        "target": "all_rezzed_ice_trash"
+        "kind": "tag",
+        "target": "self_tag"
       },
       "gates": {
         "side": [
@@ -4769,6 +4947,21 @@
       ]
     },
     {
+      "signalId": "ice.corp_hq_runpath_insert",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_hq_runpath_insert"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "ice.corp_hq_runpath_insert"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
       "signalId": "ice.corp_install_discount",
       "source": "effects",
       "match": {
@@ -4777,6 +4970,22 @@
       "gates": {
         "side": "corp",
         "cardType": "asset",
+        "target": "ice.corp_install_discount"
+      },
+      "strategyAnchorFor": [
+        "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "ice.corp_install_discount",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_install_discount"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
         "target": "ice.corp_install_discount"
       },
       "strategyAnchorFor": [
@@ -4811,6 +5020,19 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "ice.corp_reorder_fort",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_reorder_fort"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "ice.corp_reorder_fort"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "ice.corp_rez_discount",
       "source": "effects",
       "match": {
@@ -4819,6 +5041,22 @@
       "gates": {
         "side": "corp",
         "cardType": "asset",
+        "target": "ice.corp_rez_discount"
+      },
+      "strategyAnchorFor": [
+        "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "ice.corp_rez_discount",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_rez_discount"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
         "target": "ice.corp_rez_discount"
       },
       "strategyAnchorFor": [
@@ -4854,6 +5092,36 @@
       ]
     },
     {
+      "signalId": "ice.corp_strength_support",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_strength_support"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "ice.corp_strength_support"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "ice.corp_subroutine_repeat",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_subroutine_repeat"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "ice.corp_subroutine_repeat"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
       "signalId": "ice.corp_subroutine_support",
       "source": "effects",
       "match": {
@@ -4862,6 +5130,21 @@
       "gates": {
         "side": "corp",
         "cardType": "asset",
+        "target": "ice.corp_subroutine_support"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "ice.corp_subroutine_support",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_subroutine_support"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
         "target": "ice.corp_subroutine_support"
       },
       "strategyAnchorFor": [
@@ -4878,6 +5161,39 @@
         "side": "corp",
         "cardType": "operation",
         "target": "ice.corp_temporary_rez"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "ice.corp_temporary_rez",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_temporary_rez"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "ice.corp_temporary_rez"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "ice.derez",
+      "source": "effects",
+      "match": {
+        "kind": "rez",
+        "target": "derez"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "derez"
+        ]
       },
       "strategyAnchorFor": []
     },
@@ -4900,26 +5216,6 @@
         ],
         "target": [
           "derez_black_ice"
-        ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
-      "signalId": "ice.derez",
-      "source": "effects",
-      "match": {
-        "kind": "rez",
-        "target": "derez"
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "program"
-        ],
-        "target": [
-          "derez"
         ]
       },
       "strategyAnchorFor": []
@@ -5239,6 +5535,14 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "info.expose",
+      "source": "effects",
+      "match": {
+        "kind": "expose_info"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "info.expose_fort",
       "source": "effects",
       "match": {
@@ -5330,12 +5634,23 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "info.expose",
+      "signalId": "info.hq",
       "source": "effects",
       "match": {
-        "kind": "expose_info"
+        "kind": "hq_info",
+        "scope": "hq"
       },
-      "strategyAnchorFor": []
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "effectScope": [
+          "hq"
+        ]
+      },
+      "strategyAnchorFor": [
+        "runner.hq_pressure"
+      ]
     },
     {
       "signalId": "info.hq_agenda_reveal",
@@ -5362,25 +5677,6 @@
         ],
         "cardType": [
           "program"
-        ],
-        "effectScope": [
-          "hq"
-        ]
-      },
-      "strategyAnchorFor": [
-        "runner.hq_pressure"
-      ]
-    },
-    {
-      "signalId": "info.hq",
-      "source": "effects",
-      "match": {
-        "kind": "hq_info",
-        "scope": "hq"
-      },
-      "gates": {
-        "side": [
-          "runner"
         ],
         "effectScope": [
           "hq"
@@ -5558,6 +5854,21 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "remote.agenda_difficulty_discount",
+      "source": "effects",
+      "match": {
+        "target": "remote.agenda_difficulty_discount"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "remote.agenda_difficulty_discount"
+      },
+      "strategyAnchorFor": [
+        "corp.remote_scoring"
+      ]
+    },
+    {
       "signalId": "remote.agenda_difficulty_tax",
       "source": "effects",
       "match": {
@@ -5684,6 +5995,21 @@
       ]
     },
     {
+      "signalId": "remote.capacity_support",
+      "source": "effects",
+      "match": {
+        "target": "remote.capacity_support"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "remote.capacity_support"
+      },
+      "strategyAnchorFor": [
+        "corp.remote_scoring"
+      ]
+    },
+    {
       "signalId": "remote.full_fort_trash",
       "source": "effects",
       "match": {
@@ -5797,11 +6123,11 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "resource.hidden_one_shot",
+      "signalId": "resource.hidden",
       "source": "effects",
       "match": {
         "kind": "global_modifier",
-        "target": "resource.hidden_one_shot"
+        "target": "resource.hidden"
       },
       "gates": {
         "side": "runner",
@@ -5810,11 +6136,11 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "resource.hidden",
+      "signalId": "resource.hidden_one_shot",
       "source": "effects",
       "match": {
         "kind": "global_modifier",
-        "target": "resource.hidden"
+        "target": "resource.hidden_one_shot"
       },
       "gates": {
         "side": "runner",
@@ -6272,6 +6598,19 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "risk.random_discard_cost",
+      "source": "effects",
+      "match": {
+        "target": "risk.random_discard_cost"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "risk.random_discard_cost"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "risk.random_economy",
       "source": "effects",
       "match": {
@@ -6336,6 +6675,19 @@
       "gates": {
         "side": "corp",
         "target": "risk.reveal_hq_agendas"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "risk.rnd_trash_cost",
+      "source": "effects",
+      "match": {
+        "target": "risk.rnd_trash_cost"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "risk.rnd_trash_cost"
       },
       "strategyAnchorFor": []
     },
@@ -6408,6 +6760,19 @@
       "gates": {
         "side": "corp",
         "cardType": "asset",
+        "target": "risk.temporary_credit_drawback"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "risk.temporary_credit_drawback",
+      "source": "effects",
+      "match": {
+        "target": "risk.temporary_credit_drawback"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
         "target": "risk.temporary_credit_drawback"
       },
       "strategyAnchorFor": []
@@ -6740,6 +7105,22 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "run.corp_pay_or_end_run",
+      "source": "effects",
+      "match": {
+        "target": "run.corp_pay_or_end_run"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "run.corp_pay_or_end_run"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ]
+    },
+    {
       "signalId": "run.corp_redirect",
       "source": "effects",
       "match": {
@@ -6752,6 +7133,36 @@
       },
       "strategyAnchorFor": [
         "corp.remote_scoring"
+      ]
+    },
+    {
+      "signalId": "run.corp_server_lock",
+      "source": "effects",
+      "match": {
+        "target": "run.corp_server_lock"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "run.corp_server_lock"
+      },
+      "strategyAnchorFor": [
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "signalId": "run.corp_spend_cap",
+      "source": "effects",
+      "match": {
+        "target": "run.corp_spend_cap"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "run.corp_spend_cap"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
       ]
     },
     {
@@ -6768,6 +7179,34 @@
       "strategyAnchorFor": [
         "corp.ice_tax_glacier"
       ]
+    },
+    {
+      "signalId": "run.corp_stealth_credit_lockout",
+      "source": "effects",
+      "match": {
+        "target": "run.corp_stealth_credit_lockout"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "run.corp_stealth_credit_lockout"
+      },
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "signalId": "run.corp_worm_lockout",
+      "source": "effects",
+      "match": {
+        "target": "run.corp_worm_lockout"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "run.corp_worm_lockout"
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "run.damage_prevention_during_run",
@@ -7100,11 +7539,11 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "run.run_credit_pool_brain_damage_risk",
+      "signalId": "run.run_credit_pool",
       "source": "effects",
       "match": {
-        "kind": "damage",
-        "target": "self_brain_damage"
+        "kind": "finite_economy_pool",
+        "target": "run_credit_pool"
       },
       "gates": {
         "side": [
@@ -7117,11 +7556,11 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "run.run_credit_pool",
+      "signalId": "run.run_credit_pool_brain_damage_risk",
       "source": "effects",
       "match": {
-        "kind": "finite_economy_pool",
-        "target": "run_credit_pool"
+        "kind": "damage",
+        "target": "self_brain_damage"
       },
       "gates": {
         "side": [
@@ -7294,8 +7733,7 @@
         "cardType": [
           "agenda",
           "asset",
-          "operation",
-          "upgrade"
+          "operation"
         ],
         "effectScope": [
           "corp",
@@ -7341,6 +7779,19 @@
       "strategyAnchorFor": [
         "corp.fast_advance"
       ]
+    },
+    {
+      "signalId": "score.agenda_difficulty_discount",
+      "source": "effects",
+      "match": {
+        "target": "score.agenda_difficulty_discount"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
+        "target": "score.agenda_difficulty_discount"
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "score.agenda_point_gain",
@@ -7737,6 +8188,19 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "score.hand_size",
+      "source": "effects",
+      "match": {
+        "target": "score.hand_size"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "agenda",
+        "target": "score.hand_size"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "score.hand_size_pressure",
       "source": "effects",
       "match": {
@@ -7750,19 +8214,6 @@
       "strategyAnchorFor": [
         "corp.damage_kill"
       ]
-    },
-    {
-      "signalId": "score.hand_size",
-      "source": "effects",
-      "match": {
-        "target": "score.hand_size"
-      },
-      "gates": {
-        "side": "corp",
-        "cardType": "agenda",
-        "target": "score.hand_size"
-      },
-      "strategyAnchorFor": []
     },
     {
       "signalId": "score.high_agenda_value",
@@ -8304,27 +8755,6 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "setup.hand_size_penalty",
-      "source": "effects",
-      "match": {
-        "kind": "hand_size_modifier",
-        "scope": "runner",
-        "amount": -1
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "program"
-        ],
-        "effectScope": [
-          "runner"
-        ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
       "signalId": "setup.hand_size",
       "source": "effects",
       "match": {
@@ -8371,6 +8801,27 @@
       "gates": {
         "side": [
           "runner"
+        ],
+        "effectScope": [
+          "runner"
+        ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.hand_size_penalty",
+      "source": "effects",
+      "match": {
+        "kind": "hand_size_modifier",
+        "scope": "runner",
+        "amount": -1
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
         ],
         "effectScope": [
           "runner"
@@ -8633,26 +9084,6 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "setup.program_install_credit",
-      "source": "effects",
-      "match": {
-        "kind": "recurring_economy",
-        "target": "program_install"
-      },
-      "gates": {
-        "side": [
-          "runner"
-        ],
-        "cardType": [
-          "program"
-        ],
-        "target": [
-          "program_install"
-        ]
-      },
-      "strategyAnchorFor": []
-    },
-    {
       "signalId": "setup.program_install",
       "source": "effects",
       "match": {
@@ -8699,6 +9130,26 @@
       "gates": {
         "side": "runner",
         "cardType": "resource"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.program_install_credit",
+      "source": "effects",
+      "match": {
+        "kind": "recurring_economy",
+        "target": "program_install"
+      },
+      "gates": {
+        "side": [
+          "runner"
+        ],
+        "cardType": [
+          "program"
+        ],
+        "target": [
+          "program_install"
+        ]
       },
       "strategyAnchorFor": []
     },
@@ -8909,19 +9360,6 @@
       "strategyAnchorFor": []
     },
     {
-      "signalId": "setup.search_reveals_to_corp",
-      "source": "effects",
-      "match": {
-        "kind": "search",
-        "target": "setup.search_reveals_to_corp"
-      },
-      "gates": {
-        "side": "runner",
-        "cardType": "resource"
-      },
-      "strategyAnchorFor": []
-    },
-    {
       "signalId": "setup.search",
       "source": "effects",
       "match": {
@@ -8983,6 +9421,19 @@
           "stack_top",
           "heap"
         ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.search_reveals_to_corp",
+      "source": "effects",
+      "match": {
+        "kind": "search",
+        "target": "setup.search_reveals_to_corp"
+      },
+      "gates": {
+        "side": "runner",
+        "cardType": "resource"
       },
       "strategyAnchorFor": []
     },
@@ -9177,28 +9628,6 @@
     },
     {
       "signalId": "tag.payoff",
-      "source": "remoteRole",
-      "match": {
-        "kind": "tag_punish_asset"
-      },
-      "gates": {
-        "side": [
-          "corp"
-        ],
-        "cardType": [
-          "asset",
-          "upgrade"
-        ],
-        "remoteRole": [
-          "tag_punish_asset"
-        ]
-      },
-      "strategyAnchorFor": [
-        "corp.tag_trace_punish"
-      ]
-    },
-    {
-      "signalId": "tag.payoff",
       "source": "effects",
       "match": {
         "kind": "tag_punish_payoff"
@@ -9215,6 +9644,28 @@
         ],
         "effectScope": [
           "runner"
+        ]
+      },
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "signalId": "tag.payoff",
+      "source": "remoteRole",
+      "match": {
+        "kind": "tag_punish_asset"
+      },
+      "gates": {
+        "side": [
+          "corp"
+        ],
+        "cardType": [
+          "asset",
+          "upgrade"
+        ],
+        "remoteRole": [
+          "tag_punish_asset"
         ]
       },
       "strategyAnchorFor": [
@@ -9369,6 +9820,21 @@
       "gates": {
         "side": "corp",
         "cardType": "asset",
+        "target": "trace.corp_credit_support"
+      },
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "signalId": "trace.corp_credit_support",
+      "source": "effects",
+      "match": {
+        "target": "trace.corp_credit_support"
+      },
+      "gates": {
+        "side": "corp",
+        "cardType": "upgrade",
         "target": "trace.corp_credit_support"
       },
       "strategyAnchorFor": [

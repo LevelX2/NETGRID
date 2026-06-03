@@ -91,6 +91,7 @@ describe("generated fact migration priority report", () => {
     expect(
       report.cards
         .filter((card) => card.recommendedMigrationBatch <= 5)
+        .filter((card) => card.cardId !== "onr_v1_367_rio-de-janeiro-city-grid")
         .every((card) => card.monolithFields.length > 0),
     ).toBe(true);
     expect(

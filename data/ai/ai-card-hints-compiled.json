@@ -26235,7 +26235,50 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v199-smokes.json#corp_v199_aardvark_worm_intercept"
-      ]
+      ],
+      "tacticSignals": [
+        "run.corp_worm_lockout"
+      ],
+      "effects": [
+        {
+          "kind": "run_tax",
+          "timing": "during_run",
+          "scope": "fort",
+          "target": "run.corp_worm_lockout"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_during_run"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "program",
+          "purpose": "restrict_or_trash_worm_breaker",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
+      "manualNotes": [
+        "AI030 rationale: Worm-specific breaker hate is meaningful but too narrow for a deck-line anchor.",
+        "AI030 support-only/evidence signal: run.corp_worm_lockout"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_350_antiquated-interface-routines",
@@ -26271,10 +26314,10 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "high",
+        "strategyCovered": true,
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -26284,6 +26327,7 @@
           "repeatable": true,
           "resource": "strength",
           "scope": "fort",
+          "target": "ice.corp_strength_support",
           "timing": "persistent"
         },
         {
@@ -26300,11 +26344,30 @@
         "threatLevel": "medium"
       },
       "lineSupport": [
-        "corp.remote_scoring",
         "corp.ice_tax_glacier"
       ],
       "strategicRole": [
         "tax_tool"
+      ],
+      "tacticSignals": [
+        "ice.corp_strength_support"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "server",
+          "purpose": "buff_all_ice_on_fort",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
+      "manualNotes": [
+        "AI030 rationale: All ICE on the fort gain strength; glacier-tax support is true, generic remote-scoring is too broad."
       ]
     },
     {
@@ -26336,7 +26399,46 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v199-smokes.json#corp_v199_bizarre_encryption_delay"
-      ]
+      ],
+      "tacticSignals": [
+        "access.corp_agenda_score_delay"
+      ],
+      "lineSupport": [
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "scoring_tool"
+      ],
+      "effects": [
+        {
+          "kind": "access_replacement",
+          "timing": "on_access",
+          "scope": "accessed_card",
+          "target": "access.corp_agenda_score_delay"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_accessed_card"
+        }
+      ],
+      "remoteRole": {
+        "kind": "agenda_steal_tax",
+        "threatLevel": "medium",
+        "serverScope": "fort"
+      },
+      "manualNotes": [
+        "AI030 rationale: Accessed agenda scoring is delayed by a turn; this materially protects scoring remotes without becoming fast advance."
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_352_chester-mix",
@@ -26370,12 +26472,33 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
       },
+      "tacticSignals": [
+        "ice.corp_install_discount"
+      ],
+      "lineSupport": [
+        "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "support_tool",
+        "tax_tool"
+      ],
       "effects": [
+        {
+          "amount": 2,
+          "kind": "install_discount",
+          "resource": "credits",
+          "scope": "fort",
+          "target": "ice.corp_install_discount",
+          "timing": "persistent"
+        },
         {
           "amount": 2,
           "kind": "install_discount",
@@ -26389,11 +26512,28 @@
           "kind": "requires_rezzed_card"
         }
       ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "installed_ice",
+          "purpose": "discount_ice_install_on_fort",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
       "remoteRole": {
         "kind": "remote_capacity",
         "serverScope": "remote",
         "threatLevel": "medium"
-      }
+      },
+      "manualNotes": [
+        "AI030 rationale: The fort ICE install discount supports ICE-heavy glacier and rez/install reserve lines."
+      ]
     },
     {
       "cardId": "onr_v1_353_chimera",
@@ -26426,11 +26566,56 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v199-smokes.json#runner_v199_chimera_daemon_choice"
       ],
+      "tacticSignals": [
+        "access.corp_daemon_trash",
+        "access.punish"
+      ],
+      "lineSupport": [
+        "corp.ambush_bluff"
+      ],
+      "strategicRole": [
+        "punish_payoff"
+      ],
+      "effects": [
+        {
+          "kind": "program_trash",
+          "timing": "on_access",
+          "scope": "runner",
+          "target": "access.corp_daemon_trash"
+        }
+      ],
       "conditions": [
         {
           "kind": "requires_accessed_card"
         }
-      ]
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "program",
+          "purpose": "trash_daemon",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
+      "manualNotes": [
+        "AI030 rationale: Daemon trash on access is a real bluff/punish payload and uses only visible installed Runner cards.",
+        "AI030 support-only/evidence signal: access.punish"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_354_crybaby",
@@ -26470,6 +26655,24 @@
       "strategicRole": [
         "punish_payoff"
       ],
+      "tacticSignals": [
+        "access.punish",
+        "remote.ambush",
+        "tax.runner_persistent"
+      ],
+      "manualNotes": [
+        "AI030 rationale: Crying counters are persistent access punishment; no extra tag/damage anchor is implied.",
+        "AI030 support-only/evidence signal: remote.ambush"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      },
       "effects": [
         {
           "amount": 2,
@@ -26551,6 +26754,19 @@
         "needsHumanReview": false,
         "strategyCovered": false
       },
+      "lineSupport": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
+      "tacticSignals": [
+        "tax.remote"
+      ],
+      "manualNotes": [
+        "AI030 rationale: Per-subroutine break tax protects a fort and was already covered by overlay."
+      ],
       "effects": [
         {
           "amount": 1,
@@ -26579,13 +26795,6 @@
         "serverScope": "fort",
         "threatLevel": "medium"
       },
-      "lineSupport": [
-        "corp.ice_tax_glacier",
-        "corp.remote_scoring"
-      ],
-      "strategicRole": [
-        "tax_tool"
-      ],
       "strategicNotes": [
         "Remote protection is context-dependent strategic overlay; the run tax stays mechanical."
       ]
@@ -26623,13 +26832,26 @@
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_access_ambush"
       ],
       "lineSupport": [
-        "corp.tag_trace_punish",
-        "corp.damage_kill"
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
       ],
       "strategicRole": [
         "punish_payoff"
       ],
+      "tacticSignals": [
+        "damage.corp_tagged_meat_payoff",
+        "damage.payoff",
+        "tag.payoff"
+      ],
       "effects": [
+        {
+          "amount": 3,
+          "kind": "tag_punish_payoff",
+          "resource": "meat_damage",
+          "scope": "runner",
+          "target": "damage.corp_tagged_meat_payoff",
+          "timing": "on_access"
+        },
         {
           "amount": 3,
           "kind": "damage",
@@ -26653,12 +26875,26 @@
       ],
       "conditions": [
         {
-          "kind": "requires_accessed_card"
+          "kind": "requires_runner_tagged"
         },
         {
-          "kind": "requires_runner_tagged"
+          "kind": "requires_accessed_card"
         }
-      ]
+      ],
+      "manualNotes": [
+        "AI030 rationale: The meat damage only fires if Runner is tagged; both tag-payoff and damage-kill support are explicit.",
+        "AI030 support-only/evidence signal: damage.payoff",
+        "AI030 support-only/evidence signal: tag.payoff"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_357_dieter-esslin",
@@ -26693,6 +26929,14 @@
         {
           "amount": 1,
           "kind": "damage",
+          "resource": "net_damage",
+          "scope": "runner",
+          "target": "access.corp_net_damage_ambush",
+          "timing": "on_access"
+        },
+        {
+          "amount": 1,
+          "kind": "damage",
           "resource": "damage",
           "scope": "runner",
           "timing": "action"
@@ -26709,7 +26953,31 @@
         {
           "kind": "requires_accessed_card"
         }
-      ]
+      ],
+      "tacticSignals": [
+        "access.corp_net_damage_ambush",
+        "access.punish",
+        "damage.payoff"
+      ],
+      "lineSupport": [
+        "corp.ambush_bluff"
+      ],
+      "strategicRole": [
+        "punish_payoff"
+      ],
+      "manualNotes": [
+        "AI030 rationale: Access net damage is an ambush/bluff payload, not enough by itself for damage-kill.",
+        "AI030 support-only/evidence signal: damage.payoff"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_358_dr-dreff",
@@ -26739,7 +27007,30 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_run_tax_stealth"
       ],
+      "tacticSignals": [
+        "ice.corp_hq_runpath_insert"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "scoring_tool",
+        "tax_tool"
+      ],
       "effects": [
+        {
+          "kind": "future_encounter_effect",
+          "scope": "run_path",
+          "target": "ice.corp_hq_runpath_insert",
+          "timing": "successful_run"
+        },
+        {
+          "kind": "zone_shuffle",
+          "scope": "hq",
+          "target": "ice.corp_hq_runpath_insert",
+          "timing": "during_run"
+        },
         {
           "kind": "future_encounter_effect",
           "scope": "run_path",
@@ -26754,16 +27045,43 @@
       ],
       "conditions": [
         {
-          "kind": "requires_during_run"
+          "kind": "requires_successful_run"
         },
         {
-          "kind": "requires_successful_run"
+          "kind": "requires_during_run"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "after_successful_run",
+          "targetType": "card",
+          "purpose": "choose_hq_ice_for_temporary_encounter",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
         }
       ],
       "remoteRole": {
         "kind": "run_tax",
         "serverScope": "remote",
         "threatLevel": "medium"
+      },
+      "hiddenInfoPolicy": "corp_side_only_until_revealed_by_effect",
+      "manualNotes": [
+        "AI030 rationale: Corp chooses HQ ICE for a temporary encounter; target metadata must not expose hidden HQ contents."
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -26807,6 +27125,18 @@
       "effects": [
         {
           "kind": "future_encounter_effect",
+          "scope": "run_path",
+          "target": "ice.corp_hq_runpath_insert",
+          "timing": "successful_run"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "fort",
+          "target": "remote.scoring_protection",
+          "timing": "successful_run"
+        },
+        {
+          "kind": "future_encounter_effect",
           "scope": "fort",
           "timing": "successful_run"
         },
@@ -26819,18 +27149,18 @@
       "conditions": [
         {
           "kind": "requires_successful_run"
+        },
+        {
+          "kind": "requires_during_run"
         }
       ],
-      "costProfile": {
-        "reserveRisk": "medium",
-        "opportunityCost": "medium"
-      },
       "remoteRole": {
         "kind": "scoring_protection",
         "serverScope": "fort",
         "threatLevel": "high"
       },
       "lineSupport": [
+        "corp.ice_tax_glacier",
         "corp.remote_scoring"
       ],
       "strategicRole": [
@@ -26839,12 +27169,34 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "high",
+        "strategyCovered": true,
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "tacticSignals": [
+        "ice.corp_hq_runpath_insert",
+        "remote.scoring_protection"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "after_successful_run",
+          "targetType": "card",
+          "purpose": "install_hq_ice_innermost_on_fort",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_installed",
+      "manualNotes": [
+        "AI030 rationale: Innermost HQ ICE install after a successful run protects the scoring fort while keeping HQ choices private."
+      ]
     },
     {
       "cardId": "onr_v1_360_jerusalem-city-grid",
@@ -26876,10 +27228,12 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
       },
       "lineSupport": [
         "corp.economy_rez_reserve",
@@ -26889,7 +27243,27 @@
         "support_tool",
         "tax_tool"
       ],
+      "tacticSignals": [
+        "ice.corp_rez_discount",
+        "ice.corp_strength_support"
+      ],
       "effects": [
+        {
+          "amount": 2,
+          "kind": "rez_discount",
+          "resource": "credits",
+          "scope": "fort",
+          "target": "ice.corp_rez_discount",
+          "timing": "persistent"
+        },
+        {
+          "amount": 1,
+          "kind": "remote_protection",
+          "resource": "strength",
+          "scope": "fort",
+          "target": "ice.corp_strength_support",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "remote_protection",
@@ -26917,11 +27291,28 @@
           "kind": "requires_rezzed_card"
         }
       ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "installed_ice",
+          "purpose": "discount_and_buff_wall_ice_on_fort",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
       "remoteRole": {
         "kind": "ice_modifier",
         "serverScope": "fort",
         "threatLevel": "medium"
-      }
+      },
+      "manualNotes": [
+        "AI030 rationale: Wall rez discount plus strength support belongs to reserve/glacier, not a generic remote-scoring tag."
+      ]
     },
     {
       "cardId": "onr_v1_361_namatoki-plaza",
@@ -26961,6 +27352,18 @@
         {
           "kind": "remote_protection",
           "scope": "remote",
+          "target": "remote.capacity_support",
+          "timing": "persistent"
+        },
+        {
+          "kind": "score_acceleration",
+          "scope": "remote",
+          "target": "remote.capacity_support",
+          "timing": "persistent"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "remote",
           "timing": "persistent"
         },
         {
@@ -26988,12 +27391,19 @@
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "medium",
-        "needsHumanReview": true,
-        "reviewedDate": "2026-05-25",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
-      }
+      },
+      "tacticSignals": [
+        "remote.capacity_support",
+        "remote.scoring_protection"
+      ],
+      "manualNotes": [
+        "AI030 rationale: Extra agenda/node capacity is a remote-scoring support fact, not hidden targeting or fast advance."
+      ]
     },
     {
       "cardId": "onr_v1_362_new-galveston-city-grid",
@@ -27028,7 +27438,18 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_city_grid_counter"
       ],
+      "tacticSignals": [
+        "access.corp_installed_trash_tax"
+      ],
       "effects": [
+        {
+          "amount": 2,
+          "kind": "run_tax",
+          "resource": "credits",
+          "scope": "fort",
+          "target": "access.corp_installed_trash_tax",
+          "timing": "persistent"
+        },
         {
           "amount": 2,
           "kind": "remote_tax",
@@ -27037,16 +27458,29 @@
           "timing": "persistent"
         }
       ],
-      "conditions": [
-        {
-          "kind": "requires_rezzed_card"
-        }
-      ],
       "remoteRole": {
         "kind": "run_tax",
         "serverScope": "fort",
         "threatLevel": "medium"
-      }
+      },
+      "manualNotes": [
+        "AI030 rationale: Trash-cost protection for nodes/upgrades is relevant evidence but not a standalone strategy anchor.",
+        "AI030 support-only/evidence signal: access.corp_installed_trash_tax"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      },
+      "conditions": [
+        {
+          "kind": "requires_rezzed_card"
+        }
+      ]
     },
     {
       "cardId": "onr_v1_363_olivia-salazar",
@@ -27081,21 +27515,33 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
       "effects": [
         {
           "kind": "rez_discount",
           "scope": "ice",
+          "target": "ice.corp_rez_discount",
           "timing": "during_run"
         },
         {
           "kind": "remote_protection",
           "scope": "fort",
+          "target": "remote.scoring_protection",
+          "timing": "during_run"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "fort",
+          "timing": "during_run"
+        },
+        {
+          "kind": "rez_discount",
+          "scope": "ice",
           "timing": "during_run"
         }
       ],
@@ -27110,10 +27556,34 @@
         "threatLevel": "medium"
       },
       "lineSupport": [
+        "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier",
         "corp.remote_scoring"
       ],
       "strategicRole": [
         "support_tool"
+      ],
+      "tacticSignals": [
+        "ice.corp_rez_discount",
+        "ice.corp_temporary_rez",
+        "remote.scoring_protection"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "installed_ice",
+          "purpose": "temporarily_rez_ice_on_fort",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
+      "manualNotes": [
+        "AI030 rationale: Half-cost temporary rez during runs is both reserve/glacier support and remote protection."
       ]
     },
     {
@@ -27144,7 +27614,22 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_trace_tag_condition"
       ],
+      "tacticSignals": [
+        "ice.corp_hq_runpath_insert"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
+        {
+          "kind": "zone_shuffle",
+          "scope": "hq",
+          "target": "ice.corp_hq_runpath_insert",
+          "timing": "during_run"
+        },
         {
           "kind": "zone_shuffle",
           "resource": "cards",
@@ -27157,10 +27642,37 @@
           "kind": "requires_during_run"
         }
       ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "card",
+          "purpose": "swap_unrezzed_fort_ice_with_hq_ice",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
       "remoteRole": {
         "kind": "run_tax",
         "serverScope": "remote",
         "threatLevel": "medium"
+      },
+      "hiddenInfoPolicy": "corp_side_only_until_installed",
+      "manualNotes": [
+        "AI030 rationale: Hidden HQ ICE swap is an ICE-tax tool; no tag/economy role is retained from legacy roles."
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -27197,7 +27709,52 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_trace_pool"
-      ]
+      ],
+      "tacticSignals": [
+        "economy.corp_trace_credit_support",
+        "trace.corp_credit_support"
+      ],
+      "lineSupport": [
+        "corp.tag_trace_punish"
+      ],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "effects": [
+        {
+          "kind": "trace_credit",
+          "timing": "during_run",
+          "scope": "fort",
+          "target": "economy.corp_trace_credit_support",
+          "resource": "credits",
+          "amount": 3
+        },
+        {
+          "kind": "trace_credit",
+          "timing": "during_run",
+          "scope": "fort",
+          "target": "trace.corp_credit_support",
+          "resource": "credits",
+          "amount": 3
+        }
+      ],
+      "remoteRole": {
+        "kind": "run_tax",
+        "threatLevel": "medium",
+        "serverScope": "fort"
+      },
+      "manualNotes": [
+        "AI030 rationale: Server-bound trace credits are true tag/trace support, refreshed without exposing hidden state."
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_366_red-herrings",
@@ -27238,6 +27795,18 @@
         "needsHumanReview": false,
         "strategyCovered": false
       },
+      "lineSupport": [
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
+      "tacticSignals": [
+        "remote.agenda_steal_tax"
+      ],
+      "manualNotes": [
+        "AI030 rationale: Agenda steal tax is a direct remote-scoring support signal and already had overlay coverage."
+      ],
       "effects": [
         {
           "amount": 5,
@@ -27270,12 +27839,6 @@
         "serverScope": "remote",
         "threatLevel": "high"
       },
-      "lineSupport": [
-        "corp.remote_scoring"
-      ],
-      "strategicRole": [
-        "tax_tool"
-      ],
       "strategicNotes": [
         "Remote protection is context-dependent strategic overlay; agenda steal tax and access condition stay mechanical."
       ]
@@ -27313,12 +27876,24 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
+        "strategyCovered": true,
         "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
+      "lineSupport": [
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "scoring_tool"
+      ],
+      "tacticSignals": [
+        "remote.scoring_protection"
+      ],
+      "manualNotes": [
+        "AI030 rationale: Die-roll end-the-run pressure protects the fort; no new random/planner behavior is implied."
+      ],
       "effects": [
         {
           "kind": "future_encounter_effect",
@@ -27340,13 +27915,7 @@
         "kind": "scoring_protection",
         "serverScope": "fort",
         "threatLevel": "medium"
-      },
-      "lineSupport": [
-        "corp.remote_scoring"
-      ],
-      "strategicRole": [
-        "scoring_tool"
-      ]
+      }
     },
     {
       "cardId": "onr_v1_368_roving-submarine",
@@ -27378,12 +27947,29 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
       },
+      "tacticSignals": [
+        "run.corp_server_lock"
+      ],
+      "lineSupport": [
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "scoring_tool"
+      ],
       "effects": [
+        {
+          "kind": "remote_tax",
+          "scope": "remote",
+          "target": "run.corp_server_lock",
+          "timing": "during_run"
+        },
         {
           "kind": "remote_tax",
           "scope": "remote",
@@ -27399,7 +27985,10 @@
         "kind": "run_tax",
         "serverScope": "remote",
         "threatLevel": "medium"
-      }
+      },
+      "manualNotes": [
+        "AI030 rationale: Run eligibility restriction on a subsidiary fort is a direct remote-scoring protection fact."
+      ]
     },
     {
       "cardId": "onr_v1_369_singapore-city-grid",
@@ -27429,7 +28018,22 @@
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_runtime_definition"
       ],
+      "tacticSignals": [
+        "ice.corp_hq_runpath_insert"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
       "effects": [
+        {
+          "kind": "zone_shuffle",
+          "scope": "hq",
+          "target": "ice.corp_hq_runpath_insert",
+          "timing": "during_run"
+        },
         {
           "kind": "zone_shuffle",
           "resource": "cards",
@@ -27442,10 +28046,37 @@
           "kind": "requires_during_run"
         }
       ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "card",
+          "purpose": "swap_unrezzed_fort_ice_with_hq_ice",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
       "remoteRole": {
         "kind": "run_tax",
         "serverScope": "remote",
         "threatLevel": "medium"
+      },
+      "hiddenInfoPolicy": "corp_side_only_until_installed",
+      "manualNotes": [
+        "AI030 rationale: Region version of the hidden HQ ICE swap keeps the same side-safe target semantics."
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
       }
     },
     {
@@ -27484,23 +28115,29 @@
       "quality": {
         "benchmarkCovered": true,
         "hintReviewed": true,
-        "strategyCovered": false,
-        "confidence": "high",
+        "strategyCovered": true,
+        "confidence": "medium",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
       "effects": [
         {
           "kind": "future_encounter_effect",
           "scope": "run_path",
+          "target": "ice.corp_subroutine_support",
           "timing": "encounter"
         },
         {
           "kind": "remote_protection",
-          "repeatable": true,
           "scope": "fort",
+          "target": "remote.scoring_protection",
           "timing": "persistent"
+        },
+        {
+          "kind": "future_encounter_effect",
+          "scope": "run_path",
+          "timing": "encounter"
         },
         {
           "kind": "remote_protection",
@@ -27515,11 +28152,32 @@
         "threatLevel": "high"
       },
       "lineSupport": [
-        "corp.remote_scoring",
-        "corp.ice_tax_glacier"
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
       ],
       "strategicRole": [
         "engine_anchor"
+      ],
+      "tacticSignals": [
+        "ice.corp_subroutine_support",
+        "remote.scoring_protection"
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "during_ice_encounter",
+          "targetType": "installed_ice",
+          "purpose": "add_etr_subroutine_to_fort_ice",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
+      "manualNotes": [
+        "AI030 rationale: Additional ETR subroutines materially support both glacier tax and scoring fort protection."
       ]
     },
     {
@@ -27553,7 +28211,38 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v161-v170-smokes.json#corp_region_unsuccessful_run_credit"
-      ]
+      ],
+      "tacticSignals": [
+        "economy.corp_unsuccessful_run_credit"
+      ],
+      "effects": [
+        {
+          "kind": "economy",
+          "timing": "during_run",
+          "scope": "corp",
+          "target": "economy.corp_unsuccessful_run_credit",
+          "resource": "credits",
+          "amount": 2
+        }
+      ],
+      "remoteRole": {
+        "kind": "run_tax",
+        "threatLevel": "medium",
+        "serverScope": "fort"
+      },
+      "manualNotes": [
+        "AI030 rationale: Credits after unsuccessful runs are useful support evidence but too conditional for an economy-reserve anchor.",
+        "AI030 support-only/evidence signal: economy.corp_unsuccessful_run_credit"
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": false,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_372_turbeau-delacroix",
@@ -27590,6 +28279,22 @@
       "strategicRole": [
         "engine_anchor"
       ],
+      "tacticSignals": [
+        "tag.source",
+        "trace.source"
+      ],
+      "manualNotes": [
+        "AI030 rationale: Trace 10 into a tag is a clear tag/trace source."
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      },
       "effects": [
         {
           "amount": 1,
@@ -27641,7 +28346,47 @@
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
         "data/scenarios/ai-deck-legal-v1918-smokes.json#corp_v1918_upgrade_run_tax_stealth"
-      ]
+      ],
+      "tacticSignals": [
+        "run.corp_stealth_credit_lockout"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
+      "effects": [
+        {
+          "kind": "run_tax",
+          "timing": "during_run",
+          "scope": "fort",
+          "target": "run.corp_stealth_credit_lockout",
+          "resource": "credits"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_during_run"
+        }
+      ],
+      "remoteRole": {
+        "kind": "run_tax",
+        "threatLevel": "medium",
+        "serverScope": "fort"
+      },
+      "manualNotes": [
+        "AI030 rationale: Stealth-credit denial taxes breaker plans on the protected fort without exposing private data."
+      ],
+      "quality": {
+        "benchmarkCovered": false,
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      }
     },
     {
       "cardId": "onr_v1_374_washington-d-c-city-grid",
@@ -27675,12 +28420,38 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
       },
+      "tacticSignals": [
+        "remote.agenda_difficulty_discount",
+        "score.agenda_difficulty_discount"
+      ],
+      "lineSupport": [
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "scoring_tool"
+      ],
       "effects": [
+        {
+          "amount": 1,
+          "kind": "score_acceleration",
+          "resource": "advancement_counters",
+          "scope": "remote",
+          "target": "score.agenda_difficulty_discount",
+          "timing": "persistent"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "remote",
+          "target": "remote.agenda_difficulty_discount",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "global_modifier",
@@ -27695,6 +28466,19 @@
           "scope": "corp",
           "timing": "persistent"
         }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_remote_server"
+        }
+      ],
+      "remoteRole": {
+        "kind": "scoring_protection",
+        "threatLevel": "medium",
+        "serverScope": "remote"
+      },
+      "manualNotes": [
+        "AI030 rationale: Washington reduces agenda difficulty in its fort; this is remote-scoring support, not generic fast advance."
       ]
     },
     {
@@ -30983,11 +31767,48 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "ice.corp_reorder_fort"
+      ],
+      "effects": [
+        {
+          "kind": "zone_shuffle",
+          "timing": "during_run",
+          "scope": "fort",
+          "target": "ice.corp_reorder_fort"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_during_run"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "server",
+          "purpose": "rearrange_fort_ice",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_revealed_by_run_path",
+      "manualNotes": [
+        "AI030 rationale: ICE rearrangement is a real target/choice profile but support-only without a stable strategy anchor.",
+        "AI030 support-only/evidence signal: ice.corp_reorder_fort"
+      ]
     },
     {
       "cardId": "onr_proteus_061_ldl-traffic-analyzers",
@@ -31076,11 +31897,67 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "advance.corp_counter_placement",
+        "advance.remote_score_window_support"
+      ],
+      "lineSupport": [
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "scoring_tool"
+      ],
+      "effects": [
+        {
+          "kind": "advance",
+          "timing": "during_run",
+          "scope": "installed_card",
+          "target": "advance.remote_score_window_support",
+          "amount": 2,
+          "resource": "advancement_counters"
+        },
+        {
+          "kind": "advance",
+          "timing": "during_run",
+          "scope": "installed_card",
+          "target": "advance.corp_counter_placement",
+          "amount": 2,
+          "resource": "advancement_counters"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_remote_server"
+        },
+        {
+          "kind": "requires_during_run"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "card",
+          "purpose": "place_advancement_counters_in_fort",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
+      "manualNotes": [
+        "AI030 rationale: Counters placed as the Runner passes the last ICE create a remote score-window support fact.",
+        "AI030 support-only/evidence signal: advance.corp_counter_placement"
+      ]
     },
     {
       "cardId": "onr_proteus_063_lisa-blight",
@@ -31106,11 +31983,61 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "ice.corp_subroutine_repeat",
+        "risk.random_discard_cost"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
+      "effects": [
+        {
+          "kind": "future_encounter_effect",
+          "timing": "during_run",
+          "scope": "run_path",
+          "target": "ice.corp_subroutine_repeat"
+        },
+        {
+          "kind": "zone_shuffle",
+          "timing": "during_run",
+          "scope": "hq",
+          "target": "risk.random_discard_cost"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_during_run"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "installed_ice",
+          "purpose": "repeat_subroutine_on_fort_ice",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
+      "hiddenInfoPolicy": "random_discard_without_ai_hidden_choice",
+      "manualNotes": [
+        "AI030 rationale: Subroutine repeat supports ICE tax; random discard is cost/risk evidence only.",
+        "AI030 support-only/evidence signal: risk.random_discard_cost"
+      ]
     },
     {
       "cardId": "onr_proteus_064_marcel-desoleil",
@@ -31136,11 +32063,61 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "ice.corp_subroutine_repeat",
+        "risk.rnd_trash_cost"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
+      "effects": [
+        {
+          "kind": "future_encounter_effect",
+          "timing": "during_run",
+          "scope": "run_path",
+          "target": "ice.corp_subroutine_repeat"
+        },
+        {
+          "kind": "trash_credit",
+          "timing": "during_run",
+          "scope": "rnd",
+          "target": "risk.rnd_trash_cost"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_during_run"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "installed_ice",
+          "purpose": "repeat_subroutine_on_fort_ice",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
+      "hiddenInfoPolicy": "top_rnd_trash_without_ai_hidden_choice",
+      "manualNotes": [
+        "AI030 rationale: Subroutine repeat supports ICE tax; top-R&D trash cost is support-only risk metadata.",
+        "AI030 support-only/evidence signal: risk.rnd_trash_cost"
+      ]
     },
     {
       "cardId": "onr_proteus_065_networked-center",
@@ -31166,12 +32143,39 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
       },
+      "tacticSignals": [
+        "remote.agenda_difficulty_discount",
+        "score.agenda_difficulty_discount",
+        "score.gray_ops_difficulty_discount"
+      ],
+      "lineSupport": [
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "scoring_tool"
+      ],
       "effects": [
+        {
+          "amount": 1,
+          "kind": "score_acceleration",
+          "resource": "advancement_counters",
+          "scope": "remote",
+          "target": "score.agenda_difficulty_discount",
+          "timing": "persistent"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "remote",
+          "target": "remote.agenda_difficulty_discount",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "global_modifier",
@@ -31186,6 +32190,20 @@
           "scope": "corp",
           "timing": "persistent"
         }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_remote_server"
+        }
+      ],
+      "remoteRole": {
+        "kind": "scoring_protection",
+        "threatLevel": "medium",
+        "serverScope": "remote"
+      },
+      "manualNotes": [
+        "AI030 rationale: Gray Ops difficulty discount is a remote-scoring support signal, not a fast-advance derivation.",
+        "AI030 support-only/evidence signal: score.gray_ops_difficulty_discount"
       ]
     },
     {
@@ -31212,11 +32230,44 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "run.corp_spend_cap"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
+      "effects": [
+        {
+          "kind": "run_tax",
+          "timing": "during_run",
+          "scope": "fort",
+          "target": "run.corp_spend_cap",
+          "resource": "credits"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_during_run"
+        }
+      ],
+      "remoteRole": {
+        "kind": "run_tax",
+        "threatLevel": "high",
+        "serverScope": "fort"
+      },
+      "manualNotes": [
+        "AI030 rationale: Declared spend cap constrains the whole run and materially supports taxing ICE plans."
+      ]
     },
     {
       "cardId": "onr_proteus_067_panic-button",
@@ -31242,12 +32293,24 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
       },
+      "tacticSignals": [
+        "draw.corp_draw"
+      ],
       "effects": [
+        {
+          "amount": 1,
+          "kind": "draw",
+          "scope": "corp",
+          "target": "draw.corp_draw",
+          "timing": "during_run"
+        },
         {
           "amount": 1,
           "kind": "draw",
@@ -31255,6 +32318,15 @@
           "scope": "corp",
           "timing": "action"
         }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_during_run"
+        }
+      ],
+      "manualNotes": [
+        "AI030 rationale: HQ-only paid draw during runs is utility evidence only and should not anchor a strategy.",
+        "AI030 support-only/evidence signal: draw.corp_draw"
       ]
     },
     {
@@ -31344,11 +32416,59 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "hq.corp_installed_card_bounce",
+        "install.corp_uninstall_to_hq"
+      ],
+      "effects": [
+        {
+          "kind": "zone_shuffle",
+          "timing": "during_run",
+          "scope": "hq",
+          "target": "hq.corp_installed_card_bounce"
+        },
+        {
+          "kind": "install",
+          "timing": "during_run",
+          "scope": "remote",
+          "target": "install.corp_uninstall_to_hq"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_remote_server"
+        },
+        {
+          "kind": "requires_during_run"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "card",
+          "purpose": "replace_installed_fort_cards_from_hq",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
+      "hiddenInfoPolicy": "corp_side_only_until_installed",
+      "manualNotes": [
+        "AI030 rationale: Fort refresh from HQ is a side-safe target profile but not a stable deck-line anchor.",
+        "AI030 support-only/evidence signal: hq.corp_installed_card_bounce",
+        "AI030 support-only/evidence signal: install.corp_uninstall_to_hq"
+      ]
     },
     {
       "cardId": "onr_proteus_070_rasmin-bridger",
@@ -31374,11 +32494,46 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "run.corp_pay_or_end_run"
+      ],
+      "lineSupport": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "tax_tool"
+      ],
+      "effects": [
+        {
+          "kind": "run_tax",
+          "timing": "during_run",
+          "scope": "fort",
+          "target": "run.corp_pay_or_end_run",
+          "resource": "credits",
+          "amount": 1
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_during_run"
+        }
+      ],
+      "remoteRole": {
+        "kind": "scoring_protection",
+        "threatLevel": "high",
+        "serverScope": "fort"
+      },
+      "manualNotes": [
+        "AI030 rationale: Pay-or-end-run after each ICE directly protects scoring remotes and increases run tax."
+      ]
     },
     {
       "cardId": "onr_proteus_071_raymond-ellison",
@@ -31404,11 +32559,72 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [
+        "advance.corp_counter_bank",
+        "economy.corp_run_temporary_credit",
+        "risk.temporary_credit_drawback"
+      ],
+      "lineSupport": [
+        "corp.economy_rez_reserve"
+      ],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "effects": [
+        {
+          "kind": "economy",
+          "timing": "during_run",
+          "scope": "corp",
+          "target": "economy.corp_run_temporary_credit",
+          "resource": "credits"
+        },
+        {
+          "kind": "advance",
+          "timing": "during_run",
+          "scope": "installed_card",
+          "target": "advance.corp_counter_bank"
+        },
+        {
+          "kind": "trash_credit",
+          "timing": "during_run",
+          "scope": "corp",
+          "target": "risk.temporary_credit_drawback"
+        }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_remote_server"
+        },
+        {
+          "kind": "requires_during_run"
+        }
+      ],
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "on_use",
+          "targetType": "card",
+          "purpose": "remove_advancement_counters_for_temporary_credits",
+          "hiddenInfoPolicy": "public_or_controller_known_only",
+          "preferences": [],
+          "avoid": [
+            "hidden_info_dependent_choice"
+          ]
+        }
+      ],
+      "manualNotes": [
+        "AI030 rationale: Temporary run credits from advancement counters are reserve support; unspent credits returning are drawback evidence.",
+        "AI030 support-only/evidence signal: advance.corp_counter_bank",
+        "AI030 support-only/evidence signal: risk.temporary_credit_drawback"
+      ]
     },
     {
       "cardId": "onr_proteus_072_research-bunker",
@@ -31434,12 +32650,39 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
       },
+      "tacticSignals": [
+        "remote.agenda_difficulty_discount",
+        "score.agenda_difficulty_discount",
+        "score.research_difficulty_discount"
+      ],
+      "lineSupport": [
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "scoring_tool"
+      ],
       "effects": [
+        {
+          "amount": 1,
+          "kind": "score_acceleration",
+          "resource": "advancement_counters",
+          "scope": "remote",
+          "target": "score.agenda_difficulty_discount",
+          "timing": "persistent"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "remote",
+          "target": "remote.agenda_difficulty_discount",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "global_modifier",
@@ -31454,6 +32697,20 @@
           "scope": "corp",
           "timing": "persistent"
         }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_remote_server"
+        }
+      ],
+      "remoteRole": {
+        "kind": "scoring_protection",
+        "threatLevel": "medium",
+        "serverScope": "remote"
+      },
+      "manualNotes": [
+        "AI030 rationale: Research agenda difficulty discount is remote-scoring support, not a fast-advance derivation.",
+        "AI030 support-only/evidence signal: score.research_difficulty_discount"
       ]
     },
     {
@@ -31480,15 +32737,37 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
       },
+      "tacticSignals": [
+        "access.corp_central_access_reduction"
+      ],
+      "lineSupport": [
+        "corp.central_stabilize"
+      ],
+      "strategicRole": [
+        "support_tool"
+      ],
+      "effects": [
+        {
+          "kind": "multiaccess",
+          "timing": "on_access",
+          "scope": "accessed_card",
+          "target": "access.corp_central_access_reduction"
+        }
+      ],
       "conditions": [
         {
           "kind": "requires_accessed_card"
         }
+      ],
+      "manualNotes": [
+        "AI030 rationale: HQ/R&D access reduction is a central-stabilize support signal and has no target choice."
       ]
     },
     {
@@ -31715,12 +32994,39 @@
       ],
       "quality": {
         "benchmarkCovered": false,
-        "hintReviewed": false,
-        "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
+        "hintReviewed": true,
+        "strategyCovered": true,
+        "confidence": "medium",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
       },
+      "tacticSignals": [
+        "remote.agenda_difficulty_discount",
+        "score.agenda_difficulty_discount",
+        "score.black_ops_difficulty_discount"
+      ],
+      "lineSupport": [
+        "corp.remote_scoring"
+      ],
+      "strategicRole": [
+        "scoring_tool"
+      ],
       "effects": [
+        {
+          "amount": 1,
+          "kind": "score_acceleration",
+          "resource": "advancement_counters",
+          "scope": "remote",
+          "target": "score.agenda_difficulty_discount",
+          "timing": "persistent"
+        },
+        {
+          "kind": "remote_protection",
+          "scope": "remote",
+          "target": "remote.agenda_difficulty_discount",
+          "timing": "persistent"
+        },
         {
           "amount": 1,
           "kind": "global_modifier",
@@ -31735,6 +33041,20 @@
           "scope": "corp",
           "timing": "persistent"
         }
+      ],
+      "conditions": [
+        {
+          "kind": "requires_remote_server"
+        }
+      ],
+      "remoteRole": {
+        "kind": "scoring_protection",
+        "threatLevel": "medium",
+        "serverScope": "remote"
+      },
+      "manualNotes": [
+        "AI030 rationale: Black Ops difficulty discount is remote-scoring support, not a fast-advance derivation.",
+        "AI030 support-only/evidence signal: score.black_ops_difficulty_discount"
       ]
     },
     {
@@ -38025,11 +39345,18 @@
       ],
       "quality": {
         "benchmarkCovered": true,
-        "hintReviewed": false,
+        "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "low",
-        "needsHumanReview": true
-      }
+        "confidence": "high",
+        "needsHumanReview": false,
+        "reviewedDate": "2026-06-03",
+        "reviewedBy": "codex"
+      },
+      "tacticSignals": [],
+      "no_signal_reason": "Vanilla test upgrade has no active ability or tactical semantics.",
+      "manualNotes": [
+        "AI030 rationale: Kept intentionally signal-empty for the test fixture."
+      ]
     },
     {
       "cardId": "v08_adaptive_killer",

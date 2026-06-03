@@ -12,20 +12,20 @@
     "totals": {
       "roles": 235,
       "planRoles": 102,
-      "lineSupport": 15,
-      "allValues": 352
+      "lineSupport": 16,
+      "allValues": 353
     },
     "categoryCounts": {
       "alias_to_strategy_goal": 75,
       "deferred_requires_human_review": 1,
       "descriptor_gap": 8,
-      "exact_strategy_goal": 15,
+      "exact_strategy_goal": 16,
       "function_signal_only": 208,
       "legacy_role_only": 44,
       "remove_or_deprecate": 1
     },
     "mappedCounts": {
-      "exactStrategyGoal": 15,
+      "exactStrategyGoal": 16,
       "aliasToStrategyGoal": 75,
       "functionSignalOnly": 208,
       "legacyRoleOnly": 44,
@@ -36,20 +36,20 @@
   "totals": {
     "roles": 235,
     "planRoles": 102,
-    "lineSupport": 15,
-    "allValues": 352
+    "lineSupport": 16,
+    "allValues": 353
   },
   "categoryCounts": {
     "alias_to_strategy_goal": 75,
     "deferred_requires_human_review": 1,
     "descriptor_gap": 8,
-    "exact_strategy_goal": 15,
+    "exact_strategy_goal": 16,
     "function_signal_only": 208,
     "legacy_role_only": 44,
     "remove_or_deprecate": 1
   },
   "mappedCounts": {
-    "exactStrategyGoal": 15,
+    "exactStrategyGoal": 16,
     "aliasToStrategyGoal": 75,
     "functionSignalOnly": 208,
     "legacyRoleOnly": 44,
@@ -5076,7 +5076,7 @@
   "lineSupport": [
     {
       "value": "corp.ice_tax_glacier",
-      "count": 52,
+      "count": 63,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5097,7 +5097,7 @@
     },
     {
       "value": "corp.tag_trace_punish",
-      "count": 35,
+      "count": 36,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5139,7 +5139,7 @@
     },
     {
       "value": "corp.remote_scoring",
-      "count": 15,
+      "count": 23,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5153,14 +5153,14 @@
         "onr_v1_215_security-net-optimization",
         "onr_v1_216_security-purge",
         "onr_v1_312_chicago-branch",
-        "onr_v1_350_antiquated-interface-routines",
+        "onr_v1_351_bizarre-encryption-scheme",
         "onr_v1_355_crystal-palace-station-grid",
-        "onr_v1_359_jenny-jett"
+        "onr_v1_358_dr-dreff"
       ]
     },
     {
       "value": "corp.ambush_bluff",
-      "count": 14,
+      "count": 16,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5175,8 +5175,8 @@
         "onr_v1_345_trap",
         "onr_v1_346_vacant-soulkiller",
         "onr_v1_348_virus-test-site",
-        "onr_v1_354_crybaby",
-        "onr_proteus_004_fetal-ai"
+        "onr_v1_353_chimera",
+        "onr_v1_354_crybaby"
       ]
     },
     {
@@ -5306,6 +5306,26 @@
       ]
     },
     {
+      "value": "corp.economy_rez_reserve",
+      "count": 7,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "corp.economy_rez_reserve"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_324_fortress-architects",
+        "onr_v1_352_chester-mix",
+        "onr_v1_360_jerusalem-city-grid",
+        "onr_v1_363_olivia-salazar",
+        "onr_proteus_058_executive-boot-camp",
+        "onr_proteus_059_government-contract",
+        "onr_proteus_071_raymond-ellison"
+      ]
+    },
+    {
       "value": "runner.survival_defense",
       "count": 6,
       "mappingCategory": "exact_strategy_goal",
@@ -5325,23 +5345,6 @@
       ]
     },
     {
-      "value": "corp.economy_rez_reserve",
-      "count": 4,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "corp.economy_rez_reserve"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_324_fortress-architects",
-        "onr_v1_360_jerusalem-city-grid",
-        "onr_proteus_058_executive-boot-camp",
-        "onr_proteus_059_government-contract"
-      ]
-    },
-    {
       "value": "runner.remote_contest",
       "count": 4,
       "mappingCategory": "exact_strategy_goal",
@@ -5356,6 +5359,20 @@
         "onr_v1_173_restrictive-net-zoning",
         "onr_proteus_137_death-from-above",
         "onr_proteus_146_precision-bribery"
+      ]
+    },
+    {
+      "value": "corp.central_stabilize",
+      "count": 1,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "corp.central_stabilize"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_proteus_073_simon-francisco"
       ]
     },
     {

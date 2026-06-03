@@ -9,8 +9,8 @@
   "pilotCardCount": 193,
   "implementationFoundCount": 193,
   "cardsWithDerivedFacts": 193,
-  "cardsWithManualOntologyOverlap": 151,
-  "cardsNeedingManualOverlay": 135,
+  "cardsWithManualOntologyOverlap": 157,
+  "cardsNeedingManualOverlay": 132,
   "effectKindCounts": {
     "access_punish": 5,
     "access_replacement": 3,
@@ -128,7 +128,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 996,
+  "warningCount": 978,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -4736,13 +4736,18 @@
       "cardId": "onr_v1_346_vacant-soulkiller"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_350_antiquated-interface-routines"
+    },
+    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_350_antiquated-interface-routines"
     },
     {
       "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence low.",
+      "message": "Generated confidence high differs from manual confidence medium.",
       "cardId": "onr_v1_352_chester-mix"
     },
     {
@@ -4751,18 +4756,18 @@
       "cardId": "onr_v1_352_chester-mix"
     },
     {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated condition:requires_rezzed_card has no manual ontology match.",
-      "cardId": "onr_v1_352_chester-mix"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:install_discount has no manual ontology match.",
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Manual ontology contains fields not currently derivable.",
       "cardId": "onr_v1_352_chester-mix"
     },
     {
       "kind": "generated_fact_without_manual_match",
       "message": "Generated remoteRole:remote_capacity has no manual ontology match.",
+      "cardId": "onr_v1_352_chester-mix"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual remoteRole:ice_modifier has no generated basic fact match.",
       "cardId": "onr_v1_352_chester-mix"
     },
     {
@@ -4774,6 +4779,11 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_352_chester-mix"
+    },
+    {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_354_crybaby"
     },
     {
       "kind": "descriptor_or_overlay_gap",
@@ -4836,54 +4846,24 @@
       "cardId": "onr_v1_355_crystal-palace-station-grid"
     },
     {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence medium differs from manual confidence high.",
-      "cardId": "onr_v1_358_dr-dreff"
-    },
-    {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Generated facts contain fields not currently mirrored manually.",
-      "cardId": "onr_v1_358_dr-dreff"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated condition:requires_during_run has no manual ontology match.",
-      "cardId": "onr_v1_358_dr-dreff"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated condition:requires_successful_run has no manual ontology match.",
-      "cardId": "onr_v1_358_dr-dreff"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:future_encounter_effect has no manual ontology match.",
-      "cardId": "onr_v1_358_dr-dreff"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:zone_shuffle has no manual ontology match.",
-      "cardId": "onr_v1_358_dr-dreff"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated remoteRole:run_tax has no manual ontology match.",
-      "cardId": "onr_v1_358_dr-dreff"
-    },
-    {
-      "kind": "manual_overlay_expectation_mismatch",
-      "cardId": "onr_v1_358_dr-dreff",
-      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
-    },
-    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_358_dr-dreff"
     },
     {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence medium differs from manual confidence high.",
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Manual ontology contains fields not currently derivable.",
       "cardId": "onr_v1_359_jenny-jett"
+    },
+    {
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual condition:requires_during_run has no generated basic fact match.",
+      "cardId": "onr_v1_359_jenny-jett"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_359_jenny-jett",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
     },
     {
       "kind": "text_pattern_derivation",
@@ -4892,38 +4872,8 @@
     },
     {
       "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence low.",
+      "message": "Generated confidence high differs from manual confidence medium.",
       "cardId": "onr_v1_360_jerusalem-city-grid"
-    },
-    {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Generated facts contain fields not currently mirrored manually.",
-      "cardId": "onr_v1_360_jerusalem-city-grid"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated condition:requires_rezzed_card has no manual ontology match.",
-      "cardId": "onr_v1_360_jerusalem-city-grid"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:remote_protection has no manual ontology match.",
-      "cardId": "onr_v1_360_jerusalem-city-grid"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:rez_discount has no manual ontology match.",
-      "cardId": "onr_v1_360_jerusalem-city-grid"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated remoteRole:ice_modifier has no manual ontology match.",
-      "cardId": "onr_v1_360_jerusalem-city-grid"
-    },
-    {
-      "kind": "manual_overlay_expectation_mismatch",
-      "cardId": "onr_v1_360_jerusalem-city-grid",
-      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
     },
     {
       "kind": "text_pattern_derivation",
@@ -4941,8 +4891,18 @@
       "cardId": "onr_v1_361_namatoki-plaza"
     },
     {
+      "kind": "confidence_mismatch",
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_362_new-galveston-city-grid"
+    },
+    {
       "kind": "descriptor_or_overlay_gap",
       "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_362_new-galveston-city-grid"
+    },
+    {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Manual ontology contains fields not currently derivable.",
       "cardId": "onr_v1_362_new-galveston-city-grid"
     },
     {
@@ -4956,8 +4916,8 @@
       "cardId": "onr_v1_362_new-galveston-city-grid"
     },
     {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated remoteRole:run_tax has no manual ontology match.",
+      "kind": "manual_ontology_without_generated_match",
+      "message": "Manual effect:run_tax has no generated basic fact match.",
       "cardId": "onr_v1_362_new-galveston-city-grid"
     },
     {
@@ -4981,36 +4941,6 @@
       "cardId": "onr_v1_363_olivia-salazar"
     },
     {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence medium differs from manual confidence high.",
-      "cardId": "onr_v1_364_omni-kismet-ph-d"
-    },
-    {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Generated facts contain fields not currently mirrored manually.",
-      "cardId": "onr_v1_364_omni-kismet-ph-d"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated condition:requires_during_run has no manual ontology match.",
-      "cardId": "onr_v1_364_omni-kismet-ph-d"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:zone_shuffle has no manual ontology match.",
-      "cardId": "onr_v1_364_omni-kismet-ph-d"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated remoteRole:run_tax has no manual ontology match.",
-      "cardId": "onr_v1_364_omni-kismet-ph-d"
-    },
-    {
-      "kind": "manual_overlay_expectation_mismatch",
-      "cardId": "onr_v1_364_omni-kismet-ph-d",
-      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
-    },
-    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_364_omni-kismet-ph-d"
@@ -5031,79 +4961,59 @@
       "cardId": "onr_v1_366_red-herrings"
     },
     {
+      "kind": "descriptor_or_overlay_gap",
+      "message": "Generated facts contain fields not currently mirrored manually.",
+      "cardId": "onr_v1_367_rio-de-janeiro-city-grid"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated condition:requires_during_run has no manual ontology match.",
+      "cardId": "onr_v1_367_rio-de-janeiro-city-grid"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:future_encounter_effect has no manual ontology match.",
+      "cardId": "onr_v1_367_rio-de-janeiro-city-grid"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated effect:remote_protection has no manual ontology match.",
+      "cardId": "onr_v1_367_rio-de-janeiro-city-grid"
+    },
+    {
+      "kind": "generated_fact_without_manual_match",
+      "message": "Generated remoteRole:scoring_protection has no manual ontology match.",
+      "cardId": "onr_v1_367_rio-de-janeiro-city-grid"
+    },
+    {
+      "kind": "manual_overlay_expectation_mismatch",
+      "cardId": "onr_v1_367_rio-de-janeiro-city-grid",
+      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
+    },
+    {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_367_rio-de-janeiro-city-grid"
     },
     {
       "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence low.",
+      "message": "Generated confidence high differs from manual confidence medium.",
       "cardId": "onr_v1_368_roving-submarine"
-    },
-    {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Generated facts contain fields not currently mirrored manually.",
-      "cardId": "onr_v1_368_roving-submarine"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated condition:requires_remote_server has no manual ontology match.",
-      "cardId": "onr_v1_368_roving-submarine"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:remote_tax has no manual ontology match.",
-      "cardId": "onr_v1_368_roving-submarine"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated remoteRole:run_tax has no manual ontology match.",
-      "cardId": "onr_v1_368_roving-submarine"
-    },
-    {
-      "kind": "manual_overlay_expectation_mismatch",
-      "cardId": "onr_v1_368_roving-submarine",
-      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
     },
     {
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_368_roving-submarine"
+    },
+    {
+      "kind": "text_pattern_derivation",
+      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
+      "cardId": "onr_v1_369_singapore-city-grid"
     },
     {
       "kind": "confidence_mismatch",
-      "message": "Generated confidence medium differs from manual confidence high.",
-      "cardId": "onr_v1_369_singapore-city-grid"
-    },
-    {
-      "kind": "descriptor_or_overlay_gap",
-      "message": "Generated facts contain fields not currently mirrored manually.",
-      "cardId": "onr_v1_369_singapore-city-grid"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated condition:requires_during_run has no manual ontology match.",
-      "cardId": "onr_v1_369_singapore-city-grid"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:zone_shuffle has no manual ontology match.",
-      "cardId": "onr_v1_369_singapore-city-grid"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated remoteRole:run_tax has no manual ontology match.",
-      "cardId": "onr_v1_369_singapore-city-grid"
-    },
-    {
-      "kind": "manual_overlay_expectation_mismatch",
-      "cardId": "onr_v1_369_singapore-city-grid",
-      "message": "Pilot metadata expectedManualOverlayNeeded differs from generated comparison."
-    },
-    {
-      "kind": "text_pattern_derivation",
-      "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
-      "cardId": "onr_v1_369_singapore-city-grid"
+      "message": "Generated confidence high differs from manual confidence medium.",
+      "cardId": "onr_v1_370_tesseract-fort-construction"
     },
     {
       "kind": "text_pattern_derivation",
@@ -27759,14 +27669,13 @@
           "serverScope": "fort"
         },
         "lineSupport": [
-          "corp.ice_tax_glacier",
-          "corp.remote_scoring"
+          "corp.ice_tax_glacier"
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -27782,6 +27691,10 @@
       "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -27846,55 +27759,78 @@
           "protect_hq",
           "protect_rnd"
         ],
-        "effects": [],
-        "conditions": [],
-        "lineSupport": [],
+        "effects": [
+          {
+            "kind": "install_discount",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 2
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_rezzed_card"
+          }
+        ],
+        "remoteRole": {
+          "kind": "ice_modifier",
+          "threatLevel": "medium",
+          "serverScope": "fort"
+        },
+        "lineSupport": [
+          "corp.economy_rez_reserve",
+          "corp.ice_tax_glacier"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "condition:requires_rezzed_card",
-          "effect:install_discount",
+          "effect:install_discount"
+        ],
+        "generatedOnly": [
           "remoteRole:remote_capacity"
         ],
-        "manualOnly": []
+        "manualOnly": [
+          "remoteRole:ice_modifier"
+        ]
       },
       "missingManualOverlay": [
-        "condition:requires_rezzed_card",
-        "effect:install_discount",
+        "remoteRole:ice_modifier",
         "remoteRole:remote_capacity"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_rezzed_card has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:install_discount has no manual ontology match."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated remoteRole:remote_capacity has no manual ontology match."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual remoteRole:ice_modifier has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -27994,7 +27930,14 @@
         "conditions": [],
         "lineSupport": [
           "corp.ambush_bluff"
-        ]
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
         "matches": [],
@@ -28021,6 +27964,10 @@
       ],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
@@ -28238,61 +28185,58 @@
         "planRoles": [
           "remote_upgrade_tax"
         ],
-        "effects": [],
-        "conditions": [],
-        "lineSupport": []
+        "effects": [
+          {
+            "kind": "future_encounter_effect",
+            "timing": "successful_run",
+            "scope": "run_path"
+          },
+          {
+            "kind": "zone_shuffle",
+            "timing": "during_run",
+            "scope": "hq"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          },
+          {
+            "kind": "requires_successful_run"
+          }
+        ],
+        "remoteRole": {
+          "kind": "run_tax",
+          "threatLevel": "medium",
+          "serverScope": "fort"
+        },
+        "lineSupport": [
+          "corp.ice_tax_glacier",
+          "corp.remote_scoring"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "condition:requires_during_run",
           "condition:requires_successful_run",
           "effect:future_encounter_effect",
           "effect:zone_shuffle",
           "remoteRole:run_tax"
         ],
+        "generatedOnly": [],
         "manualOnly": []
       },
-      "missingManualOverlay": [
-        "condition:requires_during_run",
-        "condition:requires_successful_run",
-        "effect:future_encounter_effect",
-        "effect:zone_shuffle",
-        "remoteRole:run_tax"
-      ],
-      "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "medium",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence medium differs from manual confidence high."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_during_run has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_successful_run has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:future_encounter_effect has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:zone_shuffle has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated remoteRole:run_tax has no manual ontology match."
-        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -28369,7 +28313,7 @@
           {
             "kind": "future_encounter_effect",
             "timing": "successful_run",
-            "scope": "fort"
+            "scope": "run_path"
           },
           {
             "kind": "remote_protection",
@@ -28379,26 +28323,26 @@
         ],
         "conditions": [
           {
+            "kind": "requires_during_run"
+          },
+          {
             "kind": "requires_successful_run"
           }
         ],
-        "costProfile": {
-          "reserveRisk": "medium",
-          "opportunityCost": "medium"
-        },
         "remoteRole": {
           "kind": "scoring_protection",
           "threatLevel": "high",
           "serverScope": "fort"
         },
         "lineSupport": [
+          "corp.ice_tax_glacier",
           "corp.remote_scoring"
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -28410,15 +28354,25 @@
           "remoteRole:scoring_protection"
         ],
         "generatedOnly": [],
-        "manualOnly": []
+        "manualOnly": [
+          "condition:requires_during_run"
+        ]
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_during_run"
+      ],
+      "descriptorGaps": [
+        "Manual ontology contains fields not currently derivable."
+      ],
       "confidence": "medium",
       "warnings": [
         {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence medium differs from manual confidence high."
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
+        },
+        {
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual condition:requires_during_run has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -28500,64 +28454,61 @@
         "planRoles": [
           "remote_upgrade_modifier"
         ],
-        "effects": [],
-        "conditions": [],
+        "effects": [
+          {
+            "kind": "remote_protection",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "strength",
+            "amount": 1
+          },
+          {
+            "kind": "rez_discount",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 2
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_rezzed_card"
+          }
+        ],
+        "remoteRole": {
+          "kind": "ice_modifier",
+          "threatLevel": "medium",
+          "serverScope": "fort"
+        },
         "lineSupport": [
           "corp.economy_rez_reserve",
           "corp.ice_tax_glacier"
         ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "condition:requires_rezzed_card",
           "effect:remote_protection",
           "effect:rez_discount",
           "remoteRole:ice_modifier"
         ],
+        "generatedOnly": [],
         "manualOnly": []
       },
-      "missingManualOverlay": [
-        "condition:requires_rezzed_card",
-        "effect:remote_protection",
-        "effect:rez_discount",
-        "remoteRole:ice_modifier"
-      ],
-      "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_rezzed_card has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:remote_protection has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:rez_discount has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated remoteRole:ice_modifier has no manual ontology match."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -28654,10 +28605,10 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": false,
           "confidence": "medium",
-          "needsHumanReview": true
+          "needsHumanReview": false
         }
       },
       "overlap": {
@@ -28742,32 +28693,64 @@
           "protect_remote",
           "remote_upgrade_tax"
         ],
-        "effects": [],
+        "effects": [
+          {
+            "kind": "run_tax",
+            "timing": "persistent",
+            "scope": "fort",
+            "resource": "credits",
+            "amount": 2
+          }
+        ],
         "conditions": [],
-        "lineSupport": []
+        "remoteRole": {
+          "kind": "run_tax",
+          "threatLevel": "medium",
+          "serverScope": "fort"
+        },
+        "lineSupport": [],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": false,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
-          "condition:requires_rezzed_card",
-          "effect:remote_tax",
+        "matches": [
           "remoteRole:run_tax"
         ],
-        "manualOnly": []
+        "generatedOnly": [
+          "condition:requires_rezzed_card",
+          "effect:remote_tax"
+        ],
+        "manualOnly": [
+          "effect:run_tax"
+        ]
       },
       "missingManualOverlay": [
         "condition:requires_rezzed_card",
         "effect:remote_tax",
-        "remoteRole:run_tax"
+        "effect:run_tax"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
+        "Generated facts contain fields not currently mirrored manually.",
+        "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
+        {
           "kind": "descriptor_or_overlay_gap",
           "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Manual ontology contains fields not currently derivable."
         },
         {
           "kind": "generated_fact_without_manual_match",
@@ -28778,8 +28761,8 @@
           "message": "Generated effect:remote_tax has no manual ontology match."
         },
         {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated remoteRole:run_tax has no manual ontology match."
+          "kind": "manual_ontology_without_generated_match",
+          "message": "Manual effect:run_tax has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -28870,11 +28853,13 @@
           "serverScope": "fort"
         },
         "lineSupport": [
+          "corp.economy_rez_reserve",
+          "corp.ice_tax_glacier",
           "corp.remote_scoring"
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "medium",
           "needsHumanReview": false
@@ -28959,49 +28944,47 @@
         "planRoles": [
           "remote_upgrade_tax"
         ],
-        "effects": [],
-        "conditions": [],
-        "lineSupport": []
+        "effects": [
+          {
+            "kind": "zone_shuffle",
+            "timing": "during_run",
+            "scope": "hq"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "remoteRole": {
+          "kind": "run_tax",
+          "threatLevel": "medium",
+          "serverScope": "fort"
+        },
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "condition:requires_during_run",
           "effect:zone_shuffle",
           "remoteRole:run_tax"
         ],
+        "generatedOnly": [],
         "manualOnly": []
       },
-      "missingManualOverlay": [
-        "condition:requires_during_run",
-        "effect:zone_shuffle",
-        "remoteRole:run_tax"
-      ],
-      "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "medium",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence medium differs from manual confidence high."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_during_run has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:zone_shuffle has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated remoteRole:run_tax has no manual ontology match."
-        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -29198,53 +29181,60 @@
           "corp_after_pass_ice_random_end_run",
           "corp_rez_root_upgrade"
         ],
-        "effects": [
-          {
-            "kind": "future_encounter_effect",
-            "timing": "during_run",
-            "scope": "fort"
-          },
-          {
-            "kind": "remote_protection",
-            "timing": "persistent",
-            "scope": "fort"
-          }
-        ],
-        "conditions": [
-          {
-            "kind": "requires_during_run"
-          }
-        ],
-        "remoteRole": {
-          "kind": "scoring_protection",
-          "threatLevel": "medium",
-          "serverScope": "fort"
-        },
+        "effects": [],
+        "conditions": [],
         "lineSupport": [
           "corp.remote_scoring"
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
           "confidence": "medium",
           "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [
+        "matches": [],
+        "generatedOnly": [
           "condition:requires_during_run",
           "effect:future_encounter_effect",
           "effect:remote_protection",
           "remoteRole:scoring_protection"
         ],
-        "generatedOnly": [],
         "manualOnly": []
       },
-      "missingManualOverlay": [],
-      "descriptorGaps": [],
+      "missingManualOverlay": [
+        "condition:requires_during_run",
+        "effect:future_encounter_effect",
+        "effect:remote_protection",
+        "remoteRole:scoring_protection"
+      ],
+      "descriptorGaps": [
+        "Generated facts contain fields not currently mirrored manually."
+      ],
       "confidence": "medium",
       "warnings": [
+        {
+          "kind": "descriptor_or_overlay_gap",
+          "message": "Generated facts contain fields not currently mirrored manually."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated condition:requires_during_run has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:future_encounter_effect has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated effect:remote_protection has no manual ontology match."
+        },
+        {
+          "kind": "generated_fact_without_manual_match",
+          "message": "Generated remoteRole:scoring_protection has no manual ontology match."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -29303,55 +29293,50 @@
         "planRoles": [
           "remote_upgrade_agenda_support"
         ],
-        "effects": [],
-        "conditions": [],
-        "lineSupport": [],
+        "effects": [
+          {
+            "kind": "remote_tax",
+            "timing": "during_run",
+            "scope": "remote"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_remote_server"
+          }
+        ],
+        "remoteRole": {
+          "kind": "run_tax",
+          "threatLevel": "medium",
+          "serverScope": "remote"
+        },
+        "lineSupport": [
+          "corp.remote_scoring"
+        ],
         "quality": {
-          "hintReviewed": false,
-          "strategyCovered": false,
+          "hintReviewed": true,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "low",
-          "needsHumanReview": true
+          "confidence": "medium",
+          "needsHumanReview": false
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "condition:requires_remote_server",
           "effect:remote_tax",
           "remoteRole:run_tax"
         ],
+        "generatedOnly": [],
         "manualOnly": []
       },
-      "missingManualOverlay": [
-        "condition:requires_remote_server",
-        "effect:remote_tax",
-        "remoteRole:run_tax"
-      ],
-      "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
         {
           "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence low."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_remote_server has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:remote_tax has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated remoteRole:run_tax has no manual ontology match."
+          "message": "Generated confidence high differs from manual confidence medium."
         },
         {
           "kind": "text_pattern_derivation",
@@ -29414,49 +29399,47 @@
         "planRoles": [
           "remote_upgrade_support"
         ],
-        "effects": [],
-        "conditions": [],
-        "lineSupport": []
+        "effects": [
+          {
+            "kind": "zone_shuffle",
+            "timing": "during_run",
+            "scope": "hq"
+          }
+        ],
+        "conditions": [
+          {
+            "kind": "requires_during_run"
+          }
+        ],
+        "remoteRole": {
+          "kind": "run_tax",
+          "threatLevel": "medium",
+          "serverScope": "fort"
+        },
+        "lineSupport": [
+          "corp.ice_tax_glacier"
+        ],
+        "quality": {
+          "hintReviewed": true,
+          "strategyCovered": true,
+          "benchmarkCovered": false,
+          "confidence": "medium",
+          "needsHumanReview": false
+        }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "condition:requires_during_run",
           "effect:zone_shuffle",
           "remoteRole:run_tax"
         ],
+        "generatedOnly": [],
         "manualOnly": []
       },
-      "missingManualOverlay": [
-        "condition:requires_during_run",
-        "effect:zone_shuffle",
-        "remoteRole:run_tax"
-      ],
-      "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually."
-      ],
+      "missingManualOverlay": [],
+      "descriptorGaps": [],
       "confidence": "medium",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence medium differs from manual confidence high."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated condition:requires_during_run has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:zone_shuffle has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated remoteRole:run_tax has no manual ontology match."
-        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."
@@ -29545,9 +29528,9 @@
         ],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": false,
+          "strategyCovered": true,
           "benchmarkCovered": true,
-          "confidence": "high",
+          "confidence": "medium",
           "needsHumanReview": false
         }
       },
@@ -29564,6 +29547,10 @@
       "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
+        {
+          "kind": "confidence_mismatch",
+          "message": "Generated confidence high differs from manual confidence medium."
+        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."

@@ -73,12 +73,12 @@ describe("generated fact Batch-4 Corp remote closeout", () => {
   it("keeps included cards ready read-only with no conflicts or gaps", () => {
     const report = readReport();
     expect(report.confirmedGeneratedFactCount).toBe(27);
-    expect(report.previewAddedFactCount).toBe(0);
+    expect(report.previewAddedFactCount).toBe(4);
     expect(report.hardErrorCount).toBe(0);
     expect(report.realSemanticConflictCount).toBe(0);
-    expect(report.normalizedDifferenceCount).toBe(5);
+    expect(report.normalizedDifferenceCount).toBe(12);
     expect(report.remainingDifferenceCount).toBe(0);
-    expect(report.descriptorFollowupCount).toBe(4);
+    expect(report.descriptorFollowupCount).toBe(6);
     expect(report.readiness).toBe("ready_read_only_split_subbatches");
     expect(report.includedCards.every((card) => card.activeHintFound)).toBe(
       true,

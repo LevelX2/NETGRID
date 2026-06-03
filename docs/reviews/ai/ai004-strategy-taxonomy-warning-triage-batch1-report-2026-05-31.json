@@ -5,7 +5,7 @@
   "generatedAt": "2026-05-31",
   "status": "pass_with_warnings",
   "hardErrorCount": 0,
-  "warningCount": 161,
+  "warningCount": 184,
   "source": {
     "activeHintsPath": "data/ai/ai-card-hints-active.json",
     "compiledHintsPath": "data/ai/ai-card-hints-compiled.json",
@@ -61,20 +61,24 @@
       "utility",
       "win_condition"
     ],
-    "functionSignalRuleCount": 589,
-    "functionSignalCount": 507,
+    "functionSignalRuleCount": 621,
+    "functionSignalCount": 524,
     "functionSignalIds": [
       "access.agenda_ambush",
       "access.agenda_net_damage",
       "access.agenda_steal_tax",
       "access.agenda_tag",
       "access.archives_safe_exception",
+      "access.corp_agenda_score_delay",
       "access.corp_archives_net_damage_ambush",
       "access.corp_brain_damage_ambush",
+      "access.corp_central_access_reduction",
       "access.corp_counter_punish",
       "access.corp_credit_loss_counter",
+      "access.corp_daemon_trash",
       "access.corp_hardware_trash",
       "access.corp_icebreaker_strength_counter",
+      "access.corp_installed_trash_tax",
       "access.corp_net_damage_ambush",
       "access.corp_program_trash",
       "access.corp_rnd_net_damage_ambush",
@@ -125,6 +129,7 @@
       "advance.corp_counter_placement",
       "advance.corp_counter_transfer",
       "advance.overadvance_support",
+      "advance.remote_score_window_support",
       "advance.score_window_support",
       "archives.corp_recovery",
       "breaker.ap",
@@ -273,6 +278,7 @@
       "economy.corp_multi_action_credit",
       "economy.corp_run_temporary_credit",
       "economy.corp_trace_credit_support",
+      "economy.corp_unsuccessful_run_credit",
       "economy.cost_window_credit",
       "economy.counter",
       "economy.finite_pool",
@@ -317,12 +323,15 @@
       "hq.corp_installed_card_bounce",
       "ice.corp_deferred_rez",
       "ice.corp_free_rez",
+      "ice.corp_hq_runpath_insert",
       "ice.corp_install_discount",
       "ice.corp_installment_rez",
       "ice.corp_rearrange_conceal",
+      "ice.corp_reorder_fort",
       "ice.corp_rez_discount",
       "ice.corp_self_trash_cost",
       "ice.corp_strength_support",
+      "ice.corp_subroutine_repeat",
       "ice.corp_subroutine_support",
       "ice.corp_temporary_rez",
       "ice.derez",
@@ -355,11 +364,13 @@
       "info.rnd_topdeck",
       "info.run_recon",
       "install.corp_uninstall_to_hq",
+      "remote.agenda_difficulty_discount",
       "remote.agenda_difficulty_tax",
       "remote.agenda_steal_tax",
       "remote.ambush",
       "remote.asset_economy",
       "remote.bait",
+      "remote.capacity_support",
       "remote.full_fort_trash",
       "remote.install_ice_tax",
       "remote.install_tax",
@@ -402,6 +413,7 @@
       "risk.requires_corp_credit_threshold",
       "risk.requires_tagged_runner",
       "risk.reveal_hq_agendas",
+      "risk.rnd_trash_cost",
       "risk.run_spend_limit",
       "risk.self_brain_damage",
       "risk.self_tag",
@@ -422,8 +434,13 @@
       "run.bypass_chosen_ice",
       "run.bypass_first_ice",
       "run.central_access_conversion",
+      "run.corp_pay_or_end_run",
       "run.corp_redirect",
+      "run.corp_server_lock",
+      "run.corp_spend_cap",
       "run.corp_start_tax",
+      "run.corp_stealth_credit_lockout",
+      "run.corp_worm_lockout",
       "run.damage_prevention_during_run",
       "run.encounter_escape",
       "run.ends_run_after_effect",
@@ -572,19 +589,23 @@
       "virus.trigger_remote",
       "virus.trigger_rnd"
     ],
-    "tacticSignalCatalogCount": 507,
+    "tacticSignalCatalogCount": 524,
     "tacticSignalCatalogIds": [
       "access.agenda_ambush",
       "access.agenda_net_damage",
       "access.agenda_steal_tax",
       "access.agenda_tag",
       "access.archives_safe_exception",
+      "access.corp_agenda_score_delay",
       "access.corp_archives_net_damage_ambush",
       "access.corp_brain_damage_ambush",
+      "access.corp_central_access_reduction",
       "access.corp_counter_punish",
       "access.corp_credit_loss_counter",
+      "access.corp_daemon_trash",
       "access.corp_hardware_trash",
       "access.corp_icebreaker_strength_counter",
+      "access.corp_installed_trash_tax",
       "access.corp_net_damage_ambush",
       "access.corp_program_trash",
       "access.corp_rnd_net_damage_ambush",
@@ -635,6 +656,7 @@
       "advance.corp_counter_placement",
       "advance.corp_counter_transfer",
       "advance.overadvance_support",
+      "advance.remote_score_window_support",
       "advance.score_window_support",
       "archives.corp_recovery",
       "breaker.ap",
@@ -783,6 +805,7 @@
       "economy.corp_multi_action_credit",
       "economy.corp_run_temporary_credit",
       "economy.corp_trace_credit_support",
+      "economy.corp_unsuccessful_run_credit",
       "economy.cost_window_credit",
       "economy.counter",
       "economy.finite_pool",
@@ -827,12 +850,15 @@
       "hq.corp_installed_card_bounce",
       "ice.corp_deferred_rez",
       "ice.corp_free_rez",
+      "ice.corp_hq_runpath_insert",
       "ice.corp_install_discount",
       "ice.corp_installment_rez",
       "ice.corp_rearrange_conceal",
+      "ice.corp_reorder_fort",
       "ice.corp_rez_discount",
       "ice.corp_self_trash_cost",
       "ice.corp_strength_support",
+      "ice.corp_subroutine_repeat",
       "ice.corp_subroutine_support",
       "ice.corp_temporary_rez",
       "ice.derez",
@@ -865,11 +891,13 @@
       "info.rnd_topdeck",
       "info.run_recon",
       "install.corp_uninstall_to_hq",
+      "remote.agenda_difficulty_discount",
       "remote.agenda_difficulty_tax",
       "remote.agenda_steal_tax",
       "remote.ambush",
       "remote.asset_economy",
       "remote.bait",
+      "remote.capacity_support",
       "remote.full_fort_trash",
       "remote.install_ice_tax",
       "remote.install_tax",
@@ -912,6 +940,7 @@
       "risk.requires_corp_credit_threshold",
       "risk.requires_tagged_runner",
       "risk.reveal_hq_agendas",
+      "risk.rnd_trash_cost",
       "risk.run_spend_limit",
       "risk.self_brain_damage",
       "risk.self_tag",
@@ -932,8 +961,13 @@
       "run.bypass_chosen_ice",
       "run.bypass_first_ice",
       "run.central_access_conversion",
+      "run.corp_pay_or_end_run",
       "run.corp_redirect",
+      "run.corp_server_lock",
+      "run.corp_spend_cap",
       "run.corp_start_tax",
+      "run.corp_stealth_credit_lockout",
+      "run.corp_worm_lockout",
       "run.damage_prevention_during_run",
       "run.encounter_escape",
       "run.ends_run_after_effect",
@@ -1159,70 +1193,72 @@
       "breakerProfile.targetedIceBonus": 1,
       "cardId": 564,
       "cardType": 564,
-      "conditions": 314,
-      "conditions[].kind": 575,
-      "costProfile": 74,
+      "conditions": 330,
+      "conditions[].kind": 595,
+      "costProfile": 73,
       "costProfile.agendaPoints": 1,
       "costProfile.clicks": 59,
       "costProfile.counters": 1,
       "costProfile.credits": 23,
       "costProfile.memory": 25,
-      "costProfile.opportunityCost": 70,
-      "costProfile.reserveRisk": 69,
-      "effects": 492,
+      "costProfile.opportunityCost": 69,
+      "costProfile.reserveRisk": 68,
+      "effects": 507,
       "effects[].actionCost": 1,
-      "effects[].amount": 551,
+      "effects[].amount": 568,
       "effects[].damageTypes": 19,
       "effects[].finite": 96,
-      "effects[].kind": 1536,
+      "effects[].kind": 1585,
       "effects[].perTurnLimit": 36,
-      "effects[].repeatable": 69,
-      "effects[].resource": 685,
-      "effects[].scope": 1536,
-      "effects[].target": 636,
-      "effects[].timing": 1536,
-      "lineSupport": 185,
-      "manualNotes": 41,
+      "effects[].repeatable": 68,
+      "effects[].resource": 704,
+      "effects[].scope": 1585,
+      "effects[].target": 687,
+      "effects[].timing": 1585,
+      "hiddenInfoPolicy": 8,
+      "lineSupport": 206,
+      "manualNotes": 81,
+      "no_signal_reason": 1,
       "planRoles": 564,
-      "quality": 542,
-      "quality.benchmarkCovered": 519,
-      "quality.confidence": 536,
+      "quality": 556,
+      "quality.benchmarkCovered": 533,
+      "quality.confidence": 550,
       "quality.focusedDecisionTest": 3,
-      "quality.hintReviewed": 542,
-      "quality.needsHumanReview": 542,
-      "quality.reviewedBy": 479,
-      "quality.reviewedDate": 479,
-      "quality.strategyCovered": 523,
-      "remoteRole": 53,
-      "remoteRole.kind": 53,
-      "remoteRole.serverScope": 53,
+      "quality.hintReviewed": 556,
+      "quality.needsHumanReview": 556,
+      "quality.reviewedBy": 511,
+      "quality.reviewedDate": 511,
+      "quality.strategyCovered": 537,
+      "remoteRole": 63,
+      "remoteRole.kind": 63,
+      "remoteRole.serverScope": 63,
       "remoteRole.strategyDerivation": 4,
       "remoteRole.strategyDerivationNotes": 4,
-      "remoteRole.threatLevel": 53,
+      "remoteRole.threatLevel": 63,
       "requiredMechanics": 564,
       "riskTags": 564,
       "roles": 564,
       "scenarioRefs": 564,
       "side": 564,
       "strategicNotes": 3,
-      "strategicRole": 188,
-      "tacticSignals": 232,
-      "targetProfiles": 52,
-      "targetProfiles[].avoid": 53,
-      "targetProfiles[].hiddenInfoPolicy": 56,
+      "strategicRole": 209,
+      "tacticSignals": 272,
+      "targetProfiles": 69,
+      "targetProfiles[].avoid": 70,
+      "targetProfiles[].hiddenInfoPolicy": 73,
       "targetProfiles[].installCost": 3,
       "targetProfiles[].installsTarget": 3,
-      "targetProfiles[].kind": 56,
+      "targetProfiles[].kind": 73,
       "targetProfiles[].lookCount": 1,
       "targetProfiles[].oncePerRun": 1,
-      "targetProfiles[].preferences": 48,
-      "targetProfiles[].purpose": 56,
-      "targetProfiles[].schemaVersion": 56,
+      "targetProfiles[].preferences": 65,
+      "targetProfiles[].purpose": 73,
+      "targetProfiles[].schemaVersion": 73,
       "targetProfiles[].showToOpponent": 1,
       "targetProfiles[].shuffleAfter": 3,
       "targetProfiles[].targetCardType": 3,
-      "targetProfiles[].targetType": 56,
-      "targetProfiles[].timing": 56,
+      "targetProfiles[].targetType": 73,
+      "targetProfiles[].timing": 73,
       "targetProfiles[].zone": 3,
       "valueHints": 564,
       "valueHints.access": 8,
@@ -1292,16 +1328,20 @@
   "wildGrowth": {
     "roleValueCount": 235,
     "planRoleValueCount": 102,
-    "lineSupportValueCount": 15,
+    "lineSupportValueCount": 16,
     "lineSupportLegacyStatus": "legacy_warn_only_in_ai003"
   },
   "functionSignals": {
     "derivedSignalCounts": {
+      "access.corp_agenda_score_delay": 1,
       "access.corp_archives_net_damage_ambush": 1,
       "access.corp_brain_damage_ambush": 1,
+      "access.corp_central_access_reduction": 1,
       "access.corp_credit_loss_counter": 1,
+      "access.corp_daemon_trash": 1,
       "access.corp_icebreaker_strength_counter": 1,
-      "access.corp_net_damage_ambush": 3,
+      "access.corp_installed_trash_tax": 1,
+      "access.corp_net_damage_ambush": 4,
       "access.corp_rnd_net_damage_ambush": 1,
       "access.corp_tag_ambush": 1,
       "access.current_access_trash": 1,
@@ -1337,6 +1377,8 @@
       "action.random_extra_action": 2,
       "action.recurring_extra_action": 1,
       "action.turn_limit_penalty": 1,
+      "advance.corp_counter_placement": 1,
+      "advance.remote_score_window_support": 1,
       "breaker.ap": 1,
       "breaker.ap_subtype_limited": 1,
       "breaker.code_gate": 9,
@@ -1384,6 +1426,7 @@
       "corp.rnd_trash_pressure": 1,
       "corp.trace_effect_bad_publicity": 1,
       "cost.agenda_point_penalty": 4,
+      "damage.corp_tagged_meat_payoff": 1,
       "damage.payoff": 38,
       "defense.all_meat_damage_prevention": 1,
       "defense.ap_ice_bypass": 1,
@@ -1411,7 +1454,7 @@
       "defense.trace_cancel_bad_publicity": 1,
       "defense.trace_defense": 20,
       "defense.trace_limit_reduction": 1,
-      "draw.corp_draw": 3,
+      "draw.corp_draw": 4,
       "economy.action": 7,
       "economy.action_credit": 6,
       "economy.burst": 4,
@@ -1423,10 +1466,13 @@
       "economy.corp_counter_cashout": 1,
       "economy.corp_hq_agenda_reveal_credit": 1,
       "economy.corp_multi_action_credit": 1,
+      "economy.corp_run_temporary_credit": 1,
+      "economy.corp_trace_credit_support": 1,
+      "economy.corp_unsuccessful_run_credit": 1,
       "economy.cost_window_credit": 3,
       "economy.counter": 19,
       "economy.finite_pool": 12,
-      "economy.generic": 75,
+      "economy.generic": 77,
       "economy.hidden_bid_mindgame": 1,
       "economy.hidden_burst_credit": 3,
       "economy.high_risk_burst_credit": 3,
@@ -1445,7 +1491,7 @@
       "economy.start_of_turn": 3,
       "economy.successful_run_credit": 1,
       "economy.temporary_resource_bank": 3,
-      "economy.trace_credit": 4,
+      "economy.trace_credit": 5,
       "economy.trace_success_credit": 2,
       "economy.trash_credit": 3,
       "economy.trash_for_credit": 3,
@@ -1461,8 +1507,15 @@
       "hidden.reveals_on_use": 16,
       "hidden.runner_resource": 16,
       "hq.corp_hand_refresh": 1,
-      "hq.corp_installed_card_bounce": 1,
+      "hq.corp_installed_card_bounce": 2,
+      "ice.corp_hq_runpath_insert": 4,
+      "ice.corp_install_discount": 1,
+      "ice.corp_reorder_fort": 1,
+      "ice.corp_rez_discount": 2,
       "ice.corp_self_trash_cost": 1,
+      "ice.corp_strength_support": 2,
+      "ice.corp_subroutine_repeat": 2,
+      "ice.corp_subroutine_support": 1,
       "ice.derez": 1,
       "ice.derez_black_ice": 2,
       "ice.etr": 54,
@@ -1490,14 +1543,17 @@
       "info.rnd_manipulation": 1,
       "info.rnd_topdeck": 3,
       "info.run_recon": 2,
+      "install.corp_uninstall_to_hq": 1,
+      "remote.agenda_difficulty_discount": 4,
       "remote.agenda_difficulty_tax": 2,
-      "remote.agenda_steal_tax": 1,
+      "remote.agenda_steal_tax": 2,
       "remote.ambush": 5,
       "remote.asset_economy": 12,
+      "remote.capacity_support": 1,
       "remote.full_fort_trash": 1,
       "remote.install_ice_tax": 1,
       "remote.install_tax": 1,
-      "remote.scoring_protection": 5,
+      "remote.scoring_protection": 10,
       "resource.base_link": 8,
       "resource.bbs": 8,
       "resource.connection": 10,
@@ -1520,11 +1576,14 @@
       "risk.multi_run_failure_penalty": 1,
       "risk.opponent_guessing_game": 1,
       "risk.random_action": 2,
+      "risk.random_discard_cost": 1,
       "risk.random_economy": 1,
       "risk.random_hand_reveal": 1,
+      "risk.rnd_trash_cost": 1,
       "risk.run_spend_limit": 1,
       "risk.self_brain_damage": 2,
       "risk.self_tag": 4,
+      "risk.temporary_credit_drawback": 1,
       "risk.temporary_program_loss": 1,
       "risk.unpreventable_brain_damage": 2,
       "rnd.corp_self_shuffle_access": 2,
@@ -1537,6 +1596,11 @@
       "run.bypass_chosen_ice": 1,
       "run.bypass_first_ice": 1,
       "run.central_access_conversion": 1,
+      "run.corp_pay_or_end_run": 1,
+      "run.corp_server_lock": 1,
+      "run.corp_spend_cap": 1,
+      "run.corp_stealth_credit_lockout": 1,
+      "run.corp_worm_lockout": 1,
       "run.damage_prevention_during_run": 1,
       "run.encounter_escape": 1,
       "run.ends_run_after_effect": 2,
@@ -1557,8 +1621,9 @@
       "run.server_specific_remote": 1,
       "run.server_specific_rnd": 2,
       "run.trace_boost_during_run": 1,
-      "score.advance_burst": 12,
+      "score.advance_burst": 8,
       "score.agenda_action": 12,
+      "score.agenda_difficulty_discount": 4,
       "score.agenda_point_gain": 1,
       "score.black_ops_agenda_condition": 1,
       "score.bonus_agenda_point": 1,
@@ -1608,9 +1673,10 @@
       "tag.payoff": 19,
       "tag.source": 22,
       "tax.ice": 7,
-      "tax.remote": 7,
+      "tax.remote": 11,
       "tax.runner_credit": 2,
       "tax.runner_persistent": 5,
+      "trace.corp_credit_support": 1,
       "trace.source": 13,
       "virus.counter_amplification": 1,
       "virus.counter_engine": 19,
@@ -1627,14 +1693,15 @@
       "virus.trigger_rnd": 6
     },
     "derivedStrategyAnchorCounts": {
-      "corp.ambush_bluff": 11,
+      "corp.ambush_bluff": 13,
       "corp.asset_economy": 13,
-      "corp.damage_kill": 1,
-      "corp.economy_rez_reserve": 8,
-      "corp.fast_advance": 12,
-      "corp.ice_tax_glacier": 71,
-      "corp.remote_scoring": 6,
-      "corp.tag_trace_punish": 38,
+      "corp.central_stabilize": 1,
+      "corp.damage_kill": 2,
+      "corp.economy_rez_reserve": 10,
+      "corp.fast_advance": 9,
+      "corp.ice_tax_glacier": 85,
+      "corp.remote_scoring": 15,
+      "corp.tag_trace_punish": 39,
       "runner.hq_pressure": 12,
       "runner.interface_closeout": 12,
       "runner.remote_contest": 3,
@@ -1644,9 +1711,9 @@
       "runner.search.breaker": 6,
       "runner.survival_defense": 3
     },
-    "totalDerivedStrategyAnchors": 237,
-    "cardsWithDerivedSignals": 472,
-    "cardsWithStrategyAnchors": 212,
+    "totalDerivedStrategyAnchors": 264,
+    "cardsWithDerivedSignals": 490,
+    "cardsWithStrategyAnchors": 231,
     "descriptorGaps": [
       {
         "gapId": "remote_contest_pressure_not_first_class",
@@ -2249,20 +2316,20 @@
     "totals": {
       "roles": 235,
       "planRoles": 102,
-      "lineSupport": 15,
-      "allValues": 352
+      "lineSupport": 16,
+      "allValues": 353
     },
     "categoryCounts": {
       "alias_to_strategy_goal": 75,
       "deferred_requires_human_review": 1,
       "descriptor_gap": 8,
-      "exact_strategy_goal": 15,
+      "exact_strategy_goal": 16,
       "function_signal_only": 208,
       "legacy_role_only": 44,
       "remove_or_deprecate": 1
     },
     "mappedCounts": {
-      "exactStrategyGoal": 15,
+      "exactStrategyGoal": 16,
       "aliasToStrategyGoal": 75,
       "functionSignalOnly": 208,
       "legacyRoleOnly": 44,
@@ -2272,19 +2339,19 @@
   },
   "ai004Triage": {
     "lineSupport": {
-      "totalOccurrences": 226,
+      "totalOccurrences": 252,
       "legacyOccurrences": 0,
       "categoryCounts": {
-        "normalized_strategy_id": 226
+        "normalized_strategy_id": 252
       },
       "valueCounts": [
         {
           "value": "corp.ice_tax_glacier",
-          "count": 52
+          "count": 63
         },
         {
           "value": "corp.tag_trace_punish",
-          "count": 35
+          "count": 36
         },
         {
           "value": "corp.damage_kill",
@@ -2292,11 +2359,11 @@
         },
         {
           "value": "corp.remote_scoring",
-          "count": 15
+          "count": 23
         },
         {
           "value": "corp.ambush_bluff",
-          "count": 14
+          "count": 16
         },
         {
           "value": "runner.hq_pressure",
@@ -2323,16 +2390,20 @@
           "count": 8
         },
         {
+          "value": "corp.economy_rez_reserve",
+          "count": 7
+        },
+        {
           "value": "runner.survival_defense",
           "count": 6
         },
         {
-          "value": "corp.economy_rez_reserve",
+          "value": "runner.remote_contest",
           "count": 4
         },
         {
-          "value": "runner.remote_contest",
-          "count": 4
+          "value": "corp.central_stabilize",
+          "count": 1
         },
         {
           "value": "runner.remote_trash",
@@ -10437,10 +10508,9 @@
           "cardId": "onr_v1_350_antiquated-interface-routines",
           "side": "corp",
           "cardType": "upgrade",
-          "value": "corp.remote_scoring",
+          "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "corp.remote_scoring",
               "corp.ice_tax_glacier"
             ],
             "effects": [
@@ -10463,15 +10533,71 @@
               "serverScope": "fort",
               "threatLevel": "medium"
             },
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_use",
+                "targetType": "server",
+                "purpose": "buff_all_ice_on_fort",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
             "cardType": "upgrade",
             "side": "corp",
             "quality": {
               "benchmarkCovered": true,
               "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
+              "strategyCovered": true,
+              "confidence": "medium",
               "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_351_bizarre-encryption-scheme",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.remote_scoring",
+          "evidence": {
+            "lineSupport": [
+              "corp.remote_scoring"
+            ],
+            "effects": [
+              {
+                "kind": "access_replacement",
+                "scope": "accessed_card",
+                "timing": "on_access"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card"
+            ],
+            "remoteRole": {
+              "kind": "agenda_steal_tax",
+              "threatLevel": "medium",
+              "serverScope": "fort"
+            },
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
               "reviewedBy": "codex"
             }
           },
@@ -10482,50 +10608,181 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "cardId": "onr_v1_350_antiquated-interface-routines",
+          "cardId": "onr_v1_352_chester-mix",
           "side": "corp",
           "cardType": "upgrade",
-          "value": "corp.ice_tax_glacier",
+          "value": "corp.economy_rez_reserve",
           "evidence": {
             "lineSupport": [
-              "corp.remote_scoring",
+              "corp.economy_rez_reserve",
               "corp.ice_tax_glacier"
             ],
             "effects": [
               {
-                "kind": "remote_protection",
+                "kind": "install_discount",
                 "scope": "fort",
                 "timing": "persistent",
-                "resource": "strength"
+                "resource": "credits"
               },
               {
-                "kind": "remote_protection",
+                "kind": "install_discount",
                 "scope": "fort",
                 "timing": "persistent",
-                "resource": "strength"
+                "resource": "credits"
               }
             ],
-            "conditions": [],
+            "conditions": [
+              "requires_rezzed_card"
+            ],
             "remoteRole": {
-              "kind": "ice_modifier",
-              "serverScope": "fort",
+              "kind": "remote_capacity",
+              "serverScope": "remote",
               "threatLevel": "medium"
             },
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_use",
+                "targetType": "installed_ice",
+                "purpose": "discount_ice_install_on_fort",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
             "cardType": "upgrade",
             "side": "corp",
             "quality": {
               "benchmarkCovered": true,
               "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
+              "strategyCovered": true,
+              "confidence": "medium",
               "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.economy_rez_reserve"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_352_chester-mix",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.economy_rez_reserve",
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "install_discount",
+                "scope": "fort",
+                "timing": "persistent",
+                "resource": "credits"
+              },
+              {
+                "kind": "install_discount",
+                "scope": "fort",
+                "timing": "persistent",
+                "resource": "credits"
+              }
+            ],
+            "conditions": [
+              "requires_rezzed_card"
+            ],
+            "remoteRole": {
+              "kind": "remote_capacity",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_use",
+                "targetType": "installed_ice",
+                "purpose": "discount_ice_install_on_fort",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
               "reviewedBy": "codex"
             }
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_353_chimera",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.ambush_bluff",
+          "evidence": {
+            "lineSupport": [
+              "corp.ambush_bluff"
+            ],
+            "effects": [
+              {
+                "kind": "program_trash",
+                "scope": "runner",
+                "timing": "on_access"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card"
+            ],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_use",
+                "targetType": "program",
+                "purpose": "trash_daemon",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ambush_bluff"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -10577,7 +10834,16 @@
               "threatLevel": "medium"
             },
             "cardType": "upgrade",
-            "side": "corp"
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
@@ -10689,56 +10955,19 @@
           "cardId": "onr_v1_356_dedicated-response-team",
           "side": "corp",
           "cardType": "upgrade",
-          "value": "corp.tag_trace_punish",
-          "evidence": {
-            "lineSupport": [
-              "corp.tag_trace_punish",
-              "corp.damage_kill"
-            ],
-            "effects": [
-              {
-                "kind": "damage",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "damage"
-              },
-              {
-                "kind": "damage",
-                "scope": "runner",
-                "timing": "on_access",
-                "resource": "damage"
-              },
-              {
-                "kind": "tag_punish_payoff",
-                "scope": "runner",
-                "timing": "action",
-                "resource": "damage"
-              }
-            ],
-            "conditions": [
-              "requires_accessed_card",
-              "requires_runner_tagged"
-            ],
-            "cardType": "upgrade",
-            "side": "corp"
-          },
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.tag_trace_punish"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "cardId": "onr_v1_356_dedicated-response-team",
-          "side": "corp",
-          "cardType": "upgrade",
           "value": "corp.damage_kill",
           "evidence": {
             "lineSupport": [
-              "corp.tag_trace_punish",
-              "corp.damage_kill"
+              "corp.damage_kill",
+              "corp.tag_trace_punish"
             ],
             "effects": [
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "on_access",
+                "resource": "meat_damage"
+              },
               {
                 "kind": "damage",
                 "scope": "runner",
@@ -10759,11 +10988,20 @@
               }
             ],
             "conditions": [
-              "requires_accessed_card",
-              "requires_runner_tagged"
+              "requires_runner_tagged",
+              "requires_accessed_card"
             ],
             "cardType": "upgrade",
-            "side": "corp"
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
@@ -10772,15 +11010,282 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "cardId": "onr_v1_359_jenny-jett",
+          "cardId": "onr_v1_356_dedicated-response-team",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.damage_kill",
+              "corp.tag_trace_punish"
+            ],
+            "effects": [
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "on_access",
+                "resource": "meat_damage"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "on_access",
+                "resource": "damage"
+              },
+              {
+                "kind": "tag_punish_payoff",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_runner_tagged",
+              "requires_accessed_card"
+            ],
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_357_dieter-esslin",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.ambush_bluff",
+          "evidence": {
+            "lineSupport": [
+              "corp.ambush_bluff"
+            ],
+            "effects": [
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "on_access",
+                "resource": "net_damage"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "action",
+                "resource": "damage"
+              },
+              {
+                "kind": "damage",
+                "scope": "runner",
+                "timing": "on_access",
+                "resource": "damage"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card"
+            ],
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ambush_bluff"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_358_dr-dreff",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier",
+              "corp.remote_scoring"
+            ],
+            "effects": [
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "successful_run"
+              },
+              {
+                "kind": "zone_shuffle",
+                "scope": "hq",
+                "timing": "during_run"
+              },
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "successful_run"
+              },
+              {
+                "kind": "zone_shuffle",
+                "scope": "hq",
+                "timing": "during_run",
+                "resource": "cards"
+              }
+            ],
+            "conditions": [
+              "requires_successful_run",
+              "requires_during_run"
+            ],
+            "remoteRole": {
+              "kind": "run_tax",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "after_successful_run",
+                "targetType": "card",
+                "purpose": "choose_hq_ice_for_temporary_encounter",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_358_dr-dreff",
           "side": "corp",
           "cardType": "upgrade",
           "value": "corp.remote_scoring",
           "evidence": {
             "lineSupport": [
+              "corp.ice_tax_glacier",
               "corp.remote_scoring"
             ],
             "effects": [
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "successful_run"
+              },
+              {
+                "kind": "zone_shuffle",
+                "scope": "hq",
+                "timing": "during_run"
+              },
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "successful_run"
+              },
+              {
+                "kind": "zone_shuffle",
+                "scope": "hq",
+                "timing": "during_run",
+                "resource": "cards"
+              }
+            ],
+            "conditions": [
+              "requires_successful_run",
+              "requires_during_run"
+            ],
+            "remoteRole": {
+              "kind": "run_tax",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "after_successful_run",
+                "targetType": "card",
+                "purpose": "choose_hq_ice_for_temporary_encounter",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_359_jenny-jett",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier",
+              "corp.remote_scoring"
+            ],
+            "effects": [
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "successful_run"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "fort",
+                "timing": "successful_run"
+              },
               {
                 "kind": "future_encounter_effect",
                 "scope": "fort",
@@ -10793,22 +11298,110 @@
               }
             ],
             "conditions": [
-              "requires_successful_run"
+              "requires_successful_run",
+              "requires_during_run"
             ],
             "remoteRole": {
               "kind": "scoring_protection",
               "serverScope": "fort",
               "threatLevel": "high"
             },
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "after_successful_run",
+                "targetType": "card",
+                "purpose": "install_hq_ice_innermost_on_fort",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
             "cardType": "upgrade",
             "side": "corp",
             "quality": {
               "benchmarkCovered": false,
               "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
+              "strategyCovered": true,
+              "confidence": "medium",
               "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_359_jenny-jett",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.remote_scoring",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier",
+              "corp.remote_scoring"
+            ],
+            "effects": [
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "successful_run"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "fort",
+                "timing": "successful_run"
+              },
+              {
+                "kind": "future_encounter_effect",
+                "scope": "fort",
+                "timing": "successful_run"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "fort",
+                "timing": "successful_run"
+              }
+            ],
+            "conditions": [
+              "requires_successful_run",
+              "requires_during_run"
+            ],
+            "remoteRole": {
+              "kind": "scoring_protection",
+              "serverScope": "fort",
+              "threatLevel": "high"
+            },
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "after_successful_run",
+                "targetType": "card",
+                "purpose": "install_hq_ice_innermost_on_fort",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
               "reviewedBy": "codex"
             }
           },
@@ -10830,6 +11423,18 @@
             ],
             "effects": [
               {
+                "kind": "rez_discount",
+                "scope": "fort",
+                "timing": "persistent",
+                "resource": "credits"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "fort",
+                "timing": "persistent",
+                "resource": "strength"
+              },
+              {
                 "kind": "remote_protection",
                 "scope": "fort",
                 "timing": "persistent",
@@ -10856,14 +11461,30 @@
               "serverScope": "fort",
               "threatLevel": "medium"
             },
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_use",
+                "targetType": "installed_ice",
+                "purpose": "discount_and_buff_wall_ice_on_fort",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
             "cardType": "upgrade",
             "side": "corp",
             "quality": {
               "benchmarkCovered": true,
-              "hintReviewed": false,
-              "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
             }
           },
           "triageCategory": "normalized_strategy_id",
@@ -10884,6 +11505,18 @@
             ],
             "effects": [
               {
+                "kind": "rez_discount",
+                "scope": "fort",
+                "timing": "persistent",
+                "resource": "credits"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "fort",
+                "timing": "persistent",
+                "resource": "strength"
+              },
+              {
                 "kind": "remote_protection",
                 "scope": "fort",
                 "timing": "persistent",
@@ -10910,14 +11543,30 @@
               "serverScope": "fort",
               "threatLevel": "medium"
             },
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_use",
+                "targetType": "installed_ice",
+                "purpose": "discount_and_buff_wall_ice_on_fort",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
             "cardType": "upgrade",
             "side": "corp",
             "quality": {
               "benchmarkCovered": true,
-              "hintReviewed": false,
-              "strategyCovered": false,
-              "confidence": "low",
-              "needsHumanReview": true
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
             }
           },
           "triageCategory": "normalized_strategy_id",
@@ -10945,6 +11594,16 @@
                 "kind": "score_acceleration",
                 "scope": "remote",
                 "timing": "persistent"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "remote",
+                "timing": "persistent"
+              },
+              {
+                "kind": "score_acceleration",
+                "scope": "remote",
+                "timing": "persistent"
               }
             ],
             "conditions": [
@@ -10960,10 +11619,10 @@
             "quality": {
               "benchmarkCovered": false,
               "hintReviewed": true,
-              "strategyCovered": false,
+              "strategyCovered": true,
               "confidence": "medium",
-              "needsHumanReview": true,
-              "reviewedDate": "2026-05-25",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
               "reviewedBy": "codex"
             }
           },
@@ -10977,9 +11636,11 @@
           "cardId": "onr_v1_363_olivia-salazar",
           "side": "corp",
           "cardType": "upgrade",
-          "value": "corp.remote_scoring",
+          "value": "corp.economy_rez_reserve",
           "evidence": {
             "lineSupport": [
+              "corp.economy_rez_reserve",
+              "corp.ice_tax_glacier",
               "corp.remote_scoring"
             ],
             "effects": [
@@ -10992,6 +11653,16 @@
                 "kind": "remote_protection",
                 "scope": "fort",
                 "timing": "during_run"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "fort",
+                "timing": "during_run"
+              },
+              {
+                "kind": "rez_discount",
+                "scope": "ice",
+                "timing": "during_run"
               }
             ],
             "conditions": [
@@ -11002,21 +11673,290 @@
               "serverScope": "fort",
               "threatLevel": "medium"
             },
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_use",
+                "targetType": "installed_ice",
+                "purpose": "temporarily_rez_ice_on_fort",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
             "cardType": "upgrade",
             "side": "corp",
             "quality": {
               "benchmarkCovered": true,
               "hintReviewed": true,
-              "strategyCovered": false,
+              "strategyCovered": true,
               "confidence": "medium",
               "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.economy_rez_reserve"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_363_olivia-salazar",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.economy_rez_reserve",
+              "corp.ice_tax_glacier",
+              "corp.remote_scoring"
+            ],
+            "effects": [
+              {
+                "kind": "rez_discount",
+                "scope": "ice",
+                "timing": "during_run"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "fort",
+                "timing": "during_run"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "fort",
+                "timing": "during_run"
+              },
+              {
+                "kind": "rez_discount",
+                "scope": "ice",
+                "timing": "during_run"
+              }
+            ],
+            "conditions": [
+              "requires_during_run"
+            ],
+            "remoteRole": {
+              "kind": "scoring_protection",
+              "serverScope": "fort",
+              "threatLevel": "medium"
+            },
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_use",
+                "targetType": "installed_ice",
+                "purpose": "temporarily_rez_ice_on_fort",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_363_olivia-salazar",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.remote_scoring",
+          "evidence": {
+            "lineSupport": [
+              "corp.economy_rez_reserve",
+              "corp.ice_tax_glacier",
+              "corp.remote_scoring"
+            ],
+            "effects": [
+              {
+                "kind": "rez_discount",
+                "scope": "ice",
+                "timing": "during_run"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "fort",
+                "timing": "during_run"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "fort",
+                "timing": "during_run"
+              },
+              {
+                "kind": "rez_discount",
+                "scope": "ice",
+                "timing": "during_run"
+              }
+            ],
+            "conditions": [
+              "requires_during_run"
+            ],
+            "remoteRole": {
+              "kind": "scoring_protection",
+              "serverScope": "fort",
+              "threatLevel": "medium"
+            },
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_use",
+                "targetType": "installed_ice",
+                "purpose": "temporarily_rez_ice_on_fort",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
               "reviewedBy": "codex"
             }
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_364_omni-kismet-ph-d",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "zone_shuffle",
+                "scope": "hq",
+                "timing": "during_run"
+              },
+              {
+                "kind": "zone_shuffle",
+                "scope": "hq",
+                "timing": "during_run",
+                "resource": "cards"
+              }
+            ],
+            "conditions": [
+              "requires_during_run"
+            ],
+            "remoteRole": {
+              "kind": "run_tax",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_use",
+                "targetType": "card",
+                "purpose": "swap_unrezzed_fort_ice_with_hq_ice",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_365_paris-city-grid",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.tag_trace_punish",
+          "evidence": {
+            "lineSupport": [
+              "corp.tag_trace_punish"
+            ],
+            "effects": [
+              {
+                "kind": "trace_credit",
+                "scope": "fort",
+                "timing": "during_run",
+                "resource": "credits"
+              },
+              {
+                "kind": "trace_credit",
+                "scope": "fort",
+                "timing": "during_run",
+                "resource": "credits"
+              }
+            ],
+            "conditions": [],
+            "remoteRole": {
+              "kind": "run_tax",
+              "threatLevel": "medium",
+              "serverScope": "fort"
+            },
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.tag_trace_punish"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -11105,10 +12045,10 @@
             "quality": {
               "benchmarkCovered": true,
               "hintReviewed": true,
-              "strategyCovered": false,
+              "strategyCovered": true,
               "confidence": "medium",
               "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
+              "reviewedDate": "2026-06-03",
               "reviewedBy": "codex"
             }
           },
@@ -11119,54 +12059,111 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
-          "cardId": "onr_v1_370_tesseract-fort-construction",
+          "cardId": "onr_v1_368_roving-submarine",
           "side": "corp",
           "cardType": "upgrade",
           "value": "corp.remote_scoring",
           "evidence": {
             "lineSupport": [
-              "corp.remote_scoring",
-              "corp.ice_tax_glacier"
+              "corp.remote_scoring"
             ],
             "effects": [
               {
-                "kind": "future_encounter_effect",
-                "scope": "run_path",
-                "timing": "encounter"
+                "kind": "remote_tax",
+                "scope": "remote",
+                "timing": "during_run"
               },
               {
-                "kind": "remote_protection",
-                "scope": "fort",
-                "timing": "persistent"
-              },
-              {
-                "kind": "remote_protection",
-                "scope": "fort",
-                "timing": "persistent",
-                "resource": "subroutines"
+                "kind": "remote_tax",
+                "scope": "remote",
+                "timing": "during_run"
               }
             ],
-            "conditions": [],
+            "conditions": [
+              "requires_remote_server"
+            ],
             "remoteRole": {
-              "kind": "scoring_protection",
-              "serverScope": "fort",
-              "threatLevel": "high"
+              "kind": "run_tax",
+              "serverScope": "remote",
+              "threatLevel": "medium"
             },
             "cardType": "upgrade",
             "side": "corp",
             "quality": {
               "benchmarkCovered": true,
               "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
+              "strategyCovered": true,
+              "confidence": "medium",
               "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
+              "reviewedDate": "2026-06-03",
               "reviewedBy": "codex"
             }
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_369_singapore-city-grid",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "zone_shuffle",
+                "scope": "hq",
+                "timing": "during_run"
+              },
+              {
+                "kind": "zone_shuffle",
+                "scope": "hq",
+                "timing": "during_run",
+                "resource": "cards"
+              }
+            ],
+            "conditions": [
+              "requires_during_run"
+            ],
+            "remoteRole": {
+              "kind": "run_tax",
+              "serverScope": "remote",
+              "threatLevel": "medium"
+            },
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_use",
+                "targetType": "card",
+                "purpose": "swap_unrezzed_fort_ice_with_hq_ice",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -11177,8 +12174,8 @@
           "value": "corp.ice_tax_glacier",
           "evidence": {
             "lineSupport": [
-              "corp.remote_scoring",
-              "corp.ice_tax_glacier"
+              "corp.ice_tax_glacier",
+              "corp.remote_scoring"
             ],
             "effects": [
               {
@@ -11190,6 +12187,11 @@
                 "kind": "remote_protection",
                 "scope": "fort",
                 "timing": "persistent"
+              },
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "encounter"
               },
               {
                 "kind": "remote_protection",
@@ -11204,21 +12206,106 @@
               "serverScope": "fort",
               "threatLevel": "high"
             },
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "during_ice_encounter",
+                "targetType": "installed_ice",
+                "purpose": "add_etr_subroutine_to_fort_ice",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
             "cardType": "upgrade",
             "side": "corp",
             "quality": {
               "benchmarkCovered": true,
               "hintReviewed": true,
-              "strategyCovered": false,
-              "confidence": "high",
+              "strategyCovered": true,
+              "confidence": "medium",
               "needsHumanReview": false,
-              "reviewedDate": "2026-05-25",
+              "reviewedDate": "2026-06-03",
               "reviewedBy": "codex"
             }
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_370_tesseract-fort-construction",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.remote_scoring",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier",
+              "corp.remote_scoring"
+            ],
+            "effects": [
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "fort",
+                "timing": "persistent"
+              },
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "encounter"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "fort",
+                "timing": "persistent",
+                "resource": "subroutines"
+              }
+            ],
+            "conditions": [],
+            "remoteRole": {
+              "kind": "scoring_protection",
+              "serverScope": "fort",
+              "threatLevel": "high"
+            },
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "during_ice_encounter",
+                "targetType": "installed_ice",
+                "purpose": "add_etr_subroutine_to_fort_ice",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -11249,11 +12336,123 @@
               "requires_trace_success"
             ],
             "cardType": "upgrade",
-            "side": "corp"
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
           },
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.tag_trace_punish"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_373_twenty-four-hour-surveillance",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "run_tax",
+                "scope": "fort",
+                "timing": "during_run",
+                "resource": "credits"
+              }
+            ],
+            "conditions": [
+              "requires_during_run"
+            ],
+            "remoteRole": {
+              "kind": "run_tax",
+              "threatLevel": "medium",
+              "serverScope": "fort"
+            },
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_v1_374_washington-d-c-city-grid",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.remote_scoring",
+          "evidence": {
+            "lineSupport": [
+              "corp.remote_scoring"
+            ],
+            "effects": [
+              {
+                "kind": "score_acceleration",
+                "scope": "remote",
+                "timing": "persistent",
+                "resource": "advancement_counters"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "remote",
+                "timing": "persistent"
+              },
+              {
+                "kind": "global_modifier",
+                "scope": "corp",
+                "timing": "persistent",
+                "resource": "advancement_counters"
+              },
+              {
+                "kind": "score_acceleration",
+                "scope": "corp",
+                "timing": "persistent",
+                "resource": "advancement_counters"
+              }
+            ],
+            "conditions": [
+              "requires_remote_server"
+            ],
+            "remoteRole": {
+              "kind": "scoring_protection",
+              "threatLevel": "medium",
+              "serverScope": "remote"
+            },
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": true,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -12687,6 +13886,280 @@
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
         {
+          "cardId": "onr_proteus_062_lesley-major",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.remote_scoring",
+          "evidence": {
+            "lineSupport": [
+              "corp.remote_scoring"
+            ],
+            "effects": [
+              {
+                "kind": "advance",
+                "scope": "installed_card",
+                "timing": "during_run",
+                "resource": "advancement_counters"
+              },
+              {
+                "kind": "advance",
+                "scope": "installed_card",
+                "timing": "during_run",
+                "resource": "advancement_counters"
+              }
+            ],
+            "conditions": [
+              "requires_remote_server",
+              "requires_during_run"
+            ],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_use",
+                "targetType": "card",
+                "purpose": "place_advancement_counters_in_fort",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_063_lisa-blight",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "during_run"
+              },
+              {
+                "kind": "zone_shuffle",
+                "scope": "hq",
+                "timing": "during_run"
+              }
+            ],
+            "conditions": [
+              "requires_during_run"
+            ],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_use",
+                "targetType": "installed_ice",
+                "purpose": "repeat_subroutine_on_fort_ice",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_064_marcel-desoleil",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "future_encounter_effect",
+                "scope": "run_path",
+                "timing": "during_run"
+              },
+              {
+                "kind": "trash_credit",
+                "scope": "rnd",
+                "timing": "during_run"
+              }
+            ],
+            "conditions": [
+              "requires_during_run"
+            ],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_use",
+                "targetType": "installed_ice",
+                "purpose": "repeat_subroutine_on_fort_ice",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_065_networked-center",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.remote_scoring",
+          "evidence": {
+            "lineSupport": [
+              "corp.remote_scoring"
+            ],
+            "effects": [
+              {
+                "kind": "score_acceleration",
+                "scope": "remote",
+                "timing": "persistent",
+                "resource": "advancement_counters"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "remote",
+                "timing": "persistent"
+              },
+              {
+                "kind": "global_modifier",
+                "scope": "corp",
+                "timing": "persistent",
+                "resource": "advancement_counters"
+              },
+              {
+                "kind": "score_acceleration",
+                "scope": "corp",
+                "timing": "persistent",
+                "resource": "advancement_counters"
+              }
+            ],
+            "conditions": [
+              "requires_remote_server"
+            ],
+            "remoteRole": {
+              "kind": "scoring_protection",
+              "threatLevel": "medium",
+              "serverScope": "remote"
+            },
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_066_obfuscated-fortress",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier"
+            ],
+            "effects": [
+              {
+                "kind": "run_tax",
+                "scope": "fort",
+                "timing": "during_run",
+                "resource": "credits"
+              }
+            ],
+            "conditions": [
+              "requires_during_run"
+            ],
+            "remoteRole": {
+              "kind": "run_tax",
+              "threatLevel": "high",
+              "serverScope": "fort"
+            },
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
           "cardId": "onr_proteus_068_pattel-antibody",
           "side": "corp",
           "cardType": "asset",
@@ -12722,6 +14195,254 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.ambush_bluff"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_070_rasmin-bridger",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.ice_tax_glacier",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier",
+              "corp.remote_scoring"
+            ],
+            "effects": [
+              {
+                "kind": "run_tax",
+                "scope": "fort",
+                "timing": "during_run",
+                "resource": "credits"
+              }
+            ],
+            "conditions": [
+              "requires_during_run"
+            ],
+            "remoteRole": {
+              "kind": "scoring_protection",
+              "threatLevel": "high",
+              "serverScope": "fort"
+            },
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.ice_tax_glacier"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_070_rasmin-bridger",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.remote_scoring",
+          "evidence": {
+            "lineSupport": [
+              "corp.ice_tax_glacier",
+              "corp.remote_scoring"
+            ],
+            "effects": [
+              {
+                "kind": "run_tax",
+                "scope": "fort",
+                "timing": "during_run",
+                "resource": "credits"
+              }
+            ],
+            "conditions": [
+              "requires_during_run"
+            ],
+            "remoteRole": {
+              "kind": "scoring_protection",
+              "threatLevel": "high",
+              "serverScope": "fort"
+            },
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_071_raymond-ellison",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.economy_rez_reserve",
+          "evidence": {
+            "lineSupport": [
+              "corp.economy_rez_reserve"
+            ],
+            "effects": [
+              {
+                "kind": "economy",
+                "scope": "corp",
+                "timing": "during_run",
+                "resource": "credits"
+              },
+              {
+                "kind": "advance",
+                "scope": "installed_card",
+                "timing": "during_run"
+              },
+              {
+                "kind": "trash_credit",
+                "scope": "corp",
+                "timing": "during_run"
+              }
+            ],
+            "conditions": [
+              "requires_remote_server",
+              "requires_during_run"
+            ],
+            "targetProfiles": [
+              {
+                "schemaVersion": "target-profile-v1",
+                "kind": "use_target",
+                "timing": "on_use",
+                "targetType": "card",
+                "purpose": "remove_advancement_counters_for_temporary_credits",
+                "hiddenInfoPolicy": "public_or_controller_known_only",
+                "preferences": [],
+                "avoid": [
+                  "hidden_info_dependent_choice"
+                ]
+              }
+            ],
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.economy_rez_reserve"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_072_research-bunker",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.remote_scoring",
+          "evidence": {
+            "lineSupport": [
+              "corp.remote_scoring"
+            ],
+            "effects": [
+              {
+                "kind": "score_acceleration",
+                "scope": "remote",
+                "timing": "persistent",
+                "resource": "advancement_counters"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "remote",
+                "timing": "persistent"
+              },
+              {
+                "kind": "global_modifier",
+                "scope": "corp",
+                "timing": "persistent",
+                "resource": "advancement_counters"
+              },
+              {
+                "kind": "score_acceleration",
+                "scope": "corp",
+                "timing": "persistent",
+                "resource": "advancement_counters"
+              }
+            ],
+            "conditions": [
+              "requires_remote_server"
+            ],
+            "remoteRole": {
+              "kind": "scoring_protection",
+              "threatLevel": "medium",
+              "serverScope": "remote"
+            },
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_073_simon-francisco",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.central_stabilize",
+          "evidence": {
+            "lineSupport": [
+              "corp.central_stabilize"
+            ],
+            "effects": [
+              {
+                "kind": "multiaccess",
+                "scope": "accessed_card",
+                "timing": "on_access"
+              }
+            ],
+            "conditions": [
+              "requires_accessed_card"
+            ],
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.central_stabilize"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -12857,6 +14578,66 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.asset_economy"
+          ],
+          "rationale": "Already normalized to a side-prefixed StrategyGoal."
+        },
+        {
+          "cardId": "onr_proteus_077_weapons-depot",
+          "side": "corp",
+          "cardType": "upgrade",
+          "value": "corp.remote_scoring",
+          "evidence": {
+            "lineSupport": [
+              "corp.remote_scoring"
+            ],
+            "effects": [
+              {
+                "kind": "score_acceleration",
+                "scope": "remote",
+                "timing": "persistent",
+                "resource": "advancement_counters"
+              },
+              {
+                "kind": "remote_protection",
+                "scope": "remote",
+                "timing": "persistent"
+              },
+              {
+                "kind": "global_modifier",
+                "scope": "corp",
+                "timing": "persistent",
+                "resource": "advancement_counters"
+              },
+              {
+                "kind": "score_acceleration",
+                "scope": "corp",
+                "timing": "persistent",
+                "resource": "advancement_counters"
+              }
+            ],
+            "conditions": [
+              "requires_remote_server"
+            ],
+            "remoteRole": {
+              "kind": "scoring_protection",
+              "threatLevel": "medium",
+              "serverScope": "remote"
+            },
+            "cardType": "upgrade",
+            "side": "corp",
+            "quality": {
+              "benchmarkCovered": false,
+              "hintReviewed": true,
+              "strategyCovered": true,
+              "confidence": "medium",
+              "needsHumanReview": false,
+              "reviewedDate": "2026-06-03",
+              "reviewedBy": "codex"
+            }
+          },
+          "triageCategory": "normalized_strategy_id",
+          "mapsTo": [
+            "corp.remote_scoring"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         },
@@ -19407,6 +21188,16 @@
       "count": 1,
       "path": "data/ai/function-signal-derivation-v1.json.derivationRules[5].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "access.corp_agenda_score_delay",
+      "strategyAnchorFor": [
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[6].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.corp_archives_net_damage_ambush",
       "strategyAnchorFor": [
         "corp.ambush_bluff"
@@ -19415,7 +21206,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[6].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[7].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.corp_brain_damage_ambush",
       "strategyAnchorFor": [
@@ -19426,7 +21217,17 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[7].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[8].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "access.corp_central_access_reduction",
+      "strategyAnchorFor": [
+        "corp.central_stabilize"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[9].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.corp_counter_punish",
       "strategyAnchorFor": [
@@ -19436,7 +21237,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[8].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[10].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.corp_credit_loss_counter",
       "strategyAnchorFor": [
@@ -19446,29 +21247,9 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[9].gates.effectScope",
-      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
-      "signalId": "access.corp_hardware_trash",
-      "strategyAnchorFor": [
-        "corp.ambush_bluff"
-      ]
-    },
-    {
-      "kind": "strategy_anchor_without_effect_scope_warn_only",
-      "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[10].gates.effectScope",
-      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
-      "signalId": "access.corp_icebreaker_strength_counter",
-      "strategyAnchorFor": [
-        "corp.ambush_bluff"
-      ]
-    },
-    {
-      "kind": "strategy_anchor_without_effect_scope_warn_only",
-      "count": 1,
       "path": "data/ai/function-signal-derivation-v1.json.derivationRules[11].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
-      "signalId": "access.corp_net_damage_ambush",
+      "signalId": "access.corp_daemon_trash",
       "strategyAnchorFor": [
         "corp.ambush_bluff"
       ]
@@ -19478,7 +21259,7 @@
       "count": 1,
       "path": "data/ai/function-signal-derivation-v1.json.derivationRules[12].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
-      "signalId": "access.corp_program_trash",
+      "signalId": "access.corp_hardware_trash",
       "strategyAnchorFor": [
         "corp.ambush_bluff"
       ]
@@ -19488,6 +21269,46 @@
       "count": 1,
       "path": "data/ai/function-signal-derivation-v1.json.derivationRules[13].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "access.corp_icebreaker_strength_counter",
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[15].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "access.corp_net_damage_ambush",
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[16].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "access.corp_program_trash",
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[17].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "access.corp_program_trash",
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[18].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.corp_rnd_net_damage_ambush",
       "strategyAnchorFor": [
         "corp.ambush_bluff"
@@ -19496,7 +21317,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[14].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[19].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.corp_tag_ambush",
       "strategyAnchorFor": [
@@ -19507,7 +21328,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[19].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[24].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.hq_full_reveal",
       "strategyAnchorFor": [
@@ -19517,7 +21338,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[20].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[25].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.hq_hidden_multiaccess",
       "strategyAnchorFor": [
@@ -19528,7 +21349,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[24].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[29].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.hq_random_reveal",
       "strategyAnchorFor": [
@@ -19538,7 +21359,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[27].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[32].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.hq_sabotage_credit_loss",
       "strategyAnchorFor": [
@@ -19548,7 +21369,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[31].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[36].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.hq_via_archives",
       "strategyAnchorFor": [
@@ -19558,7 +21379,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[32].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[37].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.next_agenda_bonus",
       "strategyAnchorFor": [
@@ -19568,7 +21389,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[36].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[41].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.remote_full_trash",
       "strategyAnchorFor": [
@@ -19579,7 +21400,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[37].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[42].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.remote_sabotage_payoff",
       "strategyAnchorFor": [
@@ -19590,7 +21411,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[38].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[43].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.rnd_hidden_multiaccess",
       "strategyAnchorFor": [
@@ -19601,7 +21422,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[42].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[47].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.rnd_top_card",
       "strategyAnchorFor": [
@@ -19611,7 +21432,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[43].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[48].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.rnd_top_cards",
       "strategyAnchorFor": [
@@ -19621,7 +21442,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[44].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[49].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.rnd_top_reorder",
       "strategyAnchorFor": [
@@ -19631,7 +21452,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[49].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[54].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.runner_program_disruption",
       "strategyAnchorFor": [
@@ -19641,7 +21462,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[53].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[58].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "action.corp_counter_to_action",
       "strategyAnchorFor": [
@@ -19651,7 +21472,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[65].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[70].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "advance.agenda_counter",
       "strategyAnchorFor": [
@@ -19661,7 +21482,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[67].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[72].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "advance.corp_counter_placement",
       "strategyAnchorFor": [
@@ -19672,7 +21493,18 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[68].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[73].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "advance.corp_counter_placement",
+      "strategyAnchorFor": [
+        "corp.fast_advance",
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[74].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "advance.corp_counter_transfer",
       "strategyAnchorFor": [
@@ -19683,7 +21515,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[69].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[75].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "advance.overadvance_support",
       "strategyAnchorFor": [
@@ -19693,7 +21525,17 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[70].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[76].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "advance.remote_score_window_support",
+      "strategyAnchorFor": [
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[77].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "advance.score_window_support",
       "strategyAnchorFor": [
@@ -19703,7 +21545,17 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[116].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[78].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "advance.score_window_support",
+      "strategyAnchorFor": [
+        "corp.fast_advance"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[124].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.brain_damage",
       "strategyAnchorFor": [
@@ -19713,7 +21565,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[117].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[125].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.break_cost_tax",
       "strategyAnchorFor": [
@@ -19723,7 +21575,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[119].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[127].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.damage_source",
       "strategyAnchorFor": [
@@ -19733,7 +21585,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[120].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[128].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.encounter_paid_subroutine_add",
       "strategyAnchorFor": [
@@ -19743,7 +21595,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[121].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[129].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.encounter_tax",
       "strategyAnchorFor": [
@@ -19753,7 +21605,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[123].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[131].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.future_strength_buff",
       "strategyAnchorFor": [
@@ -19763,7 +21615,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[124].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[132].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.future_subroutine_modifier",
       "strategyAnchorFor": [
@@ -19773,7 +21625,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[125].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[133].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.hardware_trash",
       "strategyAnchorFor": [
@@ -19783,7 +21635,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[126].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[134].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.jackout_lock",
       "strategyAnchorFor": [
@@ -19793,7 +21645,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[127].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[135].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.jackout_tax",
       "strategyAnchorFor": [
@@ -19803,7 +21655,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[128].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[136].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.meat_damage",
       "strategyAnchorFor": [
@@ -19813,7 +21665,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[130].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[138].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.multi_end_run",
       "strategyAnchorFor": [
@@ -19823,7 +21675,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[131].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[139].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.net_damage",
       "strategyAnchorFor": [
@@ -19833,7 +21685,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[132].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[140].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.next_ice_break_lock",
       "strategyAnchorFor": [
@@ -19843,7 +21695,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[135].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[143].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.outer_ice_scaling",
       "strategyAnchorFor": [
@@ -19853,7 +21705,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[136].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[144].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.persistent_tag_source",
       "strategyAnchorFor": [
@@ -19863,7 +21715,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[137].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[145].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.position_scaling",
       "strategyAnchorFor": [
@@ -19873,7 +21725,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[138].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[146].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.program_trash",
       "strategyAnchorFor": [
@@ -19883,7 +21735,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[141].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[149].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.rez_paid_scaling",
       "strategyAnchorFor": [
@@ -19893,7 +21745,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[143].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[151].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.run_lock",
       "strategyAnchorFor": [
@@ -19903,7 +21755,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[144].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[152].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.runner_action_loss",
       "strategyAnchorFor": [
@@ -19913,7 +21765,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[145].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[153].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.runner_pay_or_end_run",
       "strategyAnchorFor": [
@@ -19923,7 +21775,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[146].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[154].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "corp_ice.runner_pay_or_program_trash",
       "strategyAnchorFor": [
@@ -19933,7 +21785,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[172].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[180].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "damage.corp_damage_amplifier",
       "strategyAnchorFor": [
@@ -19943,7 +21795,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[173].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[181].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "damage.corp_tagged_meat_payoff",
       "strategyAnchorFor": [
@@ -19954,7 +21806,18 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[174].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[182].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "damage.corp_tagged_meat_payoff",
+      "strategyAnchorFor": [
+        "corp.damage_kill",
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[183].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "damage.meat_source",
       "strategyAnchorFor": [
@@ -19964,7 +21827,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[177].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[186].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "damage.tagged_meat_payoff",
       "strategyAnchorFor": [
@@ -19975,7 +21838,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[178].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[187].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "defense.all_meat_damage_prevention",
       "strategyAnchorFor": [
@@ -19985,7 +21848,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[196].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[205].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "defense.flatline_prevention",
       "strategyAnchorFor": [
@@ -19995,7 +21858,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[233].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[242].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "economy.corp_advanceable_cashout",
       "strategyAnchorFor": [
@@ -20005,7 +21868,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[234].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[243].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "economy.corp_asset_cashout",
       "strategyAnchorFor": [
@@ -20016,7 +21879,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[238].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[247].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "economy.corp_counter_cashout",
       "strategyAnchorFor": [
@@ -20026,7 +21889,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[242].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[251].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "economy.corp_install_rez_credit",
       "strategyAnchorFor": [
@@ -20036,7 +21899,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[244].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[253].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "economy.corp_multi_action_credit",
       "strategyAnchorFor": [
@@ -20046,7 +21909,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[245].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[254].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "economy.corp_run_temporary_credit",
       "strategyAnchorFor": [
@@ -20056,7 +21919,17 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[246].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[255].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "economy.corp_run_temporary_credit",
+      "strategyAnchorFor": [
+        "corp.economy_rez_reserve"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[256].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "economy.corp_trace_credit_support",
       "strategyAnchorFor": [
@@ -20066,7 +21939,17 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[282].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[257].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "economy.corp_trace_credit_support",
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[294].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "fort.creation_lock",
       "strategyAnchorFor": [
@@ -20076,7 +21959,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[283].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[295].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "fort.install_ice_tax",
       "strategyAnchorFor": [
@@ -20086,7 +21969,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[285].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[297].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "hardware.trash_payoff",
       "strategyAnchorFor": [
@@ -20096,7 +21979,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[294].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[306].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "ice.corp_free_rez",
       "strategyAnchorFor": [
@@ -20107,7 +21990,17 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[295].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[307].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "ice.corp_hq_runpath_insert",
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[308].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "ice.corp_install_discount",
       "strategyAnchorFor": [
@@ -20118,7 +22011,18 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[298].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[309].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "ice.corp_install_discount",
+      "strategyAnchorFor": [
+        "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[313].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "ice.corp_rez_discount",
       "strategyAnchorFor": [
@@ -20129,7 +22033,18 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[300].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[314].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "ice.corp_rez_discount",
+      "strategyAnchorFor": [
+        "corp.economy_rez_reserve",
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[316].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "ice.corp_strength_support",
       "strategyAnchorFor": [
@@ -20139,7 +22054,27 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[301].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[317].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "ice.corp_strength_support",
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[318].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "ice.corp_subroutine_repeat",
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[319].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "ice.corp_subroutine_support",
       "strategyAnchorFor": [
@@ -20149,7 +22084,17 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[334].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[320].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "ice.corp_subroutine_support",
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[354].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "info.rnd_manipulation",
       "strategyAnchorFor": [
@@ -20159,7 +22104,27 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[344].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[358].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "remote.agenda_difficulty_discount",
+      "strategyAnchorFor": [
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[365].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "remote.capacity_support",
+      "strategyAnchorFor": [
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[366].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "remote.full_fort_trash",
       "strategyAnchorFor": [
@@ -20170,7 +22135,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[345].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[367].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "remote.install_ice_tax",
       "strategyAnchorFor": [
@@ -20180,7 +22145,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[356].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[378].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "resource.trash_payoff",
       "strategyAnchorFor": [
@@ -20190,7 +22155,18 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[413].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[438].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "run.corp_pay_or_end_run",
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier",
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[439].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "run.corp_redirect",
       "strategyAnchorFor": [
@@ -20200,7 +22176,27 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[414].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[440].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "run.corp_server_lock",
+      "strategyAnchorFor": [
+        "corp.remote_scoring"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[441].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "run.corp_spend_cap",
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[442].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "run.corp_start_tax",
       "strategyAnchorFor": [
@@ -20210,7 +22206,17 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[444].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[443].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "run.corp_stealth_credit_lockout",
+      "strategyAnchorFor": [
+        "corp.ice_tax_glacier"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[474].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.agenda_difficulty_discount",
       "strategyAnchorFor": [
@@ -20220,7 +22226,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[445].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[476].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.agenda_point_gain",
       "strategyAnchorFor": [
@@ -20230,7 +22236,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[448].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[479].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.black_ice_strength_bonus",
       "strategyAnchorFor": [
@@ -20240,7 +22246,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[451].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[482].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.bonus_agenda_point",
       "strategyAnchorFor": [
@@ -20250,7 +22256,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[453].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[484].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.chosen_ice_strength_bonus",
       "strategyAnchorFor": [
@@ -20260,7 +22266,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[454].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[485].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.closeout_agenda",
       "strategyAnchorFor": [
@@ -20270,7 +22276,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[455].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[486].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.code_gate_strength_bonus",
       "strategyAnchorFor": [
@@ -20280,7 +22286,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[458].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[489].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.damage_amp",
       "strategyAnchorFor": [
@@ -20290,7 +22296,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[466].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[497].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.fort_ice_strength_bonus",
       "strategyAnchorFor": [
@@ -20301,7 +22307,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[468].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[499].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.free_install_and_rez_ice",
       "strategyAnchorFor": [
@@ -20312,7 +22318,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[469].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[500].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.free_rez_ice",
       "strategyAnchorFor": [
@@ -20323,7 +22329,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[472].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[504].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.hand_size_pressure",
       "strategyAnchorFor": [
@@ -20333,7 +22339,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[479].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[510].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.ice_type_tax_support",
       "strategyAnchorFor": [
@@ -20343,7 +22349,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[480].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[511].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.meat_damage_amp",
       "strategyAnchorFor": [
@@ -20353,7 +22359,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[481].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[512].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.meat_damage_source",
       "strategyAnchorFor": [
@@ -20363,7 +22369,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[482].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[513].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.net_damage_access_punish",
       "strategyAnchorFor": [
@@ -20374,7 +22380,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[488].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[519].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.remote_fort_creation",
       "strategyAnchorFor": [
@@ -20384,7 +22390,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[489].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[520].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.remote_install_budget",
       "strategyAnchorFor": [
@@ -20394,7 +22400,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[490].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[521].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.repeat_ice_subroutines",
       "strategyAnchorFor": [
@@ -20404,7 +22410,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[493].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[524].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.rnd_install_and_rez",
       "strategyAnchorFor": [
@@ -20415,7 +22421,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[495].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[526].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.tag_source",
       "strategyAnchorFor": [
@@ -20425,7 +22431,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[496].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[527].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.tagged_meat_damage_payoff",
       "strategyAnchorFor": [
@@ -20436,7 +22442,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[497].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[528].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.trace_tag_source",
       "strategyAnchorFor": [
@@ -20446,7 +22452,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[499].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[530].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "score.wall_strength_bonus",
       "strategyAnchorFor": [
@@ -20456,7 +22462,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[537].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[568].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "setup.program_recovery",
       "strategyAnchorFor": [
@@ -20466,7 +22472,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[558].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[589].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "setup.temporary_program_install",
       "strategyAnchorFor": [
@@ -20476,7 +22482,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[560].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[591].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "tag.additional_tag_followup",
       "strategyAnchorFor": [
@@ -20486,7 +22492,7 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[561].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[592].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "tag.corp_persistent_source",
       "strategyAnchorFor": [
@@ -20496,7 +22502,17 @@
     {
       "kind": "strategy_anchor_without_effect_scope_warn_only",
       "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[572].gates.effectScope",
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[603].gates.effectScope",
+      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
+      "signalId": "trace.corp_credit_support",
+      "strategyAnchorFor": [
+        "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "kind": "strategy_anchor_without_effect_scope_warn_only",
+      "count": 1,
+      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[604].gates.effectScope",
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "trace.corp_credit_support",
       "strategyAnchorFor": [

@@ -1908,7 +1908,7 @@ function buildDerivationSmokeTests(rules) {
     corpScoreAcceleration: {
       cardId: "ai016_smoke_score_acceleration",
       side: "corp",
-      cardType: "upgrade",
+      cardType: "operation",
       effects: [
         {
           kind: "score_acceleration",

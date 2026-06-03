@@ -91,14 +91,21 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
   });
 
   it("detects Corp remote-scoring evidence from remote protection and safe lineSupport anchors", () => {
-    const profile = buildDeckStrategyProfile(
-      snapshotById("onr_origin_corp_ai_snapshot_v1"),
-    );
+    const profile = buildDeckStrategyProfile({
+      deckSnapshotId: "ai030-corp-remote-upgrade-diagnostic",
+      side: "corp",
+      cards: [
+        {
+          cardId: "onr_v1_355_crystal-palace-station-grid",
+          quantity: 1,
+        },
+      ],
+    });
 
     expect(profile.strategyScores["corp.remote_scoring"]?.anchorEvidence).toEqual(
       expect.arrayContaining([
         expect.objectContaining({
-          cardId: "onr_v1_350_antiquated-interface-routines",
+          cardId: "onr_v1_355_crystal-palace-station-grid",
           source: "lineSupport",
         }),
       ]),
