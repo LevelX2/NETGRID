@@ -1,20 +1,24 @@
 ---
 activityId: act-2026-06-02-ai027-corp-upgrades-semantics-review
-status: inbox
+status: done
 kind: implementation
 area: ai
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-06-02
-startedAt:
-completedAt:
+startedAt: 2026-06-03
+completedAt: 2026-06-03
 branch:
 releaseTarget:
-blockedBy:
-  - AI026 Corp Nodes / Assets Semantics Review must be complete
-resultArtifacts: []
-checks: []
+blockedBy: []
+resultArtifacts:
+  - docs/reviews/ai/ai030-corp-upgrades-semantics-review-2026-06-03.md
+  - docs/reviews/ai/ai030-corp-upgrades-semantics-review-report-2026-06-03.json
+  - docs/reviews/ai/README.md
+checks:
+  - "PASS: node scripts/check-ai030-corp-upgrades-semantics.mjs"
+  - "PASS: git diff --check"
 ---
 
 # AI027: Corp Upgrades Semantics Review
@@ -98,46 +102,46 @@ Alle aktiven/compiled Corp-Upgrade-Karten aus Classic/Originalset und Proteus so
 
 ## Akzeptanzkriterien
 
-- [ ] Alle aktiven/compiled Corp-Upgrade-Karten sind inventarisiert.
-- [ ] Alle aktiven/compiled Corp-Upgrade-Karten sind fachlich geprüft.
-- [ ] Vollständige Post-Review-Liste ist im JSON-Report vorhanden, nicht nur ein Delta.
-- [ ] Inaktive oder zusätzlich bekannte Corp-Upgrade-Karten sind, soweit vorhanden, separat erfasst.
-- [ ] Upgrade-Subtypen sind als Kartendaten/Traits sichtbar, aber nicht als Taktiksignale dupliziert.
-- [ ] Keine Runner-Karten, Corp Agendas, Corp ICE, Corp Operations oder Corp Nodes/Assets wurden fachlich migriert.
-- [ ] Keine neuen freien, unkatalogisierten, card-spezifischen oder Typ-/Subtyp-only-Taktiksignale existieren.
-- [ ] Alle neuen Taktiksignale sind im Katalog und korrekt als support-only oder may-anchor-fähig markiert.
-- [ ] Keine generische `corp.upgrade`-, `corp.region`-, `corp.sysop`- oder `corp.ambush_upgrade`-Strategie.
-- [ ] Keine Strategie aus bloßen Supportsignalen.
-- [ ] Keine Strategy Anchors für einfache Sysop-/Region-/Utility-Upgrades ohne klare Decklinie.
-- [ ] Keine kanonische strategische Rolle ohne Strategieanker.
-- [ ] Bei mehreren Strategieankern ist die Rollenzuordnung eindeutig.
-- [ ] Legacy-Felder wie `lineSupport[]` und `strategicRole[]` bleiben kompatibel, ersetzen aber nicht `strategySupportPairs`.
-- [ ] Keine Planner-, Engine-, Legalitäts-, Targeting-, ActionScore-, PlanWeight-, Profil-/Default-, UI-Derivations- oder Hidden-Info-Leak-Wirkung.
-- [ ] Keine Hidden-Info-TargetProfiles.
-- [ ] Runner-seitig wird keine verdeckte Corp-Upgrade-Semantik offengelegt.
-- [ ] Region-/Sysop-/Ambush-/Asset-/Random-Subtypen bleiben Kartendaten, keine Signale.
-- [ ] `Red Herrings` und `Bizarre Encryption Scheme` sind als Agenda-Steal-Tax/Score-Delay geprüft.
-- [ ] `Washington, D.C., City Grid`, `Networked Center`, `Research Bunker` und `Weapons Depot` sind als Agenda-Difficulty-Reduction geprüft, ohne Subtyp-Signale.
-- [ ] `Namatoki Plaza` ist als remote capacity support mit leave-play risk geprüft.
-- [ ] `Crystal Palace Station Grid`, `Rasmin Bridger`, `Tesseract Fort Construction` und `Obfuscated Fortress` sind als Run-/Break-/Spend-Tax geprüft.
-- [ ] `New Galveston City Grid` ist als Node-/Upgrade-trash-cost tax geprüft.
-- [ ] `Paris City Grid` ist als trace-credit support geprüft.
-- [ ] `Tokyo-Chiba Infighting` ist als unsuccessful-run economy geprüft.
-- [ ] `Roving Submarine` ist als remote-lock/runability condition geprüft.
-- [ ] `Jerusalem City Grid` unterstützt Walls über Funktion: rez discount + strength bonus; `Wall` bleibt Constraint/Subtyp.
-- [ ] `Lisa Blight` und `Marcel DeSoleil` wiederholen Subroutinen, erzeugen aber keine direkten Damage-/Tag-Signale ohne Boardstate.
-- [ ] `Dr. Dreff`, `Jenny Jett` und `Pavit Bharat` modellieren successful-run or after-last-ice surprise/fort-rebuild effects.
-- [ ] `Omni Kismet, Ph.D.`, `Singapore City Grid` und `Herman Revista` modellieren ICE rearrange/swap/concealment.
-- [ ] `Lesley Major` modelliert advancement support; `Raymond Ellison` modelliert counter-to-temporary-credit conversion.
-- [ ] `Dedicated Response Team` modelliert tagged access meat damage.
-- [ ] `Dieter Esslin` modelliert access net damage.
-- [ ] `Turbeau Delacroix` modelliert access trace/tag.
-- [ ] `Crybaby` modelliert persistent link penalty, nicht trace-credit.
-- [ ] `Chimera` modelliert daemon trash/rig pressure.
-- [ ] `Simon Francisco` modelliert HQ/R&D access reduction.
-- [ ] `Panic Button` modelliert draw during HQ run.
-- [ ] `Twenty-Four-Hour Surveillance` modelliert stealth denial, nicht generic run tax.
-- [ ] Access-window-, successful-run-, after-last-ice-, start-of-run- und during-run-Conditions sind als Conditions dokumentiert, nicht als LegalAction-Generatoren.
+- [x] Alle aktiven/compiled Corp-Upgrade-Karten sind inventarisiert.
+- [x] Alle aktiven/compiled Corp-Upgrade-Karten sind fachlich geprüft.
+- [x] Vollständige Post-Review-Liste ist im JSON-Report vorhanden, nicht nur ein Delta.
+- [x] Inaktive oder zusätzlich bekannte Corp-Upgrade-Karten sind, soweit vorhanden, separat erfasst.
+- [x] Upgrade-Subtypen sind als Kartendaten/Traits sichtbar, aber nicht als Taktiksignale dupliziert.
+- [x] Keine Runner-Karten, Corp Agendas, Corp ICE, Corp Operations oder Corp Nodes/Assets wurden fachlich migriert.
+- [x] Keine neuen freien, unkatalogisierten, card-spezifischen oder Typ-/Subtyp-only-Taktiksignale existieren.
+- [x] Alle neuen Taktiksignale sind im Katalog und korrekt als support-only oder may-anchor-fähig markiert.
+- [x] Keine generische `corp.upgrade`-, `corp.region`-, `corp.sysop`- oder `corp.ambush_upgrade`-Strategie.
+- [x] Keine Strategie aus bloßen Supportsignalen.
+- [x] Keine Strategy Anchors für einfache Sysop-/Region-/Utility-Upgrades ohne klare Decklinie.
+- [x] Keine kanonische strategische Rolle ohne Strategieanker.
+- [x] Bei mehreren Strategieankern ist die Rollenzuordnung eindeutig.
+- [x] Legacy-Felder wie `lineSupport[]` und `strategicRole[]` bleiben kompatibel, ersetzen aber nicht `strategySupportPairs`.
+- [x] Keine Planner-, Engine-, Legalitäts-, Targeting-, ActionScore-, PlanWeight-, Profil-/Default-, UI-Derivations- oder Hidden-Info-Leak-Wirkung.
+- [x] Keine Hidden-Info-TargetProfiles.
+- [x] Runner-seitig wird keine verdeckte Corp-Upgrade-Semantik offengelegt.
+- [x] Region-/Sysop-/Ambush-/Asset-/Random-Subtypen bleiben Kartendaten, keine Signale.
+- [x] `Red Herrings` und `Bizarre Encryption Scheme` sind als Agenda-Steal-Tax/Score-Delay geprüft.
+- [x] `Washington, D.C., City Grid`, `Networked Center`, `Research Bunker` und `Weapons Depot` sind als Agenda-Difficulty-Reduction geprüft, ohne Subtyp-Signale.
+- [x] `Namatoki Plaza` ist als remote capacity support mit leave-play risk geprüft.
+- [x] `Crystal Palace Station Grid`, `Rasmin Bridger`, `Tesseract Fort Construction` und `Obfuscated Fortress` sind als Run-/Break-/Spend-Tax geprüft.
+- [x] `New Galveston City Grid` ist als Node-/Upgrade-trash-cost tax geprüft.
+- [x] `Paris City Grid` ist als trace-credit support geprüft.
+- [x] `Tokyo-Chiba Infighting` ist als unsuccessful-run economy geprüft.
+- [x] `Roving Submarine` ist als remote-lock/runability condition geprüft.
+- [x] `Jerusalem City Grid` unterstützt Walls über Funktion: rez discount + strength bonus; `Wall` bleibt Constraint/Subtyp.
+- [x] `Lisa Blight` und `Marcel DeSoleil` wiederholen Subroutinen, erzeugen aber keine direkten Damage-/Tag-Signale ohne Boardstate.
+- [x] `Dr. Dreff`, `Jenny Jett` und `Pavit Bharat` modellieren successful-run or after-last-ice surprise/fort-rebuild effects.
+- [x] `Omni Kismet, Ph.D.`, `Singapore City Grid` und `Herman Revista` modellieren ICE rearrange/swap/concealment.
+- [x] `Lesley Major` modelliert advancement support; `Raymond Ellison` modelliert counter-to-temporary-credit conversion.
+- [x] `Dedicated Response Team` modelliert tagged access meat damage.
+- [x] `Dieter Esslin` modelliert access net damage.
+- [x] `Turbeau Delacroix` modelliert access trace/tag.
+- [x] `Crybaby` modelliert persistent link penalty, nicht trace-credit.
+- [x] `Chimera` modelliert daemon trash/rig pressure.
+- [x] `Simon Francisco` modelliert HQ/R&D access reduction.
+- [x] `Panic Button` modelliert draw during HQ run.
+- [x] `Twenty-Four-Hour Surveillance` modelliert stealth denial, nicht generic run tax.
+- [x] Access-window-, successful-run-, after-last-ice-, start-of-run- und during-run-Conditions sind als Conditions dokumentiert, nicht als LegalAction-Generatoren.
 
 ## Umsetzungshinweise
 
@@ -173,4 +177,10 @@ Alle aktiven/compiled Corp-Upgrade-Karten aus Classic/Originalset und Proteus so
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen am 2026-06-03 als Superseded-/Board-Cleanup.
+
+Dieses Inbox-Paket wurde nicht erneut unter den historischen AI027-Dateinamen umgesetzt. Der Scope ist im aktuelleren `AI030 Corp-Upgrades Semantics Review` bereits erfüllt und präziser dokumentiert: 26 Originalset-Corp-Upgrades, 13 Proteus-Corp-Upgrades und 1 Testfixture sind dort inventarisiert, fachlich geprüft und zwischen Active Hints, Compiled Hints und Inspector synchronisiert.
+
+AI030 ist der führende Artefaktstand für diesen Upgrade-Scope nach Guide V3. Der AI030-Report enthält die vollständige Post-Review-Liste, Signal-/Strategie-/TargetProfile-Prüfung, Hidden-Info-No-Effect-Flags und die kartenspezifischen Entscheidungen zu den im Paket genannten Upgrades. Eine zweite AI027-Neuausführung würde den neueren AI030-Stand duplizieren oder riskieren, ihn zu überschreiben.
+
+Aktueller Verify-Check: `node scripts/check-ai030-corp-upgrades-semantics.mjs` ist grün mit `originalset=26`, `proteus=13`, `test=1`, `signals=17`, `inspectorCards=40`.
