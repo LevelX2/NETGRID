@@ -3496,12 +3496,6 @@ export default function Page() {
   }, [damageImpactQueue, currentDamageImpact]);
 
   useEffect(() => {
-    if (!currentDamageImpact || currentDamageImpact.flatline) return;
-    const timeout = window.setTimeout(() => setCurrentDamageImpact(null), 5200);
-    return () => window.clearTimeout(timeout);
-  }, [currentDamageImpact]);
-
-  useEffect(() => {
     if (!currentActionCue) return;
     if (audioEnabled && currentActionCue.sound) playActionCueSound(currentActionCue.sound, audioVolume, currentActionCue.soundCount);
     if (localAiPacingMode === "manual" && currentActionCue.source === "ai" && aiTurnPresentation?.canAdvanceAi) return;
@@ -8012,9 +8006,9 @@ function DamageImpactOverlay({
       </div>
       <div className="damageImpactFooter">
         {queued > 0 ? <small>{queued} weitere Damage-Meldung{queued === 1 ? "" : "en"}</small> : <span aria-hidden="true" />}
-        <button className="button damageImpactDismiss" onClick={onDismiss} aria-label="Damage-Fenster schließen" title="Damage-Fenster schließen" type="button">
+        <button className="button damageImpactDismiss" onClick={onDismiss} aria-label="Damage-Fenster bestätigen" title="Damage-Fenster bestätigen" type="button">
           <Check size={14} />
-          Schließen
+          Weiter
         </button>
       </div>
     </aside>

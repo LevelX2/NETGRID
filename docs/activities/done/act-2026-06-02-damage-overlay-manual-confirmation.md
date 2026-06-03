@@ -1,19 +1,24 @@
 ---
 activityId: act-2026-06-02-damage-overlay-manual-confirmation
-status: inbox
+status: done
 kind: fix
 area: web
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-06-02
-startedAt:
-completedAt:
+startedAt: 2026-06-03
+completedAt: 2026-06-03
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/page.tsx
+  - apps/web/app/damage-impact-overlay.test.ts
+checks:
+  - "PASS: pnpm exec vitest run apps/web/app/action-cues.test.ts apps/web/app/damage-impact-overlay.test.ts"
+  - "PASS: pnpm --filter @netgrid/web typecheck"
+  - "PASS: git diff --check"
 ---
 
 # Damage-Overlay erst nach Bestätigung schließen
@@ -52,13 +57,13 @@ Die spezielle Damage-Anzeige für Runner-Schaden soll nicht automatisch ausblend
 
 ## Akzeptanzkriterien
 
-- [ ] Ein neues Damage-Overlay verschwindet nicht durch Timeout, Animation-Ende oder automatisches Cue-Weiterlaufen.
-- [ ] Das Overlay wird erst nach bewusster Bestätigung der zuständigen menschlichen Sicht geschlossen.
-- [ ] Die Bestätigungsrolle ist im Ergebnis klar dokumentiert, insbesondere ob die Korp, der Runner oder beide Perspektiven betroffen sind.
-- [ ] Human-vs-KI- und KI-vs-Human-Flows blockieren nicht dauerhaft, wenn die bestätigende Seite keine menschliche Bedienung hat.
-- [ ] Reconnect oder EventTail zeigen bereits bestätigte Damage-Overlays nicht erneut als neue Pflichtbestätigung.
-- [ ] Das Overlay bleibt hidden-info-sicher und zeigt weiterhin nur abstrakte, öffentliche Damage-/Grip-Informationen.
-- [ ] Fokussierte Web-/UI-Regressionen decken manuelles Schließen, kein automatisches Schließen und Dedupe ab, oder ausgelassene Checks sind begründet.
+- [x] Ein neues Damage-Overlay verschwindet nicht durch Timeout, Animation-Ende oder automatisches Cue-Weiterlaufen.
+- [x] Das Overlay wird erst nach bewusster Bestätigung der zuständigen menschlichen Sicht geschlossen.
+- [x] Die Bestätigungsrolle ist im Ergebnis klar dokumentiert, insbesondere ob die Korp, der Runner oder beide Perspektiven betroffen sind.
+- [x] Human-vs-KI- und KI-vs-Human-Flows blockieren nicht dauerhaft, wenn die bestätigende Seite keine menschliche Bedienung hat.
+- [x] Reconnect oder EventTail zeigen bereits bestätigte Damage-Overlays nicht erneut als neue Pflichtbestätigung.
+- [x] Das Overlay bleibt hidden-info-sicher und zeigt weiterhin nur abstrakte, öffentliche Damage-/Grip-Informationen.
+- [x] Fokussierte Web-/UI-Regressionen decken manuelles Schließen, kein automatisches Schließen und Dedupe ab, oder ausgelassene Checks sind begründet.
 
 ## Umsetzungshinweise
 
@@ -69,4 +74,11 @@ Die spezielle Damage-Anzeige für Runner-Schaden soll nicht automatisch ausblend
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt am 2026-06-03.
+
+- Der bisherige Auto-Dismiss-Timer für `currentDamageImpact` wurde entfernt. Nicht-Flatline-Damage bleibt damit wie Flatline-Damage sichtbar, bis die lokale UI bewusst bestätigt wird.
+- Der Button im Damage-Impact-Overlay heißt jetzt `Weiter` und hat den zugänglichen Namen `Damage-Fenster bestätigen`.
+- Bestätigungsrolle: Das Overlay ist kein Engine-Gate und blockiert keine Bot- oder KI-Entscheidung. Bestätigen muss die jeweilige menschliche lokale Sicht, in der der Damage-Cue angezeigt wird. In Human-vs-Human sehen beide Seiten ihre eigene öffentliche Damage-Anzeige und bestätigen lokal; in Human-vs-KI blockiert keine nicht bedienbare KI-Sicht.
+- Reconnect-/EventTail-Dedupe bleibt unverändert über `lastPresentedEventId` in `deriveDamageImpactCues`; bereits präsentierte alte Events werden nicht erneut als neues Pflichtoverlay erzeugt.
+- Hidden-Info-Vertrag bleibt unverändert: Die bestehende Cue-Ableitung nutzt weiter nur öffentliche Counts und sichtbare Quellen; es wurden keine Engine- oder Payload-Felder erweitert.
+- Der neue Regressionstest prüft, dass `page.tsx` keinen `setTimeout(() => setCurrentDamageImpact(null)` mehr enthält und der manuelle `Weiter`-Button erhalten bleibt. Die bestehenden Action-Cue-Tests decken weiterhin Damage-Cue-Ableitung und Dedupe ab.
