@@ -3030,13 +3030,19 @@
       },
       "targetProfiles": [
         {
+          "hiddenInfoPolicy": "public_or_controller_known_only",
           "installCost": "free",
           "installsTarget": true,
+          "kind": "search_install_target",
           "lookCount": 5,
           "oncePerRun": true,
+          "purpose": "search_install_program_from_stack_top",
+          "schemaVersion": "target-profile-v1",
           "showToOpponent": true,
           "shuffleAfter": true,
           "targetCardType": "program",
+          "targetType": "program",
+          "timing": "on_use",
           "zone": "stack_top"
         }
       ],
@@ -4195,10 +4201,16 @@
       ],
       "targetProfiles": [
         {
+          "hiddenInfoPolicy": "public_or_controller_known_only",
           "installCost": "normal",
           "installsTarget": true,
+          "kind": "search_install_target",
+          "purpose": "search_install_program_from_stack",
+          "schemaVersion": "target-profile-v1",
           "shuffleAfter": true,
           "targetCardType": "program",
+          "targetType": "program",
+          "timing": "on_use",
           "zone": "stack"
         }
       ],
@@ -34850,10 +34862,16 @@
           "timing": "during_ice_encounter"
         },
         {
+          "hiddenInfoPolicy": "public_or_controller_known_only",
           "installCost": "normal",
           "installsTarget": true,
+          "kind": "search_install_target",
+          "purpose": "search_install_program_from_stack",
+          "schemaVersion": "target-profile-v1",
           "shuffleAfter": true,
           "targetCardType": "program",
+          "targetType": "program",
+          "timing": "on_use",
           "zone": "stack"
         }
       ]

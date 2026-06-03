@@ -298,13 +298,50 @@ function clone(value) {
 }
 
 function generatedFactsFrom(derivedFacts = {}) {
+  const normalizedFacts = normalizeGeneratedFacts(derivedFacts);
   return Object.fromEntries(
     MECHANICAL_FIELDS.flatMap((field) =>
-      isMeaningful(derivedFacts[field])
-        ? [[field, stableValue(derivedFacts[field])]]
+      isMeaningful(normalizedFacts[field])
+        ? [[field, stableValue(normalizedFacts[field])]]
         : [],
     ),
   );
+}
+
+function normalizeGeneratedFacts(derivedFacts = {}) {
+  return {
+    ...derivedFacts,
+    targetProfiles: Array.isArray(derivedFacts.targetProfiles)
+      ? derivedFacts.targetProfiles.map(normalizeGeneratedTargetProfile)
+      : derivedFacts.targetProfiles,
+  };
+}
+
+function normalizeGeneratedTargetProfile(targetProfile) {
+  if (!targetProfile || typeof targetProfile !== "object") return targetProfile;
+  if (
+    targetProfile.schemaVersion ||
+    targetProfile.kind ||
+    targetProfile.targetType ||
+    targetProfile.hiddenInfoPolicy
+  ) {
+    return targetProfile;
+  }
+  if (!targetProfile.zone && !targetProfile.targetCardType) return targetProfile;
+  const targetType = targetProfile.targetCardType ?? "card";
+  return {
+    schemaVersion: "target-profile-v1",
+    kind: targetProfile.installsTarget ? "search_install_target" : "use_target",
+    timing: "on_use",
+    targetType,
+    purpose: targetProfile.installsTarget
+      ? `search_install_${targetType}_from_${targetProfile.zone ?? "zone"}`
+      : `choose_${targetType}_from_${targetProfile.zone ?? "zone"}`,
+    hiddenInfoPolicy: "public_or_controller_known_only",
+    preferences: [],
+    avoid: [],
+    ...targetProfile,
+  };
 }
 
 function overlayFieldsFrom(overlay = {}) {
