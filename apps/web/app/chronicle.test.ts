@@ -2345,6 +2345,70 @@ describe("formatChronicleEvent", () => {
     }
   });
 
+  it("formats Corporate War score credit swings from score payload fields", () => {
+    const success = formatChronicleEvent(
+      makeEvent("score_agenda", {
+        actor: "corp",
+        title: "Corporate War",
+        cardDefinitionId: "onr_v1_196_corporate-war",
+        corporateWarThresholdMet: true,
+        onScoreGainCredits: 12,
+        corpCreditsAfter: 24
+      }),
+      "runner",
+      { cardTitle: "Corporate War" }
+    );
+    const miss = formatChronicleEvent(
+      makeEvent("score_agenda", {
+        actor: "corp",
+        title: "Corporate War",
+        cardDefinitionId: "onr_v1_196_corporate-war",
+        corporateWarThresholdMet: false,
+        onScoreGainCredits: 0,
+        onScoreLostAllCredits: true,
+        corpCreditsAfter: 0
+      }),
+      "runner",
+      { cardTitle: "Corporate War" }
+    );
+
+    expect(success.title).toBe("Die Korp hat Corporate War gescored und 12 Credits erhalten.");
+    expect(success.category).toBe("economy");
+    expect(success.chips).toEqual(expect.arrayContaining(["Score", "+12 Credits"]));
+    expect(miss.title).toBe("Die Korp hat Corporate War gescored und alle Credits verloren.");
+    expect(miss.category).toBe("danger");
+    expect(miss.chips).toEqual(expect.arrayContaining(["Score", "Alle Credits verloren"]));
+    expect(JSON.stringify([success, miss])).not.toMatch(/"cardInstances"|"privatePayload"|"hq"|"rd"|"grip"|"stack"/);
+  });
+
+  it("merges score-agenda credit resolver effects into score entries", () => {
+    const event = makeEvent("score_agenda", {
+      actor: "corp",
+      title: "Hostile Takeover",
+      cardDefinitionId: "onr_v1_203_hostile-takeover",
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_203_hostile-takeover.score.gain_credits",
+          kind: "gain_credits",
+          visibility: "public",
+          side: "corp",
+          amount: 5,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_203_hostile-takeover",
+          sourceTitle: "Hostile Takeover"
+        }
+      ]
+    });
+
+    const item = formatChronicleEvent(event, "runner", { cardTitle: "Hostile Takeover" });
+    const effects = formatChronicleEffectItems(event, "runner");
+
+    expect(item.title).toBe("Die Korp hat Hostile Takeover gescored und 5 Credits erhalten.");
+    expect(item.category).toBe("economy");
+    expect(item.chips).toEqual(expect.arrayContaining(["Score", "+5 Credits"]));
+    expect(effects).toEqual([]);
+  });
+
   it("merges hosted-credit take effects into activated ability entries", () => {
     for (const [actor, title, cardDefinitionId, amount, remaining, expectedTitle] of [
       [

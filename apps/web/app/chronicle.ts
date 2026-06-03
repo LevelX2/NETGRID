@@ -1145,7 +1145,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         break;
       }
       const points = agendaPointSuffix(agendaPoints);
-      const scoreEffect = mergedCardResolverEffect;
+      const scoreEffect = scoreAgendaPayloadEffect(payload) ?? mergedCardResolverEffect;
       const selectedServerSuffix = selectedServerLabel ? ` und ${selectedServerLabel} gewählt` : "";
       category = scoreEffect?.category ?? category;
       title = phrase(
@@ -2438,6 +2438,23 @@ function summarizeEffect(cardText: string | undefined): EffectSummary {
   return { chips: [] };
 }
 
+function scoreAgendaPayloadEffect(payload: Record<string, unknown>): EffectSummary | undefined {
+  const gainedCredits = numberValue(payload.onScoreGainCredits);
+  if (gainedCredits !== undefined && gainedCredits > 0)
+    return {
+      category: "economy",
+      suffix: `${creditText(gainedCredits)} erhalten`,
+      chips: [`+${gainedCredits} ${creditLabel(gainedCredits)}`],
+    };
+  if (payload.onScoreLostAllCredits === true)
+    return {
+      category: "danger",
+      suffix: "alle Credits verloren",
+      chips: ["Alle Credits verloren"],
+    };
+  return undefined;
+}
+
 function mergedCardResolverEventEffect(event: PublicGameEvent): EffectSummary | undefined {
   const effects = resolvedEffectsFromPayload(event.publicPayload.resolvedEffects);
   if (effects.length === 0 || !effects.every((effect) => shouldMergeCardResolverEffect(event, effect))) return undefined;
@@ -2539,9 +2556,13 @@ function shouldMergeCardResolverEffect(event: PublicGameEvent, effect: ResolvedG
     return false;
   if (
     (actionType === "rez_ice" ||
-      actionType === "install_card" ||
-      actionType === "score_agenda") &&
+      actionType === "install_card") &&
     effect.kind !== "add_hosted_credits"
+  )
+    return false;
+  if (
+    actionType === "score_agenda" &&
+    !["add_hosted_credits", "gain_credits", "lose_credits"].includes(effect.kind)
   )
     return false;
   if (!["draw_cards", "gain_credits", "lose_credits", "add_tags", "damage", "add_hosted_credits", "take_hosted_credits", "trash_source_when_empty", "trash_source"].includes(effect.kind) || effect.visibility !== "public") return false;

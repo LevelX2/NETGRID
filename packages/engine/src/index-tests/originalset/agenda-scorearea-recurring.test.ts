@@ -2337,6 +2337,16 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
     expect(hostile.eventLog.at(-1)?.publicPayload).toMatchObject({
       onScoreGainCredits: 5,
       cardDefinitionId: "onr_v1_203_hostile-takeover",
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "gain_credits",
+          side: "corp",
+          amount: 5,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_203_hostile-takeover",
+          sourceTitle: "Hostile Takeover",
+        }),
+      ],
     });
 
     let political = apply(

@@ -4600,6 +4600,16 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       cardDefinitionId: "onr_v1_196_corporate-war",
       corporateWarThresholdMet: true,
       onScoreGainCredits: 12,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "gain_credits",
+          side: "corp",
+          amount: 12,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_196_corporate-war",
+          sourceTitle: "Corporate War",
+        }),
+      ],
     });
     expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
       /"hq"|"rd"|"cardInstances"|"privatePayload"/,
@@ -4639,6 +4649,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       );
     }
     expect(missState.corp.credits).toBeLessThan(12);
+    const missCreditsBeforeScore = missState.corp.credits;
     missState = apply(
       missState,
       "corp",
@@ -4650,6 +4661,16 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(missState.eventLog.at(-1)?.publicPayload).toMatchObject({
       corporateWarThresholdMet: false,
       onScoreLostAllCredits: true,
+      resolvedEffects: [
+        expect.objectContaining({
+          kind: "lose_credits",
+          side: "corp",
+          amount: missCreditsBeforeScore,
+          reason: "card_resolver",
+          sourceDefinitionId: "onr_v1_196_corporate-war",
+          sourceTitle: "Corporate War",
+        }),
+      ],
     });
   });
 
