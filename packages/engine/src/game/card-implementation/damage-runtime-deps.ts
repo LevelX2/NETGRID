@@ -20,6 +20,8 @@ type DamageSummaryForCardImplementation = {
   amount: number;
   cardsTrashed: number;
   flatline: boolean;
+  runnerGripBefore?: number;
+  runnerGripAfter?: number;
   coreDamageAfter?: number;
   runnerMaxHandSizeAfter?: number;
 };
@@ -198,6 +200,12 @@ function damageSummaryPublicPayload(
     damageAmount: summary.amount,
     cardsTrashed: summary.cardsTrashed,
     flatline: summary.flatline,
+    ...(summary.runnerGripBefore !== undefined
+      ? { runnerGripBefore: summary.runnerGripBefore }
+      : {}),
+    ...(summary.runnerGripAfter !== undefined
+      ? { runnerGripAfter: summary.runnerGripAfter }
+      : {}),
     ...(summary.coreDamageAfter !== undefined
       ? { coreDamageAfter: summary.coreDamageAfter }
       : {}),

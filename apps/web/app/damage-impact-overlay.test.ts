@@ -12,4 +12,14 @@ describe("DamageImpactOverlay lifecycle", () => {
     expect(source).toContain('aria-label="Damage-Fenster bestätigen"');
     expect(source).toMatch(/<Check size=\{14\} \/>\s+Weiter\s+<\/button>/);
   });
+
+  it("shows a zero line and overkill labels instead of an unlabeled Grip-Pool delta", () => {
+    const source = pageSource();
+
+    expect(source).toContain('className="damageImpactZero"');
+    expect(source).toContain("Null-Linie");
+    expect(source).toContain("über Flatline-Schwelle");
+    expect(source).toContain("Überhang +");
+    expect(source).not.toContain("<span>-{cue.amount}</span>");
+  });
 });

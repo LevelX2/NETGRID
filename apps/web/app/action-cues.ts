@@ -191,7 +191,7 @@ export function deriveDamageImpactCues(input: Pick<CueDerivationInput, "viewerSi
       const runnerGripBefore = nonNegativeIntegerValue(payload.runnerGripBefore);
       const runnerGripAfter = nonNegativeIntegerValue(payload.runnerGripAfter);
       const coreDamageAfter = nonNegativeIntegerValue(payload.coreDamageAfter);
-      const runnerMaxHandSizeAfter = nonNegativeIntegerValue(payload.runnerMaxHandSizeAfter);
+      const runnerMaxHandSizeAfter = nonNegativeIntegerValue(payload.runnerMaxHandSizeAfter) ?? currentRunnerMaxHandSize(input.playerView, input.viewerSide);
       const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
       const visibleSource = sourceDefinitionId ? visibleCards.get(sourceDefinitionId) : undefined;
       return {
@@ -434,4 +434,9 @@ function nonNegativeIntegerValue(value: unknown): number | undefined {
 
 function damageTypeValue(value: unknown): DamageImpactCue["damageType"] | undefined {
   return value === "net" || value === "meat" || value === "core" ? value : undefined;
+}
+
+function currentRunnerMaxHandSize(playerView: PlayerView, viewerSide: Side): number | undefined {
+  const value = viewerSide === "runner" ? playerView.own.maxHandSize : playerView.opponent.maxHandSize;
+  return nonNegativeIntegerValue(value);
 }

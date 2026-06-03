@@ -214,6 +214,7 @@ describe("deriveOpponentActionCues", () => {
         runnerGripBefore: 4,
         runnerGripAfter: 2,
         flatline: false,
+        runnerMaxHandSizeAfter: 5,
         sourceLabel: "Korp-Effekt"
       }
     ]);
@@ -246,7 +247,37 @@ describe("deriveOpponentActionCues", () => {
       runnerGripBefore: 3,
       runnerGripAfter: 0,
       flatline: true,
+      runnerMaxHandSizeAfter: 5,
       sourceLabel: "Korp-Effekt"
+    });
+  });
+
+  it("falls back to public PlayerView max hand size for damage impact grip labels", () => {
+    const cues = deriveDamageImpactCues({
+      viewerSide: "corp",
+      playerView: view("corp", {
+        opponent: {
+          ...view("corp").opponent,
+          maxHandSize: 5
+        }
+      }),
+      events: [
+        event("evt_flatline", "play_operation", {
+          damageResolved: true,
+          damageType: "meat",
+          damageAmount: 4,
+          cardsTrashed: 0,
+          runnerGripBefore: 2,
+          runnerGripAfter: 0,
+          flatline: true
+        })
+      ]
+    });
+
+    expect(cues[0]).toMatchObject({
+      runnerGripBefore: 2,
+      runnerGripAfter: 0,
+      runnerMaxHandSizeAfter: 5
     });
   });
 

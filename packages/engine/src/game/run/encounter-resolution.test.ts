@@ -16,6 +16,7 @@ import {
   resolveFatalAttractorPostEncounter,
   resolveRunDurationMarkerSubroutine,
   startViral15ProgramTrashChoice,
+  type DamageSummary,
 } from "./encounter-resolution";
 import {
   payEncounterTaxForFutureIce,
@@ -260,6 +261,7 @@ describe("encounter resolution boundary", () => {
       { id: "etr", type: "end_the_run" },
     ] as SubroutineDefinition[];
     const dealt: unknown[] = [];
+    let damagePayload: DamageSummary | undefined;
 
     const result = resolveFatalAttractorPostEncounter(encounterResolutionHost(state), {
       subroutines,
@@ -271,9 +273,13 @@ describe("encounter resolution boundary", () => {
           amount: input.amount,
           cardsTrashed: 1,
           flatline: false,
+          runnerGripBefore: 5,
+          runnerGripAfter: 2,
         };
       },
-      setDamagePayload: () => undefined,
+      setDamagePayload: (summary) => {
+        damagePayload = summary;
+      },
     });
 
     expect(result).toMatchObject({ handled: true, stateChanged: true });
@@ -285,6 +291,10 @@ describe("encounter resolution boundary", () => {
         source: "subroutine:onr_v1_242_fatal-attractor:next_encounter",
       },
     ]);
+    expect(damagePayload).toMatchObject({
+      runnerGripBefore: 5,
+      runnerGripAfter: 2,
+    });
 
     const fullyBroken = makeState();
     fullyBroken.run!.fatalDamageActiveForEncounter = true;

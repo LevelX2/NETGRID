@@ -34,6 +34,8 @@ export type DamageSummary = {
   amount: number;
   cardsTrashed: number;
   flatline: boolean;
+  runnerGripBefore?: number;
+  runnerGripAfter?: number;
   coreDamageAfter?: number;
   runnerMaxHandSizeAfter?: number;
 };
@@ -891,6 +893,16 @@ function aggregateDamageSummaries(summaries: DamageSummary[]): DamageSummary {
       amount: aggregate.amount + summary.amount,
       cardsTrashed: aggregate.cardsTrashed + summary.cardsTrashed,
       flatline: aggregate.flatline || summary.flatline,
+      ...(aggregate.runnerGripBefore !== undefined
+        ? { runnerGripBefore: aggregate.runnerGripBefore }
+        : summary.runnerGripBefore !== undefined
+          ? { runnerGripBefore: summary.runnerGripBefore }
+          : {}),
+      ...(summary.runnerGripAfter !== undefined
+        ? { runnerGripAfter: summary.runnerGripAfter }
+        : aggregate.runnerGripAfter !== undefined
+          ? { runnerGripAfter: aggregate.runnerGripAfter }
+          : {}),
       ...(summary.coreDamageAfter !== undefined
         ? { coreDamageAfter: summary.coreDamageAfter }
         : {}),

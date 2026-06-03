@@ -7961,19 +7961,26 @@ function DamageImpactOverlay({
   onDismiss(): void;
 }) {
   if (!cue) return null;
-  const maxSegments = Math.max(1, cue.runnerGripBefore ?? cue.runnerGripAfter ?? cue.amount);
-  const segmentCount = Math.min(12, maxSegments);
-  const hitSegments = Math.min(segmentCount, Math.max(1, Math.ceil((cue.amount / maxSegments) * segmentCount)));
-  const filledAfter = cue.runnerGripAfter === undefined ? null : Math.max(0, Math.min(segmentCount, Math.round((cue.runnerGripAfter / maxSegments) * segmentCount)));
+  const survivableDamage = cue.runnerGripBefore;
+  const overkillDamage = cue.flatline && survivableDamage !== undefined ? Math.max(0, cue.amount - survivableDamage) : 0;
+  const meterUnits = damageImpactMeterUnits(cue);
   const title = cue.flatline ? "Flatline" : `${damageTypeLabel(cue.damageType)} Impact`;
   const gripLabel = cue.runnerGripBefore !== undefined && cue.runnerGripAfter !== undefined
-    ? `Grip ${cue.runnerGripBefore} -> ${cue.runnerGripAfter}`
+    ? `Grip ${damageImpactGripValue(cue.runnerGripBefore, cue.runnerMaxHandSizeAfter)} -> ${damageImpactGripValue(cue.runnerGripAfter, cue.runnerMaxHandSizeAfter)}`
     : cue.runnerGripAfter !== undefined
-      ? `Grip jetzt ${cue.runnerGripAfter}`
+      ? `Grip jetzt ${damageImpactGripValue(cue.runnerGripAfter, cue.runnerMaxHandSizeAfter)}`
       : "Grip-Pool";
   const summary = cue.flatline && cue.runnerGripBefore !== undefined
-    ? `Runner hatte nicht genug Grip für ${cue.amount} ${damageTypeLabel(cue.damageType)}.`
+    ? overkillDamage > 0
+      ? `${cue.amount} ${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel}; ${overkillDamage} über Flatline-Schwelle.`
+      : `${cue.amount} ${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel}; Flatline-Schwelle erreicht.`
     : `${cue.amount} ${damageTypeLabel(cue.damageType)} durch ${cue.sourceLabel}.`;
+  const thresholdLabel = cue.runnerGripBefore !== undefined
+    ? cue.flatline
+      ? `Null-Linie nach ${cue.runnerGripBefore} Damage`
+      : `Verkraftet bis ${cue.runnerGripBefore} Damage`
+    : null;
+  const overkillLabel = overkillDamage > 0 ? `Überhang +${overkillDamage}` : null;
   const coreDetail = cue.damageType === "core"
     ? [
         cue.coreDamageAfter !== undefined ? `Core Damage: ${cue.coreDamageAfter}` : "Core Damage",
@@ -7993,15 +8000,21 @@ function DamageImpactOverlay({
         </div>
       </div>
       <div className="damageImpactMeter" aria-label={gripLabel}>
-        {Array.from({ length: segmentCount }, (_, index) => {
-          const isHit = index >= segmentCount - hitSegments;
-          const isFilled = filledAfter === null || index < filledAfter;
-          return <span key={index} className={`${isFilled ? "is-filled" : "is-empty"} ${isHit ? "is-hit" : ""}`} />;
-        })}
+        {meterUnits.map((unit, index) =>
+          unit.kind === "zero" ? (
+            <span key={`zero-${index}`} className="damageImpactZero" aria-label="Null-Linie">
+              0
+            </span>
+          ) : (
+            <span key={index} className={`damageImpactSegment ${unit.kind}`} aria-hidden="true" />
+          )
+        )}
       </div>
       <div className="damageImpactStats">
         <span>{gripLabel}</span>
-        <span>-{cue.amount}</span>
+        <span>Damage {cue.amount}</span>
+        {thresholdLabel ? <span>{thresholdLabel}</span> : null}
+        {overkillLabel ? <span>{overkillLabel}</span> : null}
         {coreDetail ? <span>{coreDetail}</span> : null}
       </div>
       <div className="damageImpactFooter">
@@ -8013,6 +8026,60 @@ function DamageImpactOverlay({
       </div>
     </aside>
   );
+}
+
+type DamageImpactMeterUnit = {
+  kind: "remaining" | "lost" | "overkill" | "unknown" | "zero";
+};
+
+function damageImpactMeterUnits(cue: DamageImpactCue): DamageImpactMeterUnit[] {
+  const gripBefore = cue.runnerGripBefore;
+  if (gripBefore === undefined) {
+    const fallbackCount = Math.max(1, Math.min(12, cue.amount));
+    return Array.from({ length: fallbackCount }, () => ({ kind: "unknown" }));
+  }
+  const gripAfter = cue.runnerGripAfter ?? Math.max(0, gripBefore - cue.amount);
+  const lost = Math.max(0, Math.min(gripBefore, gripBefore - gripAfter));
+  const remaining = Math.max(0, gripBefore - lost);
+  const overkill = cue.flatline ? Math.max(0, cue.amount - gripBefore) : 0;
+  const counts = damageImpactVisualCounts({ remaining, lost, overkill });
+  const units: DamageImpactMeterUnit[] = [
+    ...Array.from({ length: counts.remaining }, () => ({ kind: "remaining" as const })),
+    ...Array.from({ length: counts.lost }, () => ({ kind: "lost" as const })),
+    { kind: "zero" },
+    ...Array.from({ length: counts.overkill }, () => ({ kind: "overkill" as const })),
+  ];
+  return units.length > 1 ? units : [{ kind: "zero" }];
+}
+
+function damageImpactVisualCounts(counts: { remaining: number; lost: number; overkill: number }): { remaining: number; lost: number; overkill: number } {
+  const maxSegments = 12;
+  const total = counts.remaining + counts.lost + counts.overkill;
+  if (total <= maxSegments) return counts;
+  const entries = (["remaining", "lost", "overkill"] as const).map((key) => ({
+    key,
+    value: counts[key],
+    visual: counts[key] > 0 ? Math.max(1, Math.round((counts[key] / total) * maxSegments)) : 0
+  }));
+  while (entries.reduce((sum, entry) => sum + entry.visual, 0) > maxSegments) {
+    const target = entries.filter((entry) => entry.visual > 1).sort((left, right) => right.visual - left.visual)[0];
+    if (!target) break;
+    target.visual -= 1;
+  }
+  while (entries.reduce((sum, entry) => sum + entry.visual, 0) < maxSegments) {
+    const target = entries.filter((entry) => entry.value > 0).sort((left, right) => right.value - left.value)[0];
+    if (!target) break;
+    target.visual += 1;
+  }
+  return {
+    remaining: entries.find((entry) => entry.key === "remaining")?.visual ?? 0,
+    lost: entries.find((entry) => entry.key === "lost")?.visual ?? 0,
+    overkill: entries.find((entry) => entry.key === "overkill")?.visual ?? 0
+  };
+}
+
+function damageImpactGripValue(count: number, maxHandSize: number | undefined): string {
+  return maxHandSize !== undefined ? `${count}/${maxHandSize}` : `${count}`;
 }
 
 function RecentSeriesResultCard({ result }: { result: ApiRecentSeriesResult }) {

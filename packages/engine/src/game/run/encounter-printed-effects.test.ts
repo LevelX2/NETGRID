@@ -200,6 +200,8 @@ function makeHost(
         amount: event.payload.amount,
         cardsTrashed: event.payload.amount,
         flatline: false,
+        runnerGripBefore: 4,
+        runnerGripAfter: 2,
       }) as DamageSummary,
     resolveTraceHardwareWreckerSuccess: () => ({}),
     resolveTraceTrashRunnerResourceSuccess: () => ({}),
@@ -213,6 +215,12 @@ function makeHost(
         damageAmount: summary.amount,
         cardsTrashed: summary.cardsTrashed,
         flatline: summary.flatline,
+        ...(summary.runnerGripBefore !== undefined
+          ? { runnerGripBefore: summary.runnerGripBefore }
+          : {}),
+        ...(summary.runnerGripAfter !== undefined
+          ? { runnerGripAfter: summary.runnerGripAfter }
+          : {}),
       };
     },
     supportsTraceSuccessEffect: () => true,
@@ -269,6 +277,8 @@ describe("encounter printed effects boundary", () => {
       damageAmount: 2,
       cardsTrashed: 2,
       flatline: false,
+      runnerGripBefore: 4,
+      runnerGripAfter: 2,
     });
     expect(legalAction.resolvedEffects).toEqual([
       expect.objectContaining({
