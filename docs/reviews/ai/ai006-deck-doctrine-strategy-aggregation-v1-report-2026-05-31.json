@@ -3997,8 +3997,8 @@
         },
         "corp.economy_rez_reserve": {
           "anchorScore": 44,
-          "supportScore": 95,
-          "finalScore": 72,
+          "supportScore": 90,
+          "finalScore": 69,
           "anchorEvidence": [
             {
               "cardId": "onr_v1_317_data-masons",
@@ -4023,13 +4023,6 @@
               "source": "functionSignal",
               "signal": "economy.generic",
               "reason": "support:economy"
-            },
-            {
-              "cardId": "onr_v1_214_project-babylon",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "score.advance_burst",
-              "reason": "support:scorePlan"
             },
             {
               "cardId": "onr_v1_232_crystal-wall",
@@ -4116,22 +4109,16 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [],
+          "supportGaps": [
+            "low_scorePlan_support"
+          ],
           "confidence": "high"
         },
         "corp.fast_advance": {
-          "anchorScore": 32,
-          "supportScore": 80,
-          "finalScore": 51,
-          "anchorEvidence": [
-            {
-              "cardId": "onr_v1_214_project-babylon",
-              "quantity": 1,
-              "source": "derivedStrategyAnchor",
-              "strategyId": "corp.fast_advance",
-              "reason": "derived_strategy_anchor_from_inspector_index"
-            }
-          ],
+          "anchorScore": 0,
+          "supportScore": 60,
+          "finalScore": 24,
+          "anchorEvidence": [],
           "supportEvidence": [
             {
               "cardId": "onr_v1_203_hostile-takeover",
@@ -4153,13 +4140,6 @@
               "source": "compiledHint",
               "signal": "cardType:agenda",
               "reason": "support:agendaDensity"
-            },
-            {
-              "cardId": "onr_v1_214_project-babylon",
-              "quantity": 1,
-              "source": "functionSignal",
-              "signal": "score.advance_burst",
-              "reason": "support:scoreAcceleration"
             },
             {
               "cardId": "onr_v1_220_tycho-extension",
@@ -4253,8 +4233,10 @@
               "reason": "support:economy"
             }
           ],
-          "supportGaps": [],
-          "confidence": "medium"
+          "supportGaps": [
+            "low_scoreAcceleration_support"
+          ],
+          "confidence": "low"
         },
         "corp.ice_tax_glacier": {
           "anchorScore": 100,
@@ -4807,7 +4789,6 @@
       ],
       "secondaryStrategies": [
         "corp.remote_scoring",
-        "corp.fast_advance",
         "corp.central_stabilize",
         "corp.damage_kill",
         "corp.rush_score"
@@ -4819,7 +4800,12 @@
         "economy.rez_discount": 1,
         "ice.etr": 8,
         "ice.strength_modifier": 1,
-        "score.advance_burst": 1,
+        "score.conditional_bonus_agenda_points": 1,
+        "score.economy_burst": 3,
+        "score.high_agenda_value": 1,
+        "score.overadvance_bonus": 1,
+        "score.overadvance_scaling": 1,
+        "score.vanilla_points": 1,
         "tag.payoff": 2,
         "tax.runner_credit": 1
       },
@@ -4869,8 +4855,8 @@
           "taxRunCost": 8
         },
         "scoreProfile": {
-          "scoreAcceleration": 1,
-          "agendaInstallAdvanceScoreSupport": 6,
+          "scoreAcceleration": 0,
+          "agendaInstallAdvanceScoreSupport": 5,
           "remoteScoringProtection": 1,
           "stealTax": 0
         },
@@ -6327,6 +6313,9 @@
         "economy.rez_discount": 1,
         "ice.etr": 6,
         "ice.strength_modifier": 1,
+        "score.economy_burst": 3,
+        "score.high_agenda_value": 1,
+        "score.vanilla_points": 1,
         "tag.payoff": 4,
         "tag.source": 4,
         "tax.runner_credit": 2,
@@ -6446,6 +6435,6 @@
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 2
     },
-    "contentSha256": "2b3d563bfa4cf11eeedf068feb2e4419e869460b0a29755384cdd8ab031f076a"
+    "contentSha256": "eb93b43cda7060e795f514a392479ddbd9874bc818c275e21bf40b6474f49a62"
   }
 }

@@ -13530,15 +13530,6 @@
         "reviewedDate": "2026-06-02",
         "reviewedBy": "codex"
       },
-      "effects": [
-        {
-          "kind": "score_acceleration",
-          "timing": "when_scored",
-          "scope": "score_area",
-          "resource": "advancement_counters",
-          "repeatable": false
-        }
-      ],
       "tacticSignals": [
         "score.conditional_bonus_agenda_points",
         "score.overadvance_bonus",

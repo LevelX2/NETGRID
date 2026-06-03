@@ -17,8 +17,8 @@
     "cardsWithMechanicalFacts": 511,
     "cardsWithGeneratedFacts": 331,
     "cardsWithOverlays": 6,
-    "cardsWithFunctionSignals": 473,
-    "cardsWithStrategyAnchors": 213,
+    "cardsWithFunctionSignals": 486,
+    "cardsWithStrategyAnchors": 212,
     "cardsWithWarnings": 143,
     "warningCategoryCounts": {
       "deferred_requires_human_review": 64,
@@ -182,7 +182,10 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "risk.random_action",
+        "score.random_extra_action"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -255,7 +258,13 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "risk.bad_publicity",
+        "risk.loss_condition",
+        "score.bad_publicity_gain",
+        "score.bad_publicity_win_risk",
+        "score.economy_burst"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -329,7 +338,14 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "damage.payoff",
+        "risk.requires_tagged_runner",
+        "score.hand_size_pressure",
+        "score.meat_damage_source",
+        "score.tagged_meat_damage_payoff",
+        "tag.payoff"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.damage_kill",
@@ -444,7 +460,13 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "damage.payoff"
+        "access.agenda_ambush",
+        "access.agenda_net_damage",
+        "access.agenda_steal_tax",
+        "access.archives_safe_exception",
+        "access.rnd_reveal_requirement",
+        "damage.payoff",
+        "score.net_damage_access_punish"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
@@ -563,6 +585,9 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "access.agenda_ambush",
+        "access.agenda_tag",
+        "access.rnd_reveal_requirement",
         "tag.source"
       ],
       "derivedStrategyAnchors": [
@@ -683,7 +708,10 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "score.action_counter_bank",
+        "score.damage_conversion_action_engine"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -756,7 +784,11 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "score.overadvance_bonus",
+        "score.overadvance_scaling",
+        "score.recurring_extra_action"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -830,7 +862,11 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "score.economy_recurring",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -904,7 +940,12 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "access.agenda_ambush",
+        "access.runner_program_bounce",
+        "access.runner_program_disruption",
+        "score.fort_trash_on_score"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.ambush_bluff"
@@ -1001,7 +1042,11 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "risk.high_difficulty_agenda",
+        "score.bonus_agenda_points",
+        "score.closeout_agenda"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.remote_scoring"
@@ -33981,7 +34026,10 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "score.agenda_action"
+        "score.agenda_action",
+        "score.draw",
+        "score.hq_archive_to_rnd_shuffle",
+        "score.rnd_archive_recycle"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
@@ -34092,7 +34140,9 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "score.advance_burst"
+        "score.advance_burst",
+        "score.agenda_difficulty_discount",
+        "score.black_ops_difficulty_discount"
       ],
       "derivedStrategyAnchors": [
         "corp.fast_advance"
@@ -34200,7 +34250,10 @@
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "score.damage_amp",
+        "score.meat_damage_amp"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.damage_kill"
@@ -34318,7 +34371,9 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "ice.strength_modifier"
+        "ice.strength_modifier",
+        "score.black_ice_strength_bonus",
+        "score.ice_type_tax_support"
       ],
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
@@ -34425,6 +34480,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "score.action_counter_bank",
+        "score.action_gain",
         "score.agenda_action"
       ],
       "derivedStrategyAnchors": [],
@@ -34513,7 +34570,9 @@
       },
       "derivedFunctionSignals": [
         "economy.counter",
-        "score.agenda_action"
+        "score.agenda_action",
+        "score.economy_action",
+        "score.economy_counter_bank"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
@@ -34626,7 +34685,10 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "economy.generic"
+        "economy.generic",
+        "score.economy_conditional_burst",
+        "score.hq_agenda_reveal",
+        "score.hq_agenda_shuffle"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
@@ -34722,7 +34784,9 @@
       },
       "derivedFunctionSignals": [
         "economy.generic",
-        "score.agenda_action"
+        "risk.loses_ability_on_install_or_rez",
+        "score.agenda_action",
+        "score.economy_action"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
@@ -34814,7 +34878,10 @@
       },
       "derivedFunctionSignals": [
         "economy.counter",
-        "economy.generic"
+        "economy.generic",
+        "risk.economy_crash_on_score",
+        "risk.requires_corp_credit_threshold",
+        "score.economy_conditional_burst"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
@@ -34908,7 +34975,9 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.generic"
+        "economy.generic",
+        "score.remote_fort_creation",
+        "score.remote_install_budget"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
@@ -35021,7 +35090,9 @@
       },
       "derivedFunctionSignals": [
         "economy.counter",
-        "economy.finite_pool"
+        "economy.finite_pool",
+        "score.economy_counter_bank",
+        "score.economy_recurring"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
@@ -35105,7 +35176,9 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "score.agenda_action"
+        "score.agenda_action",
+        "score.draw",
+        "score.recurring_draw"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
@@ -35191,7 +35264,10 @@
       },
       "derivedFunctionSignals": [
         "economy.generic",
-        "ice.strength_modifier"
+        "ice.strength_modifier",
+        "score.code_gate_strength_bonus",
+        "score.ice_type_reveal_economy",
+        "score.ice_type_tax_support"
       ],
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
@@ -35317,7 +35393,9 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "score.advance_burst"
+        "score.advance_burst",
+        "score.agenda_difficulty_discount",
+        "score.gray_ops_difficulty_discount"
       ],
       "derivedStrategyAnchors": [
         "corp.fast_advance"
@@ -35442,7 +35520,9 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
-        "score.advance_burst"
+        "score.advance_burst",
+        "score.agenda_difficulty_discount",
+        "score.research_difficulty_discount"
       ],
       "derivedStrategyAnchors": [
         "corp.fast_advance"
@@ -35551,7 +35631,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.generic"
+        "economy.generic",
+        "score.economy_burst"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
@@ -35645,7 +35726,9 @@
       },
       "derivedFunctionSignals": [
         "ice.strength_modifier",
-        "ice.subroutine_modifier"
+        "ice.subroutine_modifier",
+        "score.chosen_ice_strength_bonus",
+        "score.repeat_ice_subroutines"
       ],
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
@@ -35751,7 +35834,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "score.hand_size"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -35830,7 +35915,8 @@
       },
       "derivedFunctionSignals": [
         "economy.generic",
-        "score.agenda_action"
+        "score.agenda_action",
+        "score.economy_action"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
@@ -35925,6 +36011,8 @@
       },
       "derivedFunctionSignals": [
         "score.agenda_action",
+        "score.tag_source",
+        "score.trace_tag_source",
         "tag.source",
         "trace.source"
       ],
@@ -36065,7 +36153,10 @@
       },
       "derivedFunctionSignals": [
         "damage.payoff",
+        "risk.requires_tagged_runner",
         "score.agenda_action",
+        "score.meat_damage_source",
+        "score.tagged_meat_damage_payoff",
         "tag.payoff"
       ],
       "derivedStrategyAnchors": [
@@ -36218,7 +36309,9 @@
       "derivedFunctionSignals": [
         "economy.counter",
         "economy.finite_pool",
-        "score.agenda_action"
+        "score.agenda_action",
+        "score.economy_action",
+        "score.economy_counter_bank"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
@@ -36333,7 +36426,8 @@
       },
       "derivedFunctionSignals": [
         "economy.generic",
-        "score.agenda_action"
+        "score.agenda_action",
+        "score.economy_action"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
@@ -36427,7 +36521,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.generic"
+        "economy.generic",
+        "score.economy_recurring"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
@@ -36527,7 +36622,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.rez_discount"
+        "economy.rez_discount",
+        "score.free_rez_ice"
       ],
       "derivedStrategyAnchors": [
         "corp.economy_rez_reserve"
@@ -36702,6 +36798,8 @@
       },
       "derivedFunctionSignals": [
         "score.agenda_action",
+        "score.tag_source",
+        "score.trace_tag_source",
         "tag.source",
         "trace.source"
       ],
@@ -36841,15 +36939,13 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "score.advance_burst"
+        "score.conditional_bonus_agenda_points",
+        "score.overadvance_bonus",
+        "score.overadvance_scaling"
       ],
-      "derivedStrategyAnchors": [
-        "corp.fast_advance"
-      ],
+      "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
-      "derivedPossibleStrategyAnchors": [
-        "corp.fast_advance"
-      ],
+      "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
         "score.conditional_bonus_agenda_points",
@@ -36915,11 +37011,8 @@
         "rolesPresent": true,
         "planRolesPresent": true,
         "legacyLineSupportPresent": false,
-        "activeMechanicalFactFields": [
-          "effects"
-        ],
+        "activeMechanicalFactFields": [],
         "compiledMechanicalFactFields": [
-          "effects",
           "conditions"
         ],
         "generatedFactFields": [
@@ -36946,7 +37039,10 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "ice.strength_modifier",
+        "score.fort_ice_strength_bonus"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier",
@@ -37083,7 +37179,11 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.rez_discount"
+        "access.rnd_reveal_requirement",
+        "economy.rez_discount",
+        "score.free_install_and_rez_ice",
+        "score.rnd_install_and_rez",
+        "score.rnd_reveal"
       ],
       "derivedStrategyAnchors": [
         "corp.economy_rez_reserve"
@@ -37218,7 +37318,10 @@
       },
       "derivedFunctionSignals": [
         "damage.payoff",
+        "risk.requires_tagged_runner",
         "score.agenda_action",
+        "score.meat_damage_source",
+        "score.tagged_meat_damage_payoff",
         "tag.payoff"
       ],
       "derivedStrategyAnchors": [
@@ -37368,7 +37471,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "score.recurring_extra_action"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -37449,7 +37554,10 @@
       },
       "derivedFunctionSignals": [
         "economy.generic",
-        "ice.strength_modifier"
+        "ice.strength_modifier",
+        "score.ice_type_reveal_economy",
+        "score.ice_type_tax_support",
+        "score.wall_strength_bonus"
       ],
       "derivedStrategyAnchors": [
         "corp.ice_tax_glacier"
@@ -37606,7 +37714,10 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "score.high_agenda_value",
+        "score.vanilla_points"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],

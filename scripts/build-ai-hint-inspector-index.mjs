@@ -95,6 +95,10 @@ export function buildAiHintInspectorIndex(options = {}) {
         isCompiledGeneratedField(hint[field], activeHint[field], overlay[field]),
       );
       const functionSignals = deriveFunctionSignalsFromHint(hint, derivationRules);
+      const inspectorFunctionSignals = functionSignalsForInspector({
+        hint,
+        functionSignals,
+      });
       const rolesClassification = classifyValues(
         hint.roles ?? [],
         roleClassifications,
@@ -162,7 +166,7 @@ export function buildAiHintInspectorIndex(options = {}) {
             overlayFields.length === 0,
           warningCount: warningCategories.length,
         },
-        derivedFunctionSignals: functionSignals.signals,
+        derivedFunctionSignals: inspectorFunctionSignals,
         derivedStrategyAnchors: functionSignals.anchorStrategyIds,
         cardLevelStrategyAnchors,
         derivedPossibleStrategyAnchors,
@@ -310,6 +314,15 @@ function reviewedStrategySupportPairsFromLineSupport({
         left.strategyId.localeCompare(right.strategyId) ||
         left.sourceValue.localeCompare(right.sourceValue),
     );
+}
+
+function functionSignalsForInspector({ hint, functionSignals }) {
+  const derivedSignals = functionSignals.signals ?? [];
+  if (hint.side !== "corp" || hint.cardType !== "agenda") return derivedSignals;
+  return sortedUnique([
+    ...derivedSignals,
+    ...(hint.tacticSignals ?? []),
+  ]);
 }
 
 function supportingEvidenceOnlyForHint({ hint, functionSignals, tacticSignalById }) {
