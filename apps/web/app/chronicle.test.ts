@@ -1954,6 +1954,74 @@ describe("formatChronicleEvent", () => {
     expect(effects).toEqual([]);
   });
 
+  it("adds City Surveillance draw-tax details to card draw event chronicle entries", () => {
+    const event = makeEvent("play_event", {
+      actor: "runner",
+      cardDefinitionId: "onr_v1_095_jack-n-joe",
+      drawnCount: 3,
+      citySurveillanceSourceCount: 1,
+      citySurveillanceCreditsPaid: 2,
+      citySurveillanceTagsAdded: 1,
+      citySurveillanceTags: 1,
+      runnerCreditsAfter: 0,
+      runnerTagsAfter: 1,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_095_jack-n-joe.effect.0.draw_cards",
+          kind: "draw_cards",
+          visibility: "public",
+          side: "runner",
+          amount: 3,
+          sourceDefinitionId: "onr_v1_095_jack-n-joe",
+          sourceTitle: "Jack 'n' Joe",
+          reason: "card_resolver"
+        }
+      ]
+    });
+
+    const item = formatChronicleEvent(event, "corp");
+    const effects = formatChronicleEffectItems(event, "corp");
+
+    expect(item.title).toBe("Der Runner hat Jack 'n' Joe gespielt und 3 Karten gezogen.");
+    expect(item.description).toBe("City Surveillance: Der Runner hat 2 Credits gezahlt und 1 Tag erhalten.");
+    expect(item.importance).toBe("important");
+    expect(item.chips).toEqual(expect.arrayContaining(["City Surveillance", "-2 Credits", "+1 Tag"]));
+    expect(effects).toEqual([]);
+  });
+
+  it("adds City Surveillance draw-tax details to other runner draw card events", () => {
+    const event = makeEvent("play_event", {
+      actor: "runner",
+      cardDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+      title: "Bodyweight™ Synthetic Blood",
+      drawnCount: 5,
+      citySurveillanceSourceCount: 1,
+      citySurveillanceCreditsPaid: 5,
+      citySurveillanceTagsAdded: 0,
+      citySurveillanceTags: 0,
+      runnerCreditsAfter: 1,
+      runnerTagsAfter: 0,
+      resolvedEffects: [
+        {
+          effectId: "onr_v1_079_bodyweight-synthetic-blood.effect.0.draw_cards",
+          kind: "draw_cards",
+          visibility: "public",
+          side: "runner",
+          amount: 5,
+          sourceDefinitionId: "onr_v1_079_bodyweight-synthetic-blood",
+          sourceTitle: "Bodyweight™ Synthetic Blood",
+          reason: "card_resolver"
+        }
+      ]
+    });
+
+    const item = formatChronicleEvent(event, "corp");
+
+    expect(item.title).toBe("Der Runner hat Bodyweight™ Synthetic Blood gespielt und 5 Karten gezogen.");
+    expect(item.description).toBe("City Surveillance: Der Runner hat 5 Credits gezahlt und keinen Tag erhalten.");
+    expect(item.chips).toEqual(expect.arrayContaining(["City Surveillance", "-5 Credits", "Kein Tag"]));
+  });
+
   it("merges activated card implementation credit effects with card context", () => {
     const event = makeEvent("activated_card_ability", {
       actor: "runner",

@@ -1578,6 +1578,16 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
 
   if (effect.sentence && !description) description = effect.sentence;
 
+  const citySurveillanceDetails = citySurveillanceChronicleDetails(payload, side);
+  if (citySurveillanceDetails) {
+    description = description
+      ? `${description} ${citySurveillanceDetails.sentence}`
+      : citySurveillanceDetails.sentence;
+    chips.push(...citySurveillanceDetails.chips);
+    if (citySurveillanceDetails.tagsAdded > 0 && importance === "normal")
+      importance = "important";
+  }
+
   return {
     id: event.eventId,
     category,
@@ -2470,6 +2480,39 @@ function cardResolverPlayEffectPart(
   if (effect.kind === "trash_source_when_empty") return { category: "economy", suffix: `${stringValue(effect.sourceTitle) ?? "Quelle"} getrasht`, chips: ["Quelle getrasht"] };
   if (effect.kind === "trash_source") return { category: "card", suffix: `${stringValue(effect.sourceTitle) ?? "Quelle"} getrasht`, chips: ["Quelle getrasht"] };
   return undefined;
+}
+
+function citySurveillanceChronicleDetails(
+  payload: Record<string, unknown>,
+  side: Side,
+): { sentence: string; chips: string[]; tagsAdded: number } | undefined {
+  const sourceCount = numberValue(payload.citySurveillanceSourceCount) ?? 0;
+  if (sourceCount <= 0) return undefined;
+  const creditsPaid = numberValue(payload.citySurveillanceCreditsPaid) ?? 0;
+  const tagsAdded =
+    numberValue(payload.citySurveillanceTagsAdded) ??
+    numberValue(payload.citySurveillanceTags) ??
+    0;
+  if (creditsPaid <= 0 && tagsAdded <= 0) return undefined;
+
+  const runnerSubject = side === "runner" ? "Du" : "Der Runner";
+  const runnerVerb = runnerSubject === "Du" ? "hast" : "hat";
+  const parts: string[] = [];
+  if (creditsPaid > 0) parts.push(`${creditText(creditsPaid)} gezahlt`);
+  if (tagsAdded > 0) parts.push(`${tagCountText(tagsAdded)} erhalten`);
+  else if (creditsPaid > 0) parts.push("keinen Tag erhalten");
+
+  return {
+    sentence: `City Surveillance: ${runnerSubject} ${runnerVerb} ${joinChronicleParts(parts) ?? "keinen Effekt erhalten"}.`,
+    chips: [
+      "City Surveillance",
+      ...(creditsPaid > 0
+        ? [`-${creditsPaid} ${creditLabel(creditsPaid)}`]
+        : []),
+      ...(tagsAdded > 0 ? [`+${tagsAdded} Tag${tagsAdded === 1 ? "" : "s"}`] : ["Kein Tag"]),
+    ],
+    tagsAdded,
+  };
 }
 
 function joinChronicleParts(parts: string[]): string | undefined {
