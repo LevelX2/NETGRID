@@ -1,0 +1,93 @@
+---
+activityId: act-2026-06-02-bug-zapper-ice-value-alignment
+status: inbox
+kind: fix
+area: cards
+priority: high
+primaryAgent: card-enablement-ai-knowledge-agent
+requiresImplementation: true
+createdAt: 2026-06-02
+startedAt:
+completedAt:
+branch:
+releaseTarget:
+blockedBy: []
+resultArtifacts: []
+checks: []
+---
+
+# Bug Zapper und ICE-Basiswerte gegen Katalog ausrichten
+
+## Ziel
+
+`Bug Zapper` soll mit den korrekten ICE-Basiswerten verwendet werden: Rez-Kosten 6, Stärke 2 und passender Subtyp `Hellbolt`. Der irreführende `+1 Stärke`-Badge darf ohne echte Effektquelle nicht mehr erscheinen. Zusätzlich soll geprüft werden, ob andere aktive ICE-Karten vergleichbare unbegründete Abweichungen zwischen Katalog/Spoiler und Runtime/Shared-Definition haben; klare Fehler sollen im selben Paket korrigiert werden.
+
+## Kontext und Quellen
+
+- Nutzerfund vom 2026-06-02: Beim Ausspielen beziehungsweise Anzeigen von `Bug Zapper` erscheint sofort ein `+1 Stärke`-Chip, obwohl keine Karte oder Fähigkeit einen Stärkeeffekt vergibt.
+- Analyse vom 2026-06-02:
+  - `docs/source/Proteusspoiler.txt` nennt `Bug Zapper` als `Ice-Sentry-AP-Hellbolt` mit `Cost/Strength: 6/2`.
+  - `data/cards/proteus-cards.json` führt `onr_proteus_012_bug-zapper` mit `rezCost: 6`, `strength: 2` und Subtypen `ap`, `hellbolt`, `sentry`.
+  - `packages/shared/src/index.ts` führt dieselbe Karte aktuell mit `rezCost: 5`, `strength: 3` und ohne `hellbolt`.
+  - Die Web-UI setzt `strengthModifier`, wenn die sichtbare Runtime-Stärke größer ist als die Katalogstärke; dadurch entsteht aus `3 - 2` der sichtbare `+1 Stärke`-Badge.
+- CardImplementation-Befund:
+  - `packages/engine/src/card-implementations/proteus/corp/ice/bug-zapper.ts` enthält keinen `strengthBonusPerCount`.
+  - `Dog Pile` und `Mastermind` haben dagegen bewusst `strengthBonusPerCount: 1`; dieser Unterschied muss erhalten bleiben.
+- Auffällige Nebenbefunde:
+  - AI024-Review-/Hint-Artefakte klassifizieren `Bug Zapper` teils mit `ice.strength_modifier`, obwohl der Kartentext keinen Stärkeeffekt hat. Prüfen, ob diese Metadaten regeneriert oder korrigiert werden müssen.
+
+## Scope
+
+- `Bug Zapper`-Basisdaten in der aktiven Runtime-/Shared-Definition korrigieren:
+  - `rezCost: 6`
+  - `strength: 2`
+  - Subtyp `hellbolt` ergänzen, falls der lokale Subtyp-Standard das zulässt.
+- Sicherstellen, dass `Bug Zapper` ohne externe Stärkequelle keinen `+1 Stärke`-Badge mehr bekommt.
+- Sicherstellen, dass die dynamische Damage-Subroutine unverändert korrekt bleibt: 2 Net Damage pro gerezztem ICE außerhalb von Bug Zapper.
+- Einen fokussierten Paritätscheck für aktive/compiled ICE-Karten durchführen:
+  - `packages/shared/src/index.ts` beziehungsweise aktive Runtime-Definitionen gegen `data/cards/*-cards.json` und bei Bedarf lokale Spoilerquelle vergleichen.
+  - Mindestens `rezCost`, `strength`, ICE-Subtypen und sichtbaren Kartentext so prüfen, dass falsche Stärke-/Kosten-Badges auffallen.
+- Klar unbegründete ICE-Basiswert-Abweichungen im selben Paket korrigieren, wenn sie klein und eindeutig sind.
+- Für unklare oder regelrelevante Abweichungen kein stilles Umdeuten vornehmen; stattdessen Ergebnis dokumentieren und kleine Folge-Activities anlegen.
+- Regressionen ergänzen oder aktualisieren:
+  - Bug Zapper hat in PlayerView/Run-Encounter Stärke 2 ohne Badge.
+  - Bug Zapper kostet beim Rezzen 6 Credits.
+  - Dog Pile/Mastermind behalten ihre echten relativen Stärke-Boni.
+  - Paritätscheck oder Test schützt mindestens gegen erneute Bug-Zapper-Basiswertdrift.
+
+## Nicht im Scope
+
+- Keine generische Neugestaltung der Kartenimport-Pipeline.
+- Keine Änderung an allgemeinen ICE-Stärke-Modifikatoren, Agenda-Modifikatoren oder City-Grid-/Asset-Effekten außer zur Regression.
+- Keine Änderung an der Bug-Zapper-Damage-Regel, an Run-/Encounter-Timing oder an LegalAction-/`applyAction`-Verträgen außer der korrekten Rez-Kosten-Revalidation.
+- Keine pauschale Korrektur aller Kartenfamilien außerhalb aktiver ICE-Basiswerte.
+- Keine Hidden-Info-Offenlegung durch Paritätschecks, PlayerViews, PublicEvents, Reconnect, Replay oder KI-Inputs.
+
+## Akzeptanzkriterien
+
+- [ ] `Bug Zapper` hat in der aktiven Runtime/Shared-Definition Rez-Kosten 6 und Stärke 2.
+- [ ] `Bug Zapper` zeigt ohne echte externe Stärkequelle keinen `+1 Stärke`-Badge.
+- [ ] `Bug Zapper` behält die korrekte dynamische Damage-Subroutine mit 2 Net Damage pro gerezztem ICE außerhalb von Bug Zapper.
+- [ ] `Dog Pile` und `Mastermind` behalten ihre regelkonformen relativen Stärke-Boni; `Bug Zapper` erhält keinen solchen Bonus.
+- [ ] Ein ICE-Paritätscheck für aktive/compiled ICE-Karten wurde durchgeführt und im Ergebnis benannt.
+- [ ] Alle dabei gefundenen klar unbegründeten kleinen ICE-Basiswert-Abweichungen sind korrigiert.
+- [ ] Unklare oder größere Abweichungen sind nicht still korrigiert, sondern als Folgepunkte oder Folge-Activities dokumentiert.
+- [ ] Falls AI-Hints/AI024-Artefakte `Bug Zapper` fälschlich als Stärke-Modifikator führen und diese Daten aktuell verbraucht werden, sind sie korrigiert oder die Nicht-Korrektur ist begründet.
+- [ ] Fokussierte Engine-/Web-/Katalog-Checks sind ausgeführt oder begründet ausgelassen.
+- [ ] `git diff --check` ist grün.
+
+## Umsetzungshinweise
+
+- Naheliegende betroffene Dateien:
+  - `packages/shared/src/index.ts`
+  - `data/cards/proteus-cards.json`
+  - `packages/engine/src/card-implementations/proteus/corp/ice/bug-zapper.ts`
+  - `packages/engine/src/index-tests/proteus/variable-ice.test.ts`
+  - `apps/web/app/page.tsx` oder passende Webtests für `strengthModifier`-Anzeige, falls bestehende Tests keine ausreichende Abdeckung haben.
+- Für den Paritätscheck vorzugsweise eine kleine scriptbare Prüfung verwenden, statt Werte manuell aus einzelnen Dateien zu lesen.
+- Bei Subtypen auf bestehende Normalisierung achten (`hellbolt`, `sentry`, `ap`) und keine UI-/AI-Subtyp-Signale aus bloßen Typdaten ableiten.
+- Die Ursache des beobachteten Badges liegt wahrscheinlich nicht in der CardImplementation, sondern in der Drift zwischen Katalogstärke 2 und Runtime-Stärke 3.
+
+## Ergebnisnotiz
+
+Noch offen.
