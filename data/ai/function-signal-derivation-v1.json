@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI024-1/AI025-1/AI025-1/AI025-1/AI025-1/AI026-1",
-  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022/AI024/AI024/AI024/AI025/AI025/AI025/AI026/AI026/AI026/AI026/AI024-1/AI025-1/AI025-1/AI025-1/AI025-1/AI026-1",
+  "taskId": "AI024-1/AI025-1/AI025-1/AI025-1/AI025-1/AI026-1/AI027",
+  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022/AI024/AI024/AI024/AI025/AI025/AI025/AI026/AI026/AI026/AI026/AI024-1/AI025-1/AI025-1/AI025-1/AI025-1/AI026-1/AI027",
   "generatedAt": "2026-06-03",
-  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI026-1 aligns Corp semantics to Guide V3 while keeping Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default and UI-derivation effects unchanged.",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI027 aligns broad/legacy derivations and inspector anchor separation to Guide V3 while keeping Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default and UI-derivation effects unchanged.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -20,15 +20,16 @@
     "strategyAnchors": "strategyAnchorFor must be side-gated; if side/cardType/scope evidence is missing, do not derive the anchor"
   },
   "supportedGates": [
-    "side",
-    "cardType",
-    "effectScope",
-    "target",
-    "controller",
     "beneficiary",
-    "remoteRole",
     "breakerProfileCoverage",
-    "breakerProfileRestrictionAbsent"
+    "breakerProfileRestrictionAbsent",
+    "cardType",
+    "controller",
+    "effectScope",
+    "remoteRole",
+    "remoteRoleStrategyDerivationAbsent",
+    "side",
+    "target"
   ],
   "derivationRules": [
     {
@@ -176,8 +177,7 @@
         "target": "access.corp_hardware_trash"
       },
       "strategyAnchorFor": [
-        "corp.ambush_bluff",
-        "corp.tag_trace_punish"
+        "corp.ambush_bluff"
       ]
     },
     {
@@ -205,8 +205,7 @@
         "target": "access.corp_net_damage_ambush"
       },
       "strategyAnchorFor": [
-        "corp.ambush_bluff",
-        "corp.damage_kill"
+        "corp.ambush_bluff"
       ]
     },
     {
@@ -1045,10 +1044,7 @@
         "cardType": "asset",
         "target": "action.corp_repeatable_extra_action"
       },
-      "strategyAnchorFor": [
-        "corp.fast_advance",
-        "corp.remote_scoring"
-      ]
+      "strategyAnchorFor": []
     },
     {
       "signalId": "action.delayed_extra_action_engine",
@@ -2889,9 +2885,7 @@
           "runner"
         ]
       },
-      "strategyAnchorFor": [
-        "corp.damage_kill"
-      ]
+      "strategyAnchorFor": []
     },
     {
       "signalId": "damage.payoff",
@@ -2914,9 +2908,7 @@
           "runner"
         ]
       },
-      "strategyAnchorFor": [
-        "corp.damage_kill"
-      ]
+      "strategyAnchorFor": []
     },
     {
       "signalId": "damage.tagged_meat_payoff",
@@ -5659,6 +5651,10 @@
         ],
         "remoteRole": [
           "asset_economy"
+        ],
+        "remoteRoleStrategyDerivationAbsent": [
+          "legacy_only",
+          "not_for_strategy_derivation"
         ]
       },
       "strategyAnchorFor": [

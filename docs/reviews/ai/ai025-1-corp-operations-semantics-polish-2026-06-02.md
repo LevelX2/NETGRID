@@ -2,7 +2,7 @@
 
 ## Kurzfazit
 
-AI025-1 schärft AI025 als gezielte Nachkorrektur. Die 40 aktiven/compiled Corp-Operations bleiben abgedeckt; davon sind 27 Originalset-, 8 Proteus- und 5 aktive Test-/V08-Operations. 20 Operation-Hints wurden korrigiert und 8 read-only Funktionssignale ergänzt.
+AI025-1 schärft AI025 als gezielte Nachkorrektur. Die 40 aktiven/compiled Corp-Operations bleiben abgedeckt; davon sind 27 Originalset-, 8 Proteus- und 5 aktive Test-/V08-Operations. 20 Operation-Hints wurden korrigiert und 9 read-only Funktionssignale im Katalog ergänzt: 8 lokale AI025-1-Signale plus das shared Guide-V3-Draw-Signal `draw.corp_draw`.
 
 ## Korrekturen
 
@@ -21,6 +21,7 @@ AI025-1 schärft AI025 als gezielte Nachkorrektur. Die 40 aktiven/compiled Corp-
 - `condition.resource_installed_last_turn`: supportOnly=true, anchors=none
 - `damage.meat_source`: supportOnly=false, anchors=corp.damage_kill
 - `damage.tagged_meat_payoff`: supportOnly=false, anchors=corp.damage_kill, corp.tag_trace_punish
+- `draw.corp_draw`: supportOnly=true, anchors=none; shared Guide-V3-Signal für AI025-1 und AI026-1
 - `ice.corp_installment_rez`: supportOnly=true, anchors=none
 - `tag.additional_tag_followup`: supportOnly=false, anchors=corp.tag_trace_punish
 

@@ -5,7 +5,7 @@
   "generatedAt": "2026-05-31",
   "status": "pass_with_warnings",
   "hardErrorCount": 0,
-  "warningCount": 162,
+  "warningCount": 161,
   "source": {
     "activeHintsPath": "data/ai/ai-card-hints-active.json",
     "compiledHintsPath": "data/ai/ai-card-hints-compiled.json",
@@ -1196,6 +1196,8 @@
       "remoteRole": 53,
       "remoteRole.kind": 53,
       "remoteRole.serverScope": 53,
+      "remoteRole.strategyDerivation": 4,
+      "remoteRole.strategyDerivationNotes": 4,
       "remoteRole.threatLevel": 53,
       "requiredMechanics": 564,
       "riskTags": 564,
@@ -1491,7 +1493,7 @@
       "remote.agenda_difficulty_tax": 2,
       "remote.agenda_steal_tax": 1,
       "remote.ambush": 5,
-      "remote.asset_economy": 16,
+      "remote.asset_economy": 12,
       "remote.full_fort_trash": 1,
       "remote.install_ice_tax": 1,
       "remote.install_tax": 1,
@@ -1626,8 +1628,8 @@
     },
     "derivedStrategyAnchorCounts": {
       "corp.ambush_bluff": 11,
-      "corp.asset_economy": 17,
-      "corp.damage_kill": 38,
+      "corp.asset_economy": 13,
+      "corp.damage_kill": 1,
       "corp.economy_rez_reserve": 8,
       "corp.fast_advance": 13,
       "corp.ice_tax_glacier": 71,
@@ -1642,9 +1644,9 @@
       "runner.search.breaker": 6,
       "runner.survival_defense": 3
     },
-    "totalDerivedStrategyAnchors": 279,
-    "cardsWithDerivedSignals": 474,
-    "cardsWithStrategyAnchors": 220,
+    "totalDerivedStrategyAnchors": 238,
+    "cardsWithDerivedSignals": 473,
+    "cardsWithStrategyAnchors": 213,
     "descriptorGaps": [
       {
         "gapId": "remote_contest_pressure_not_first_class",
@@ -1672,7 +1674,7 @@
     ]
   },
   "sideAwareDerivation": {
-    "preventedWrongSideAnchorCount": 40,
+    "preventedWrongSideAnchorCount": 36,
     "preventedWrongSideAnchorExamples": [
       {
         "cardId": "onr_v1_012_clown",
@@ -1694,13 +1696,6 @@
         "cardType": "event",
         "signalId": "ice.future_pressure",
         "strategyId": "corp.ice_tax_glacier"
-      },
-      {
-        "cardId": "onr_v1_098_lucidrine-booster-drug",
-        "side": "runner",
-        "cardType": "event",
-        "signalId": "damage.payoff",
-        "strategyId": "corp.damage_kill"
       },
       {
         "cardId": "onr_v1_111_social-engineering",
@@ -1913,20 +1908,6 @@
         "strategyId": "corp.tag_trace_punish"
       },
       {
-        "cardId": "onr_proteus_108_faked-hit",
-        "side": "runner",
-        "cardType": "event",
-        "signalId": "damage.payoff",
-        "strategyId": "corp.damage_kill"
-      },
-      {
-        "cardId": "onr_proteus_126_test-spin",
-        "side": "runner",
-        "cardType": "event",
-        "signalId": "damage.payoff",
-        "strategyId": "corp.damage_kill"
-      },
-      {
         "cardId": "onr_proteus_129_back-door-to-netwatch",
         "side": "runner",
         "cardType": "resource",
@@ -1946,13 +1927,6 @@
         "cardType": "resource",
         "signalId": "tag.payoff",
         "strategyId": "corp.tag_trace_punish"
-      },
-      {
-        "cardId": "onr_proteus_144_lucidrinetm-drip-feed",
-        "side": "runner",
-        "cardType": "hardware",
-        "signalId": "damage.payoff",
-        "strategyId": "corp.damage_kill"
       }
     ],
     "wrongSideAnchorMatchCount": 0,
@@ -2171,7 +2145,6 @@
         "tag.payoff"
       ],
       "anchorStrategyIds": [
-        "corp.damage_kill",
         "corp.tag_trace_punish"
       ]
     },
@@ -2191,9 +2164,7 @@
       "signals": [
         "damage.payoff"
       ],
-      "anchorStrategyIds": [
-        "corp.damage_kill"
-      ]
+      "anchorStrategyIds": []
     },
     "corpScoredAgendaUtility": {
       "cardId": "ai016_smoke_scored_agenda_utility",
@@ -9503,6 +9474,8 @@
             "remoteRole": {
               "kind": "asset_economy",
               "serverScope": "remote",
+              "strategyDerivation": "not_for_strategy_derivation",
+              "strategyDerivationNotes": "Guide V3: score-conversion support remains card-level fast advance; generated asset_economy remoteRole must not derive asset-economy strategy.",
               "threatLevel": "medium"
             },
             "cardType": "asset",
@@ -19459,8 +19432,7 @@
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.corp_hardware_trash",
       "strategyAnchorFor": [
-        "corp.ambush_bluff",
-        "corp.tag_trace_punish"
+        "corp.ambush_bluff"
       ]
     },
     {
@@ -19480,8 +19452,7 @@
       "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
       "signalId": "access.corp_net_damage_ambush",
       "strategyAnchorFor": [
-        "corp.ambush_bluff",
-        "corp.damage_kill"
+        "corp.ambush_bluff"
       ]
     },
     {
@@ -19657,17 +19628,6 @@
       "signalId": "action.corp_counter_to_action",
       "strategyAnchorFor": [
         "corp.fast_advance"
-      ]
-    },
-    {
-      "kind": "strategy_anchor_without_effect_scope_warn_only",
-      "count": 1,
-      "path": "data/ai/function-signal-derivation-v1.json.derivationRules[57].gates.effectScope",
-      "message": "Effect-derived strategy anchors should gate on effect scope or match.scope.",
-      "signalId": "action.corp_repeatable_extra_action",
-      "strategyAnchorFor": [
-        "corp.fast_advance",
-        "corp.remote_scoring"
       ]
     },
     {

@@ -128,7 +128,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 997,
+  "warningCount": 996,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -4393,11 +4393,6 @@
     {
       "kind": "generated_fact_without_manual_match",
       "message": "Generated effect:advanceable_economy has no manual ontology match.",
-      "cardId": "onr_v1_334_pacifica-regional-ai"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated remoteRole:asset_economy has no manual ontology match.",
       "cardId": "onr_v1_334_pacifica-regional-ai"
     },
     {
@@ -26249,6 +26244,9 @@
           }
         ],
         "conditions": [],
+        "remoteRole": {
+          "kind": "asset_economy"
+        },
         "lineSupport": [
           "corp.fast_advance"
         ],
@@ -26262,19 +26260,18 @@
       },
       "overlap": {
         "matches": [
-          "effect:extra_action"
+          "effect:extra_action",
+          "remoteRole:asset_economy"
         ],
         "generatedOnly": [
           "condition:requires_advancement_counter",
-          "effect:advanceable_economy",
-          "remoteRole:asset_economy"
+          "effect:advanceable_economy"
         ],
         "manualOnly": []
       },
       "missingManualOverlay": [
         "condition:requires_advancement_counter",
-        "effect:advanceable_economy",
-        "remoteRole:asset_economy"
+        "effect:advanceable_economy"
       ],
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually."
@@ -26292,10 +26289,6 @@
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated effect:advanceable_economy has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated remoteRole:asset_economy has no manual ontology match."
         },
         {
           "kind": "text_pattern_derivation",

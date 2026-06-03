@@ -432,7 +432,9 @@ describe("AI003 strategy goal taxonomy", () => {
       "corp.tag_trace_punish",
     );
     expect(corpDamagePayoff.signals).toContain("damage.payoff");
-    expect(corpDamagePayoff.anchorStrategyIds).toContain("corp.damage_kill");
+    expect(corpDamagePayoff.anchorStrategyIds).not.toContain(
+      "corp.damage_kill",
+    );
   });
 
   it("keeps AI016 tactic derivation fixes narrow and side-aware", () => {

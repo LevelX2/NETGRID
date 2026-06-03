@@ -30,6 +30,16 @@ type AiHintInspectorIndex = {
     };
     derivedFunctionSignals: string[];
     derivedStrategyAnchors: string[];
+    cardLevelStrategyAnchors: string[];
+    derivedPossibleStrategyAnchors: string[];
+    reviewedStrategySupportPairs: Array<{
+      strategyId: string;
+      sourceField: string;
+      sourceValue: string;
+      triageCategory: string;
+      rationale: string;
+    }>;
+    supportingEvidenceOnly: string[];
     lineSupportClassification: Array<{
       value: string;
       triageCategory: string;
@@ -163,7 +173,11 @@ describe("AI005 hint inspector index", () => {
         "tag.payoff",
       ]),
     );
-    expect(onCallSoloTeam.derivedStrategyAnchors).toContain(
+    expect(onCallSoloTeam.supportingEvidenceOnly).toContain("damage.payoff");
+    expect(onCallSoloTeam.derivedStrategyAnchors).not.toContain(
+      "corp.damage_kill",
+    );
+    expect(onCallSoloTeam.cardLevelStrategyAnchors).toContain(
       "corp.damage_kill",
     );
     expect(onCallSoloTeam.derivedStrategyAnchors).toContain(

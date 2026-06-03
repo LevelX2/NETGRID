@@ -3931,17 +3931,10 @@
           "confidence": "medium"
         },
         "corp.damage_kill": {
-          "anchorScore": 72,
+          "anchorScore": 40,
           "supportScore": 45,
-          "finalScore": 61,
+          "finalScore": 42,
           "anchorEvidence": [
-            {
-              "cardId": "onr_v1_301_punitive-counterstrike",
-              "quantity": 1,
-              "source": "derivedStrategyAnchor",
-              "strategyId": "corp.damage_kill",
-              "reason": "derived_strategy_anchor_from_inspector_index"
-            },
             {
               "cardId": "onr_v1_301_punitive-counterstrike",
               "quantity": 1,
@@ -4814,9 +4807,9 @@
       ],
       "secondaryStrategies": [
         "corp.remote_scoring",
-        "corp.damage_kill",
         "corp.fast_advance",
         "corp.central_stabilize",
+        "corp.damage_kill",
         "corp.rush_score"
       ],
       "functionSignalCounts": {
@@ -6453,6 +6446,6 @@
       "inspector:function_signal_descriptor_gap": 1,
       "inspector:legacy_fallback_only": 2
     },
-    "contentSha256": "4d038f554cdc275abd0ce6f7637296e68a3222baa95433a26e7a786e8fddc688"
+    "contentSha256": "2b3d563bfa4cf11eeedf068feb2e4419e869460b0a29755384cdd8ab031f076a"
   }
 }

@@ -57,6 +57,7 @@ const VALID_RULE_GATE_FIELDS = new Set([
   "controller",
   "beneficiary",
   "remoteRole",
+  "remoteRoleStrategyDerivationAbsent",
   "breakerProfileCoverage",
   "breakerProfileRestrictionAbsent",
 ]);
@@ -1502,6 +1503,16 @@ function ruleGatesMatch(rule, hint, effect) {
   if (!matchesGateValue(effect?.controller, gates.controller)) return false;
   if (!matchesGateValue(effect?.beneficiary, gates.beneficiary)) return false;
   if (!matchesGateValue(hint.remoteRole?.kind, gates.remoteRole)) return false;
+  if (gates.remoteRoleStrategyDerivationAbsent !== undefined) {
+    const forbidden = normalizeGateValues(gates.remoteRoleStrategyDerivationAbsent);
+    if (
+      forbidden.length === 0 ||
+      (hint.remoteRole?.strategyDerivation !== undefined &&
+        forbidden.includes(hint.remoteRole.strategyDerivation))
+    ) {
+      return false;
+    }
+  }
   if (gates.breakerProfileCoverage !== undefined) {
     const expected = normalizeGateValues(gates.breakerProfileCoverage);
     if (

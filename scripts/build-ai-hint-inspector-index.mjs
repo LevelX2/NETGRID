@@ -56,6 +56,7 @@ export function buildAiHintInspectorIndex(options = {}) {
   const strategyGoalsData = readJson(repoRoot, STRATEGY_GOALS_PATH);
   const strategicRolesData = readJson(repoRoot, STRATEGIC_ROLES_PATH);
   const functionDerivationData = readJson(repoRoot, FUNCTION_SIGNAL_DERIVATION_PATH);
+  const tacticSignalCatalogData = readJson(repoRoot, TACTIC_SIGNAL_CATALOG_PATH);
   const { report, aliasReport } = buildAiStrategyTaxonomyReport({ repoRoot });
 
   const activeByCardId = new Map((activeHints.cards ?? []).map((hint) => [hint.cardId, hint]));
@@ -75,6 +76,9 @@ export function buildAiHintInspectorIndex(options = {}) {
   );
   const descriptorGapTriage = report.ai004Triage?.descriptorGaps ?? [];
   const derivationRules = functionDerivationData.derivationRules ?? [];
+  const tacticSignalById = new Map(
+    (tacticSignalCatalogData.signals ?? []).map((signal) => [signal.signalId, signal]),
+  );
 
   const cards = (compiledHints.cards ?? [])
     .map((hint) => {
@@ -127,6 +131,20 @@ export function buildAiHintInspectorIndex(options = {}) {
         generatedFactFields,
         overlayFields,
       });
+      const cardLevelStrategyAnchors = strategyAnchorsFromLineSupport({
+        lineSupportClassification,
+        strategyIds,
+      });
+      const derivedPossibleStrategyAnchors = functionSignals.anchorStrategyIds;
+      const reviewedStrategySupportPairs = reviewedStrategySupportPairsFromLineSupport({
+        lineSupportClassification,
+        strategyIds,
+      });
+      const supportingEvidenceOnly = supportingEvidenceOnlyForHint({
+        hint,
+        functionSignals,
+        tacticSignalById,
+      });
 
       return removeUndefined({
         cardId: hint.cardId,
@@ -146,6 +164,10 @@ export function buildAiHintInspectorIndex(options = {}) {
         },
         derivedFunctionSignals: functionSignals.signals,
         derivedStrategyAnchors: functionSignals.anchorStrategyIds,
+        cardLevelStrategyAnchors,
+        derivedPossibleStrategyAnchors,
+        reviewedStrategySupportPairs,
+        supportingEvidenceOnly,
         lineSupportClassification,
         rolesClassification,
         planRolesClassification,
@@ -257,6 +279,56 @@ function descriptorGapsForCard({ descriptorGapTriage, values }) {
       batchMigrationDecision: gap.batchMigrationDecision,
       needsSchemaOrDescriptorExtension: gap.needsSchemaOrDescriptorExtension === true,
     }));
+}
+
+function strategyAnchorsFromLineSupport({ lineSupportClassification, strategyIds }) {
+  return sortedUnique(
+    lineSupportClassification.flatMap((entry) =>
+      (entry.mapsTo ?? []).filter((strategyId) => strategyIds.has(strategyId)),
+    ),
+  );
+}
+
+function reviewedStrategySupportPairsFromLineSupport({
+  lineSupportClassification,
+  strategyIds,
+}) {
+  return lineSupportClassification
+    .flatMap((entry) =>
+      (entry.mapsTo ?? [])
+        .filter((strategyId) => strategyIds.has(strategyId))
+        .map((strategyId) => ({
+          strategyId,
+          sourceField: "lineSupport",
+          sourceValue: entry.value,
+          triageCategory: entry.triageCategory,
+          rationale: entry.rationale,
+        })),
+    )
+    .sort(
+      (left, right) =>
+        left.strategyId.localeCompare(right.strategyId) ||
+        left.sourceValue.localeCompare(right.sourceValue),
+    );
+}
+
+function supportingEvidenceOnlyForHint({ hint, functionSignals, tacticSignalById }) {
+  const signalIds = sortedUnique([
+    ...(hint.tacticSignals ?? []),
+    ...(functionSignals.signals ?? []),
+  ]);
+  return signalIds.filter((signalId) => {
+    const signal = tacticSignalById.get(signalId);
+    if (!signal) return false;
+    return (
+      signal.supportOnly === true ||
+      signal.mayAnchorStrategy === false ||
+      (signal.allowedStrategyAnchors ?? []).length === 0 ||
+      signal.legacy === true ||
+      signal.aggregation === true ||
+      signal.notForDirectScoring === true
+    );
+  });
 }
 
 function warningCategoriesForCard({

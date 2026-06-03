@@ -6883,11 +6883,11 @@
       "generatedMechanicalFacts": ["effect:draw", "remoteRole:asset_economy"],
       "monolithFields": ["effects", "remoteRole"],
       "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
-        "generated_fact_absent_from_monolith": 1
+        "generated_fact_absent_from_monolith": 2
       },
       "recommendedNextAction": "ready_for_generated_mechanical_fields",
       "migrationReadiness": "ready",
@@ -6926,11 +6926,11 @@
       ],
       "monolithFields": ["effects", "remoteRole"],
       "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
-      "generatedOnlyFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
-        "generated_fact_absent_from_monolith": 2,
+        "generated_fact_absent_from_monolith": 3,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",
@@ -7364,12 +7364,12 @@
         "effect:extra_action",
         "remoteRole:asset_economy"
       ],
-      "monolithFields": ["effects"],
-      "duplicatedActiveMechanicalFields": ["effects"],
+      "monolithFields": ["effects", "remoteRole"],
+      "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
       "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
-        "monolith_mechanical_duplication_candidate": 1,
+        "monolith_mechanical_duplication_candidate": 2,
         "generated_fact_absent_from_monolith": 3,
         "manual_review_candidate": 1
       },
@@ -7535,11 +7535,11 @@
       ],
       "monolithFields": ["effects", "remoteRole"],
       "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
-      "generatedOnlyFields": ["conditions", "effects"],
+      "generatedOnlyFields": ["conditions", "effects", "remoteRole"],
       "overlayFields": [],
       "warningGroups": {
         "monolith_mechanical_duplication_candidate": 2,
-        "generated_fact_absent_from_monolith": 2,
+        "generated_fact_absent_from_monolith": 3,
         "manual_review_candidate": 1
       },
       "recommendedNextAction": "manual_review_candidate",

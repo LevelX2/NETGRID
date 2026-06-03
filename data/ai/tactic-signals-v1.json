@@ -1,8 +1,8 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI024-1/AI025-1/AI025-1/AI025-1/AI025-1/AI026-1",
+  "taskId": "AI024-1/AI025-1/AI025-1/AI025-1/AI025-1/AI026-1/AI027",
   "generatedAt": "2026-06-03",
-  "description": "Controlled V1 tactic-signal catalog. AI026-1 aligns Corp node/asset and shared Corp draw semantics with Guide V3 without planner, engine, targeting, action-score, plan-weight, legality, profile/default, UI or hidden-info effects.",
+  "description": "Controlled V1 tactic-signal catalog. AI027 aligns broad/legacy derivation and inspector semantics with Guide V3 without planner, engine, targeting, action-score, plan-weight, legality, profile/default, UI or hidden-info effects.",
   "signalPolicy": {
     "tacticSignal": "Functional card utility: what the AI can use the card for.",
     "strategyAnchor": "Large deck line: which strategy the card can anchor or materially support.",
@@ -178,15 +178,14 @@
       "supportOnly": false,
       "mayAnchorStrategy": true,
       "allowedStrategyAnchors": [
-        "corp.ambush_bluff",
-        "corp.tag_trace_punish"
+        "corp.ambush_bluff"
       ],
       "sourceKinds": [
         "AI026 reviewed Corp node/asset structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": true,
-      "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+      "notes": "Guide V3: hardware trash on access can support ambush/bluff but does not imply tag/trace punish without a tag source, tagged-runner condition or reviewed card-level StrategySupportPair."
     },
     {
       "signalId": "access.corp_icebreaker_strength_counter",
@@ -213,15 +212,14 @@
       "supportOnly": false,
       "mayAnchorStrategy": true,
       "allowedStrategyAnchors": [
-        "corp.ambush_bluff",
-        "corp.damage_kill"
+        "corp.ambush_bluff"
       ],
       "sourceKinds": [
         "AI026-1 Guide V3 Corp semantics polish"
       ],
       "examples": [],
       "targetProfileRelevant": true,
-      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+      "notes": "Guide V3: Net-Damage Access Ambush supports ambush/bluff by default; corp.damage_kill requires reviewed card-level StrategySupportPairs or a narrower kill-specific signal."
     },
     {
       "signalId": "access.corp_program_trash",
@@ -838,18 +836,17 @@
       "group": "ai026_corp_nodes_assets_advancement_action",
       "sideScope": "corp",
       "description": "AI026 Corp node/asset tactic signal: action.corp repeatable extra action.",
-      "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.fast_advance",
-        "corp.remote_scoring"
-      ],
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "AI026 reviewed Corp node/asset structured hint effects"
       ],
       "examples": [],
       "targetProfileRelevant": false,
-      "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+      "notes": "Guide V3: repeatable Corp extra actions are support/deferred unless a reviewed score-conversion signal or card-level StrategySupportPair exists; no automatic fast-advance or remote-scoring anchor.",
+      "deferredStrategyCandidate": true,
+      "notForDirectScoring": true
     },
     {
       "signalId": "action.delayed_extra_action_engine",
@@ -2646,11 +2643,9 @@
       "group": "damage_kill",
       "sideScope": "corp",
       "description": "Deals or converts into Runner damage as a payoff.",
-      "supportOnly": false,
-      "mayAnchorStrategy": true,
-      "allowedStrategyAnchors": [
-        "corp.damage_kill"
-      ],
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
       "sourceKinds": [
         "effects.kind=damage",
         "effects.kind=tag_punish_payoff resource=damage"
@@ -2659,7 +2654,10 @@
         "Scorched Earth"
       ],
       "targetProfileRelevant": false,
-      "notes": "Damage anchor requires Corp side and Runner scope."
+      "notes": "Guide V3: broad damage payoff is legacy/aggregation/supporting evidence only and must not alone derive corp.damage_kill; use precise damage/access/ICE signals or reviewed card-level StrategySupportPairs.",
+      "legacy": true,
+      "aggregation": true,
+      "notForDirectScoring": true
     },
     {
       "signalId": "damage.tagged_meat_payoff",
@@ -4883,7 +4881,7 @@
         "ACME Savings and Loan"
       ],
       "targetProfileRelevant": false,
-      "notes": "Anchor-capable only for Corp asset-economy role."
+      "notes": "Anchor-capable only for reviewed real economy assets. Legacy remoteRole.asset_economy entries marked strategyDerivation=not_for_strategy_derivation are inspector support context only."
     },
     {
       "signalId": "remote.bait",

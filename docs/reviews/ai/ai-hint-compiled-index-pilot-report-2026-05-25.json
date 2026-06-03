@@ -15,17 +15,17 @@
   "overlayCardCount": 6,
   "cardsWithoutOverlay": 187,
   "hardErrorCount": 0,
-  "warningCount": 719,
+  "warningCount": 723,
   "warningCountsByKind": {
-    "active_monolith_mechanical_duplication": 266,
-    "generated_fact_missing_from_active_monolith": 317,
+    "active_monolith_mechanical_duplication": 267,
+    "generated_fact_missing_from_active_monolith": 320,
     "manual_overlay_strategy_field_missing_from_active": 6,
     "overlay_missing_for_manual_gap": 130
   },
   "warningClassificationCounts": {
-    "generated_fact_absent_from_monolith": 317,
+    "generated_fact_absent_from_monolith": 320,
     "manual_review_candidate": 130,
-    "monolith_mechanical_duplication_candidate": 266,
+    "monolith_mechanical_duplication_candidate": 267,
     "overlay_strategy_field_not_in_monolith": 6
   },
   "warningClassificationByCard": [
@@ -1817,7 +1817,7 @@
       "recommendedNextAction": "ready_for_generated_mechanical_fields",
       "migrationReadiness": "ready",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 1,
+        "generated_fact_absent_from_monolith": 2,
         "monolith_mechanical_duplication_candidate": 2
       },
       "info": ["info_no_overlay_needed"]
@@ -1828,7 +1828,7 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 2,
+        "generated_fact_absent_from_monolith": 3,
         "manual_review_candidate": 1,
         "monolith_mechanical_duplication_candidate": 2
       },
@@ -1950,7 +1950,7 @@
       "warningClassificationCounts": {
         "generated_fact_absent_from_monolith": 3,
         "manual_review_candidate": 1,
-        "monolith_mechanical_duplication_candidate": 1
+        "monolith_mechanical_duplication_candidate": 2
       },
       "info": []
     },
@@ -1996,7 +1996,7 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "warningClassificationCounts": {
-        "generated_fact_absent_from_monolith": 2,
+        "generated_fact_absent_from_monolith": 3,
         "manual_review_candidate": 1,
         "monolith_mechanical_duplication_candidate": 2
       },
@@ -3665,7 +3665,7 @@
       "recommendedNextAction": "ready_for_generated_mechanical_fields",
       "migrationReadiness": "ready",
       "generatedFields": ["effects", "remoteRole"],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["effects", "remoteRole"],
       "duplicatedActiveMechanicalFields": ["effects", "remoteRole"]
     },
     {
@@ -3674,7 +3674,7 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects", "remoteRole"],
-      "generatedOnlyFields": ["effects", "conditions"],
+      "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
       "duplicatedActiveMechanicalFields": ["effects", "remoteRole"]
     },
     {
@@ -3765,7 +3765,7 @@
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects", "remoteRole"],
       "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
-      "duplicatedActiveMechanicalFields": ["effects"]
+      "duplicatedActiveMechanicalFields": ["effects", "remoteRole"]
     },
     {
       "cardId": "onr_v1_335_remote-facility",
@@ -3800,7 +3800,7 @@
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
       "generatedFields": ["conditions", "effects", "remoteRole"],
-      "generatedOnlyFields": ["effects", "conditions"],
+      "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
       "duplicatedActiveMechanicalFields": ["effects", "remoteRole"]
     },
     {
@@ -5204,8 +5204,7 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_advancement_counter",
-        "effect:advanceable_economy",
-        "remoteRole:asset_economy"
+        "effect:advanceable_economy"
       ]
     },
     {
@@ -8771,8 +8770,7 @@
       "migrationReadiness": "needs_review",
       "missingManualOverlay": [
         "condition:requires_advancement_counter",
-        "effect:advanceable_economy",
-        "remoteRole:asset_economy"
+        "effect:advanceable_economy"
       ]
     },
     {
@@ -25187,7 +25185,7 @@
         "tacticSignals",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects"],
+      "generatedOnlyFields": ["effects", "remoteRole"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
@@ -25214,6 +25212,14 @@
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_321_esa-contract",
           "field": "effects"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
+          "cardId": "onr_v1_321_esa-contract",
+          "field": "remoteRole"
         }
       ],
       "recommendedNextAction": "ready_for_generated_mechanical_fields",
@@ -25293,7 +25299,7 @@
         "tacticSignals",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects", "conditions"],
+      "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
@@ -25328,6 +25334,14 @@
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_322_euromarket-consortium",
           "field": "effects"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
+          "cardId": "onr_v1_322_euromarket-consortium",
+          "field": "remoteRole"
         },
         {
           "classification": "manual_review_candidate",
@@ -26452,8 +26466,7 @@
       "needsManualReview": true,
       "missingManualOverlay": [
         "condition:requires_advancement_counter",
-        "effect:advanceable_economy",
-        "remoteRole:asset_economy"
+        "effect:advanceable_economy"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_334_pacifica-regional-ai",
@@ -26504,7 +26517,7 @@
       ],
       "generatedFields": ["conditions", "effects", "remoteRole"],
       "strategyFieldsFromOverlay": [],
-      "duplicatedActiveMechanicalFields": ["effects"],
+      "duplicatedActiveMechanicalFields": ["effects", "remoteRole"],
       "activeMonolithOnlyFields": [
         "lineSupport",
         "quality",
@@ -26526,6 +26539,14 @@
           "message": "Active monolith already carries mechanical field effects; long-term source should be generated facts.",
           "cardId": "onr_v1_334_pacifica-regional-ai",
           "field": "effects"
+        },
+        {
+          "classification": "monolith_mechanical_duplication_candidate",
+          "blocking": false,
+          "kind": "active_monolith_mechanical_duplication",
+          "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
+          "cardId": "onr_v1_334_pacifica-regional-ai",
+          "field": "remoteRole"
         },
         {
           "classification": "generated_fact_absent_from_monolith",
@@ -26944,7 +26965,7 @@
         "tacticSignals",
         "valueHints"
       ],
-      "generatedOnlyFields": ["effects", "conditions"],
+      "generatedOnlyFields": ["effects", "conditions", "remoteRole"],
       "overlayOnlyFields": [],
       "conflicts": [],
       "warnings": [
@@ -26979,6 +27000,14 @@
           "message": "Generated mechanical field effects is absent from or differs from active monolith.",
           "cardId": "onr_v1_338_rustbelt-hq-branch",
           "field": "effects"
+        },
+        {
+          "classification": "generated_fact_absent_from_monolith",
+          "blocking": false,
+          "kind": "generated_fact_missing_from_active_monolith",
+          "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
+          "cardId": "onr_v1_338_rustbelt-hq-branch",
+          "field": "remoteRole"
         },
         {
           "classification": "manual_review_candidate",
@@ -33902,6 +33931,14 @@
       "field": "effects"
     },
     {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
+      "cardId": "onr_v1_321_esa-contract",
+      "field": "remoteRole"
+    },
+    {
       "classification": "monolith_mechanical_duplication_candidate",
       "blocking": false,
       "kind": "active_monolith_mechanical_duplication",
@@ -33932,6 +33969,14 @@
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_322_euromarket-consortium",
       "field": "effects"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
+      "cardId": "onr_v1_322_euromarket-consortium",
+      "field": "remoteRole"
     },
     {
       "classification": "manual_review_candidate",
@@ -34292,6 +34337,14 @@
       "field": "effects"
     },
     {
+      "classification": "monolith_mechanical_duplication_candidate",
+      "blocking": false,
+      "kind": "active_monolith_mechanical_duplication",
+      "message": "Active monolith already carries mechanical field remoteRole; long-term source should be generated facts.",
+      "cardId": "onr_v1_334_pacifica-regional-ai",
+      "field": "remoteRole"
+    },
+    {
       "classification": "generated_fact_absent_from_monolith",
       "blocking": false,
       "kind": "generated_fact_missing_from_active_monolith",
@@ -34446,6 +34499,14 @@
       "message": "Generated mechanical field effects is absent from or differs from active monolith.",
       "cardId": "onr_v1_338_rustbelt-hq-branch",
       "field": "effects"
+    },
+    {
+      "classification": "generated_fact_absent_from_monolith",
+      "blocking": false,
+      "kind": "generated_fact_missing_from_active_monolith",
+      "message": "Generated mechanical field remoteRole is absent from or differs from active monolith.",
+      "cardId": "onr_v1_338_rustbelt-hq-branch",
+      "field": "remoteRole"
     },
     {
       "classification": "manual_review_candidate",

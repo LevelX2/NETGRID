@@ -17,7 +17,7 @@
   "previewAddedFactCount": 76,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
-  "normalizedDifferenceCount": 326,
+  "normalizedDifferenceCount": 330,
   "remainingDifferenceCount": 0,
   "remoteContextInfoCount": 23,
   "accessContextInfoCount": 11,
@@ -59,7 +59,7 @@
     "remote_capacity_or_portfolio_normalization": 8,
     "trace_credit_support_normalization": 1,
     "hidden_zone_or_rearrange_context_normalization": 7,
-    "remote_strategy_overlay_split_normalization": 213,
+    "remote_strategy_overlay_split_normalization": 217,
     "access_context_required_classification": 16,
     "trace_success_context_required_classification": 2,
     "runner_tagged_context_required_classification": 23,
@@ -1668,6 +1668,13 @@
           "classification": "remote_strategy_overlay_split_normalized",
           "rule": "remote_strategy_overlay_split_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-9 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "remoteRole",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
+          "classification": "remote_strategy_overlay_split_normalized",
+          "rule": "remote_strategy_overlay_split_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-9 comparator path; active hints and runtime behavior are unchanged."
         }
       ],
       "remoteContextInfos": [
@@ -1779,6 +1786,13 @@
         {
           "field": "remoteRole",
           "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "remote_strategy_overlay_split_normalized",
+          "rule": "remote_strategy_overlay_split_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-9 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "remoteRole",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
           "classification": "remote_strategy_overlay_split_normalized",
           "rule": "remote_strategy_overlay_split_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-9 comparator path; active hints and runtime behavior are unchanged."
@@ -2863,7 +2877,7 @@
       "subBatch": "advanceable_asset_economy",
       "priority": "P1",
       "risk": "medium",
-      "activeMechanicalFields": ["effects"],
+      "activeMechanicalFields": ["effects", "remoteRole"],
       "generatedFactsConfirmed": [
         "condition:requires_advancement_counter",
         "effect:advanceable_economy",
@@ -2919,6 +2933,13 @@
         {
           "field": "overlay_missing_for_manual_gap",
           "sourceWarningKind": "overlay_missing_for_manual_gap",
+          "classification": "remote_strategy_overlay_split_normalized",
+          "rule": "remote_strategy_overlay_split_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-9 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "remoteRole",
+          "sourceWarningKind": "active_monolith_mechanical_duplication",
           "classification": "remote_strategy_overlay_split_normalized",
           "rule": "remote_strategy_overlay_split_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-9 comparator path; active hints and runtime behavior are unchanged."
@@ -3359,6 +3380,13 @@
         {
           "field": "remoteRole",
           "sourceWarningKind": "active_monolith_mechanical_duplication",
+          "classification": "remote_strategy_overlay_split_normalized",
+          "rule": "remote_strategy_overlay_split_normalization",
+          "rationale": "Compiled-index warning is normalized inside the read-only Batch-9 comparator path; active hints and runtime behavior are unchanged."
+        },
+        {
+          "field": "remoteRole",
+          "sourceWarningKind": "generated_fact_missing_from_active_monolith",
           "classification": "remote_strategy_overlay_split_normalized",
           "rule": "remote_strategy_overlay_split_normalization",
           "rationale": "Compiled-index warning is normalized inside the read-only Batch-9 comparator path; active hints and runtime behavior are unchanged."

@@ -23941,6 +23941,8 @@
       "remoteRole": {
         "kind": "asset_economy",
         "serverScope": "remote",
+        "strategyDerivation": "not_for_strategy_derivation",
+        "strategyDerivationNotes": "Guide V3: draw support only, not Corp asset-economy strategy derivation.",
         "threatLevel": "medium"
       },
       "tacticSignals": [
@@ -24017,6 +24019,8 @@
       "remoteRole": {
         "kind": "asset_economy",
         "serverScope": "remote",
+        "strategyDerivation": "not_for_strategy_derivation",
+        "strategyDerivationNotes": "Guide V3: draw and hand-size support only, not Corp asset-economy strategy derivation.",
         "threatLevel": "medium"
       },
       "tacticSignals": [
@@ -24976,16 +24980,18 @@
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
+      "remoteRole": {
+        "kind": "asset_economy",
+        "serverScope": "remote",
+        "strategyDerivation": "not_for_strategy_derivation",
+        "strategyDerivationNotes": "Guide V3: score-conversion support remains card-level fast advance; generated asset_economy remoteRole must not derive asset-economy strategy.",
+        "threatLevel": "medium"
+      },
       "conditions": [
         {
           "kind": "requires_advancement_counter"
         }
-      ],
-      "remoteRole": {
-        "kind": "asset_economy",
-        "serverScope": "remote",
-        "threatLevel": "medium"
-      }
+      ]
     },
     {
       "cardId": "onr_v1_335_remote-facility",
@@ -25268,6 +25274,8 @@
       "remoteRole": {
         "kind": "asset_economy",
         "serverScope": "remote",
+        "strategyDerivation": "not_for_strategy_derivation",
+        "strategyDerivationNotes": "Guide V3: hand-size support only, not Corp asset-economy strategy derivation.",
         "threatLevel": "medium"
       },
       "tacticSignals": [

@@ -20279,7 +20279,9 @@
       "remoteRole": {
         "kind": "asset_economy",
         "serverScope": "remote",
-        "threatLevel": "medium"
+        "threatLevel": "medium",
+        "strategyDerivation": "not_for_strategy_derivation",
+        "strategyDerivationNotes": "Guide V3: draw support only, not Corp asset-economy strategy derivation."
       },
       "tacticSignals": [
         "draw.corp_draw"
@@ -20341,7 +20343,9 @@
       "remoteRole": {
         "kind": "asset_economy",
         "serverScope": "remote",
-        "threatLevel": "medium"
+        "threatLevel": "medium",
+        "strategyDerivation": "not_for_strategy_derivation",
+        "strategyDerivationNotes": "Guide V3: draw and hand-size support only, not Corp asset-economy strategy derivation."
       },
       "tacticSignals": [
         "draw.corp_draw",
@@ -21082,6 +21086,11 @@
         "needsHumanReview": false,
         "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
+      },
+      "remoteRole": {
+        "kind": "asset_economy",
+        "strategyDerivation": "not_for_strategy_derivation",
+        "strategyDerivationNotes": "Guide V3: score-conversion support remains card-level fast advance; generated asset_economy remoteRole must not derive asset-economy strategy."
       }
     },
     {
@@ -21296,7 +21305,9 @@
       "remoteRole": {
         "kind": "asset_economy",
         "serverScope": "remote",
-        "threatLevel": "medium"
+        "threatLevel": "medium",
+        "strategyDerivation": "not_for_strategy_derivation",
+        "strategyDerivationNotes": "Guide V3: hand-size support only, not Corp asset-economy strategy derivation."
       },
       "tacticSignals": [
         "setup.corp_hand_size"

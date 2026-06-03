@@ -92,7 +92,7 @@ describe("generated fact Batch-9 Corp nodes/assets/ambush closeout", () => {
     expect(report.previewAddedFactCount).toBe(76);
     expect(report.hardErrorCount).toBe(0);
     expect(report.realSemanticConflictCount).toBe(0);
-    expect(report.normalizedDifferenceCount).toBe(326);
+    expect(report.normalizedDifferenceCount).toBe(330);
     expect(report.remainingDifferenceCount).toBe(0);
     expect(report.descriptorFollowupCount).toBe(0);
     expect(report.readiness).toBe("ready_read_only_split_subbatches");

@@ -155,7 +155,7 @@
   },
   "hardErrorCount": 0,
   "hardErrors": [],
-  "warningCount": 2078,
+  "warningCount": 2077,
   "warnings": [
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -9731,11 +9731,6 @@
       "kind": "generated_fact_absent_from_active_monolith",
       "cardId": "onr_v1_334_pacifica-regional-ai",
       "message": "Generated effect:advanceable_economy is absent from the active monolith."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_v1_334_pacifica-regional-ai",
-      "message": "Generated remoteRole:asset_economy is absent from the active monolith."
     },
     {
       "kind": "text_pattern_derivation",
@@ -66700,6 +66695,9 @@
           }
         ],
         "conditions": [],
+        "remoteRole": {
+          "kind": "asset_economy"
+        },
         "lineSupport": [
           "corp.fast_advance"
         ],
@@ -66713,19 +66711,18 @@
       },
       "overlap": {
         "matches": [
-          "effect:extra_action"
+          "effect:extra_action",
+          "remoteRole:asset_economy"
         ],
         "generatedOnly": [
           "condition:requires_advancement_counter",
-          "effect:advanceable_economy",
-          "remoteRole:asset_economy"
+          "effect:advanceable_economy"
         ],
         "manualOnly": []
       },
       "missingManualOverlay": [
         "condition:requires_advancement_counter",
-        "effect:advanceable_economy",
-        "remoteRole:asset_economy"
+        "effect:advanceable_economy"
       ],
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually."
@@ -66743,10 +66740,6 @@
         {
           "kind": "generated_fact_without_manual_match",
           "message": "Generated effect:advanceable_economy has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated remoteRole:asset_economy has no manual ontology match."
         },
         {
           "kind": "text_pattern_derivation",
