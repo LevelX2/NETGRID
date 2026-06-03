@@ -1,16 +1,21 @@
 {
   "schemaVersion": "chronicle-choice-fallback-audit-v1",
   "sourceFiles": [
-    "apps/web/app/chronicle.test.ts"
+    "apps/web/app/chronicle.test.ts",
+    "scripts/check-chronicle-choice-fallbacks.ts#engine-scenarios"
   ],
-  "fixtureCount": 60,
+  "fixtureCount": 65,
+  "webFixtureCount": 60,
+  "engineScenarioCount": 4,
+  "engineEventCaseCount": 5,
   "skippedFixtureCount": 0,
-  "checkedItemCount": 120,
+  "checkedItemCount": 130,
   "fallbackCount": 0,
   "fallbacks": [],
   "renderedCases": [
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:70",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 70,
       "testName": "formats setup mulligan choices with the public decision",
@@ -33,7 +38,9 @@
         "Behalten"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
+        "label",
         "setupDecision",
         "setupSide",
         "setupStep"
@@ -41,6 +48,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:79",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 79,
       "testName": "formats setup mulligan choices with the public decision",
@@ -63,7 +71,9 @@
         "Mulligan"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
+        "label",
         "setupDecision",
         "setupSide",
         "setupStep"
@@ -71,6 +81,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:88",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 88,
       "testName": "formats setup mulligan choices with the public decision",
@@ -93,13 +104,16 @@
         "Entscheidung"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
+        "label",
         "setupSide",
         "setupStep"
       ]
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:403",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 403,
       "testName": "shows Corporate Negotiating Center HQ agenda reveals with public card names",
@@ -128,10 +142,12 @@
         "Start-of-turn"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "gainedCredits",
         "hiddenZoneAction",
         "hiddenZoneBarrier",
+        "label",
         "publicRevealDefinitionIds",
         "publicRevealKind",
         "publicRevealTitles",
@@ -143,6 +159,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:429",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 429,
       "testName": "shows Smith's Pawnshop choices with the corrected 2-credit gain",
@@ -166,9 +183,11 @@
         "Trash"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "creditsGained",
         "gainedCredits",
+        "label",
         "smithsPawnshopTriggered",
         "sourceDefinitionId",
         "trashedCardDefinitionId",
@@ -177,6 +196,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:449",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 449,
       "testName": "does not claim a stack-search program was installed when the engine reports failure",
@@ -202,9 +222,11 @@
         "Shuffle"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "hiddenZoneAction",
         "installSucceeded",
+        "label",
         "searchDestination",
         "searchReveal",
         "searchShuffleAfter",
@@ -213,6 +235,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:461",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 461,
       "testName": "does not claim a stack-search program was installed when the engine reports failure",
@@ -238,9 +261,11 @@
         "Shuffle"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "hiddenZoneAction",
         "installSucceeded",
+        "label",
         "searchDestination",
         "searchReveal",
         "searchShuffleAfter",
@@ -249,6 +274,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:489",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 489,
       "testName": "shows Self-Modifying Code stack choices with the selected program",
@@ -276,10 +302,12 @@
         "Shuffle"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "hiddenZoneAction",
         "installed",
         "installedProgramDefinitionId",
+        "label",
         "publicRevealDefinitionId",
         "searchDestination",
         "shuffled"
@@ -287,6 +315,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:517",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 517,
       "testName": "shows The Short Circuit activation and selected program concretely",
@@ -315,9 +344,11 @@
         "Shuffle"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "cardDefinitionId",
         "hiddenZoneAction",
+        "label",
         "publicRevealDefinitionId",
         "searchDestination",
         "shuffled",
@@ -326,6 +357,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:539",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 539,
       "testName": "shows Mystery Box Runner-AI install choices with selected program and run context",
@@ -358,12 +390,14 @@
         "Shuffle"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "aiReasonCode",
         "hiddenZoneAction",
         "installed",
         "installedProgramCount",
         "installedProgramDefinitionId",
+        "label",
         "publicRevealDefinitionId",
         "revealCount",
         "revealedCardDefinitionIds",
@@ -375,6 +409,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:568",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 568,
       "testName": "shows Mystery Box no-program reviews without the generic choice fallback",
@@ -405,9 +440,11 @@
         "Shuffle"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "hiddenZoneAction",
         "installedProgramCount",
+        "label",
         "programFound",
         "revealCount",
         "revealedCardDefinitionIds",
@@ -420,6 +457,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:595",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 595,
       "testName": "shows Systematic Layoffs advancement choices with target context",
@@ -444,9 +482,11 @@
         "1 Ziel"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "addedAdvancementCounters",
         "advancementCountersAfter",
+        "label",
         "sourceDefinitionId",
         "targetCardDefinitionId",
         "targetCardDefinitionIds",
@@ -456,6 +496,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:615",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 615,
       "testName": "shows Self-Modifying Code blocked and MU follow-up choices concretely",
@@ -483,10 +524,12 @@
         "Shuffle"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "hiddenZoneAction",
         "installBlockedReason",
         "installed",
+        "label",
         "publicRevealDefinitionId",
         "searchDestination",
         "shuffled"
@@ -494,6 +537,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:627",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 627,
       "testName": "shows Self-Modifying Code blocked and MU follow-up choices concretely",
@@ -521,10 +565,12 @@
         "Shuffle"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "hiddenZoneAction",
         "installDeferredForMemory",
         "installed",
+        "label",
         "publicRevealDefinitionId",
         "searchDestination",
         "shuffled"
@@ -532,6 +578,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:639",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 639,
       "testName": "shows Self-Modifying Code blocked and MU follow-up choices concretely",
@@ -557,10 +604,12 @@
         "1 Trash"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "hiddenZoneAction",
         "installed",
         "installedProgramDefinitionId",
+        "label",
         "publicRevealDefinitionId",
         "trashedCardDefinitionIds",
         "trashedCount"
@@ -568,6 +617,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:660",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 660,
       "testName": "shows access ambush payment choices in the chronicle",
@@ -590,13 +640,16 @@
         "2 Credits"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "ambushDefinitionId",
-        "ambushPaidCost"
+        "ambushPaidCost",
+        "label"
       ]
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:668",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 668,
       "testName": "shows access ambush payment choices in the chronicle",
@@ -619,14 +672,17 @@
         "Nicht bezahlt"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "ambushDefinitionId",
         "ambushPaidCost",
-        "ambushPaymentDeclined"
+        "ambushPaymentDeclined",
+        "label"
       ]
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:686",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 686,
       "testName": "names access ambush choices from resolved effects when payment payload is missing",
@@ -649,12 +705,15 @@
         "Ausgelöst"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
+        "label",
         "resolvedEffects"
       ]
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:711",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 711,
       "testName": "shows access ambush counter effects in the chronicle",
@@ -677,14 +736,17 @@
         "2 Credits"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "ambushDefinitionId",
         "ambushPaidCost",
+        "label",
         "resolvedEffects"
       ]
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:750",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 750,
       "testName": "shows Playful AI die results and follow-up choices in the chronicle",
@@ -712,7 +774,9 @@
       ],
       "payloadKeys": [
         "abilityId",
+        "actionType",
         "actor",
+        "label",
         "playfulAiComplete",
         "playfulAiDiceQueuedAfterRolls",
         "playfulAiDiceQueuedBeforeRolls",
@@ -727,6 +791,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:777",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 777,
       "testName": "shows partial Playful AI queued dice without treating the roll history as newly rolled dice",
@@ -756,7 +821,9 @@
       ],
       "payloadKeys": [
         "abilityId",
+        "actionType",
         "actor",
+        "label",
         "playfulAiChoiceOpened",
         "playfulAiDiceQueuedAfterRolls",
         "playfulAiDiceQueuedBeforeRolls",
@@ -772,6 +839,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:795",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 795,
       "testName": "shows partial Playful AI queued dice without treating the roll history as newly rolled dice",
@@ -795,7 +863,9 @@
       ],
       "payloadKeys": [
         "abilityId",
+        "actionType",
         "actor",
+        "label",
         "playfulAiComplete",
         "playfulAiDiceQueuedAfterRolls",
         "playfulAiDiceQueuedBeforeRolls",
@@ -809,6 +879,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:1079",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 1079,
       "testName": "names Core Command Jettison Ice targets and paid rez costs in the chronicle",
@@ -834,7 +905,9 @@
         "R&D"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
+        "label",
         "rezCostPaid",
         "targetCardDefinitionId",
         "targetServerLabel",
@@ -844,6 +917,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:1100",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 1100,
       "testName": "summarizes Synchronized Attack on HQ retain choices without hidden card details",
@@ -872,9 +946,11 @@
         "4 Credits"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "aiExplanation",
         "discardedCount",
+        "label",
         "retainedCount",
         "sourceDefinitionId",
         "v1922RunnerEventAbility"
@@ -882,6 +958,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:1111",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 1111,
       "testName": "summarizes Synchronized Attack on HQ retain choices without hidden card details",
@@ -907,14 +984,17 @@
         "2 Credits"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "discardedCount",
+        "label",
         "retainedCount",
         "v1922RunnerEventAbility"
       ]
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:1132",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 1132,
       "testName": "names Forged Activation Orders target and Corp rez-or-trash decisions in the chronicle",
@@ -938,7 +1018,9 @@
         "ICE 2 in HQ"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
+        "label",
         "targetIcePositionLabel",
         "targetServerLabel",
         "targetVisibility",
@@ -947,6 +1029,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:1142",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 1142,
       "testName": "names Forged Activation Orders target and Corp rez-or-trash decisions in the chronicle",
@@ -974,9 +1057,11 @@
         "ICE 2 in HQ"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "aiExplanation",
         "corpDecision",
+        "label",
         "rezCostPaid",
         "targetCardDefinitionId",
         "targetIcePositionLabel",
@@ -986,6 +1071,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:1155",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 1155,
       "testName": "names Forged Activation Orders target and Corp rez-or-trash decisions in the chronicle",
@@ -1011,9 +1097,11 @@
         "ICE 2 in HQ"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "aiExplanation",
         "corpDecision",
+        "label",
         "targetCardDefinitionId",
         "targetIcePositionLabel",
         "targetServerLabel",
@@ -1023,6 +1111,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:1201",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 1201,
       "testName": "describes V1.8.1 Pattel and Pox run-success counters",
@@ -1047,7 +1136,9 @@
         "2 auf ICE"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
+        "label",
         "remainingCounters",
         "targetCardDefinitionId",
         "v181RunnerProgramAbility"
@@ -1055,6 +1146,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:1330",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 1330,
       "testName": "describes Data Fort Reclamation and Aardvark hidden-zone choices",
@@ -1080,6 +1172,7 @@
         "12 Temp-Credits"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "dataFortReclamationRezCandidateCount",
         "hiddenZoneAction",
@@ -1087,11 +1180,13 @@
         "installedCount",
         "installedIceCount",
         "installedRootCount",
+        "label",
         "temporaryCreditsProvided"
       ]
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:1343",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 1343,
       "testName": "describes Data Fort Reclamation and Aardvark hidden-zone choices",
@@ -1117,10 +1212,12 @@
         "2 Credits"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "corpCreditsSpent",
         "hiddenZoneAction",
         "hiddenZoneBarrier",
+        "label",
         "rezzedCount",
         "rezzedIceCount",
         "rezzedRootCount",
@@ -1129,6 +1226,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:1356",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 1356,
       "testName": "describes Data Fort Reclamation and Aardvark hidden-zone choices",
@@ -1152,14 +1250,17 @@
         "Worm Trash"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "hiddenZoneAction",
         "hiddenZoneBarrier",
+        "label",
         "publicRevealDefinitionId"
       ]
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:1377",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 1377,
       "testName": "names the ICE rezzed by Priority Requisition",
@@ -1183,9 +1284,11 @@
         "0 Credits"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "hiddenZoneAction",
         "hiddenZoneBarrier",
+        "label",
         "priorityRequisitionFreeRez",
         "priorityRequisitionTargetDefinitionId",
         "rezCostPaid"
@@ -1193,6 +1296,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:1398",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 1398,
       "testName": "summarizes Superior Net Barriers reveal and credit counts",
@@ -1218,18 +1322,21 @@
         "+3 Credits"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "agendaAbility",
         "countedMatchingIceCount",
         "gainedCredits",
         "hiddenZoneAction",
         "hiddenZoneBarrier",
+        "label",
         "revealedCount",
         "rezzedMatchingIceCount"
       ]
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:1986",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 1986,
       "testName": "distinguishes Employee Empowerment optional start draw from its agenda action",
@@ -1253,16 +1360,19 @@
         "Zusatzkarte"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "cardDefinitionId",
         "drawnCards",
         "employeeEmpowermentStartDrawDecision",
+        "label",
         "resolvedEffects",
         "sourceDefinitionId"
       ]
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:2005",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 2005,
       "testName": "distinguishes Employee Empowerment optional start draw from its agenda action",
@@ -1286,14 +1396,17 @@
         "Übersprungen"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "cardDefinitionId",
         "employeeEmpowermentStartDrawDecision",
+        "label",
         "sourceDefinitionId"
       ]
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:2075",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 2075,
       "testName": "shows Too Many Doors as paid by both sides after reveal",
@@ -1319,8 +1432,10 @@
         "Run endet"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "corpCreditsAfter",
+        "label",
         "runnerCreditsAfter",
         "secretSpendCorp",
         "secretSpendRevealed",
@@ -1331,6 +1446,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:2585",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 2585,
       "testName": "describes public stack-search reveals with the selected card and destination",
@@ -1356,10 +1472,12 @@
         "Shuffle"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "cardDefinitionId",
         "hiddenZoneAction",
         "hiddenZoneBarrier",
+        "label",
         "searchDestination",
         "searchReveal",
         "searchShuffleAfter",
@@ -1369,6 +1487,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:2608",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 2608,
       "testName": "describes card-implementation stack-to-hand searches with the revealed selected card",
@@ -1397,11 +1516,13 @@
         "Shuffle"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "aiReasonCode",
         "cardDefinitionId",
         "hiddenZoneAction",
         "hiddenZoneBarrier",
+        "label",
         "movedCardCount",
         "publicRevealDefinitionId",
         "publicRevealKind",
@@ -1413,6 +1534,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:2635",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 2635,
       "testName": "redacts private card-implementation stack-to-hand searches",
@@ -1441,10 +1563,12 @@
         "Shuffle"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "aiReasonCode",
         "hiddenZoneAction",
         "hiddenZoneBarrier",
+        "label",
         "movedCardCount",
         "searchDestination",
         "selectedCount",
@@ -1454,6 +1578,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:2659",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 2659,
       "testName": "describes Aujourd'Oui top-five program choices with revealed selected programs only",
@@ -1484,9 +1609,11 @@
         "Shuffle"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "hiddenZoneAction",
         "hiddenZoneBarrier",
+        "label",
         "publicRevealDefinitionId",
         "publicRevealDefinitionIds",
         "publicRevealKind",
@@ -1497,6 +1624,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:2682",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 2682,
       "testName": "describes Aujourd'Oui empty top-five choices with the required shuffle",
@@ -1525,9 +1653,11 @@
         "Shuffle"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "hiddenZoneAction",
         "hiddenZoneBarrier",
+        "label",
         "selectedCount",
         "shuffled",
         "sourceDefinitionId"
@@ -1535,6 +1665,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:2701",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 2701,
       "testName": "describes hidden stack-search moves without leaking the selected card",
@@ -1558,10 +1689,12 @@
         "den Grip"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "cardDefinitionId",
         "hiddenZoneAction",
         "hiddenZoneBarrier",
+        "label",
         "searchDestination",
         "searchReveal",
         "selectedCount",
@@ -1570,6 +1703,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:2735",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 2735,
       "testName": "describes Trace start, bids, and outcome with public bid amounts",
@@ -1597,10 +1731,12 @@
         "Link 0"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "aiReasonCode",
         "baseTraceStrength",
         "corpBid",
+        "label",
         "runnerLink",
         "sourceDefinitionId",
         "traceStep",
@@ -1609,6 +1745,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:2748",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 2748,
       "testName": "describes Trace start, bids, and outcome with public bid amounts",
@@ -1638,9 +1775,11 @@
         "+1 Tag"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "baseTraceStrength",
         "corpBid",
+        "label",
         "runnerBid",
         "runnerLink",
         "runnerStrength",
@@ -1653,6 +1792,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:2777",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 2777,
       "testName": "describes trace base-link and post-bid link choices",
@@ -1678,10 +1818,12 @@
         "Link 1"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "baseLinkUsed",
         "baseLinkValue",
         "corpBid",
+        "label",
         "runnerLink",
         "sourceDefinitionId",
         "traceBaseLinkCostPaid",
@@ -1692,6 +1834,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:2792",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 2792,
       "testName": "describes trace base-link and post-bid link choices",
@@ -1723,9 +1866,11 @@
         "Fehlschlag"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "corpBid",
         "eventModificationDecision",
+        "label",
         "postBidTraceLinkBonus",
         "postBidTraceLinkCostPaid",
         "postBidTraceLinkDelta",
@@ -1742,6 +1887,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:2812",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 2812,
       "testName": "describes trace base-link and post-bid link choices",
@@ -1769,8 +1915,10 @@
         "Fehlschlag"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "corpBid",
+        "label",
         "postBidTraceLinkBonus",
         "runnerBid",
         "runnerLink",
@@ -1783,6 +1931,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:2840",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 2840,
       "testName": "keeps Cinderella trace outcome and break costs distinct",
@@ -1816,11 +1965,13 @@
         "Run endet"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "corpBid",
         "damageAmount",
         "damageCannotBePrevented",
         "damageType",
+        "label",
         "runnerBid",
         "runnerStrength",
         "sourceDefinitionId",
@@ -1834,6 +1985,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:2883",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 2883,
       "testName": "describes Hacker Tracker, Fang 2.0 and Arasaka Owns You follow-up payloads",
@@ -1867,11 +2019,13 @@
         "HTC +1"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "corpBid",
         "fangRunEnded",
         "fangRunLockCreditCost",
         "hackerTrackerCountersAdded",
+        "label",
         "runnerBid",
         "runnerStrength",
         "sourceDefinitionId",
@@ -1883,6 +2037,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:2909",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 2909,
       "testName": "describes Hacker Tracker, Fang 2.0 and Arasaka Owns You follow-up payloads",
@@ -1910,10 +2065,12 @@
         "3 Agenda-Punkte"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "coreDamageRemoved",
         "drawnCards",
         "futureAgendaPointForfeitPending",
+        "label",
         "originalAmount",
         "preventedAmount",
         "removedTags",
@@ -1923,6 +2080,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:2932",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 2932,
       "testName": "describes Fall Guy tag prevention during Marked Accounts access",
@@ -1953,6 +2111,7 @@
       "payloadKeys": [
         "accessEffectSourceDefinitionId",
         "accessedFromZone",
+        "actionType",
         "actor",
         "ambushDefinitionId",
         "eventModificationDecision",
@@ -1961,6 +2120,7 @@
         "hiddenZoneAction",
         "hiddenZoneBarrier",
         "imminentEventType",
+        "label",
         "originalAmount",
         "preventedTags",
         "sourceDefinitionId",
@@ -1970,6 +2130,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:3000",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 3000,
       "testName": "describes complex card payloads from the Originalset spot-check clearly",
@@ -1993,9 +2154,11 @@
         "0 übrig"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "damageAmount",
         "eventModificationDecision",
+        "label",
         "preventedAmount",
         "sourceDefinitionId",
         "title"
@@ -2003,6 +2166,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:3194",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 3194,
       "testName": "counts Korp and Runner turns as one shared sequence",
@@ -2024,14 +2188,16 @@
         "Heap"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "discardResolved",
-        "eventId",
-        "hiddenZoneAction"
+        "hiddenZoneAction",
+        "label"
       ]
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:3197",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 3197,
       "testName": "counts Korp and Runner turns as one shared sequence",
@@ -2055,13 +2221,15 @@
         "einem Server"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
-        "eventId",
+        "label",
         "v1922RunnerEventAbility"
       ]
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:3199",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 3199,
       "testName": "counts Korp and Runner turns as one shared sequence",
@@ -2083,14 +2251,16 @@
         "Heap"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
         "discardResolved",
-        "eventId",
-        "hiddenZoneAction"
+        "hiddenZoneAction",
+        "label"
       ]
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:3821",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 3821,
       "testName": "names access-effect damage with source and discarded cards",
@@ -2113,12 +2283,15 @@
         "Ausgelöst"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
+        "label",
         "resolvedEffects"
       ]
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:3962",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 3962,
       "testName": "describes Pattel access counters by affected icebreakers or absence",
@@ -2141,7 +2314,9 @@
         "3 Credits"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
+        "label",
         "resolvedEffects",
         "targetCardDefinitionIds",
         "targetCount"
@@ -2149,6 +2324,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:3984",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 3984,
       "testName": "describes Pattel access counters by affected icebreakers or absence",
@@ -2171,7 +2347,9 @@
         "3 Credits"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
+        "label",
         "resolvedEffects",
         "targetCardDefinitionIds",
         "targetCount"
@@ -2179,6 +2357,7 @@
     },
     {
       "fixtureId": "apps/web/app/chronicle.test.ts:4015",
+      "sourceKind": "web_fixture",
       "sourceFile": "apps/web/app/chronicle.test.ts",
       "line": 4015,
       "testName": "names legacy Pattel payment choices from counter effects",
@@ -2201,8 +2380,276 @@
         "3 Credits"
       ],
       "payloadKeys": [
+        "actionType",
         "actor",
+        "label",
         "resolvedEffects"
+      ]
+    },
+    {
+      "fixtureId": "engine_trace_audit_of_call_records:1:evt_12",
+      "sourceKind": "engine_scenario",
+      "sourceFile": "scripts/check-chronicle-choice-fallbacks.ts#engine-scenarios",
+      "line": 0,
+      "scenarioName": "Engine: Audit of Call Records trace bids",
+      "actor": "corp",
+      "sourceDefinitionId": "onr_v1_283_audit-of-call-records",
+      "templateKey": "corp_bid",
+      "runnerTitle": "Die Korp hat im Trace 2 Credits geboten.",
+      "corpTitle": "Du hast im Trace 2 Credits geboten.",
+      "runnerCategory": "danger",
+      "corpCategory": "danger",
+      "runnerChips": [
+        "Korp",
+        "Trace",
+        "Korp-Gebot 2",
+        "Trace 7",
+        "Link 0"
+      ],
+      "corpChips": [
+        "Korp",
+        "Trace",
+        "Korp-Gebot 2",
+        "Trace 7",
+        "Link 0"
+      ],
+      "payloadKeys": [
+        "actionType",
+        "actor",
+        "baseTraceStrength",
+        "choiceId",
+        "choiceKind",
+        "corpBid",
+        "corpBidMax",
+        "corpCreditBid",
+        "effectKind",
+        "label",
+        "runnerLink",
+        "sourceDefinitionId",
+        "targets",
+        "traceBaseLinkChoiceOpened",
+        "traceId",
+        "traceStep",
+        "traceStrength",
+        "visibility"
+      ]
+    },
+    {
+      "fixtureId": "engine_trace_audit_of_call_records:2:evt_13",
+      "sourceKind": "engine_scenario",
+      "sourceFile": "scripts/check-chronicle-choice-fallbacks.ts#engine-scenarios",
+      "line": 0,
+      "scenarioName": "Engine: Audit of Call Records trace bids",
+      "actor": "runner",
+      "sourceDefinitionId": "onr_v1_283_audit-of-call-records",
+      "templateKey": "runner_bid",
+      "runnerTitle": "Trace entschieden: Korp 2 Credits, Du 0 Credits; Trace erfolgreich.",
+      "corpTitle": "Trace entschieden: Du 2 Credits, Runner 0 Credits; Trace erfolgreich.",
+      "runnerCategory": "danger",
+      "corpCategory": "danger",
+      "runnerChips": [
+        "Runner",
+        "Trace",
+        "Korp 2",
+        "Runner 0",
+        "7:0",
+        "Erfolg",
+        "+1 Tag"
+      ],
+      "corpChips": [
+        "Runner",
+        "Trace",
+        "Korp 2",
+        "Runner 0",
+        "7:0",
+        "Erfolg",
+        "+1 Tag"
+      ],
+      "payloadKeys": [
+        "actionType",
+        "actor",
+        "amounts",
+        "baseTraceStrength",
+        "choiceId",
+        "choiceKind",
+        "corpBid",
+        "effectKind",
+        "label",
+        "runnerBid",
+        "runnerLink",
+        "runnerStrength",
+        "sourceDefinitionId",
+        "tagsAdded",
+        "targets",
+        "traceId",
+        "traceStep",
+        "traceStrength",
+        "traceSuccessful",
+        "visibility"
+      ]
+    },
+    {
+      "fixtureId": "engine_force_shield_damage_prevention:1:evt_8",
+      "sourceKind": "engine_scenario",
+      "sourceFile": "scripts/check-chronicle-choice-fallbacks.ts#engine-scenarios",
+      "line": 0,
+      "scenarioName": "Engine: Force Shield damage prevention",
+      "actor": "runner",
+      "sourceDefinitionId": "onr_v1_028_force-shield",
+      "templateKey": "prevent",
+      "runnerTitle": "Du hast 1 Schaden verhindert.",
+      "corpTitle": "Der Runner hat 1 Schaden verhindert.",
+      "runnerCategory": "danger",
+      "corpCategory": "danger",
+      "runnerChips": [
+        "Runner",
+        "Prävention",
+        "1 verhindert",
+        "0 übrig"
+      ],
+      "corpChips": [
+        "Runner",
+        "Prävention",
+        "1 verhindert",
+        "0 übrig"
+      ],
+      "payloadKeys": [
+        "actionType",
+        "actor",
+        "affectedSide",
+        "amounts",
+        "cardsTrashed",
+        "choiceKind",
+        "damageAmount",
+        "damageResolved",
+        "damageType",
+        "effectKind",
+        "eventModificationDecision",
+        "eventModificationKind",
+        "eventModificationOutcome",
+        "eventModificationWindowId",
+        "finalAmount",
+        "flatline",
+        "imminentEventId",
+        "imminentEventType",
+        "label",
+        "originalAmount",
+        "preventedAmount",
+        "redactedKind",
+        "sourceDefinitionId",
+        "targets",
+        "visibility"
+      ]
+    },
+    {
+      "fixtureId": "engine_marked_accounts_fall_guy:1:evt_7",
+      "sourceKind": "engine_scenario",
+      "sourceFile": "scripts/check-chronicle-choice-fallbacks.ts#engine-scenarios",
+      "line": 0,
+      "scenarioName": "Engine: Marked Accounts tag prevention with Fall Guy",
+      "actor": "runner",
+      "sourceDefinitionId": "onr_v1_161_fall-guy",
+      "hiddenZoneAction": "v1917_access_ambush",
+      "abilityId": "v1917_access_ambush",
+      "templateKey": "v1917_access_ambush",
+      "runnerTitle": "Du hast Fall Guy getrasht und 1 Tag durch Marked Accounts verhindert.",
+      "corpTitle": "Der Runner hat Fall Guy getrasht und 1 Tag durch Marked Accounts verhindert.",
+      "runnerCategory": "danger",
+      "corpCategory": "danger",
+      "runnerChips": [
+        "Runner",
+        "Tag verhindert",
+        "1 verhindert",
+        "Fall Guy",
+        "Marked Accounts",
+        "Source-Trash"
+      ],
+      "corpChips": [
+        "Runner",
+        "Tag verhindert",
+        "1 verhindert",
+        "Fall Guy",
+        "Marked Accounts",
+        "Source-Trash"
+      ],
+      "payloadKeys": [
+        "abilityFamily",
+        "abilityId",
+        "accessEffectSourceDefinitionId",
+        "accessedFromZone",
+        "actionType",
+        "actor",
+        "affectedSide",
+        "ambushDefinitionId",
+        "amounts",
+        "choiceKind",
+        "choiceVisibility",
+        "effectKind",
+        "eventModificationDecision",
+        "eventModificationKind",
+        "eventModificationOutcome",
+        "eventModificationWindowId",
+        "finalAmount",
+        "hiddenZoneAction",
+        "hiddenZoneBarrier",
+        "imminentEventId",
+        "imminentEventType",
+        "label",
+        "originalAmount",
+        "preventedTags",
+        "redactedKind",
+        "runPhase",
+        "runnerTagsAfter",
+        "sourceDefinitionId",
+        "sourceTrashed",
+        "tagsAdded",
+        "targets",
+        "trashedCardDefinitionId",
+        "visibility"
+      ]
+    },
+    {
+      "fixtureId": "engine_runner_discard_phase:1:evt_9",
+      "sourceKind": "engine_scenario",
+      "sourceFile": "scripts/check-chronicle-choice-fallbacks.ts#engine-scenarios",
+      "line": 0,
+      "scenarioName": "Engine: Runner discard phase choice",
+      "actor": "runner",
+      "hiddenZoneAction": "discard_phase",
+      "abilityId": "discard_phase",
+      "templateKey": "discard_phase",
+      "runnerTitle": "Du hast 4 Karten abgeworfen.",
+      "corpTitle": "Der Runner hat 4 Karten abgeworfen.",
+      "runnerCategory": "hidden",
+      "corpCategory": "hidden",
+      "runnerChips": [
+        "Runner",
+        "Discard",
+        "Heap"
+      ],
+      "corpChips": [
+        "Runner",
+        "Discard",
+        "Heap"
+      ],
+      "payloadKeys": [
+        "abilityFamily",
+        "abilityId",
+        "actionType",
+        "actor",
+        "choiceKind",
+        "choiceVisibility",
+        "discardCount",
+        "discardResolved",
+        "discardSide",
+        "discardZone",
+        "effectKind",
+        "hiddenZoneAction",
+        "hiddenZoneBarrier",
+        "label",
+        "redactedKind",
+        "targets",
+        "visibility"
       ]
     }
   ],

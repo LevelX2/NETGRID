@@ -17,7 +17,7 @@ corepack pnpm check:chronicle-choice-fallbacks
 Aktueller Lauf:
 
 ```text
-CHRONICLE_CHOICE_FALLBACK_AUDIT OK fixtures=60 checked=120 skipped=0 fallbacks=0
+CHRONICLE_CHOICE_FALLBACK_AUDIT OK cases=65 webFixtures=60 engineScenarios=4 engineEvents=5 checked=130 skipped=0 fallbacks=0
 ```
 
 Optional kann ein JSON-Report geschrieben werden:
@@ -36,9 +36,14 @@ Aktueller Schablonenreport: `docs/reviews/chronicle/choice-message-template-repo
 
 ## Abdeckung
 
-Der Check deckt die vorhandenen Web-Chronicle-Fixtures ab. Er ist damit ein Gate gegen Regressionen in bereits bekannten Choice-Formaten.
+Der Check deckt zwei Quellen ab:
 
-Er ist noch kein Vollscan aller Karten und Engine-Pfade. Dafür müssen weitere reale Engine-Szenarien oder generierte PublicEvent-Fixtures in die Chronicle-Testbasis übernommen werden. Der sinnvolle Ausbaupfad ist:
+- `web_fixture`: literal auswertbare `makeEvent("resolve_choice", { ... })`-Fixtures aus `apps/web/app/chronicle.test.ts`.
+- `engine_scenario`: echte Engine-Flows, die LegalActions ausführen, anschließend `getPlayerView(...).publicEvents` aus Runner- und Corp-Sicht lesen und die realen `resolve_choice`-Events rendern.
+
+Aktuell sind vier Engine-Szenarien enthalten: Trace-Gebote über `Audit of Call Records`, Damage-Prevention über `Force Shield`, Tag-Prevention über `Fall Guy` bei `Marked Accounts` und Runner-Discard-Phase.
+
+Er ist noch kein Vollscan aller Karten und Engine-Pfade. Dafür müssen weitere reale Engine-Szenarien oder generierte PublicEvent-Fixtures ergänzt werden. Der sinnvolle Ausbaupfad ist:
 
 1. Neue gefundene generische Chronikmeldung als `resolve_choice`-Fixture in `chronicle.test.ts` ablegen.
 2. Den Chronicle-Formatter oder den Engine-Payload-Kontrakt spezialisieren.
@@ -46,6 +51,6 @@ Er ist noch kein Vollscan aller Karten und Engine-Pfade. Dafür müssen weitere 
 
 ## Grenzen
 
-Der Audit wertet nur literal auswertbare `makeEvent("resolve_choice", { ... })`-Aufrufe aus. Dynamische Testdaten werden bewusst übersprungen, damit der Check deterministisch und einfach bleibt.
+Der Web-Fixture-Teil wertet nur literal auswertbare `makeEvent("resolve_choice", { ... })`-Aufrufe aus. Dynamische Testdaten werden bewusst übersprungen, damit der Check deterministisch und einfach bleibt.
 
-Wenn ein neuer Choice-Pfad nur in Engine-Integrationstests existiert, muss er entweder als PublicEvent-Fixture in die Web-Chronicle-Tests kopiert oder durch einen späteren Engine-Event-Export in den Audit eingespeist werden.
+Wenn ein neuer Choice-Pfad nur in Engine-Integrationstests existiert, kann er entweder als PublicEvent-Fixture in die Web-Chronicle-Tests kopiert oder als weiteres Engine-Szenario im Audit-Script ergänzt werden.

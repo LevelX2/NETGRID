@@ -5,6 +5,28 @@ import { fileURLToPath } from "node:url";
 import * as ts from "typescript";
 import type { PublicGameEvent, Side } from "@netgrid/shared";
 import { formatChronicleEvent } from "../apps/web/app/chronicle";
+import {
+  createGameAfterSetup,
+  getLegalActions,
+  getPlayerView,
+  type GameState,
+  type LegalAction,
+} from "../packages/engine/src/index";
+import {
+  MECHANIC_SMOKE_DECKS,
+  ONR_V1_6_1_RUNNER_DECK,
+  V111_CORP_DECK,
+  apply,
+  applyChoice,
+  applyChoices,
+  moveCorpCardToHq,
+  moveRunnerCardToGrip,
+  putCorpCardOnTopOfRd,
+  putCorpIceOnServer,
+  sourceDefinition,
+  toRunnerTurn,
+  v172CardReleaseGame,
+} from "../packages/engine/src/test-fixtures/mechanic-smoke-fixtures";
 
 const REPO_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const CHRONICLE_TEST_PATH = path.join(REPO_ROOT, "apps", "web", "app", "chronicle.test.ts");
@@ -42,6 +64,16 @@ type Fixture = {
   payload: Record<string, JsonValue>;
 };
 
+type AuditCase = {
+  id: string;
+  sourceKind: "web_fixture" | "engine_scenario";
+  sourceFile: string;
+  line: number;
+  testName: string | undefined;
+  scenarioName: string | undefined;
+  eventsBySide: Partial<Record<Side, PublicGameEvent>>;
+};
+
 type SkippedFixture = {
   sourceFile: string;
   line: number;
@@ -50,9 +82,11 @@ type SkippedFixture = {
 
 type FallbackHit = {
   fixtureId: string;
+  sourceKind: "web_fixture" | "engine_scenario";
   sourceFile: string;
   line: number;
   testName: string | undefined;
+  scenarioName: string | undefined;
   viewerSide: Side;
   title: string;
   sourceDefinitionId: string | undefined;
@@ -63,9 +97,11 @@ type FallbackHit = {
 
 type RenderedChoiceCase = {
   fixtureId: string;
+  sourceKind: "web_fixture" | "engine_scenario";
   sourceFile: string;
   line: number;
   testName: string | undefined;
+  scenarioName: string | undefined;
   actor: Side;
   sourceDefinitionId: string | undefined;
   hiddenZoneAction: string | undefined;
@@ -84,6 +120,9 @@ type Report = {
   schemaVersion: "chronicle-choice-fallback-audit-v1";
   sourceFiles: string[];
   fixtureCount: number;
+  webFixtureCount: number;
+  engineScenarioCount: number;
+  engineEventCaseCount: number;
   skippedFixtureCount: number;
   checkedItemCount: number;
   fallbackCount: number;
@@ -91,6 +130,40 @@ type Report = {
   renderedCases: RenderedChoiceCase[];
   skippedFixtures: SkippedFixture[];
 };
+
+type EngineScenario = {
+  id: string;
+  name: string;
+  run: () => EngineScenarioRun;
+};
+
+type EngineScenarioRun = {
+  state: GameState;
+  fromStateVersion: number;
+};
+
+const ENGINE_SCENARIOS: EngineScenario[] = [
+  {
+    id: "engine_trace_audit_of_call_records",
+    name: "Engine: Audit of Call Records trace bids",
+    run: engineTraceAuditOfCallRecordsScenario,
+  },
+  {
+    id: "engine_force_shield_damage_prevention",
+    name: "Engine: Force Shield damage prevention",
+    run: engineForceShieldDamagePreventionScenario,
+  },
+  {
+    id: "engine_marked_accounts_fall_guy",
+    name: "Engine: Marked Accounts tag prevention with Fall Guy",
+    run: engineMarkedAccountsFallGuyScenario,
+  },
+  {
+    id: "engine_runner_discard_phase",
+    name: "Engine: Runner discard phase choice",
+    run: engineRunnerDiscardPhaseScenario,
+  },
+];
 
 function main(): void {
   const args = process.argv.slice(2);
@@ -102,13 +175,21 @@ function main(): void {
   const { fixtures, skippedFixtures } = collectResolveChoiceFixtures(
     CHRONICLE_TEST_PATH,
   );
-  const { fallbacks, renderedCases } = auditFixtures(fixtures);
+  const engineCases = collectEngineScenarioCases();
+  const auditCases = [...fixtures.map(webFixtureToAuditCase), ...engineCases];
+  const { fallbacks, renderedCases } = auditCasesForFallbacks(auditCases);
   const report: Report = {
     schemaVersion: "chronicle-choice-fallback-audit-v1",
-    sourceFiles: [relativePath(CHRONICLE_TEST_PATH)],
-    fixtureCount: fixtures.length,
+    sourceFiles: [
+      relativePath(CHRONICLE_TEST_PATH),
+      "scripts/check-chronicle-choice-fallbacks.ts#engine-scenarios",
+    ],
+    fixtureCount: auditCases.length,
+    webFixtureCount: fixtures.length,
+    engineScenarioCount: ENGINE_SCENARIOS.length,
+    engineEventCaseCount: engineCases.length,
     skippedFixtureCount: skippedFixtures.length,
-    checkedItemCount: fixtures.length * VIEWER_SIDES.length,
+    checkedItemCount: visibleAuditEventCount(auditCases),
     fallbackCount: fallbacks.length,
     fallbacks,
     renderedCases,
@@ -120,7 +201,7 @@ function main(): void {
 
   const status = fallbacks.length === 0 ? "OK" : "FAIL";
   console.log(
-    `CHRONICLE_CHOICE_FALLBACK_AUDIT ${status} fixtures=${report.fixtureCount} checked=${report.checkedItemCount} skipped=${report.skippedFixtureCount} fallbacks=${report.fallbackCount}`,
+    `CHRONICLE_CHOICE_FALLBACK_AUDIT ${status} cases=${report.fixtureCount} webFixtures=${report.webFixtureCount} engineScenarios=${report.engineScenarioCount} engineEvents=${report.engineEventCaseCount} checked=${report.checkedItemCount} skipped=${report.skippedFixtureCount} fallbacks=${report.fallbackCount}`,
   );
   if (writeReport) console.log(`report=${relativePath(reportPath)}`);
   if (writeTemplateReport)
@@ -208,41 +289,120 @@ function collectResolveChoiceFixtures(filePath: string): {
   return { fixtures, skippedFixtures };
 }
 
-function auditFixtures(fixtures: Fixture[]): {
+function webFixtureToAuditCase(fixture: Fixture): AuditCase {
+  return {
+    id: fixture.id,
+    sourceKind: "web_fixture",
+    sourceFile: fixture.sourceFile,
+    line: fixture.line,
+    testName: fixture.testName,
+    scenarioName: undefined,
+    eventsBySide: {
+      runner: makeEvent("resolve_choice", fixture.payload, fixture.id),
+      corp: makeEvent("resolve_choice", fixture.payload, fixture.id),
+    },
+  };
+}
+
+function collectEngineScenarioCases(): AuditCase[] {
+  const cases: AuditCase[] = [];
+  for (const scenario of ENGINE_SCENARIOS) {
+    const result = scenario.run();
+    const runnerEvents = resolveChoiceEventsById(
+      result.state,
+      "runner",
+      result.fromStateVersion,
+    );
+    const corpEvents = resolveChoiceEventsById(
+      result.state,
+      "corp",
+      result.fromStateVersion,
+    );
+    const ids = [...new Set([...runnerEvents.keys(), ...corpEvents.keys()])].sort();
+    for (const [index, eventId] of ids.entries()) {
+      const eventsBySide: Partial<Record<Side, PublicGameEvent>> = {};
+      const runnerEvent = runnerEvents.get(eventId);
+      const corpEvent = corpEvents.get(eventId);
+      if (runnerEvent) eventsBySide.runner = runnerEvent;
+      if (corpEvent) eventsBySide.corp = corpEvent;
+      cases.push({
+        id: `${scenario.id}:${index + 1}:${eventId}`,
+        sourceKind: "engine_scenario",
+        sourceFile: "scripts/check-chronicle-choice-fallbacks.ts#engine-scenarios",
+        line: 0,
+        testName: undefined,
+        scenarioName: scenario.name,
+        eventsBySide,
+      });
+    }
+  }
+  return cases;
+}
+
+function resolveChoiceEventsById(
+  state: GameState,
+  side: Side,
+  fromStateVersion: number,
+): Map<string, PublicGameEvent> {
+  const events = getPlayerView(state, side).publicEvents.filter(
+    (event) =>
+      isResolveChoiceEvent(event) && event.stateVersionBefore >= fromStateVersion,
+  );
+  return new Map(events.map((event) => [event.eventId, event]));
+}
+
+function isResolveChoiceEvent(event: PublicGameEvent): boolean {
+  return (
+    event.type === "resolve_choice" ||
+    event.publicPayload.actionType === "resolve_choice"
+  );
+}
+
+function visibleAuditEventCount(cases: AuditCase[]): number {
+  return cases.reduce(
+    (sum, item) =>
+      sum + VIEWER_SIDES.filter((side) => Boolean(item.eventsBySide[side])).length,
+    0,
+  );
+}
+
+function auditCasesForFallbacks(cases: AuditCase[]): {
   fallbacks: FallbackHit[];
   renderedCases: RenderedChoiceCase[];
 } {
   const fallbacks: FallbackHit[] = [];
   const renderedCases: RenderedChoiceCase[] = [];
-  for (const fixture of fixtures) {
-    const runnerItem = formatChronicleEvent(
-      makeEvent("resolve_choice", fixture.payload, fixture.id),
-      "runner",
-    );
-    const corpItem = formatChronicleEvent(
-      makeEvent("resolve_choice", fixture.payload, fixture.id),
-      "corp",
-    );
+  for (const auditCase of cases) {
+    const runnerEvent = auditCase.eventsBySide.runner;
+    const corpEvent = auditCase.eventsBySide.corp;
+    const runnerItem = runnerEvent
+      ? formatChronicleEvent(runnerEvent, "runner")
+      : undefined;
+    const corpItem = corpEvent ? formatChronicleEvent(corpEvent, "corp") : undefined;
+    const payload = runnerEvent?.publicPayload ?? corpEvent?.publicPayload ?? {};
     renderedCases.push({
-      fixtureId: fixture.id,
-      sourceFile: fixture.sourceFile,
-      line: fixture.line,
-      testName: fixture.testName,
-      actor: sideValue(fixture.payload.actor) ?? "runner",
-      sourceDefinitionId: stringValue(fixture.payload.sourceDefinitionId),
-      hiddenZoneAction: stringValue(fixture.payload.hiddenZoneAction),
-      abilityId: abilityIdFromPayload(fixture.payload),
-      templateKey: templateKeyFromPayload(fixture.payload),
-      runnerTitle: runnerItem.title,
-      corpTitle: corpItem.title,
-      runnerCategory: runnerItem.category,
-      corpCategory: corpItem.category,
-      runnerChips: runnerItem.chips,
-      corpChips: corpItem.chips,
-      payloadKeys: Object.keys(fixture.payload).sort(),
+      fixtureId: auditCase.id,
+      sourceKind: auditCase.sourceKind,
+      sourceFile: auditCase.sourceFile,
+      line: auditCase.line,
+      testName: auditCase.testName,
+      scenarioName: auditCase.scenarioName,
+      actor: sideValue(payload.actor) ?? "runner",
+      sourceDefinitionId: stringValue(payload.sourceDefinitionId),
+      hiddenZoneAction: stringValue(payload.hiddenZoneAction),
+      abilityId: abilityIdFromPayload(payload),
+      templateKey: templateKeyFromPayload(payload),
+      runnerTitle: runnerItem?.title ?? "nicht sichtbar",
+      corpTitle: corpItem?.title ?? "nicht sichtbar",
+      runnerCategory: runnerItem?.category ?? "nicht sichtbar",
+      corpCategory: corpItem?.category ?? "nicht sichtbar",
+      runnerChips: runnerItem?.chips ?? [],
+      corpChips: corpItem?.chips ?? [],
+      payloadKeys: Object.keys(payload).sort(),
     });
     for (const viewerSide of VIEWER_SIDES) {
-      const event = makeEvent("resolve_choice", fixture.payload, fixture.id);
+      const event = auditCase.eventsBySide[viewerSide];
+      if (!event) continue;
       const item = formatChronicleEvent(event, viewerSide);
       const serialized = JSON.stringify(item);
       if (
@@ -250,21 +410,203 @@ function auditFixtures(fixtures: Fixture[]): {
         serialized.includes(GENERIC_ENGINE_LABEL)
       ) {
         fallbacks.push({
-          fixtureId: fixture.id,
-          sourceFile: fixture.sourceFile,
-          line: fixture.line,
-          testName: fixture.testName,
+          fixtureId: auditCase.id,
+          sourceKind: auditCase.sourceKind,
+          sourceFile: auditCase.sourceFile,
+          line: auditCase.line,
+          testName: auditCase.testName,
+          scenarioName: auditCase.scenarioName,
           viewerSide,
           title: item.title,
-          sourceDefinitionId: stringValue(fixture.payload.sourceDefinitionId),
-          hiddenZoneAction: stringValue(fixture.payload.hiddenZoneAction),
-          abilityId: abilityIdFromPayload(fixture.payload),
-          payloadKeys: Object.keys(fixture.payload).sort(),
+          sourceDefinitionId: stringValue(event.publicPayload.sourceDefinitionId),
+          hiddenZoneAction: stringValue(event.publicPayload.hiddenZoneAction),
+          abilityId: abilityIdFromPayload(event.publicPayload),
+          payloadKeys: Object.keys(event.publicPayload).sort(),
         });
       }
     }
   }
   return { fallbacks, renderedCases };
+}
+
+function engineTraceAuditOfCallRecordsScenario(): EngineScenarioRun {
+  let state = toRunnerTurn(v172CardReleaseGame("chronicle-audit-engine-trace"));
+  state.runner.credits = 30;
+  state.corp.credits = 30;
+  moveCorpCardToHq(state, "onr_v1_283_audit-of-call-records");
+  putCorpIceOnServer(state, "rd", "onr_v1_232_crystal-wall");
+
+  state = apply(
+    state,
+    "runner",
+    (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+  );
+  state = apply(
+    state,
+    "corp",
+    (action) =>
+      action.type === "rez_ice" &&
+      sourceDefinition(state, action) === "onr_v1_232_crystal-wall",
+  );
+  state = apply(state, "runner", (action) => action.type === "continue_run");
+  state = apply(
+    state,
+    "runner",
+    (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+  );
+  state = apply(state, "runner", (action) => action.type === "continue_run");
+  state = apply(state, "runner", (action) => action.type === "end_turn");
+  state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+  const fromStateVersion = state.stateVersion;
+  state = apply(
+    state,
+    "corp",
+    (action) =>
+      action.type === "play_operation" &&
+      sourceDefinition(state, action) === "onr_v1_283_audit-of-call-records",
+  );
+  state = applyChoice(state, "corp", "bid_2");
+  state = applyChoice(state, "runner", "bid_0");
+  return { state, fromStateVersion };
+}
+
+function engineForceShieldDamagePreventionScenario(): EngineScenarioRun {
+  let state = toRunnerTurn(
+    createGameAfterSetup({
+      seed: "chronicle-audit-engine-force-shield",
+      runnerDeck: ONR_V1_6_1_RUNNER_DECK,
+      corpDeck: V111_CORP_DECK,
+      agendaPointsToWin: 7,
+    }),
+  );
+  state.runner.credits = 20;
+  moveRunnerCardToGrip(state, "onr_v1_028_force-shield");
+  state = apply(
+    state,
+    "runner",
+    (action) =>
+      action.type === "install_card" &&
+      sourceDefinition(state, action) === "onr_v1_028_force-shield",
+  );
+  state = apply(state, "runner", (action) => action.type === "end_turn");
+  state = apply(state, "corp", (action) => action.type === "mandatory_draw");
+  moveCorpCardToHq(state, "v111_core_damage_operation");
+  const fromStateVersion = state.stateVersion;
+  state = apply(
+    state,
+    "corp",
+    (action) =>
+      action.type === "play_operation" &&
+      sourceDefinition(state, action) === "v111_core_damage_operation",
+  );
+  const preventionOption = state.pendingChoice?.options.find(
+    (option) => option.id !== "pass",
+  )?.id;
+  state = applyChoice(state, "runner", preventionOption ?? "pass");
+  return { state, fromStateVersion };
+}
+
+function engineMarkedAccountsFallGuyScenario(): EngineScenarioRun {
+  const fallGuyId = "onr_v1_161_fall-guy";
+  const markedAccountsId = "onr_proteus_005_marked-accounts";
+  let state = toRunnerTurn(
+    createGameAfterSetup({
+      seed: "chronicle-audit-engine-marked-accounts-fall-guy",
+      runnerDeck: {
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+        id: "chronicle_audit_marked_fall_guy_runner",
+        cards: [
+          { id: fallGuyId, quantity: 1 },
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.runner.cards,
+        ],
+      },
+      corpDeck: {
+        ...MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+        id: "chronicle_audit_marked_fall_guy_corp",
+        cards: [
+          { id: markedAccountsId, quantity: 1 },
+          { id: "onr_proteus_004_fetal-ai", quantity: 1 },
+          ...MECHANIC_SMOKE_DECKS.globalModifiers.corp.cards,
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  state.runner.credits = 8;
+  state.runner.clicks = 4;
+  const fallGuyCardId = moveRunnerCardToGrip(state, fallGuyId);
+  state = apply(
+    state,
+    "runner",
+    (action) =>
+      action.type === "install_card" &&
+      String(action.payload?.cardId) === fallGuyCardId,
+  );
+  putCorpCardOnTopOfRd(state, "onr_proteus_004_fetal-ai");
+  putCorpCardOnTopOfRd(state, markedAccountsId);
+  const fromStateVersion = state.stateVersion;
+  state = runAndAccessTopCard(state, "rd");
+  const fallGuyOption = state.pendingChoice?.options.find((option) =>
+    option.id.includes("avoid_tag"),
+  )?.id;
+  state = applyChoice(state, "runner", fallGuyOption ?? "pass");
+  return { state, fromStateVersion };
+}
+
+function engineRunnerDiscardPhaseScenario(): EngineScenarioRun {
+  let state = toRunnerTurn(
+    createGameAfterSetup({
+      seed: "chronicle-audit-engine-runner-discard",
+      runnerDeck: MECHANIC_SMOKE_DECKS.globalModifiers.runner,
+      corpDeck: MECHANIC_SMOKE_DECKS.globalModifiers.corp,
+      agendaPointsToWin: 7,
+    }),
+  );
+  state.runner.clicks = 4;
+  for (let index = 0; index < 4; index += 1) {
+    if (!hasLegalAction(state, "runner", (action) => action.type === "draw_card"))
+      break;
+    state = apply(state, "runner", (action) => action.type === "draw_card");
+  }
+  const fromStateVersion = state.stateVersion;
+  state = apply(state, "runner", (action) => action.type === "end_turn");
+  if (state.pendingChoice?.source !== "discard_phase")
+    return { state, fromStateVersion };
+  const selectedOptionIds = state.pendingChoice.options
+    .slice(0, state.pendingChoice.minSelections)
+    .map((option) => option.id);
+  state = applyChoices(state, "runner", selectedOptionIds);
+  return { state, fromStateVersion };
+}
+
+function runAndAccessTopCard(state: GameState, serverId: "rd" | "hq" | "archives"): GameState {
+  let next = apply(
+    state,
+    "runner",
+    (action) => action.type === "start_run" && action.payload?.serverId === serverId,
+  );
+  for (let step = 0; step < 12; step += 1) {
+    if (hasLegalAction(next, "runner", (action) => action.type === "access_card"))
+      return apply(next, "runner", (action) => action.type === "access_card");
+    if (hasLegalAction(next, "runner", (action) => action.type === "continue_run")) {
+      next = apply(next, "runner", (action) => action.type === "continue_run");
+      continue;
+    }
+    if (hasLegalAction(next, "corp", (action) => action.type === "decline_rez")) {
+      next = apply(next, "corp", (action) => action.type === "decline_rez");
+      continue;
+    }
+    throw new Error(`Run erreicht keinen Access-Schritt: ${serverId}`);
+  }
+  throw new Error(`Run-Access-Schleife ist zu lang: ${serverId}`);
+}
+
+function hasLegalAction(
+  state: GameState,
+  side: Side,
+  predicate: (action: LegalAction) => boolean,
+): boolean {
+  return getLegalActions(state, side).some(predicate);
 }
 
 function isResolveChoiceMakeEventCall(node: ts.CallExpression): boolean {
@@ -372,21 +714,25 @@ function markdownTemplateReport(report: Report): string {
     "",
     "## Zusammenfassung",
     "",
-    `- Fixtures: ${report.fixtureCount}`,
+    `- Audit-Cases gesamt: ${report.fixtureCount}`,
+    `- Web-Fixtures: ${report.webFixtureCount}`,
+    `- Engine-Szenarien: ${report.engineScenarioCount}`,
+    `- Engine-Event-Cases: ${report.engineEventCaseCount}`,
     `- Gerenderte Perspektiven: ${report.checkedItemCount}`,
     `- Generische Fallbacks: ${report.fallbackCount}`,
     `- Übersprungene Fixtures: ${report.skippedFixtureCount}`,
     "",
     "## Meldungsschablonen",
     "",
-    "| Nr. | Testfall | Zeile | Schlüssel | Runner-Meldung | Corp-Meldung |",
-    "| ---: | --- | ---: | --- | --- | --- |",
+    "| Nr. | Quelle | Testfall/Szenario | Zeile | Schlüssel | Runner-Meldung | Corp-Meldung |",
+    "| ---: | --- | --- | ---: | --- | --- | --- |",
   ];
   for (const [index, item] of report.renderedCases.entries()) {
     lines.push(
       `| ${[
         `${index + 1}`,
-        markdownCell(item.testName ?? item.fixtureId),
+        markdownCell(item.sourceKind),
+        markdownCell(item.scenarioName ?? item.testName ?? item.fixtureId),
         `${item.line}`,
         markdownCell(item.templateKey),
         markdownCell(item.runnerTitle),
@@ -396,7 +742,7 @@ function markdownTemplateReport(report: Report): string {
   }
   lines.push("", "## Hinweise", "");
   lines.push(
-    "Die Tabelle zeigt konkrete gerenderte Meldungen aus den vorhandenen Web-Chronicle-Fixtures. Sie ist eine belastbare Regressionsbasis für bekannte `resolve_choice`-Payload-Formate, aber noch kein Vollscan aller Engine-Pfade.",
+    "Die Tabelle zeigt konkrete gerenderte Meldungen aus vorhandenen Web-Chronicle-Fixtures und aus gezielten Engine-Szenarien. Sie ist eine belastbare Regressionsbasis für bekannte `resolve_choice`-Payload-Formate, aber noch kein Vollscan aller Engine-Pfade.",
   );
   if (report.fallbacks.length > 0) {
     lines.push("", "## Fallback-Treffer", "");
@@ -424,11 +770,11 @@ function isRecord(value: JsonValue): value is Record<string, JsonValue> {
   return Boolean(value && typeof value === "object" && !Array.isArray(value));
 }
 
-function stringValue(value: JsonValue | undefined): string | undefined {
+function stringValue(value: unknown): string | undefined {
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
 
-function abilityIdFromPayload(payload: Record<string, JsonValue>): string | undefined {
+function abilityIdFromPayload(payload: Record<string, unknown>): string | undefined {
   return (
     stringValue(payload.abilityId) ??
     stringValue(payload.cardImplementationAbility) ??
@@ -441,7 +787,7 @@ function abilityIdFromPayload(payload: Record<string, JsonValue>): string | unde
   );
 }
 
-function templateKeyFromPayload(payload: Record<string, JsonValue>): string {
+function templateKeyFromPayload(payload: Record<string, unknown>): string {
   return (
     abilityIdFromPayload(payload) ??
     stringValue(payload.hiddenZoneAction) ??
@@ -456,7 +802,7 @@ function templateKeyFromPayload(payload: Record<string, JsonValue>): string {
   );
 }
 
-function sideValue(value: JsonValue | undefined): Side | undefined {
+function sideValue(value: unknown): Side | undefined {
   return value === "corp" || value === "runner" ? value : undefined;
 }
 
