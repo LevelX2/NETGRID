@@ -26,6 +26,7 @@
     "check:ai-strategy-taxonomy": "node scripts/check-ai-strategy-taxonomy.mjs --write-reports",
     "check:ai-deck-doctrine-strategy": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/check-ai-deck-doctrine-strategy.ts",
     "check:ai022-1-tactic-signal-taxonomy": "node scripts/check-ai022-1-tactic-signal-taxonomy-cleanup.mjs",
+    "check:chronicle-choice-fallbacks": "corepack pnpm --filter @netgrid/server exec tsx ../../scripts/check-chronicle-choice-fallbacks.ts",
     "storage:backup": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts backup",
     "storage:restore": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts restore",
     "storage:inspect": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts inspect",
