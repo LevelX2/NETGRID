@@ -1,9 +1,9 @@
 {
   "schemaVersion": "ai-function-signal-derivation-v1",
-  "taskId": "AI024-1/AI025-1/AI025-1/AI025-1/AI025-1",
-  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022/AI024/AI024/AI024/AI025/AI025/AI025/AI026/AI026/AI026/AI026/AI024-1/AI025-1/AI025-1/AI025-1/AI025-1",
-  "generatedAt": "2026-06-02",
-  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI024-1 sharpens selected Corp-ICE semantics while keeping Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default and UI-derivation effects unchanged.",
+  "taskId": "AI024-1/AI025-1/AI025-1/AI025-1/AI025-1/AI026-1",
+  "updatesTaskId": "AI003/AI003-1/AI015/AI016/AI017/AI018/AI018c/AI019/AI019a/AI020/AI020-1/AI021/AI022/AI024/AI024/AI024/AI025/AI025/AI025/AI026/AI026/AI026/AI026/AI024-1/AI025-1/AI025-1/AI025-1/AI025-1/AI026-1",
+  "generatedAt": "2026-06-03",
+  "description": "Read-only side-aware derivation contract for function signals from existing structured AI hint fields. AI026-1 aligns Corp semantics to Guide V3 while keeping Planner, targeting-AI, action-score, plan-weight, engine, legality, profile/default and UI-derivation effects unchanged.",
   "manualHintFieldPolicy": {
     "forbiddenFields": [
       "functionTags"
@@ -107,6 +107,35 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "access.corp_archives_net_damage_ambush",
+      "source": "effects",
+      "match": {
+        "target": "access.corp_archives_net_damage_ambush"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "access.corp_archives_net_damage_ambush"
+      },
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "access.corp_brain_damage_ambush",
+      "source": "effects",
+      "match": {
+        "target": "access.corp_brain_damage_ambush"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "access.corp_brain_damage_ambush"
+      },
+      "strategyAnchorFor": [
+        "corp.ambush_bluff",
+        "corp.damage_kill"
+      ]
+    },
+    {
       "signalId": "access.corp_counter_punish",
       "source": "effects",
       "match": {
@@ -116,6 +145,20 @@
         "side": "corp",
         "cardType": "asset",
         "target": "access.corp_counter_punish"
+      },
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "access.corp_credit_loss_counter",
+      "source": "effects",
+      "match": {
+        "target": "access.corp_credit_loss_counter"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "access.corp_credit_loss_counter"
       },
       "strategyAnchorFor": [
         "corp.ambush_bluff"
@@ -138,6 +181,35 @@
       ]
     },
     {
+      "signalId": "access.corp_icebreaker_strength_counter",
+      "source": "effects",
+      "match": {
+        "target": "access.corp_icebreaker_strength_counter"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "access.corp_icebreaker_strength_counter"
+      },
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "access.corp_net_damage_ambush",
+      "source": "effects",
+      "match": {
+        "target": "access.corp_net_damage_ambush"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "access.corp_net_damage_ambush"
+      },
+      "strategyAnchorFor": [
+        "corp.ambush_bluff",
+        "corp.damage_kill"
+      ]
+    },
+    {
       "signalId": "access.corp_program_trash",
       "source": "effects",
       "match": {
@@ -150,6 +222,35 @@
       },
       "strategyAnchorFor": [
         "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "access.corp_rnd_net_damage_ambush",
+      "source": "effects",
+      "match": {
+        "target": "access.corp_rnd_net_damage_ambush"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "access.corp_rnd_net_damage_ambush"
+      },
+      "strategyAnchorFor": [
+        "corp.ambush_bluff"
+      ]
+    },
+    {
+      "signalId": "access.corp_tag_ambush",
+      "source": "effects",
+      "match": {
+        "target": "access.corp_tag_ambush"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "access.corp_tag_ambush"
+      },
+      "strategyAnchorFor": [
+        "corp.ambush_bluff",
+        "corp.tag_trace_punish"
       ]
     },
     {
@@ -3594,6 +3695,18 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "draw.corp_draw",
+      "source": "effects",
+      "match": {
+        "target": "draw.corp_draw"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "draw.corp_draw"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "economy.action_credit",
       "source": "effects",
       "match": {
@@ -3724,6 +3837,32 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "economy.corp_action_charged_bank",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_action_charged_bank"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "economy.corp_action_charged_bank"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.corp_advanceable_cashout",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_advanceable_cashout"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "economy.corp_advanceable_cashout"
+      },
+      "strategyAnchorFor": [
+        "corp.asset_economy"
+      ]
+    },
+    {
       "signalId": "economy.corp_asset_cashout",
       "source": "effects",
       "match": {
@@ -3738,6 +3877,18 @@
         "corp.asset_economy",
         "corp.economy_rez_reserve"
       ]
+    },
+    {
+      "signalId": "economy.corp_charge_bank",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_charge_bank"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "economy.corp_charge_bank"
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "economy.corp_conditional_credit",
@@ -3766,6 +3917,20 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "economy.corp_counter_cashout",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_counter_cashout"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "economy.corp_counter_cashout"
+      },
+      "strategyAnchorFor": [
+        "corp.asset_economy"
+      ]
+    },
+    {
       "signalId": "economy.corp_credit_burst",
       "source": "effects",
       "match": {
@@ -3788,6 +3953,18 @@
         "side": "corp",
         "cardType": "operation",
         "target": "economy.corp_draw"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.corp_hq_agenda_reveal_credit",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_hq_agenda_reveal_credit"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "economy.corp_hq_agenda_reveal_credit"
       },
       "strategyAnchorFor": []
     },
@@ -3818,6 +3995,20 @@
         "target": "economy.corp_installed_credit_drip"
       },
       "strategyAnchorFor": []
+    },
+    {
+      "signalId": "economy.corp_multi_action_credit",
+      "source": "effects",
+      "match": {
+        "target": "economy.corp_multi_action_credit"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "economy.corp_multi_action_credit"
+      },
+      "strategyAnchorFor": [
+        "corp.asset_economy"
+      ]
     },
     {
       "signalId": "economy.corp_run_temporary_credit",
@@ -4533,6 +4724,30 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "hq.corp_hand_refresh",
+      "source": "effects",
+      "match": {
+        "target": "hq.corp_hand_refresh"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "hq.corp_hand_refresh"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "hq.corp_installed_card_bounce",
+      "source": "effects",
+      "match": {
+        "target": "hq.corp_installed_card_bounce"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "hq.corp_installed_card_bounce"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "ice.corp_deferred_rez",
       "source": "effects",
       "match": {
@@ -4618,6 +4833,18 @@
         "corp.economy_rez_reserve",
         "corp.ice_tax_glacier"
       ]
+    },
+    {
+      "signalId": "ice.corp_self_trash_cost",
+      "source": "effects",
+      "match": {
+        "target": "ice.corp_self_trash_cost"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "ice.corp_self_trash_cost"
+      },
+      "strategyAnchorFor": []
     },
     {
       "signalId": "ice.corp_strength_support",
@@ -5119,6 +5346,18 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "info.hq_agenda_reveal",
+      "source": "effects",
+      "match": {
+        "target": "info.hq_agenda_reveal"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "info.hq_agenda_reveal"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "info.hq_information",
       "source": "effects",
       "match": {
@@ -5311,6 +5550,18 @@
         "cardType": [
           "event"
         ]
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "install.corp_uninstall_to_hq",
+      "source": "effects",
+      "match": {
+        "target": "install.corp_uninstall_to_hq"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "install.corp_uninstall_to_hq"
       },
       "strategyAnchorFor": []
     },
@@ -6081,6 +6332,18 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "risk.reveal_hq_agendas",
+      "source": "effects",
+      "match": {
+        "target": "risk.reveal_hq_agendas"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "risk.reveal_hq_agendas"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "risk.run_spend_limit",
       "source": "effects",
       "match": {
@@ -6184,6 +6447,18 @@
       "strategyAnchorFor": []
     },
     {
+      "signalId": "risk.trash_own_rezzed_ice",
+      "source": "effects",
+      "match": {
+        "target": "risk.trash_own_rezzed_ice"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "risk.trash_own_rezzed_ice"
+      },
+      "strategyAnchorFor": []
+    },
+    {
       "signalId": "risk.unpreventable_brain_damage",
       "source": "effects",
       "match": {
@@ -6206,6 +6481,18 @@
         "side": "corp",
         "cardType": "asset",
         "target": "rnd.corp_self_shuffle_access"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "rnd.corp_shuffle_hq_into_rnd",
+      "source": "effects",
+      "match": {
+        "target": "rnd.corp_shuffle_hq_into_rnd"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "rnd.corp_shuffle_hq_into_rnd"
       },
       "strategyAnchorFor": []
     },
@@ -7890,6 +8177,18 @@
       "gates": {
         "side": "runner",
         "cardType": "resource"
+      },
+      "strategyAnchorFor": []
+    },
+    {
+      "signalId": "setup.corp_hand_size",
+      "source": "effects",
+      "match": {
+        "target": "setup.corp_hand_size"
+      },
+      "gates": {
+        "side": "corp",
+        "target": "setup.corp_hand_size"
       },
       "strategyAnchorFor": []
     },

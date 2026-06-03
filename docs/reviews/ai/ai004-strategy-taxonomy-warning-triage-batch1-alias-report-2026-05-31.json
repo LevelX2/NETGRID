@@ -5097,7 +5097,7 @@
     },
     {
       "value": "corp.tag_trace_punish",
-      "count": 36,
+      "count": 35,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5139,7 +5139,7 @@
     },
     {
       "value": "corp.remote_scoring",
-      "count": 17,
+      "count": 15,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5153,9 +5153,9 @@
         "onr_v1_215_security-net-optimization",
         "onr_v1_216_security-purge",
         "onr_v1_312_chicago-branch",
-        "onr_v1_331_nevinyrral",
-        "onr_v1_335_remote-facility",
-        "onr_v1_350_antiquated-interface-routines"
+        "onr_v1_350_antiquated-interface-routines",
+        "onr_v1_355_crystal-palace-station-grid",
+        "onr_v1_359_jenny-jett"
       ]
     },
     {
@@ -5201,27 +5201,6 @@
       ]
     },
     {
-      "value": "corp.fast_advance",
-      "count": 13,
-      "mappingCategory": "exact_strategy_goal",
-      "triageCategory": "exact_strategy_goal",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "corp.fast_advance"
-      ],
-      "rationale": "Already uses a normalized strategy ID.",
-      "examples": [
-        "onr_v1_189_artificial-security-directors",
-        "onr_v1_201_executive-extraction",
-        "onr_v1_202_genetics-visionary-acquisition",
-        "onr_v1_291_falsified-transactions-expert",
-        "onr_v1_292_management-shake-up",
-        "onr_v1_300_project-consultants",
-        "onr_v1_304_systematic-layoffs",
-        "onr_v1_305_team-restructuring"
-      ]
-    },
-    {
       "value": "corp.asset_economy",
       "count": 11,
       "mappingCategory": "exact_strategy_goal",
@@ -5240,6 +5219,27 @@
         "onr_v1_328_information-laundering",
         "onr_v1_329_investment-firm",
         "onr_v1_337_rockerboy-promotion"
+      ]
+    },
+    {
+      "value": "corp.fast_advance",
+      "count": 11,
+      "mappingCategory": "exact_strategy_goal",
+      "triageCategory": "exact_strategy_goal",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "corp.fast_advance"
+      ],
+      "rationale": "Already uses a normalized strategy ID.",
+      "examples": [
+        "onr_v1_189_artificial-security-directors",
+        "onr_v1_201_executive-extraction",
+        "onr_v1_202_genetics-visionary-acquisition",
+        "onr_v1_291_falsified-transactions-expert",
+        "onr_v1_292_management-shake-up",
+        "onr_v1_300_project-consultants",
+        "onr_v1_304_systematic-layoffs",
+        "onr_v1_305_team-restructuring"
       ]
     },
     {
@@ -5326,7 +5326,7 @@
     },
     {
       "value": "corp.economy_rez_reserve",
-      "count": 5,
+      "count": 4,
       "mappingCategory": "exact_strategy_goal",
       "triageCategory": "exact_strategy_goal",
       "triageSource": "classifier",
@@ -5338,8 +5338,7 @@
         "onr_v1_324_fortress-architects",
         "onr_v1_360_jerusalem-city-grid",
         "onr_proteus_058_executive-boot-camp",
-        "onr_proteus_059_government-contract",
-        "onr_proteus_076_syd-meyer-superstores"
+        "onr_proteus_059_government-contract"
       ]
     },
     {

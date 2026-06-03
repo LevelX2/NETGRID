@@ -148,3 +148,4 @@
 
 Reviews bleiben als Evidence versioniert. Verdichtung erfolgt nur über ein separates Rollup mit Linkprüfung.
 - `ai025-1-corp-operations-semantics-polish-2026-06-02.md` / `ai025-1-corp-operations-semantics-polish-report-2026-06-02.json`: AI025-1 schaerft Corp-Operations-Semantik gezielt nach: Draw/Recovery, Counter-Transfer, Conditions, Tag-Snowball, Tagged-Meat-Damage, ICE-Rez-Lifetime und Test-/V08-Trennung bleiben read-only und ohne Planner-, Engine-, Targeting-, UI- oder Hidden-Info-Wirkung.
+- `ai026-1-corp-nodes-assets-semantics-polish-2026-06-02.md` / `ai026-1-corp-nodes-assets-semantics-polish-report-2026-06-02.json`: AI026-1 richtet Corp-Nodes/Assets an Guide V3 aus, präzisiert Access-Damage-/Tag-/Counter-Punish-, Draw-/Handsize-, HQ-Reveal-, Bounce-, Refresh- und Cashout-Signale, korrigiert Strategy-Rollen und trennt statische ICE-Scope-Constraints von TargetProfiles; keine Planner-, Engine-, Legalitäts-, UI- oder Hidden-Info-Wirkung.

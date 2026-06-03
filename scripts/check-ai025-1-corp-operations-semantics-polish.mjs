@@ -17,6 +17,7 @@ const ADDED_SIGNALS = [
   "condition.run_this_game",
   "damage.meat_source",
   "damage.tagged_meat_payoff",
+  "draw.corp_draw",
   "ice.corp_installment_rez",
   "tag.additional_tag_followup",
 ];
@@ -117,9 +118,18 @@ function main() {
   const hint = (cardId) => activeById.get(cardId);
   const reportCard = (cardId) => reportById.get(cardId);
 
+  for (const cardId of ["onr_v1_282_annual-reviews", "simple_draw_operation", "v08_archive_planning_operation"]) {
+    if (!hasAll(hint(cardId), ["draw.corp_draw"])) fail(errors, `${cardId} missing precise Corp draw`);
+    if (!hasNone(hint(cardId), ["economy.corp_draw"])) fail(errors, `${cardId} still uses legacy draw as primary signal`);
+  }
+  for (const cardId of ["onr_v1_288_day-shift", "onr_v1_295_night-shift"]) {
+    if (!hasAll(hint(cardId), ["draw.corp_draw", "economy.corp_credit_burst"])) {
+      fail(errors, `${cardId} missing Draw plus credit burst`);
+    }
+    if (!hasNone(hint(cardId), ["economy.corp_draw"])) fail(errors, `${cardId} still uses legacy draw as primary signal`);
+  }
   if (!hasAll(hint("onr_v1_296_off-site-backups"), ["archives.corp_recovery"])) fail(errors, "Off-Site Backups missing Archives recovery");
-  if (!hasNone(hint("onr_v1_296_off-site-backups"), ["economy.corp_draw"])) fail(errors, "Off-Site Backups still has draw");
-  if (!hasAll(hint("v08_archive_planning_operation"), ["economy.corp_draw"])) fail(errors, "V08 Archive Planning Operation missing draw");
+  if (!hasNone(hint("onr_v1_296_off-site-backups"), ["draw.corp_draw", "economy.corp_draw"])) fail(errors, "Off-Site Backups still has draw");
   if (!hasNone(hint("v08_archive_planning_operation"), ["archives.corp_recovery"])) fail(errors, "V08 Archive Planning Operation still has Archives recovery");
 
   if (!hasNone(hint("onr_v1_285_closed-accounts"), ["economy.corp_conditional_credit", "economy.corp_credit_burst"])) {

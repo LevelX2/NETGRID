@@ -1,8 +1,8 @@
 {
   "schemaVersion": "ai-tactic-signals-v1",
-  "taskId": "AI024-1/AI025-1/AI025-1/AI025-1/AI025-1",
-  "generatedAt": "2026-06-02",
-  "description": "Controlled V1 tactic-signal catalog. AI024-1 sharpens selected Corp-ICE function signals without subtype-only or card-specific signals and without planner, engine, targeting, action-score, plan-weight, legality, profile/default or UI-derivation effects.",
+  "taskId": "AI024-1/AI025-1/AI025-1/AI025-1/AI025-1/AI026-1",
+  "generatedAt": "2026-06-03",
+  "description": "Controlled V1 tactic-signal catalog. AI026-1 aligns Corp node/asset and shared Corp draw semantics with Guide V3 without planner, engine, targeting, action-score, plan-weight, legality, profile/default, UI or hidden-info effects.",
   "signalPolicy": {
     "tacticSignal": "Functional card utility: what the AI can use the card for.",
     "strategyAnchor": "Large deck line: which strategy the card can anchor or materially support.",
@@ -102,6 +102,41 @@
       "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "access.corp_archives_net_damage_ambush",
+      "group": "ai026_1_corp_node_asset_access_ambush",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: access.corp archives net damage ambush.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "access.corp_brain_damage_ambush",
+      "group": "ai026_1_corp_node_asset_access_ambush",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: access.corp brain damage ambush.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff",
+        "corp.damage_kill"
+      ],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
       "signalId": "access.corp_counter_punish",
       "group": "ai026_corp_nodes_assets_access_run",
       "sideScope": "corp",
@@ -117,6 +152,23 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "access.corp_credit_loss_counter",
+      "group": "ai026_1_corp_node_asset_counter_punish",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: access.corp credit loss counter.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
       "signalId": "access.corp_hardware_trash",
@@ -137,6 +189,41 @@
       "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "access.corp_icebreaker_strength_counter",
+      "group": "ai026_1_corp_node_asset_counter_punish",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: access.corp icebreaker strength counter.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "access.corp_net_damage_ambush",
+      "group": "ai026_1_corp_node_asset_access_ambush",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: access.corp net damage ambush.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff",
+        "corp.damage_kill"
+      ],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
       "signalId": "access.corp_program_trash",
       "group": "ai026_corp_nodes_assets_access_run",
       "sideScope": "corp",
@@ -152,6 +239,41 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "access.corp_rnd_net_damage_ambush",
+      "group": "ai026_1_corp_node_asset_access_ambush",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: access.corp rnd net damage ambush.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "access.corp_tag_ambush",
+      "group": "ai026_1_corp_node_asset_access_ambush",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: access.corp tag ambush.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.ambush_bluff",
+        "corp.tag_trace_punish"
+      ],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
       "signalId": "access.current_access_trash",
@@ -3002,6 +3124,21 @@
       "notes": "Support-only AI019 signal; it does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "draw.corp_draw",
+      "group": "ai025_1_ai026_1_corp_draw",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: draw.corp draw.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
       "signalId": "economy.action",
       "group": "economy",
       "sideScope": "neutral",
@@ -3099,6 +3236,38 @@
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "economy.corp_action_charged_bank",
+      "group": "ai026_1_corp_node_asset_economy",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: economy.corp action charged bank.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "economy.corp_advanceable_cashout",
+      "group": "ai026_1_corp_node_asset_economy",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: economy.corp advanceable cashout.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.asset_economy"
+      ],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
       "signalId": "economy.corp_asset_cashout",
       "group": "ai026_corp_nodes_assets_economy",
       "sideScope": "corp",
@@ -3115,6 +3284,21 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "economy.corp_charge_bank",
+      "group": "ai026_1_corp_node_asset_economy",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: economy.corp charge bank.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
       "signalId": "economy.corp_conditional_credit",
@@ -3147,6 +3331,23 @@
       "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "economy.corp_counter_cashout",
+      "group": "ai026_1_corp_node_asset_economy",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: economy.corp counter cashout.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.asset_economy"
+      ],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
       "signalId": "economy.corp_credit_burst",
       "group": "ai025_corp_operations_economy",
       "sideScope": "corp",
@@ -3174,7 +3375,25 @@
       ],
       "examples": [],
       "targetProfileRelevant": false,
-      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+      "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior. Guide V3 retains economy.corp_draw only as a legacy aggregation; use draw.corp_draw as the precise primary Corp draw signal.",
+      "legacy": true,
+      "aggregation": true,
+      "notForDirectScoring": true
+    },
+    {
+      "signalId": "economy.corp_hq_agenda_reveal_credit",
+      "group": "ai026_1_corp_node_asset_economy",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: economy.corp hq agenda reveal credit.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
       "signalId": "economy.corp_install_rez_credit",
@@ -3207,6 +3426,23 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "economy.corp_multi_action_credit",
+      "group": "ai026_1_corp_node_asset_economy",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: economy.corp multi action credit.",
+      "supportOnly": false,
+      "mayAnchorStrategy": true,
+      "allowedStrategyAnchors": [
+        "corp.asset_economy"
+      ],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
       "signalId": "economy.corp_run_temporary_credit",
@@ -3885,6 +4121,36 @@
       "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "hq.corp_hand_refresh",
+      "group": "ai026_1_corp_node_asset_hq",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: hq.corp hand refresh.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "hq.corp_installed_card_bounce",
+      "group": "ai026_1_corp_node_asset_hq",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: hq.corp installed card bounce.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
       "signalId": "ice.corp_deferred_rez",
       "group": "ai025_corp_operations_ice",
       "sideScope": "corp",
@@ -3982,6 +4248,21 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "ice.corp_self_trash_cost",
+      "group": "ai026_1_corp_node_asset_ice",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: ice.corp self trash cost.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
       "signalId": "ice.corp_strength_support",
@@ -4380,6 +4661,21 @@
       "notes": "Anchor-capable when side- and scope-gated."
     },
     {
+      "signalId": "info.hq_agenda_reveal",
+      "group": "ai026_1_corp_node_asset_info",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: info.hq agenda reveal.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
       "signalId": "info.hq_information",
       "group": "ai019_info",
       "sideScope": "runner",
@@ -4501,6 +4797,21 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "install.corp_uninstall_to_hq",
+      "group": "ai026_1_corp_node_asset_install",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: install.corp uninstall to hq.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": true,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
       "signalId": "remote.agenda_difficulty_tax",
@@ -5220,6 +5531,21 @@
       "notes": "AI023 Corp-Agenda signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "risk.reveal_hq_agendas",
+      "group": "ai026_1_corp_node_asset_risk",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: risk.reveal hq agendas.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
       "signalId": "risk.run_spend_limit",
       "group": "risk",
       "sideScope": "runner",
@@ -5310,6 +5636,21 @@
       "notes": "AI025 Corp-operation signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
     },
     {
+      "signalId": "risk.trash_own_rezzed_ice",
+      "group": "ai026_1_corp_node_asset_risk",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: risk.trash own rezzed ice.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
       "signalId": "risk.unpreventable_brain_damage",
       "group": "risk",
       "sideScope": "runner",
@@ -5338,6 +5679,21 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI026 Corp node/asset signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "rnd.corp_shuffle_hq_into_rnd",
+      "group": "ai026_1_corp_node_asset_rnd",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: rnd.corp shuffle hq into rnd.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
       "signalId": "rnd.corp_topdeck_reorder",
@@ -6847,6 +7203,21 @@
       "examples": [],
       "targetProfileRelevant": true,
       "notes": "AI021 Runner-Prep signal; read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score or plan-weight behavior."
+    },
+    {
+      "signalId": "setup.corp_hand_size",
+      "group": "ai026_1_corp_node_asset_setup",
+      "sideScope": "corp",
+      "description": "AI026-1 Guide V3 Corp semantics signal: setup.corp hand size.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "AI026-1 Guide V3 Corp semantics polish"
+      ],
+      "examples": [],
+      "targetProfileRelevant": false,
+      "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
     },
     {
       "signalId": "setup.deck_exclusive",

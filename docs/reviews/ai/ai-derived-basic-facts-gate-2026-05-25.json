@@ -9,7 +9,7 @@
   "pilotCardCount": 193,
   "implementationFoundCount": 193,
   "cardsWithDerivedFacts": 193,
-  "cardsWithManualOntologyOverlap": 150,
+  "cardsWithManualOntologyOverlap": 151,
   "cardsNeedingManualOverlay": 135,
   "effectKindCounts": {
     "access_punish": 5,
@@ -128,7 +128,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 1000,
+  "warningCount": 997,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -3947,7 +3947,7 @@
     },
     {
       "kind": "manual_ontology_without_generated_match",
-      "message": "Manual effect:economy has no generated basic fact match.",
+      "message": "Manual effect:agenda_reveal_economy has no generated basic fact match.",
       "cardId": "onr_v1_314_corporate-negotiating-center"
     },
     {
@@ -4437,22 +4437,7 @@
     },
     {
       "kind": "descriptor_or_overlay_gap",
-      "message": "Generated facts contain fields not currently mirrored manually.",
-      "cardId": "onr_v1_336_rescheduler"
-    },
-    {
-      "kind": "descriptor_or_overlay_gap",
       "message": "Manual ontology contains fields not currently derivable.",
-      "cardId": "onr_v1_336_rescheduler"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:draw has no manual ontology match.",
-      "cardId": "onr_v1_336_rescheduler"
-    },
-    {
-      "kind": "generated_fact_without_manual_match",
-      "message": "Generated effect:zone_shuffle has no manual ontology match.",
       "cardId": "onr_v1_336_rescheduler"
     },
     {
@@ -24274,10 +24259,9 @@
         ],
         "effects": [
           {
-            "kind": "economy",
+            "kind": "agenda_reveal_economy",
             "timing": "start_of_turn",
-            "scope": "corp",
-            "resource": "credits"
+            "scope": "corp"
           }
         ],
         "conditions": [
@@ -24312,13 +24296,13 @@
         ],
         "manualOnly": [
           "condition:requires_agenda_reveal",
-          "effect:economy"
+          "effect:agenda_reveal_economy"
         ]
       },
       "missingManualOverlay": [
         "condition:requires_agenda_reveal",
         "condition:requires_start_of_turn",
-        "effect:economy"
+        "effect:agenda_reveal_economy"
       ],
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually.",
@@ -24344,7 +24328,7 @@
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:economy has no generated basic fact match."
+          "message": "Manual effect:agenda_reveal_economy has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -24451,8 +24435,7 @@
           }
         ],
         "lineSupport": [
-          "corp.ambush_bluff",
-          "corp.tag_trace_punish"
+          "corp.ambush_bluff"
         ],
         "quality": {
           "hintReviewed": true,
@@ -26391,13 +26374,10 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "corp.fast_advance",
-          "corp.remote_scoring"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": true,
+          "strategyCovered": false,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -26491,9 +26471,19 @@
         ],
         "effects": [
           {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "corp"
+          },
+          {
             "kind": "shuffle_draw",
             "timing": "action",
             "scope": "corp"
+          },
+          {
+            "kind": "zone_shuffle",
+            "timing": "action",
+            "scope": "rnd"
           }
         ],
         "conditions": [],
@@ -26507,41 +26497,26 @@
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "effect:draw",
           "effect:zone_shuffle"
         ],
+        "generatedOnly": [],
         "manualOnly": [
           "effect:shuffle_draw"
         ]
       },
       "missingManualOverlay": [
-        "effect:draw",
-        "effect:shuffle_draw",
-        "effect:zone_shuffle"
+        "effect:shuffle_draw"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually.",
         "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
           "message": "Manual ontology contains fields not currently derivable."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:draw has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:zone_shuffle has no manual ontology match."
         },
         {
           "kind": "manual_ontology_without_generated_match",

@@ -1140,7 +1140,9 @@
   "verification": [
     {
       "command": "node scripts/check-ai024-1-corp-ice-semantics-polish.mjs",
-      "result": "pending_after_apply"
+      "result": "pending_after_ai026_1_apply"
     }
-  ]
+  ],
+  "guideVersion": "V3",
+  "guidePath": "docs/architecture/ai/taktiksignale-strategieanker-guide-2026-06-02-v3.md"
 }

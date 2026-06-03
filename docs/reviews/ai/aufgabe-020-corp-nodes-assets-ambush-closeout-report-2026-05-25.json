@@ -14,7 +14,7 @@
   "includedCardCount": 45,
   "excludedCardCount": 3,
   "confirmedGeneratedFactCount": 131,
-  "previewAddedFactCount": 78,
+  "previewAddedFactCount": 76,
   "conflictCount": 0,
   "realSemanticConflictCount": 0,
   "normalizedDifferenceCount": 326,
@@ -3094,7 +3094,7 @@
       "risk": "medium",
       "activeMechanicalFields": ["effects"],
       "generatedFactsConfirmed": ["effect:draw", "effect:zone_shuffle"],
-      "previewAdds": ["effect:draw", "effect:zone_shuffle"],
+      "previewAdds": [],
       "normalizedDifferences": [
         {
           "field": "effect:draw",

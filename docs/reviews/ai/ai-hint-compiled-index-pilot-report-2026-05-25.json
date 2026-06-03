@@ -5061,7 +5061,7 @@
       "missingManualOverlay": [
         "condition:requires_agenda_reveal",
         "condition:requires_start_of_turn",
-        "effect:economy"
+        "effect:agenda_reveal_economy"
       ]
     },
     {
@@ -5223,11 +5223,7 @@
       "title": "Rescheduler",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "effect:draw",
-        "effect:shuffle_draw",
-        "effect:zone_shuffle"
-      ]
+      "missingManualOverlay": ["effect:shuffle_draw"]
     },
     {
       "cardId": "onr_v1_337_rockerboy-promotion",
@@ -8632,7 +8628,7 @@
       "missingManualOverlay": [
         "condition:requires_agenda_reveal",
         "condition:requires_start_of_turn",
-        "effect:economy"
+        "effect:agenda_reveal_economy"
       ]
     },
     {
@@ -8794,11 +8790,7 @@
       "title": "Rescheduler",
       "recommendedNextAction": "manual_review_candidate",
       "migrationReadiness": "needs_review",
-      "missingManualOverlay": [
-        "effect:draw",
-        "effect:shuffle_draw",
-        "effect:zone_shuffle"
-      ]
+      "missingManualOverlay": ["effect:shuffle_draw"]
     },
     {
       "cardId": "onr_v1_337_rockerboy-promotion",
@@ -24731,7 +24723,7 @@
       "missingManualOverlay": [
         "condition:requires_agenda_reveal",
         "condition:requires_start_of_turn",
-        "effect:economy"
+        "effect:agenda_reveal_economy"
       ],
       "compiledPreview": {
         "cardId": "onr_v1_314_corporate-negotiating-center",
@@ -26635,12 +26627,10 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": ["effects"],
       "activeMonolithOnlyFields": [
-        "lineSupport",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
-        "strategicRole",
         "tacticSignals",
         "valueHints"
       ],
@@ -26701,11 +26691,7 @@
       "manualOverlayFound": false,
       "expectedManualOverlayNeeded": false,
       "needsManualReview": true,
-      "missingManualOverlay": [
-        "effect:draw",
-        "effect:shuffle_draw",
-        "effect:zone_shuffle"
-      ],
+      "missingManualOverlay": ["effect:shuffle_draw"],
       "compiledPreview": {
         "cardId": "onr_v1_336_rescheduler",
         "side": "corp",

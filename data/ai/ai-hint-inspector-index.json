@@ -17,8 +17,8 @@
     "cardsWithMechanicalFacts": 511,
     "cardsWithGeneratedFacts": 331,
     "cardsWithOverlays": 6,
-    "cardsWithFunctionSignals": 471,
-    "cardsWithStrategyAnchors": 218,
+    "cardsWithFunctionSignals": 474,
+    "cardsWithStrategyAnchors": 220,
     "cardsWithWarnings": 143,
     "warningCategoryCounts": {
       "deferred_requires_human_review": 64,
@@ -4767,9 +4767,12 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "damage.payoff"
+        "access.corp_rnd_net_damage_ambush",
+        "damage.payoff",
+        "rnd.corp_self_shuffle_access"
       ],
       "derivedStrategyAnchors": [
+        "corp.ambush_bluff",
         "corp.damage_kill"
       ],
       "lineSupportClassification": [
@@ -4978,6 +4981,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "access.corp_credit_loss_counter",
         "access.punish",
         "economy.counter",
         "tax.runner_credit",
@@ -5745,8 +5749,12 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
-      "derivedStrategyAnchors": [],
+      "derivedFunctionSignals": [
+        "access.corp_icebreaker_strength_counter"
+      ],
+      "derivedStrategyAnchors": [
+        "corp.ambush_bluff"
+      ],
       "lineSupportClassification": [
         {
           "value": "corp.ambush_bluff",
@@ -6217,9 +6225,12 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "damage.payoff"
+        "access.corp_archives_net_damage_ambush",
+        "damage.payoff",
+        "rnd.corp_self_shuffle_access"
       ],
       "derivedStrategyAnchors": [
+        "corp.ambush_bluff",
         "corp.damage_kill"
       ],
       "lineSupportClassification": [
@@ -6297,9 +6308,14 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.generic"
+        "economy.corp_asset_cashout",
+        "economy.generic",
+        "ice.corp_self_trash_cost"
       ],
-      "derivedStrategyAnchors": [],
+      "derivedStrategyAnchors": [
+        "corp.asset_economy",
+        "corp.economy_rez_reserve"
+      ],
       "lineSupportClassification": [
         {
           "value": "corp.asset_economy",
@@ -6307,15 +6323,6 @@
           "triageCategory": "normalized_strategy_id",
           "mapsTo": [
             "corp.asset_economy"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.economy_rez_reserve",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.economy_rez_reserve"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
@@ -6361,10 +6368,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "engine_anchor"
+          "punish_payoff"
         ],
         "validValues": [
-          "engine_anchor"
+          "punish_payoff"
         ],
         "unknownValues": []
       }
@@ -42705,7 +42712,7 @@
         "warningCount": 2
       },
       "derivedFunctionSignals": [
-        "economy.generic",
+        "economy.corp_hq_agenda_reveal_credit",
         "remote.asset_economy"
       ],
       "derivedStrategyAnchors": [
@@ -42834,15 +42841,6 @@
             "corp.ambush_bluff"
           ],
           "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.tag_trace_punish",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.tag_trace_punish"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
         }
       ],
       "rolesClassification": [
@@ -42904,10 +42902,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "punish_payoff"
+          "support_tool"
         ],
         "validValues": [
-          "punish_payoff"
+          "support_tool"
         ],
         "unknownValues": []
       }
@@ -42925,7 +42923,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "hq.corp_installed_card_bounce"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -43123,6 +43123,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_action_charged_bank",
+        "economy.corp_charge_bank",
         "economy.counter",
         "economy.finite_pool",
         "economy.generic"
@@ -43409,6 +43411,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "draw.corp_draw",
         "remote.asset_economy"
       ],
       "derivedStrategyAnchors": [
@@ -43488,7 +43491,9 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "remote.asset_economy"
+        "draw.corp_draw",
+        "remote.asset_economy",
+        "setup.corp_hand_size"
       ],
       "derivedStrategyAnchors": [
         "corp.asset_economy"
@@ -44089,6 +44094,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_counter_cashout",
         "economy.generic",
         "remote.asset_economy"
       ],
@@ -44383,26 +44389,7 @@
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "corp.fast_advance",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.fast_advance"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.remote_scoring",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.remote_scoring"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "action",
@@ -44453,12 +44440,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "scoring_tool"
-        ],
-        "validValues": [
-          "scoring_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -44727,10 +44710,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "scoring_tool"
+          "engine_anchor"
         ],
         "validValues": [
-          "scoring_tool"
+          "engine_anchor"
         ],
         "unknownValues": []
       }
@@ -44750,26 +44733,7 @@
       },
       "derivedFunctionSignals": [],
       "derivedStrategyAnchors": [],
-      "lineSupportClassification": [
-        {
-          "value": "corp.fast_advance",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.fast_advance"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        },
-        {
-          "value": "corp.remote_scoring",
-          "category": "exact_strategy_goal",
-          "triageCategory": "normalized_strategy_id",
-          "mapsTo": [
-            "corp.remote_scoring"
-          ],
-          "rationale": "Already normalized to a side-prefixed StrategyGoal."
-        }
-      ],
+      "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "action",
@@ -44824,12 +44788,8 @@
         "overlayFields": []
       },
       "strategicRoleStatus": {
-        "values": [
-          "scoring_tool"
-        ],
-        "validValues": [
-          "scoring_tool"
-        ],
+        "values": [],
+        "validValues": [],
         "unknownValues": []
       }
     },
@@ -44846,7 +44806,11 @@
         "legacyFallbackOnly": false,
         "warningCount": 2
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "draw.corp_draw",
+        "hq.corp_hand_refresh",
+        "rnd.corp_shuffle_hq_into_rnd"
+      ],
       "derivedStrategyAnchors": [],
       "lineSupportClassification": [],
       "rolesClassification": [
@@ -45038,7 +45002,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "remote.asset_economy"
+        "remote.asset_economy",
+        "setup.corp_hand_size"
       ],
       "derivedStrategyAnchors": [
         "corp.asset_economy"
@@ -45262,6 +45227,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "access.corp_net_damage_ambush",
         "access.punish",
         "damage.payoff",
         "remote.ambush"
@@ -45589,6 +45555,7 @@
       },
       "derivedFunctionSignals": [
         "economy.action",
+        "economy.corp_multi_action_credit",
         "economy.generic",
         "remote.asset_economy"
       ],
@@ -45659,10 +45626,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "engine_anchor"
+          "punish_payoff"
         ],
         "validValues": [
-          "engine_anchor"
+          "punish_payoff"
         ],
         "unknownValues": []
       }
@@ -45789,10 +45756,13 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "access.corp_net_damage_ambush",
+        "access.corp_tag_ambush",
         "damage.payoff",
         "tag.source"
       ],
       "derivedStrategyAnchors": [
+        "corp.ambush_bluff",
         "corp.damage_kill",
         "corp.tag_trace_punish"
       ],
@@ -45904,6 +45874,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "access.corp_brain_damage_ambush",
         "access.punish",
         "damage.payoff",
         "remote.ambush"
@@ -45991,12 +45962,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "punish_payoff",
-          "win_condition"
+          "punish_payoff"
         ],
         "validValues": [
-          "punish_payoff",
-          "win_condition"
+          "punish_payoff"
         ],
         "unknownValues": []
       }
@@ -46106,9 +46075,11 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "access.corp_net_damage_ambush",
         "damage.payoff"
       ],
       "derivedStrategyAnchors": [
+        "corp.ambush_bluff",
         "corp.damage_kill"
       ],
       "lineSupportClassification": [
@@ -46197,12 +46168,10 @@
       },
       "strategicRoleStatus": {
         "values": [
-          "punish_payoff",
-          "win_condition"
+          "punish_payoff"
         ],
         "validValues": [
-          "punish_payoff",
-          "win_condition"
+          "punish_payoff"
         ],
         "unknownValues": []
       }

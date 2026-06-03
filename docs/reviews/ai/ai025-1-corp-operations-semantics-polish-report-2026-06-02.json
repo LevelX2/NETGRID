@@ -22,7 +22,7 @@
     "activeTestOperations": 5,
     "inactiveClassicOperations": 4,
     "changedCardCount": 20,
-    "addedSignalCount": 8,
+    "addedSignalCount": 9,
     "newStrategyIdCount": 0,
     "strategySupportPairCount": 25,
     "targetProfileCandidateCount": 15,
@@ -356,12 +356,18 @@
       "cardId": "v08_archive_planning_operation",
       "title": "Archive Planning Operation",
       "tacticSignals": [
-        "economy.corp_draw"
+        "draw.corp_draw"
       ],
       "conditions": [],
       "strategyAnchors": [],
       "targetProfileStatus": "not_required",
-      "rationale": "The active V08 test operation text says draw 3 cards; it is not Archives recovery. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+      "rationale": "The active V08 test operation text says draw 3 cards; it is not Archives recovery. Operation type/subtype remains card data and is not mirrored as a tactic signal. Guide V3 primary draw signal is draw.corp_draw; economy.corp_draw is retained only as legacy aggregation.",
+      "functionalEffects": [
+        "draw.corp_draw"
+      ],
+      "supportingEvidence": [
+        "draw.corp_draw"
+      ]
     }
   ],
   "addedSignals": [
@@ -378,13 +384,13 @@
       "allowedStrategyAnchors": []
     },
     {
-      "signalId": "condition.run_this_game",
+      "signalId": "condition.resource_installed_last_turn",
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": []
     },
     {
-      "signalId": "condition.resource_installed_last_turn",
+      "signalId": "condition.run_this_game",
       "supportOnly": true,
       "mayAnchorStrategy": false,
       "allowedStrategyAnchors": []
@@ -405,6 +411,12 @@
         "corp.damage_kill",
         "corp.tag_trace_punish"
       ]
+    },
+    {
+      "signalId": "draw.corp_draw",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": []
     },
     {
       "signalId": "ice.corp_installment_rez",
@@ -452,6 +464,17 @@
         "ice.corp_temporary_rez",
         "risk.temporary_rez_liability"
       ]
+    },
+    {
+      "signalId": "economy.corp_draw",
+      "removedFrom": [
+        "onr_v1_282_annual-reviews",
+        "onr_v1_288_day-shift",
+        "onr_v1_295_night-shift",
+        "simple_draw_operation",
+        "v08_archive_planning_operation"
+      ],
+      "rationale": "Guide V3 uses draw.corp_draw as precise Corp draw signal; economy.corp_draw remains catalogued only as legacy aggregation."
     }
   ],
   "changedStrategySupportPairs": [
@@ -815,8 +838,8 @@
     },
     {
       "topic": "prefix_compatibility",
-      "decision": "no_renaming",
-      "rationale": "AI025-1 adds precise condition, tag-snowball and damage signals but does not rename legacy `economy.corp_draw` or existing AI025 signals."
+      "decision": "legacy_aggregation_retained",
+      "rationale": "Guide V3 uses `draw.corp_draw` as precise primary Corp draw signal; legacy `economy.corp_draw` remains catalogued only as aggregation/compatibility context."
     }
   ],
   "hiddenInfoSafetyReview": [
@@ -834,7 +857,7 @@
   "verification": [
     {
       "command": "node scripts/check-ai025-1-corp-operations-semantics-polish.mjs",
-      "result": "pending_after_apply"
+      "result": "pending_after_ai026_1_apply"
     }
   ],
   "postReviewAssignments": [
@@ -876,19 +899,19 @@
       "subtypes": [],
       "mechanicalFamily": "draw",
       "functionalEffects": [
-        "economy.corp_draw"
+        "draw.corp_draw"
       ],
       "conditions": [],
       "risks": [],
       "tacticSignals": [
-        "economy.corp_draw"
+        "draw.corp_draw"
       ],
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
       "primaryAnchorEvidence": [],
       "supportingEvidence": [
-        "economy.corp_draw"
+        "draw.corp_draw"
       ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
@@ -896,7 +919,7 @@
       "needsHumanReview": false,
       "confidence": "high",
       "postReviewStatus": "changed",
-      "rationale": "Corp draw support; no strategy anchor from card flow alone. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+      "rationale": "Corp draw support; no strategy anchor from card flow alone. Operation type/subtype remains card data and is not mirrored as a tactic signal. Guide V3 primary draw signal is draw.corp_draw; economy.corp_draw is retained only as legacy aggregation."
     },
     {
       "cardId": "onr_v1_283_audit-of-call-records",
@@ -1163,22 +1186,22 @@
       "subtypes": [],
       "mechanicalFamily": "economy_draw",
       "functionalEffects": [
-        "economy.corp_credit_burst",
-        "economy.corp_draw"
+        "draw.corp_draw",
+        "economy.corp_credit_burst"
       ],
       "conditions": [],
       "risks": [],
       "tacticSignals": [
-        "economy.corp_credit_burst",
-        "economy.corp_draw"
+        "draw.corp_draw",
+        "economy.corp_credit_burst"
       ],
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
       "primaryAnchorEvidence": [],
       "supportingEvidence": [
-        "economy.corp_credit_burst",
-        "economy.corp_draw"
+        "draw.corp_draw",
+        "economy.corp_credit_burst"
       ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
@@ -1186,7 +1209,7 @@
       "needsHumanReview": false,
       "confidence": "high",
       "postReviewStatus": "changed",
-      "rationale": "Corp draw plus small credit support; no strategy anchor. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+      "rationale": "Corp draw plus small credit support; no strategy anchor. Operation type/subtype remains card data and is not mirrored as a tactic signal. Guide V3 primary draw signal is draw.corp_draw; economy.corp_draw is retained only as legacy aggregation."
     },
     {
       "cardId": "onr_v1_289_edgerunner-inc-temps",
@@ -1446,22 +1469,22 @@
       "subtypes": [],
       "mechanicalFamily": "economy_draw",
       "functionalEffects": [
-        "economy.corp_credit_burst",
-        "economy.corp_draw"
+        "draw.corp_draw",
+        "economy.corp_credit_burst"
       ],
       "conditions": [],
       "risks": [],
       "tacticSignals": [
-        "economy.corp_credit_burst",
-        "economy.corp_draw"
+        "draw.corp_draw",
+        "economy.corp_credit_burst"
       ],
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
       "primaryAnchorEvidence": [],
       "supportingEvidence": [
-        "economy.corp_credit_burst",
-        "economy.corp_draw"
+        "draw.corp_draw",
+        "economy.corp_credit_burst"
       ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
@@ -1469,7 +1492,7 @@
       "needsHumanReview": false,
       "confidence": "high",
       "postReviewStatus": "changed",
-      "rationale": "Corp economy plus draw support; no strategy anchor. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+      "rationale": "Corp economy plus draw support; no strategy anchor. Operation type/subtype remains card data and is not mirrored as a tactic signal. Guide V3 primary draw signal is draw.corp_draw; economy.corp_draw is retained only as legacy aggregation."
     },
     {
       "cardId": "onr_v1_296_off-site-backups",
@@ -2432,19 +2455,19 @@
       "subtypes": [],
       "mechanicalFamily": "draw",
       "functionalEffects": [
-        "economy.corp_draw"
+        "draw.corp_draw"
       ],
       "conditions": [],
       "risks": [],
       "tacticSignals": [
-        "economy.corp_draw"
+        "draw.corp_draw"
       ],
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
       "primaryAnchorEvidence": [],
       "supportingEvidence": [
-        "economy.corp_draw"
+        "draw.corp_draw"
       ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
@@ -2452,7 +2475,7 @@
       "needsHumanReview": false,
       "confidence": "high",
       "postReviewStatus": "changed",
-      "rationale": "Test draw operation stays support-only. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+      "rationale": "Test draw operation stays support-only. Operation type/subtype remains card data and is not mirrored as a tactic signal. Guide V3 primary draw signal is draw.corp_draw; economy.corp_draw is retained only as legacy aggregation."
     },
     {
       "cardId": "simple_economy_operation",
@@ -2537,19 +2560,19 @@
       "subtypes": [],
       "mechanicalFamily": "draw",
       "functionalEffects": [
-        "economy.corp_draw"
+        "draw.corp_draw"
       ],
       "conditions": [],
       "risks": [],
       "tacticSignals": [
-        "economy.corp_draw"
+        "draw.corp_draw"
       ],
       "strategyAnchors": [],
       "legacyStrategicRole": [],
       "strategySupportPairs": [],
       "primaryAnchorEvidence": [],
       "supportingEvidence": [
-        "economy.corp_draw"
+        "draw.corp_draw"
       ],
       "targetProfileStatus": "not_required",
       "targetProfileKinds": [],
@@ -2557,7 +2580,7 @@
       "needsHumanReview": false,
       "confidence": "high",
       "postReviewStatus": "changed",
-      "rationale": "The active V08 test operation text says draw 3 cards; it is not Archives recovery. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+      "rationale": "The active V08 test operation text says draw 3 cards; it is not Archives recovery. Operation type/subtype remains card data and is not mirrored as a tactic signal. Guide V3 primary draw signal is draw.corp_draw; economy.corp_draw is retained only as legacy aggregation."
     },
     {
       "cardId": "v08_credit_surge_operation",
@@ -2587,6 +2610,15 @@
       "confidence": "high",
       "postReviewStatus": "changed",
       "rationale": "Test credit operation stays support-only. Operation type/subtype remains card data and is not mirrored as a tactic signal."
+    }
+  ],
+  "guideVersion": "V3",
+  "guidePath": "docs/architecture/ai/taktiksignale-strategieanker-guide-2026-06-02-v3.md",
+  "retainedLegacySignals": [
+    {
+      "signalId": "economy.corp_draw",
+      "status": "legacy_aggregation_not_for_direct_scoring",
+      "replacedBy": "draw.corp_draw"
     }
   ]
 }

@@ -17700,7 +17700,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -17719,7 +17719,7 @@
         "opportunityCost": "medium"
       },
       "tacticSignals": [
-        "economy.corp_draw"
+        "draw.corp_draw"
       ]
     },
     {
@@ -18158,12 +18158,12 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "economy.corp_credit_burst",
-        "economy.corp_draw"
+        "draw.corp_draw",
+        "economy.corp_credit_burst"
       ]
     },
     {
@@ -18571,7 +18571,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -18598,8 +18598,8 @@
         "opportunityCost": "low"
       },
       "tacticSignals": [
-        "economy.corp_credit_burst",
-        "economy.corp_draw"
+        "draw.corp_draw",
+        "economy.corp_credit_burst"
       ]
     },
     {
@@ -19592,7 +19592,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -19837,15 +19837,15 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
       "effects": [
         {
-          "kind": "economy",
+          "kind": "agenda_reveal_economy",
           "timing": "start_of_turn",
           "scope": "corp",
-          "resource": "credits"
+          "target": "economy.corp_hq_agenda_reveal_credit"
         }
       ],
       "costProfile": {
@@ -19858,8 +19858,9 @@
         "serverScope": "remote"
       },
       "tacticSignals": [
-        "economy.corp_installed_credit_drip",
-        "risk.high_difficulty_agenda"
+        "economy.corp_hq_agenda_reveal_credit",
+        "info.hq_agenda_reveal",
+        "risk.reveal_hq_agendas"
       ],
       "conditions": [
         {
@@ -19897,11 +19898,10 @@
         "data/scenarios/ai-deck-legal-v1919-smokes.json#corp_v1919_asset_agenda_support"
       ],
       "lineSupport": [
-        "corp.ambush_bluff",
-        "corp.tag_trace_punish"
+        "corp.ambush_bluff"
       ],
       "strategicRole": [
-        "punish_payoff"
+        "support_tool"
       ],
       "tacticSignals": [
         "access.corp_hardware_trash",
@@ -19930,7 +19930,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -19962,13 +19962,15 @@
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_trace_hidden_targets"
       ],
       "tacticSignals": [
-        "archives.corp_recovery"
+        "hq.corp_installed_card_bounce",
+        "install.corp_uninstall_to_hq"
       ],
       "effects": [
         {
           "kind": "card_recovery",
           "timing": "action",
-          "scope": "installed_card"
+          "scope": "installed_card",
+          "target": "hq.corp_installed_card_bounce"
         }
       ],
       "quality": {
@@ -19977,7 +19979,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -20020,7 +20022,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -20085,20 +20087,23 @@
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_access_ambush"
       ],
       "tacticSignals": [
+        "economy.corp_action_charged_bank",
+        "economy.corp_charge_bank",
         "economy.corp_counter_bank",
-        "economy.corp_installed_credit_drip",
         "remote.asset_economy"
       ],
       "effects": [
         {
           "kind": "finite_economy_pool",
           "timing": "action",
-          "scope": "corp"
+          "scope": "corp",
+          "target": "economy.corp_charge_bank"
         },
         {
           "kind": "economy",
           "timing": "action",
-          "scope": "corp"
+          "scope": "corp",
+          "target": "economy.corp_action_charged_bank"
         }
       ],
       "lineSupport": [
@@ -20113,7 +20118,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -20231,7 +20236,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -20267,6 +20272,7 @@
           "kind": "draw",
           "timing": "action",
           "scope": "corp",
+          "target": "draw.corp_draw",
           "amount": 2
         }
       ],
@@ -20276,7 +20282,7 @@
         "threatLevel": "medium"
       },
       "tacticSignals": [
-        "economy.corp_draw"
+        "draw.corp_draw"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -20284,7 +20290,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -20322,12 +20328,14 @@
           "kind": "draw",
           "timing": "action",
           "scope": "corp",
+          "target": "draw.corp_draw",
           "amount": 2
         },
         {
           "kind": "hand_size_modifier",
           "timing": "persistent",
-          "scope": "corp"
+          "scope": "corp",
+          "target": "setup.corp_hand_size"
         }
       ],
       "remoteRole": {
@@ -20336,8 +20344,8 @@
         "threatLevel": "medium"
       },
       "tacticSignals": [
-        "economy.corp_draw",
-        "score.hand_size"
+        "draw.corp_draw",
+        "setup.corp_hand_size"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -20345,7 +20353,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -20451,7 +20459,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -20706,15 +20714,16 @@
       ],
       "tacticSignals": [
         "advance.corp_counter_bank",
-        "economy.corp_counter_bank",
-        "economy.corp_installed_credit_drip",
+        "economy.corp_advanceable_cashout",
+        "economy.corp_counter_cashout",
         "remote.asset_economy"
       ],
       "effects": [
         {
           "kind": "economy",
           "timing": "action",
-          "scope": "corp"
+          "scope": "corp",
+          "target": "economy.corp_counter_cashout"
         }
       ],
       "quality": {
@@ -20723,7 +20732,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -20888,20 +20897,13 @@
           "scope": "corp"
         }
       ],
-      "lineSupport": [
-        "corp.fast_advance",
-        "corp.remote_scoring"
-      ],
-      "strategicRole": [
-        "scoring_tool"
-      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -20996,15 +20998,16 @@
         "enabler"
       ],
       "tacticSignals": [
-        "tag.corp_persistent_source",
-        "tag.payoff",
-        "tag.source"
+        "risk.requires_tagged_runner",
+        "tag.additional_tag_followup",
+        "tag.payoff"
       ],
       "effects": [
         {
           "kind": "tag_source",
           "timing": "corp_turn",
-          "scope": "runner"
+          "scope": "runner",
+          "target": "tag.additional_tag_followup"
         }
       ],
       "conditions": [
@@ -21018,7 +21021,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -21057,7 +21060,7 @@
         "corp.fast_advance"
       ],
       "strategicRole": [
-        "scoring_tool"
+        "engine_anchor"
       ],
       "tacticSignals": [
         "action.corp_counter_to_action",
@@ -21077,7 +21080,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -21119,20 +21122,13 @@
           "scope": "corp"
         }
       ],
-      "lineSupport": [
-        "corp.fast_advance",
-        "corp.remote_scoring"
-      ],
-      "strategicRole": [
-        "scoring_tool"
-      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
-        "strategyCovered": true,
+        "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -21167,14 +21163,29 @@
         "data/scenarios/ai-deck-legal-v1917-smokes.json#corp_v1917_asset_trace_hidden_targets"
       ],
       "tacticSignals": [
+        "draw.corp_draw",
         "hq.corp_hand_filter",
-        "rnd.corp_topdeck_setup"
+        "hq.corp_hand_refresh",
+        "rnd.corp_shuffle_hq_into_rnd"
       ],
       "effects": [
         {
           "kind": "shuffle_draw",
           "timing": "action",
-          "scope": "corp"
+          "scope": "corp",
+          "target": "hq.corp_hand_refresh"
+        },
+        {
+          "kind": "zone_shuffle",
+          "timing": "action",
+          "scope": "rnd",
+          "target": "rnd.corp_shuffle_hq_into_rnd"
+        },
+        {
+          "kind": "draw",
+          "timing": "action",
+          "scope": "corp",
+          "target": "draw.corp_draw"
         }
       ],
       "quality": {
@@ -21183,7 +21194,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -21278,6 +21289,7 @@
           "kind": "hand_size_modifier",
           "timing": "persistent",
           "scope": "corp",
+          "target": "setup.corp_hand_size",
           "amount": 2
         }
       ],
@@ -21287,7 +21299,7 @@
         "threatLevel": "medium"
       },
       "tacticSignals": [
-        "score.hand_size"
+        "setup.corp_hand_size"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -21295,7 +21307,7 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -21412,6 +21424,7 @@
       ],
       "tacticSignals": [
         "access.archives_safe_exception",
+        "access.corp_net_damage_ambush",
         "access.punish",
         "access.rnd_reveal_requirement",
         "damage.payoff",
@@ -21422,6 +21435,7 @@
           "kind": "damage",
           "timing": "on_access",
           "scope": "runner",
+          "target": "access.corp_net_damage_ambush",
           "amount": 2
         }
       ],
@@ -21439,7 +21453,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -21503,7 +21517,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -21605,17 +21619,17 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
       "lineSupport": [
         "corp.asset_economy"
       ],
       "strategicRole": [
-        "engine_anchor"
+        "punish_payoff"
       ],
       "tacticSignals": [
-        "economy.corp_installed_credit_drip",
+        "economy.corp_multi_action_credit",
         "remote.asset_economy"
       ],
       "effects": [
@@ -21623,6 +21637,7 @@
           "kind": "economy",
           "timing": "action",
           "scope": "corp",
+          "target": "economy.corp_multi_action_credit",
           "amount": 6,
           "actionCost": 3
         }
@@ -21734,6 +21749,8 @@
       ],
       "tacticSignals": [
         "access.archives_safe_exception",
+        "access.corp_net_damage_ambush",
+        "access.corp_tag_ambush",
         "access.punish",
         "access.rnd_reveal_requirement",
         "damage.payoff",
@@ -21745,12 +21762,15 @@
           "kind": "damage",
           "timing": "on_access",
           "scope": "runner",
+          "target": "access.corp_net_damage_ambush",
           "amount": 3
         },
         {
           "kind": "tag_source",
           "timing": "on_access",
-          "scope": "runner"
+          "scope": "runner",
+          "target": "access.corp_tag_ambush",
+          "amount": 1
         }
       ],
       "conditions": [
@@ -21770,7 +21790,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -21808,10 +21828,10 @@
         "corp.damage_kill"
       ],
       "strategicRole": [
-        "punish_payoff",
-        "win_condition"
+        "punish_payoff"
       ],
       "tacticSignals": [
+        "access.corp_brain_damage_ambush",
         "access.punish",
         "advance.corp_counter_bank",
         "damage.payoff",
@@ -21821,7 +21841,8 @@
         {
           "kind": "damage",
           "timing": "on_access",
-          "scope": "runner"
+          "scope": "runner",
+          "target": "access.corp_brain_damage_ambush"
         }
       ],
       "conditions": [
@@ -21838,7 +21859,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -21939,7 +21960,8 @@
         {
           "kind": "damage",
           "timing": "on_access",
-          "scope": "runner"
+          "scope": "runner",
+          "target": "access.corp_net_damage_ambush"
         }
       ],
       "conditions": [
@@ -21955,6 +21977,7 @@
       ],
       "tacticSignals": [
         "access.archives_safe_exception",
+        "access.corp_net_damage_ambush",
         "access.punish",
         "access.rnd_reveal_requirement",
         "advance.corp_counter_bank",
@@ -21966,8 +21989,7 @@
         "corp.damage_kill"
       ],
       "strategicRole": [
-        "punish_payoff",
-        "win_condition"
+        "punish_payoff"
       ],
       "quality": {
         "benchmarkCovered": false,
@@ -21975,7 +21997,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       }
     },
@@ -25673,7 +25695,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -25681,12 +25703,14 @@
           "kind": "damage",
           "timing": "on_access",
           "scope": "runner",
+          "target": "access.corp_rnd_net_damage_ambush",
           "amount": 1
         },
         {
           "kind": "zone_shuffle",
           "timing": "on_rez",
-          "scope": "rnd"
+          "scope": "rnd",
+          "target": "rnd.corp_self_shuffle_access"
         }
       ],
       "conditions": [
@@ -25695,6 +25719,8 @@
         }
       ],
       "tacticSignals": [
+        "access.corp_net_damage_ambush",
+        "access.corp_rnd_net_damage_ambush",
         "access.punish",
         "access.rnd_reveal_requirement",
         "damage.payoff",
@@ -25825,12 +25851,13 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "access.archives_safe_exception",
         "access.corp_counter_punish",
+        "access.corp_credit_loss_counter",
         "access.punish",
         "access.rnd_reveal_requirement"
       ],
@@ -25838,7 +25865,8 @@
         {
           "kind": "access_punish",
           "timing": "on_access",
-          "scope": "runner"
+          "scope": "runner",
+          "target": "access.corp_credit_loss_counter"
         }
       ],
       "conditions": [
@@ -26270,12 +26298,13 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "access.archives_safe_exception",
         "access.corp_counter_punish",
+        "access.corp_icebreaker_strength_counter",
         "access.punish",
         "access.rnd_reveal_requirement"
       ],
@@ -26283,7 +26312,8 @@
         {
           "kind": "access_punish",
           "timing": "on_access",
-          "scope": "runner"
+          "scope": "runner",
+          "target": "access.corp_icebreaker_strength_counter"
         }
       ],
       "conditions": [
@@ -26538,7 +26568,7 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
       "effects": [
@@ -26546,12 +26576,14 @@
           "kind": "damage",
           "timing": "on_access",
           "scope": "runner",
+          "target": "access.corp_archives_net_damage_ambush",
           "amount": 1
         },
         {
           "kind": "zone_shuffle",
           "timing": "on_access",
-          "scope": "rnd"
+          "scope": "rnd",
+          "target": "rnd.corp_self_shuffle_access"
         }
       ],
       "conditions": [
@@ -26560,6 +26592,8 @@
         }
       ],
       "tacticSignals": [
+        "access.corp_archives_net_damage_ambush",
+        "access.corp_net_damage_ambush",
         "access.punish",
         "damage.payoff",
         "rnd.corp_self_shuffle_access"
@@ -26598,25 +26632,27 @@
         "strategyCovered": true,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
         "economy.corp_asset_cashout",
-        "ice.corp_install_discount",
-        "risk.temporary_rez_liability"
+        "ice.corp_self_trash_cost",
+        "risk.trash_own_rezzed_ice"
       ],
       "effects": [
         {
           "kind": "economy",
           "timing": "action",
           "scope": "corp",
+          "target": "economy.corp_asset_cashout",
           "amount": 4
         },
         {
           "kind": "ice_trash",
           "timing": "action",
-          "scope": "ice"
+          "scope": "ice",
+          "target": "ice.corp_self_trash_cost"
         }
       ],
       "conditions": [
@@ -26625,11 +26661,10 @@
         }
       ],
       "lineSupport": [
-        "corp.asset_economy",
-        "corp.economy_rez_reserve"
+        "corp.asset_economy"
       ],
       "strategicRole": [
-        "engine_anchor"
+        "punish_payoff"
       ]
     },
     {
@@ -31840,11 +31875,11 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "economy.corp_draw"
+        "draw.corp_draw"
       ],
       "effects": [
         {
@@ -32443,11 +32478,11 @@
         "strategyCovered": false,
         "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-06-02",
+        "reviewedDate": "2026-06-03",
         "reviewedBy": "codex"
       },
       "tacticSignals": [
-        "economy.corp_draw"
+        "draw.corp_draw"
       ],
       "effects": [
         {

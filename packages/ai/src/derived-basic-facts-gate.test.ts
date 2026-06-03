@@ -71,7 +71,7 @@ describe("derived basic facts gate report", () => {
     expect(report.pilotCardCount).toBe(193);
     expect(report.implementationFoundCount).toBe(193);
     expect(report.cardsWithDerivedFacts).toBe(193);
-    expect(report.cardsWithManualOntologyOverlap).toBe(150);
+    expect(report.cardsWithManualOntologyOverlap).toBe(151);
     expect(report.cardsNeedingManualOverlay).toBe(135);
     expect(report.cards.every((card) => card.implementationFound)).toBe(true);
     expect(

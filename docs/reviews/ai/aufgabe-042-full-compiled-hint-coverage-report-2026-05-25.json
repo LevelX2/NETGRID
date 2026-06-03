@@ -155,7 +155,7 @@
   },
   "hardErrorCount": 0,
   "hardErrors": [],
-  "warningCount": 2080,
+  "warningCount": 2078,
   "warnings": [
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -9300,7 +9300,7 @@
     {
       "kind": "monolith_mechanical_duplication_candidate",
       "cardId": "onr_v1_314_corporate-negotiating-center",
-      "message": "Active monolith has effect:economy that the current deriver does not reproduce."
+      "message": "Active monolith has effect:agenda_reveal_economy that the current deriver does not reproduce."
     },
     {
       "kind": "text_pattern_derivation",
@@ -9766,16 +9766,6 @@
       "kind": "descriptor_or_schema_gap",
       "cardId": "onr_v1_336_rescheduler",
       "message": "Implementation produced facts, but descriptor/schema comparison still has gaps."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_v1_336_rescheduler",
-      "message": "Generated effect:draw is absent from the active monolith."
-    },
-    {
-      "kind": "generated_fact_absent_from_active_monolith",
-      "cardId": "onr_v1_336_rescheduler",
-      "message": "Generated effect:zone_shuffle is absent from the active monolith."
     },
     {
       "kind": "monolith_mechanical_duplication_candidate",
@@ -17300,8 +17290,7 @@
           }
         ],
         "lineSupport": [
-          "corp.asset_economy",
-          "corp.economy_rez_reserve"
+          "corp.asset_economy"
         ],
         "quality": {
           "hintReviewed": true,
@@ -64199,10 +64188,9 @@
         ],
         "effects": [
           {
-            "kind": "economy",
+            "kind": "agenda_reveal_economy",
             "timing": "start_of_turn",
-            "scope": "corp",
-            "resource": "credits"
+            "scope": "corp"
           }
         ],
         "conditions": [
@@ -64237,13 +64225,13 @@
         ],
         "manualOnly": [
           "condition:requires_agenda_reveal",
-          "effect:economy"
+          "effect:agenda_reveal_economy"
         ]
       },
       "missingManualOverlay": [
         "condition:requires_agenda_reveal",
         "condition:requires_start_of_turn",
-        "effect:economy"
+        "effect:agenda_reveal_economy"
       ],
       "descriptorGaps": [
         "Generated facts contain fields not currently mirrored manually.",
@@ -64269,7 +64257,7 @@
         },
         {
           "kind": "manual_ontology_without_generated_match",
-          "message": "Manual effect:economy has no generated basic fact match."
+          "message": "Manual effect:agenda_reveal_economy has no generated basic fact match."
         },
         {
           "kind": "text_pattern_derivation",
@@ -64378,8 +64366,7 @@
           }
         ],
         "lineSupport": [
-          "corp.ambush_bluff",
-          "corp.tag_trace_punish"
+          "corp.ambush_bluff"
         ],
         "quality": {
           "hintReviewed": true,
@@ -66376,13 +66363,10 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "corp.fast_advance",
-          "corp.remote_scoring"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": true,
+          "strategyCovered": false,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -66843,13 +66827,10 @@
           }
         ],
         "conditions": [],
-        "lineSupport": [
-          "corp.fast_advance",
-          "corp.remote_scoring"
-        ],
+        "lineSupport": [],
         "quality": {
           "hintReviewed": true,
-          "strategyCovered": true,
+          "strategyCovered": false,
           "benchmarkCovered": false,
           "confidence": "high",
           "needsHumanReview": false
@@ -66945,9 +66926,19 @@
         ],
         "effects": [
           {
+            "kind": "draw",
+            "timing": "action",
+            "scope": "corp"
+          },
+          {
             "kind": "shuffle_draw",
             "timing": "action",
             "scope": "corp"
+          },
+          {
+            "kind": "zone_shuffle",
+            "timing": "action",
+            "scope": "rnd"
           }
         ],
         "conditions": [],
@@ -66961,41 +66952,26 @@
         }
       },
       "overlap": {
-        "matches": [],
-        "generatedOnly": [
+        "matches": [
           "effect:draw",
           "effect:zone_shuffle"
         ],
+        "generatedOnly": [],
         "manualOnly": [
           "effect:shuffle_draw"
         ]
       },
       "missingManualOverlay": [
-        "effect:draw",
-        "effect:shuffle_draw",
-        "effect:zone_shuffle"
+        "effect:shuffle_draw"
       ],
       "descriptorGaps": [
-        "Generated facts contain fields not currently mirrored manually.",
         "Manual ontology contains fields not currently derivable."
       ],
       "confidence": "high",
       "warnings": [
         {
           "kind": "descriptor_or_overlay_gap",
-          "message": "Generated facts contain fields not currently mirrored manually."
-        },
-        {
-          "kind": "descriptor_or_overlay_gap",
           "message": "Manual ontology contains fields not currently derivable."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:draw has no manual ontology match."
-        },
-        {
-          "kind": "generated_fact_without_manual_match",
-          "message": "Generated effect:zone_shuffle has no manual ontology match."
         },
         {
           "kind": "manual_ontology_without_generated_match",
@@ -68211,7 +68187,8 @@
           {
             "kind": "tag_source",
             "timing": "on_access",
-            "scope": "runner"
+            "scope": "runner",
+            "amount": 1
           }
         ],
         "conditions": [
