@@ -776,6 +776,29 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
     return state;
   }
 
+  it("keeps relative ICE base values aligned with the Proteus catalog", () => {
+    expect(DEMO_CARDS_BY_ID[BUG_ZAPPER]).toMatchObject({
+      rezCost: 6,
+      strength: 2,
+      subtypes: expect.arrayContaining(["ap", "hellbolt", "sentry"]),
+    });
+    expect(DEMO_CARDS_BY_ID[DOG_PILE]).toMatchObject({
+      rezCost: 5,
+      strength: 0,
+      subtypes: expect.arrayContaining(["ap", "sentry"]),
+    });
+    expect(DEMO_CARDS_BY_ID[HUNTING_PACK]).toMatchObject({
+      rezCost: 1,
+      strength: 4,
+      subtypes: expect.arrayContaining(["bloodhound", "sentry"]),
+    });
+    expect(DEMO_CARDS_BY_ID[MASTERMIND]).toMatchObject({
+      rezCost: 7,
+      strength: 0,
+      subtypes: expect.arrayContaining(["ap", "black_ice", "sentry", "zombie"]),
+    });
+  });
+
   it("counts only rezzed ICE outside the current ICE for strength and damage", () => {
     for (const definitionId of [
       BUG_ZAPPER,
@@ -787,8 +810,13 @@ describe("Proteus Phase 3c Relative Board-Count ICE", () => {
       state = setup.state;
       const beforeGrip = state.runner.grip.length;
       const beforeCoreDamage = state.runner.coreDamage;
-      if (definitionId === DOG_PILE || definitionId === MASTERMIND) {
-        expect(getPlayerView(state, "runner").run?.encounteredIce?.strength).toBe(2);
+      const encounteredIce = getPlayerView(state, "runner").run?.encounteredIce;
+      if (definitionId === BUG_ZAPPER) {
+        expect(encounteredIce?.strength).toBe(2);
+        expect(encounteredIce?.strengthModifier ?? 0).toBe(0);
+      } else if (definitionId === DOG_PILE || definitionId === MASTERMIND) {
+        expect(encounteredIce?.strength).toBe(2);
+        expect(encounteredIce?.strengthModifier).toBe(2);
       }
       const initial = structuredClone(state);
       const replayStart = state.eventLog.length;

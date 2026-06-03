@@ -10066,10 +10066,10 @@ const PROTEUS_VARIABLE_ICE_CARDS: CardDefinition[] = [
     title: "Bug Zapper",
     side: "corp",
     type: "ice",
-    subtypes: ["sentry", "ap"],
+    subtypes: ["sentry", "ap", "hellbolt"],
     implementationStatus: "playable_mvp",
-    rezCost: 5,
-    strength: 3,
+    rezCost: 6,
+    strength: 2,
     rulesText:
       "[Subroutine] Do 2 net damage for each rezzed piece of ice installed outside Bug Zapper.\n[Subroutine] End the run.",
     subroutines: [
@@ -10166,7 +10166,7 @@ const PROTEUS_VARIABLE_ICE_CARDS: CardDefinition[] = [
     type: "ice",
     subtypes: ["sentry", "ap"],
     implementationStatus: "playable_mvp",
-    rezCost: 4,
+    rezCost: 5,
     strength: 0,
     rulesText:
       "[Subroutine] Do 1 net damage for each rezzed piece of ice installed outside Dog Pile.\n[Subroutine] End the run.\nDog Pile has +1 strength for each rezzed piece of ice installed outside it.",
@@ -10283,9 +10283,9 @@ const PROTEUS_VARIABLE_ICE_CARDS: CardDefinition[] = [
     title: "Hunting Pack",
     side: "corp",
     type: "ice",
-    subtypes: ["sentry"],
+    subtypes: ["sentry", "bloodhound"],
     implementationStatus: "playable_mvp",
-    rezCost: 5,
+    rezCost: 1,
     strength: 4,
     rulesText:
       "For each rezzed piece of ice installed outside Hunting Pack, Hunting Pack has one [Subroutine] Trace 5. If successful, give Runner a tag.",
@@ -10327,9 +10327,9 @@ const PROTEUS_VARIABLE_ICE_CARDS: CardDefinition[] = [
     title: "Mastermind",
     side: "corp",
     type: "ice",
-    subtypes: ["sentry", "ap"],
+    subtypes: ["sentry", "black_ice", "ap", "zombie"],
     implementationStatus: "playable_mvp",
-    rezCost: 6,
+    rezCost: 7,
     strength: 0,
     rulesText:
       "[Subroutine] Do 1 core damage for each rezzed piece of ice installed outside Mastermind.\n[Subroutine] End the run.\nMastermind has +1 strength for each rezzed piece of ice installed outside it.",

@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-06-02-bug-zapper-ice-value-alignment
-status: inbox
+status: done
 kind: fix
 area: cards
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-02
-startedAt:
-completedAt:
+startedAt: 2026-06-03
+completedAt: 2026-06-03
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/shared/src/index.ts
+  - packages/engine/src/index-tests/proteus/variable-ice.test.ts
+checks:
+  - "PASS: pnpm exec vitest run packages/engine/src/index-tests/proteus/variable-ice.test.ts -t \"relative ICE|Relative Board-Count ICE|Bug Zapper|Hunting Pack|Mastermind|Dog Pile\""
+  - "PASS: pnpm exec vitest run packages/engine/src/index-tests/proteus/variable-ice.test.ts"
+  - "PASS: pnpm --filter @netgrid/shared typecheck"
+  - "PASS: pnpm --filter @netgrid/shared test"
+  - "PASS: git diff --check"
+  - "WARN: pnpm --filter @netgrid/engine typecheck scheitert weiterhin an bestehendem, unberührtem TS2739 in packages/engine/src/game/card-implementation/trace-runtime-deps.test.ts:131"
 ---
 
 # Bug Zapper und ICE-Basiswerte gegen Katalog ausrichten
@@ -65,16 +73,16 @@ checks: []
 
 ## Akzeptanzkriterien
 
-- [ ] `Bug Zapper` hat in der aktiven Runtime/Shared-Definition Rez-Kosten 6 und Stärke 2.
-- [ ] `Bug Zapper` zeigt ohne echte externe Stärkequelle keinen `+1 Stärke`-Badge.
-- [ ] `Bug Zapper` behält die korrekte dynamische Damage-Subroutine mit 2 Net Damage pro gerezztem ICE außerhalb von Bug Zapper.
-- [ ] `Dog Pile` und `Mastermind` behalten ihre regelkonformen relativen Stärke-Boni; `Bug Zapper` erhält keinen solchen Bonus.
-- [ ] Ein ICE-Paritätscheck für aktive/compiled ICE-Karten wurde durchgeführt und im Ergebnis benannt.
-- [ ] Alle dabei gefundenen klar unbegründeten kleinen ICE-Basiswert-Abweichungen sind korrigiert.
-- [ ] Unklare oder größere Abweichungen sind nicht still korrigiert, sondern als Folgepunkte oder Folge-Activities dokumentiert.
-- [ ] Falls AI-Hints/AI024-Artefakte `Bug Zapper` fälschlich als Stärke-Modifikator führen und diese Daten aktuell verbraucht werden, sind sie korrigiert oder die Nicht-Korrektur ist begründet.
-- [ ] Fokussierte Engine-/Web-/Katalog-Checks sind ausgeführt oder begründet ausgelassen.
-- [ ] `git diff --check` ist grün.
+- [x] `Bug Zapper` hat in der aktiven Runtime/Shared-Definition Rez-Kosten 6 und Stärke 2.
+- [x] `Bug Zapper` zeigt ohne echte externe Stärkequelle keinen `+1 Stärke`-Badge.
+- [x] `Bug Zapper` behält die korrekte dynamische Damage-Subroutine mit 2 Net Damage pro gerezztem ICE außerhalb von Bug Zapper.
+- [x] `Dog Pile` und `Mastermind` behalten ihre regelkonformen relativen Stärke-Boni; `Bug Zapper` erhält keinen solchen Bonus.
+- [x] Ein ICE-Paritätscheck für aktive/compiled ICE-Karten wurde durchgeführt und im Ergebnis benannt.
+- [x] Alle dabei gefundenen klar unbegründeten kleinen ICE-Basiswert-Abweichungen sind korrigiert.
+- [x] Unklare oder größere Abweichungen sind nicht still korrigiert, sondern als Folgepunkte oder Folge-Activities dokumentiert.
+- [x] Falls AI-Hints/AI024-Artefakte `Bug Zapper` fälschlich als Stärke-Modifikator führen und diese Daten aktuell verbraucht werden, sind sie korrigiert oder die Nicht-Korrektur ist begründet.
+- [x] Fokussierte Engine-/Web-/Katalog-Checks sind ausgeführt oder begründet ausgelassen.
+- [x] `git diff --check` ist grün.
 
 ## Umsetzungshinweise
 
@@ -90,4 +98,12 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt am 2026-06-03.
+
+- `Bug Zapper` ist in der aktiven Shared-Definition auf Rez-Kosten 6, Stärke 2 und Subtyp `hellbolt` korrigiert. Im fokussierten Encounter-Test bleibt `strengthModifier` ohne externe Quelle leer beziehungsweise 0; der irreführende `+1 Stärke`-Badge entsteht damit nicht mehr aus der Katalogdrift.
+- Die dynamische Damage-Regel bleibt unverändert über die bestehende CardImplementation abgedeckt: 2 Net Damage pro gerezztem ICE außerhalb von `Bug Zapper`.
+- Der Proteus-Regressionstest schützt zusätzlich die Basiswerte von `Bug Zapper`, `Dog Pile`, `Hunting Pack` und `Mastermind`; `Dog Pile` und `Mastermind` behalten ihre echten relativen Stärke-Boni.
+- Ein scriptbarer ICE-Paritätscheck gegen `data/cards/*-cards.json` wurde ausgeführt. Klare kleine Proteus-Drifts wurden im selben Paket korrigiert: `Dog Pile` Rez-Kosten 5, `Hunting Pack` Rez-Kosten 1 plus Subtyp `bloodhound`, `Mastermind` Rez-Kosten 7 plus Subtypen `black_ice` und `zombie`.
+- Unverändert geblieben sind `Digiconda` und `Homing Missile`, weil die verbleibende Differenz `strength: 0` in der aktiven Runtime gegen `null` im Katalog X-Stärke-Placeholder betrifft und nicht als stiller Basiswertfehler korrigiert wurde.
+- AI-Hint-/AI024-Artefakte führen `Bug Zapper` weiterhin mit dem Signal `ice.strength_modifier`. Diese generierten/AI-semantischen Daten wurden in diesem Runtime-/Badge-Paket bewusst nicht geändert, weil bereits ein separates AI-Semantik-Review-Paket offen ist und aktuell ein unversionierter AI023-Report im Workspace liegt.
+- Ein separater Web-Check wurde nicht ausgeführt, weil die Badge-Ursache direkt im PlayerView-Wert `strengthModifier` abgesichert ist und kein Web-Code geändert wurde.
