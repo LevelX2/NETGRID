@@ -2928,6 +2928,38 @@ describe("formatChronicleEvent", () => {
     expect(arasaka.chips).toContain("Flatline verhindert");
   });
 
+  it("describes Fall Guy tag prevention during Marked Accounts access", () => {
+    const event = makeEvent("resolve_choice", {
+      actor: "runner",
+      eventModificationDecision: "apply",
+      eventModificationOutcome: "avoided",
+      imminentEventType: "add_tag",
+      originalAmount: 1,
+      preventedTags: 1,
+      finalAmount: 0,
+      sourceDefinitionId: "onr_v1_161_fall-guy",
+      sourceTrashed: true,
+      trashedCardDefinitionId: "onr_v1_161_fall-guy",
+      ambushDefinitionId: "onr_proteus_005_marked-accounts",
+      accessEffectSourceDefinitionId: "onr_proteus_005_marked-accounts",
+      accessedFromZone: "rd",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1917_access_ambush"
+    });
+
+    const runnerItem = formatChronicleEvent(event, "runner");
+    const corpItem = formatChronicleEvent(event, "corp");
+
+    expect(runnerItem.title).toBe("Du hast Fall Guy getrasht und 1 Tag durch Marked Accounts verhindert.");
+    expect(corpItem.title).toBe("Der Runner hat Fall Guy getrasht und 1 Tag durch Marked Accounts verhindert.");
+    expect(runnerItem.category).toBe("danger");
+    expect(runnerItem.importance).toBe("important");
+    expect(runnerItem.cardDefinitionId).toBe("onr_v1_161_fall-guy");
+    expect(runnerItem.cardTitle).toBe("Fall Guy");
+    expect(runnerItem.chips).toEqual(expect.arrayContaining(["Tag verhindert", "1 verhindert", "Fall Guy", "Marked Accounts", "Source-Trash"]));
+    expect(runnerItem.title).not.toContain("Entscheidung beantwortet");
+  });
+
   it("describes complex card payloads from the Originalset spot-check clearly", () => {
     const valuPak = formatChronicleEvent(
       makeEvent("play_event", {

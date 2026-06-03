@@ -10,6 +10,7 @@ import {
   ONR_V1_1_2K_CORP_DECK,
   ONR_V1_1_2K_RUNNER_DECK,
   apply,
+  applyChoice,
   mustAction,
   sourceDefinition,
   toRunnerTurn,
@@ -29,6 +30,7 @@ const FETAL_AI = "onr_proteus_004_fetal-ai";
 const MARKED_ACCOUNTS = "onr_proteus_005_marked-accounts";
 const PROJECT_ZURICH = "onr_proteus_008_project-zurich";
 const WORLD_DOMINATION = "onr_proteus_010_world-domination";
+const FALL_GUY = "onr_v1_161_fall-guy";
 const BLACKMAIL = "onr_proteus_102_blackmail";
 const PIRATE_BROADCAST = "onr_proteus_116_pirate-broadcast";
 const PROMISES_PROMISES = "onr_proteus_119_promises-promises";
@@ -341,6 +343,78 @@ describe("Proteus PRO013 agenda suite behavior", () => {
     addCorpCard(markedArchives, MARKED_ACCOUNTS, "pro013_marked_archives", "archives");
     markedArchives = accessTopCard(markedArchives, "archives");
     expect(markedArchives.runner.tags).toBe(0);
+  });
+
+  it("keeps Marked Accounts access context when Fall Guy avoids the tag", () => {
+    let state = baseState("pro013-marked-fall-guy");
+    const fallGuyId = addRunnerGripCard(state, FALL_GUY, "pro013_fall_guy");
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.cardId === fallGuyId,
+    );
+    addCorpCard(state, FETAL_AI, "pro013_fetal_stays_hidden_rd", "rd");
+    const markedId = addCorpCard(
+      state,
+      MARKED_ACCOUNTS,
+      "pro013_marked_fall_guy_rd",
+      "rd",
+    );
+
+    openAccess(state, "rd");
+    const before = structuredClone(state);
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.run?.accessedCardId).toBe(markedId);
+    expect(state.runner.tags).toBe(0);
+    expect(state.pendingChoice?.source).toContain("event_modification");
+    expect(state.cardInstances[markedId]?.faceup).toBe(true);
+    expect(state.cardInstances["pro013_fetal_stays_hidden_rd"]?.faceup).toBe(false);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      eventModificationWindowOpened: true,
+      publicRevealDefinitionId: MARKED_ACCOUNTS,
+      ambushDefinitionId: MARKED_ACCOUNTS,
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1917_access_ambush",
+    });
+
+    const fallGuyOption = state.pendingChoice?.options.find((option) =>
+      option.id.includes("avoid_tag"),
+    )?.id;
+    expect(fallGuyOption).toBeDefined();
+    if (!fallGuyOption) throw new Error("Missing Fall Guy tag-avoid option");
+
+    state = applyChoice(state, "runner", fallGuyOption);
+
+    expect(state.runner.tags).toBe(0);
+    expect(state.runner.heap).toContain(fallGuyId);
+    expect(state.cardInstances["pro013_fetal_stays_hidden_rd"]?.faceup).toBe(false);
+    const resolvePayload = state.eventLog.at(-1)?.publicPayload;
+    expect(resolvePayload).toMatchObject({
+      actionType: "resolve_choice",
+      eventModificationDecision: "apply",
+      eventModificationOutcome: "avoided",
+      imminentEventType: "add_tag",
+      originalAmount: 1,
+      preventedTags: 1,
+      finalAmount: 0,
+      tagsAdded: 0,
+      runnerTagsAfter: 0,
+      sourceDefinitionId: FALL_GUY,
+      sourceTrashed: true,
+      trashedCardDefinitionId: FALL_GUY,
+      ambushDefinitionId: MARKED_ACCOUNTS,
+      accessEffectSourceDefinitionId: MARKED_ACCOUNTS,
+      accessedFromZone: "rd",
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "v1917_access_ambush",
+    });
+    expect(resolvePayload).not.toHaveProperty("publicRevealDefinitionId");
+    expect(JSON.stringify(resolvePayload)).not.toContain("pro013_fetal_stays_hidden_rd");
+    expectReplayStable(before, state);
   });
 
   it("Project Zurich stores source-bound overadvance credits and World Domination awards fixed points through score authority", () => {

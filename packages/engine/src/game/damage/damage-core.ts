@@ -713,6 +713,7 @@ export function createAddTagImminentEvent(
   state: GameState,
   amount: number,
   source: string,
+  publicContext: Record<string, unknown> = {},
 ): ImminentEvent {
   return {
     eventId: `imminent_tag_${state.stateVersion + 1}_${sanitizeId(source)}`,
@@ -723,10 +724,29 @@ export function createAddTagImminentEvent(
     payload: {
       amount,
       source,
+      ...publicContext,
     },
     visibility: "public",
     createdAtStateVersion: state.stateVersion + 1,
   };
+}
+
+function addTagPublicContextFromPayload(
+  payload: Record<string, unknown> | undefined,
+): Record<string, unknown> {
+  const context: Record<string, unknown> = {};
+  if (!payload) return context;
+  if (payload.hiddenZoneBarrier === true) context.hiddenZoneBarrier = true;
+  for (const key of [
+    "hiddenZoneAction",
+    "ambushDefinitionId",
+    "accessEffectSourceDefinitionId",
+    "accessedFromZone",
+  ] as const) {
+    const value = payload[key];
+    if (typeof value === "string") context[key] = value;
+  }
+  return context;
 }
 
 export function addRunnerTagsWithPrevention(
@@ -754,7 +774,12 @@ export function addRunnerTagsWithPrevention(
     };
     return;
   }
-  const event = createAddTagImminentEvent(state, amount, source);
+  const event = createAddTagImminentEvent(
+    state,
+    amount,
+    source,
+    addTagPublicContextFromPayload(legalAction.payload),
+  );
   if (openEventModificationWindow(state, event, legalAction)) return;
   resolveAddTagImminentEvent(state, event, legalAction);
 }
@@ -1646,6 +1671,7 @@ export function resolveEventModificationChoice(
     throw new Error("Es wurde keine Event-Modification-Option gewählt.");
   const basePayload = {
     ...(legalAction.payload ?? {}),
+    ...addTagPublicContextFromPayload(event.payload),
     eventModificationWindowId: window.windowId,
     eventModificationKind: window.kind,
     imminentEventId: event.eventId,

@@ -441,6 +441,50 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Arasaka Owns You", "Flatline verhindert", "+10 Credits", "4 Aktionen Schuld", `${debt} Agenda-Punkte`);
         break;
       }
+      if (stringValue(payload.imminentEventType) === "add_tag" && typeof payload.eventModificationDecision === "string") {
+        const originalTags = numberValue(payload.originalAmount) ?? numberValue(payload.tagsAdded) ?? 0;
+        const finalTags =
+          numberValue(payload.finalAmount) ??
+          numberValue(payload.tagsAdded) ??
+          Math.max(0, originalTags - (numberValue(payload.preventedTags) ?? 0));
+        const preventedTags =
+          numberValue(payload.preventedTags) ?? Math.max(0, originalTags - finalTags);
+        const preventionSource = titleForDefinitionId(sourceDefinitionId) ?? sourceTitle ?? cardTitle;
+        const tagSourceDefinitionId =
+          stringValue(payload.accessEffectSourceDefinitionId) ?? stringValue(payload.ambushDefinitionId);
+        const tagSource = titleForDefinitionId(tagSourceDefinitionId);
+        category = "danger";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = cardDefinitionId ?? sourceDefinitionId;
+        if (preventionSource) cardTitle = cardTitle ?? preventionSource;
+        if (payload.eventModificationDecision === "apply" && preventedTags > 0) {
+          title =
+            payload.sourceTrashed === true && preventionSource
+              ? phrase(subject, `${preventionSource} getrasht und ${tagCountText(preventedTags)}${tagSource ? ` durch ${tagSource}` : ""} verhindert`)
+              : phrase(subject, `${tagCountText(preventedTags)}${tagSource ? ` durch ${tagSource}` : ""}${preventionSource ? ` mit ${preventionSource}` : ""} verhindert`);
+          description = finalTags > 0 ? `${tagCountText(finalTags)} bleibt übrig.` : undefined;
+          chips.push(
+            "Tag verhindert",
+            `${preventedTags} verhindert`,
+            ...(preventionSource ? [preventionSource] : []),
+            ...(tagSource ? [tagSource] : []),
+            ...(payload.sourceTrashed === true ? ["Source-Trash"] : []),
+            ...(finalTags > 0 ? [`${finalTags} übrig`] : []),
+          );
+        } else {
+          title = phrase(subject, tagSource ? `keine Tag-Prevention gegen ${tagSource} genutzt` : "keine Tag-Prevention genutzt");
+          description = `${sideLabel("runner")} hat ${tagCountText(finalTags)} erhalten.`;
+          chips.push(
+            "Tag-Prevention",
+            "Nicht genutzt",
+            ...(preventionSource ? [preventionSource] : []),
+            ...(tagSource ? [tagSource] : []),
+            ...(finalTags > 0 ? [`+${finalTags} Tag${finalTags === 1 ? "" : "s"}`] : []),
+          );
+        }
+        break;
+      }
       if (payload.eventModificationDecision === "apply" && numberValue(payload.preventedAmount) !== undefined) {
         const preventedAmount = numberValue(payload.preventedAmount) ?? 0;
         const damageAmount = numberValue(payload.damageAmount);
@@ -2562,6 +2606,10 @@ function traceStartTitle(subject: string, cardTitle: string | undefined, baseTra
 
 function cardCountText(amount: number): string {
   return amount === 1 ? "eine Karte" : `${amount} Karten`;
+}
+
+function tagCountText(amount: number): string {
+  return `${amount} Tag${amount === 1 ? "" : "s"}`;
 }
 
 function openArchivesCardCountText(amount: number): string {

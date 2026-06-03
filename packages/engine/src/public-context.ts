@@ -434,6 +434,7 @@ export function publicContextForAction(
       "sourceDefinitionId",
       "originalAmount",
       "preventedAmount",
+      "preventedTags",
       "finalAmount",
       "fullBodyConversionCorpBypassPaid",
       "fullBodyConversionBypassCostPerDamage",
