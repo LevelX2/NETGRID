@@ -110,6 +110,44 @@ describe("deriveOpponentActionCues", () => {
     expect(cueHasHiddenLeak(corpCues[0]!)).toBe(false);
   });
 
+  it("keeps Vacuum Link die roll cues visible for both players", () => {
+    const vacuumEvent = event("evt_vacuum", "continue_run", {
+      actor: "runner",
+      serverLabel: "HQ",
+      vacuumLinkDieRoll: 3,
+      vacuumLinkRewindApplied: true,
+      vacuumLinkRewindRezzedIceBack: 3,
+      vacuumLinkTargetIceIndex: 1
+    });
+
+    const runnerCues = deriveOpponentActionCues({
+      viewerSide: "runner",
+      playerView: view("runner"),
+      events: [vacuumEvent]
+    });
+    const corpCues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      events: [vacuumEvent]
+    });
+
+    expect(runnerCues).toHaveLength(1);
+    expect(corpCues).toHaveLength(1);
+    expect(runnerCues[0]?.source).toBe("system");
+    expect(runnerCues[0]?.actorLabel).toBe("Spiel");
+    expect(runnerCues[0]?.title).toBe("Du hast Vacuum Link ausgelöst und eine 3 gewürfelt.");
+    expect(runnerCues[0]?.description).toBe(
+      "Wurf 3: Runner wird um 3 gerezzte ICE zurückgesetzt oder darf ausstöpseln; wenn nicht so viele ICE vorhanden sind, geht es zum ersten ICE. Ziel ist ICE 2."
+    );
+    expect(runnerCues[0]?.cardDefinitionId).toBe("onr_v1_275_vacuum-link");
+    expect(runnerCues[0]?.cardTitle).toBe("Vacuum Link");
+    expect(runnerCues[0]?.highlight).toEqual({ kind: "run", serverLabel: "HQ" });
+    expect(runnerCues[0]?.sound).toBe("run");
+    expect(corpCues[0]?.title).toBe("Der Runner hat Vacuum Link ausgelöst und eine 3 gewürfelt.");
+    expect(cueHasHiddenLeak(runnerCues[0]!)).toBe(false);
+    expect(cueHasHiddenLeak(corpCues[0]!)).toBe(false);
+  });
+
   it("shows access-effect damage cues for both players", () => {
     const accessDamageEvent = event("evt_access_damage", "resolve_choice", {
       actor: "corp",

@@ -65,6 +65,7 @@ const BRAINDANCE_CAMPAIGN_ID = "onr_v1_311_braindance-campaign";
 const SHELL_TRADERS_ID = "onr_v1_176_the-shell-traders";
 const SKIVVISS_ID = "onr_v1_064_skivviss";
 const QUEST_FOR_CATTEKIN_ID = "onr_v1_172_quest-for-cattekin";
+const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
 
 type EffectSummary = {
   category?: ChronicleCategory;
@@ -1251,6 +1252,30 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         cardTitle = passedIceDefinitionId ? passedIce : cardTitle;
         chips.push("Rio", ...(serverLabel ? [serverLabel] : []), ...(dieRoll !== undefined ? [`Wurf ${dieRoll}`] : []), runEnded ? "Run endet" : "Weiter");
         break;
+      }
+      {
+        const vacuumLinkDieRoll = numberValue(payload.vacuumLinkDieRoll);
+        if (vacuumLinkDieRoll !== undefined) {
+          const rewindApplied = payload.vacuumLinkRewindApplied === true;
+          const rewindBack = numberValue(payload.vacuumLinkRewindRezzedIceBack);
+          const targetIceIndex = numberValue(payload.vacuumLinkTargetIceIndex);
+          const targetIcePosition = targetIceIndex !== undefined ? targetIceIndex + 1 : undefined;
+          category = "run";
+          importance = rewindApplied ? "important" : "normal";
+          visibility = "public";
+          cardDefinitionId = cardDefinitionId ?? sourceDefinitionId ?? VACUUM_LINK_ID;
+          cardTitle = cardTitle ?? titleForDefinitionId(cardDefinitionId) ?? "Vacuum Link";
+          title = phrase(subject, `${cardTitle} ausgelöst und eine ${vacuumLinkDieRoll} gewürfelt`);
+          description = vacuumLinkDescription(vacuumLinkDieRoll, rewindApplied, rewindBack, targetIcePosition);
+          chips.push(
+            "Vacuum Link",
+            `Wurf ${vacuumLinkDieRoll}`,
+            rewindApplied ? "Run zurückgesetzt" : "Weiter",
+            ...(rewindBack !== undefined ? [`${rewindBack} ICE zurück`] : []),
+            ...(targetIcePosition !== undefined ? [`Ziel ICE ${targetIcePosition}`] : []),
+          );
+          break;
+        }
       }
       if (payload.traceStarted === true) {
         const baseTraceStrength = numberValue(payload.baseTraceStrength);
@@ -2593,6 +2618,19 @@ function playfulAiResolveDescription(
     parts.push("Die Playful-AI-Schleife ist abgeschlossen.");
   }
   return parts.join(" ") || undefined;
+}
+
+function vacuumLinkDescription(
+  dieRoll: number,
+  rewindApplied: boolean,
+  rewindBack: number | undefined,
+  targetIcePosition: number | undefined
+): string {
+  if (!rewindApplied) return `Wurf ${dieRoll}: Kein Zurücksetzen; der Run läuft weiter.`;
+  const back = rewindBack ?? dieRoll;
+  const backText = back === 1 ? "1 gerezztes ICE" : `${back} gerezzte ICE`;
+  const targetText = targetIcePosition !== undefined ? ` Ziel ist ICE ${targetIcePosition}.` : "";
+  return `Wurf ${dieRoll}: Runner wird um ${backText} zurückgesetzt oder darf ausstöpseln; wenn nicht so viele ICE vorhanden sind, geht es zum ersten ICE.${targetText}`;
 }
 
 function traceParticipantLabel(participant: Side, viewer: Side): string {

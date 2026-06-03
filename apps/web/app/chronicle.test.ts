@@ -921,6 +921,41 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(expect.arrayContaining(["Rio", "Remote 1", "Wurf 1", "Run endet"]));
   });
 
+  it("shows Vacuum Link die rolls and their run-rewind meaning", () => {
+    const rewound = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        serverLabel: "HQ",
+        vacuumLinkDieRoll: 3,
+        vacuumLinkRewindApplied: true,
+        vacuumLinkRewindRezzedIceBack: 3,
+        vacuumLinkTargetIceIndex: 1
+      }),
+      "runner"
+    );
+    const noRewind = formatChronicleEvent(
+      makeEvent("continue_run", {
+        actor: "runner",
+        serverLabel: "HQ",
+        vacuumLinkDieRoll: 5,
+        vacuumLinkRewindApplied: false
+      }),
+      "corp"
+    );
+
+    expect(rewound.title).toBe("Du hast Vacuum Link ausgelöst und eine 3 gewürfelt.");
+    expect(rewound.description).toBe(
+      "Wurf 3: Runner wird um 3 gerezzte ICE zurückgesetzt oder darf ausstöpseln; wenn nicht so viele ICE vorhanden sind, geht es zum ersten ICE. Ziel ist ICE 2."
+    );
+    expect(rewound.cardDefinitionId).toBe("onr_v1_275_vacuum-link");
+    expect(rewound.cardTitle).toBe("Vacuum Link");
+    expect(rewound.chips).toEqual(expect.arrayContaining(["Vacuum Link", "Wurf 3", "Run zurückgesetzt", "3 ICE zurück", "Ziel ICE 2"]));
+    expect(noRewind.title).toBe("Der Runner hat Vacuum Link ausgelöst und eine 5 gewürfelt.");
+    expect(noRewind.description).toBe("Wurf 5: Kein Zurücksetzen; der Run läuft weiter.");
+    expect(noRewind.chips).toEqual(expect.arrayContaining(["Vacuum Link", "Wurf 5", "Weiter"]));
+    expect(JSON.stringify(rewound)).not.toContain("cardInstances");
+  });
+
   it("shows Wall of Ice subroutine damage and end-the-run as separate chronicle steps", () => {
     const items = formatChronicleEffectItems(
       makeEvent("continue_run", {
