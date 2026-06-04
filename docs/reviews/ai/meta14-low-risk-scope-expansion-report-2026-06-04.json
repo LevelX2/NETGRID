@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "meta14-low-risk-scope-expansion-v0",
+  "step": "META14",
+  "scope": "low_risk_scope_expansion",
+  "sourceStep": "META13",
+  "candidateOrder": [
+    "simple_rez",
+    "simple_run_choice",
+    "remote_contest"
+  ],
+  "activeProductionScopesBefore": [
+    "basic_economy_draw",
+    "tag_removal",
+    "simple_score_advance",
+    "basic_install"
+  ],
+  "activeProductionScopesAfter": [
+    "basic_economy_draw",
+    "tag_removal",
+    "simple_score_advance",
+    "basic_install",
+    "simple_rez"
+  ],
+  "newScopeActivated": "simple_rez",
+  "dossiers": [
+    {
+      "scopeId": "simple_rez",
+      "inputStatus": "production_shadow_stable",
+      "outputStatus": "limited_scoped_production_active",
+      "productiveActivation": true,
+      "hiddenInfoPolicy": "side_safe_public_context_only",
+      "releaseDecision": "activate_one_scope"
+    },
+    {
+      "scopeId": "simple_run_choice",
+      "inputStatus": "internal_canary_ready",
+      "outputStatus": "limited_candidate",
+      "productiveActivation": false,
+      "hiddenInfoPolicy": "side_safe_public_context_only",
+      "releaseDecision": "candidate_not_activated"
+    },
+    {
+      "scopeId": "remote_contest",
+      "inputStatus": "agreement_ready",
+      "outputStatus": "agreement_ready",
+      "productiveActivation": false,
+      "hiddenInfoPolicy": "side_safe_public_context_only",
+      "releaseDecision": "calibrated_not_productive"
+    }
+  ],
+  "calibrationResults": [
+    {
+      "scopeId": "simple_rez",
+      "findingId": "simple_rez_credit_reserve",
+      "status": "clear"
+    },
+    {
+      "scopeId": "simple_run_choice",
+      "findingId": "simple_run_choice_reviewed_legacy_preferred",
+      "status": "candidate_requires_more_review"
+    },
+    {
+      "scopeId": "remote_contest",
+      "findingId": "remote_target_scoring_calibration",
+      "status": "calibrated"
+    }
+  ],
+  "qualityGates": {
+    "oneNewScopeActivatedAtMost": true,
+    "bulkActivationCount": 0,
+    "humanReviewOpenCount": 0,
+    "unsafeDivergenceCount": 0,
+    "engineRejectCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "knownBadDecisionCount": 0,
+    "multiRunMetricsStable": true,
+    "rollbackTested": true
+  },
+  "goNoGo": {
+    "decision": "simple_rez_limited_scoped_production_active",
+    "simpleRunChoiceDecision": "limited_candidate_not_activated",
+    "remoteContestDecision": "agreement_ready_not_productive",
+    "nextStep": "META15_complex_scope_enablement",
+    "fullProductionReady": false,
+    "legacyRemovalReady": false
+  },
+  "legacyFallbackAvailable": true,
+  "rollbackAvailable": true
+}

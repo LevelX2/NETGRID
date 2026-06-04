@@ -3,8 +3,8 @@
   "date": "2026-06-04",
   "branch": "codex/meta13-meta18-semantic-ai-takeover",
   "worktree": "C:\\Projekte\\NETGRID_META13_META18_SEMANTIC_AI_TAKEOVER",
-  "currentStep": "META13_done",
-  "completedSteps": ["META13"],
+  "currentStep": "META14_done",
+  "completedSteps": ["META13", "META14"],
   "blocked": false,
   "legacyFreezeActiveForScopes": [
     "basic_economy_draw",
@@ -12,7 +12,7 @@
     "simple_score_advance",
     "basic_install"
   ],
-  "newProductionScopes": [],
+  "newProductionScopes": ["simple_rez"],
   "semanticDefaultActive": false,
   "fullProductionReady": false,
   "legacyRemovalReady": false,

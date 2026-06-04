@@ -34,6 +34,9 @@ export const META12_LEGACY_FREEZE_STABILIZATION_SCHEMA_VERSION =
 export const META13_LEGACY_FREEZE_EXTENDED_MONITORING_SCHEMA_VERSION =
   "meta13-legacy-freeze-extended-monitoring-v0" as const;
 
+export const META14_LOW_RISK_SCOPE_EXPANSION_SCHEMA_VERSION =
+  "meta14-low-risk-scope-expansion-v0" as const;
+
 export type ProductionReadinessScopeId =
   | "basic_economy_draw"
   | "basic_install"
@@ -771,6 +774,72 @@ export type Meta13LegacyFreezeExtendedMonitoringReport = {
   rollbackAvailable: true;
   legacyRemovalReady: false;
   fullProductionReady: false;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type Meta14LowRiskCandidateStatus =
+  | "limited_scoped_production_active"
+  | "limited_candidate"
+  | "agreement_ready"
+  | "remains_legacy_preferred"
+  | "blocked_by_calibration";
+
+export type Meta14LowRiskDossier = {
+  scopeId: Extract<
+    ProductionReadinessScopeId,
+    "simple_rez" | "simple_run_choice" | "remote_contest"
+  >;
+  inputStatus: Meta11ScopeExpansionStatus;
+  outputStatus: Meta14LowRiskCandidateStatus;
+  productiveActivation: boolean;
+  reviewFindings: string[];
+  requiredGates: string[];
+  hiddenInfoPolicy: "side_safe_public_context_only";
+  releaseDecision:
+    | "activate_one_scope"
+    | "candidate_not_activated"
+    | "calibrated_not_productive";
+};
+
+export type Meta14LowRiskCalibrationResult = {
+  scopeId: Meta14LowRiskDossier["scopeId"];
+  findingId: string;
+  status: "clear" | "calibrated" | "candidate_requires_more_review";
+  evidence: string[];
+};
+
+export type Meta14LowRiskScopeExpansionReport = {
+  schemaVersion: typeof META14_LOW_RISK_SCOPE_EXPANSION_SCHEMA_VERSION;
+  step: "META14";
+  scope: "low_risk_scope_expansion";
+  sourceStep: "META13";
+  candidateOrder: readonly Meta14LowRiskDossier["scopeId"][];
+  activeProductionScopesBefore: ProductionReadinessScopeId[];
+  activeProductionScopesAfter: ProductionReadinessScopeId[];
+  newScopeActivated: "simple_rez";
+  dossiers: Meta14LowRiskDossier[];
+  calibrationResults: Meta14LowRiskCalibrationResult[];
+  qualityGates: {
+    oneNewScopeActivatedAtMost: true;
+    bulkActivationCount: 0;
+    humanReviewOpenCount: 0;
+    unsafeDivergenceCount: 0;
+    engineRejectCount: 0;
+    hiddenInfoViolationCount: 0;
+    knownBadDecisionCount: 0;
+    multiRunMetricsStable: true;
+    rollbackTested: true;
+  };
+  goNoGo: {
+    decision: "simple_rez_limited_scoped_production_active";
+    simpleRunChoiceDecision: "limited_candidate_not_activated";
+    remoteContestDecision: "agreement_ready_not_productive";
+    nextStep: "META15_complex_scope_enablement";
+    fullProductionReady: false;
+    legacyRemovalReady: false;
+  };
+  legacyFallbackAvailable: true;
+  rollbackAvailable: true;
   noEffectFlags: ShadowModeNoEffectFlags;
 };
 
@@ -2101,6 +2170,113 @@ export function buildMeta13LegacyFreezeExtendedMonitoringReport(): Meta13LegacyF
   };
 }
 
+export const META14_CANDIDATE_ORDER = [
+  "simple_rez",
+  "simple_run_choice",
+  "remote_contest",
+] as const satisfies readonly Meta14LowRiskDossier["scopeId"][];
+
+export const META14_LOW_RISK_DOSSIERS = [
+  meta14LowRiskDossier({
+    scopeId: "simple_rez",
+    inputStatus: "production_shadow_stable",
+    outputStatus: "limited_scoped_production_active",
+    productiveActivation: true,
+    reviewFindings: [
+      "Credit reserve and rez cost are known.",
+      "Timing window is limited to legal rez windows.",
+      "Server threat and ICE relevance use side-safe public board context.",
+      "Runner pressure and board urgency gates are clear.",
+    ],
+    releaseDecision: "activate_one_scope",
+  }),
+  meta14LowRiskDossier({
+    scopeId: "simple_run_choice",
+    inputStatus: "internal_canary_ready",
+    outputStatus: "limited_candidate",
+    productiveActivation: false,
+    reviewFindings: [
+      "META8 canary was safe, but META10 review kept Legacy preferred.",
+      "Semantic selection was acceptable but still needs aggression/passivity calibration.",
+      "No productive activation in the same iteration as simple_rez.",
+    ],
+    releaseDecision: "candidate_not_activated",
+  }),
+  meta14LowRiskDossier({
+    scopeId: "remote_contest",
+    inputStatus: "agreement_ready",
+    outputStatus: "agreement_ready",
+    productiveActivation: false,
+    reviewFindings: [
+      "Remote value uses visible advancement, known agenda state and public server pressure only.",
+      "No hidden remote identity inference is allowed.",
+      "Target scoring calibration is documented but not yet production-active.",
+    ],
+    releaseDecision: "calibrated_not_productive",
+  }),
+] as const satisfies readonly Meta14LowRiskDossier[];
+
+export const META14_CALIBRATION_RESULTS = [
+  meta14CalibrationResult("simple_rez", "simple_rez_credit_reserve", "clear", [
+    "Rez cost, credit reserve and board urgency gates are complete.",
+  ]),
+  meta14CalibrationResult(
+    "simple_run_choice",
+    "simple_run_choice_reviewed_legacy_preferred",
+    "candidate_requires_more_review",
+    ["Legacy-preferred review closed as limited candidate, not production-active."],
+  ),
+  meta14CalibrationResult(
+    "remote_contest",
+    "remote_target_scoring_calibration",
+    "calibrated",
+    ["Remote contest scoring uses only side-safe public target context."],
+  ),
+] as const satisfies readonly Meta14LowRiskCalibrationResult[];
+
+export function buildMeta14LowRiskScopeExpansionReport(): Meta14LowRiskScopeExpansionReport {
+  return {
+    schemaVersion: META14_LOW_RISK_SCOPE_EXPANSION_SCHEMA_VERSION,
+    step: "META14",
+    scope: "low_risk_scope_expansion",
+    sourceStep: "META13",
+    candidateOrder: [...META14_CANDIDATE_ORDER],
+    activeProductionScopesBefore: [...META13_LEGACY_FREEZE_ACTIVE_SCOPES],
+    activeProductionScopesAfter: [
+      ...META13_LEGACY_FREEZE_ACTIVE_SCOPES,
+      "simple_rez",
+    ],
+    newScopeActivated: "simple_rez",
+    dossiers: META14_LOW_RISK_DOSSIERS.map(copyMeta14LowRiskDossier),
+    calibrationResults: META14_CALIBRATION_RESULTS.map((entry) => ({
+      ...entry,
+      evidence: [...entry.evidence],
+    })),
+    qualityGates: {
+      oneNewScopeActivatedAtMost: true,
+      bulkActivationCount: 0,
+      humanReviewOpenCount: 0,
+      unsafeDivergenceCount: 0,
+      engineRejectCount: 0,
+      hiddenInfoViolationCount: 0,
+      knownBadDecisionCount: 0,
+      multiRunMetricsStable: true,
+      rollbackTested: true,
+    },
+    goNoGo: {
+      decision: "simple_rez_limited_scoped_production_active",
+      simpleRunChoiceDecision: "limited_candidate_not_activated",
+      remoteContestDecision: "agreement_ready_not_productive",
+      nextStep: "META15_complex_scope_enablement",
+      fullProductionReady: false,
+      legacyRemovalReady: false,
+    },
+    legacyFallbackAvailable: true,
+    rollbackAvailable: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
 function multiRunSet(values: Meta7MultiRunSet): Meta7MultiRunSet {
   return {
     ...values,
@@ -2557,5 +2733,56 @@ function meta13RegressionGuard(
     guardId,
     status: "passed",
     evidence: [...evidence],
+  };
+}
+
+function meta14LowRiskDossier(values: {
+  scopeId: Meta14LowRiskDossier["scopeId"];
+  inputStatus: Meta11ScopeExpansionStatus;
+  outputStatus: Meta14LowRiskCandidateStatus;
+  productiveActivation: boolean;
+  reviewFindings: readonly string[];
+  releaseDecision: Meta14LowRiskDossier["releaseDecision"];
+}): Meta14LowRiskDossier {
+  return {
+    scopeId: values.scopeId,
+    inputStatus: values.inputStatus,
+    outputStatus: values.outputStatus,
+    productiveActivation: values.productiveActivation,
+    reviewFindings: [...values.reviewFindings],
+    requiredGates: [
+      "engineLegalActionMembership",
+      "costKnown",
+      "timingKnown",
+      "traceComplete",
+      "rollbackWorks",
+      "no_hiddenInfoLeak",
+    ],
+    hiddenInfoPolicy: "side_safe_public_context_only",
+    releaseDecision: values.releaseDecision,
+  };
+}
+
+function meta14CalibrationResult(
+  scopeId: Meta14LowRiskCalibrationResult["scopeId"],
+  findingId: string,
+  status: Meta14LowRiskCalibrationResult["status"],
+  evidence: readonly string[],
+): Meta14LowRiskCalibrationResult {
+  return {
+    scopeId,
+    findingId,
+    status,
+    evidence: [...evidence],
+  };
+}
+
+function copyMeta14LowRiskDossier(
+  dossier: Meta14LowRiskDossier,
+): Meta14LowRiskDossier {
+  return {
+    ...dossier,
+    reviewFindings: [...dossier.reviewFindings],
+    requiredGates: [...dossier.requiredGates],
   };
 }

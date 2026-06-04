@@ -8,6 +8,7 @@ import {
   META8_INTERNAL_CANARY_FIXTURES,
   META9_PRODUCTION_SAFE_SHADOW_CONFIG,
   META10_SELECTED_PRODUCTION_SCOPES,
+  buildMeta14LowRiskScopeExpansionReport,
   buildMeta13LegacyFreezeExtendedMonitoringReport,
   buildMeta12LegacyFreezeProductionStabilizationReport,
   buildMeta11ScopeExpansionCalibrationReport,
@@ -343,6 +344,88 @@ describe("META13 Legacy-Freeze-Aktivierung + Extended Monitoring", () => {
     expect(report.legacyFallbackAvailable).toBe(true);
     expect(report.rollbackAvailable).toBe(true);
     expect(report.legacyRemovalReady).toBe(false);
+  });
+});
+
+describe("META14 Low-Risk Scope Expansion", () => {
+  it("activates simple_rez as the only new production scope", () => {
+    const report = buildMeta14LowRiskScopeExpansionReport();
+
+    expect(report.schemaVersion).toBe("meta14-low-risk-scope-expansion-v0");
+    expect(report.step).toBe("META14");
+    expect(report.activeProductionScopesBefore).toEqual([
+      "basic_economy_draw",
+      "tag_removal",
+      "simple_score_advance",
+      "basic_install",
+    ]);
+    expect(report.activeProductionScopesAfter).toEqual([
+      "basic_economy_draw",
+      "tag_removal",
+      "simple_score_advance",
+      "basic_install",
+      "simple_rez",
+    ]);
+    expect(report.newScopeActivated).toBe("simple_rez");
+    expect(
+      report.dossiers.filter((dossier) => dossier.productiveActivation),
+    ).toHaveLength(1);
+  });
+
+  it("keeps simple_run_choice and remote_contest out of production", () => {
+    const report = buildMeta14LowRiskScopeExpansionReport();
+
+    expect(report.dossiers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          scopeId: "simple_run_choice",
+          outputStatus: "limited_candidate",
+          productiveActivation: false,
+          releaseDecision: "candidate_not_activated",
+        }),
+        expect.objectContaining({
+          scopeId: "remote_contest",
+          outputStatus: "agreement_ready",
+          productiveActivation: false,
+          releaseDecision: "calibrated_not_productive",
+          hiddenInfoPolicy: "side_safe_public_context_only",
+        }),
+      ]),
+    );
+    expect(report.calibrationResults).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          findingId: "remote_target_scoring_calibration",
+          status: "calibrated",
+        }),
+      ]),
+    );
+  });
+
+  it("reports low-risk expansion gates without bulk activation", () => {
+    const report = buildMeta14LowRiskScopeExpansionReport();
+
+    expect(report.qualityGates).toEqual({
+      oneNewScopeActivatedAtMost: true,
+      bulkActivationCount: 0,
+      humanReviewOpenCount: 0,
+      unsafeDivergenceCount: 0,
+      engineRejectCount: 0,
+      hiddenInfoViolationCount: 0,
+      knownBadDecisionCount: 0,
+      multiRunMetricsStable: true,
+      rollbackTested: true,
+    });
+    expect(report.goNoGo).toEqual({
+      decision: "simple_rez_limited_scoped_production_active",
+      simpleRunChoiceDecision: "limited_candidate_not_activated",
+      remoteContestDecision: "agreement_ready_not_productive",
+      nextStep: "META15_complex_scope_enablement",
+      fullProductionReady: false,
+      legacyRemovalReady: false,
+    });
+    expect(report.legacyFallbackAvailable).toBe(true);
+    expect(report.rollbackAvailable).toBe(true);
   });
 });
 
