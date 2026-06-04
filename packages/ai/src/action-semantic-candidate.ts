@@ -1,3 +1,5 @@
+import type { LegalAction } from "@netgrid/shared";
+
 export const ACTION_SEMANTIC_CANDIDATE_SCHEMA_VERSION =
   "action-semantic-candidate-v1" as const;
 
@@ -224,3 +226,149 @@ export type ActionSemanticCandidate = {
   hardGates: ActionGateResult[];
   evidence: string[];
 };
+
+export type BuildActionSemanticCandidatesParams = {
+  legalActions: readonly LegalAction[];
+  observerSide?: "runner" | "corp" | "system";
+  stateVersion?: number;
+};
+
+export type BuildNeutralActionSemanticCandidateOptions = {
+  observerSide?: "runner" | "corp" | "system";
+  stateVersion?: number;
+};
+
+export function buildActionSemanticCandidates(
+  params: BuildActionSemanticCandidatesParams,
+): ActionSemanticCandidate[] {
+  return params.legalActions.map((action) =>
+    buildNeutralActionSemanticCandidate(action, {
+      ...(params.observerSide !== undefined
+        ? { observerSide: params.observerSide }
+        : {}),
+      ...(params.stateVersion !== undefined
+        ? { stateVersion: params.stateVersion }
+        : {}),
+    }),
+  );
+}
+
+export function buildNeutralActionSemanticCandidate(
+  action: LegalAction,
+  options: BuildNeutralActionSemanticCandidateOptions = {},
+): ActionSemanticCandidate {
+  const originalPayloadKeys = Object.keys(action.payload ?? {}).sort();
+
+  return {
+    actionId: action.actionId,
+    actionType: action.type,
+    actorSide: action.side,
+    ...(options.observerSide !== undefined
+      ? { observerSide: options.observerSide }
+      : {}),
+    visibilityScope: visibilityScopeForAction(action),
+    legalActionRef: {
+      actionId: action.actionId,
+      actionType: action.type,
+      originalPayloadKeys,
+    },
+    ...(options.stateVersion !== undefined
+      ? { stateVersion: options.stateVersion }
+      : {}),
+    sourceKind: "unknown",
+    abilityBindingMethod: "unresolved",
+    semanticActionType: "unknown",
+    cardContextSignals: [],
+    actionTacticSignals: [],
+    strategySupport: [],
+    conditions: [],
+    risks: [],
+    constraints: [],
+    costProfile: {
+      costKnownStatus: "unknown",
+      additionalCosts: [],
+    },
+    timingProfile: {},
+    boardContext: {
+      source: "not_projected",
+      sideSafe: true,
+      ...(options.stateVersion !== undefined
+        ? { stateVersion: options.stateVersion }
+        : {}),
+      timingPoint: action.timingPoint,
+      notes: ["AI036 neutral projection only"],
+    },
+    confidence: "none",
+    primaryProjectionStatus: "neutral_projected",
+    projectionIssues: [],
+    hardGates: neutralHardGates(action),
+    evidence: ["AI036 neutral projection", "source: LegalAction only"],
+  };
+}
+
+function visibilityScopeForAction(
+  action: LegalAction,
+): ActionSemanticVisibilityScope {
+  if (action.visibility === "public") return "public";
+  return "actor_private";
+}
+
+function neutralHardGates(action: LegalAction): ActionGateResult[] {
+  return [
+    {
+      gateId: "engine_legal_action",
+      status: "pass",
+      severity: "info",
+      reason: "Candidate was built from an existing LegalAction.",
+      evidence: [action.actionId],
+    },
+    {
+      gateId: "side_visibility",
+      status: "pass",
+      severity: "info",
+      reason: `LegalAction visibility is ${action.visibility}.`,
+    },
+    {
+      gateId: "hidden_info",
+      status: "pass",
+      severity: "info",
+      reason: "No GameState, hidden zone or private opponent data is read.",
+    },
+    {
+      gateId: "source_resolution",
+      status: "unknown",
+      severity: "warning",
+      reason: "Source binding is deferred to AI038.",
+    },
+    {
+      gateId: "ability_resolution",
+      status: "unknown",
+      severity: "warning",
+      reason: "Ability binding is deferred to AI038.",
+    },
+    {
+      gateId: "target_context",
+      status: "unknown",
+      severity: "warning",
+      reason: "TargetContext projection is deferred to AI039.",
+    },
+    {
+      gateId: "cost_known",
+      status: "unknown",
+      severity: "warning",
+      reason: "Cost normalization is deferred to AI040.",
+    },
+    {
+      gateId: "timing_known",
+      status: "unknown",
+      severity: "warning",
+      reason: "Timing normalization is deferred to AI040.",
+    },
+    {
+      gateId: "runtime_no_effect",
+      status: "pass",
+      severity: "info",
+      reason: "Builder returns diagnostics only and has no decision consumer.",
+    },
+  ];
+}

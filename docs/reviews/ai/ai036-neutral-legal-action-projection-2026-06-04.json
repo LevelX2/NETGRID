@@ -1,0 +1,134 @@
+{
+  "step": "AI036",
+  "title": "Neutral LegalAction Projection",
+  "date": "2026-06-04",
+  "status": "done",
+  "builderFile": "packages/ai/src/action-semantic-candidate.ts",
+  "testFile": "packages/ai/src/action-semantic-candidate.test.ts",
+  "runtimeConsumerStatus": "none",
+  "scenarioCorpus": {
+    "id": "ai036_synthetic_legal_action_fixture",
+    "source": "packages/ai/src/action-semantic-candidate.test.ts",
+    "coverageClaim": "100 Prozent neutral projected nur fuer diese synthetische LegalAction-Fixture und fuer jede LegalAction, die dem Builder uebergeben wird.",
+    "totalLegalActions": 32,
+    "groups": [
+      {
+        "scenarioId": "runner_basic_turn",
+        "actionTypes": ["gain_credit", "draw_card", "install_card", "play_event", "start_run", "end_turn"]
+      },
+      {
+        "scenarioId": "corp_basic_turn",
+        "actionTypes": ["mandatory_draw", "gain_credit", "install_card", "play_operation", "rez_ice", "advance_card", "score_agenda", "end_turn"]
+      },
+      {
+        "scenarioId": "run_sequence",
+        "actionTypes": ["start_run", "rez_ice", "decline_rez", "pump_breaker", "break_subroutine", "continue_run", "jack_out"]
+      },
+      {
+        "scenarioId": "access_sequence",
+        "actionTypes": ["access_card", "steal_agenda", "trash_accessed_card", "decline_trash", "trash_resource"]
+      },
+      {
+        "scenarioId": "choice_prompt_sequence",
+        "actionTypes": ["resolve_choice", "trigger_ability"]
+      },
+      {
+        "scenarioId": "rez_paid_ability_window",
+        "actionTypes": ["rez_ice", "activated_card_ability", "trigger_ability"]
+      },
+      {
+        "scenarioId": "trace_tag_damage_near_actions",
+        "actionTypes": ["remove_tag", "purge_virus_counters", "purge_runner_virus_counters"]
+      },
+      {
+        "scenarioId": "special_system_actions",
+        "actionTypes": ["forgo_action", "move_to_set_aside", "move_to_removed_from_game", "return_from_set_aside", "change_card_control"]
+      }
+    ]
+  },
+  "metrics": {
+    "totalLegalActions": 32,
+    "neutralProjected": 32,
+    "semanticActionTypeKnown": 0,
+    "sourceResolved": 0,
+    "abilityResolved": 0,
+    "targetContextProjected": 0,
+    "cardSemanticsJoined": 0
+  },
+  "projectionPolicy": {
+    "primaryProjectionStatus": "neutral_projected",
+    "semanticActionType": "unknown",
+    "sourceKind": "unknown",
+    "abilityBindingMethod": "unresolved",
+    "projectionIssues": [],
+    "confidence": "none"
+  },
+  "gates": {
+    "engine_legal_action": "pass",
+    "side_visibility": "pass",
+    "hidden_info": "pass",
+    "source_resolution": "unknown",
+    "ability_resolution": "unknown",
+    "target_context": "unknown",
+    "cost_known": "unknown",
+    "timing_known": "unknown",
+    "runtime_no_effect": "pass"
+  },
+  "unknownActions": [
+    "mandatory_draw",
+    "gain_credit",
+    "draw_card",
+    "activated_card_ability",
+    "install_card",
+    "play_event",
+    "play_operation",
+    "advance_card",
+    "score_agenda",
+    "start_run",
+    "jack_out",
+    "rez_ice",
+    "decline_rez",
+    "pump_breaker",
+    "break_subroutine",
+    "continue_run",
+    "access_card",
+    "steal_agenda",
+    "trash_accessed_card",
+    "trash_resource",
+    "decline_trash",
+    "remove_tag",
+    "purge_virus_counters",
+    "purge_runner_virus_counters",
+    "forgo_action",
+    "move_to_set_aside",
+    "move_to_removed_from_game",
+    "return_from_set_aside",
+    "change_card_control",
+    "resolve_choice",
+    "trigger_ability",
+    "end_turn"
+  ],
+  "schemaGaps": [
+    {
+      "gapId": "AI036-G001",
+      "category": "semantic_classification_deferred",
+      "description": "AI036 setzt bewusst semanticActionType=unknown. AI037 klassifiziert erst Basic-/System-Actions."
+    },
+    {
+      "gapId": "AI036-G002",
+      "category": "source_ability_target_cost_timing_deferred",
+      "description": "Source, Ability, TargetContext, Cost und Timing bleiben Gate-unknown bis AI038-AI040."
+    }
+  ],
+  "noEffectFlags": {
+    "planner": false,
+    "actionScore": false,
+    "planWeight": false,
+    "targetingAi": false,
+    "engine": false,
+    "legality": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivation": false,
+    "hiddenInfoLeak": false
+  }
+}
