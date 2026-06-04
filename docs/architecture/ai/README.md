@@ -14,6 +14,7 @@
 - `taktiksignale-strategieanker-guide-2026-06-02-v3.md`: Leitfaden für Taktiksignale, Strategieanker, Rollen, TargetProfiles, Conditions, Risiken und Constraints.
 - `action-semantics-bridge-automation-process-2026-06-04.md`: sequenzieller AI034-bis-AI043-Prozess für die read-only Action-Semantik-Brücke mit Preflight, Szenario-Coverage, erweitertem Candidate-/Gate-Schema, eigenem Arbeits-Worktree, lokalen Merge-nach-`main`-Regeln und Handoff.
 - `controlled-shadow-mode-automation-process-2026-06-04.md`: sequenzieller AI051-bis-AI060-Prozess für Controlled Shadow Mode nach AI050 mit Trace-Vertrag, Szenario-Korpus, Semantic-Shadow-Decision, Legacy-Vergleich, Deviation-Triage, Metriken, default-off Runtime-Harness, Batch-Report, Regression-Fixtures, Shadow-Readiness-Review, eigenem Umsetzungs-Worktree und lokalem Merge nach `main`; kein produktiver Cutover.
+- `semantic-ai-core-meta-automation-process-2026-06-04.md`: Semantic AI Core META 1 bis META 6 für DeckStrategicProfile, DeckDoctrine, mehrzügige TacticalGoalState-Verfolgung, Semantic Decision Score, WhyNot, Cutover Safety Envelope, Agreement-only Canary, testinternen Scoped Override Pilot und Stabilisierung. Ergebnis: `limited_rollout_candidate_for_selected_scopes`, `fullProductionReady: false`, `legacyRemovalReady: false`, Legacy bleibt Fallback.
 
 ## Regel
 

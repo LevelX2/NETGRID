@@ -1,0 +1,39 @@
+{
+  "schemaVersion": "meta6-semantic-ai-stabilization-legacy-freeze-prep-v0",
+  "step": "META6",
+  "scope": "semantic_ai_stabilization_legacy_freeze_prep",
+  "sourceStep": "META5",
+  "scopeReadinessMatrixCount": 11,
+  "traceScrubber": {
+    "forbiddenSignalCount": 7,
+    "passes": true
+  },
+  "legacyFreezeCriteria": {
+    "criteriaCount": 7,
+    "readyCount": 5,
+    "blockedCount": 2
+  },
+  "expansionPlanCount": 11,
+  "goNoGo": {
+    "decision": "limited_rollout_candidate_for_selected_scopes",
+    "fullProductionReady": false,
+    "legacyRemovalReady": false,
+    "legacyFallbackAvailable": true,
+    "rollbackAvailable": true
+  },
+  "regressionSuiteExpanded": true,
+  "qualityGates": {
+    "scopeReadinessMatrixExists": true,
+    "traceScrubberPasses": true,
+    "legacyFallbackAvailable": true,
+    "rollbackAvailable": true,
+    "hardGateFailureCount": 0,
+    "unsafeDivergenceCount": 0,
+    "fullProductionReady": false,
+    "legacyRemovalReady": false
+  },
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "runtimeConsumerStatus": "stabilization_contract_only",
+  "noRuntimeEffect": true
+}

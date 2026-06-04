@@ -20,6 +20,10 @@ import {
   META5_BLOCKED_OVERRIDE_SCOPES,
   META5_DIVERGENCE_TRIAGE_CATEGORIES,
   META5_OVERRIDE_FIXTURES,
+  META6_EXPANSION_PLAN,
+  META6_LEGACY_FREEZE_CRITERIA,
+  META6_SCOPE_READINESS_MATRIX,
+  META6_TRACE_SCRUBBER_FORBIDDEN_SIGNALS,
   adaptSemanticDecisionToLegacyActual,
   buildDeckDoctrineFromProfile,
   buildDeckStrategicProfile,
@@ -28,9 +32,11 @@ import {
   buildMeta3CutoverSafetyEnvelopeReport,
   buildMeta4AgreementOnlyRuntimeCanaryReport,
   buildMeta5ScopedSemanticOverridePilotReport,
+  buildMeta6SemanticAiStabilizationLegacyFreezePrepReport,
   buildSemanticDecisionScore,
   evaluateScopedOverridePilotFixture,
   runAgreementOnlyCanary,
+  scrubTraceForProduction,
 } from "./semantic-ai-core-meta";
 
 describe("META1 DeckDoctrine + Multi-Turn TacticalGoal Engine v0", () => {
@@ -134,6 +140,116 @@ describe("META1 DeckDoctrine + Multi-Turn TacticalGoal Engine v0", () => {
         }),
       ]),
     );
+  });
+});
+
+describe("META6 Stabilization + Limited Rollout / Legacy-Freeze Prep", () => {
+  it("builds a scope readiness matrix with fallback and rollback for every scope", () => {
+    const report = buildMeta6SemanticAiStabilizationLegacyFreezePrepReport();
+
+    expect(report.schemaVersion).toBe(
+      "meta6-semantic-ai-stabilization-legacy-freeze-prep-v0",
+    );
+    expect(report.step).toBe("META6");
+    expect(report.scopeReadinessMatrix).toEqual(META6_SCOPE_READINESS_MATRIX);
+    expect(report.scopeReadinessMatrix.length).toBeGreaterThanOrEqual(10);
+    expect(
+      report.scopeReadinessMatrix.every(
+        (entry) => entry.fallbackAvailable && entry.rollbackAvailable,
+      ),
+    ).toBe(true);
+    expect(report.scopeReadinessMatrix).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          scopeId: "basic_economy_draw",
+          status: "limited_candidate",
+        }),
+        expect.objectContaining({
+          scopeId: "trace_payment",
+          status: "blocked",
+        }),
+      ]),
+    );
+  });
+
+  it("scrubs production traces for hidden, wrong-side and private debug signals", () => {
+    const unsafe = scrubTraceForProduction(
+      "unsafe",
+      "FullState exposes opponent hand, HQ detail, unrezzed ICE detail, facedown remote content, choice options and private debug data.",
+    );
+    const safe = scrubTraceForProduction(
+      "safe",
+      "candidateEvidence: gain_credit; goalMatches: basic_economy_draw",
+    );
+
+    expect(META6_TRACE_SCRUBBER_FORBIDDEN_SIGNALS).toEqual(
+      expect.arrayContaining([
+        "opponent_hand",
+        "hq_or_rd_wrong_side_detail",
+        "unrezzed_ice_detail_for_runner",
+        "facedown_remote_content",
+        "full_state_fragment",
+        "choice_option_leak",
+        "private_debug_data",
+      ]),
+    );
+    expect(unsafe.safe).toBe(false);
+    expect(unsafe.violations).toEqual(
+      expect.arrayContaining([...META6_TRACE_SCRUBBER_FORBIDDEN_SIGNALS]),
+    );
+    expect(unsafe.redactedText).toContain("[redacted:full_state_fragment]");
+    expect(safe.safe).toBe(true);
+    expect(safe.violations).toEqual([]);
+  });
+
+  it("keeps legacy freeze criteria strict and does not allow legacy removal", () => {
+    const report = buildMeta6SemanticAiStabilizationLegacyFreezePrepReport();
+
+    expect(report.legacyFreezeCriteria).toEqual(META6_LEGACY_FREEZE_CRITERIA);
+    expect(report.legacyFreezeCriteria).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ criterionId: "human_review_complete", status: "blocked" }),
+        expect.objectContaining({ criterionId: "multi_run_metrics_stable", status: "blocked" }),
+      ]),
+    );
+    expect(report.goNoGo).toEqual({
+      decision: "limited_rollout_candidate_for_selected_scopes",
+      fullProductionReady: false,
+      legacyRemovalReady: false,
+      legacyFallbackAvailable: true,
+      rollbackAvailable: true,
+    });
+  });
+
+  it("defines the expansion plan while keeping full production and legacy removal false", () => {
+    const report = buildMeta6SemanticAiStabilizationLegacyFreezePrepReport();
+
+    expect(report.expansionPlan).toEqual(META6_EXPANSION_PLAN);
+    expect(report.expansionPlan.map((step) => step.scopeId)).toEqual([
+      "basic_economy_draw",
+      "basic_install",
+      "tag_removal",
+      "simple_score_advance",
+      "simple_run_choice",
+      "simple_rez",
+      "remote_contest",
+      "access_trash_steal",
+      "trace_payment",
+      "damage_prevention",
+      "multi_target_multi_ability",
+    ]);
+    expect(report.qualityGates).toEqual({
+      scopeReadinessMatrixExists: true,
+      traceScrubberPasses: true,
+      legacyFallbackAvailable: true,
+      rollbackAvailable: true,
+      hardGateFailureCount: 0,
+      unsafeDivergenceCount: 0,
+      fullProductionReady: false,
+      legacyRemovalReady: false,
+    });
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.semanticExecutionAllowed).toBe(false);
   });
 });
 

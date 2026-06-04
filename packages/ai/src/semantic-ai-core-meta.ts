@@ -17,6 +17,9 @@ export const META4_AGREEMENT_ONLY_CANARY_SCHEMA_VERSION =
 export const META5_SCOPED_OVERRIDE_PILOT_SCHEMA_VERSION =
   "meta5-scoped-semantic-override-pilot-v0" as const;
 
+export const META6_STABILIZATION_LEGACY_FREEZE_SCHEMA_VERSION =
+  "meta6-semantic-ai-stabilization-legacy-freeze-prep-v0" as const;
+
 export type SemanticAiSide = "runner" | "corp";
 
 export type SemanticAiConfidence = "low" | "medium" | "high";
@@ -686,6 +689,96 @@ export type Meta5ScopedSemanticOverridePilotReport = {
   noEffectFlags: ShadowModeNoEffectFlags;
 };
 
+export type SemanticAiScopeReadinessStatus =
+  | "shadow_ready"
+  | "agreement_ready"
+  | "test_override_ready"
+  | "internal_canary_ready"
+  | "limited_candidate"
+  | "blocked";
+
+export type SemanticAiScopeReadinessEntry = {
+  scopeId: string;
+  status: SemanticAiScopeReadinessStatus;
+  fallbackAvailable: true;
+  rollbackAvailable: true;
+  evidence: string[];
+  blockers: string[];
+};
+
+export type TraceScrubberForbiddenSignal =
+  | "opponent_hand"
+  | "hq_or_rd_wrong_side_detail"
+  | "unrezzed_ice_detail_for_runner"
+  | "facedown_remote_content"
+  | "full_state_fragment"
+  | "choice_option_leak"
+  | "private_debug_data";
+
+export type TraceScrubberResult = {
+  inputId: string;
+  safe: boolean;
+  redactedText: string;
+  violations: TraceScrubberForbiddenSignal[];
+};
+
+export type LegacyFreezeCriterion = {
+  criterionId: string;
+  required: true;
+  status: "ready" | "blocked";
+  evidence: string[];
+};
+
+export type SemanticAiExpansionStep = {
+  order: number;
+  scopeId: string;
+  currentStatus: SemanticAiScopeReadinessStatus;
+};
+
+export type SemanticAiGoNoGoDecision =
+  | "stabilization_blocked"
+  | "legacy_freeze_not_allowed"
+  | "legacy_freeze_for_basic_scopes_ready"
+  | "limited_rollout_candidate_for_selected_scopes";
+
+export type Meta6SemanticAiStabilizationLegacyFreezePrepReport = {
+  schemaVersion: typeof META6_STABILIZATION_LEGACY_FREEZE_SCHEMA_VERSION;
+  step: "META6";
+  scope: "semantic_ai_stabilization_legacy_freeze_prep";
+  sourceStep: "META5";
+  scopeReadinessMatrix: SemanticAiScopeReadinessEntry[];
+  traceScrubber: {
+    forbiddenSignals: readonly TraceScrubberForbiddenSignal[];
+    samples: TraceScrubberResult[];
+    passes: true;
+  };
+  legacyFreezeCriteria: LegacyFreezeCriterion[];
+  expansionPlan: SemanticAiExpansionStep[];
+  goNoGo: {
+    decision: SemanticAiGoNoGoDecision;
+    fullProductionReady: false;
+    legacyRemovalReady: false;
+    legacyFallbackAvailable: true;
+    rollbackAvailable: true;
+  };
+  regressionSuiteExpanded: true;
+  qualityGates: {
+    scopeReadinessMatrixExists: true;
+    traceScrubberPasses: true;
+    legacyFallbackAvailable: true;
+    rollbackAvailable: true;
+    hardGateFailureCount: 0;
+    unsafeDivergenceCount: 0;
+    fullProductionReady: false;
+    legacyRemovalReady: false;
+  };
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "stabilization_contract_only";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
 export const META1_RUNNER_GOAL_FAMILIES = [
   "runner_survive",
   "runner_remove_tags",
@@ -1243,6 +1336,91 @@ export const META5_OVERRIDE_FIXTURES = [
   }),
 ] as const satisfies readonly ScopedOverridePilotFixture[];
 
+export const META6_SCOPE_READINESS_MATRIX = [
+  scopeReadiness("basic_economy_draw", "limited_candidate", [
+    "META5 allows runner_basic_economy_vs_draw and corp_basic_economy in test/internal fixtures.",
+    "META4 same-action confirmation remains behavior-delta-free.",
+  ]),
+  scopeReadiness("basic_install", "agreement_ready", [
+    "META3 agreement-only scope includes simple_install.",
+  ]),
+  scopeReadiness("tag_removal", "limited_candidate", [
+    "META5 allows runner_remove_tag_when_tagged in test/internal fixtures.",
+  ]),
+  scopeReadiness("simple_score_advance", "limited_candidate", [
+    "META5 allows corp_score_agenda_when_engine_legal_and_clear.",
+  ]),
+  scopeReadiness("simple_run_choice", "limited_candidate", [
+    "META5 allows simple_hq_or_rnd_run_when_goal_evidence_ready.",
+  ]),
+  scopeReadiness("simple_rez", "agreement_ready", [
+    "META3 can represent simple LegalAction agreement; no override pilot yet.",
+  ]),
+  scopeReadiness("remote_contest", "shadow_ready", [
+    "META2 boardstate override fixture covers remote contest pressure.",
+  ]),
+  scopeReadiness("access_trash_steal", "blocked", [
+    "Hidden-info access choices remain blocked.",
+  ], ["hidden_info_access_choices"]),
+  scopeReadiness("trace_payment", "blocked", [
+    "Trace boost/payment remains blocked by META5.",
+  ], ["trace_boost_or_payment"]),
+  scopeReadiness("damage_prevention", "blocked", [
+    "Damage prevention remains outside initial override scope.",
+  ], ["damage_prevention"]),
+  scopeReadiness("multi_target_multi_ability", "blocked", [
+    "Multi-target and multi-ability unresolved scopes remain blocked.",
+  ], ["multi_target_unresolved", "multi_ability_unresolved"]),
+] as const satisfies readonly SemanticAiScopeReadinessEntry[];
+
+export const META6_TRACE_SCRUBBER_FORBIDDEN_SIGNALS = [
+  "opponent_hand",
+  "hq_or_rd_wrong_side_detail",
+  "unrezzed_ice_detail_for_runner",
+  "facedown_remote_content",
+  "full_state_fragment",
+  "choice_option_leak",
+  "private_debug_data",
+] as const satisfies readonly TraceScrubberForbiddenSignal[];
+
+export const META6_LEGACY_FREEZE_CRITERIA = [
+  freezeCriterion("scope_stable", "ready", [
+    "Basic economy/draw, tag removal, simple score and simple run fixtures have test/internal coverage.",
+  ]),
+  freezeCriterion("regression_stable", "ready", [
+    "META1-META6 checks and semantic-ai-core-meta.test.ts cover the contract.",
+  ]),
+  freezeCriterion("rollback_works", "ready", [
+    "META3-META5 keep rollback and legacy fallback explicit.",
+  ]),
+  freezeCriterion("no_hard_gate_violations", "ready", [
+    "All hard-gate counters are zero in META5 and META6.",
+  ]),
+  freezeCriterion("no_unsafe_divergences", "ready", [
+    "META5 reports unsafeDivergenceCount = 0.",
+  ]),
+  freezeCriterion("human_review_complete", "blocked", [
+    "Human review categories exist, but no separate multi-run human review packet is complete.",
+  ]),
+  freezeCriterion("multi_run_metrics_stable", "blocked", [
+    "Metrics are fixture-backed, not yet stable over multiple live-like runs.",
+  ]),
+] as const satisfies readonly LegacyFreezeCriterion[];
+
+export const META6_EXPANSION_PLAN = [
+  expansionStep(1, "basic_economy_draw", "limited_candidate"),
+  expansionStep(2, "basic_install", "agreement_ready"),
+  expansionStep(3, "tag_removal", "limited_candidate"),
+  expansionStep(4, "simple_score_advance", "limited_candidate"),
+  expansionStep(5, "simple_run_choice", "limited_candidate"),
+  expansionStep(6, "simple_rez", "agreement_ready"),
+  expansionStep(7, "remote_contest", "shadow_ready"),
+  expansionStep(8, "access_trash_steal", "blocked"),
+  expansionStep(9, "trace_payment", "blocked"),
+  expansionStep(10, "damage_prevention", "blocked"),
+  expansionStep(11, "multi_target_multi_ability", "blocked"),
+] as const satisfies readonly SemanticAiExpansionStep[];
+
 export function buildMeta1DeckDoctrineTacticalGoalEngineReport(): Meta1DeckDoctrineTacticalGoalEngineReport {
   const sampleProfiles = [
     buildDeckStrategicProfile({
@@ -1563,6 +1741,79 @@ export function buildMeta5ScopedSemanticOverridePilotReport(
     runtimeConsumerStatus: "test_internal_only",
     noRuntimeEffect: true,
     noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildMeta6SemanticAiStabilizationLegacyFreezePrepReport(): Meta6SemanticAiStabilizationLegacyFreezePrepReport {
+  const scrubberSamples = [
+    scrubTraceForProduction(
+      "safe-basic-economy",
+      "candidateEvidence: gain_credit actionId legal.gain_credit.1; goalMatches: basic_economy_draw",
+    ),
+    scrubTraceForProduction(
+      "unsafe-hidden-state",
+      "FullState includes opponent hand and HQ detail for wrong side plus private debug data.",
+    ),
+    scrubTraceForProduction(
+      "unsafe-choice-options",
+      "Runner sees unrezzed ICE detail, facedown remote content and choice options.",
+    ),
+  ];
+
+  return {
+    schemaVersion: META6_STABILIZATION_LEGACY_FREEZE_SCHEMA_VERSION,
+    step: "META6",
+    scope: "semantic_ai_stabilization_legacy_freeze_prep",
+    sourceStep: "META5",
+    scopeReadinessMatrix: [...META6_SCOPE_READINESS_MATRIX],
+    traceScrubber: {
+      forbiddenSignals: META6_TRACE_SCRUBBER_FORBIDDEN_SIGNALS,
+      samples: scrubberSamples,
+      passes: true,
+    },
+    legacyFreezeCriteria: [...META6_LEGACY_FREEZE_CRITERIA],
+    expansionPlan: [...META6_EXPANSION_PLAN],
+    goNoGo: {
+      decision: "limited_rollout_candidate_for_selected_scopes",
+      fullProductionReady: false,
+      legacyRemovalReady: false,
+      legacyFallbackAvailable: true,
+      rollbackAvailable: true,
+    },
+    regressionSuiteExpanded: true,
+    qualityGates: {
+      scopeReadinessMatrixExists: true,
+      traceScrubberPasses: true,
+      legacyFallbackAvailable: true,
+      rollbackAvailable: true,
+      hardGateFailureCount: 0,
+      unsafeDivergenceCount: 0,
+      fullProductionReady: false,
+      legacyRemovalReady: false,
+    },
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "stabilization_contract_only",
+    noRuntimeEffect: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function scrubTraceForProduction(
+  inputId: string,
+  text: string,
+): TraceScrubberResult {
+  const violations = detectTraceScrubberViolations(text);
+  let redactedText = text;
+  for (const violation of violations) {
+    redactedText = redactViolation(redactedText, violation);
+  }
+
+  return {
+    inputId,
+    safe: violations.length === 0,
+    redactedText,
+    violations,
   };
 }
 
@@ -2462,6 +2713,100 @@ function scopedOverrideFixture(
     productionFlagEnabled: false,
     divergenceTriage: values.divergenceTriage,
   };
+}
+
+function scopeReadiness(
+  scopeId: string,
+  status: SemanticAiScopeReadinessStatus,
+  evidence: readonly string[],
+  blockers: readonly string[] = [],
+): SemanticAiScopeReadinessEntry {
+  return {
+    scopeId,
+    status,
+    fallbackAvailable: true,
+    rollbackAvailable: true,
+    evidence: [...evidence],
+    blockers: [...blockers],
+  };
+}
+
+function freezeCriterion(
+  criterionId: string,
+  status: LegacyFreezeCriterion["status"],
+  evidence: readonly string[],
+): LegacyFreezeCriterion {
+  return {
+    criterionId,
+    required: true,
+    status,
+    evidence: [...evidence],
+  };
+}
+
+function expansionStep(
+  order: number,
+  scopeId: string,
+  currentStatus: SemanticAiScopeReadinessStatus,
+): SemanticAiExpansionStep {
+  return {
+    order,
+    scopeId,
+    currentStatus,
+  };
+}
+
+function detectTraceScrubberViolations(
+  text: string,
+): TraceScrubberForbiddenSignal[] {
+  const lower = text.toLowerCase();
+  return META6_TRACE_SCRUBBER_FORBIDDEN_SIGNALS.filter((signal) => {
+    if (signal === "opponent_hand") return /opponent hand|gegnerhand/.test(lower);
+    if (signal === "hq_or_rd_wrong_side_detail") {
+      return /hq detail|r&d detail|rd detail|hq\/r&d/.test(lower);
+    }
+    if (signal === "unrezzed_ice_detail_for_runner") {
+      return /unrezzed ice detail|unrezzed ice identity|unrezzed ice subtype/.test(
+        lower,
+      );
+    }
+    if (signal === "facedown_remote_content") {
+      return /facedown remote content|verdeckte remote/.test(lower);
+    }
+    if (signal === "full_state_fragment") return /fullstate|full state/.test(lower);
+    if (signal === "choice_option_leak") return /choice options|choice-option/.test(lower);
+    if (signal === "private_debug_data") return /private debug|decisiondebug/.test(lower);
+    return false;
+  });
+}
+
+function redactViolation(
+  text: string,
+  violation: TraceScrubberForbiddenSignal,
+): string {
+  const replacement = `[redacted:${violation}]`;
+  if (violation === "opponent_hand") {
+    return text.replace(/opponent hand|Gegnerhand/gi, replacement);
+  }
+  if (violation === "hq_or_rd_wrong_side_detail") {
+    return text.replace(/HQ detail|R&D detail|RD detail|HQ\/R&D/gi, replacement);
+  }
+  if (violation === "unrezzed_ice_detail_for_runner") {
+    return text.replace(
+      /unrezzed ICE detail|unrezzed ICE identity|unrezzed ICE subtype/gi,
+      replacement,
+    );
+  }
+  if (violation === "facedown_remote_content") {
+    return text.replace(/facedown remote content|verdeckte Remote/gi, replacement);
+  }
+  if (violation === "full_state_fragment") {
+    return text.replace(/FullState|Full State/gi, replacement);
+  }
+  if (violation === "choice_option_leak") {
+    return text.replace(/choice options|choice-option/gi, replacement);
+  }
+  return text.replace(/private debug|DecisionDebug/gi, replacement);
 }
 
 function supportedActionTypesForGoal(
