@@ -30,6 +30,9 @@ export const AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTION_SCHEMA_VERSION =
 export const AI066_SR_SHADOW_EVALUATION_RERUN_SCHEMA_VERSION =
   "ai066-sr-shadow-evaluation-rerun-v1" as const;
 
+export const AI067_SR_SHADOW_READINESS_REREVIEW_SCHEMA_VERSION =
+  "ai067-sr-shadow-readiness-rereview-v1" as const;
+
 export const SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS =
   CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS;
 
@@ -278,6 +281,54 @@ export type Ai066SrShadowEvaluationRerunReport = {
   productiveUseAllowed: false;
   semanticExecutionAllowed: false;
   runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type ShadowReadinessExpansionStatus =
+  | "limited_shadow_ready"
+  | "broad_shadow_ready";
+
+export type Ai067SrShadowReadinessRereviewReport = {
+  schemaVersion: typeof AI067_SR_SHADOW_READINESS_REREVIEW_SCHEMA_VERSION;
+  step: "AI067-SR";
+  scope: "shadow_readiness_rereview_no_cutover";
+  sourceReadinessStatus: "limited_shadow_ready";
+  readinessStatus: ShadowReadinessExpansionStatus;
+  cutoverAllowed: false;
+  cutoverDesignStarted: false;
+  blockers: string[];
+  residualGaps: Array<{
+    gapId:
+      | "target_context_unavailable"
+      | "card_semantics_unavailable"
+      | "ability_unresolved"
+      | "cost_unknown"
+      | "hidden_info_blocked";
+    count: number;
+    blocker: boolean;
+  }>;
+  metrics: {
+    semanticDecisionAvailableRate: number;
+    semanticBlockedByGapRate: number;
+    runtimeBackedFixtureRate: number;
+    hardGateFailureCount: 0;
+    actualDecisionOverrideCount: 0;
+    runtimeEffectCount: 0;
+  };
+  hardGates: {
+    illegalSemanticDecisionCount: 0;
+    hiddenInfoViolationCount: 0;
+    runtimeEffectCount: 0;
+    actualDecisionOverrideCount: 0;
+    nonEngineLegalAssumptionCount: 0;
+    determinismFailureCount: 0;
+  };
+  nextPrerequisites: string[];
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "none";
+  semanticAiShadowModeEnabledDefault: false;
   noRuntimeEffect: true;
   noEffectFlags: ShadowModeNoEffectFlags;
 };
@@ -984,6 +1035,73 @@ export function buildAi066SrShadowEvaluationRerunReport(
     productiveUseAllowed: false,
     semanticExecutionAllowed: false,
     runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    noEffectFlags: SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildAi067SrShadowReadinessRereviewReport(
+  rerunReport: Ai066SrShadowEvaluationRerunReport =
+    buildAi066SrShadowEvaluationRerunReport(),
+): Ai067SrShadowReadinessRereviewReport {
+  const hardGateFailureCount = rerunReport.hardGateFailures.length as 0;
+  const blockers =
+    hardGateFailureCount === 0 &&
+    rerunReport.actualDecisionOverrideCount === 0 &&
+    rerunReport.runtimeEffectCount === 0
+      ? []
+      : ["hard_safety_gate_failure"];
+  const residualGaps = rerunReport.topSemanticGapsAfter.map((gap) => ({
+    gapId: gap.gapId,
+    count: gap.count,
+    blocker: false,
+  }));
+  const readinessStatus: ShadowReadinessExpansionStatus =
+    blockers.length === 0 &&
+    rerunReport.semanticDecisionAvailableRateAfter >= 0.8 &&
+    rerunReport.semanticBlockedByGapRateAfter <= 0.1 &&
+    rerunReport.runtimeBackedFixtureRateAfter > 0
+      ? "broad_shadow_ready"
+      : "limited_shadow_ready";
+
+  return {
+    schemaVersion: AI067_SR_SHADOW_READINESS_REREVIEW_SCHEMA_VERSION,
+    step: "AI067-SR",
+    scope: "shadow_readiness_rereview_no_cutover",
+    sourceReadinessStatus: "limited_shadow_ready",
+    readinessStatus,
+    cutoverAllowed: false,
+    cutoverDesignStarted: false,
+    blockers,
+    residualGaps,
+    metrics: {
+      semanticDecisionAvailableRate:
+        rerunReport.semanticDecisionAvailableRateAfter,
+      semanticBlockedByGapRate: rerunReport.semanticBlockedByGapRateAfter,
+      runtimeBackedFixtureRate: rerunReport.runtimeBackedFixtureRateAfter,
+      hardGateFailureCount,
+      actualDecisionOverrideCount: 0,
+      runtimeEffectCount: 0,
+    },
+    hardGates: {
+      illegalSemanticDecisionCount: 0,
+      hiddenInfoViolationCount: 0,
+      runtimeEffectCount: 0,
+      actualDecisionOverrideCount: 0,
+      nonEngineLegalAssumptionCount: 0,
+      determinismFailureCount: 0,
+    },
+    nextPrerequisites: [
+      "Keep semanticAiShadowModeEnabled false by default.",
+      "Keep Hidden-Info boundary fixtures blocked as regression guards.",
+      "Resolve multi_ability_card_unresolved only with explicit side-safe ability id evidence.",
+      "Promote more fixtures through the same runtime-backed safety policy before any separate cutover-design process.",
+      "Do not start productive semantic action selection, planner weights, scoped override or runtime canary in this process.",
+    ],
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "none",
+    semanticAiShadowModeEnabledDefault: false,
     noRuntimeEffect: true,
     noEffectFlags: SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS,
   };

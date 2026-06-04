@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "ai067-sr-shadow-readiness-rereview-v1",
+  "step": "AI067-SR",
+  "title": "Shadow Readiness Re-Review",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai061-sr-ai067-shadow-readiness-expansion",
+  "scope": "shadow_readiness_rereview_no_cutover",
+  "sourceReadinessStatus": "limited_shadow_ready",
+  "readinessStatus": "broad_shadow_ready",
+  "cutoverAllowed": false,
+  "cutoverDesignStarted": false,
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "runtimeConsumerStatus": "none",
+  "semanticAiShadowModeEnabledDefault": false,
+  "noRuntimeEffect": true,
+  "metrics": {
+    "semanticDecisionAvailableRate": 0.8788,
+    "semanticBlockedByGapRate": 0.0303,
+    "runtimeBackedFixtureRate": 0.2424,
+    "hardGateFailureCount": 0,
+    "actualDecisionOverrideCount": 0,
+    "runtimeEffectCount": 0
+  },
+  "hardGates": {
+    "illegalSemanticDecisionCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "runtimeEffectCount": 0,
+    "actualDecisionOverrideCount": 0,
+    "nonEngineLegalAssumptionCount": 0,
+    "determinismFailureCount": 0
+  },
+  "residualGaps": [
+    {"gapId": "target_context_unavailable", "count": 0, "blocker": false},
+    {"gapId": "card_semantics_unavailable", "count": 0, "blocker": false},
+    {"gapId": "ability_unresolved", "count": 1, "blocker": false},
+    {"gapId": "cost_unknown", "count": 0, "blocker": false},
+    {"gapId": "hidden_info_blocked", "count": 3, "blocker": false}
+  ],
+  "nextPrerequisites": [
+    "Keep semanticAiShadowModeEnabled false by default.",
+    "Keep Hidden-Info boundary fixtures blocked as regression guards.",
+    "Resolve multi_ability_card_unresolved only with explicit side-safe ability id evidence.",
+    "Promote more fixtures through the same runtime-backed safety policy before any separate cutover-design process.",
+    "Do not start productive semantic action selection, planner weights, scoped override or runtime canary in this process."
+  ],
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "verification": [
+    "node scripts/check-ai067-sr-shadow-readiness-rereview.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- shadow-readiness-expansion.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "doneGate": {
+    "statusSet": "broad_shadow_ready",
+    "productiveCutoverDecided": false,
+    "cutoverAllowed": false,
+    "finalReportExists": true
+  }
+}

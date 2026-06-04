@@ -13,6 +13,7 @@ import {
   buildAi064SrCostTimingEvidenceExpansionReport,
   buildAi065SrRuntimeBackedShadowFixturePromotionReport,
   buildAi066SrShadowEvaluationRerunReport,
+  buildAi067SrShadowReadinessRereviewReport,
   buildFixturesAfterAbilityBindingExpansion,
   buildFixturesAfterCardSemanticsJoinCoverage,
   buildFixturesAfterCostTimingEvidenceExpansion,
@@ -85,6 +86,60 @@ describe("AI061-SR TargetContext Projection Expansion", () => {
     expect(batch.noRuntimeEffect).toBe(true);
     expect(Object.values(batch.noEffectFlags).every((value) => value === false)).toBe(
       true,
+    );
+  });
+});
+
+describe("AI067-SR Shadow Readiness Re-Review", () => {
+  it("upgrades shadow readiness to broad without allowing cutover", () => {
+    const report = buildAi067SrShadowReadinessRereviewReport();
+
+    expect(report.schemaVersion).toBe(
+      "ai067-sr-shadow-readiness-rereview-v1",
+    );
+    expect(report.step).toBe("AI067-SR");
+    expect(report.sourceReadinessStatus).toBe("limited_shadow_ready");
+    expect(report.readinessStatus).toBe("broad_shadow_ready");
+    expect(report.cutoverAllowed).toBe(false);
+    expect(report.cutoverDesignStarted).toBe(false);
+    expect(report.semanticAiShadowModeEnabledDefault).toBe(false);
+  });
+
+  it("keeps every hard safety gate and runtime-effect counter at zero", () => {
+    const report = buildAi067SrShadowReadinessRereviewReport();
+
+    expect(report.blockers).toEqual([]);
+    expect(report.metrics).toEqual({
+      semanticDecisionAvailableRate: 0.8788,
+      semanticBlockedByGapRate: 0.0303,
+      runtimeBackedFixtureRate: 0.2424,
+      hardGateFailureCount: 0,
+      actualDecisionOverrideCount: 0,
+      runtimeEffectCount: 0,
+    });
+    expect(Object.values(report.hardGates).every((value) => value === 0)).toBe(
+      true,
+    );
+    expect(Object.values(report.noEffectFlags).every((value) => value === false)).toBe(
+      true,
+    );
+  });
+
+  it("carries residual ability and hidden-info gaps without treating them as cutover approval", () => {
+    const report = buildAi067SrShadowReadinessRereviewReport();
+
+    expect(report.residualGaps).toEqual([
+      { gapId: "target_context_unavailable", count: 0, blocker: false },
+      { gapId: "card_semantics_unavailable", count: 0, blocker: false },
+      { gapId: "ability_unresolved", count: 1, blocker: false },
+      { gapId: "cost_unknown", count: 0, blocker: false },
+      { gapId: "hidden_info_blocked", count: 3, blocker: false },
+    ]);
+    expect(report.nextPrerequisites).toEqual(
+      expect.arrayContaining([
+        "Keep Hidden-Info boundary fixtures blocked as regression guards.",
+        "Do not start productive semantic action selection, planner weights, scoped override or runtime canary in this process.",
+      ]),
     );
   });
 });
