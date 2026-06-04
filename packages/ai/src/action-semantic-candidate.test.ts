@@ -228,6 +228,113 @@ describe("buildActionSemanticCandidates", () => {
     expect(unresolved.abilityBindingMethod).toBe("unresolved");
     expect(unresolved.projectionIssues).toContain("ability_unresolved");
   });
+
+  it("projects target context only from selected or engine-provided targets", () => {
+    const candidates = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("trash_accessed_card", 0, {
+          targetRequirements: [
+            {
+              id: "accessed",
+              kind: "card",
+              side: "corp",
+              zoneScope: ["remote"],
+              visibility: "known_to_actor",
+            },
+          ],
+        }),
+        legalAction("start_run", 1, {
+          targetRequirements: [
+            {
+              id: "server",
+              kind: "server",
+              side: "corp",
+              visibility: "public",
+            },
+          ],
+        }),
+        legalAction("install_card", 2, {
+          targetRequirements: [
+            {
+              id: "host",
+              kind: "card",
+              side: "runner",
+              visibility: "known_to_actor",
+            },
+          ],
+        }),
+        legalAction("trash_resource", 3, {
+          targetRequirements: [
+            {
+              id: "hidden-resource",
+              kind: "card",
+              side: "runner",
+              visibility: "engine_only",
+            },
+          ],
+        }),
+      ],
+      selectedTargetsByActionId: {
+        "ai036-0-trash_accessed_card": {
+          accessed: "remote-card-1",
+        },
+      },
+      availableTargetsByActionId: {
+        "ai036-1-start_run": [
+          {
+            targetId: "hq",
+            targetKind: "server",
+            targetSide: "corp",
+            evidence: ["AI039 test engine-provided legal server"],
+          },
+        ],
+      },
+    });
+
+    const selected = candidates[0];
+    const available = candidates[1];
+    const unavailable = candidates[2];
+    const hiddenBlocked = candidates[3];
+    if (!selected || !available || !unavailable || !hiddenBlocked) {
+      throw new Error("Expected four AI039 candidates");
+    }
+
+    expect(selected.targetContext?.selectedTargets).toEqual([
+      expect.objectContaining({
+        targetId: "remote-card-1",
+        targetKind: "card",
+        targetSide: "corp",
+      }),
+    ]);
+    expect(selected.targetContext?.availableTargetsStatus).toBe(
+      "not_available",
+    );
+    expect(selected.projectionIssues).not.toContain(
+      "target_context_unavailable",
+    );
+
+    expect(available.targetContext?.availableTargetsStatus).toBe(
+      "engine_provided",
+    );
+    expect(available.targetContext?.availableTargets).toEqual([
+      expect.objectContaining({ targetId: "hq", targetKind: "server" }),
+    ]);
+
+    expect(unavailable.targetContext?.availableTargetsStatus).toBe(
+      "target_context_unavailable",
+    );
+    expect(unavailable.projectionIssues).toContain(
+      "target_context_unavailable",
+    );
+
+    expect(hiddenBlocked.targetContext?.selectedTargets).toEqual([]);
+    expect(hiddenBlocked.targetContext?.hiddenInfoPolicy).toBe(
+      "hidden_info_blocked",
+    );
+    expect(hiddenBlocked.primaryProjectionStatus).toBe("hidden_info_blocked");
+    expect(hiddenBlocked.projectionIssues).toContain("hidden_info_blocked");
+    expect(JSON.stringify(hiddenBlocked)).not.toContain("hidden-resource-card");
+  });
 });
 
 function legalAction(
