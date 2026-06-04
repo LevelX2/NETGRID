@@ -8,6 +8,7 @@ import {
   META8_INTERNAL_CANARY_FIXTURES,
   META9_PRODUCTION_SAFE_SHADOW_CONFIG,
   META10_SELECTED_PRODUCTION_SCOPES,
+  buildMeta15ComplexScopeEnablementReport,
   buildMeta14LowRiskScopeExpansionReport,
   buildMeta13LegacyFreezeExtendedMonitoringReport,
   buildMeta12LegacyFreezeProductionStabilizationReport,
@@ -421,6 +422,89 @@ describe("META14 Low-Risk Scope Expansion", () => {
       simpleRunChoiceDecision: "limited_candidate_not_activated",
       remoteContestDecision: "agreement_ready_not_productive",
       nextStep: "META15_complex_scope_enablement",
+      fullProductionReady: false,
+      legacyRemovalReady: false,
+    });
+    expect(report.legacyFallbackAvailable).toBe(true);
+    expect(report.rollbackAvailable).toBe(true);
+  });
+});
+
+describe("META15 Complex Scope Enablement", () => {
+  it("classifies complex scopes without productive activation", () => {
+    const report = buildMeta15ComplexScopeEnablementReport();
+
+    expect(report.schemaVersion).toBe("meta15-complex-scope-enablement-v0");
+    expect(report.step).toBe("META15");
+    expect(report.evaluatedScopes).toEqual([
+      "access_trash_steal",
+      "trace_payment",
+      "damage_prevention",
+      "multi_target_multi_ability",
+    ]);
+    expect(report.productiveActivationCount).toBe(0);
+    expect(
+      report.dossiers.every(
+        (dossier) => dossier.productiveActivationAllowed === false,
+      ),
+    ).toBe(true);
+  });
+
+  it("keeps multi_target_multi_ability blocked with explicit requirements", () => {
+    const report = buildMeta15ComplexScopeEnablementReport();
+
+    expect(report.dossiers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          scopeId: "access_trash_steal",
+          outputStatus: "agreement_ready",
+        }),
+        expect.objectContaining({
+          scopeId: "trace_payment",
+          outputStatus: "shadow_ready",
+        }),
+        expect.objectContaining({
+          scopeId: "damage_prevention",
+          outputStatus: "shadow_ready",
+        }),
+        expect.objectContaining({
+          scopeId: "multi_target_multi_ability",
+          outputStatus: "still_blocked_with_requirements",
+          blockedReasons: ["multi_ability_card_unresolved"],
+        }),
+      ]),
+    );
+    const multi = report.dossiers.find(
+      (dossier) => dossier.scopeId === "multi_target_multi_ability",
+    );
+    expect(multi?.requiredContext).toEqual(
+      expect.arrayContaining([
+        "explicitAbilityId",
+        "engineProvidedTargetOptions",
+        "targetPriorityModel",
+      ]),
+    );
+  });
+
+  it("reports complex-scope gates as shadow/agreement ready or safely blocked", () => {
+    const report = buildMeta15ComplexScopeEnablementReport();
+
+    expect(report.qualityGates).toEqual({
+      noHiddenInfoViolation: true,
+      noIllegalAction: true,
+      targetContextCompleteForEvaluatedCases: true,
+      abilityResolvedForMultiAbilityCases: true,
+      costTimingKnownWhenRequired: true,
+      unsafeDivergenceCount: 0,
+      blockedCasesRemainBlocked: true,
+    });
+    expect(report.goNoGo).toEqual({
+      decision: "complex_scopes_shadow_or_blocked",
+      accessTrashStealStatus: "agreement_ready",
+      tracePaymentStatus: "shadow_ready",
+      damagePreventionStatus: "shadow_ready",
+      multiTargetMultiAbilityStatus: "still_blocked_with_requirements",
+      nextStep: "META16_broad_scoped_production_expansion",
       fullProductionReady: false,
       legacyRemovalReady: false,
     });

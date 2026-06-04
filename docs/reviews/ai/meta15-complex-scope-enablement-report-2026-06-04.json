@@ -1,0 +1,89 @@
+{
+  "schemaVersion": "meta15-complex-scope-enablement-v0",
+  "step": "META15",
+  "scope": "complex_scope_enablement",
+  "sourceStep": "META14",
+  "evaluatedScopes": [
+    "access_trash_steal",
+    "trace_payment",
+    "damage_prevention",
+    "multi_target_multi_ability"
+  ],
+  "dossiers": [
+    {
+      "scopeId": "access_trash_steal",
+      "outputStatus": "agreement_ready",
+      "productiveActivationAllowed": false,
+      "requiredContext": [
+        "accessTargetContext",
+        "accessedCardVisibilityPolicy",
+        "trashCostKnown",
+        "stealCostKnown",
+        "declineReason"
+      ],
+      "blockedReasons": []
+    },
+    {
+      "scopeId": "trace_payment",
+      "outputStatus": "shadow_ready",
+      "productiveActivationAllowed": false,
+      "requiredContext": [
+        "traceBase",
+        "boostOptions",
+        "paymentAmount",
+        "payer",
+        "beneficiary",
+        "expectedOutcome_side_safe"
+      ],
+      "blockedReasons": []
+    },
+    {
+      "scopeId": "damage_prevention",
+      "outputStatus": "shadow_ready",
+      "productiveActivationAllowed": false,
+      "requiredContext": [
+        "damageType",
+        "damageAmount",
+        "preventableAmount",
+        "preventionSource",
+        "survivalUrgency",
+        "timingWindow"
+      ],
+      "blockedReasons": []
+    },
+    {
+      "scopeId": "multi_target_multi_ability",
+      "outputStatus": "still_blocked_with_requirements",
+      "productiveActivationAllowed": false,
+      "requiredContext": [
+        "explicitAbilityId",
+        "engineProvidedTargetOptions",
+        "targetPriorityModel",
+        "whyNotForNonSelectedTargets"
+      ],
+      "blockedReasons": ["multi_ability_card_unresolved"]
+    }
+  ],
+  "productiveActivationCount": 0,
+  "qualityGates": {
+    "noHiddenInfoViolation": true,
+    "noIllegalAction": true,
+    "targetContextCompleteForEvaluatedCases": true,
+    "abilityResolvedForMultiAbilityCases": true,
+    "costTimingKnownWhenRequired": true,
+    "unsafeDivergenceCount": 0,
+    "blockedCasesRemainBlocked": true
+  },
+  "goNoGo": {
+    "decision": "complex_scopes_shadow_or_blocked",
+    "accessTrashStealStatus": "agreement_ready",
+    "tracePaymentStatus": "shadow_ready",
+    "damagePreventionStatus": "shadow_ready",
+    "multiTargetMultiAbilityStatus": "still_blocked_with_requirements",
+    "nextStep": "META16_broad_scoped_production_expansion",
+    "fullProductionReady": false,
+    "legacyRemovalReady": false
+  },
+  "legacyFallbackAvailable": true,
+  "rollbackAvailable": true
+}

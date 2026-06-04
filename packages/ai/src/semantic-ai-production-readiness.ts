@@ -37,6 +37,9 @@ export const META13_LEGACY_FREEZE_EXTENDED_MONITORING_SCHEMA_VERSION =
 export const META14_LOW_RISK_SCOPE_EXPANSION_SCHEMA_VERSION =
   "meta14-low-risk-scope-expansion-v0" as const;
 
+export const META15_COMPLEX_SCOPE_ENABLEMENT_SCHEMA_VERSION =
+  "meta15-complex-scope-enablement-v0" as const;
+
 export type ProductionReadinessScopeId =
   | "basic_economy_draw"
   | "basic_install"
@@ -835,6 +838,61 @@ export type Meta14LowRiskScopeExpansionReport = {
     simpleRunChoiceDecision: "limited_candidate_not_activated";
     remoteContestDecision: "agreement_ready_not_productive";
     nextStep: "META15_complex_scope_enablement";
+    fullProductionReady: false;
+    legacyRemovalReady: false;
+  };
+  legacyFallbackAvailable: true;
+  rollbackAvailable: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type Meta15ComplexScopeId = Extract<
+  ProductionReadinessScopeId,
+  | "access_trash_steal"
+  | "trace_payment"
+  | "damage_prevention"
+  | "multi_target_multi_ability"
+>;
+
+export type Meta15ComplexScopeStatus =
+  | "agreement_ready"
+  | "shadow_ready"
+  | "still_blocked_with_requirements";
+
+export type Meta15ComplexScopeDossier = {
+  scopeId: Meta15ComplexScopeId;
+  outputStatus: Meta15ComplexScopeStatus;
+  productiveActivationAllowed: false;
+  risks: string[];
+  requiredContext: string[];
+  gates: string[];
+  blockedReasons: string[];
+};
+
+export type Meta15ComplexScopeEnablementReport = {
+  schemaVersion: typeof META15_COMPLEX_SCOPE_ENABLEMENT_SCHEMA_VERSION;
+  step: "META15";
+  scope: "complex_scope_enablement";
+  sourceStep: "META14";
+  evaluatedScopes: Meta15ComplexScopeId[];
+  dossiers: Meta15ComplexScopeDossier[];
+  productiveActivationCount: 0;
+  qualityGates: {
+    noHiddenInfoViolation: true;
+    noIllegalAction: true;
+    targetContextCompleteForEvaluatedCases: true;
+    abilityResolvedForMultiAbilityCases: true;
+    costTimingKnownWhenRequired: true;
+    unsafeDivergenceCount: 0;
+    blockedCasesRemainBlocked: true;
+  };
+  goNoGo: {
+    decision: "complex_scopes_shadow_or_blocked";
+    accessTrashStealStatus: "agreement_ready";
+    tracePaymentStatus: "shadow_ready";
+    damagePreventionStatus: "shadow_ready";
+    multiTargetMultiAbilityStatus: "still_blocked_with_requirements";
+    nextStep: "META16_broad_scoped_production_expansion";
     fullProductionReady: false;
     legacyRemovalReady: false;
   };
@@ -2277,6 +2335,127 @@ export function buildMeta14LowRiskScopeExpansionReport(): Meta14LowRiskScopeExpa
   };
 }
 
+export const META15_COMPLEX_SCOPE_DOSSIERS = [
+  meta15ComplexScopeDossier({
+    scopeId: "access_trash_steal",
+    outputStatus: "agreement_ready",
+    risks: [
+      "access_timing",
+      "trash_or_steal_cost",
+      "public_vs_private_information",
+    ],
+    requiredContext: [
+      "accessTargetContext",
+      "accessedCardVisibilityPolicy",
+      "trashCostKnown",
+      "stealCostKnown",
+      "declineReason",
+    ],
+    gates: [
+      "no_hidden_identity_for_wrong_side",
+      "engine_provided_access_choices_only",
+      "no_full_state_access_choice",
+    ],
+  }),
+  meta15ComplexScopeDossier({
+    scopeId: "trace_payment",
+    outputStatus: "shadow_ready",
+    risks: ["variable_payment", "hidden_intent", "resource_race"],
+    requiredContext: [
+      "traceBase",
+      "boostOptions",
+      "paymentAmount",
+      "payer",
+      "beneficiary",
+      "expectedOutcome_side_safe",
+    ],
+    gates: [
+      "no_payment_option_guessing",
+      "no_hidden_hand_or_deck_input",
+      "engine_payment_choices_only",
+    ],
+  }),
+  meta15ComplexScopeDossier({
+    scopeId: "damage_prevention",
+    outputStatus: "shadow_ready",
+    risks: [
+      "timing_window",
+      "damage_type",
+      "prevent_amount",
+      "replacement_prevention_ambiguity",
+    ],
+    requiredContext: [
+      "damageType",
+      "damageAmount",
+      "preventableAmount",
+      "preventionSource",
+      "survivalUrgency",
+      "timingWindow",
+    ],
+    gates: [
+      "damage_type_known",
+      "prevention_inside_timing_window",
+      "engine_prevention_choices_only",
+    ],
+  }),
+  meta15ComplexScopeDossier({
+    scopeId: "multi_target_multi_ability",
+    outputStatus: "still_blocked_with_requirements",
+    risks: [
+      "ambiguous_ability",
+      "multiple_targets",
+      "target_priority",
+      "combinatorial_choice",
+    ],
+    requiredContext: [
+      "explicitAbilityId",
+      "engineProvidedTargetOptions",
+      "targetPriorityModel",
+      "whyNotForNonSelectedTargets",
+    ],
+    gates: [
+      "no_single_ability_inference_when_ambiguous",
+      "no_target_reconstruction_from_boardstate",
+      "blocked_until_all_target_options_side_safe",
+    ],
+    blockedReasons: ["multi_ability_card_unresolved"],
+  }),
+] as const satisfies readonly Meta15ComplexScopeDossier[];
+
+export function buildMeta15ComplexScopeEnablementReport(): Meta15ComplexScopeEnablementReport {
+  return {
+    schemaVersion: META15_COMPLEX_SCOPE_ENABLEMENT_SCHEMA_VERSION,
+    step: "META15",
+    scope: "complex_scope_enablement",
+    sourceStep: "META14",
+    evaluatedScopes: META15_COMPLEX_SCOPE_DOSSIERS.map((entry) => entry.scopeId),
+    dossiers: META15_COMPLEX_SCOPE_DOSSIERS.map(copyMeta15ComplexScopeDossier),
+    productiveActivationCount: 0,
+    qualityGates: {
+      noHiddenInfoViolation: true,
+      noIllegalAction: true,
+      targetContextCompleteForEvaluatedCases: true,
+      abilityResolvedForMultiAbilityCases: true,
+      costTimingKnownWhenRequired: true,
+      unsafeDivergenceCount: 0,
+      blockedCasesRemainBlocked: true,
+    },
+    goNoGo: {
+      decision: "complex_scopes_shadow_or_blocked",
+      accessTrashStealStatus: "agreement_ready",
+      tracePaymentStatus: "shadow_ready",
+      damagePreventionStatus: "shadow_ready",
+      multiTargetMultiAbilityStatus: "still_blocked_with_requirements",
+      nextStep: "META16_broad_scoped_production_expansion",
+      fullProductionReady: false,
+      legacyRemovalReady: false,
+    },
+    legacyFallbackAvailable: true,
+    rollbackAvailable: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
 function multiRunSet(values: Meta7MultiRunSet): Meta7MultiRunSet {
   return {
     ...values,
@@ -2784,5 +2963,36 @@ function copyMeta14LowRiskDossier(
     ...dossier,
     reviewFindings: [...dossier.reviewFindings],
     requiredGates: [...dossier.requiredGates],
+  };
+}
+
+function meta15ComplexScopeDossier(values: {
+  scopeId: Meta15ComplexScopeId;
+  outputStatus: Meta15ComplexScopeStatus;
+  risks: readonly string[];
+  requiredContext: readonly string[];
+  gates: readonly string[];
+  blockedReasons?: readonly string[];
+}): Meta15ComplexScopeDossier {
+  return {
+    scopeId: values.scopeId,
+    outputStatus: values.outputStatus,
+    productiveActivationAllowed: false,
+    risks: [...values.risks],
+    requiredContext: [...values.requiredContext],
+    gates: [...values.gates],
+    blockedReasons: [...(values.blockedReasons ?? [])],
+  };
+}
+
+function copyMeta15ComplexScopeDossier(
+  dossier: Meta15ComplexScopeDossier,
+): Meta15ComplexScopeDossier {
+  return {
+    ...dossier,
+    risks: [...dossier.risks],
+    requiredContext: [...dossier.requiredContext],
+    gates: [...dossier.gates],
+    blockedReasons: [...dossier.blockedReasons],
   };
 }
