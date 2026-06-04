@@ -3202,10 +3202,11 @@ export function chooseAiAction(input: AiDecisionInput): AiDecision {
 
 export function chooseCorpAction(input: AiDecisionInput): AiDecision {
   const baselineDecision = chooseCorpBaselineAction(input);
-  return hasCorpPlanAction(input) &&
+  const legacyDecision = hasCorpPlanAction(input) &&
     !isCorpReactiveBaselineDecision(baselineDecision)
     ? chooseCorpPlanAction(input, baselineDecision)
     : baselineDecision;
+  return chooseSemanticRuntimeAction(input, legacyDecision);
 }
 
 export function chooseCorpBaselineAction(input: AiDecisionInput): AiDecision {
@@ -3222,13 +3223,345 @@ export function chooseRunnerAction(input: AiDecisionInput): AiDecision {
     (!isRunnerReactiveBaselineDecision(baselineDecision) ||
       baselineShellTradersPlanIsVisible(input, baselineDecision)) &&
     !runnerHasConditionalPaymentContinueDecision(input, baselineAction);
-  return shouldUsePlanAction
+  const legacyDecision = shouldUsePlanAction
     ? chooseRunnerPlanAction(input, baselineDecision)
     : baselineDecision;
+  return chooseSemanticRuntimeAction(input, legacyDecision);
 }
 
 export function chooseRunnerBaselineAction(input: AiDecisionInput): AiDecision {
   return decisionFromChoices(input, scoreActions(input, "runner"));
+}
+
+type SemanticRuntimeChoice = RankedChoice & {
+  action: LegalAction;
+  scopeId: string;
+};
+
+function chooseSemanticRuntimeAction(
+  input: AiDecisionInput,
+  legacyDecision: AiDecision,
+): AiDecision {
+  if (semanticRuntimeForcedLegacy()) {
+    return {
+      ...legacyDecision,
+      evidence: [
+        ...(legacyDecision.evidence ?? []),
+        "semantic_runtime_force_legacy",
+      ],
+    };
+  }
+  const choice = chooseSemanticRuntimeChoice(input);
+  if (!choice) {
+    return {
+      ...legacyDecision,
+      evidence: [
+        ...(legacyDecision.evidence ?? []),
+        "semantic_runtime_no_rankable_legal_action",
+      ],
+    };
+  }
+  const legacyActionType = input.legalActions.find(
+    (action) => action.actionId === legacyDecision.actionId,
+  )?.type;
+  const selectedChoices = selectedChoicesForDecision(input, choice.action);
+  return {
+    actionId: choice.action.actionId,
+    ...(selectedChoices ? { selectedChoices } : {}),
+    reasonCode: choice.reasonCode,
+    explanation: choice.explanation,
+    consideredActionIds: [],
+    fallbackUsed: false,
+    ...(choice.confidence !== undefined ? { confidence: choice.confidence } : {}),
+    evidence: scrubEvidence([
+      ...choice.evidence,
+      `semantic_runtime_default:true`,
+      `semantic_runtime_scope:${choice.scopeId}`,
+      `legacy_reference_reason:${legacyDecision.reasonCode}`,
+      ...(legacyActionType
+        ? [`legacy_reference_action_type:${legacyActionType}`]
+        : []),
+    ]),
+    ...(legacyDecision.decisionDebug !== undefined
+      ? { decisionDebug: legacyDecision.decisionDebug }
+      : {}),
+    timeoutUsed: Boolean(legacyDecision.timeoutUsed),
+    profileId: input.profileId,
+    difficulty: input.difficulty,
+    reason: choice.reasonCode,
+  };
+}
+
+function semanticRuntimeForcedLegacy(): boolean {
+  return process.env.NETGRID_SEMANTIC_AI_RUNTIME === "legacy";
+}
+
+function chooseSemanticRuntimeChoice(
+  input: AiDecisionInput,
+): SemanticRuntimeChoice | undefined {
+  return input.legalActions
+    .map((action) => scoreSemanticRuntimeAction(input, action))
+    .filter((choice): choice is SemanticRuntimeChoice => choice.score > 0)
+    .sort(
+      (left, right) =>
+        right.score - left.score || compareAction(left.action, right.action),
+    )[0];
+}
+
+function scoreSemanticRuntimeAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): SemanticRuntimeChoice {
+  const scopeId = semanticRuntimeScopeForAction(input, action);
+  const semanticScore = semanticRuntimeBaseScore(input, action, scopeId);
+  const costPenalty = actionCreditCost(action) * 35;
+  const score = semanticScore - costPenalty;
+  return {
+    action,
+    scopeId,
+    reasonCode: `${input.side}.semantic.${scopeId}`,
+    explanation: semanticRuntimeExplanation(input.side, scopeId),
+    score,
+    evidence: [
+      `action_type:${action.type}`,
+      `semantic_scope:${scopeId}`,
+      `semantic_score:${score}`,
+      `credit_cost:${actionCreditCost(action)}`,
+      ...semanticRuntimeEvidence(input, action, scopeId),
+    ],
+    confidence: semanticRuntimeConfidence(scopeId, score),
+  };
+}
+
+function semanticRuntimeScopeForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): string {
+  if (action.type === "mandatory_draw") return "mandatory_draw";
+  if (action.type === "resolve_choice") return "choice_resolution";
+  if (action.type === "score_agenda") return "simple_score_advance";
+  if (action.type === "advance_card") return "simple_score_advance";
+  if (action.type === "remove_tag") return "tag_removal";
+  if (action.type === "rez_ice" || action.type === "decline_rez") {
+    return "simple_rez";
+  }
+  if (action.type === "start_run") {
+    const serverId = semanticRuntimeServerId(action);
+    if (serverId === "hq" || serverId === "rd") return "simple_hq_or_rnd_pressure";
+    if (isRemoteServerTarget(serverId)) return "remote_contest";
+    return "simple_run_choice";
+  }
+  if (
+    action.type === "access_card" ||
+    action.type === "steal_agenda" ||
+    action.type === "trash_accessed_card" ||
+    action.type === "decline_trash"
+  ) {
+    return "access_trash_steal";
+  }
+  if (
+    action.type === "install_card" ||
+    action.type === "play_event" ||
+    action.type === "play_operation" ||
+    action.type === "trigger_ability" ||
+    action.type === "activated_card_ability"
+  ) {
+    return "basic_install";
+  }
+  if (action.type === "gain_credit" || action.type === "draw_card") {
+    return "basic_economy_draw";
+  }
+  if (action.type === "break_subroutine" || action.type === "pump_breaker") {
+    return "encounter_survival";
+  }
+  if (action.type === "continue_run" || action.type === "jack_out") {
+    return "simple_run_choice";
+  }
+  if (
+    action.type === "trash_resource" ||
+    action.type === "purge_virus_counters" ||
+    action.type === "purge_runner_virus_counters"
+  ) {
+    return "board_safety";
+  }
+  if (action.type === "end_turn") return "end_turn";
+  return `${input.side}_legal_action`;
+}
+
+function semanticRuntimeBaseScore(
+  input: AiDecisionInput,
+  action: LegalAction,
+  scopeId: string,
+): number {
+  let score = semanticRuntimeTypePriority(action.type);
+  if (input.side === "runner") {
+    score += semanticRuntimeRunnerScore(input, action, scopeId);
+  } else {
+    score += semanticRuntimeCorpScore(input, action, scopeId);
+  }
+  if (action.visibility === "private_to_actor") score += 25;
+  return score;
+}
+
+function semanticRuntimeTypePriority(type: LegalAction["type"]): number {
+  switch (type) {
+    case "resolve_choice":
+      return 10000;
+    case "mandatory_draw":
+      return 9800;
+    case "steal_agenda":
+      return 9600;
+    case "score_agenda":
+      return 9400;
+    case "access_card":
+      return 9000;
+    case "remove_tag":
+      return 8800;
+    case "break_subroutine":
+      return 8500;
+    case "pump_breaker":
+      return 8300;
+    case "trash_accessed_card":
+      return 8000;
+    case "continue_run":
+      return 7800;
+    case "jack_out":
+      return 7400;
+    case "rez_ice":
+      return 7200;
+    case "advance_card":
+      return 7000;
+    case "start_run":
+      return 6800;
+    case "install_card":
+      return 6400;
+    case "play_event":
+    case "play_operation":
+    case "trigger_ability":
+    case "activated_card_ability":
+      return 6200;
+    case "trash_resource":
+      return 6000;
+    case "purge_virus_counters":
+    case "purge_runner_virus_counters":
+      return 5800;
+    case "gain_credit":
+      return 5400;
+    case "draw_card":
+      return 5300;
+    case "decline_trash":
+    case "decline_rez":
+      return 3000;
+    case "end_turn":
+      return 1000;
+    default:
+      return 4000;
+  }
+}
+
+function semanticRuntimeRunnerScore(
+  input: AiDecisionInput,
+  action: LegalAction,
+  scopeId: string,
+): number {
+  let score = 0;
+  const credits = input.playerView.own.credits;
+  if (action.type === "remove_tag" && input.playerView.own.tags > 0) score += 900;
+  if (action.type === "gain_credit" && credits < 5) score += 700;
+  if (action.type === "draw_card" && input.playerView.own.gripOrHq.length < 5) {
+    score += 550;
+  }
+  if (action.type === "install_card") {
+    const roles = rolesForAction(input, action);
+    if (roles.some((role) => role.startsWith("breaker_"))) score += 750;
+    if (roles.some((role) => isRunnerEconomyRole(role))) score += 500;
+    if (roles.some((role) => isRunnerPressureRole(role))) score += 650;
+  }
+  if (action.type === "start_run") {
+    const serverId = semanticRuntimeServerId(action);
+    const server = input.playerView.servers.find((entry) => entry.id === serverId);
+    if (serverId === "hq" || serverId === "rd") score += 550;
+    if (isRemoteServerTarget(serverId)) {
+      score += server?.root.some((card) => (card.advancementCounters ?? 0) > 0)
+        ? 950
+        : 250;
+      if ((server?.root.length ?? 0) === 0 && (server?.ice.length ?? 0) > 0) {
+        score -= 800;
+      }
+    }
+    if ((server?.ice.length ?? 0) === 0) score += 350;
+  }
+  if (action.type === "trash_accessed_card") {
+    score += credits >= actionCreditCost(action) ? 600 : -1200;
+  }
+  if (action.type === "jack_out" && scopeId === "simple_run_choice") score -= 450;
+  if (action.type === "end_turn" && input.playerView.own.clicks > 0) score -= 1500;
+  return score;
+}
+
+function semanticRuntimeCorpScore(
+  input: AiDecisionInput,
+  action: LegalAction,
+  scopeId: string,
+): number {
+  let score = 0;
+  const credits = input.playerView.own.credits;
+  if (action.type === "score_agenda") score += 1200;
+  if (action.type === "advance_card") score += 600;
+  if (action.type === "rez_ice") {
+    score += credits >= actionCreditCost(action) ? 750 : -1200;
+  }
+  if (action.type === "install_card") {
+    const roles = rolesForAction(input, action);
+    if (roles.some((role) => role.startsWith("agenda_"))) score += 550;
+    if (roles.some((role) => role.includes("ice") || role.includes("protect"))) {
+      score += 650;
+    }
+    if (roles.some((role) => role.includes("economy"))) score += 500;
+  }
+  if (action.type === "gain_credit" && credits < 6) score += 700;
+  if (action.type === "draw_card" && input.playerView.own.gripOrHq.length < 4) {
+    score += 450;
+  }
+  if (action.type === "decline_rez" && scopeId === "simple_rez") score -= 700;
+  if (action.type === "end_turn" && input.playerView.own.clicks > 0) score -= 1400;
+  return score;
+}
+
+function semanticRuntimeServerId(action: LegalAction): string | undefined {
+  const serverId = action.payload?.serverId;
+  return typeof serverId === "string" ? serverId : undefined;
+}
+
+function semanticRuntimeEvidence(
+  input: AiDecisionInput,
+  action: LegalAction,
+  scopeId: string,
+): string[] {
+  const serverId = semanticRuntimeServerId(action);
+  return [
+    `side:${input.side}`,
+    `scope_family:${scopeId}`,
+    ...(serverId ? [`server:${serverId}`] : []),
+    `own_credits:${input.playerView.own.credits}`,
+    `own_clicks:${input.playerView.own.clicks}`,
+    `own_tags:${input.playerView.own.tags}`,
+  ];
+}
+
+function semanticRuntimeConfidence(scopeId: string, score: number): number {
+  if (scopeId === "choice_resolution" || scopeId === "mandatory_draw") return 0.95;
+  if (score >= 9000) return 0.86;
+  if (score >= 7000) return 0.76;
+  if (score >= 5000) return 0.66;
+  return 0.51;
+}
+
+function semanticRuntimeExplanation(
+  side: Side,
+  scopeId: string,
+): string {
+  return `${side} Semantic Runtime waehlt eine legale Aktion im Scope ${scopeId}.`;
 }
 
 function isCorpReactiveBaselineDecision(decision: AiDecision): boolean {

@@ -1,4 +1,4 @@
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { tmpdir } from "node:os";
@@ -125,6 +125,20 @@ import {
   DEMO_CARDS_BY_ID,
   sanitizeAiDecisionDebug,
 } from "@netgrid/shared";
+
+const originalSemanticAiRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+
+beforeEach(() => {
+  process.env.NETGRID_SEMANTIC_AI_RUNTIME = "legacy";
+});
+
+afterEach(() => {
+  if (originalSemanticAiRuntimeMode === undefined) {
+    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+  } else {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = originalSemanticAiRuntimeMode;
+  }
+});
 
 describe("MVP 0.3 AI controller contract", () => {
   afterEach(() => {

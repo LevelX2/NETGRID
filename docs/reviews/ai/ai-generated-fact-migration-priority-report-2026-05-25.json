@@ -667,7 +667,12 @@
       ],
       "generatedFields": ["breakerProfile", "effects"],
       "generatedMechanicalFacts": ["breakerProfile", "effect:breaker"],
-      "monolithFields": ["effects", "costProfile", "breakerProfile"],
+      "monolithFields": [
+        "effects",
+        "costProfile",
+        "breakerProfile",
+        "targetProfiles"
+      ],
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "generatedOnlyFields": ["breakerProfile"],
       "overlayFields": [],

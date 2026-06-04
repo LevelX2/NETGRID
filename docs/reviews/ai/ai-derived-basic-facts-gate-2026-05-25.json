@@ -128,7 +128,7 @@
   "hardErrorCount": 0,
   "hardErrors": [],
   "hardConflicts": [],
-  "warningCount": 978,
+  "warningCount": 977,
   "warnings": [
     {
       "kind": "text_pattern_derivation",
@@ -249,11 +249,6 @@
       "kind": "text_pattern_derivation",
       "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate.",
       "cardId": "onr_v1_017_deep-thought"
-    },
-    {
-      "kind": "confidence_mismatch",
-      "message": "Generated confidence high differs from manual confidence medium.",
-      "cardId": "onr_v1_019_dropp"
     },
     {
       "kind": "text_pattern_derivation",
@@ -6101,15 +6096,11 @@
         "cardType": "program",
         "roles": [
           "breaker_end_run",
+          "emergency_breaker",
           "icebreaker",
-          "program",
-          "run_pressure"
+          "program"
         ],
-        "planRoles": [
-          "build_rig",
-          "contest_remote",
-          "safe_probe_run"
-        ],
+        "planRoles": [],
         "effects": [
           {
             "kind": "breaker",
@@ -6135,14 +6126,18 @@
           "sideEffects": [
             "ends_run_after_use"
           ],
-          "restrictions": []
+          "restrictions": [
+            "break_ability_ends_run",
+            "not_access_enabling_breaker",
+            "not_reachability_coverage"
+          ]
         },
         "lineSupport": [],
         "quality": {
           "hintReviewed": true,
           "strategyCovered": false,
           "benchmarkCovered": false,
-          "confidence": "medium",
+          "confidence": "high",
           "needsHumanReview": false
         }
       },
@@ -6159,10 +6154,6 @@
       "descriptorGaps": [],
       "confidence": "high",
       "warnings": [
-        {
-          "kind": "confidence_mismatch",
-          "message": "Generated confidence high differs from manual confidence medium."
-        },
         {
           "kind": "text_pattern_derivation",
           "message": "Derived facts come from a read-only text/descriptor scan; no TS descriptor import is used in this gate."

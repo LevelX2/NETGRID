@@ -250,12 +250,25 @@ describe("AI003 strategy goal taxonomy", () => {
     const derivationSignalIds = [
       ...new Set(functionSignalDerivationData.derivationRules.map((rule) => rule.signalId)),
     ].sort();
+    const dormantTacticSignalIds =
+      (report.warnings.find(
+        (warning) => warning.kind === "dormant_tactic_signals_warn_only",
+      )?.items as string[] | undefined) ?? [];
+    const expectedCatalogSignalIds = [
+      ...new Set([...derivationSignalIds, ...dormantTacticSignalIds]),
+    ].sort();
 
     expect(report.hardErrorCount).toBe(0);
     expect(tacticSignalCatalogData.schemaVersion).toBe("ai-tactic-signals-v1");
-    expect(report.taxonomy.tacticSignalCatalogCount).toBe(524);
+    expect(report.taxonomy.tacticSignalCatalogCount).toBe(528);
     expect(new Set(signalIds).size).toBe(signalIds.length);
-    expect([...signalIds].sort()).toEqual(derivationSignalIds);
+    expect(dormantTacticSignalIds).toEqual([
+      "breaker.break_any_subroutine",
+      "breaker.subroutine_prevention",
+      "defense.encounter_threat_mitigation",
+      "encounter.emergency_subroutine_prevention",
+    ]);
+    expect([...signalIds].sort()).toEqual(expectedCatalogSignalIds);
     expect(signalIds.some((signalId) => signalId.startsWith("anti.ice."))).toBe(
       false,
     );

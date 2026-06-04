@@ -10,6 +10,10 @@
 - Die direkten Kernkommandos wie `check:ai-derived-facts`, `check:ai-manual-overlays`, `check:ai-hint-quality` und `check:ai-approval-consistency` bleiben für bestehende Review- und Diagnosebelege verfügbar.
 - Historische `check:ai-generated-fact-*` Batch- und Migrationsaliase stehen nicht mehr in der Root-`package.json`. Die zugehörigen `scripts/check-ai-generated-fact-*.mjs` bleiben als Spezialwerkzeuge erhalten und werden bei Bedarf direkt mit `node <script> --check` aus dem jeweiligen Review-Kontext ausgeführt.
 
+## Aktueller Runtime-Cutover
+
+- `semantic-ai-runtime-cutover-2026-06-04.md`: Die Semantic Runtime ist im AI-Livepfad default aktiv. `chooseRunnerAction` und `chooseCorpAction` nutzen Legacy nur noch als Referenz, per `NETGRID_SEMANTIC_AI_RUNTIME=legacy` als expliziten Notaus oder als No-Candidate-Fallback. Bestehende Legacy-Regressionstests setzen den Notaus bewusst; der neue Cutover-Test prüft den default-aktiven Semantic-Pfad.
+
 ## Neue AI-Aufgaben ab AI001
 
 - `ai001-decision-architecture-inventory-2026-05-25.md`: Aufgabe AI001 dokumentiert die aktuelle AI-Entscheidungsarchitektur als reine Ist-Bestandsaufnahme mit Entscheidungsfluss, Runner-/Corp-Kontextverlusten, lokalen Fixes, Datenquellen und offenen Ist-Risiken. Keine Zielarchitektur, Roadmap, Folgepakete oder Codeänderung.

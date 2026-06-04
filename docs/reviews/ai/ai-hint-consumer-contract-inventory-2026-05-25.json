@@ -4611,6 +4611,20 @@
       "classification": "direct_decision_effect"
     },
     {
+      "value": "emergency_breaker",
+      "count": 1,
+      "examples": [
+        {
+          "cardId": "onr_v1_019_dropp",
+          "side": "runner",
+          "cardType": "program"
+        }
+      ],
+      "codeExactReference": false,
+      "codeSubstringReference": false,
+      "classification": "indirect_generic_effect"
+    },
+    {
       "value": "card_flow_agenda",
       "count": 1,
       "examples": [

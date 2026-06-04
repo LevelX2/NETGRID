@@ -2,13 +2,13 @@
   "schemaVersion": "ai-hint-quality-gate-report-v1",
   "generatedAt": "2026-05-25",
   "hintCount": 564,
-  "roleContractCount": 251,
+  "roleContractCount": 252,
   "planRoleContractCount": 102,
   "errors": [],
   "warnings": [
     {
       "kind": "suspicious_singleton_roles",
-      "count": 96,
+      "count": 97,
       "items": [
         "access_ambush",
         "access_punisher",
@@ -27,6 +27,7 @@
         "black_ops",
         "black_ops_punish_event",
         "breaker_end_run",
+        "emergency_breaker",
         "card_flow_agenda",
         "click_economy",
         "corp_draw_pressure",
@@ -260,7 +261,7 @@
     }
   ],
   "errorCount": 0,
-  "warningCount": 150,
+  "warningCount": 151,
   "gates": {
     "unknownRolesFail": true,
     "consumedRoleContractFail": true,
