@@ -1,0 +1,103 @@
+{
+  "step": "AI052",
+  "title": "Shadow Scenario Corpus",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai051-ai060-controlled-shadow-mode",
+  "schemaVersion": "shadow-scenario-corpus-v1",
+  "scope": "shadow_scenario_corpus",
+  "runtimeConsumerStatus": "none",
+  "fixtureRef": "data/scenarios/ai052-shadow-scenario-corpus-2026-06-04.json",
+  "scenarioCount": 33,
+  "runnerScenarioCount": 16,
+  "corpScenarioCount": 17,
+  "advancedScenarioCount": 7,
+  "allowedShadowCount": 33,
+  "runtimeBackedScenarioCount": 0,
+  "syntheticLegalActionCount": 33,
+  "knownProjectionGaps": [
+    "target_context_unavailable",
+    "ability_unresolved",
+    "card_semantics_unavailable",
+    "cost_unknown",
+    "hidden_info_blocked"
+  ],
+  "requiredScenarioIds": [
+    "runner_basic_economy",
+    "runner_draw_vs_credit",
+    "runner_install_program",
+    "runner_install_breaker_for_known_ice",
+    "runner_start_hq_run",
+    "runner_start_rnd_run",
+    "runner_remote_contest",
+    "runner_access_steal_agenda",
+    "runner_access_trash_asset",
+    "runner_remove_tag",
+    "runner_survival_damage_risk",
+    "runner_jack_out_vs_continue",
+    "runner_break_subroutine",
+    "corp_basic_economy",
+    "corp_install_ice",
+    "corp_rez_ice_window",
+    "corp_advance_agenda",
+    "corp_score_agenda",
+    "corp_remote_score_window",
+    "corp_defend_hq",
+    "corp_defend_rnd",
+    "corp_tag_trace_window",
+    "corp_tagged_runner_punish",
+    "corp_damage_kill_window",
+    "corp_ambush_or_remote_bait",
+    "corp_operation_play",
+    "trace_boost_or_decline",
+    "x_value_choice",
+    "multi_target_choice",
+    "source_target_advancement_counter",
+    "hidden_info_boundary_unrezzed_ice",
+    "hidden_resource_boundary",
+    "multi_ability_card_unresolved"
+  ],
+  "implementationFiles": [
+    "packages/ai/src/controlled-shadow-mode.ts",
+    "packages/ai/src/controlled-shadow-mode.test.ts",
+    "data/scenarios/ai052-shadow-scenario-corpus-2026-06-04.json"
+  ],
+  "reportFiles": [
+    "docs/reviews/ai/ai052-shadow-scenario-corpus-2026-06-04.md",
+    "docs/reviews/ai/ai052-shadow-scenario-corpus-2026-06-04.json"
+  ],
+  "checkScripts": [
+    "scripts/check-ai052-shadow-scenario-corpus.mjs"
+  ],
+  "runtimeFilesTouched": [],
+  "productiveUseAllowed": false,
+  "noRuntimeEffect": true,
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "verification": [
+    "node scripts/check-ai052-shadow-scenario-corpus.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- controlled-shadow-mode.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "node scripts/check-ai051-shadow-mode-trace-contract.mjs",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "doneGate": {
+    "runnerScenariosPresent": true,
+    "corpScenariosPresent": true,
+    "advancedScenariosPresent": true,
+    "legalActionTypesDocumented": true,
+    "tacticalGoalsDocumented": true,
+    "hiddenInfoBoundaryDocumented": true,
+    "knownGapsDocumented": true,
+    "noRuntimeEffect": true
+  }
+}

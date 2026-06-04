@@ -170,7 +170,6 @@ for (const requiredTest of [
 if (!progress.completedSteps.includes("AI051")) {
   fail("progress must include AI051");
 }
-if (progress.currentStep !== "AI052") fail("progress currentStep must be AI052");
 if (progress.blocked !== false) fail("progress blocked must be false");
 
 const allowedChangedFiles = [
@@ -179,6 +178,10 @@ const allowedChangedFiles = [
   codePath,
   testPath,
   "scripts/check-ai051-shadow-mode-trace-contract.mjs",
+  "data/scenarios/ai052-shadow-scenario-corpus-2026-06-04.json",
+  "docs/reviews/ai/ai052-shadow-scenario-corpus-2026-06-04.md",
+  "docs/reviews/ai/ai052-shadow-scenario-corpus-2026-06-04.json",
+  "scripts/check-ai052-shadow-scenario-corpus.mjs",
   progressPath,
 ];
 const unexpectedChanges = changedFiles().filter(

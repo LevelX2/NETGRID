@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest";
 import {
   CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
   FORBIDDEN_SHADOW_TRACE_CONSUMERS,
+  buildShadowScenarioCorpusReport,
   buildShadowModeTraceContractReport,
   type ShadowDecisionTrace,
 } from "./controlled-shadow-mode";
@@ -79,6 +80,82 @@ describe("buildShadowModeTraceContractReport", () => {
     expect(Object.values(report.noEffectFlags)).toEqual(
       expect.arrayContaining([false]),
     );
+    expect(Object.values(report.noEffectFlags).every((value) => value === false)).toBe(
+      true,
+    );
+  });
+});
+
+describe("buildShadowScenarioCorpusReport", () => {
+  it("defines the required runner, corp and advanced shadow scenarios", () => {
+    const report = buildShadowScenarioCorpusReport();
+    const scenarioIds = report.fixtures.map((fixture) => fixture.scenarioId);
+
+    expect(report.schemaVersion).toBe("shadow-scenario-corpus-v1");
+    expect(report.scope).toBe("shadow_scenario_corpus");
+    expect(report.summary).toMatchObject({
+      scenarioCount: 33,
+      runnerScenarioCount: 16,
+      corpScenarioCount: 17,
+      advancedScenarioCount: 7,
+      allowedShadowCount: 33,
+      syntheticLegalActionCount: 33,
+      runtimeBackedScenarioCount: 0,
+    });
+    expect(scenarioIds).toEqual(
+      expect.arrayContaining([
+        "runner_basic_economy",
+        "runner_break_subroutine",
+        "corp_basic_economy",
+        "corp_operation_play",
+        "trace_boost_or_decline",
+        "hidden_info_boundary_unrezzed_ice",
+        "multi_ability_card_unresolved",
+      ]),
+    );
+  });
+
+  it("marks known projection gaps instead of guessing missing semantics", () => {
+    const report = buildShadowScenarioCorpusReport();
+
+    expect(report.summary.knownProjectionGaps).toEqual(
+      expect.arrayContaining([
+        "target_context_unavailable",
+        "ability_unresolved",
+        "card_semantics_unavailable",
+        "cost_unknown",
+        "hidden_info_blocked",
+      ]),
+    );
+    expect(
+      report.fixtures.find(
+        (fixture) => fixture.scenarioId === "multi_ability_card_unresolved",
+      )?.knownProjectionGaps,
+    ).toEqual(["ability_unresolved"]);
+  });
+
+  it("requires an explicit hidden-info boundary on every fixture", () => {
+    const report = buildShadowScenarioCorpusReport();
+
+    expect(
+      report.fixtures.every((fixture) => fixture.hiddenInfoBoundary.length >= 2),
+    ).toBe(true);
+    expect(
+      report.fixtures.find(
+        (fixture) => fixture.scenarioId === "hidden_resource_boundary",
+      )?.hiddenInfoBoundary,
+    ).toEqual(
+      expect.arrayContaining([
+        "Hidden Runner resources and grip/stack contents stay outside Corp shadow input.",
+      ]),
+    );
+  });
+
+  it("keeps the corpus diagnostic with no runtime effect", () => {
+    const report = buildShadowScenarioCorpusReport();
+
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.noRuntimeEffect).toBe(true);
     expect(Object.values(report.noEffectFlags).every((value) => value === false)).toBe(
       true,
     );

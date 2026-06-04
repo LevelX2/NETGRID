@@ -11,6 +11,9 @@ import type {
 export const SHADOW_MODE_TRACE_CONTRACT_SCHEMA_VERSION =
   "shadow-mode-trace-contract-v1" as const;
 
+export const SHADOW_SCENARIO_CORPUS_SCHEMA_VERSION =
+  "shadow-scenario-corpus-v1" as const;
+
 export const CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS = {
   actualDecisionOverride: false,
   productiveScoring: false,
@@ -50,6 +53,49 @@ export type ShadowModeNoEffectFlags = {
 export type ShadowTraceVisibilityScope = "developer_only";
 
 export type ShadowActorSide = "runner" | "corp";
+
+export type ShadowScenarioSetupKind =
+  | "fixture_state"
+  | "saved_state"
+  | "synthetic_legal_actions";
+
+export type ShadowScenarioFixture = {
+  scenarioId: string;
+  side: ShadowActorSide;
+  description: string;
+  setupKind: ShadowScenarioSetupKind;
+  stateRef?: string;
+  expectedLegalActionTypes: string[];
+  expectedTacticalGoals: string[];
+  requiredCandidateFields: string[];
+  knownProjectionGaps: ActionProjectionIssue[];
+  hiddenInfoBoundary: string[];
+  allowedShadow: boolean;
+  reasonIfDisabled?: string;
+};
+
+export type ShadowScenarioCorpusSummary = {
+  scenarioCount: number;
+  runnerScenarioCount: number;
+  corpScenarioCount: number;
+  advancedScenarioCount: number;
+  allowedShadowCount: number;
+  syntheticLegalActionCount: number;
+  runtimeBackedScenarioCount: number;
+  knownProjectionGaps: ActionProjectionIssue[];
+};
+
+export type ShadowScenarioCorpusReport = {
+  schemaVersion: typeof SHADOW_SCENARIO_CORPUS_SCHEMA_VERSION;
+  scope: "shadow_scenario_corpus";
+  fixtureRef: string;
+  fixtures: ShadowScenarioFixture[];
+  summary: ShadowScenarioCorpusSummary;
+  hiddenInfoBoundaryPolicy: "explicit_per_fixture";
+  productiveUseAllowed: false;
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
 
 export type LegacyDecisionTrace = {
   selectedActionId: string;
@@ -240,6 +286,334 @@ export type ShadowModeTraceContractReport = {
   noEffectFlags: ShadowModeNoEffectFlags;
 };
 
+export const DEFAULT_SHADOW_SCENARIO_CORPUS = [
+  scenario({
+    scenarioId: "runner_basic_economy",
+    side: "runner",
+    description: "Runner compares basic credit gain with other safe actions.",
+    expectedLegalActionTypes: ["gain_credit"],
+    expectedTacticalGoals: ["runner_economy_stabilize"],
+    requiredCandidateFields: ["costProfile", "timingProfile", "hardGates"],
+  }),
+  scenario({
+    scenarioId: "runner_draw_vs_credit",
+    side: "runner",
+    description: "Runner compares drawing with gaining a credit.",
+    expectedLegalActionTypes: ["draw_card", "gain_credit"],
+    expectedTacticalGoals: ["runner_economy_stabilize", "runner_rig_setup"],
+    requiredCandidateFields: ["semanticActionType", "costProfile", "timingProfile"],
+  }),
+  scenario({
+    scenarioId: "runner_install_program",
+    side: "runner",
+    description: "Runner can install a program from side-safe hand context.",
+    expectedLegalActionTypes: ["install_card"],
+    expectedTacticalGoals: ["runner_rig_setup"],
+    requiredCandidateFields: ["sourceCardId", "costProfile", "targetContext"],
+    knownProjectionGaps: [
+      "target_context_unavailable",
+      "card_semantics_unavailable",
+    ],
+  }),
+  scenario({
+    scenarioId: "runner_install_breaker_for_known_ice",
+    side: "runner",
+    description:
+      "Runner can install a breaker while known ICE pressure is visible.",
+    expectedLegalActionTypes: ["install_card"],
+    expectedTacticalGoals: ["runner_rig_setup", "runner_central_pressure"],
+    requiredCandidateFields: ["sourceCardId", "cardContextSignals", "risks"],
+    knownProjectionGaps: [
+      "ability_unresolved",
+      "card_semantics_unavailable",
+    ],
+  }),
+  scenario({
+    scenarioId: "runner_start_hq_run",
+    side: "runner",
+    description: "Runner starts a side-safe HQ run.",
+    expectedLegalActionTypes: ["start_run"],
+    expectedTacticalGoals: ["runner_central_pressure"],
+    requiredCandidateFields: ["targetContext", "timingProfile", "hardGates"],
+  }),
+  scenario({
+    scenarioId: "runner_start_rnd_run",
+    side: "runner",
+    description: "Runner starts a side-safe R&D run.",
+    expectedLegalActionTypes: ["start_run"],
+    expectedTacticalGoals: ["runner_central_pressure"],
+    requiredCandidateFields: ["targetContext", "timingProfile", "hardGates"],
+  }),
+  scenario({
+    scenarioId: "runner_remote_contest",
+    side: "runner",
+    description: "Runner pressures a remote without projecting hidden contents.",
+    expectedLegalActionTypes: ["start_run"],
+    expectedTacticalGoals: ["runner_remote_contest"],
+    requiredCandidateFields: ["targetContext", "hardGates"],
+    knownProjectionGaps: ["target_context_unavailable"],
+    hiddenInfoBoundary: [
+      "Remote contents stay unknown unless legally revealed by the Engine.",
+    ],
+  }),
+  scenario({
+    scenarioId: "runner_access_steal_agenda",
+    side: "runner",
+    description: "Runner resolves a legally revealed agenda access.",
+    expectedLegalActionTypes: ["steal_agenda"],
+    expectedTacticalGoals: ["runner_remote_contest"],
+    requiredCandidateFields: ["targetContext", "costProfile", "hardGates"],
+  }),
+  scenario({
+    scenarioId: "runner_access_trash_asset",
+    side: "runner",
+    description: "Runner evaluates trashing a legally accessed asset.",
+    expectedLegalActionTypes: ["trash_accessed_card", "decline_trash"],
+    expectedTacticalGoals: ["runner_remote_contest", "runner_survival"],
+    requiredCandidateFields: ["targetContext", "costProfile", "risks"],
+    knownProjectionGaps: ["target_context_unavailable", "cost_unknown"],
+  }),
+  scenario({
+    scenarioId: "runner_remove_tag",
+    side: "runner",
+    description: "Runner can remove a visible tag.",
+    expectedLegalActionTypes: ["remove_tag"],
+    expectedTacticalGoals: ["runner_survival"],
+    requiredCandidateFields: ["costProfile", "timingProfile", "risks"],
+  }),
+  scenario({
+    scenarioId: "runner_survival_damage_risk",
+    side: "runner",
+    description:
+      "Runner prioritizes survival when visible damage pressure is documented.",
+    expectedLegalActionTypes: ["draw_card", "remove_tag", "gain_credit"],
+    expectedTacticalGoals: ["runner_survival"],
+    requiredCandidateFields: ["risks", "conditions", "hardGates"],
+    knownProjectionGaps: ["card_semantics_unavailable"],
+  }),
+  scenario({
+    scenarioId: "runner_jack_out_vs_continue",
+    side: "runner",
+    description: "Runner compares jack-out and continue-run choices.",
+    expectedLegalActionTypes: ["jack_out", "continue_run"],
+    expectedTacticalGoals: ["runner_central_pressure", "runner_survival"],
+    requiredCandidateFields: ["timingProfile", "risks", "hardGates"],
+  }),
+  scenario({
+    scenarioId: "runner_break_subroutine",
+    side: "runner",
+    description: "Runner considers breaking an Engine-provided subroutine.",
+    expectedLegalActionTypes: ["break_subroutine", "pump_breaker"],
+    expectedTacticalGoals: ["runner_central_pressure", "runner_survival"],
+    requiredCandidateFields: ["abilityId", "targetContext", "costProfile"],
+    knownProjectionGaps: ["ability_unresolved", "target_context_unavailable"],
+  }),
+  scenario({
+    scenarioId: "corp_basic_economy",
+    side: "corp",
+    description: "Corp compares basic credit gain with other safe actions.",
+    expectedLegalActionTypes: ["gain_credit"],
+    expectedTacticalGoals: ["corp_economy_stabilize"],
+    requiredCandidateFields: ["costProfile", "timingProfile", "hardGates"],
+  }),
+  scenario({
+    scenarioId: "corp_install_ice",
+    side: "corp",
+    description: "Corp can install ICE on a side-safe server target.",
+    expectedLegalActionTypes: ["install_card"],
+    expectedTacticalGoals: ["corp_central_defense", "corp_ice_tax"],
+    requiredCandidateFields: ["targetContext", "sourceCardId", "costProfile"],
+    knownProjectionGaps: ["target_context_unavailable"],
+  }),
+  scenario({
+    scenarioId: "corp_rez_ice_window",
+    side: "corp",
+    description: "Corp compares rez and decline in a paid ability window.",
+    expectedLegalActionTypes: ["rez_ice", "decline_rez"],
+    expectedTacticalGoals: ["corp_ice_tax", "corp_central_defense"],
+    requiredCandidateFields: ["targetContext", "costProfile", "timingProfile"],
+    knownProjectionGaps: ["target_context_unavailable"],
+  }),
+  scenario({
+    scenarioId: "corp_advance_agenda",
+    side: "corp",
+    description: "Corp advances a side-safe installed card.",
+    expectedLegalActionTypes: ["advance_card"],
+    expectedTacticalGoals: ["corp_remote_score_window"],
+    requiredCandidateFields: ["targetContext", "costProfile", "conditions"],
+    knownProjectionGaps: ["target_context_unavailable"],
+  }),
+  scenario({
+    scenarioId: "corp_score_agenda",
+    side: "corp",
+    description: "Corp scores an agenda through an Engine LegalAction.",
+    expectedLegalActionTypes: ["score_agenda"],
+    expectedTacticalGoals: ["corp_remote_score_window"],
+    requiredCandidateFields: ["targetContext", "conditions", "hardGates"],
+    knownProjectionGaps: ["target_context_unavailable"],
+  }),
+  scenario({
+    scenarioId: "corp_remote_score_window",
+    side: "corp",
+    description:
+      "Corp compares advance, score and economy in a remote score window.",
+    expectedLegalActionTypes: ["advance_card", "score_agenda", "gain_credit"],
+    expectedTacticalGoals: ["corp_remote_score_window"],
+    requiredCandidateFields: ["targetContext", "conditions", "risks"],
+    knownProjectionGaps: [
+      "target_context_unavailable",
+      "card_semantics_unavailable",
+    ],
+  }),
+  scenario({
+    scenarioId: "corp_defend_hq",
+    side: "corp",
+    description: "Corp defends HQ using side-safe server information.",
+    expectedLegalActionTypes: ["install_card", "rez_ice"],
+    expectedTacticalGoals: ["corp_central_defense"],
+    requiredCandidateFields: ["targetContext", "costProfile", "risks"],
+    knownProjectionGaps: ["target_context_unavailable"],
+  }),
+  scenario({
+    scenarioId: "corp_defend_rnd",
+    side: "corp",
+    description: "Corp defends R&D using side-safe server information.",
+    expectedLegalActionTypes: ["install_card", "rez_ice"],
+    expectedTacticalGoals: ["corp_central_defense"],
+    requiredCandidateFields: ["targetContext", "costProfile", "risks"],
+    knownProjectionGaps: ["target_context_unavailable"],
+  }),
+  scenario({
+    scenarioId: "corp_tag_trace_window",
+    side: "corp",
+    description: "Corp decides whether to boost or decline a trace window.",
+    expectedLegalActionTypes: ["resolve_choice", "trigger_ability"],
+    expectedTacticalGoals: ["corp_tag_trace_punish"],
+    requiredCandidateFields: ["abilityId", "conditions", "costProfile"],
+    knownProjectionGaps: ["ability_unresolved", "cost_unknown"],
+  }),
+  scenario({
+    scenarioId: "corp_tagged_runner_punish",
+    side: "corp",
+    description: "Corp evaluates visible tagged-runner punishment.",
+    expectedLegalActionTypes: ["play_operation", "trash_resource"],
+    expectedTacticalGoals: ["corp_tag_trace_punish"],
+    requiredCandidateFields: ["conditions", "risks", "costProfile"],
+    knownProjectionGaps: ["card_semantics_unavailable"],
+  }),
+  scenario({
+    scenarioId: "corp_damage_kill_window",
+    side: "corp",
+    description: "Corp evaluates a visible damage kill window.",
+    expectedLegalActionTypes: ["play_operation", "trigger_ability"],
+    expectedTacticalGoals: ["corp_tag_trace_punish"],
+    requiredCandidateFields: ["conditions", "risks", "hardGates"],
+    knownProjectionGaps: [
+      "ability_unresolved",
+      "card_semantics_unavailable",
+    ],
+  }),
+  scenario({
+    scenarioId: "corp_ambush_or_remote_bait",
+    side: "corp",
+    description:
+      "Corp evaluates a remote-bait context without exposing hidden installed contents.",
+    expectedLegalActionTypes: ["install_card", "advance_card"],
+    expectedTacticalGoals: ["corp_remote_score_window"],
+    requiredCandidateFields: ["targetContext", "conditions", "risks"],
+    knownProjectionGaps: [
+      "target_context_unavailable",
+      "hidden_info_blocked",
+    ],
+    hiddenInfoBoundary: [
+      "Runner-unknown remote contents are not projected into the shadow trace.",
+    ],
+  }),
+  scenario({
+    scenarioId: "corp_operation_play",
+    side: "corp",
+    description: "Corp evaluates a side-safe operation play.",
+    expectedLegalActionTypes: ["play_operation"],
+    expectedTacticalGoals: ["corp_economy_stabilize", "corp_tag_trace_punish"],
+    requiredCandidateFields: ["sourceCardId", "costProfile", "conditions"],
+    knownProjectionGaps: ["card_semantics_unavailable"],
+  }),
+  scenario({
+    scenarioId: "trace_boost_or_decline",
+    side: "corp",
+    description: "Advanced trace choice keeps bid and cost evidence explicit.",
+    expectedLegalActionTypes: ["resolve_choice"],
+    expectedTacticalGoals: ["corp_tag_trace_punish"],
+    requiredCandidateFields: ["costProfile", "timingProfile", "conditions"],
+    knownProjectionGaps: ["cost_unknown"],
+  }),
+  scenario({
+    scenarioId: "x_value_choice",
+    side: "runner",
+    description: "Advanced X-value choice reports unknown cost instead of guessing.",
+    expectedLegalActionTypes: ["resolve_choice"],
+    expectedTacticalGoals: ["runner_rig_setup"],
+    requiredCandidateFields: ["costProfile", "timingProfile", "hardGates"],
+    knownProjectionGaps: ["cost_unknown"],
+  }),
+  scenario({
+    scenarioId: "multi_target_choice",
+    side: "runner",
+    description:
+      "Advanced multi-target choice requires Engine-provided target context.",
+    expectedLegalActionTypes: ["resolve_choice"],
+    expectedTacticalGoals: ["runner_remote_contest"],
+    requiredCandidateFields: ["targetContext", "hardGates"],
+    knownProjectionGaps: ["target_context_unavailable"],
+  }),
+  scenario({
+    scenarioId: "source_target_advancement_counter",
+    side: "corp",
+    description:
+      "Advanced advancement-counter source/target relation stays explicit.",
+    expectedLegalActionTypes: ["advance_card", "trigger_ability"],
+    expectedTacticalGoals: ["corp_remote_score_window"],
+    requiredCandidateFields: ["sourceCardId", "targetContext", "conditions"],
+    knownProjectionGaps: ["target_context_unavailable", "ability_unresolved"],
+  }),
+  scenario({
+    scenarioId: "hidden_info_boundary_unrezzed_ice",
+    side: "runner",
+    description:
+      "Runner-facing shadow diagnostics must not inspect unrezzed ICE details.",
+    expectedLegalActionTypes: ["start_run", "jack_out", "continue_run"],
+    expectedTacticalGoals: ["runner_central_pressure", "runner_survival"],
+    requiredCandidateFields: ["hardGates", "risks"],
+    knownProjectionGaps: ["hidden_info_blocked"],
+    hiddenInfoBoundary: [
+      "Unrezzed ICE identity, subtypes and subroutines stay hidden from Runner shadow input.",
+    ],
+  }),
+  scenario({
+    scenarioId: "hidden_resource_boundary",
+    side: "corp",
+    description:
+      "Corp-facing diagnostics must not inspect hidden Runner resource state.",
+    expectedLegalActionTypes: ["play_operation", "gain_credit"],
+    expectedTacticalGoals: ["corp_tag_trace_punish"],
+    requiredCandidateFields: ["hardGates", "conditions"],
+    knownProjectionGaps: ["hidden_info_blocked"],
+    hiddenInfoBoundary: [
+      "Hidden Runner resources and grip/stack contents stay outside Corp shadow input.",
+    ],
+  }),
+  scenario({
+    scenarioId: "multi_ability_card_unresolved",
+    side: "corp",
+    description:
+      "Multi-ability card action remains blocked until ability binding is side-safe.",
+    expectedLegalActionTypes: ["trigger_ability", "activated_card_ability"],
+    expectedTacticalGoals: ["corp_ice_tax", "corp_tag_trace_punish"],
+    requiredCandidateFields: ["abilityId", "sourceCardId", "hardGates"],
+    knownProjectionGaps: ["ability_unresolved"],
+  }),
+] as const satisfies readonly ShadowScenarioFixture[];
+
 export function buildShadowModeTraceContractReport(): ShadowModeTraceContractReport {
   return {
     schemaVersion: SHADOW_MODE_TRACE_CONTRACT_SCHEMA_VERSION,
@@ -285,5 +659,110 @@ export function buildShadowModeTraceContractReport(): ShadowModeTraceContractRep
     runtimeConsumerStatus: "none",
     forbiddenConsumers: FORBIDDEN_SHADOW_TRACE_CONSUMERS,
     noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildShadowScenarioCorpusReport(
+  fixtures: readonly ShadowScenarioFixture[] = DEFAULT_SHADOW_SCENARIO_CORPUS,
+): ShadowScenarioCorpusReport {
+  const copiedFixtures = fixtures.map(copyShadowScenarioFixture);
+
+  return {
+    schemaVersion: SHADOW_SCENARIO_CORPUS_SCHEMA_VERSION,
+    scope: "shadow_scenario_corpus",
+    fixtureRef: "data/scenarios/ai052-shadow-scenario-corpus-2026-06-04.json",
+    fixtures: copiedFixtures,
+    summary: summarizeShadowScenarioCorpus(copiedFixtures),
+    hiddenInfoBoundaryPolicy: "explicit_per_fixture",
+    productiveUseAllowed: false,
+    noRuntimeEffect: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+function scenario(
+  params: Omit<
+    ShadowScenarioFixture,
+    "setupKind" | "knownProjectionGaps" | "hiddenInfoBoundary" | "allowedShadow"
+  > & {
+    setupKind?: ShadowScenarioSetupKind;
+    knownProjectionGaps?: ActionProjectionIssue[];
+    hiddenInfoBoundary?: string[];
+    allowedShadow?: boolean;
+  },
+): ShadowScenarioFixture {
+  return {
+    scenarioId: params.scenarioId,
+    side: params.side,
+    description: params.description,
+    setupKind: params.setupKind ?? "synthetic_legal_actions",
+    ...(params.stateRef !== undefined ? { stateRef: params.stateRef } : {}),
+    expectedLegalActionTypes: [...params.expectedLegalActionTypes],
+    expectedTacticalGoals: [...params.expectedTacticalGoals],
+    requiredCandidateFields: [...params.requiredCandidateFields],
+    knownProjectionGaps: [...(params.knownProjectionGaps ?? [])],
+    hiddenInfoBoundary: [
+      "No full GameState is available to shadow diagnostics.",
+      "No opponent hidden hand, deck, HQ, R&D, grip or stack contents are projected.",
+      ...(params.hiddenInfoBoundary ?? []),
+    ],
+    allowedShadow: params.allowedShadow ?? true,
+    ...(params.reasonIfDisabled !== undefined
+      ? { reasonIfDisabled: params.reasonIfDisabled }
+      : {}),
+  };
+}
+
+function copyShadowScenarioFixture(
+  fixture: ShadowScenarioFixture,
+): ShadowScenarioFixture {
+  return {
+    scenarioId: fixture.scenarioId,
+    side: fixture.side,
+    description: fixture.description,
+    setupKind: fixture.setupKind,
+    ...(fixture.stateRef !== undefined ? { stateRef: fixture.stateRef } : {}),
+    expectedLegalActionTypes: [...fixture.expectedLegalActionTypes],
+    expectedTacticalGoals: [...fixture.expectedTacticalGoals],
+    requiredCandidateFields: [...fixture.requiredCandidateFields],
+    knownProjectionGaps: [...fixture.knownProjectionGaps],
+    hiddenInfoBoundary: [...fixture.hiddenInfoBoundary],
+    allowedShadow: fixture.allowedShadow,
+    ...(fixture.reasonIfDisabled !== undefined
+      ? { reasonIfDisabled: fixture.reasonIfDisabled }
+      : {}),
+  };
+}
+
+function summarizeShadowScenarioCorpus(
+  fixtures: readonly ShadowScenarioFixture[],
+): ShadowScenarioCorpusSummary {
+  return {
+    scenarioCount: fixtures.length,
+    runnerScenarioCount: fixtures.filter((fixture) => fixture.side === "runner")
+      .length,
+    corpScenarioCount: fixtures.filter((fixture) => fixture.side === "corp")
+      .length,
+    advancedScenarioCount: fixtures.filter((fixture) =>
+      [
+        "trace_boost_or_decline",
+        "x_value_choice",
+        "multi_target_choice",
+        "source_target_advancement_counter",
+        "hidden_info_boundary_unrezzed_ice",
+        "hidden_resource_boundary",
+        "multi_ability_card_unresolved",
+      ].includes(fixture.scenarioId),
+    ).length,
+    allowedShadowCount: fixtures.filter((fixture) => fixture.allowedShadow).length,
+    syntheticLegalActionCount: fixtures.filter(
+      (fixture) => fixture.setupKind === "synthetic_legal_actions",
+    ).length,
+    runtimeBackedScenarioCount: fixtures.filter(
+      (fixture) => fixture.setupKind !== "synthetic_legal_actions",
+    ).length,
+    knownProjectionGaps: [
+      ...new Set(fixtures.flatMap((fixture) => fixture.knownProjectionGaps)),
+    ],
   };
 }
