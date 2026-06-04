@@ -335,6 +335,81 @@ describe("buildActionSemanticCandidates", () => {
     expect(hiddenBlocked.projectionIssues).toContain("hidden_info_blocked");
     expect(JSON.stringify(hiddenBlocked)).not.toContain("hidden-resource-card");
   });
+
+  it("normalizes action cost and timing profiles without scoring", () => {
+    const candidates = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("gain_credit", 0, {
+          side: "runner",
+          timingPoint: "runner_action.main",
+          costs: [{ clicks: 1 }],
+        }),
+        legalAction("rez_ice", 1, {
+          side: "corp",
+          timingPoint: "run.encounter_ice",
+          costs: [{ credits: 3 }],
+          payload: {
+            variableRezKind: "paid_end_the_run_subroutines",
+            variableRezValue: 2,
+            variableRezAdditionalCost: 1,
+          },
+        }),
+        legalAction("end_turn", 2, {
+          side: "corp",
+          timingPoint: "corp_action.main",
+          costs: [],
+        }),
+      ],
+    });
+
+    const gainCredit = candidates[0];
+    const rezIce = candidates[1];
+    const endTurn = candidates[2];
+    if (!gainCredit || !rezIce || !endTurn) {
+      throw new Error("Expected three AI040 candidates");
+    }
+
+    expect(gainCredit.costProfile).toMatchObject({
+      clickCost: 1,
+      paidBy: "runner",
+      beneficiary: "runner",
+      costKnownStatus: "known",
+    });
+    expect(gainCredit.timingProfile).toMatchObject({
+      phase: "runner_action_phase",
+      turnSide: "runner",
+      window: "runner_action.main",
+    });
+
+    expect(rezIce.costProfile).toMatchObject({
+      creditCost: 3,
+      costKnownStatus: "known",
+      variableCost: {
+        kind: "rez_cost",
+        min: 1,
+        chosen: 2,
+      },
+    });
+    expect(rezIce.costProfile.additionalCosts).toEqual([
+      "variableRezKind",
+      "variableRezAdditionalCost",
+      "variableRezValue",
+    ]);
+    expect(rezIce.timingProfile).toMatchObject({
+      phase: "run",
+      window: "run.encounter_ice",
+      runPhase: "run.encounter_ice",
+      encounterPhase: "encounter_ice",
+      rezWindow: true,
+    });
+
+    expect(endTurn.costProfile.costKnownStatus).toBe("not_applicable");
+    expect(endTurn.timingProfile).toMatchObject({
+      phase: "corp_action_phase",
+      turnSide: "corp",
+      window: "corp_action.main",
+    });
+  });
 });
 
 function legalAction(

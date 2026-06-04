@@ -1,0 +1,81 @@
+{
+  "step": "AI040",
+  "title": "Action Cost and Timing Profiles",
+  "date": "2026-06-04",
+  "status": "done",
+  "builderFile": "packages/ai/src/action-semantic-candidate.ts",
+  "testFile": "packages/ai/src/action-semantic-candidate.test.ts",
+  "runtimeConsumerStatus": "none",
+  "scenarioCorpus": {
+    "id": "ai040_cost_timing_fixture",
+    "source": "packages/ai/src/action-semantic-candidate.test.ts",
+    "coverageClaim": "Cost-/Timing-Normalisierung ist fuer die dokumentierte Fixture geprueft; keine Aussage ueber alle theoretischen Spielzustaende.",
+    "fixtureCases": 3
+  },
+  "normalizationPolicy": {
+    "costInputs": ["LegalAction.costs", "primitive LegalAction.payload cost fields"],
+    "timingInputs": ["LegalAction.timingPoint", "LegalAction.type"],
+    "forbiddenBehavior": ["cost scoring", "action ranking", "planner weighting", "runtime decision changes"],
+    "unknownPolicy": "Nicht ableitbare Kosten bleiben unknown oder fehlen; Timing nutzt den vorhandenen TimingPoint."
+  },
+  "metrics": {
+    "fixtureCases": 3,
+    "costProfileProjected": 3,
+    "timingProfileProjected": 3,
+    "knownCostProfiles": 2,
+    "notApplicableCostProfiles": 1,
+    "variableCostProfiles": 1,
+    "timingUnknown": 0,
+    "runtimeConsumers": 0
+  },
+  "coveredCostFields": [
+    "clickCost",
+    "creditCost",
+    "trashCost",
+    "agendaPointCost",
+    "xValue",
+    "paidBy",
+    "beneficiary",
+    "costKnownStatus",
+    "variableCost",
+    "additionalCosts"
+  ],
+  "coveredTimingFields": [
+    "phase",
+    "turnSide",
+    "window",
+    "runPhase",
+    "encounterPhase",
+    "accessPhase",
+    "scoreWindow",
+    "rezWindow",
+    "responseWindow"
+  ],
+  "gapsForwarded": [
+    {
+      "gapId": "AI040-G001",
+      "category": "non_click_credit_costs_sparse",
+      "description": "Self-damage, self-tag, discard and forfeit costs are schema-supported but only filled when explicit side-safe LegalAction data exists.",
+      "primaryProjectionStatus": "partial_projected",
+      "projectionIssues": ["cost_unknown"]
+    },
+    {
+      "gapId": "AI040-G002",
+      "category": "timing_context_broad",
+      "description": "TimingProfile normalizes timingPoint and broad windows, but does not reconstruct detailed run/access state from Boardstate.",
+      "primaryProjectionStatus": "partial_projected",
+      "projectionIssues": []
+    }
+  ],
+  "noEffectFlags": {
+    "planner": false,
+    "actionScore": false,
+    "planWeight": false,
+    "targetingAi": false,
+    "engine": false,
+    "legality": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivation": false,
+    "hiddenInfoLeak": false
+  }
+}
