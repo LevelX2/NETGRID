@@ -1,0 +1,147 @@
+{
+  "schemaVersion": "meta12-legacy-freeze-production-stabilization-v0",
+  "step": "META12",
+  "scope": "legacy_freeze_production_stabilization",
+  "sourceStep": "META11",
+  "stabilizedProductionScopes": [
+    "basic_economy_draw",
+    "tag_removal",
+    "simple_score_advance",
+    "basic_install"
+  ],
+  "freezeDecisions": [
+    {
+      "scopeId": "basic_economy_draw",
+      "productionStable": true,
+      "legacyFreezeDecision": "freeze_ready",
+      "legacyFallbackAvailable": true,
+      "rollbackAvailable": true,
+      "observationCycles": 4,
+      "productionDecisionCount": 148
+    },
+    {
+      "scopeId": "tag_removal",
+      "productionStable": true,
+      "legacyFreezeDecision": "freeze_ready",
+      "legacyFallbackAvailable": true,
+      "rollbackAvailable": true,
+      "observationCycles": 4,
+      "productionDecisionCount": 76
+    },
+    {
+      "scopeId": "simple_score_advance",
+      "productionStable": true,
+      "legacyFreezeDecision": "freeze_ready",
+      "legacyFallbackAvailable": true,
+      "rollbackAvailable": true,
+      "observationCycles": 3,
+      "productionDecisionCount": 84
+    },
+    {
+      "scopeId": "basic_install",
+      "productionStable": true,
+      "legacyFreezeDecision": "freeze_ready",
+      "legacyFallbackAvailable": true,
+      "rollbackAvailable": true,
+      "observationCycles": 2,
+      "productionDecisionCount": 52
+    }
+  ],
+  "stabilityDashboard": {
+    "productionDecisionCount": 360,
+    "semanticDecisionShare": 0.72,
+    "legacyFallbackShare": 0.28,
+    "rollbackCount": 8,
+    "engineRejectCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "unsafeDivergenceCount": 0,
+    "decisionLatencyP95Ms": 9.8,
+    "traceScrubPassRate": 1,
+    "scopeRegressionStatus": "green"
+  },
+  "expansionPolicy": [
+    {
+      "scopeId": "basic_economy_draw",
+      "policy": "freeze_legacy_for_scope"
+    },
+    {
+      "scopeId": "tag_removal",
+      "policy": "freeze_legacy_for_scope"
+    },
+    {
+      "scopeId": "simple_score_advance",
+      "policy": "freeze_legacy_for_scope"
+    },
+    {
+      "scopeId": "basic_install",
+      "policy": "freeze_legacy_for_scope"
+    },
+    {
+      "scopeId": "simple_rez",
+      "policy": "semantic_followup_required"
+    },
+    {
+      "scopeId": "remote_contest",
+      "policy": "semantic_followup_required"
+    },
+    {
+      "scopeId": "trace_payment",
+      "policy": "remain_blocked"
+    },
+    {
+      "scopeId": "damage_prevention",
+      "policy": "remain_blocked"
+    },
+    {
+      "scopeId": "multi_target_multi_ability",
+      "policy": "remain_blocked"
+    }
+  ],
+  "laterLegacyRetirementConditions": [
+    {
+      "conditionId": "minimum_observation_duration",
+      "status": "future_required"
+    },
+    {
+      "conditionId": "minimum_production_decision_count",
+      "status": "future_required"
+    },
+    {
+      "conditionId": "rollback_replacement_plan",
+      "status": "future_required"
+    },
+    {
+      "conditionId": "human_signoff_required",
+      "status": "future_required"
+    },
+    {
+      "conditionId": "blocked_scopes_resolved_or_declared_legacy_only",
+      "status": "future_required"
+    }
+  ],
+  "qualityGates": {
+    "legacyFreezeAllowedForSelectedScopes": true,
+    "legacyFallbackAvailable": true,
+    "rollbackAvailable": true,
+    "hiddenInfoViolationCount": 0,
+    "illegalSemanticDecisionCount": 0,
+    "engineRejectCount": 0,
+    "unsafeDivergenceCount": 0,
+    "traceScrubberPasses": true,
+    "multiRunMetricsStable": true,
+    "fullProductionReady": false,
+    "legacyRemovalReady": false
+  },
+  "goNoGo": {
+    "decision": "legacy_freeze_for_selected_scopes_ready",
+    "legacyRemoved": false,
+    "fullReplacementWithoutFallback": false,
+    "laterRetirementOnly": true
+  },
+  "productiveUse": "selected_scopes_stabilized",
+  "legacyFreezeScope": "selected_scopes_only",
+  "legacyFallbackAvailable": true,
+  "rollbackAvailable": true,
+  "legacyRemovalReady": false,
+  "fullProductionReady": false
+}

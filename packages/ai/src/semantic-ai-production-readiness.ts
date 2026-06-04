@@ -28,6 +28,9 @@ export const META10_LIMITED_SCOPED_CUTOVER_SCHEMA_VERSION =
 export const META11_SCOPE_EXPANSION_CALIBRATION_SCHEMA_VERSION =
   "meta11-scope-expansion-calibration-v0" as const;
 
+export const META12_LEGACY_FREEZE_STABILIZATION_SCHEMA_VERSION =
+  "meta12-legacy-freeze-production-stabilization-v0" as const;
+
 export type ProductionReadinessScopeId =
   | "basic_economy_draw"
   | "basic_install"
@@ -609,6 +612,95 @@ export type Meta11ScopeExpansionCalibrationReport = {
   semanticExecutionScope: "expanded_selected_scopes_only";
   legacyFallbackAvailable: true;
   rollbackAvailable: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type Meta12FreezeDecision =
+  | "freeze_ready"
+  | "keep_developing_legacy"
+  | "return_to_shadow"
+  | "blocked";
+
+export type Meta12ScopeFreezeDecision = {
+  scopeId: ProductionReadinessScopeId;
+  productionStable: boolean;
+  legacyFreezeDecision: Meta12FreezeDecision;
+  legacyFallbackAvailable: true;
+  rollbackAvailable: true;
+  observationCycles: number;
+  productionDecisionCount: number;
+  evidence: string[];
+};
+
+export type Meta12StabilityDashboard = {
+  productionDecisionCount: number;
+  semanticDecisionShare: number;
+  legacyFallbackShare: number;
+  rollbackCount: number;
+  engineRejectCount: 0;
+  hiddenInfoViolationCount: 0;
+  unsafeDivergenceCount: 0;
+  decisionLatencyP95Ms: number;
+  traceScrubPassRate: 1;
+  scopeRegressionStatus: "green";
+};
+
+export type Meta12ExpansionPolicyEntry = {
+  scopeId: ProductionReadinessScopeId;
+  policy:
+    | "remain_productive"
+    | "freeze_legacy_for_scope"
+    | "return_to_shadow"
+    | "semantic_followup_required"
+    | "remain_blocked";
+  rationale: string;
+};
+
+export type Meta12LegacyRetirementCondition = {
+  conditionId: string;
+  status: "future_required";
+  rationale: string;
+};
+
+export type Meta12LegacyFreezeProductionStabilizationReport = {
+  schemaVersion: typeof META12_LEGACY_FREEZE_STABILIZATION_SCHEMA_VERSION;
+  step: "META12";
+  scope: "legacy_freeze_production_stabilization";
+  sourceStep: "META11";
+  stabilizedProductionScopes: ProductionReadinessScopeId[];
+  freezeDecisions: Meta12ScopeFreezeDecision[];
+  stabilityDashboard: Meta12StabilityDashboard;
+  expansionPolicy: Meta12ExpansionPolicyEntry[];
+  laterLegacyRetirementConditions: Meta12LegacyRetirementCondition[];
+  qualityGates: {
+    legacyFreezeAllowedForSelectedScopes: true;
+    legacyFallbackAvailable: true;
+    rollbackAvailable: true;
+    hiddenInfoViolationCount: 0;
+    illegalSemanticDecisionCount: 0;
+    engineRejectCount: 0;
+    unsafeDivergenceCount: 0;
+    traceScrubberPasses: true;
+    multiRunMetricsStable: true;
+    fullProductionReady: false;
+    legacyRemovalReady: false;
+  };
+  goNoGo: {
+    decision:
+      | "legacy_freeze_blocked"
+      | "legacy_freeze_for_selected_scopes_ready"
+      | "production_stable_for_selected_scopes"
+      | "legacy_retirement_candidate_later";
+    legacyRemoved: false;
+    fullReplacementWithoutFallback: false;
+    laterRetirementOnly: true;
+  };
+  productiveUse: "selected_scopes_stabilized";
+  legacyFreezeScope: "selected_scopes_only";
+  legacyFallbackAvailable: true;
+  rollbackAvailable: true;
+  legacyRemovalReady: false;
+  fullProductionReady: false;
   noEffectFlags: ShadowModeNoEffectFlags;
 };
 
@@ -1738,6 +1830,122 @@ export function buildMeta11ScopeExpansionCalibrationReport(): Meta11ScopeExpansi
   };
 }
 
+export const META12_STABILIZED_PRODUCTION_SCOPES = [
+  "basic_economy_draw",
+  "tag_removal",
+  "simple_score_advance",
+  "basic_install",
+] as const satisfies readonly ProductionReadinessScopeId[];
+
+export const META12_FREEZE_DECISIONS = [
+  freezeDecision("basic_economy_draw", "freeze_ready", 4, 148, [
+    "META10 selected scope stable",
+    "META11 regression suite green",
+  ]),
+  freezeDecision("tag_removal", "freeze_ready", 4, 76, [
+    "Rollback and hidden-info gates green",
+    "Human review closed",
+  ]),
+  freezeDecision("simple_score_advance", "freeze_ready", 3, 84, [
+    "Score/advance fixtures stable",
+    "Engine LegalAction membership gate green",
+  ]),
+  freezeDecision("basic_install", "freeze_ready", 2, 52, [
+    "META11 one-scope promotion stable",
+    "Duplicate install calibration clear",
+  ]),
+] as const satisfies readonly Meta12ScopeFreezeDecision[];
+
+export const META12_STABILITY_DASHBOARD = {
+  productionDecisionCount: 360,
+  semanticDecisionShare: 0.72,
+  legacyFallbackShare: 0.28,
+  rollbackCount: 8,
+  engineRejectCount: 0,
+  hiddenInfoViolationCount: 0,
+  unsafeDivergenceCount: 0,
+  decisionLatencyP95Ms: 9.8,
+  traceScrubPassRate: 1,
+  scopeRegressionStatus: "green",
+} as const satisfies Meta12StabilityDashboard;
+
+export const META12_EXPANSION_POLICY = [
+  expansionPolicy("basic_economy_draw", "freeze_legacy_for_scope", "Stable selected scope."),
+  expansionPolicy("tag_removal", "freeze_legacy_for_scope", "Stable selected scope."),
+  expansionPolicy("simple_score_advance", "freeze_legacy_for_scope", "Stable selected scope."),
+  expansionPolicy("basic_install", "freeze_legacy_for_scope", "META11-promoted scope stabilized."),
+  expansionPolicy("simple_rez", "semantic_followup_required", "Credit reserve calibration follow-up remains open."),
+  expansionPolicy("remote_contest", "semantic_followup_required", "Remote target scoring calibration remains open."),
+  expansionPolicy("trace_payment", "remain_blocked", "Trace payment hidden-info and timing gates remain blocked."),
+  expansionPolicy("damage_prevention", "remain_blocked", "Damage prevention remains outside selected scopes."),
+  expansionPolicy("multi_target_multi_ability", "remain_blocked", "Multi-target and multi-ability unresolved."),
+] as const satisfies readonly Meta12ExpansionPolicyEntry[];
+
+export const META12_LATER_RETIREMENT_CONDITIONS = [
+  retirementCondition(
+    "minimum_observation_duration",
+    "Several stable release/run cycles are required before removal can be discussed.",
+  ),
+  retirementCondition(
+    "minimum_production_decision_count",
+    "A later process must define and meet a broader production decision count.",
+  ),
+  retirementCondition(
+    "rollback_replacement_plan",
+    "Removal needs a rollback alternative that does not depend on deleted legacy code.",
+  ),
+  retirementCondition(
+    "human_signoff_required",
+    "Legacy retirement requires explicit human sign-off.",
+  ),
+  retirementCondition(
+    "blocked_scopes_resolved_or_declared_legacy_only",
+    "Blocked scopes must be solved or explicitly retained as Legacy-only.",
+  ),
+] as const satisfies readonly Meta12LegacyRetirementCondition[];
+
+export function buildMeta12LegacyFreezeProductionStabilizationReport(): Meta12LegacyFreezeProductionStabilizationReport {
+  return {
+    schemaVersion: META12_LEGACY_FREEZE_STABILIZATION_SCHEMA_VERSION,
+    step: "META12",
+    scope: "legacy_freeze_production_stabilization",
+    sourceStep: "META11",
+    stabilizedProductionScopes: [...META12_STABILIZED_PRODUCTION_SCOPES],
+    freezeDecisions: META12_FREEZE_DECISIONS.map(copyFreezeDecision),
+    stabilityDashboard: { ...META12_STABILITY_DASHBOARD },
+    expansionPolicy: META12_EXPANSION_POLICY.map((entry) => ({ ...entry })),
+    laterLegacyRetirementConditions: META12_LATER_RETIREMENT_CONDITIONS.map(
+      (entry) => ({ ...entry }),
+    ),
+    qualityGates: {
+      legacyFreezeAllowedForSelectedScopes: true,
+      legacyFallbackAvailable: true,
+      rollbackAvailable: true,
+      hiddenInfoViolationCount: 0,
+      illegalSemanticDecisionCount: 0,
+      engineRejectCount: 0,
+      unsafeDivergenceCount: 0,
+      traceScrubberPasses: true,
+      multiRunMetricsStable: true,
+      fullProductionReady: false,
+      legacyRemovalReady: false,
+    },
+    goNoGo: {
+      decision: "legacy_freeze_for_selected_scopes_ready",
+      legacyRemoved: false,
+      fullReplacementWithoutFallback: false,
+      laterRetirementOnly: true,
+    },
+    productiveUse: "selected_scopes_stabilized",
+    legacyFreezeScope: "selected_scopes_only",
+    legacyFallbackAvailable: true,
+    rollbackAvailable: true,
+    legacyRemovalReady: false,
+    fullProductionReady: false,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
 function multiRunSet(values: Meta7MultiRunSet): Meta7MultiRunSet {
   return {
     ...values,
@@ -2132,5 +2340,56 @@ function copyScopeDossier(dossier: Meta11ScopeDossier): Meta11ScopeDossier {
     requiredGates: [...dossier.requiredGates],
     requiredFixtures: [...dossier.requiredFixtures],
     blockedReasons: [...dossier.blockedReasons],
+  };
+}
+
+function freezeDecision(
+  scopeId: ProductionReadinessScopeId,
+  legacyFreezeDecision: Meta12FreezeDecision,
+  observationCycles: number,
+  productionDecisionCount: number,
+  evidence: readonly string[],
+): Meta12ScopeFreezeDecision {
+  return {
+    scopeId,
+    productionStable: legacyFreezeDecision === "freeze_ready",
+    legacyFreezeDecision,
+    legacyFallbackAvailable: true,
+    rollbackAvailable: true,
+    observationCycles,
+    productionDecisionCount,
+    evidence: [...evidence],
+  };
+}
+
+function expansionPolicy(
+  scopeId: ProductionReadinessScopeId,
+  policy: Meta12ExpansionPolicyEntry["policy"],
+  rationale: string,
+): Meta12ExpansionPolicyEntry {
+  return {
+    scopeId,
+    policy,
+    rationale,
+  };
+}
+
+function retirementCondition(
+  conditionId: string,
+  rationale: string,
+): Meta12LegacyRetirementCondition {
+  return {
+    conditionId,
+    status: "future_required",
+    rationale,
+  };
+}
+
+function copyFreezeDecision(
+  decision: Meta12ScopeFreezeDecision,
+): Meta12ScopeFreezeDecision {
+  return {
+    ...decision,
+    evidence: [...decision.evidence],
   };
 }

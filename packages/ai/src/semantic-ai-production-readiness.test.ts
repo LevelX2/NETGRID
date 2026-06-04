@@ -8,6 +8,7 @@ import {
   META8_INTERNAL_CANARY_FIXTURES,
   META9_PRODUCTION_SAFE_SHADOW_CONFIG,
   META10_SELECTED_PRODUCTION_SCOPES,
+  buildMeta12LegacyFreezeProductionStabilizationReport,
   buildMeta11ScopeExpansionCalibrationReport,
   buildMeta10LimitedScopedProductionCutoverReport,
   buildMeta9ProductionSafeShadowAgreementCanaryReport,
@@ -164,6 +165,107 @@ describe("META7 Multi-Run Evaluation + Human Review Closure", () => {
       nextStep: "META8_internal_semantic_canary",
     });
     expect(report.noRuntimeEffect).toBe(true);
+  });
+});
+
+describe("META12 Legacy Freeze + Production Stabilization", () => {
+  it("marks selected production scopes as freeze-ready while keeping fallback", () => {
+    const report = buildMeta12LegacyFreezeProductionStabilizationReport();
+
+    expect(report.schemaVersion).toBe(
+      "meta12-legacy-freeze-production-stabilization-v0",
+    );
+    expect(report.step).toBe("META12");
+    expect(report.stabilizedProductionScopes).toEqual([
+      "basic_economy_draw",
+      "tag_removal",
+      "simple_score_advance",
+      "basic_install",
+    ]);
+    expect(report.freezeDecisions).toHaveLength(4);
+    expect(
+      report.freezeDecisions.every(
+        (entry) =>
+          entry.productionStable &&
+          entry.legacyFreezeDecision === "freeze_ready" &&
+          entry.legacyFallbackAvailable &&
+          entry.rollbackAvailable,
+      ),
+    ).toBe(true);
+  });
+
+  it("reports a green stability dashboard for selected scopes", () => {
+    const report = buildMeta12LegacyFreezeProductionStabilizationReport();
+
+    expect(report.stabilityDashboard).toEqual({
+      productionDecisionCount: 360,
+      semanticDecisionShare: 0.72,
+      legacyFallbackShare: 0.28,
+      rollbackCount: 8,
+      engineRejectCount: 0,
+      hiddenInfoViolationCount: 0,
+      unsafeDivergenceCount: 0,
+      decisionLatencyP95Ms: 9.8,
+      traceScrubPassRate: 1,
+      scopeRegressionStatus: "green",
+    });
+  });
+
+  it("keeps expansion policy explicit for productive, follow-up and blocked scopes", () => {
+    const report = buildMeta12LegacyFreezeProductionStabilizationReport();
+
+    expect(report.expansionPolicy).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          scopeId: "basic_economy_draw",
+          policy: "freeze_legacy_for_scope",
+        }),
+        expect.objectContaining({
+          scopeId: "simple_rez",
+          policy: "semantic_followup_required",
+        }),
+        expect.objectContaining({
+          scopeId: "trace_payment",
+          policy: "remain_blocked",
+        }),
+      ]),
+    );
+    expect(report.laterLegacyRetirementConditions.map((entry) => entry.status)).toEqual(
+      [
+        "future_required",
+        "future_required",
+        "future_required",
+        "future_required",
+        "future_required",
+      ],
+    );
+  });
+
+  it("allows legacy freeze but not full production or legacy removal", () => {
+    const report = buildMeta12LegacyFreezeProductionStabilizationReport();
+
+    expect(report.qualityGates).toEqual({
+      legacyFreezeAllowedForSelectedScopes: true,
+      legacyFallbackAvailable: true,
+      rollbackAvailable: true,
+      hiddenInfoViolationCount: 0,
+      illegalSemanticDecisionCount: 0,
+      engineRejectCount: 0,
+      unsafeDivergenceCount: 0,
+      traceScrubberPasses: true,
+      multiRunMetricsStable: true,
+      fullProductionReady: false,
+      legacyRemovalReady: false,
+    });
+    expect(report.goNoGo).toEqual({
+      decision: "legacy_freeze_for_selected_scopes_ready",
+      legacyRemoved: false,
+      fullReplacementWithoutFallback: false,
+      laterRetirementOnly: true,
+    });
+    expect(report.legacyFreezeScope).toBe("selected_scopes_only");
+    expect(report.legacyRemovalReady).toBe(false);
+    expect(report.fullProductionReady).toBe(false);
   });
 });
 
