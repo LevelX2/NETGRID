@@ -1,0 +1,43 @@
+{
+  "processId": "action-semantics-bridge",
+  "processDocument": "docs/architecture/ai/action-semantics-bridge-automation-process-2026-06-04.md",
+  "state": "step_planned",
+  "currentStep": "AI034",
+  "currentStepTitle": "LegalAction Shape Inventory",
+  "completedSteps": [],
+  "blocked": false,
+  "blockerReport": null,
+  "lastGreenCommit": null,
+  "nextStep": "AI035",
+  "worktree": {
+    "mainWorkspace": "C:\\Projekte\\NETGRID",
+    "workingWorktree": "C:\\Projekte\\NETGRID_AI_ACTION_SEMANTICS_BRIDGE",
+    "branch": "codex/ai-action-semantics-bridge",
+    "baseBranch": "main",
+    "baseHead": "b6e089e8ec6d2dfb1b1110d0450d9a43b357b2ec"
+  },
+  "preflight": {
+    "completed": true,
+    "completedAt": "2026-06-04",
+    "report": "docs/reviews/ai/action-semantics-bridge-preflight-2026-06-04.md",
+    "checksPassed": true,
+    "foreignChanges": "none",
+    "notes": [
+      "Main workspace clean on main and ahead of origin/main by 23 local commits.",
+      "Working worktree created from local main for codex/ai-action-semantics-bridge.",
+      "AI023-2 through AI031-033 checks passed.",
+      "AI028-R baseline warning count is documented and non-blocking."
+    ]
+  },
+  "noEffectFlags": {
+    "planner": false,
+    "actionScore": false,
+    "planWeight": false,
+    "targetingAi": false,
+    "engine": false,
+    "legality": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivation": false,
+    "hiddenInfoLeak": false
+  }
+}
