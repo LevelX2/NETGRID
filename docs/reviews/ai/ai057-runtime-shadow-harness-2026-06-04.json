@@ -1,0 +1,62 @@
+{
+  "step": "AI057",
+  "title": "Runtime Shadow Harness, disabled by default",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai051-ai060-controlled-shadow-mode",
+  "schemaVersion": "runtime-shadow-harness-v1",
+  "scope": "runtime_shadow_harness_default_off_diagnostic_only",
+  "runtimeConsumerStatus": "none",
+  "semanticExecutionAllowed": false,
+  "productiveUseAllowed": false,
+  "noRuntimeEffect": true,
+  "configContract": {
+    "semanticAiShadowModeEnabled": false,
+    "diagnosticsOnly": true,
+    "visibilityScope": "developer_only",
+    "productiveCutoverAllowed": false,
+    "publicPayloadChangesAllowed": false
+  },
+  "actualDecisionContract": "actualDecision_equals_legacyDecision",
+  "actualDecisionIdentityAssertion": "actualDecision is the same object reference as legacyDecision in harness tests",
+  "publicPayloadChangesAllowed": false,
+  "runtimeFilesTouched": [],
+  "runtimeFilesImportingHarness": [],
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "implementationFiles": [
+    "packages/ai/src/controlled-shadow-mode.ts",
+    "packages/ai/src/controlled-shadow-mode.test.ts"
+  ],
+  "reportFiles": [
+    "docs/reviews/ai/ai057-runtime-shadow-harness-2026-06-04.md",
+    "docs/reviews/ai/ai057-runtime-shadow-harness-2026-06-04.json"
+  ],
+  "checkScripts": [
+    "scripts/check-ai057-runtime-shadow-harness.mjs"
+  ],
+  "verification": [
+    "node scripts/check-ai057-runtime-shadow-harness.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- controlled-shadow-mode.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "node scripts/check-ai056-shadow-metrics-and-quality-gates.mjs",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "doneGate": {
+    "flagDefaultFalse": true,
+    "actualDecisionEqualsLegacyDecision": true,
+    "shadowDecisionNeverExecuted": true,
+    "noPublicPayloadChanges": true,
+    "noHiddenInfoInTrace": true,
+    "noRuntimeEffect": true
+  }
+}

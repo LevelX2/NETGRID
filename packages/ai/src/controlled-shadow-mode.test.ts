@@ -10,6 +10,9 @@ import {
   buildShadowMetricsAndGatesReport,
   buildShadowScenarioCorpusReport,
   buildShadowModeTraceContractReport,
+  buildRuntimeShadowHarnessReport,
+  DEFAULT_SEMANTIC_AI_SHADOW_MODE_CONFIG,
+  runRuntimeShadowHarness,
   type ShadowDecisionTrace,
 } from "./controlled-shadow-mode";
 
@@ -456,6 +459,102 @@ describe("buildShadowMetricsAndGatesReport", () => {
     expect(report.runtimeConsumerStatus).toBe("none");
     expect(report.semanticExecutionAllowed).toBe(false);
     expect(report.productiveUseAllowed).toBe(false);
+    expect(report.noRuntimeEffect).toBe(true);
+  });
+});
+
+describe("runRuntimeShadowHarness", () => {
+  it("is disabled by default and returns the exact legacy decision as actualDecision", () => {
+    const legacyDecision = {
+      selectedActionId: "legacy-gain-credit",
+      selectedActionType: "gain_credit",
+    };
+    const result = runRuntimeShadowHarness({
+      legacyDecision,
+      stateVersion: 1,
+    });
+
+    expect(DEFAULT_SEMANTIC_AI_SHADOW_MODE_CONFIG.semanticAiShadowModeEnabled).toBe(
+      false,
+    );
+    expect(result.shadowDiagnosticsEnabled).toBe(false);
+    expect(result.actualDecision).toBe(legacyDecision);
+    expect(result.legacyDecision).toBe(legacyDecision);
+    expect(result.semanticShadowDecision).toBeUndefined();
+    expect(result.trace).toBeUndefined();
+  });
+
+  it("can run diagnostics when explicitly enabled while actualDecision remains legacy", () => {
+    const corpus = buildShadowScenarioCorpusReport();
+    const fixture = corpus.fixtures.find(
+      (candidate) => candidate.scenarioId === "runner_draw_vs_credit",
+    );
+    const legacyDecision = {
+      selectedActionId: "legacy-draw",
+      selectedActionType: "draw_card",
+    };
+
+    expect(fixture).toBeDefined();
+    const result = runRuntimeShadowHarness({
+      legacyDecision,
+      fixture: fixture!,
+      stateVersion: 2,
+      config: {
+        ...DEFAULT_SEMANTIC_AI_SHADOW_MODE_CONFIG,
+        semanticAiShadowModeEnabled: true,
+      },
+    });
+
+    expect(result.shadowDiagnosticsEnabled).toBe(true);
+    expect(result.actualDecision).toBe(legacyDecision);
+    expect(result.actualDecisionEqualsLegacyDecision).toBe(true);
+    expect(result.semanticShadowDecision?.scoreStatus).toBe("ranked_shadow_only");
+    expect(result.trace?.visibilityScope).toBe("developer_only");
+    expect(result.trace?.noRuntimeEffect).toBe(true);
+  });
+
+  it("keeps hidden-info fixtures diagnostic and blocked when enabled", () => {
+    const corpus = buildShadowScenarioCorpusReport();
+    const fixture = corpus.fixtures.find(
+      (candidate) => candidate.scenarioId === "hidden_resource_boundary",
+    );
+    const legacyDecision = {
+      selectedActionId: "legacy-operation",
+      selectedActionType: "play_operation",
+    };
+
+    expect(fixture).toBeDefined();
+    const result = runRuntimeShadowHarness({
+      legacyDecision,
+      fixture: fixture!,
+      stateVersion: 3,
+      config: {
+        ...DEFAULT_SEMANTIC_AI_SHADOW_MODE_CONFIG,
+        semanticAiShadowModeEnabled: true,
+      },
+    });
+
+    expect(result.actualDecision).toBe(legacyDecision);
+    expect(result.semanticShadowDecision?.scoreStatus).toBe("blocked_by_gate");
+    expect(result.trace?.hardGates.hiddenInfoViolationCount).toBe(0);
+    expect(result.trace?.hardGates.actualDecisionOverrideCount).toBe(0);
+  });
+});
+
+describe("buildRuntimeShadowHarnessReport", () => {
+  it("documents the default-off diagnostic-only harness contract", () => {
+    const report = buildRuntimeShadowHarnessReport();
+
+    expect(report.schemaVersion).toBe("runtime-shadow-harness-v1");
+    expect(report.scope).toBe("runtime_shadow_harness_default_off_diagnostic_only");
+    expect(report.configContract.semanticAiShadowModeEnabled).toBe(false);
+    expect(report.configContract.diagnosticsOnly).toBe(true);
+    expect(report.configContract.visibilityScope).toBe("developer_only");
+    expect(report.actualDecisionContract).toBe(
+      "actualDecision_equals_legacyDecision",
+    );
+    expect(report.runtimeConsumerStatus).toBe("none");
+    expect(report.publicPayloadChangesAllowed).toBe(false);
     expect(report.noRuntimeEffect).toBe(true);
   });
 });

@@ -26,6 +26,9 @@ export const DEVIATION_TRIAGE_SCHEMA_VERSION =
 export const SHADOW_METRICS_GATES_SCHEMA_VERSION =
   "shadow-metrics-gates-v1" as const;
 
+export const RUNTIME_SHADOW_HARNESS_SCHEMA_VERSION =
+  "runtime-shadow-harness-v1" as const;
+
 export const CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS = {
   actualDecisionOverride: false,
   productiveScoring: false,
@@ -486,6 +489,49 @@ export type ShadowMetricsAndGatesReport = {
   productiveUseAllowed: false;
   semanticExecutionAllowed: false;
   runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type SemanticAiShadowModeConfig = {
+  semanticAiShadowModeEnabled: boolean;
+  diagnosticsOnly: true;
+  visibilityScope: ShadowTraceVisibilityScope;
+  productiveCutoverAllowed: false;
+  publicPayloadChangesAllowed: false;
+};
+
+export type RuntimeShadowLegacyDecisionLike = {
+  selectedActionId: string;
+  selectedActionType: string;
+};
+
+export type RuntimeShadowHarnessParams<TLegacyDecision> = {
+  legacyDecision: TLegacyDecision;
+  fixture?: ShadowScenarioFixture;
+  stateVersion: number;
+  config?: SemanticAiShadowModeConfig;
+};
+
+export type RuntimeShadowHarnessResult<TLegacyDecision> = {
+  legacyDecision: TLegacyDecision;
+  actualDecision: TLegacyDecision;
+  semanticShadowDecision?: SemanticShadowDecision;
+  trace?: ShadowDecisionTrace;
+  shadowDiagnosticsEnabled: boolean;
+  actualDecisionEqualsLegacyDecision: true;
+  noRuntimeEffect: true;
+};
+
+export type RuntimeShadowHarnessReport = {
+  schemaVersion: typeof RUNTIME_SHADOW_HARNESS_SCHEMA_VERSION;
+  scope: "runtime_shadow_harness_default_off_diagnostic_only";
+  configContract: SemanticAiShadowModeConfig;
+  actualDecisionContract: "actualDecision_equals_legacyDecision";
+  runtimeConsumerStatus: "none";
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  publicPayloadChangesAllowed: false;
   noRuntimeEffect: true;
   noEffectFlags: ShadowModeNoEffectFlags;
 };
@@ -1019,6 +1065,65 @@ export function buildShadowMetricsAndGatesReport(
     productiveUseAllowed: false,
     semanticExecutionAllowed: false,
     runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export const DEFAULT_SEMANTIC_AI_SHADOW_MODE_CONFIG = {
+  semanticAiShadowModeEnabled: false,
+  diagnosticsOnly: true,
+  visibilityScope: "developer_only",
+  productiveCutoverAllowed: false,
+  publicPayloadChangesAllowed: false,
+} as const satisfies SemanticAiShadowModeConfig;
+
+export function runRuntimeShadowHarness<
+  TLegacyDecision extends RuntimeShadowLegacyDecisionLike,
+>(
+  params: RuntimeShadowHarnessParams<TLegacyDecision>,
+): RuntimeShadowHarnessResult<TLegacyDecision> {
+  const config = params.config ?? DEFAULT_SEMANTIC_AI_SHADOW_MODE_CONFIG;
+  const shadowDiagnosticsEnabled =
+    config.semanticAiShadowModeEnabled === true && params.fixture !== undefined;
+  const baseResult = {
+    legacyDecision: params.legacyDecision,
+    actualDecision: params.legacyDecision,
+    shadowDiagnosticsEnabled,
+    actualDecisionEqualsLegacyDecision: true,
+    noRuntimeEffect: true,
+  } as const;
+
+  if (!shadowDiagnosticsEnabled || params.fixture === undefined) {
+    return baseResult;
+  }
+
+  const semanticShadowDecision = buildSemanticShadowDecisionForFixture(
+    params.fixture,
+  );
+
+  return {
+    ...baseResult,
+    semanticShadowDecision,
+    trace: buildRuntimeShadowTrace(
+      params.legacyDecision,
+      semanticShadowDecision,
+      params.fixture,
+      params.stateVersion,
+    ),
+  };
+}
+
+export function buildRuntimeShadowHarnessReport(): RuntimeShadowHarnessReport {
+  return {
+    schemaVersion: RUNTIME_SHADOW_HARNESS_SCHEMA_VERSION,
+    scope: "runtime_shadow_harness_default_off_diagnostic_only",
+    configContract: DEFAULT_SEMANTIC_AI_SHADOW_MODE_CONFIG,
+    actualDecisionContract: "actualDecision_equals_legacyDecision",
+    runtimeConsumerStatus: "none",
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    publicPayloadChangesAllowed: false,
     noRuntimeEffect: true,
     noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
   };
@@ -1848,4 +1953,109 @@ function metricValue(
 
 function roundRate(value: number): number {
   return Math.round(value * 10000) / 10000;
+}
+
+function buildRuntimeShadowTrace<TLegacyDecision extends RuntimeShadowLegacyDecisionLike>(
+  legacyDecision: TLegacyDecision,
+  semanticShadowDecision: SemanticShadowDecision,
+  fixture: ShadowScenarioFixture,
+  stateVersion: number,
+): ShadowDecisionTrace {
+  return {
+    traceId: `shadow-${fixture.scenarioId}-${stateVersion}`,
+    stateVersion,
+    actorSide: fixture.side,
+    legacyDecision: {
+      selectedActionId: legacyDecision.selectedActionId,
+      selectedActionType: legacyDecision.selectedActionType,
+      source: "legacy_ai",
+      selectedFromLegalActions: true,
+      evidence: ["AI057 runtime shadow harness received legacy decision."],
+    },
+    semanticShadowDecision: {
+      ...(semanticShadowDecision.selectedActionId !== undefined
+        ? { selectedActionId: semanticShadowDecision.selectedActionId }
+        : {}),
+      ...(semanticShadowDecision.selectedCandidateId !== undefined
+        ? { selectedCandidateId: semanticShadowDecision.selectedCandidateId }
+        : {}),
+      scoreStatus: semanticShadowDecision.scoreStatus,
+      topCandidates: semanticShadowDecision.ranking.slice(0, 3),
+      blockedCandidates: [...semanticShadowDecision.blockingReasons],
+      whyNot: [...semanticShadowDecision.whyNot],
+      noRuntimeEffect: true,
+    },
+    legalActionSummary: fixture.expectedLegalActionTypes.map((actionType, index) => ({
+      actionId: `${fixture.scenarioId}.${actionType}.${index + 1}`,
+      actionType,
+      source: "engine_legal_actions",
+      visibilityScope: "developer_only",
+    })),
+    candidateSummary: semanticShadowDecision.ranking.map((candidate) => ({
+      candidateId: candidate.candidateId,
+      actionId: candidate.actionId,
+      actionType: candidate.actionType,
+      primaryProjectionStatus:
+        semanticShadowDecision.scoreStatus === "ranked_shadow_only"
+          ? "projected"
+          : semanticShadowDecision.scoreStatus === "blocked_by_gate"
+            ? "hidden_info_blocked"
+            : "partial_projected",
+      hardGateStatus:
+        semanticShadowDecision.scoreStatus === "ranked_shadow_only"
+          ? "pass"
+          : semanticShadowDecision.scoreStatus === "blocked_by_gate"
+            ? "blocked"
+            : "unknown",
+      projectionIssues: [...fixture.knownProjectionGaps],
+    })),
+    tacticalGoals: fixture.expectedTacticalGoals.map((goalId) => ({
+      goalId,
+      family: tacticalGoalFamilyForTrace(goalId),
+      side: fixture.side,
+      readiness:
+        semanticShadowDecision.scoreStatus === "ranked_shadow_only"
+          ? "ready"
+          : "partial",
+      evidence: [`AI057 fixture goal: ${goalId}`],
+    })),
+    doctrineReadiness: {
+      status:
+        semanticShadowDecision.scoreStatus === "ranked_shadow_only"
+          ? "ready"
+          : "partial",
+      gaps: [...fixture.knownProjectionGaps],
+      evidence: ["AI057 diagnostic trace only"],
+    },
+    hardGates: {
+      gateResults: [
+        {
+          gateId: "actual_decision_legacy_only",
+          status: "pass",
+          severity: "info",
+          evidence: ["actualDecision === legacyDecision"],
+        },
+      ],
+      illegalSemanticDecisionCount: 0,
+      hiddenInfoViolationCount: 0,
+      runtimeEffectCount: 0,
+      actualDecisionOverrideCount: 0,
+      nonEngineLegalAssumptionCount: 0,
+    },
+    visibilityScope: "developer_only",
+    noRuntimeEffect: true,
+  };
+}
+
+function tacticalGoalFamilyForTrace(goalId: string): TacticalGoalFamily {
+  if (goalId.startsWith("runner_economy")) return "runner_economy_stabilize";
+  if (goalId.startsWith("runner_rig")) return "runner_rig_setup";
+  if (goalId.startsWith("runner_central")) return "runner_central_pressure";
+  if (goalId.startsWith("runner_remote")) return "runner_remote_contest";
+  if (goalId.startsWith("runner_survival")) return "runner_survival";
+  if (goalId.startsWith("corp_economy")) return "corp_economy_stabilize";
+  if (goalId.startsWith("corp_remote")) return "corp_remote_score_window";
+  if (goalId.startsWith("corp_central")) return "corp_central_defense";
+  if (goalId.startsWith("corp_ice")) return "corp_ice_tax";
+  return "corp_tag_trace_punish";
 }
