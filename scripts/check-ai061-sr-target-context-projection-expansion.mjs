@@ -132,8 +132,18 @@ for (const requiredTest of [
 if (!progress.completedSteps.includes("AI061-SR")) {
   fail("progress must include AI061-SR");
 }
-if (progress.currentStep !== "AI062-SR") {
-  fail("progress currentStep must be AI062-SR");
+if (
+  ![
+    "AI062-SR",
+    "AI063-SR",
+    "AI064-SR",
+    "AI065-SR",
+    "AI066-SR",
+    "AI067-SR",
+    "integration_preflight",
+  ].includes(progress.currentStep)
+) {
+  fail("progress currentStep must be AI062-SR or later");
 }
 if (progress.blocked !== false) fail("progress blocked must be false");
 

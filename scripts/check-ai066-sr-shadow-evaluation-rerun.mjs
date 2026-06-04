@@ -152,8 +152,8 @@ for (const step of [
     fail(`progress must include ${step}`);
   }
 }
-if (progress.currentStep !== "AI067-SR") {
-  fail("progress currentStep must be AI067-SR");
+if (!["AI067-SR", "integration_preflight"].includes(progress.currentStep)) {
+  fail("progress currentStep must be AI067-SR or later");
 }
 if (progress.blocked !== false) fail("progress blocked must be false");
 
