@@ -20,6 +20,9 @@ export const SEMANTIC_SHADOW_DECISION_SCHEMA_VERSION =
 export const LEGACY_SEMANTIC_SHADOW_COMPARISON_SCHEMA_VERSION =
   "legacy-semantic-shadow-comparison-v1" as const;
 
+export const DEVIATION_TRIAGE_SCHEMA_VERSION =
+  "shadow-deviation-triage-v1" as const;
+
 export const CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS = {
   actualDecisionOverride: false,
   productiveScoring: false,
@@ -343,6 +346,73 @@ export type LegacySemanticComparisonReport = {
   sourceDecisionSchema: typeof SEMANTIC_SHADOW_DECISION_SCHEMA_VERSION;
   comparisons: LegacySemanticComparison[];
   summary: LegacySemanticComparisonSummary;
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type DeviationTriageClass =
+  | "acceptable_difference"
+  | "semantic_improvement_candidate"
+  | "legacy_preferred"
+  | "semantic_gap"
+  | "missing_tactic_signal"
+  | "missing_target_context"
+  | "missing_ability_binding"
+  | "missing_cost_or_timing"
+  | "bad_goal_mapping"
+  | "bad_doctrine_context"
+  | "bad_risk_evaluation"
+  | "hidden_info_blocker"
+  | "legal_or_reachability_blocker"
+  | "needs_card_semantics_review"
+  | "needs_engine_payload_projection";
+
+export type DeviationTriageEntry = {
+  scenarioId: string;
+  actorSide: ShadowActorSide;
+  agreement: LegacySemanticAgreement;
+  deltaCategory: LegacySemanticDeltaCategory;
+  triageClass: DeviationTriageClass;
+  requiresHumanReview: boolean;
+  followupScope: "separate_semantics_followup" | "none";
+  reason: string;
+  productiveChangeAllowed: false;
+};
+
+export type HumanReviewListItem = {
+  reviewId: string;
+  scenarioId: string;
+  triageClass: DeviationTriageClass;
+  deltaCategories: LegacySemanticDeltaCategory[];
+  reviewQuestion: string;
+  requiredEvidence: string[];
+  productiveChangeAllowed: false;
+};
+
+export type DeviationTriageSummary = {
+  comparisonCount: number;
+  triageEntryCount: number;
+  humanReviewItemCount: number;
+  acceptableDifference: number;
+  missingTargetContext: number;
+  missingAbilityBinding: number;
+  missingCostOrTiming: number;
+  needsCardSemanticsReview: number;
+  hiddenInfoBlocker: number;
+};
+
+export type DeviationTriageReport = {
+  schemaVersion: typeof DEVIATION_TRIAGE_SCHEMA_VERSION;
+  scope: "deviation_taxonomy_and_triage_report_only";
+  sourceComparisonSchema: typeof LEGACY_SEMANTIC_SHADOW_COMPARISON_SCHEMA_VERSION;
+  taxonomy: readonly DeviationTriageClass[];
+  triageEntries: DeviationTriageEntry[];
+  humanReviewList: HumanReviewListItem[];
+  summary: DeviationTriageSummary;
+  humanReviewStopsProcess: false;
   productiveUseAllowed: false;
   semanticExecutionAllowed: false;
   runtimeConsumerStatus: "none";
@@ -828,6 +898,52 @@ export function buildLegacySemanticComparisonReport(
   };
 }
 
+export function buildDeviationTriageReport(
+  comparisonReport: LegacySemanticComparisonReport =
+    buildLegacySemanticComparisonReport(),
+): DeviationTriageReport {
+  const triageEntries = comparisonReport.comparisons.flatMap(triageComparison);
+  const humanReviewList = buildHumanReviewList(triageEntries);
+
+  return {
+    schemaVersion: DEVIATION_TRIAGE_SCHEMA_VERSION,
+    scope: "deviation_taxonomy_and_triage_report_only",
+    sourceComparisonSchema: LEGACY_SEMANTIC_SHADOW_COMPARISON_SCHEMA_VERSION,
+    taxonomy: DEVIATION_TRIAGE_CLASSES,
+    triageEntries,
+    humanReviewList,
+    summary: summarizeDeviationTriage(
+      comparisonReport.comparisons.length,
+      triageEntries,
+      humanReviewList,
+    ),
+    humanReviewStopsProcess: false,
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export const DEVIATION_TRIAGE_CLASSES = [
+  "acceptable_difference",
+  "semantic_improvement_candidate",
+  "legacy_preferred",
+  "semantic_gap",
+  "missing_tactic_signal",
+  "missing_target_context",
+  "missing_ability_binding",
+  "missing_cost_or_timing",
+  "bad_goal_mapping",
+  "bad_doctrine_context",
+  "bad_risk_evaluation",
+  "hidden_info_blocker",
+  "legal_or_reachability_blocker",
+  "needs_card_semantics_review",
+  "needs_engine_payload_projection",
+] as const satisfies readonly DeviationTriageClass[];
+
 export function buildSemanticShadowDecisionForFixture(
   fixture: ShadowScenarioFixture,
 ): SemanticShadowDecision {
@@ -1298,4 +1414,179 @@ function countComparisons(
 ): number {
   return comparisons.filter((comparison) => comparison.agreement === agreement)
     .length;
+}
+
+function triageComparison(
+  comparison: LegacySemanticComparison,
+): DeviationTriageEntry[] {
+  return comparison.deltaCategory.map((deltaCategory) => {
+    const triageClass = triageClassForDelta(deltaCategory);
+    return {
+      scenarioId: comparison.scenarioId,
+      actorSide: comparison.actorSide,
+      agreement: comparison.agreement,
+      deltaCategory,
+      triageClass,
+      requiresHumanReview: triageClass !== "acceptable_difference",
+      followupScope:
+        triageClass === "acceptable_difference"
+          ? "none"
+          : "separate_semantics_followup",
+      reason: triageReason(triageClass, deltaCategory),
+      productiveChangeAllowed: false,
+    };
+  });
+}
+
+function triageClassForDelta(
+  deltaCategory: LegacySemanticDeltaCategory,
+): DeviationTriageClass {
+  if (deltaCategory === "same_exact_action") return "acceptable_difference";
+  if (deltaCategory === "same_action_type_different_target") {
+    return "acceptable_difference";
+  }
+  if (deltaCategory === "semantic_blocked_by_target_context") {
+    return "missing_target_context";
+  }
+  if (deltaCategory === "semantic_blocked_by_ability_gap") {
+    return "missing_ability_binding";
+  }
+  if (deltaCategory === "semantic_blocked_by_cost_gap") {
+    return "missing_cost_or_timing";
+  }
+  if (deltaCategory === "semantic_lacks_card_semantics") {
+    return "needs_card_semantics_review";
+  }
+  if (deltaCategory === "semantic_avoids_hidden_info") {
+    return "hidden_info_blocker";
+  }
+  if (
+    deltaCategory === "semantic_selected_unreachable_action" ||
+    deltaCategory === "semantic_selected_risky_action"
+  ) {
+    return "legal_or_reachability_blocker";
+  }
+  if (deltaCategory === "semantic_selected_low_value_action") {
+    return "bad_risk_evaluation";
+  }
+  if (deltaCategory === "legacy_selected_unknown_semantics") {
+    return "semantic_gap";
+  }
+  if (
+    deltaCategory === "semantic_prefers_economy" ||
+    deltaCategory === "semantic_prefers_setup" ||
+    deltaCategory === "semantic_prefers_run_pressure" ||
+    deltaCategory === "semantic_prefers_remote_contest" ||
+    deltaCategory === "semantic_prefers_score_window" ||
+    deltaCategory === "semantic_prefers_defense"
+  ) {
+    return "semantic_improvement_candidate";
+  }
+  return "semantic_gap";
+}
+
+function triageReason(
+  triageClass: DeviationTriageClass,
+  deltaCategory: LegacySemanticDeltaCategory,
+): string {
+  if (triageClass === "acceptable_difference") {
+    return `No followup required for delta ${deltaCategory}.`;
+  }
+  if (triageClass === "hidden_info_blocker") {
+    return "Keep semantic candidate blocked and review only the fixture boundary.";
+  }
+  return `Review ${deltaCategory} as ${triageClass}; do not change card hints or resolvers inside AI055.`;
+}
+
+function buildHumanReviewList(
+  entries: readonly DeviationTriageEntry[],
+): HumanReviewListItem[] {
+  const reviewEntries = entries.filter((entry) => entry.requiresHumanReview);
+  return reviewEntries.map((entry, index) => ({
+    reviewId: `ai055-review-${String(index + 1).padStart(2, "0")}`,
+    scenarioId: entry.scenarioId,
+    triageClass: entry.triageClass,
+    deltaCategories: [entry.deltaCategory],
+    reviewQuestion: reviewQuestionForClass(entry.triageClass),
+    requiredEvidence: requiredEvidenceForClass(entry.triageClass),
+    productiveChangeAllowed: false,
+  }));
+}
+
+function reviewQuestionForClass(triageClass: DeviationTriageClass): string {
+  if (triageClass === "missing_target_context") {
+    return "Is there a side-safe Engine-provided TargetContext that can be projected?";
+  }
+  if (triageClass === "missing_ability_binding") {
+    return "Can the LegalAction be bound to an explicit side-safe ability id?";
+  }
+  if (triageClass === "missing_cost_or_timing") {
+    return "Can cost or timing evidence be normalized without guessing?";
+  }
+  if (triageClass === "needs_card_semantics_review") {
+    return "Does a side-safe card semantic profile exist or need a separate review?";
+  }
+  if (triageClass === "hidden_info_blocker") {
+    return "Does the fixture correctly block hidden information?";
+  }
+  return "What separate diagnostic followup is needed for this semantic gap?";
+}
+
+function requiredEvidenceForClass(triageClass: DeviationTriageClass): string[] {
+  if (triageClass === "missing_target_context") {
+    return ["LegalAction target requirements", "side-safe selected or available targets"];
+  }
+  if (triageClass === "missing_ability_binding") {
+    return ["sourceCardId", "abilityId", "binding evidence"];
+  }
+  if (triageClass === "missing_cost_or_timing") {
+    return ["costProfile", "timingProfile"];
+  }
+  if (triageClass === "needs_card_semantics_review") {
+    return ["ActionCardSemanticProfile", "ability semantic profile if applicable"];
+  }
+  if (triageClass === "hidden_info_blocker") {
+    return ["HiddenInfoBoundary", "side-safe visibility policy"];
+  }
+  return ["comparison explanation", "fixture evidence"];
+}
+
+function summarizeDeviationTriage(
+  comparisonCount: number,
+  triageEntries: readonly DeviationTriageEntry[],
+  humanReviewList: readonly HumanReviewListItem[],
+): DeviationTriageSummary {
+  return {
+    comparisonCount,
+    triageEntryCount: triageEntries.length,
+    humanReviewItemCount: humanReviewList.length,
+    acceptableDifference: countTriageClass(
+      triageEntries,
+      "acceptable_difference",
+    ),
+    missingTargetContext: countTriageClass(
+      triageEntries,
+      "missing_target_context",
+    ),
+    missingAbilityBinding: countTriageClass(
+      triageEntries,
+      "missing_ability_binding",
+    ),
+    missingCostOrTiming: countTriageClass(
+      triageEntries,
+      "missing_cost_or_timing",
+    ),
+    needsCardSemanticsReview: countTriageClass(
+      triageEntries,
+      "needs_card_semantics_review",
+    ),
+    hiddenInfoBlocker: countTriageClass(triageEntries, "hidden_info_blocker"),
+  };
+}
+
+function countTriageClass(
+  entries: readonly DeviationTriageEntry[],
+  triageClass: DeviationTriageClass,
+): number {
+  return entries.filter((entry) => entry.triageClass === triageClass).length;
 }

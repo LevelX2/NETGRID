@@ -1,0 +1,81 @@
+{
+  "step": "AI055",
+  "title": "Deviation Taxonomy and Triage",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai051-ai060-controlled-shadow-mode",
+  "schemaVersion": "shadow-deviation-triage-v1",
+  "scope": "deviation_taxonomy_and_triage_report_only",
+  "runtimeConsumerStatus": "none",
+  "semanticExecutionAllowed": false,
+  "productiveUseAllowed": false,
+  "noRuntimeEffect": true,
+  "humanReviewStopsProcess": false,
+  "humanReviewArtifact": "docs/reviews/ai/ai055-deviation-human-review-list-2026-06-04.json",
+  "summary": {
+    "comparisonCount": 33,
+    "triageEntryCount": 41,
+    "humanReviewItemCount": 33,
+    "acceptableDifference": 8,
+    "missingTargetContext": 13,
+    "missingAbilityBinding": 6,
+    "missingCostOrTiming": 4,
+    "needsCardSemanticsReview": 7,
+    "hiddenInfoBlocker": 3
+  },
+  "taxonomy": [
+    "acceptable_difference",
+    "semantic_improvement_candidate",
+    "legacy_preferred",
+    "semantic_gap",
+    "missing_tactic_signal",
+    "missing_target_context",
+    "missing_ability_binding",
+    "missing_cost_or_timing",
+    "bad_goal_mapping",
+    "bad_doctrine_context",
+    "bad_risk_evaluation",
+    "hidden_info_blocker",
+    "legal_or_reachability_blocker",
+    "needs_card_semantics_review",
+    "needs_engine_payload_projection"
+  ],
+  "implementationFiles": [
+    "packages/ai/src/controlled-shadow-mode.ts",
+    "packages/ai/src/controlled-shadow-mode.test.ts"
+  ],
+  "reportFiles": [
+    "docs/reviews/ai/ai055-deviation-taxonomy-and-triage-2026-06-04.md",
+    "docs/reviews/ai/ai055-deviation-taxonomy-and-triage-2026-06-04.json",
+    "docs/reviews/ai/ai055-deviation-human-review-list-2026-06-04.json"
+  ],
+  "checkScripts": [
+    "scripts/check-ai055-deviation-taxonomy-and-triage.mjs"
+  ],
+  "runtimeFilesTouched": [],
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "verification": [
+    "node scripts/check-ai055-deviation-taxonomy-and-triage.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- controlled-shadow-mode.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "node scripts/check-ai054-legacy-vs-semantic-comparison-report.mjs",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "doneGate": {
+    "allDeltasHaveTriageClass": true,
+    "humanReviewListGenerated": true,
+    "humanReviewStopsProcess": false,
+    "followupsSeparateFromShadowCode": true,
+    "noRuntimeEffect": true
+  }
+}

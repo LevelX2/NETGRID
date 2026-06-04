@@ -5,6 +5,7 @@ import {
   FORBIDDEN_SHADOW_TRACE_CONSUMERS,
   buildSemanticShadowDecisionForFixture,
   buildSemanticShadowDecisionReport,
+  buildDeviationTriageReport,
   buildLegacySemanticComparisonReport,
   buildShadowScenarioCorpusReport,
   buildShadowModeTraceContractReport,
@@ -321,6 +322,67 @@ describe("buildLegacySemanticComparisonReport", () => {
       }),
     );
     expect(comparison?.semanticActionId).toBeUndefined();
+  });
+});
+
+describe("buildDeviationTriageReport", () => {
+  it("assigns a triage class to every comparison delta", () => {
+    const report = buildDeviationTriageReport();
+
+    expect(report.schemaVersion).toBe("shadow-deviation-triage-v1");
+    expect(report.scope).toBe("deviation_taxonomy_and_triage_report_only");
+    expect(report.humanReviewStopsProcess).toBe(false);
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.summary).toEqual({
+      comparisonCount: 33,
+      triageEntryCount: 41,
+      humanReviewItemCount: 33,
+      acceptableDifference: 8,
+      missingTargetContext: 13,
+      missingAbilityBinding: 6,
+      missingCostOrTiming: 4,
+      needsCardSemanticsReview: 7,
+      hiddenInfoBlocker: 3,
+    });
+  });
+
+  it("generates a human-review list without stopping the process", () => {
+    const report = buildDeviationTriageReport();
+
+    expect(report.humanReviewList).toHaveLength(33);
+    expect(
+      report.humanReviewList.every(
+        (item) => item.productiveChangeAllowed === false,
+      ),
+    ).toBe(true);
+    expect(report.humanReviewStopsProcess).toBe(false);
+  });
+
+  it("maps target, ability, cost, card and hidden-info gaps to controlled classes", () => {
+    const report = buildDeviationTriageReport();
+    const classes = report.triageEntries.map((entry) => entry.triageClass);
+
+    expect(classes).toEqual(
+      expect.arrayContaining([
+        "missing_target_context",
+        "missing_ability_binding",
+        "missing_cost_or_timing",
+        "needs_card_semantics_review",
+        "hidden_info_blocker",
+      ]),
+    );
+  });
+
+  it("keeps triage followups separate from shadow code changes", () => {
+    const report = buildDeviationTriageReport();
+
+    expect(
+      report.triageEntries
+        .filter((entry) => entry.requiresHumanReview)
+        .every(
+          (entry) => entry.followupScope === "separate_semantics_followup",
+        ),
+    ).toBe(true);
   });
 });
 
