@@ -16,6 +16,10 @@ import {
   META3_SCOPE_MATRIX,
   META3_TRACE_CONTRACT_FIELDS,
   META4_CANARY_FIXTURES,
+  META5_ALLOWED_OVERRIDE_SCOPES,
+  META5_BLOCKED_OVERRIDE_SCOPES,
+  META5_DIVERGENCE_TRIAGE_CATEGORIES,
+  META5_OVERRIDE_FIXTURES,
   adaptSemanticDecisionToLegacyActual,
   buildDeckDoctrineFromProfile,
   buildDeckStrategicProfile,
@@ -23,7 +27,9 @@ import {
   buildMeta2SemanticDecisionCoreReport,
   buildMeta3CutoverSafetyEnvelopeReport,
   buildMeta4AgreementOnlyRuntimeCanaryReport,
+  buildMeta5ScopedSemanticOverridePilotReport,
   buildSemanticDecisionScore,
+  evaluateScopedOverridePilotFixture,
   runAgreementOnlyCanary,
 } from "./semantic-ai-core-meta";
 
@@ -128,6 +134,118 @@ describe("META1 DeckDoctrine + Multi-Turn TacticalGoal Engine v0", () => {
         }),
       ]),
     );
+  });
+});
+
+describe("META5 Scoped Semantic Override Pilot", () => {
+  it("defines a narrow test/internal whitelist and blocked scope list", () => {
+    const report = buildMeta5ScopedSemanticOverridePilotReport();
+
+    expect(report.schemaVersion).toBe(
+      "meta5-scoped-semantic-override-pilot-v0",
+    );
+    expect(report.step).toBe("META5");
+    expect(report.allowedScopes).toEqual(META5_ALLOWED_OVERRIDE_SCOPES);
+    expect(report.blockedScopes).toEqual(META5_BLOCKED_OVERRIDE_SCOPES);
+    expect(META5_ALLOWED_OVERRIDE_SCOPES).toEqual([
+      "runner_basic_economy_vs_draw",
+      "corp_basic_economy",
+      "runner_remove_tag_when_tagged",
+      "corp_score_agenda_when_engine_legal_and_clear",
+      "simple_hq_or_rnd_run_when_goal_evidence_ready",
+    ]);
+    expect(META5_BLOCKED_OVERRIDE_SCOPES).toEqual(
+      expect.arrayContaining([
+        "hidden_info_access_choices",
+        "trace_boost_or_payment",
+        "x_value_decisions",
+        "multi_target_unresolved",
+        "multi_ability_unresolved",
+      ]),
+    );
+  });
+
+  it("allows overrides only when every override gate passes in whitelisted fixtures", () => {
+    const report = buildMeta5ScopedSemanticOverridePilotReport();
+    const allowed = report.fixtureResults.filter((result) => result.overrideAllowed);
+
+    expect(META5_OVERRIDE_FIXTURES).toHaveLength(8);
+    expect(allowed).toHaveLength(5);
+    expect(allowed.map((result) => result.scope)).toEqual(
+      expect.arrayContaining([...META5_ALLOWED_OVERRIDE_SCOPES]),
+    );
+    expect(
+      allowed.every(
+        (result) => result.testInternalActualActionId === result.semanticActionId,
+      ),
+    ).toBe(true);
+  });
+
+  it("blocks forbidden scopes, hidden info, trace payment and unresolved ability cases", () => {
+    const hidden = evaluateScopedOverridePilotFixture(
+      META5_OVERRIDE_FIXTURES.find(
+        (fixture) => fixture.fixtureId === "meta5-hidden-access-choice-blocked",
+      )!,
+    );
+    const trace = evaluateScopedOverridePilotFixture(
+      META5_OVERRIDE_FIXTURES.find(
+        (fixture) => fixture.fixtureId === "meta5-trace-payment-blocked",
+      )!,
+    );
+    const multiAbility = evaluateScopedOverridePilotFixture(
+      META5_OVERRIDE_FIXTURES.find(
+        (fixture) => fixture.fixtureId === "meta5-multi-ability-blocked",
+      )!,
+    );
+
+    expect(hidden.overrideAllowed).toBe(false);
+    expect(hidden.blockReasons).toEqual(
+      expect.arrayContaining([
+        "Scope is blocked or not whitelisted: hidden_info_access_choices",
+        "Hidden-info gate blocked.",
+      ]),
+    );
+    expect(trace.overrideAllowed).toBe(false);
+    expect(trace.blockReasons).toEqual(
+      expect.arrayContaining([
+        "Scope is blocked or not whitelisted: trace_boost_or_payment",
+        "Cost or timing evidence is insufficient.",
+      ]),
+    );
+    expect(multiAbility.overrideAllowed).toBe(false);
+    expect(multiAbility.blockReasons).toEqual(
+      expect.arrayContaining([
+        "Scope is blocked or not whitelisted: multi_ability_unresolved",
+        "Ability is unresolved.",
+      ]),
+    );
+  });
+
+  it("triages every divergence and keeps production and safety counters closed", () => {
+    const report = buildMeta5ScopedSemanticOverridePilotReport();
+
+    expect(report.divergenceTriageCategories).toEqual(
+      META5_DIVERGENCE_TRIAGE_CATEGORIES,
+    );
+    expect(report.summary).toEqual({
+      fixtureCount: 8,
+      overrideAllowedCount: 5,
+      blockedFixtureCount: 3,
+      allDivergencesTriaged: true,
+    });
+    expect(report.qualityGates).toEqual({
+      overrideAllowedCount: 5,
+      unsafeDivergenceCount: 0,
+      illegalSemanticDecisionCount: 0,
+      hiddenInfoViolationCount: 0,
+      engineRejectCount: 0,
+      rollbackTested: true,
+      allDivergencesTriaged: true,
+      productionFlagEnabledCount: 0,
+    });
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.semanticExecutionAllowed).toBe(false);
+    expect(report.runtimeConsumerStatus).toBe("test_internal_only");
   });
 });
 

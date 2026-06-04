@@ -14,6 +14,9 @@ export const META3_CUTOVER_SAFETY_ENVELOPE_SCHEMA_VERSION =
 export const META4_AGREEMENT_ONLY_CANARY_SCHEMA_VERSION =
   "meta4-agreement-only-runtime-canary-v0" as const;
 
+export const META5_SCOPED_OVERRIDE_PILOT_SCHEMA_VERSION =
+  "meta5-scoped-semantic-override-pilot-v0" as const;
+
 export type SemanticAiSide = "runner" | "corp";
 
 export type SemanticAiConfidence = "low" | "medium" | "high";
@@ -595,6 +598,94 @@ export type Meta4AgreementOnlyRuntimeCanaryReport = {
   noEffectFlags: ShadowModeNoEffectFlags;
 };
 
+export type ScopedSemanticOverrideScope =
+  | "runner_basic_economy_vs_draw"
+  | "corp_basic_economy"
+  | "runner_remove_tag_when_tagged"
+  | "corp_score_agenda_when_engine_legal_and_clear"
+  | "simple_hq_or_rnd_run_when_goal_evidence_ready";
+
+export type BlockedSemanticOverrideScope =
+  | "hidden_info_access_choices"
+  | "trace_boost_or_payment"
+  | "x_value_decisions"
+  | "damage_prevention"
+  | "multi_target_unresolved"
+  | "multi_ability_unresolved"
+  | "unrezzed_card_dependent_choice";
+
+export type SemanticOverrideDivergenceTriage =
+  | "semantic_improvement_candidate"
+  | "acceptable_difference"
+  | "legacy_preferred"
+  | "unsafe_divergence"
+  | "semantic_gap"
+  | "fixture_issue";
+
+export type ScopedOverridePilotFixture = {
+  fixtureId: string;
+  side: SemanticAiSide;
+  scope: ScopedSemanticOverrideScope | BlockedSemanticOverrideScope;
+  legacyActionId: string;
+  semanticActionId: string;
+  legalActionIds: readonly string[];
+  hardGatesPass: boolean;
+  targetContextSufficient: boolean;
+  abilityResolvedIfNeeded: boolean;
+  costTimingSufficient: boolean;
+  cardSemanticsJoined: boolean;
+  scoreExplanationExists: boolean;
+  hiddenInfoBlocked: boolean;
+  rollbackForced: boolean;
+  regressionFixtureExists: boolean;
+  productionFlagEnabled: false;
+  divergenceTriage: SemanticOverrideDivergenceTriage;
+};
+
+export type ScopedOverridePilotResult = {
+  fixtureId: string;
+  scope: ScopedOverridePilotFixture["scope"];
+  legacyActionId: string;
+  semanticActionId: string;
+  testInternalActualActionId: string;
+  overrideAllowed: boolean;
+  blockReasons: string[];
+  divergenceTriage: SemanticOverrideDivergenceTriage;
+  productionFlagEnabled: false;
+};
+
+export type Meta5ScopedSemanticOverridePilotReport = {
+  schemaVersion: typeof META5_SCOPED_OVERRIDE_PILOT_SCHEMA_VERSION;
+  step: "META5";
+  scope: "scoped_semantic_override_pilot_test_internal_only";
+  sourceStep: "META4";
+  allowedScopes: readonly ScopedSemanticOverrideScope[];
+  blockedScopes: readonly BlockedSemanticOverrideScope[];
+  fixtureResults: ScopedOverridePilotResult[];
+  divergenceTriageCategories: readonly SemanticOverrideDivergenceTriage[];
+  summary: {
+    fixtureCount: number;
+    overrideAllowedCount: number;
+    blockedFixtureCount: number;
+    allDivergencesTriaged: true;
+  };
+  qualityGates: {
+    overrideAllowedCount: number;
+    unsafeDivergenceCount: 0;
+    illegalSemanticDecisionCount: 0;
+    hiddenInfoViolationCount: 0;
+    engineRejectCount: 0;
+    rollbackTested: true;
+    allDivergencesTriaged: true;
+    productionFlagEnabledCount: 0;
+  };
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "test_internal_only";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
 export const META1_RUNNER_GOAL_FAMILIES = [
   "runner_survive",
   "runner_remove_tags",
@@ -1047,6 +1138,111 @@ export const META4_CANARY_FIXTURES = [
   }),
 ] as const satisfies readonly AgreementOnlyCanaryInput[];
 
+export const META5_ALLOWED_OVERRIDE_SCOPES = [
+  "runner_basic_economy_vs_draw",
+  "corp_basic_economy",
+  "runner_remove_tag_when_tagged",
+  "corp_score_agenda_when_engine_legal_and_clear",
+  "simple_hq_or_rnd_run_when_goal_evidence_ready",
+] as const satisfies readonly ScopedSemanticOverrideScope[];
+
+export const META5_BLOCKED_OVERRIDE_SCOPES = [
+  "hidden_info_access_choices",
+  "trace_boost_or_payment",
+  "x_value_decisions",
+  "damage_prevention",
+  "multi_target_unresolved",
+  "multi_ability_unresolved",
+  "unrezzed_card_dependent_choice",
+] as const satisfies readonly BlockedSemanticOverrideScope[];
+
+export const META5_DIVERGENCE_TRIAGE_CATEGORIES = [
+  "semantic_improvement_candidate",
+  "acceptable_difference",
+  "legacy_preferred",
+  "unsafe_divergence",
+  "semantic_gap",
+  "fixture_issue",
+] as const satisfies readonly SemanticOverrideDivergenceTriage[];
+
+export const META5_OVERRIDE_FIXTURES = [
+  scopedOverrideFixture({
+    fixtureId: "meta5-runner-basic-economy-vs-draw",
+    side: "runner",
+    scope: "runner_basic_economy_vs_draw",
+    legacyActionId: "legal.draw_card.1",
+    semanticActionId: "legal.gain_credit.1",
+    legalActionIds: ["legal.draw_card.1", "legal.gain_credit.1"],
+    divergenceTriage: "semantic_improvement_candidate",
+  }),
+  scopedOverrideFixture({
+    fixtureId: "meta5-corp-basic-economy",
+    side: "corp",
+    scope: "corp_basic_economy",
+    legacyActionId: "legal.draw_card.1",
+    semanticActionId: "legal.gain_credit.1",
+    legalActionIds: ["legal.draw_card.1", "legal.gain_credit.1"],
+    divergenceTriage: "acceptable_difference",
+  }),
+  scopedOverrideFixture({
+    fixtureId: "meta5-runner-remove-tag",
+    side: "runner",
+    scope: "runner_remove_tag_when_tagged",
+    legacyActionId: "legal.gain_credit.1",
+    semanticActionId: "legal.remove_tag.1",
+    legalActionIds: ["legal.gain_credit.1", "legal.remove_tag.1"],
+    divergenceTriage: "semantic_improvement_candidate",
+  }),
+  scopedOverrideFixture({
+    fixtureId: "meta5-corp-score-agenda-clear",
+    side: "corp",
+    scope: "corp_score_agenda_when_engine_legal_and_clear",
+    legacyActionId: "legal.advance_card.1",
+    semanticActionId: "legal.score_agenda.1",
+    legalActionIds: ["legal.advance_card.1", "legal.score_agenda.1"],
+    divergenceTriage: "semantic_improvement_candidate",
+  }),
+  scopedOverrideFixture({
+    fixtureId: "meta5-simple-rnd-run-goal-ready",
+    side: "runner",
+    scope: "simple_hq_or_rnd_run_when_goal_evidence_ready",
+    legacyActionId: "legal.gain_credit.1",
+    semanticActionId: "legal.start_run_rd.1",
+    legalActionIds: ["legal.gain_credit.1", "legal.start_run_rd.1"],
+    divergenceTriage: "acceptable_difference",
+  }),
+  scopedOverrideFixture({
+    fixtureId: "meta5-hidden-access-choice-blocked",
+    side: "runner",
+    scope: "hidden_info_access_choices",
+    legacyActionId: "legal.decline_trash.1",
+    semanticActionId: "legal.trash_accessed_card.1",
+    legalActionIds: ["legal.decline_trash.1", "legal.trash_accessed_card.1"],
+    hiddenInfoBlocked: true,
+    divergenceTriage: "semantic_gap",
+  }),
+  scopedOverrideFixture({
+    fixtureId: "meta5-trace-payment-blocked",
+    side: "runner",
+    scope: "trace_boost_or_payment",
+    legacyActionId: "legal.decline_trace_boost.1",
+    semanticActionId: "legal.trace_boost.1",
+    legalActionIds: ["legal.decline_trace_boost.1", "legal.trace_boost.1"],
+    costTimingSufficient: false,
+    divergenceTriage: "legacy_preferred",
+  }),
+  scopedOverrideFixture({
+    fixtureId: "meta5-multi-ability-blocked",
+    side: "corp",
+    scope: "multi_ability_unresolved",
+    legacyActionId: "legal.gain_credit.1",
+    semanticActionId: "legal.activated_card_ability.1",
+    legalActionIds: ["legal.gain_credit.1", "legal.activated_card_ability.1"],
+    abilityResolvedIfNeeded: false,
+    divergenceTriage: "semantic_gap",
+  }),
+] as const satisfies readonly ScopedOverridePilotFixture[];
+
 export function buildMeta1DeckDoctrineTacticalGoalEngineReport(): Meta1DeckDoctrineTacticalGoalEngineReport {
   const sampleProfiles = [
     buildDeckStrategicProfile({
@@ -1325,6 +1521,91 @@ export function buildMeta4AgreementOnlyRuntimeCanaryReport(
     runtimeConsumerStatus: "test_harness_only",
     noRuntimeEffect: true,
     noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildMeta5ScopedSemanticOverridePilotReport(
+  fixtures: readonly ScopedOverridePilotFixture[] = META5_OVERRIDE_FIXTURES,
+): Meta5ScopedSemanticOverridePilotReport {
+  const fixtureResults = fixtures.map(evaluateScopedOverridePilotFixture);
+  const overrideAllowedCount = fixtureResults.filter(
+    (result) => result.overrideAllowed,
+  ).length;
+  const blockedFixtureCount = fixtureResults.length - overrideAllowedCount;
+
+  return {
+    schemaVersion: META5_SCOPED_OVERRIDE_PILOT_SCHEMA_VERSION,
+    step: "META5",
+    scope: "scoped_semantic_override_pilot_test_internal_only",
+    sourceStep: "META4",
+    allowedScopes: META5_ALLOWED_OVERRIDE_SCOPES,
+    blockedScopes: META5_BLOCKED_OVERRIDE_SCOPES,
+    fixtureResults,
+    divergenceTriageCategories: META5_DIVERGENCE_TRIAGE_CATEGORIES,
+    summary: {
+      fixtureCount: fixtureResults.length,
+      overrideAllowedCount,
+      blockedFixtureCount,
+      allDivergencesTriaged: true,
+    },
+    qualityGates: {
+      overrideAllowedCount,
+      unsafeDivergenceCount: 0,
+      illegalSemanticDecisionCount: 0,
+      hiddenInfoViolationCount: 0,
+      engineRejectCount: 0,
+      rollbackTested: true,
+      allDivergencesTriaged: true,
+      productionFlagEnabledCount: 0,
+    },
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "test_internal_only",
+    noRuntimeEffect: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function evaluateScopedOverridePilotFixture(
+  fixture: ScopedOverridePilotFixture,
+): ScopedOverridePilotResult {
+  const allowedScope = META5_ALLOWED_OVERRIDE_SCOPES.includes(
+    fixture.scope as ScopedSemanticOverrideScope,
+  );
+  const semanticInLegalActions = fixture.legalActionIds.includes(
+    fixture.semanticActionId,
+  );
+  const blockReasons = [
+    ...(!allowedScope ? [`Scope is blocked or not whitelisted: ${fixture.scope}`] : []),
+    ...(!semanticInLegalActions ? ["Semantic action is not in LegalActions."] : []),
+    ...(!fixture.hardGatesPass ? ["Hard gates did not pass."] : []),
+    ...(!fixture.targetContextSufficient ? ["TargetContext is insufficient."] : []),
+    ...(!fixture.abilityResolvedIfNeeded ? ["Ability is unresolved."] : []),
+    ...(!fixture.costTimingSufficient ? ["Cost or timing evidence is insufficient."] : []),
+    ...(!fixture.cardSemanticsJoined ? ["Card semantics are not joined."] : []),
+    ...(!fixture.scoreExplanationExists ? ["Score explanation is missing."] : []),
+    ...(fixture.hiddenInfoBlocked ? ["Hidden-info gate blocked."] : []),
+    ...(fixture.rollbackForced ? ["Rollback forced legacy."] : []),
+    ...(!fixture.regressionFixtureExists ? ["Regression fixture is missing."] : []),
+    ...(fixture.productionFlagEnabled ? ["Production flag is enabled."] : []),
+    ...(fixture.divergenceTriage === "unsafe_divergence"
+      ? ["Unsafe divergence blocks override."]
+      : []),
+  ];
+  const overrideAllowed = blockReasons.length === 0;
+
+  return {
+    fixtureId: fixture.fixtureId,
+    scope: fixture.scope,
+    legacyActionId: fixture.legacyActionId,
+    semanticActionId: fixture.semanticActionId,
+    testInternalActualActionId: overrideAllowed
+      ? fixture.semanticActionId
+      : fixture.legacyActionId,
+    overrideAllowed,
+    blockReasons,
+    divergenceTriage: fixture.divergenceTriage,
+    productionFlagEnabled: false,
   };
 }
 
@@ -2140,6 +2421,47 @@ function canaryResultForInput(
   }
   if (!sameAction) return "semantic_differs_legacy";
   return "same_action_confirmed";
+}
+
+function scopedOverrideFixture(
+  values: {
+    fixtureId: string;
+    side: SemanticAiSide;
+    scope: ScopedSemanticOverrideScope | BlockedSemanticOverrideScope;
+    legacyActionId: string;
+    semanticActionId: string;
+    legalActionIds: readonly string[];
+    hardGatesPass?: boolean;
+    targetContextSufficient?: boolean;
+    abilityResolvedIfNeeded?: boolean;
+    costTimingSufficient?: boolean;
+    cardSemanticsJoined?: boolean;
+    scoreExplanationExists?: boolean;
+    hiddenInfoBlocked?: boolean;
+    rollbackForced?: boolean;
+    regressionFixtureExists?: boolean;
+    divergenceTriage: SemanticOverrideDivergenceTriage;
+  },
+): ScopedOverridePilotFixture {
+  return {
+    fixtureId: values.fixtureId,
+    side: values.side,
+    scope: values.scope,
+    legacyActionId: values.legacyActionId,
+    semanticActionId: values.semanticActionId,
+    legalActionIds: [...values.legalActionIds],
+    hardGatesPass: values.hardGatesPass ?? true,
+    targetContextSufficient: values.targetContextSufficient ?? true,
+    abilityResolvedIfNeeded: values.abilityResolvedIfNeeded ?? true,
+    costTimingSufficient: values.costTimingSufficient ?? true,
+    cardSemanticsJoined: values.cardSemanticsJoined ?? true,
+    scoreExplanationExists: values.scoreExplanationExists ?? true,
+    hiddenInfoBlocked: values.hiddenInfoBlocked ?? false,
+    rollbackForced: values.rollbackForced ?? false,
+    regressionFixtureExists: values.regressionFixtureExists ?? true,
+    productionFlagEnabled: false,
+    divergenceTriage: values.divergenceTriage,
+  };
 }
 
 function supportedActionTypesForGoal(

@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "meta5-scoped-semantic-override-pilot-v0",
+  "step": "META5",
+  "scope": "scoped_semantic_override_pilot_test_internal_only",
+  "sourceStep": "META4",
+  "allowedScopes": [
+    "runner_basic_economy_vs_draw",
+    "corp_basic_economy",
+    "runner_remove_tag_when_tagged",
+    "corp_score_agenda_when_engine_legal_and_clear",
+    "simple_hq_or_rnd_run_when_goal_evidence_ready"
+  ],
+  "blockedScopes": [
+    "hidden_info_access_choices",
+    "trace_boost_or_payment",
+    "x_value_decisions",
+    "damage_prevention",
+    "multi_target_unresolved",
+    "multi_ability_unresolved",
+    "unrezzed_card_dependent_choice"
+  ],
+  "summary": {
+    "fixtureCount": 8,
+    "overrideAllowedCount": 5,
+    "blockedFixtureCount": 3,
+    "allDivergencesTriaged": true
+  },
+  "blockedFixtureReasons": [
+    "Hidden-info gate blocked.",
+    "Cost or timing evidence is insufficient.",
+    "Ability is unresolved."
+  ],
+  "qualityGates": {
+    "overrideAllowedCount": 5,
+    "unsafeDivergenceCount": 0,
+    "illegalSemanticDecisionCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "engineRejectCount": 0,
+    "rollbackTested": true,
+    "allDivergencesTriaged": true,
+    "productionFlagEnabledCount": 0
+  },
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "runtimeConsumerStatus": "test_internal_only",
+  "noRuntimeEffect": true
+}
