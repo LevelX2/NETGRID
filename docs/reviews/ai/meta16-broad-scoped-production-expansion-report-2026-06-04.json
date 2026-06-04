@@ -1,0 +1,112 @@
+{
+  "schemaVersion": "meta16-broad-scoped-production-expansion-v0",
+  "step": "META16",
+  "scope": "broad_scoped_production_expansion",
+  "sourceStep": "META15",
+  "activeProductionScopesBefore": [
+    "basic_economy_draw",
+    "tag_removal",
+    "simple_score_advance",
+    "basic_install",
+    "simple_rez"
+  ],
+  "activeProductionScopesAfter": [
+    "basic_economy_draw",
+    "tag_removal",
+    "simple_score_advance",
+    "basic_install",
+    "simple_rez",
+    "simple_run_choice",
+    "remote_contest",
+    "simple_hq_or_rnd_pressure"
+  ],
+  "productionIterations": [
+    {
+      "scopeId": "simple_run_choice",
+      "group": "low_risk",
+      "iteration": 1,
+      "inputStage": "limited_candidate",
+      "outputStage": "limited_scoped_production_active",
+      "productiveActivation": true,
+      "rollbackAvailable": true
+    },
+    {
+      "scopeId": "remote_contest",
+      "group": "medium_risk",
+      "iteration": 2,
+      "inputStage": "agreement_ready",
+      "outputStage": "limited_scoped_production_active",
+      "productiveActivation": true,
+      "rollbackAvailable": true
+    },
+    {
+      "scopeId": "simple_hq_or_rnd_pressure",
+      "group": "medium_risk",
+      "iteration": 3,
+      "inputStage": "production_shadow_stable",
+      "outputStage": "limited_scoped_production_active",
+      "productiveActivation": true,
+      "rollbackAvailable": true
+    },
+    {
+      "scopeId": "simple_advance_score",
+      "group": "medium_risk",
+      "iteration": 4,
+      "inputStage": "limited_candidate",
+      "outputStage": "production_shadow_stable",
+      "productiveActivation": false,
+      "rollbackAvailable": true
+    },
+    {
+      "scopeId": "trace_payment",
+      "group": "high_risk",
+      "iteration": 5,
+      "inputStage": "shadow_ready",
+      "outputStage": "shadow_ready",
+      "productiveActivation": false,
+      "rollbackAvailable": true
+    }
+  ],
+  "scopeGroups": {
+    "lowRisk": [
+      "basic_economy_draw",
+      "tag_removal",
+      "simple_score_advance",
+      "basic_install",
+      "simple_rez",
+      "simple_run_choice"
+    ],
+    "mediumRisk": [
+      "remote_contest",
+      "simple_hq_or_rnd_pressure",
+      "simple_advance_score",
+      "basic_setup_install"
+    ],
+    "highRisk": [
+      "access_trash_steal",
+      "trace_payment",
+      "damage_prevention",
+      "multi_target_multi_ability"
+    ]
+  },
+  "qualityGates": {
+    "oneScopePerIteration": true,
+    "bulkActivationCount": 0,
+    "engineRejectCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "unsafeDivergenceCount": 0,
+    "publicPayloadDeltaCount": 0,
+    "rollbackFailureCount": 0,
+    "scopeRegressionStatus": "green",
+    "humanReviewOpenCount": 0,
+    "multiRunMetricsStable": true
+  },
+  "goNoGo": {
+    "decision": "broad_scoped_production_active",
+    "globalSemanticDefaultAllowed": false,
+    "legacyRemovalReady": false,
+    "nextStep": "META17_semantic_default_eligible_scopes"
+  },
+  "legacyFallbackAvailable": true,
+  "rollbackAvailable": true
+}

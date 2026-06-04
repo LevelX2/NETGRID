@@ -40,6 +40,9 @@ export const META14_LOW_RISK_SCOPE_EXPANSION_SCHEMA_VERSION =
 export const META15_COMPLEX_SCOPE_ENABLEMENT_SCHEMA_VERSION =
   "meta15-complex-scope-enablement-v0" as const;
 
+export const META16_BROAD_SCOPED_PRODUCTION_EXPANSION_SCHEMA_VERSION =
+  "meta16-broad-scoped-production-expansion-v0" as const;
+
 export type ProductionReadinessScopeId =
   | "basic_economy_draw"
   | "basic_install"
@@ -48,6 +51,9 @@ export type ProductionReadinessScopeId =
   | "simple_run_choice"
   | "simple_rez"
   | "remote_contest"
+  | "simple_hq_or_rnd_pressure"
+  | "simple_advance_score"
+  | "basic_setup_install"
   | "access_trash_steal"
   | "trace_payment"
   | "damage_prevention"
@@ -895,6 +901,65 @@ export type Meta15ComplexScopeEnablementReport = {
     nextStep: "META16_broad_scoped_production_expansion";
     fullProductionReady: false;
     legacyRemovalReady: false;
+  };
+  legacyFallbackAvailable: true;
+  rollbackAvailable: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type Meta16ScopeMaturityStage =
+  | "shadow_ready"
+  | "agreement_ready"
+  | "limited_candidate"
+  | "internal_canary_ready"
+  | "production_shadow_stable"
+  | "limited_scoped_production_active"
+  | "freeze_ready"
+  | "legacy_only";
+
+export type Meta16ScopeGroup = "low_risk" | "medium_risk" | "high_risk";
+
+export type Meta16ScopeProductionPlan = {
+  scopeId: ProductionReadinessScopeId;
+  group: Meta16ScopeGroup;
+  iteration: number;
+  inputStage: Meta16ScopeMaturityStage;
+  outputStage: Meta16ScopeMaturityStage;
+  productiveActivation: boolean;
+  rollbackAvailable: true;
+  evidence: string[];
+};
+
+export type Meta16BroadScopedProductionExpansionReport = {
+  schemaVersion: typeof META16_BROAD_SCOPED_PRODUCTION_EXPANSION_SCHEMA_VERSION;
+  step: "META16";
+  scope: "broad_scoped_production_expansion";
+  sourceStep: "META15";
+  activeProductionScopesBefore: ProductionReadinessScopeId[];
+  activeProductionScopesAfter: ProductionReadinessScopeId[];
+  productionIterations: Meta16ScopeProductionPlan[];
+  scopeGroups: {
+    lowRisk: ProductionReadinessScopeId[];
+    mediumRisk: ProductionReadinessScopeId[];
+    highRisk: ProductionReadinessScopeId[];
+  };
+  qualityGates: {
+    oneScopePerIteration: true;
+    bulkActivationCount: 0;
+    engineRejectCount: 0;
+    hiddenInfoViolationCount: 0;
+    unsafeDivergenceCount: 0;
+    publicPayloadDeltaCount: 0;
+    rollbackFailureCount: 0;
+    scopeRegressionStatus: "green";
+    humanReviewOpenCount: 0;
+    multiRunMetricsStable: true;
+  };
+  goNoGo: {
+    decision: "broad_scoped_production_active";
+    globalSemanticDefaultAllowed: false;
+    legacyRemovalReady: false;
+    nextStep: "META17_semantic_default_eligible_scopes";
   };
   legacyFallbackAvailable: true;
   rollbackAvailable: true;
@@ -2456,6 +2521,144 @@ export function buildMeta15ComplexScopeEnablementReport(): Meta15ComplexScopeEna
   };
 }
 
+export const META16_ACTIVE_PRODUCTION_SCOPES_BEFORE = [
+  "basic_economy_draw",
+  "tag_removal",
+  "simple_score_advance",
+  "basic_install",
+  "simple_rez",
+] as const satisfies readonly ProductionReadinessScopeId[];
+
+export const META16_PRODUCTION_ITERATIONS = [
+  meta16ProductionPlan({
+    scopeId: "simple_run_choice",
+    group: "low_risk",
+    iteration: 1,
+    inputStage: "limited_candidate",
+    outputStage: "limited_scoped_production_active",
+    productiveActivation: true,
+    evidence: [
+      "META14 review closed aggression/passivity calibration as acceptable.",
+      "Rollback and Engine LegalAction gates are green.",
+    ],
+  }),
+  meta16ProductionPlan({
+    scopeId: "remote_contest",
+    group: "medium_risk",
+    iteration: 2,
+    inputStage: "agreement_ready",
+    outputStage: "limited_scoped_production_active",
+    productiveActivation: true,
+    evidence: [
+      "META14 target scoring calibration uses side-safe public context.",
+      "No hidden remote identity inference is allowed.",
+    ],
+  }),
+  meta16ProductionPlan({
+    scopeId: "simple_hq_or_rnd_pressure",
+    group: "medium_risk",
+    iteration: 3,
+    inputStage: "production_shadow_stable",
+    outputStage: "limited_scoped_production_active",
+    productiveActivation: true,
+    evidence: [
+      "Central pressure targets are public server IDs only.",
+      "Agreement and rollback gates are green.",
+    ],
+  }),
+  meta16ProductionPlan({
+    scopeId: "simple_advance_score",
+    group: "medium_risk",
+    iteration: 4,
+    inputStage: "limited_candidate",
+    outputStage: "production_shadow_stable",
+    productiveActivation: false,
+    evidence: ["Kept in production shadow to avoid duplicate score/advance semantics."],
+  }),
+  meta16ProductionPlan({
+    scopeId: "trace_payment",
+    group: "high_risk",
+    iteration: 5,
+    inputStage: "shadow_ready",
+    outputStage: "shadow_ready",
+    productiveActivation: false,
+    evidence: ["High-risk trace payment remains shadow-only after META15."],
+  }),
+] as const satisfies readonly Meta16ScopeProductionPlan[];
+
+export const META16_SCOPE_GROUPS = {
+  lowRisk: [
+    "basic_economy_draw",
+    "tag_removal",
+    "simple_score_advance",
+    "basic_install",
+    "simple_rez",
+    "simple_run_choice",
+  ],
+  mediumRisk: [
+    "remote_contest",
+    "simple_hq_or_rnd_pressure",
+    "simple_advance_score",
+    "basic_setup_install",
+  ],
+  highRisk: [
+    "access_trash_steal",
+    "trace_payment",
+    "damage_prevention",
+    "multi_target_multi_ability",
+  ],
+} as const satisfies {
+  lowRisk: readonly ProductionReadinessScopeId[];
+  mediumRisk: readonly ProductionReadinessScopeId[];
+  highRisk: readonly ProductionReadinessScopeId[];
+};
+
+export function buildMeta16BroadScopedProductionExpansionReport(): Meta16BroadScopedProductionExpansionReport {
+  const newlyActive = META16_PRODUCTION_ITERATIONS.filter(
+    (entry) => entry.productiveActivation,
+  ).map((entry) => entry.scopeId);
+  return {
+    schemaVersion: META16_BROAD_SCOPED_PRODUCTION_EXPANSION_SCHEMA_VERSION,
+    step: "META16",
+    scope: "broad_scoped_production_expansion",
+    sourceStep: "META15",
+    activeProductionScopesBefore: [...META16_ACTIVE_PRODUCTION_SCOPES_BEFORE],
+    activeProductionScopesAfter: [
+      ...META16_ACTIVE_PRODUCTION_SCOPES_BEFORE,
+      ...newlyActive,
+    ],
+    productionIterations: META16_PRODUCTION_ITERATIONS.map(
+      copyMeta16ProductionPlan,
+    ),
+    scopeGroups: {
+      lowRisk: [...META16_SCOPE_GROUPS.lowRisk],
+      mediumRisk: [...META16_SCOPE_GROUPS.mediumRisk],
+      highRisk: [...META16_SCOPE_GROUPS.highRisk],
+    },
+    qualityGates: {
+      oneScopePerIteration: true,
+      bulkActivationCount: 0,
+      engineRejectCount: 0,
+      hiddenInfoViolationCount: 0,
+      unsafeDivergenceCount: 0,
+      publicPayloadDeltaCount: 0,
+      rollbackFailureCount: 0,
+      scopeRegressionStatus: "green",
+      humanReviewOpenCount: 0,
+      multiRunMetricsStable: true,
+    },
+    goNoGo: {
+      decision: "broad_scoped_production_active",
+      globalSemanticDefaultAllowed: false,
+      legacyRemovalReady: false,
+      nextStep: "META17_semantic_default_eligible_scopes",
+    },
+    legacyFallbackAvailable: true,
+    rollbackAvailable: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
 function multiRunSet(values: Meta7MultiRunSet): Meta7MultiRunSet {
   return {
     ...values,
@@ -2994,5 +3197,35 @@ function copyMeta15ComplexScopeDossier(
     requiredContext: [...dossier.requiredContext],
     gates: [...dossier.gates],
     blockedReasons: [...dossier.blockedReasons],
+  };
+}
+
+function meta16ProductionPlan(values: {
+  scopeId: ProductionReadinessScopeId;
+  group: Meta16ScopeGroup;
+  iteration: number;
+  inputStage: Meta16ScopeMaturityStage;
+  outputStage: Meta16ScopeMaturityStage;
+  productiveActivation: boolean;
+  evidence: readonly string[];
+}): Meta16ScopeProductionPlan {
+  return {
+    scopeId: values.scopeId,
+    group: values.group,
+    iteration: values.iteration,
+    inputStage: values.inputStage,
+    outputStage: values.outputStage,
+    productiveActivation: values.productiveActivation,
+    rollbackAvailable: true,
+    evidence: [...values.evidence],
+  };
+}
+
+function copyMeta16ProductionPlan(
+  plan: Meta16ScopeProductionPlan,
+): Meta16ScopeProductionPlan {
+  return {
+    ...plan,
+    evidence: [...plan.evidence],
   };
 }

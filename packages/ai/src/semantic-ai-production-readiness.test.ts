@@ -8,6 +8,7 @@ import {
   META8_INTERNAL_CANARY_FIXTURES,
   META9_PRODUCTION_SAFE_SHADOW_CONFIG,
   META10_SELECTED_PRODUCTION_SCOPES,
+  buildMeta16BroadScopedProductionExpansionReport,
   buildMeta15ComplexScopeEnablementReport,
   buildMeta14LowRiskScopeExpansionReport,
   buildMeta13LegacyFreezeExtendedMonitoringReport,
@@ -507,6 +508,89 @@ describe("META15 Complex Scope Enablement", () => {
       nextStep: "META16_broad_scoped_production_expansion",
       fullProductionReady: false,
       legacyRemovalReady: false,
+    });
+    expect(report.legacyFallbackAvailable).toBe(true);
+    expect(report.rollbackAvailable).toBe(true);
+  });
+});
+
+describe("META16 Broad Scoped Production Expansion", () => {
+  it("expands production scope-by-scope without a global semantic default", () => {
+    const report = buildMeta16BroadScopedProductionExpansionReport();
+
+    expect(report.schemaVersion).toBe(
+      "meta16-broad-scoped-production-expansion-v0",
+    );
+    expect(report.step).toBe("META16");
+    expect(report.activeProductionScopesBefore).toEqual([
+      "basic_economy_draw",
+      "tag_removal",
+      "simple_score_advance",
+      "basic_install",
+      "simple_rez",
+    ]);
+    expect(report.activeProductionScopesAfter).toEqual([
+      "basic_economy_draw",
+      "tag_removal",
+      "simple_score_advance",
+      "basic_install",
+      "simple_rez",
+      "simple_run_choice",
+      "remote_contest",
+      "simple_hq_or_rnd_pressure",
+    ]);
+    expect(report.goNoGo.globalSemanticDefaultAllowed).toBe(false);
+  });
+
+  it("keeps one activation per iteration and high-risk scopes non-productive", () => {
+    const report = buildMeta16BroadScopedProductionExpansionReport();
+    const productiveIterations = report.productionIterations.filter(
+      (entry) => entry.productiveActivation,
+    );
+
+    expect(productiveIterations.map((entry) => entry.scopeId)).toEqual([
+      "simple_run_choice",
+      "remote_contest",
+      "simple_hq_or_rnd_pressure",
+    ]);
+    expect(new Set(productiveIterations.map((entry) => entry.iteration)).size).toBe(
+      productiveIterations.length,
+    );
+    expect(report.productionIterations).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          scopeId: "trace_payment",
+          group: "high_risk",
+          productiveActivation: false,
+          outputStage: "shadow_ready",
+        }),
+      ]),
+    );
+  });
+
+  it("reports broad production gates while preserving rollback and fallback", () => {
+    const report = buildMeta16BroadScopedProductionExpansionReport();
+
+    expect(report.scopeGroups.lowRisk).toContain("simple_run_choice");
+    expect(report.scopeGroups.mediumRisk).toContain("remote_contest");
+    expect(report.scopeGroups.highRisk).toContain("multi_target_multi_ability");
+    expect(report.qualityGates).toEqual({
+      oneScopePerIteration: true,
+      bulkActivationCount: 0,
+      engineRejectCount: 0,
+      hiddenInfoViolationCount: 0,
+      unsafeDivergenceCount: 0,
+      publicPayloadDeltaCount: 0,
+      rollbackFailureCount: 0,
+      scopeRegressionStatus: "green",
+      humanReviewOpenCount: 0,
+      multiRunMetricsStable: true,
+    });
+    expect(report.goNoGo).toEqual({
+      decision: "broad_scoped_production_active",
+      globalSemanticDefaultAllowed: false,
+      legacyRemovalReady: false,
+      nextStep: "META17_semantic_default_eligible_scopes",
     });
     expect(report.legacyFallbackAvailable).toBe(true);
     expect(report.rollbackAvailable).toBe(true);
