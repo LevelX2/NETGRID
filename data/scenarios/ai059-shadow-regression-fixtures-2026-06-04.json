@@ -1,0 +1,78 @@
+{
+  "schemaVersion": "shadow-regression-fixtures-v1",
+  "date": "2026-06-04",
+  "source": "AI059 Shadow Regression Fixtures",
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "fixtures": [
+    {
+      "fixtureId": "ai059-golden-same-as-legacy-runner-draw",
+      "fixtureType": "golden_same_as_legacy",
+      "scenarioId": "runner_draw_vs_credit",
+      "active": true,
+      "expectedScoreStatus": "ranked_shadow_only",
+      "expectedAgreement": "same_action",
+      "expectedHardGate": "none"
+    },
+    {
+      "fixtureId": "ai059-golden-semantic-improvement-placeholder",
+      "fixtureType": "golden_semantic_improvement",
+      "scenarioId": "no_ai058_potential_improvement",
+      "active": false,
+      "reasonIfInactive": "AI058 produced no topPotentialImprovements; do not fabricate improvement semantics."
+    },
+    {
+      "fixtureId": "ai059-golden-blocked-by-gap-runner-break",
+      "fixtureType": "golden_semantic_blocked_by_gap",
+      "scenarioId": "runner_break_subroutine",
+      "active": true,
+      "expectedScoreStatus": "blocked_by_gap",
+      "expectedTriageClass": "missing_ability_binding",
+      "expectedGap": "ability_unresolved"
+    },
+    {
+      "fixtureId": "ai059-golden-hidden-info-unrezzed-ice",
+      "fixtureType": "golden_hidden_info_guard",
+      "scenarioId": "hidden_info_boundary_unrezzed_ice",
+      "active": true,
+      "expectedScoreStatus": "blocked_by_gate",
+      "expectedTriageClass": "hidden_info_blocker",
+      "expectedGap": "hidden_info_blocked",
+      "expectedHardGate": "hidden_info"
+    },
+    {
+      "fixtureId": "ai059-golden-illegal-action-guard",
+      "fixtureType": "golden_illegal_action_guard",
+      "scenarioId": "batch_all_scenarios",
+      "active": true,
+      "expectedHardGate": "engine_legal_action"
+    },
+    {
+      "fixtureId": "ai059-golden-target-context-required",
+      "fixtureType": "golden_target_context_required",
+      "scenarioId": "runner_remote_contest",
+      "active": true,
+      "expectedScoreStatus": "blocked_by_gap",
+      "expectedTriageClass": "missing_target_context",
+      "expectedGap": "target_context_unavailable"
+    },
+    {
+      "fixtureId": "ai059-golden-ability-resolution-required",
+      "fixtureType": "golden_ability_resolution_required",
+      "scenarioId": "multi_ability_card_unresolved",
+      "active": true,
+      "expectedScoreStatus": "blocked_by_gap",
+      "expectedTriageClass": "missing_ability_binding",
+      "expectedGap": "ability_unresolved"
+    },
+    {
+      "fixtureId": "ai059-golden-cost-known-required",
+      "fixtureType": "golden_cost_known_required",
+      "scenarioId": "x_value_choice",
+      "active": true,
+      "expectedScoreStatus": "blocked_by_gap",
+      "expectedTriageClass": "missing_cost_or_timing",
+      "expectedGap": "cost_unknown"
+    }
+  ]
+}

@@ -12,6 +12,7 @@ import {
   buildShadowModeTraceContractReport,
   buildRuntimeShadowHarnessReport,
   buildShadowEvaluationBatchReport,
+  buildShadowRegressionFixturesReport,
   DEFAULT_SEMANTIC_AI_SHADOW_MODE_CONFIG,
   runRuntimeShadowHarness,
   type ShadowDecisionTrace,
@@ -612,6 +613,75 @@ describe("buildShadowEvaluationBatchReport", () => {
     expect(report.semanticExecutionAllowed).toBe(false);
     expect(report.productiveUseAllowed).toBe(false);
     expect(report.noRuntimeEffect).toBe(true);
+  });
+});
+
+describe("buildShadowRegressionFixturesReport", () => {
+  it("defines all required shadow regression fixture types", () => {
+    const report = buildShadowRegressionFixturesReport();
+
+    expect(report.schemaVersion).toBe("shadow-regression-fixtures-v1");
+    expect(report.scope).toBe("shadow_regression_fixtures");
+    expect(report.fixtureTypes).toEqual([
+      "golden_same_as_legacy",
+      "golden_semantic_improvement",
+      "golden_semantic_blocked_by_gap",
+      "golden_hidden_info_guard",
+      "golden_illegal_action_guard",
+      "golden_target_context_required",
+      "golden_ability_resolution_required",
+      "golden_cost_known_required",
+    ]);
+    expect(report.fixtures).toHaveLength(8);
+    expect(report.activeFixtureCount).toBe(7);
+    expect(report.inactiveFixtureCount).toBe(1);
+  });
+
+  it("does not fabricate a semantic improvement fixture when AI058 has none", () => {
+    const report = buildShadowRegressionFixturesReport();
+    const improvement = report.fixtures.find(
+      (fixture) => fixture.fixtureType === "golden_semantic_improvement",
+    );
+
+    expect(improvement).toEqual(
+      expect.objectContaining({
+        active: false,
+        reasonIfInactive: "AI058 produced no topPotentialImprovements.",
+      }),
+    );
+  });
+
+  it("captures hidden-info, illegal-action and required-gap guards", () => {
+    const report = buildShadowRegressionFixturesReport();
+
+    expect(report.fixtures).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          fixtureType: "golden_hidden_info_guard",
+          expectedHardGate: "hidden_info",
+          expectedGap: "hidden_info_blocked",
+        }),
+        expect.objectContaining({
+          fixtureType: "golden_illegal_action_guard",
+          expectedHardGate: "engine_legal_action",
+        }),
+        expect.objectContaining({
+          fixtureType: "golden_target_context_required",
+          expectedGap: "target_context_unavailable",
+        }),
+      ]),
+    );
+  });
+
+  it("is deterministic and diagnostic-only", () => {
+    const first = buildShadowRegressionFixturesReport();
+    const second = buildShadowRegressionFixturesReport();
+
+    expect(first).toEqual(second);
+    expect(first.determinismKey).toBe(second.determinismKey);
+    expect(first.runtimeConsumerStatus).toBe("none");
+    expect(first.productiveUseAllowed).toBe(false);
+    expect(first.noRuntimeEffect).toBe(true);
   });
 });
 

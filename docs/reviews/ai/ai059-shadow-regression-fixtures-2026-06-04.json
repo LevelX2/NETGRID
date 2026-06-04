@@ -1,0 +1,67 @@
+{
+  "step": "AI059",
+  "title": "Shadow Regression Fixtures",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai051-ai060-controlled-shadow-mode",
+  "schemaVersion": "shadow-regression-fixtures-v1",
+  "scope": "shadow_regression_fixtures",
+  "fixtureFile": "data/scenarios/ai059-shadow-regression-fixtures-2026-06-04.json",
+  "fixtureCount": 8,
+  "activeFixtureCount": 7,
+  "inactiveFixtureCount": 1,
+  "inactiveFixtureReason": "AI058 produced no topPotentialImprovements; semantic improvement fixture remains placeholder only.",
+  "fixtureTypes": [
+    "golden_same_as_legacy",
+    "golden_semantic_improvement",
+    "golden_semantic_blocked_by_gap",
+    "golden_hidden_info_guard",
+    "golden_illegal_action_guard",
+    "golden_target_context_required",
+    "golden_ability_resolution_required",
+    "golden_cost_known_required"
+  ],
+  "deterministicOutput": true,
+  "runtimeConsumerStatus": "none",
+  "semanticExecutionAllowed": false,
+  "productiveUseAllowed": false,
+  "noRuntimeEffect": true,
+  "runtimeFilesTouched": [],
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "implementationFiles": [
+    "packages/ai/src/controlled-shadow-mode.ts",
+    "packages/ai/src/controlled-shadow-mode.test.ts",
+    "data/scenarios/ai059-shadow-regression-fixtures-2026-06-04.json"
+  ],
+  "reportFiles": [
+    "docs/reviews/ai/ai059-shadow-regression-fixtures-2026-06-04.md",
+    "docs/reviews/ai/ai059-shadow-regression-fixtures-2026-06-04.json"
+  ],
+  "checkScripts": [
+    "scripts/check-ai059-shadow-regression-fixtures.mjs"
+  ],
+  "verification": [
+    "node scripts/check-ai059-shadow-regression-fixtures.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- controlled-shadow-mode.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "node scripts/check-ai058-shadow-evaluation-batch-report.mjs",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "doneGate": {
+    "knownBadCasesReproducibleWherePresent": true,
+    "hiddenInfoGuardStable": true,
+    "illegalActionGuardStable": true,
+    "gapGuardsStable": true,
+    "deterministicOutput": true
+  }
+}

@@ -32,6 +32,9 @@ export const RUNTIME_SHADOW_HARNESS_SCHEMA_VERSION =
 export const SHADOW_EVALUATION_BATCH_SCHEMA_VERSION =
   "shadow-evaluation-batch-v1" as const;
 
+export const SHADOW_REGRESSION_FIXTURES_SCHEMA_VERSION =
+  "shadow-regression-fixtures-v1" as const;
+
 export const CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS = {
   actualDecisionOverride: false,
   productiveScoring: false,
@@ -576,6 +579,47 @@ export type ShadowEvaluationBatchReport = {
   scenarioResults: ShadowEvaluationBatchScenarioResult[];
   actualDecisionOverrideCount: 0;
   runtimeEffectCount: 0;
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type ShadowRegressionFixtureType =
+  | "golden_same_as_legacy"
+  | "golden_semantic_improvement"
+  | "golden_semantic_blocked_by_gap"
+  | "golden_hidden_info_guard"
+  | "golden_illegal_action_guard"
+  | "golden_target_context_required"
+  | "golden_ability_resolution_required"
+  | "golden_cost_known_required";
+
+export type ShadowRegressionFixture = {
+  fixtureId: string;
+  fixtureType: ShadowRegressionFixtureType;
+  scenarioId: string;
+  active: boolean;
+  expectedScoreStatus?: SemanticShadowScoreStatus;
+  expectedAgreement?: LegacySemanticAgreement;
+  expectedTriageClass?: DeviationTriageClass;
+  expectedGap?: ActionProjectionIssue;
+  expectedHardGate?: ActionGateId | "none";
+  assertion: string;
+  reasonIfInactive?: string;
+};
+
+export type ShadowRegressionFixturesReport = {
+  schemaVersion: typeof SHADOW_REGRESSION_FIXTURES_SCHEMA_VERSION;
+  scope: "shadow_regression_fixtures";
+  sourceBatchSchema: typeof SHADOW_EVALUATION_BATCH_SCHEMA_VERSION;
+  fixtureFile: string;
+  fixtures: ShadowRegressionFixture[];
+  fixtureTypes: readonly ShadowRegressionFixtureType[];
+  activeFixtureCount: number;
+  inactiveFixtureCount: number;
+  determinismKey: string;
   productiveUseAllowed: false;
   semanticExecutionAllowed: false;
   runtimeConsumerStatus: "none";
@@ -1213,6 +1257,42 @@ export function buildShadowEvaluationBatchReport(
     noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
   };
 }
+
+export function buildShadowRegressionFixturesReport(
+  batchReport: ShadowEvaluationBatchReport = buildShadowEvaluationBatchReport(),
+): ShadowRegressionFixturesReport {
+  const fixtures = buildShadowRegressionFixtures(batchReport);
+
+  return {
+    schemaVersion: SHADOW_REGRESSION_FIXTURES_SCHEMA_VERSION,
+    scope: "shadow_regression_fixtures",
+    sourceBatchSchema: SHADOW_EVALUATION_BATCH_SCHEMA_VERSION,
+    fixtureFile: "data/scenarios/ai059-shadow-regression-fixtures-2026-06-04.json",
+    fixtures,
+    fixtureTypes: SHADOW_REGRESSION_FIXTURE_TYPES,
+    activeFixtureCount: fixtures.filter((fixture) => fixture.active).length,
+    inactiveFixtureCount: fixtures.filter((fixture) => !fixture.active).length,
+    determinismKey: fixtures
+      .map((fixture) => `${fixture.fixtureId}:${fixture.active}`)
+      .join("|"),
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export const SHADOW_REGRESSION_FIXTURE_TYPES = [
+  "golden_same_as_legacy",
+  "golden_semantic_improvement",
+  "golden_semantic_blocked_by_gap",
+  "golden_hidden_info_guard",
+  "golden_illegal_action_guard",
+  "golden_target_context_required",
+  "golden_ability_resolution_required",
+  "golden_cost_known_required",
+] as const satisfies readonly ShadowRegressionFixtureType[];
 
 export const DEVIATION_TRIAGE_CLASSES = [
   "acceptable_difference",
@@ -2218,6 +2298,101 @@ function topSemanticGapsFromTriage(
     {
       gapId: "hidden_info_blocked",
       count: triageReport.summary.hiddenInfoBlocker,
+    },
+  ];
+}
+
+function buildShadowRegressionFixtures(
+  batchReport: ShadowEvaluationBatchReport,
+): ShadowRegressionFixture[] {
+  return [
+    {
+      fixtureId: "ai059-golden-same-as-legacy-runner-draw",
+      fixtureType: "golden_same_as_legacy",
+      scenarioId: "runner_draw_vs_credit",
+      active: true,
+      expectedScoreStatus: "ranked_shadow_only",
+      expectedAgreement: "same_action",
+      expectedHardGate: "none",
+      assertion:
+        "Semantic shadow may rank a fixture candidate, but actualDecision remains the legacy reference.",
+    },
+    {
+      fixtureId: "ai059-golden-semantic-improvement-placeholder",
+      fixtureType: "golden_semantic_improvement",
+      scenarioId: "no_ai058_potential_improvement",
+      active: false,
+      assertion:
+        "No AI058 topPotentialImprovements exist; do not fabricate a semantic improvement fixture.",
+      reasonIfInactive:
+        batchReport.topPotentialImprovements.length === 0
+          ? "AI058 produced no topPotentialImprovements."
+          : "Improvement fixture requires separate evidence selection.",
+    },
+    {
+      fixtureId: "ai059-golden-blocked-by-gap-runner-break",
+      fixtureType: "golden_semantic_blocked_by_gap",
+      scenarioId: "runner_break_subroutine",
+      active: true,
+      expectedScoreStatus: "blocked_by_gap",
+      expectedTriageClass: "missing_ability_binding",
+      expectedGap: "ability_unresolved",
+      assertion:
+        "Semantic shadow must block breaker decisions when ability binding is unresolved.",
+    },
+    {
+      fixtureId: "ai059-golden-hidden-info-unrezzed-ice",
+      fixtureType: "golden_hidden_info_guard",
+      scenarioId: "hidden_info_boundary_unrezzed_ice",
+      active: true,
+      expectedScoreStatus: "blocked_by_gate",
+      expectedTriageClass: "hidden_info_blocker",
+      expectedGap: "hidden_info_blocked",
+      expectedHardGate: "hidden_info",
+      assertion:
+        "Semantic shadow must not inspect unrezzed ICE identity, subtype or subroutines.",
+    },
+    {
+      fixtureId: "ai059-golden-illegal-action-guard",
+      fixtureType: "golden_illegal_action_guard",
+      scenarioId: "batch_all_scenarios",
+      active: true,
+      expectedHardGate: "engine_legal_action",
+      assertion:
+        "Every selected semantic shadow action, when present, must be one of the fixture LegalAction candidates.",
+    },
+    {
+      fixtureId: "ai059-golden-target-context-required",
+      fixtureType: "golden_target_context_required",
+      scenarioId: "runner_remote_contest",
+      active: true,
+      expectedScoreStatus: "blocked_by_gap",
+      expectedTriageClass: "missing_target_context",
+      expectedGap: "target_context_unavailable",
+      assertion:
+        "Target-sensitive remote contest diagnostics must stay blocked without side-safe TargetContext.",
+    },
+    {
+      fixtureId: "ai059-golden-ability-resolution-required",
+      fixtureType: "golden_ability_resolution_required",
+      scenarioId: "multi_ability_card_unresolved",
+      active: true,
+      expectedScoreStatus: "blocked_by_gap",
+      expectedTriageClass: "missing_ability_binding",
+      expectedGap: "ability_unresolved",
+      assertion:
+        "Multi-ability card diagnostics must stay blocked without explicit ability binding.",
+    },
+    {
+      fixtureId: "ai059-golden-cost-known-required",
+      fixtureType: "golden_cost_known_required",
+      scenarioId: "x_value_choice",
+      active: true,
+      expectedScoreStatus: "blocked_by_gap",
+      expectedTriageClass: "missing_cost_or_timing",
+      expectedGap: "cost_unknown",
+      assertion:
+        "X-value diagnostics must stay blocked until cost evidence is explicit.",
     },
   ];
 }
