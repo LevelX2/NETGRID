@@ -1,0 +1,191 @@
+{
+  "schemaVersion": "ai068-sr-runtime-backed-shadow-fixture-coverage-expansion-v1",
+  "taskId": "AI068-SR",
+  "step": "AI068-SR",
+  "date": "2026-06-04",
+  "status": "done",
+  "scope": "minimal_runtime_backed_shadow_fixture_coverage_expansion",
+  "sourceCommit": "950a93a6",
+  "baseline": {
+    "sourceStep": "AI067-SR",
+    "readinessStatus": "broad_shadow_ready",
+    "cutoverAllowed": false,
+    "actualDecision": "legacyDecision",
+    "semanticAiShadowModeEnabledDefault": false,
+    "hardSafetyGates": 0,
+    "semanticDecisionAvailableRate": 0.8788,
+    "semanticBlockedByGapRate": 0.0303,
+    "runtimeBackedFixtureRate": 0.2424,
+    "residualAbilityUnresolved": 1,
+    "residualHiddenInfoBlocked": 3
+  },
+  "countsBefore": {
+    "totalFixtureCount": 33,
+    "runtimeBackedFixtureCount": 8,
+    "runtimeBackedFixtureRate": 0.2424
+  },
+  "countsAfter": {
+    "totalFixtureCount": 33,
+    "runtimeBackedFixtureCount": 16,
+    "runtimeBackedFixtureRate": 0.4848
+  },
+  "promotedFixtures": [
+    {
+      "scenarioId": "runner_start_rnd_run",
+      "side": "runner",
+      "promotedSetupKind": "saved_state",
+      "stateRef": "data/scenarios/ai068-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_start_rnd_run",
+      "promotionReason": "safe_side_safe_run_target",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "hardGateExpectation": "zero_failures",
+      "productiveChangeAllowed": false
+    },
+    {
+      "scenarioId": "runner_remote_contest",
+      "side": "runner",
+      "promotedSetupKind": "saved_state",
+      "stateRef": "data/scenarios/ai068-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_remote_contest",
+      "promotionReason": "safe_side_safe_run_target",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "hardGateExpectation": "zero_failures",
+      "productiveChangeAllowed": false
+    },
+    {
+      "scenarioId": "runner_access_trash_asset",
+      "side": "runner",
+      "promotedSetupKind": "saved_state",
+      "stateRef": "data/scenarios/ai068-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_access_trash_asset",
+      "promotionReason": "safe_access_window",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "hardGateExpectation": "zero_failures",
+      "productiveChangeAllowed": false
+    },
+    {
+      "scenarioId": "runner_remove_tag",
+      "side": "runner",
+      "promotedSetupKind": "saved_state",
+      "stateRef": "data/scenarios/ai068-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_remove_tag",
+      "promotionReason": "safe_tag_cleanup",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "hardGateExpectation": "zero_failures",
+      "productiveChangeAllowed": false
+    },
+    {
+      "scenarioId": "runner_survival_damage_risk",
+      "side": "runner",
+      "promotedSetupKind": "saved_state",
+      "stateRef": "data/scenarios/ai068-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_survival_damage_risk",
+      "promotionReason": "safe_visible_survival_choice",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "hardGateExpectation": "zero_failures",
+      "productiveChangeAllowed": false
+    },
+    {
+      "scenarioId": "runner_jack_out_vs_continue",
+      "side": "runner",
+      "promotedSetupKind": "saved_state",
+      "stateRef": "data/scenarios/ai068-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_jack_out_vs_continue",
+      "promotionReason": "safe_side_safe_run_window",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "hardGateExpectation": "zero_failures",
+      "productiveChangeAllowed": false
+    },
+    {
+      "scenarioId": "runner_break_subroutine",
+      "side": "runner",
+      "promotedSetupKind": "saved_state",
+      "stateRef": "data/scenarios/ai068-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_break_subroutine",
+      "promotionReason": "safe_side_safe_run_window",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "hardGateExpectation": "zero_failures",
+      "productiveChangeAllowed": false
+    },
+    {
+      "scenarioId": "corp_rez_ice_window",
+      "side": "corp",
+      "promotedSetupKind": "saved_state",
+      "stateRef": "data/scenarios/ai068-sr-runtime-backed-shadow-fixtures-2026-06-04.json#corp_rez_ice_window",
+      "promotionReason": "safe_corp_rez_or_defense",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "hardGateExpectation": "zero_failures",
+      "productiveChangeAllowed": false
+    }
+  ],
+  "blockedPromotionCandidates": [
+    {"scenarioId": "runner_install_breaker_for_known_ice", "reason": "deferred_beyond_minimal_safe_batch", "retainedGaps": []},
+    {"scenarioId": "corp_advance_agenda", "reason": "deferred_beyond_minimal_safe_batch", "retainedGaps": []},
+    {"scenarioId": "corp_remote_score_window", "reason": "deferred_beyond_minimal_safe_batch", "retainedGaps": []},
+    {"scenarioId": "corp_defend_hq", "reason": "deferred_beyond_minimal_safe_batch", "retainedGaps": []},
+    {"scenarioId": "corp_defend_rnd", "reason": "deferred_beyond_minimal_safe_batch", "retainedGaps": []},
+    {"scenarioId": "corp_tag_trace_window", "reason": "deferred_beyond_minimal_safe_batch", "retainedGaps": []},
+    {"scenarioId": "corp_tagged_runner_punish", "reason": "deferred_beyond_minimal_safe_batch", "retainedGaps": []},
+    {"scenarioId": "corp_damage_kill_window", "reason": "deferred_beyond_minimal_safe_batch", "retainedGaps": []},
+    {"scenarioId": "corp_operation_play", "reason": "deferred_beyond_minimal_safe_batch", "retainedGaps": []},
+    {"scenarioId": "trace_boost_or_decline", "reason": "deferred_beyond_minimal_safe_batch", "retainedGaps": []},
+    {"scenarioId": "x_value_choice", "reason": "deferred_beyond_minimal_safe_batch", "retainedGaps": []},
+    {"scenarioId": "multi_target_choice", "reason": "deferred_beyond_minimal_safe_batch", "retainedGaps": []},
+    {"scenarioId": "source_target_advancement_counter", "reason": "deferred_beyond_minimal_safe_batch", "retainedGaps": []},
+    {"scenarioId": "corp_ambush_or_remote_bait", "reason": "hidden_info_blocked_guard", "retainedGaps": ["target_context_unavailable", "hidden_info_blocked"]},
+    {"scenarioId": "hidden_info_boundary_unrezzed_ice", "reason": "hidden_info_blocked_guard", "retainedGaps": ["hidden_info_blocked"]},
+    {"scenarioId": "hidden_resource_boundary", "reason": "hidden_info_blocked_guard", "retainedGaps": ["hidden_info_blocked"]},
+    {"scenarioId": "multi_ability_card_unresolved", "reason": "multi_ability_card_unresolved_guard", "retainedGaps": ["ability_unresolved"]}
+  ],
+  "runtimeBackedFixtureRateBefore": 0.2424,
+  "runtimeBackedFixtureRateAfter": 0.4848,
+  "semanticDecisionAvailableRateAfter": 0.8788,
+  "semanticBlockedByGapRateAfter": 0.0303,
+  "hardGateFailures": [],
+  "knownBadDecisions": [],
+  "actualDecisionOverrideCount": 0,
+  "runtimeEffectCount": 0,
+  "hiddenInfoViolationCount": 0,
+  "residualGaps": [
+    {"gapId": "target_context_unavailable", "count": 0, "blocker": false},
+    {"gapId": "card_semantics_unavailable", "count": 0, "blocker": false},
+    {"gapId": "ability_unresolved", "count": 1, "blocker": false},
+    {"gapId": "cost_unknown", "count": 0, "blocker": false},
+    {"gapId": "hidden_info_blocked", "count": 3, "blocker": false}
+  ],
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "verification": [
+    "node scripts/check-ai061-sr-target-context-projection-expansion.mjs",
+    "node scripts/check-ai062-sr-ability-binding-expansion.mjs",
+    "node scripts/check-ai063-sr-card-semantics-join-coverage.mjs",
+    "node scripts/check-ai064-sr-cost-timing-evidence-expansion.mjs",
+    "node scripts/check-ai065-sr-runtime-backed-shadow-fixture-promotion.mjs",
+    "node scripts/check-ai066-sr-shadow-evaluation-rerun.mjs",
+    "node scripts/check-ai067-sr-shadow-readiness-rereview.mjs",
+    "node scripts/check-ai068-sr-runtime-backed-shadow-fixture-coverage-expansion.mjs",
+    "corepack pnpm --filter @netgrid/ai test",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "git diff --check"
+  ],
+  "readinessDecision": {
+    "status": "broad_shadow_ready",
+    "cutoverAllowed": false,
+    "cutoverDesignStarted": false
+  },
+  "semanticAiShadowModeEnabledDefault": false,
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "runtimeConsumerStatus": "none",
+  "noRuntimeEffect": true
+}
+

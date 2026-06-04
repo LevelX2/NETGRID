@@ -7,6 +7,7 @@ import {
   AI063_SR_SIDE_SAFE_CARD_SEMANTICS_JOINS,
   AI064_SR_SIDE_SAFE_COST_TIMING_EVIDENCE,
   AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTIONS,
+  AI068_SR_RUNTIME_BACKED_FIXTURE_COVERAGE_PROMOTIONS,
   buildAi061SrTargetContextProjectionExpansionReport,
   buildAi062SrAbilityBindingExpansionReport,
   buildAi063SrCardSemanticsJoinCoverageReport,
@@ -14,9 +15,11 @@ import {
   buildAi065SrRuntimeBackedShadowFixturePromotionReport,
   buildAi066SrShadowEvaluationRerunReport,
   buildAi067SrShadowReadinessRereviewReport,
+  buildAi068SrRuntimeBackedShadowFixtureCoverageExpansionReport,
   buildFixturesAfterAbilityBindingExpansion,
   buildFixturesAfterCardSemanticsJoinCoverage,
   buildFixturesAfterCostTimingEvidenceExpansion,
+  buildFixturesAfterRuntimeBackedShadowFixtureCoverageExpansion,
   buildFixturesAfterRuntimeBackedShadowFixturePromotion,
   buildFixturesAfterTargetContextProjection,
 } from "./shadow-readiness-expansion";
@@ -140,6 +143,99 @@ describe("AI067-SR Shadow Readiness Re-Review", () => {
         "Keep Hidden-Info boundary fixtures blocked as regression guards.",
         "Do not start productive semantic action selection, planner weights, scoped override or runtime canary in this process.",
       ]),
+    );
+  });
+});
+
+describe("AI068-SR Runtime-backed Shadow Fixture Coverage Expansion", () => {
+  it("promotes a minimal second batch of safe runtime-backed fixtures", () => {
+    const report =
+      buildAi068SrRuntimeBackedShadowFixtureCoverageExpansionReport();
+
+    expect(report.schemaVersion).toBe(
+      "ai068-sr-runtime-backed-shadow-fixture-coverage-expansion-v1",
+    );
+    expect(report.taskId).toBe("AI068-SR");
+    expect(report.countsBefore.runtimeBackedFixtureCount).toBe(8);
+    expect(report.countsBefore.runtimeBackedFixtureRate).toBe(0.2424);
+    expect(report.promotedFixtures).toHaveLength(8);
+    expect(report.countsAfter.runtimeBackedFixtureCount).toBe(16);
+    expect(report.runtimeBackedFixtureRateAfter).toBe(0.4848);
+    expect(report.readinessDecision.status).toBe("broad_shadow_ready");
+  });
+
+  it("does not promote hidden-info or unresolved multi-ability guard fixtures", () => {
+    const promotedIds =
+      AI068_SR_RUNTIME_BACKED_FIXTURE_COVERAGE_PROMOTIONS.map(
+        (promotion) => promotion.scenarioId,
+      );
+    const report =
+      buildAi068SrRuntimeBackedShadowFixtureCoverageExpansionReport();
+
+    expect(promotedIds).not.toEqual(
+      expect.arrayContaining([
+        "hidden_info_boundary_unrezzed_ice",
+        "hidden_resource_boundary",
+        "corp_ambush_or_remote_bait",
+        "multi_ability_card_unresolved",
+      ]),
+    );
+    expect(
+      AI068_SR_RUNTIME_BACKED_FIXTURE_COVERAGE_PROMOTIONS.every(
+        (promotion) =>
+          promotion.promotedSetupKind === "saved_state" &&
+          promotion.deterministicReference === true &&
+          promotion.hiddenInfoRisk === "low" &&
+          promotion.productiveChangeAllowed === false,
+      ),
+    ).toBe(true);
+    expect(report.blockedPromotionCandidates).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          scenarioId: "hidden_info_boundary_unrezzed_ice",
+          reason: "hidden_info_blocked_guard",
+        }),
+        expect.objectContaining({
+          scenarioId: "hidden_resource_boundary",
+          reason: "hidden_info_blocked_guard",
+        }),
+        expect.objectContaining({
+          scenarioId: "corp_ambush_or_remote_bait",
+          reason: "hidden_info_blocked_guard",
+        }),
+        expect.objectContaining({
+          scenarioId: "multi_ability_card_unresolved",
+          reason: "multi_ability_card_unresolved_guard",
+        }),
+      ]),
+    );
+  });
+
+  it("keeps broad readiness, residual gaps and every no-effect gate unchanged", () => {
+    const report =
+      buildAi068SrRuntimeBackedShadowFixtureCoverageExpansionReport();
+    const fixtures = buildFixturesAfterRuntimeBackedShadowFixtureCoverageExpansion();
+    const batch = buildShadowEvaluationBatchReport(fixtures);
+
+    expect(fixtures.filter((fixture) => fixture.setupKind === "saved_state")).toHaveLength(
+      16,
+    );
+    expect(batch.hardGateFailures).toEqual([]);
+    expect(batch.actualDecisionOverrideCount).toBe(0);
+    expect(batch.runtimeEffectCount).toBe(0);
+    expect(report.semanticDecisionAvailableRateAfter).toBe(0.8788);
+    expect(report.semanticBlockedByGapRateAfter).toBe(0.0303);
+    expect(report.residualGaps).toEqual([
+      { gapId: "target_context_unavailable", count: 0, blocker: false },
+      { gapId: "card_semantics_unavailable", count: 0, blocker: false },
+      { gapId: "ability_unresolved", count: 1, blocker: false },
+      { gapId: "cost_unknown", count: 0, blocker: false },
+      { gapId: "hidden_info_blocked", count: 3, blocker: false },
+    ]);
+    expect(report.readinessDecision.cutoverAllowed).toBe(false);
+    expect(report.semanticAiShadowModeEnabledDefault).toBe(false);
+    expect(Object.values(report.noEffectFlags).every((value) => value === false)).toBe(
+      true,
     );
   });
 });

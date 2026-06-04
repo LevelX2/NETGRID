@@ -1,0 +1,124 @@
+{
+  "schemaVersion": "ai068-sr-runtime-backed-shadow-fixture-coverage-expansion-v1",
+  "date": "2026-06-04",
+  "source": "AI068-SR Runtime-backed Shadow Fixture Coverage Expansion",
+  "baselineFixtureFile": "data/scenarios/ai065-sr-runtime-backed-shadow-fixtures-2026-06-04.json",
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "runtimeConsumerStatus": "none",
+  "noRuntimeEffect": true,
+  "fixtureSelectionPolicy": "minimal_safe_runtime_backed_expansion_only",
+  "runtimeBackedFixtureCountBefore": 8,
+  "runtimeBackedFixtureCountAfter": 16,
+  "runtimeBackedFixtureRateBefore": 0.2424,
+  "runtimeBackedFixtureRateAfter": 0.4848,
+  "previousRuntimeBackedFixtures": [
+    "runner_basic_economy",
+    "runner_draw_vs_credit",
+    "runner_install_program",
+    "runner_start_hq_run",
+    "runner_access_steal_agenda",
+    "corp_basic_economy",
+    "corp_install_ice",
+    "corp_score_agenda"
+  ],
+  "promotedFixtures": [
+    {
+      "scenarioId": "runner_start_rnd_run",
+      "side": "runner",
+      "setupKind": "saved_state",
+      "stateRef": "data/scenarios/ai068-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_start_rnd_run",
+      "promotionReason": "safe_side_safe_run_target",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "expectedLegalActionTypes": ["start_run"]
+    },
+    {
+      "scenarioId": "runner_remote_contest",
+      "side": "runner",
+      "setupKind": "saved_state",
+      "stateRef": "data/scenarios/ai068-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_remote_contest",
+      "promotionReason": "safe_side_safe_run_target",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "expectedLegalActionTypes": ["start_run"]
+    },
+    {
+      "scenarioId": "runner_access_trash_asset",
+      "side": "runner",
+      "setupKind": "saved_state",
+      "stateRef": "data/scenarios/ai068-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_access_trash_asset",
+      "promotionReason": "safe_access_window",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "expectedLegalActionTypes": ["trash_accessed_card", "decline_trash"]
+    },
+    {
+      "scenarioId": "runner_remove_tag",
+      "side": "runner",
+      "setupKind": "saved_state",
+      "stateRef": "data/scenarios/ai068-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_remove_tag",
+      "promotionReason": "safe_tag_cleanup",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "expectedLegalActionTypes": ["remove_tag"]
+    },
+    {
+      "scenarioId": "runner_survival_damage_risk",
+      "side": "runner",
+      "setupKind": "saved_state",
+      "stateRef": "data/scenarios/ai068-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_survival_damage_risk",
+      "promotionReason": "safe_visible_survival_choice",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "expectedLegalActionTypes": ["draw_card", "remove_tag", "gain_credit"]
+    },
+    {
+      "scenarioId": "runner_jack_out_vs_continue",
+      "side": "runner",
+      "setupKind": "saved_state",
+      "stateRef": "data/scenarios/ai068-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_jack_out_vs_continue",
+      "promotionReason": "safe_side_safe_run_window",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "expectedLegalActionTypes": ["jack_out", "continue_run"]
+    },
+    {
+      "scenarioId": "runner_break_subroutine",
+      "side": "runner",
+      "setupKind": "saved_state",
+      "stateRef": "data/scenarios/ai068-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_break_subroutine",
+      "promotionReason": "safe_side_safe_run_window",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "expectedLegalActionTypes": ["break_subroutine", "pump_breaker"]
+    },
+    {
+      "scenarioId": "corp_rez_ice_window",
+      "side": "corp",
+      "setupKind": "saved_state",
+      "stateRef": "data/scenarios/ai068-sr-runtime-backed-shadow-fixtures-2026-06-04.json#corp_rez_ice_window",
+      "promotionReason": "safe_corp_rez_or_defense",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "expectedLegalActionTypes": ["rez_ice", "decline_rez"]
+    }
+  ],
+  "notPromotedPolicy": {
+    "hiddenInfoBoundaryFixturesRemainSynthetic": true,
+    "multiAbilityUnresolvedGuardRemainsSynthetic": true,
+    "minimalBatchStopsAtPreferredCoverage": true,
+    "laterRuntimeCaptureAllowedOnlyWithSameSafetyGates": true
+  },
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  }
+}
+

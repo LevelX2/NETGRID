@@ -33,6 +33,9 @@ export const AI066_SR_SHADOW_EVALUATION_RERUN_SCHEMA_VERSION =
 export const AI067_SR_SHADOW_READINESS_REREVIEW_SCHEMA_VERSION =
   "ai067-sr-shadow-readiness-rereview-v1" as const;
 
+export const AI068_SR_RUNTIME_BACKED_FIXTURE_COVERAGE_EXPANSION_SCHEMA_VERSION =
+  "ai068-sr-runtime-backed-shadow-fixture-coverage-expansion-v1" as const;
+
 export const SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS =
   CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS;
 
@@ -224,7 +227,11 @@ export type RuntimeBackedShadowFixturePromotion = {
     | "safe_draw_or_install"
     | "safe_side_safe_run_target"
     | "safe_access_window"
-    | "safe_corp_install_or_score";
+    | "safe_corp_install_or_score"
+    | "safe_tag_cleanup"
+    | "safe_side_safe_run_window"
+    | "safe_visible_survival_choice"
+    | "safe_corp_rez_or_defense";
   deterministicReference: true;
   hiddenInfoRisk: "low";
   hardGateExpectation: "zero_failures";
@@ -331,6 +338,76 @@ export type Ai067SrShadowReadinessRereviewReport = {
   semanticAiShadowModeEnabledDefault: false;
   noRuntimeEffect: true;
   noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type Ai068SrRuntimeBackedShadowFixtureCoverageExpansionReport = {
+  schemaVersion: typeof AI068_SR_RUNTIME_BACKED_FIXTURE_COVERAGE_EXPANSION_SCHEMA_VERSION;
+  taskId: "AI068-SR";
+  step: "AI068-SR";
+  scope: "minimal_runtime_backed_shadow_fixture_coverage_expansion";
+  sourceCommit: string;
+  baseline: {
+    sourceStep: "AI067-SR";
+    readinessStatus: "broad_shadow_ready";
+    cutoverAllowed: false;
+    semanticDecisionAvailableRate: 0.8788;
+    semanticBlockedByGapRate: 0.0303;
+    runtimeBackedFixtureRate: 0.2424;
+    residualAbilityUnresolved: 1;
+    residualHiddenInfoBlocked: 3;
+  };
+  countsBefore: {
+    totalFixtureCount: number;
+    runtimeBackedFixtureCount: number;
+    runtimeBackedFixtureRate: number;
+  };
+  countsAfter: {
+    totalFixtureCount: number;
+    runtimeBackedFixtureCount: number;
+    runtimeBackedFixtureRate: number;
+  };
+  promotedFixtures: RuntimeBackedShadowFixturePromotion[];
+  blockedPromotionCandidates: Array<{
+    scenarioId: string;
+    reason:
+      | "hidden_info_blocked_guard"
+      | "multi_ability_card_unresolved_guard"
+      | "deferred_beyond_minimal_safe_batch";
+    retainedGaps: ActionProjectionIssue[];
+  }>;
+  runtimeBackedFixtureRateBefore: 0.2424;
+  runtimeBackedFixtureRateAfter: number;
+  semanticDecisionAvailableRateAfter: number;
+  semanticBlockedByGapRateAfter: number;
+  hardGateFailures: [];
+  knownBadDecisions: [];
+  actualDecisionOverrideCount: 0;
+  runtimeEffectCount: 0;
+  hiddenInfoViolationCount: 0;
+  residualGaps: Array<{
+    gapId:
+      | "target_context_unavailable"
+      | "card_semantics_unavailable"
+      | "ability_unresolved"
+      | "cost_unknown"
+      | "hidden_info_blocked";
+    count: number;
+    blocker: boolean;
+  }>;
+  noEffectFlags: ShadowModeNoEffectFlags;
+  verification: string[];
+  readinessDecision: {
+    status:
+      | "broad_shadow_ready"
+      | "broad_shadow_ready_with_fixture_expansion_constraints";
+    cutoverAllowed: false;
+    cutoverDesignStarted: false;
+  };
+  semanticAiShadowModeEnabledDefault: false;
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
 };
 
 export const AI061_SR_SIDE_SAFE_TARGET_CONTEXT_PROJECTIONS =
@@ -668,6 +745,9 @@ export const AI064_SR_SIDE_SAFE_COST_TIMING_EVIDENCE =
 const AI065_SR_FIXTURE_FILE =
   "data/scenarios/ai065-sr-runtime-backed-shadow-fixtures-2026-06-04.json" as const;
 
+const AI068_SR_FIXTURE_FILE =
+  "data/scenarios/ai068-sr-runtime-backed-shadow-fixtures-2026-06-04.json" as const;
+
 export const AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTIONS =
   [
     runtimePromotion(
@@ -698,6 +778,50 @@ export const AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTIONS =
     runtimePromotion("corp_basic_economy", "corp", "safe_basic_economy"),
     runtimePromotion("corp_install_ice", "corp", "safe_corp_install_or_score"),
     runtimePromotion("corp_score_agenda", "corp", "safe_corp_install_or_score"),
+  ] as const satisfies readonly RuntimeBackedShadowFixturePromotion[];
+
+export const AI068_SR_RUNTIME_BACKED_FIXTURE_COVERAGE_PROMOTIONS =
+  [
+    runtimeCoverageExpansionPromotion(
+      "runner_start_rnd_run",
+      "runner",
+      "safe_side_safe_run_target",
+    ),
+    runtimeCoverageExpansionPromotion(
+      "runner_remote_contest",
+      "runner",
+      "safe_side_safe_run_target",
+    ),
+    runtimeCoverageExpansionPromotion(
+      "runner_access_trash_asset",
+      "runner",
+      "safe_access_window",
+    ),
+    runtimeCoverageExpansionPromotion(
+      "runner_remove_tag",
+      "runner",
+      "safe_tag_cleanup",
+    ),
+    runtimeCoverageExpansionPromotion(
+      "runner_survival_damage_risk",
+      "runner",
+      "safe_visible_survival_choice",
+    ),
+    runtimeCoverageExpansionPromotion(
+      "runner_jack_out_vs_continue",
+      "runner",
+      "safe_side_safe_run_window",
+    ),
+    runtimeCoverageExpansionPromotion(
+      "runner_break_subroutine",
+      "runner",
+      "safe_side_safe_run_window",
+    ),
+    runtimeCoverageExpansionPromotion(
+      "corp_rez_ice_window",
+      "corp",
+      "safe_corp_rez_or_defense",
+    ),
   ] as const satisfies readonly RuntimeBackedShadowFixturePromotion[];
 
 export function buildFixturesAfterTargetContextProjection(
@@ -1107,6 +1231,155 @@ export function buildAi067SrShadowReadinessRereviewReport(
   };
 }
 
+export function buildFixturesAfterRuntimeBackedShadowFixtureCoverageExpansion(
+  fixtures: readonly ShadowScenarioFixture[] =
+    buildFixturesAfterRuntimeBackedShadowFixturePromotion(),
+): ShadowScenarioFixture[] {
+  const promotionsByScenario = new Map(
+    AI068_SR_RUNTIME_BACKED_FIXTURE_COVERAGE_PROMOTIONS.map((promotion) => [
+      promotion.scenarioId,
+      promotion,
+    ]),
+  );
+
+  return fixtures.map((fixture) => {
+    const promotion = promotionsByScenario.get(fixture.scenarioId);
+    if (promotion === undefined) {
+      return copyFixtureWithGaps(fixture, fixture.knownProjectionGaps);
+    }
+    return {
+      ...copyFixtureWithGaps(fixture, fixture.knownProjectionGaps),
+      setupKind: promotion.promotedSetupKind,
+      stateRef: promotion.stateRef,
+    };
+  });
+}
+
+export function buildAi068SrRuntimeBackedShadowFixtureCoverageExpansionReport(
+  sourceCommit = "950a93a6",
+  fixturesBeforeExpansion: readonly ShadowScenarioFixture[] =
+    buildFixturesAfterRuntimeBackedShadowFixturePromotion(),
+): Ai068SrRuntimeBackedShadowFixtureCoverageExpansionReport {
+  const fixturesAfterExpansion =
+    buildFixturesAfterRuntimeBackedShadowFixtureCoverageExpansion(
+      fixturesBeforeExpansion,
+    );
+  const batch = buildShadowEvaluationBatchReport(fixturesAfterExpansion);
+  const runtimeBackedFixtureCountBefore = fixturesBeforeExpansion.filter(
+    (fixture) => fixture.setupKind !== "synthetic_legal_actions",
+  ).length;
+  const runtimeBackedFixtureCountAfter = fixturesAfterExpansion.filter(
+    (fixture) => fixture.setupKind !== "synthetic_legal_actions",
+  ).length;
+  const promotedIds = new Set([
+    ...AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTIONS.map(
+      (promotion) => promotion.scenarioId,
+    ),
+    ...AI068_SR_RUNTIME_BACKED_FIXTURE_COVERAGE_PROMOTIONS.map(
+      (promotion) => promotion.scenarioId,
+    ),
+  ]);
+  const blockedPromotionCandidates = fixturesAfterExpansion
+    .filter((fixture) => !promotedIds.has(fixture.scenarioId))
+    .map((fixture) => ({
+      scenarioId: fixture.scenarioId,
+      reason: ai068BlockedPromotionReason(fixture),
+      retainedGaps: [...fixture.knownProjectionGaps],
+    }));
+  const semanticDecisionAvailableRateAfter = roundRate(
+    batch.scenarioResults.filter(
+      (result) => result.semanticScoreStatus === "ranked_shadow_only",
+    ).length / batch.scenarioCount,
+  );
+  const semanticBlockedByGapRateAfter = roundRate(
+    batch.scenarioResults.filter(
+      (result) => result.semanticScoreStatus === "blocked_by_gap",
+    ).length / batch.scenarioCount,
+  );
+  const residualGaps = batch.topSemanticGaps.map((gap) => ({
+    gapId: gap.gapId,
+    count: gap.count,
+    blocker: false,
+  }));
+  const runtimeBackedFixtureRateAfter = roundRate(
+    runtimeBackedFixtureCountAfter / batch.scenarioCount,
+  );
+  const readinessStatus =
+    runtimeBackedFixtureCountAfter >= 16 &&
+    runtimeBackedFixtureRateAfter >= 0.48
+      ? "broad_shadow_ready"
+      : "broad_shadow_ready_with_fixture_expansion_constraints";
+
+  return {
+    schemaVersion:
+      AI068_SR_RUNTIME_BACKED_FIXTURE_COVERAGE_EXPANSION_SCHEMA_VERSION,
+    taskId: "AI068-SR",
+    step: "AI068-SR",
+    scope: "minimal_runtime_backed_shadow_fixture_coverage_expansion",
+    sourceCommit,
+    baseline: {
+      sourceStep: "AI067-SR",
+      readinessStatus: "broad_shadow_ready",
+      cutoverAllowed: false,
+      semanticDecisionAvailableRate: 0.8788,
+      semanticBlockedByGapRate: 0.0303,
+      runtimeBackedFixtureRate: 0.2424,
+      residualAbilityUnresolved: 1,
+      residualHiddenInfoBlocked: 3,
+    },
+    countsBefore: {
+      totalFixtureCount: fixturesBeforeExpansion.length,
+      runtimeBackedFixtureCount: runtimeBackedFixtureCountBefore,
+      runtimeBackedFixtureRate: roundRate(
+        runtimeBackedFixtureCountBefore / fixturesBeforeExpansion.length,
+      ),
+    },
+    countsAfter: {
+      totalFixtureCount: fixturesAfterExpansion.length,
+      runtimeBackedFixtureCount: runtimeBackedFixtureCountAfter,
+      runtimeBackedFixtureRate: runtimeBackedFixtureRateAfter,
+    },
+    promotedFixtures: [
+      ...AI068_SR_RUNTIME_BACKED_FIXTURE_COVERAGE_PROMOTIONS,
+    ],
+    blockedPromotionCandidates,
+    runtimeBackedFixtureRateBefore: 0.2424,
+    runtimeBackedFixtureRateAfter,
+    semanticDecisionAvailableRateAfter,
+    semanticBlockedByGapRateAfter,
+    hardGateFailures: [],
+    knownBadDecisions: [],
+    actualDecisionOverrideCount: 0,
+    runtimeEffectCount: 0,
+    hiddenInfoViolationCount: 0,
+    residualGaps,
+    noEffectFlags: SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS,
+    verification: [
+      "node scripts/check-ai061-sr-target-context-projection-expansion.mjs",
+      "node scripts/check-ai062-sr-ability-binding-expansion.mjs",
+      "node scripts/check-ai063-sr-card-semantics-join-coverage.mjs",
+      "node scripts/check-ai064-sr-cost-timing-evidence-expansion.mjs",
+      "node scripts/check-ai065-sr-runtime-backed-shadow-fixture-promotion.mjs",
+      "node scripts/check-ai066-sr-shadow-evaluation-rerun.mjs",
+      "node scripts/check-ai067-sr-shadow-readiness-rereview.mjs",
+      "node scripts/check-ai068-sr-runtime-backed-shadow-fixture-coverage-expansion.mjs",
+      "corepack pnpm --filter @netgrid/ai test",
+      "corepack pnpm --filter @netgrid/ai typecheck",
+      "git diff --check",
+    ],
+    readinessDecision: {
+      status: readinessStatus,
+      cutoverAllowed: false,
+      cutoverDesignStarted: false,
+    },
+    semanticAiShadowModeEnabledDefault: false,
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+  };
+}
+
 function runtimePromotion(
   scenarioId: string,
   side: ShadowActorSide,
@@ -1123,6 +1396,36 @@ function runtimePromotion(
     hardGateExpectation: "zero_failures",
     productiveChangeAllowed: false,
   };
+}
+
+function runtimeCoverageExpansionPromotion(
+  scenarioId: string,
+  side: ShadowActorSide,
+  promotionReason: RuntimeBackedShadowFixturePromotion["promotionReason"],
+): RuntimeBackedShadowFixturePromotion {
+  return {
+    scenarioId,
+    side,
+    promotedSetupKind: "saved_state",
+    stateRef: `${AI068_SR_FIXTURE_FILE}#${scenarioId}`,
+    promotionReason,
+    deterministicReference: true,
+    hiddenInfoRisk: "low",
+    hardGateExpectation: "zero_failures",
+    productiveChangeAllowed: false,
+  };
+}
+
+function ai068BlockedPromotionReason(
+  fixture: ShadowScenarioFixture,
+): Ai068SrRuntimeBackedShadowFixtureCoverageExpansionReport["blockedPromotionCandidates"][number]["reason"] {
+  if (fixture.knownProjectionGaps.includes("hidden_info_blocked")) {
+    return "hidden_info_blocked_guard";
+  }
+  if (fixture.scenarioId === "multi_ability_card_unresolved") {
+    return "multi_ability_card_unresolved_guard";
+  }
+  return "deferred_beyond_minimal_safe_batch";
 }
 
 function notPromotedReason(
