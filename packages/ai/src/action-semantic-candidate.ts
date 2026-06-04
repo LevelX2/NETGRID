@@ -130,7 +130,17 @@ export type ActionTimingProfile = {
 
 export type LegalTarget = {
   targetId: string;
-  targetKind: "card" | "server" | "ice" | "program" | "resource" | "hardware" | "agenda" | "choice" | "unknown";
+  targetKind:
+    | "card"
+    | "server"
+    | "ice"
+    | "program"
+    | "resource"
+    | "hardware"
+    | "agenda"
+    | "choice"
+    | "subroutine"
+    | "unknown";
   targetSide: "runner" | "corp" | "both" | "unknown";
   targetZone?: string;
   visibilityScope: ActionSemanticVisibilityScope;
@@ -171,6 +181,7 @@ export type ActionTargetContext = {
     | "hardware"
     | "agenda"
     | "choice"
+    | "subroutine"
     | "unknown";
   targetZones: string[];
   targetSide: "runner" | "corp" | "both" | "unknown";
@@ -264,6 +275,7 @@ export type ActionCardAbilitySemanticProfile = {
   conditions?: readonly SemanticCondition[];
   risks?: readonly SemanticRisk[];
   constraints?: readonly SemanticConstraint[];
+  additionalCosts?: readonly string[];
   targetProfileMatches?: readonly TargetProfileMatch[];
 };
 
@@ -1030,7 +1042,7 @@ function targetKindFromRequirement(
 ): LegalTarget["targetKind"] {
   if (kind === "card") return "card";
   if (kind === "server") return "server";
-  if (kind === "subroutine") return "unknown";
+  if (kind === "subroutine") return "subroutine";
   if (kind === "side") return "unknown";
   return "unknown";
 }
@@ -1408,9 +1420,20 @@ function applyCardSemanticJoin(
     candidate.targetContext,
     actionAbility?.targetProfileMatches ?? profile.targetProfileMatches,
   );
+  const costProfile =
+    actionAbility !== undefined && actionAbility.additionalCosts !== undefined
+      ? {
+          ...candidate.costProfile,
+          additionalCosts: uniqueStrings([
+            ...candidate.costProfile.additionalCosts,
+            ...actionAbility.additionalCosts,
+          ]),
+        }
+      : candidate.costProfile;
 
   return {
     ...candidate,
+    costProfile,
     cardContextSignals,
     actionTacticSignals,
     strategySupport:
