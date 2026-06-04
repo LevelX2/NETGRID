@@ -2,7 +2,7 @@
   "processId": "controlled-shadow-mode",
   "date": "2026-06-04",
   "status": "in_progress",
-  "currentStep": "AI060",
+  "currentStep": "integration_preflight",
   "completedSteps": [
     "AI051",
     "AI052",
@@ -12,11 +12,12 @@
     "AI056",
     "AI057",
     "AI058",
-    "AI059"
+    "AI059",
+    "AI060"
   ],
   "blocked": false,
-  "lastGreenCommit": "68cebb60",
-  "nextStep": "final_shadow_review",
+  "lastGreenCommit": "9a95dd9d",
+  "nextStep": "integration_verifying",
   "branch": "codex/ai051-ai060-controlled-shadow-mode",
   "worktree": "C:\\Projekte\\NETGRID_AI051_AI060_CONTROLLED_SHADOW_MODE",
   "integrationWorkspace": "C:\\Projekte\\NETGRID",

@@ -1,0 +1,49 @@
+{
+  "step": "AI051-AI060-FINAL",
+  "title": "Controlled Shadow Mode Final Report",
+  "date": "2026-06-04",
+  "status": "ready_for_local_main_integration",
+  "branch": "codex/ai051-ai060-controlled-shadow-mode",
+  "completedSteps": [
+    "AI051",
+    "AI052",
+    "AI053",
+    "AI054",
+    "AI055",
+    "AI056",
+    "AI057",
+    "AI058",
+    "AI059",
+    "AI060"
+  ],
+  "shadowReadinessStatus": "limited_shadow_ready",
+  "cutoverAllowed": false,
+  "actualDecisionContract": "legacyDecision",
+  "semanticExecutionAllowed": false,
+  "productiveUseAllowed": false,
+  "runtimeConsumerStatus": "none",
+  "hardGates": {
+    "illegalSemanticDecisionCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "runtimeEffectCount": 0,
+    "actualDecisionOverrideCount": 0,
+    "nonEngineLegalAssumptionCount": 0,
+    "determinismFailureCount": 0
+  },
+  "finalChecksRequiredBeforeMerge": [
+    "node scripts/check-ai051-shadow-mode-trace-contract.mjs",
+    "node scripts/check-ai052-shadow-scenario-corpus.mjs",
+    "node scripts/check-ai053-semantic-shadow-decision-v0.mjs",
+    "node scripts/check-ai054-legacy-vs-semantic-comparison-report.mjs",
+    "node scripts/check-ai055-deviation-taxonomy-and-triage.mjs",
+    "node scripts/check-ai056-shadow-metrics-and-quality-gates.mjs",
+    "node scripts/check-ai057-runtime-shadow-harness.mjs",
+    "node scripts/check-ai058-shadow-evaluation-batch-report.mjs",
+    "node scripts/check-ai059-shadow-regression-fixtures.mjs",
+    "node scripts/check-ai060-shadow-readiness-review.mjs",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "corepack pnpm --filter @netgrid/ai test",
+    "git diff --check"
+  ],
+  "nextProcessState": "integration_preflight"
+}

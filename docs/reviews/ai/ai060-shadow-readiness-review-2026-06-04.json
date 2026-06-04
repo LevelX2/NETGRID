@@ -1,0 +1,80 @@
+{
+  "step": "AI060",
+  "title": "Shadow Readiness Review",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai051-ai060-controlled-shadow-mode",
+  "schemaVersion": "shadow-readiness-review-v1",
+  "scope": "shadow_readiness_review_no_cutover",
+  "readinessStatus": "limited_shadow_ready",
+  "cutoverAllowed": false,
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "runtimeConsumerStatus": "none",
+  "noRuntimeEffect": true,
+  "metrics": {
+    "semanticDecisionAvailableRate": 0.2424,
+    "semanticBlockedByGapRate": 0.6667,
+    "hardGateFailureCount": 0,
+    "activeRegressionFixtureCount": 7
+  },
+  "hardGates": {
+    "illegalSemanticDecisionCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "runtimeEffectCount": 0,
+    "actualDecisionOverrideCount": 0,
+    "nonEngineLegalAssumptionCount": 0,
+    "determinismFailureCount": 0
+  },
+  "qualityGaps": [
+    "semanticDecisionAvailableRate below initial 0.8 threshold",
+    "target, ability, card and cost gaps remain classified",
+    "semantic improvement regression fixture inactive due missing evidence",
+    "runtime-backed fixture rate remains 0 in this process"
+  ],
+  "topSemanticGaps": [
+    {"gapId": "target_context_unavailable", "count": 13},
+    {"gapId": "card_semantics_unavailable", "count": 7},
+    {"gapId": "ability_unresolved", "count": 6},
+    {"gapId": "cost_unknown", "count": 4},
+    {"gapId": "hidden_info_blocked", "count": 3}
+  ],
+  "nextCutoverPrerequisites": [
+    "Raise semanticDecisionAvailableRate to at least the initial 0.8 threshold.",
+    "Reduce semanticBlockedByGapRate by projecting side-safe TargetContext.",
+    "Resolve ability binding, card semantic and cost/timing gaps through separate reviewed slices.",
+    "Promote selected synthetic fixtures to runtime-backed saved fixtures.",
+    "Keep hidden-info guard, illegal-action guard and actualDecision legacy guard at zero failures.",
+    "Design any later cutover as a separate default-off process after Shadow readiness improves."
+  ],
+  "rollbackRequirements": [
+    "Keep semanticAiShadowModeEnabled false by default.",
+    "Disable diagnostic harness and continue using Legacy decision only.",
+    "Do not migrate, persist or publicize shadow traces.",
+    "Treat any hard safety gate failure as a process blocker."
+  ],
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "verification": [
+    "node scripts/check-ai060-shadow-readiness-review.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- controlled-shadow-mode.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "node scripts/check-ai059-shadow-regression-fixtures.mjs",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "doneGate": {
+    "statusSet": "limited_shadow_ready",
+    "productiveCutoverDecided": false,
+    "cutoverAllowed": false,
+    "finalReportExists": true
+  }
+}

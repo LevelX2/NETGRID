@@ -13,6 +13,7 @@ import {
   buildRuntimeShadowHarnessReport,
   buildShadowEvaluationBatchReport,
   buildShadowRegressionFixturesReport,
+  buildShadowReadinessReviewReport,
   DEFAULT_SEMANTIC_AI_SHADOW_MODE_CONFIG,
   runRuntimeShadowHarness,
   type ShadowDecisionTrace,
@@ -682,6 +683,55 @@ describe("buildShadowRegressionFixturesReport", () => {
     expect(first.runtimeConsumerStatus).toBe("none");
     expect(first.productiveUseAllowed).toBe(false);
     expect(first.noRuntimeEffect).toBe(true);
+  });
+});
+
+describe("buildShadowReadinessReviewReport", () => {
+  it("marks controlled shadow mode as limited shadow ready without cutover", () => {
+    const report = buildShadowReadinessReviewReport();
+
+    expect(report.schemaVersion).toBe("shadow-readiness-review-v1");
+    expect(report.scope).toBe("shadow_readiness_review_no_cutover");
+    expect(report.status).toBe("limited_shadow_ready");
+    expect(report.cutoverAllowed).toBe(false);
+    expect(report.semanticExecutionAllowed).toBe(false);
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.recommendedNextStep).toBe("limited_internal_shadow_simulation");
+  });
+
+  it("keeps hard safety gates green while carrying quality gaps", () => {
+    const report = buildShadowReadinessReviewReport();
+
+    expect(report.blockers).toEqual([]);
+    expect(report.metrics).toEqual({
+      semanticDecisionAvailableRate: 0.2424,
+      semanticBlockedByGapRate: 0.6667,
+      hardGateFailureCount: 0,
+      activeRegressionFixtureCount: 7,
+    });
+    expect(report.qualityGaps).toEqual(
+      expect.arrayContaining([
+        "semanticDecisionAvailableRate below initial 0.8 threshold",
+        "runtime-backed fixture rate remains 0 in this process",
+      ]),
+    );
+  });
+
+  it("documents cutover prerequisites and rollback requirements", () => {
+    const report = buildShadowReadinessReviewReport();
+
+    expect(report.nextCutoverPrerequisites).toEqual(
+      expect.arrayContaining([
+        "Design any later cutover as a separate default-off process after Shadow readiness improves.",
+        "Promote selected synthetic fixtures to runtime-backed saved fixtures.",
+      ]),
+    );
+    expect(report.rollbackRequirements).toEqual(
+      expect.arrayContaining([
+        "Keep semanticAiShadowModeEnabled false by default.",
+        "Disable diagnostic harness and continue using Legacy decision only.",
+      ]),
+    );
   });
 });
 

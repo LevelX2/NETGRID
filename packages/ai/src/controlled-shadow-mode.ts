@@ -35,6 +35,9 @@ export const SHADOW_EVALUATION_BATCH_SCHEMA_VERSION =
 export const SHADOW_REGRESSION_FIXTURES_SCHEMA_VERSION =
   "shadow-regression-fixtures-v1" as const;
 
+export const SHADOW_READINESS_REVIEW_SCHEMA_VERSION =
+  "shadow-readiness-review-v1" as const;
+
 export const CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS = {
   actualDecisionOverride: false,
   productiveScoring: false,
@@ -620,6 +623,36 @@ export type ShadowRegressionFixturesReport = {
   activeFixtureCount: number;
   inactiveFixtureCount: number;
   determinismKey: string;
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type ShadowReadinessReviewStatus =
+  | "blocked"
+  | "limited_shadow_ready"
+  | "broad_shadow_ready"
+  | "cutover_candidate_later";
+
+export type ShadowReadinessReviewReport = {
+  schemaVersion: typeof SHADOW_READINESS_REVIEW_SCHEMA_VERSION;
+  scope: "shadow_readiness_review_no_cutover";
+  status: ShadowReadinessReviewStatus;
+  cutoverAllowed: false;
+  blockers: string[];
+  qualityGaps: string[];
+  metrics: {
+    semanticDecisionAvailableRate: number | null;
+    semanticBlockedByGapRate: number | null;
+    hardGateFailureCount: 0;
+    activeRegressionFixtureCount: number;
+  };
+  topSemanticGaps: ShadowSemanticGapSummary[];
+  nextCutoverPrerequisites: string[];
+  rollbackRequirements: string[];
+  recommendedNextStep: "limited_internal_shadow_simulation";
   productiveUseAllowed: false;
   semanticExecutionAllowed: false;
   runtimeConsumerStatus: "none";
@@ -1275,6 +1308,81 @@ export function buildShadowRegressionFixturesReport(
     determinismKey: fixtures
       .map((fixture) => `${fixture.fixtureId}:${fixture.active}`)
       .join("|"),
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildShadowReadinessReviewReport(
+  metricsReport: ShadowMetricsAndGatesReport = buildShadowMetricsAndGatesReport(),
+  batchReport: ShadowEvaluationBatchReport = buildShadowEvaluationBatchReport(),
+  regressionReport: ShadowRegressionFixturesReport =
+    buildShadowRegressionFixturesReport(batchReport),
+): ShadowReadinessReviewReport {
+  const hardGateFailureCount = metricsReport.hardGates.filter(
+    (gate) => gate.status !== "pass",
+  ).length as 0;
+  const semanticDecisionAvailableRate = metricValue(
+    metricsReport.qualityMetrics,
+    "semanticDecisionAvailableRate",
+  );
+  const semanticBlockedByGapRate = metricValue(
+    metricsReport.qualityMetrics,
+    "semanticBlockedByGapRate",
+  );
+  const blockers =
+    hardGateFailureCount > 0 ? ["hard_safety_gate_failure"] : [];
+  const qualityGaps = [
+    ...(semanticDecisionAvailableRate !== null &&
+    semanticDecisionAvailableRate < 0.8
+      ? ["semanticDecisionAvailableRate below initial 0.8 threshold"]
+      : []),
+    ...(batchReport.topSemanticGaps.length > 0
+      ? ["target, ability, card and cost gaps remain classified"]
+      : []),
+    ...(regressionReport.inactiveFixtureCount > 0
+      ? ["semantic improvement regression fixture inactive due missing evidence"]
+      : []),
+    "runtime-backed fixture rate remains 0 in this process",
+  ];
+
+  return {
+    schemaVersion: SHADOW_READINESS_REVIEW_SCHEMA_VERSION,
+    scope: "shadow_readiness_review_no_cutover",
+    status:
+      blockers.length > 0
+        ? "blocked"
+        : qualityGaps.length > 0
+          ? "limited_shadow_ready"
+          : "broad_shadow_ready",
+    cutoverAllowed: false,
+    blockers,
+    qualityGaps,
+    metrics: {
+      semanticDecisionAvailableRate,
+      semanticBlockedByGapRate,
+      hardGateFailureCount,
+      activeRegressionFixtureCount: regressionReport.activeFixtureCount,
+    },
+    topSemanticGaps: [...batchReport.topSemanticGaps],
+    nextCutoverPrerequisites: [
+      "Raise semanticDecisionAvailableRate to at least the initial 0.8 threshold.",
+      "Reduce semanticBlockedByGapRate by projecting side-safe TargetContext.",
+      "Resolve ability binding, card semantic and cost/timing gaps through separate reviewed slices.",
+      "Promote selected synthetic fixtures to runtime-backed saved fixtures.",
+      "Keep hidden-info guard, illegal-action guard and actualDecision legacy guard at zero failures.",
+      "Design any later cutover as a separate default-off process after Shadow readiness improves.",
+    ],
+    rollbackRequirements: [
+      "Keep semanticAiShadowModeEnabled false by default.",
+      "Disable diagnostic harness and continue using Legacy decision only.",
+      "Do not migrate, persist or publicize shadow traces.",
+      "Treat any hard safety gate failure as a process blocker.",
+    ],
+    recommendedNextStep: "limited_internal_shadow_simulation",
     productiveUseAllowed: false,
     semanticExecutionAllowed: false,
     runtimeConsumerStatus: "none",
