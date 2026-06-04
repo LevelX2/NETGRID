@@ -6,9 +6,13 @@ import {
   META8_DEFAULT_CONFIG,
   META8_INTERNAL_CANARY_CONFIG,
   META8_INTERNAL_CANARY_FIXTURES,
+  META9_PRODUCTION_SAFE_SHADOW_CONFIG,
+  buildMeta9ProductionSafeShadowAgreementCanaryReport,
   buildMeta8InternalSemanticCanaryReport,
   buildMeta7MultiRunSemanticEvaluationHumanReviewReport,
   buildMeta7ScopeReadinessPromotions,
+  evaluateMeta9AgreementShadowFixture,
+  evaluateMeta9TraceScrubFixture,
   evaluateMeta8InternalCanaryFixture,
   promoteMeta7ScopeStatus,
 } from "./semantic-ai-production-readiness";
@@ -156,6 +160,144 @@ describe("META7 Multi-Run Evaluation + Human Review Closure", () => {
       nextStep: "META8_internal_semantic_canary",
     });
     expect(report.noRuntimeEffect).toBe(true);
+  });
+});
+
+describe("META9 Production-Safe Shadow / Agreement Canary", () => {
+  it("uses production-safe shadow config without scoped override or cutover", () => {
+    const report = buildMeta9ProductionSafeShadowAgreementCanaryReport();
+
+    expect(report.schemaVersion).toBe(
+      "meta9-production-safe-shadow-agreement-canary-v0",
+    );
+    expect(report.step).toBe("META9");
+    expect(report.shadowConfig).toEqual(META9_PRODUCTION_SAFE_SHADOW_CONFIG);
+    expect(report.shadowConfig).toMatchObject({
+      semanticAiShadowModeEnabled: true,
+      semanticAiCutoverEnabled: false,
+      semanticAiAgreementOnlyMode: true,
+      semanticAiScopedOverrideEnabled: false,
+      semanticAiRollbackForceLegacy: true,
+      semanticAiTraceMode: "production_safe_shadow",
+      semanticAiTraceVisibility: "developer_only_scrubbed",
+    });
+  });
+
+  it("scrubs or safely drops hidden-info and private debug traces", () => {
+    const unsafe = evaluateMeta9TraceScrubFixture({
+      fixtureId: "unsafe",
+      inputText: "FullState exposes opponent hand, HQ detail and private debug data.",
+      expectedSafe: false,
+      expectedSafelyDropped: true,
+    });
+    const safe = evaluateMeta9TraceScrubFixture({
+      fixtureId: "safe",
+      inputText: "candidateEvidence: gain_credit; goalMatches: basic_economy_draw",
+      expectedSafe: true,
+      expectedSafelyDropped: false,
+    });
+
+    expect(unsafe.safe).toBe(false);
+    expect(unsafe.safelyDropped).toBe(true);
+    expect(unsafe.violations).toEqual(
+      expect.arrayContaining([
+        "opponent_hand",
+        "hq_or_rd_wrong_side_detail",
+        "full_state_fragment",
+        "private_debug_data",
+      ]),
+    );
+    expect(safe.safe).toBe(true);
+    expect(safe.safelyDropped).toBe(false);
+  });
+
+  it("keeps actual decisions legacy for agreement, divergence and blocked shadow cases", () => {
+    const report = buildMeta9ProductionSafeShadowAgreementCanaryReport();
+
+    expect(report.agreementResults).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          fixtureId: "meta9-basic-economy-agreement",
+          agreement: true,
+          actualDecisionSource: "legacy",
+          result: "agreement_observed",
+        }),
+        expect.objectContaining({
+          fixtureId: "meta9-score-differs-shadow-only",
+          agreement: false,
+          actualDecisionSource: "legacy",
+          result: "semantic_differs_shadow_only",
+        }),
+        expect.objectContaining({
+          fixtureId: "meta9-remote-contest-hard-gate-shadow-only",
+          actualDecisionSource: "legacy",
+          result: "hard_gate_blocked_shadow_only",
+        }),
+      ]),
+    );
+    expect(
+      report.agreementResults.every(
+        (entry) => entry.actualActionId === entry.legacyActionId,
+      ),
+    ).toBe(true);
+  });
+
+  it("evaluates a custom shadow fixture without behavior or public-payload delta", () => {
+    const result = evaluateMeta9AgreementShadowFixture({
+      fixtureId: "custom",
+      scopeId: "basic_economy_draw",
+      legalActionIds: ["legacy", "semantic"],
+      legacyActionId: "legacy",
+      semanticActionId: "semantic",
+      hardGatesPass: true,
+      traceSafeOrDropped: true,
+    });
+
+    expect(result).toMatchObject({
+      actualActionId: "legacy",
+      actualDecisionSource: "legacy",
+      agreement: false,
+      behaviorDelta: false,
+      publicPayloadDelta: false,
+      result: "semantic_differs_shadow_only",
+    });
+  });
+
+  it("reports production shadow as stable without allowing broad cutover", () => {
+    const report = buildMeta9ProductionSafeShadowAgreementCanaryReport();
+
+    expect(report.publicPayloadChecks).toEqual(
+      expect.arrayContaining([
+        { surface: "PlayerView", status: "unchanged", publicPayloadDeltaCount: 0 },
+        {
+          surface: "WebSocket public payload",
+          status: "unchanged",
+          publicPayloadDeltaCount: 0,
+        },
+        { surface: "Logs", status: "scrubbed", publicPayloadDeltaCount: 0 },
+      ]),
+    );
+    expect(report.qualityGates).toEqual({
+      behaviorDeltaCount: 0,
+      publicPayloadDeltaCount: 0,
+      hiddenInfoViolationCount: 0,
+      traceScrubViolationCount: 0,
+      engineRejectCount: 0,
+      rollbackFailureCount: 0,
+      traceCompleteOrSafelyDroppedRate: 1,
+      semanticScopedOverrideEnabled: false,
+      actualDecisionAlwaysLegacy: true,
+      runtimeOverheadBounded: true,
+    });
+    expect(report.goNoGo).toEqual({
+      decision: "limited_cutover_candidate_for_selected_scopes",
+      broadCutoverAllowed: false,
+      legacyRemovalReady: false,
+      nextStep: "META10_limited_scoped_production_cutover",
+    });
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.semanticExecutionAllowed).toBe(false);
+    expect(report.noBehaviorDelta).toBe(true);
   });
 });
 

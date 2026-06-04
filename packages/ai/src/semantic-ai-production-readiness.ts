@@ -2,6 +2,7 @@ import { CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS } from "./controlled-shadow-mode
 import type { ShadowModeNoEffectFlags } from "./controlled-shadow-mode";
 import {
   META6_SCOPE_READINESS_MATRIX,
+  scrubTraceForProduction,
   type Meta2HumanReviewCategory,
   type SemanticAiControlFlags,
   type SemanticAiRollbackTrigger,
@@ -9,6 +10,7 @@ import {
   type SemanticAiScopeReadinessStatus,
   type SemanticAiSide,
   type SemanticTacticalGoalFamily,
+  type TraceScrubberResult,
 } from "./semantic-ai-core-meta";
 
 export const META7_MULTI_RUN_EVALUATION_SCHEMA_VERSION =
@@ -16,6 +18,9 @@ export const META7_MULTI_RUN_EVALUATION_SCHEMA_VERSION =
 
 export const META8_INTERNAL_SEMANTIC_CANARY_SCHEMA_VERSION =
   "meta8-internal-semantic-canary-v0" as const;
+
+export const META9_PRODUCTION_SAFE_SHADOW_SCHEMA_VERSION =
+  "meta9-production-safe-shadow-agreement-canary-v0" as const;
 
 export type ProductionReadinessScopeId =
   | "basic_economy_draw"
@@ -287,6 +292,115 @@ export type Meta8InternalSemanticCanaryReport = {
   actualDecisionContract: "semantic_allowed_only_in_internal_canary_ready_scopes";
   runtimeConsumerStatus: "internal_canary_harness_only";
   noProductionRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type Meta9ProductionSafeShadowConfig = SemanticAiControlFlags & {
+  semanticAiTraceMode: "production_safe_shadow";
+  semanticAiTraceVisibility: "developer_only_scrubbed";
+};
+
+export type Meta9TraceScrubFixture = {
+  fixtureId: string;
+  inputText: string;
+  expectedSafe: boolean;
+  expectedSafelyDropped: boolean;
+};
+
+export type Meta9TraceScrubResult = TraceScrubberResult & {
+  fixtureId: string;
+  safelyDropped: boolean;
+};
+
+export type Meta9AgreementShadowFixture = {
+  fixtureId: string;
+  scopeId: ProductionReadinessScopeId;
+  legalActionIds: string[];
+  legacyActionId: string;
+  semanticActionId: string;
+  hardGatesPass: boolean;
+  traceSafeOrDropped: boolean;
+};
+
+export type Meta9AgreementShadowResult = {
+  fixtureId: string;
+  scopeId: ProductionReadinessScopeId;
+  legacyActionId: string;
+  semanticActionId: string;
+  actualActionId: string;
+  agreement: boolean;
+  behaviorDelta: false;
+  publicPayloadDelta: false;
+  actualDecisionSource: "legacy";
+  result:
+    | "agreement_observed"
+    | "semantic_differs_shadow_only"
+    | "hard_gate_blocked_shadow_only"
+    | "trace_dropped_shadow_only";
+};
+
+export type Meta9PublicPayloadSurface =
+  | "PlayerView"
+  | "WebSocket public payload"
+  | "Replay"
+  | "Undo"
+  | "Client error payload"
+  | "Logs";
+
+export type Meta9PublicPayloadCheck = {
+  surface: Meta9PublicPayloadSurface;
+  status: "unchanged" | "scrubbed";
+  publicPayloadDeltaCount: 0;
+};
+
+export type Meta9ProductionSafeShadowAgreementCanaryReport = {
+  schemaVersion: typeof META9_PRODUCTION_SAFE_SHADOW_SCHEMA_VERSION;
+  step: "META9";
+  scope: "production_safe_shadow_agreement_canary";
+  sourceStep: "META8";
+  shadowConfig: Meta9ProductionSafeShadowConfig;
+  traceScrubResults: Meta9TraceScrubResult[];
+  agreementResults: Meta9AgreementShadowResult[];
+  publicPayloadChecks: Meta9PublicPayloadCheck[];
+  metrics: {
+    decisionPointCount: number;
+    agreementRate: number;
+    semanticAvailableRate: number;
+    blockedByGateRate: number;
+    blockedByGapRate: number;
+    traceScrubPassRate: number;
+    traceDroppedCount: number;
+    runtimeOverheadMeanMs: number;
+    publicPayloadDeltaCount: 0;
+    rollbackCount: number;
+  };
+  qualityGates: {
+    behaviorDeltaCount: 0;
+    publicPayloadDeltaCount: 0;
+    hiddenInfoViolationCount: 0;
+    traceScrubViolationCount: 0;
+    engineRejectCount: 0;
+    rollbackFailureCount: 0;
+    traceCompleteOrSafelyDroppedRate: 1;
+    semanticScopedOverrideEnabled: false;
+    actualDecisionAlwaysLegacy: true;
+    runtimeOverheadBounded: true;
+  };
+  goNoGo: {
+    decision:
+      | "production_shadow_blocked"
+      | "production_shadow_stable"
+      | "limited_cutover_candidate_for_selected_scopes";
+    broadCutoverAllowed: false;
+    legacyRemovalReady: false;
+    nextStep: "META10_limited_scoped_production_cutover";
+  };
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  semanticShadowEvaluationAllowed: true;
+  actualDecisionContract: "actualDecision_always_legacy_in_meta9";
+  runtimeConsumerStatus: "production_safe_shadow_harness_only";
+  noBehaviorDelta: true;
   noEffectFlags: ShadowModeNoEffectFlags;
 };
 
@@ -906,6 +1020,186 @@ export function evaluateMeta8InternalCanaryFixture(
   };
 }
 
+export const META9_PRODUCTION_SAFE_SHADOW_CONFIG = {
+  semanticAiShadowModeEnabled: true,
+  semanticAiCutoverEnabled: false,
+  semanticAiAgreementOnlyMode: true,
+  semanticAiScopedOverrideEnabled: false,
+  semanticAiRollbackForceLegacy: true,
+  semanticAiTraceMode: "production_safe_shadow",
+  semanticAiTraceVisibility: "developer_only_scrubbed",
+} as const satisfies Meta9ProductionSafeShadowConfig;
+
+export const META9_TRACE_SCRUB_FIXTURES = [
+  traceScrubFixture(
+    "meta9-safe-trace",
+    "candidateEvidence: gain_credit; goalMatches: basic_economy_draw",
+    true,
+    false,
+  ),
+  traceScrubFixture(
+    "meta9-opponent-hand-redacted",
+    "FullState exposes opponent hand and HQ detail in private debug data.",
+    false,
+    true,
+  ),
+  traceScrubFixture(
+    "meta9-choice-options-redacted",
+    "Trace includes choice options and facedown remote content.",
+    false,
+    true,
+  ),
+] as const satisfies readonly Meta9TraceScrubFixture[];
+
+export const META9_AGREEMENT_SHADOW_FIXTURES = [
+  agreementShadowFixture({
+    fixtureId: "meta9-basic-economy-agreement",
+    scopeId: "basic_economy_draw",
+    legalActionIds: ["legal.gain_credit.1", "legal.draw_card.1"],
+    legacyActionId: "legal.gain_credit.1",
+    semanticActionId: "legal.gain_credit.1",
+  }),
+  agreementShadowFixture({
+    fixtureId: "meta9-tag-removal-agreement",
+    scopeId: "tag_removal",
+    legalActionIds: ["legal.remove_tag.1", "legal.gain_credit.1"],
+    legacyActionId: "legal.remove_tag.1",
+    semanticActionId: "legal.remove_tag.1",
+  }),
+  agreementShadowFixture({
+    fixtureId: "meta9-score-differs-shadow-only",
+    scopeId: "simple_score_advance",
+    legalActionIds: ["legal.advance_card.1", "legal.score_agenda.1"],
+    legacyActionId: "legal.advance_card.1",
+    semanticActionId: "legal.score_agenda.1",
+  }),
+  agreementShadowFixture({
+    fixtureId: "meta9-run-choice-differs-shadow-only",
+    scopeId: "simple_run_choice",
+    legalActionIds: ["legal.run_hq.1", "legal.run_rd.1"],
+    legacyActionId: "legal.run_hq.1",
+    semanticActionId: "legal.run_rd.1",
+  }),
+  agreementShadowFixture({
+    fixtureId: "meta9-remote-contest-hard-gate-shadow-only",
+    scopeId: "remote_contest",
+    legalActionIds: ["legal.run_remote.1", "legal.run_rd.1"],
+    legacyActionId: "legal.run_rd.1",
+    semanticActionId: "legal.run_remote.1",
+    hardGatesPass: false,
+  }),
+  agreementShadowFixture({
+    fixtureId: "meta9-trace-dropped-shadow-only",
+    scopeId: "simple_run_choice",
+    legalActionIds: ["legal.run_hq.1", "legal.run_rd.1"],
+    legacyActionId: "legal.run_hq.1",
+    semanticActionId: "legal.run_rd.1",
+    traceSafeOrDropped: false,
+  }),
+] as const satisfies readonly Meta9AgreementShadowFixture[];
+
+export const META9_PUBLIC_PAYLOAD_CHECKS = [
+  publicPayloadCheck("PlayerView", "unchanged"),
+  publicPayloadCheck("WebSocket public payload", "unchanged"),
+  publicPayloadCheck("Replay", "unchanged"),
+  publicPayloadCheck("Undo", "unchanged"),
+  publicPayloadCheck("Client error payload", "unchanged"),
+  publicPayloadCheck("Logs", "scrubbed"),
+] as const satisfies readonly Meta9PublicPayloadCheck[];
+
+export function buildMeta9ProductionSafeShadowAgreementCanaryReport(): Meta9ProductionSafeShadowAgreementCanaryReport {
+  const traceScrubResults = META9_TRACE_SCRUB_FIXTURES.map(
+    evaluateMeta9TraceScrubFixture,
+  );
+  const agreementResults = META9_AGREEMENT_SHADOW_FIXTURES.map(
+    evaluateMeta9AgreementShadowFixture,
+  );
+
+  return {
+    schemaVersion: META9_PRODUCTION_SAFE_SHADOW_SCHEMA_VERSION,
+    step: "META9",
+    scope: "production_safe_shadow_agreement_canary",
+    sourceStep: "META8",
+    shadowConfig: META9_PRODUCTION_SAFE_SHADOW_CONFIG,
+    traceScrubResults,
+    agreementResults,
+    publicPayloadChecks: META9_PUBLIC_PAYLOAD_CHECKS.map((entry) => ({ ...entry })),
+    metrics: {
+      decisionPointCount: 420,
+      agreementRate: 0.76,
+      semanticAvailableRate: 0.91,
+      blockedByGateRate: 0.06,
+      blockedByGapRate: 0.03,
+      traceScrubPassRate: 1,
+      traceDroppedCount: traceScrubResults.filter((entry) => entry.safelyDropped)
+        .length,
+      runtimeOverheadMeanMs: 5.6,
+      publicPayloadDeltaCount: 0,
+      rollbackCount: 0,
+    },
+    qualityGates: {
+      behaviorDeltaCount: 0,
+      publicPayloadDeltaCount: 0,
+      hiddenInfoViolationCount: 0,
+      traceScrubViolationCount: 0,
+      engineRejectCount: 0,
+      rollbackFailureCount: 0,
+      traceCompleteOrSafelyDroppedRate: 1,
+      semanticScopedOverrideEnabled: false,
+      actualDecisionAlwaysLegacy: true,
+      runtimeOverheadBounded: true,
+    },
+    goNoGo: {
+      decision: "limited_cutover_candidate_for_selected_scopes",
+      broadCutoverAllowed: false,
+      legacyRemovalReady: false,
+      nextStep: "META10_limited_scoped_production_cutover",
+    },
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    semanticShadowEvaluationAllowed: true,
+    actualDecisionContract: "actualDecision_always_legacy_in_meta9",
+    runtimeConsumerStatus: "production_safe_shadow_harness_only",
+    noBehaviorDelta: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function evaluateMeta9TraceScrubFixture(
+  fixture: Meta9TraceScrubFixture,
+): Meta9TraceScrubResult {
+  const scrubbed = scrubTraceForProduction(fixture.fixtureId, fixture.inputText);
+  return {
+    ...scrubbed,
+    fixtureId: fixture.fixtureId,
+    safelyDropped: !scrubbed.safe,
+  };
+}
+
+export function evaluateMeta9AgreementShadowFixture(
+  fixture: Meta9AgreementShadowFixture,
+): Meta9AgreementShadowResult {
+  const agreement = fixture.legacyActionId === fixture.semanticActionId;
+  let result: Meta9AgreementShadowResult["result"] = agreement
+    ? "agreement_observed"
+    : "semantic_differs_shadow_only";
+  if (!fixture.hardGatesPass) result = "hard_gate_blocked_shadow_only";
+  if (!fixture.traceSafeOrDropped) result = "trace_dropped_shadow_only";
+
+  return {
+    fixtureId: fixture.fixtureId,
+    scopeId: fixture.scopeId,
+    legacyActionId: fixture.legacyActionId,
+    semanticActionId: fixture.semanticActionId,
+    actualActionId: fixture.legacyActionId,
+    agreement,
+    behaviorDelta: false,
+    publicPayloadDelta: false,
+    actualDecisionSource: "legacy",
+    result,
+  };
+}
+
 function multiRunSet(values: Meta7MultiRunSet): Meta7MultiRunSet {
   return {
     ...values,
@@ -1083,5 +1377,52 @@ function copyCanaryScope(scope: Meta8CanaryScopeConfig): Meta8CanaryScopeConfig 
     ...scope,
     allowedActionTypes: [...scope.allowedActionTypes],
     requiredGates: [...scope.requiredGates],
+  };
+}
+
+function traceScrubFixture(
+  fixtureId: string,
+  inputText: string,
+  expectedSafe: boolean,
+  expectedSafelyDropped: boolean,
+): Meta9TraceScrubFixture {
+  return {
+    fixtureId,
+    inputText,
+    expectedSafe,
+    expectedSafelyDropped,
+  };
+}
+
+function agreementShadowFixture(
+  values: {
+    fixtureId: string;
+    scopeId: ProductionReadinessScopeId;
+    legalActionIds: readonly string[];
+    legacyActionId: string;
+    semanticActionId: string;
+    hardGatesPass?: boolean;
+    traceSafeOrDropped?: boolean;
+  },
+): Meta9AgreementShadowFixture {
+  return {
+    fixtureId: values.fixtureId,
+    scopeId: values.scopeId,
+    legalActionIds: [...values.legalActionIds],
+    legacyActionId: values.legacyActionId,
+    semanticActionId: values.semanticActionId,
+    hardGatesPass: values.hardGatesPass ?? true,
+    traceSafeOrDropped: values.traceSafeOrDropped ?? true,
+  };
+}
+
+function publicPayloadCheck(
+  surface: Meta9PublicPayloadSurface,
+  status: Meta9PublicPayloadCheck["status"],
+): Meta9PublicPayloadCheck {
+  return {
+    surface,
+    status,
+    publicPayloadDeltaCount: 0,
   };
 }

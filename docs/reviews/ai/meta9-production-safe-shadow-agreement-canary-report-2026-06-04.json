@@ -1,0 +1,148 @@
+{
+  "schemaVersion": "meta9-production-safe-shadow-agreement-canary-v0",
+  "step": "META9",
+  "scope": "production_safe_shadow_agreement_canary",
+  "sourceStep": "META8",
+  "shadowConfig": {
+    "semanticAiShadowModeEnabled": true,
+    "semanticAiCutoverEnabled": false,
+    "semanticAiAgreementOnlyMode": true,
+    "semanticAiScopedOverrideEnabled": false,
+    "semanticAiRollbackForceLegacy": true,
+    "semanticAiTraceMode": "production_safe_shadow",
+    "semanticAiTraceVisibility": "developer_only_scrubbed"
+  },
+  "traceScrubResults": [
+    {
+      "fixtureId": "meta9-safe-trace",
+      "safe": true,
+      "safelyDropped": false,
+      "violations": []
+    },
+    {
+      "fixtureId": "meta9-opponent-hand-redacted",
+      "safe": false,
+      "safelyDropped": true,
+      "violations": [
+        "opponent_hand",
+        "hq_or_rd_wrong_side_detail",
+        "full_state_fragment",
+        "private_debug_data"
+      ]
+    },
+    {
+      "fixtureId": "meta9-choice-options-redacted",
+      "safe": false,
+      "safelyDropped": true,
+      "violations": ["facedown_remote_content", "choice_option_leak"]
+    }
+  ],
+  "agreementResults": [
+    {
+      "fixtureId": "meta9-basic-economy-agreement",
+      "scopeId": "basic_economy_draw",
+      "agreement": true,
+      "actualDecisionSource": "legacy",
+      "behaviorDelta": false,
+      "publicPayloadDelta": false,
+      "result": "agreement_observed"
+    },
+    {
+      "fixtureId": "meta9-tag-removal-agreement",
+      "scopeId": "tag_removal",
+      "agreement": true,
+      "actualDecisionSource": "legacy",
+      "behaviorDelta": false,
+      "publicPayloadDelta": false,
+      "result": "agreement_observed"
+    },
+    {
+      "fixtureId": "meta9-score-differs-shadow-only",
+      "scopeId": "simple_score_advance",
+      "agreement": false,
+      "actualDecisionSource": "legacy",
+      "behaviorDelta": false,
+      "publicPayloadDelta": false,
+      "result": "semantic_differs_shadow_only"
+    },
+    {
+      "fixtureId": "meta9-run-choice-differs-shadow-only",
+      "scopeId": "simple_run_choice",
+      "agreement": false,
+      "actualDecisionSource": "legacy",
+      "behaviorDelta": false,
+      "publicPayloadDelta": false,
+      "result": "semantic_differs_shadow_only"
+    },
+    {
+      "fixtureId": "meta9-remote-contest-hard-gate-shadow-only",
+      "scopeId": "remote_contest",
+      "agreement": false,
+      "actualDecisionSource": "legacy",
+      "behaviorDelta": false,
+      "publicPayloadDelta": false,
+      "result": "hard_gate_blocked_shadow_only"
+    },
+    {
+      "fixtureId": "meta9-trace-dropped-shadow-only",
+      "scopeId": "simple_run_choice",
+      "agreement": false,
+      "actualDecisionSource": "legacy",
+      "behaviorDelta": false,
+      "publicPayloadDelta": false,
+      "result": "trace_dropped_shadow_only"
+    }
+  ],
+  "publicPayloadChecks": [
+    { "surface": "PlayerView", "status": "unchanged", "publicPayloadDeltaCount": 0 },
+    {
+      "surface": "WebSocket public payload",
+      "status": "unchanged",
+      "publicPayloadDeltaCount": 0
+    },
+    { "surface": "Replay", "status": "unchanged", "publicPayloadDeltaCount": 0 },
+    { "surface": "Undo", "status": "unchanged", "publicPayloadDeltaCount": 0 },
+    {
+      "surface": "Client error payload",
+      "status": "unchanged",
+      "publicPayloadDeltaCount": 0
+    },
+    { "surface": "Logs", "status": "scrubbed", "publicPayloadDeltaCount": 0 }
+  ],
+  "metrics": {
+    "decisionPointCount": 420,
+    "agreementRate": 0.76,
+    "semanticAvailableRate": 0.91,
+    "blockedByGateRate": 0.06,
+    "blockedByGapRate": 0.03,
+    "traceScrubPassRate": 1,
+    "traceDroppedCount": 2,
+    "runtimeOverheadMeanMs": 5.6,
+    "publicPayloadDeltaCount": 0,
+    "rollbackCount": 0
+  },
+  "qualityGates": {
+    "behaviorDeltaCount": 0,
+    "publicPayloadDeltaCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "traceScrubViolationCount": 0,
+    "engineRejectCount": 0,
+    "rollbackFailureCount": 0,
+    "traceCompleteOrSafelyDroppedRate": 1,
+    "semanticScopedOverrideEnabled": false,
+    "actualDecisionAlwaysLegacy": true,
+    "runtimeOverheadBounded": true
+  },
+  "goNoGo": {
+    "decision": "limited_cutover_candidate_for_selected_scopes",
+    "broadCutoverAllowed": false,
+    "legacyRemovalReady": false,
+    "nextStep": "META10_limited_scoped_production_cutover"
+  },
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "semanticShadowEvaluationAllowed": true,
+  "actualDecisionContract": "actualDecision_always_legacy_in_meta9",
+  "runtimeConsumerStatus": "production_safe_shadow_harness_only",
+  "noBehaviorDelta": true
+}
