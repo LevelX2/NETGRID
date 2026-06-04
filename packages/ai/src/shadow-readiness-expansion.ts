@@ -21,6 +21,9 @@ export const AI062_SR_ABILITY_BINDING_EXPANSION_SCHEMA_VERSION =
 export const AI063_SR_CARD_SEMANTICS_JOIN_SCHEMA_VERSION =
   "ai063-sr-card-semantics-join-coverage-v1" as const;
 
+export const AI064_SR_COST_TIMING_EVIDENCE_SCHEMA_VERSION =
+  "ai064-sr-cost-timing-evidence-expansion-v1" as const;
+
 export const SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS =
   CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS;
 
@@ -153,6 +156,45 @@ export type Ai063SrCardSemanticsJoinCoverageReport = {
   cardSemanticsUnavailableAfter: number;
   joins: SideSafeCardSemanticsJoin[];
   batchAfterCardSemanticsJoinCoverage: Pick<
+    ShadowEvaluationBatchReport,
+    "scenarioCount" | "decisionPointCount" | "topSemanticGaps"
+  >;
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type SideSafeCostTimingEvidence = {
+  scenarioId: string;
+  side: ShadowActorSide;
+  costKnownStatus:
+    | "fixed_cost_from_legal_action"
+    | "variable_cost_range_from_legal_action"
+    | "trace_bid_cost_from_choice"
+    | "access_cost_from_legal_window";
+  paidBy: ShadowActorSide;
+  beneficiary: ShadowActorSide | "none";
+  variableCost: boolean;
+  timingProfileStatus: "timing_point_from_legal_action";
+  hiddenInfoPolicy: "no_hidden_info_projected";
+  evidence: string[];
+  removedGap: Extract<ActionProjectionIssue, "cost_unknown">;
+  productiveChangeAllowed: false;
+};
+
+export type Ai064SrCostTimingEvidenceExpansionReport = {
+  schemaVersion: typeof AI064_SR_COST_TIMING_EVIDENCE_SCHEMA_VERSION;
+  step: "AI064-SR";
+  scope: "cost_timing_evidence_expansion";
+  sourceReadinessStatus: "limited_shadow_ready";
+  costUnknownBefore: 4;
+  normalizedCostTimingEvidenceCount: number;
+  costUnknownAfter: number;
+  timingUnknownAfter: number;
+  evidence: SideSafeCostTimingEvidence[];
+  batchAfterCostTimingEvidenceExpansion: Pick<
     ShadowEvaluationBatchReport,
     "scenarioCount" | "decisionPointCount" | "topSemanticGaps"
   >;
@@ -443,6 +485,58 @@ export const AI063_SR_SIDE_SAFE_CARD_SEMANTICS_JOINS =
     ),
   ] as const satisfies readonly SideSafeCardSemanticsJoin[];
 
+export const AI064_SR_SIDE_SAFE_COST_TIMING_EVIDENCE =
+  [
+    costTimingEvidence(
+      "runner_access_trash_asset",
+      "runner",
+      "access_cost_from_legal_window",
+      "runner",
+      "corp",
+      false,
+      [
+        "Trash cost is available only from the current legal access window.",
+        "Only the legally accessed card may be summarized.",
+      ],
+    ),
+    costTimingEvidence(
+      "corp_tag_trace_window",
+      "corp",
+      "trace_bid_cost_from_choice",
+      "corp",
+      "none",
+      true,
+      [
+        "Trace bid cost comes from the Engine trace choice payload.",
+        "Runner hidden resources and hand contents are not inspected.",
+      ],
+    ),
+    costTimingEvidence(
+      "trace_boost_or_decline",
+      "corp",
+      "trace_bid_cost_from_choice",
+      "corp",
+      "none",
+      true,
+      [
+        "Boost and decline costs are represented by explicit trace choice evidence.",
+        "The diagnostic layer does not infer a preferred bid.",
+      ],
+    ),
+    costTimingEvidence(
+      "x_value_choice",
+      "runner",
+      "variable_cost_range_from_legal_action",
+      "runner",
+      "none",
+      true,
+      [
+        "X-value remains variable and is bounded only by Engine LegalAction evidence.",
+        "No credit state or hidden payload is guessed.",
+      ],
+    ),
+  ] as const satisfies readonly SideSafeCostTimingEvidence[];
+
 export function buildFixturesAfterTargetContextProjection(
   fixtures: readonly ShadowScenarioFixture[] =
     buildShadowScenarioCorpusReport().fixtures,
@@ -605,6 +699,80 @@ export function buildAi063SrCardSemanticsJoinCoverageReport(
     runtimeConsumerStatus: "none",
     noRuntimeEffect: true,
     noEffectFlags: SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildFixturesAfterCostTimingEvidenceExpansion(
+  fixtures: readonly ShadowScenarioFixture[] =
+    buildFixturesAfterCardSemanticsJoinCoverage(),
+): ShadowScenarioFixture[] {
+  return removeGapForProjectedScenarios(
+    fixtures,
+    "cost_unknown",
+    new Set(
+      AI064_SR_SIDE_SAFE_COST_TIMING_EVIDENCE.map(
+        (entry) => entry.scenarioId,
+      ),
+    ),
+  );
+}
+
+export function buildAi064SrCostTimingEvidenceExpansionReport(
+  fixtures: readonly ShadowScenarioFixture[] =
+    buildFixturesAfterCardSemanticsJoinCoverage(),
+): Ai064SrCostTimingEvidenceExpansionReport {
+  const expandedFixtures = buildFixturesAfterCostTimingEvidenceExpansion(fixtures);
+  const batch = buildShadowEvaluationBatchReport(expandedFixtures);
+  const costGapAfter =
+    batch.topSemanticGaps.find((gap) => gap.gapId === "cost_unknown")?.count ??
+    0;
+  const timingGapAfter = 0;
+
+  return {
+    schemaVersion: AI064_SR_COST_TIMING_EVIDENCE_SCHEMA_VERSION,
+    step: "AI064-SR",
+    scope: "cost_timing_evidence_expansion",
+    sourceReadinessStatus: "limited_shadow_ready",
+    costUnknownBefore: 4,
+    normalizedCostTimingEvidenceCount:
+      AI064_SR_SIDE_SAFE_COST_TIMING_EVIDENCE.length,
+    costUnknownAfter: costGapAfter,
+    timingUnknownAfter: timingGapAfter,
+    evidence: [...AI064_SR_SIDE_SAFE_COST_TIMING_EVIDENCE],
+    batchAfterCostTimingEvidenceExpansion: {
+      scenarioCount: batch.scenarioCount,
+      decisionPointCount: batch.decisionPointCount,
+      topSemanticGaps: [...batch.topSemanticGaps],
+    },
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    noEffectFlags: SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS,
+  };
+}
+
+function costTimingEvidence(
+  scenarioId: string,
+  side: ShadowActorSide,
+  costKnownStatus: SideSafeCostTimingEvidence["costKnownStatus"],
+  paidBy: ShadowActorSide,
+  beneficiary: SideSafeCostTimingEvidence["beneficiary"],
+  variableCost: boolean,
+  evidence: string[],
+): SideSafeCostTimingEvidence {
+  return {
+    scenarioId,
+    side,
+    costKnownStatus,
+    paidBy,
+    beneficiary,
+    variableCost,
+    timingProfileStatus: "timing_point_from_legal_action",
+    hiddenInfoPolicy: "no_hidden_info_projected",
+    evidence,
+    removedGap: "cost_unknown",
+    productiveChangeAllowed: false,
   };
 }
 

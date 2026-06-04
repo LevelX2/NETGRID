@@ -5,11 +5,14 @@ import {
   AI061_SR_SIDE_SAFE_TARGET_CONTEXT_PROJECTIONS,
   AI062_SR_SIDE_SAFE_ABILITY_BINDINGS,
   AI063_SR_SIDE_SAFE_CARD_SEMANTICS_JOINS,
+  AI064_SR_SIDE_SAFE_COST_TIMING_EVIDENCE,
   buildAi061SrTargetContextProjectionExpansionReport,
   buildAi062SrAbilityBindingExpansionReport,
   buildAi063SrCardSemanticsJoinCoverageReport,
+  buildAi064SrCostTimingEvidenceExpansionReport,
   buildFixturesAfterAbilityBindingExpansion,
   buildFixturesAfterCardSemanticsJoinCoverage,
+  buildFixturesAfterCostTimingEvidenceExpansion,
   buildFixturesAfterTargetContextProjection,
 } from "./shadow-readiness-expansion";
 
@@ -79,6 +82,63 @@ describe("AI061-SR TargetContext Projection Expansion", () => {
     expect(Object.values(batch.noEffectFlags).every((value) => value === false)).toBe(
       true,
     );
+  });
+});
+
+describe("AI064-SR Cost/Timing Evidence Expansion", () => {
+  it("normalizes side-safe cost and timing evidence for all AI058 cost gaps", () => {
+    const report = buildAi064SrCostTimingEvidenceExpansionReport();
+
+    expect(report.schemaVersion).toBe(
+      "ai064-sr-cost-timing-evidence-expansion-v1",
+    );
+    expect(report.step).toBe("AI064-SR");
+    expect(report.costUnknownBefore).toBe(4);
+    expect(report.normalizedCostTimingEvidenceCount).toBe(4);
+    expect(report.costUnknownAfter).toBe(0);
+    expect(report.timingUnknownAfter).toBe(0);
+    expect(report.evidence).toHaveLength(4);
+  });
+
+  it("marks variable costs explicitly instead of guessing a paid amount", () => {
+    const variableScenarios = AI064_SR_SIDE_SAFE_COST_TIMING_EVIDENCE.filter(
+      (entry) => entry.variableCost,
+    ).map((entry) => entry.scenarioId);
+
+    expect(variableScenarios).toEqual([
+      "corp_tag_trace_window",
+      "trace_boost_or_decline",
+      "x_value_choice",
+    ]);
+    expect(
+      AI064_SR_SIDE_SAFE_COST_TIMING_EVIDENCE.every(
+        (entry) =>
+          entry.timingProfileStatus === "timing_point_from_legal_action" &&
+          entry.hiddenInfoPolicy === "no_hidden_info_projected" &&
+          entry.productiveChangeAllowed === false,
+      ),
+    ).toBe(true);
+  });
+
+  it("leaves only intentional ability and hidden-info gaps after cost timing expansion", () => {
+    const batch = buildShadowEvaluationBatchReport(
+      buildFixturesAfterCostTimingEvidenceExpansion(),
+    );
+
+    expect(
+      batch.topSemanticGaps.find((gap) => gap.gapId === "cost_unknown")?.count,
+    ).toBe(0);
+    expect(
+      batch.topSemanticGaps.find((gap) => gap.gapId === "ability_unresolved")
+        ?.count,
+    ).toBe(1);
+    expect(
+      batch.topSemanticGaps.find((gap) => gap.gapId === "hidden_info_blocked")
+        ?.count,
+    ).toBe(3);
+    expect(batch.hardGateFailures).toEqual([]);
+    expect(batch.actualDecisionOverrideCount).toBe(0);
+    expect(batch.runtimeEffectCount).toBe(0);
   });
 });
 

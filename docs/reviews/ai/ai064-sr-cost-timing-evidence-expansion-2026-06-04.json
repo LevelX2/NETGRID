@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "ai064-sr-cost-timing-evidence-expansion-v1",
+  "step": "AI064-SR",
+  "title": "Cost/Timing Evidence Expansion",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai061-sr-ai067-shadow-readiness-expansion",
+  "scope": "cost_timing_evidence_expansion",
+  "sourceReadinessStatus": "limited_shadow_ready",
+  "costUnknownBefore": 4,
+  "normalizedCostTimingEvidenceCount": 4,
+  "costUnknownAfter": 0,
+  "timingUnknownAfter": 0,
+  "normalizedScenarioIds": [
+    "runner_access_trash_asset",
+    "corp_tag_trace_window",
+    "trace_boost_or_decline",
+    "x_value_choice"
+  ],
+  "evidencePolicy": {
+    "legalActionCostEvidenceOnly": true,
+    "engineChoicePayloadAllowed": true,
+    "paidByRequired": true,
+    "beneficiaryRequired": true,
+    "variableCostExplicit": true,
+    "timingPointFromLegalAction": true,
+    "costGuessingAllowed": false,
+    "hiddenInfoProjectionAllowed": false,
+    "runtimePaymentChangeAllowed": false
+  },
+  "batchAfterCostTimingEvidenceExpansion": {
+    "scenarioCount": 33,
+    "decisionPointCount": 33,
+    "hardGateFailures": 0,
+    "actualDecisionOverrideCount": 0,
+    "runtimeEffectCount": 0
+  },
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "runtimeConsumerStatus": "none",
+  "noRuntimeEffect": true,
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "verification": [
+    "node scripts/check-ai064-sr-cost-timing-evidence-expansion.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- shadow-readiness-expansion.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "doneGate": {
+    "costKnownStatusImproved": true,
+    "timingProfileImproved": true,
+    "costsGuessed": false,
+    "hiddenInfoLeaks": 0,
+    "actualDecisionRemainsLegacy": true
+  }
+}
