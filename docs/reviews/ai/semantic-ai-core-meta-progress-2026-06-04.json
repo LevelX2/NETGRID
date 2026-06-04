@@ -1,0 +1,22 @@
+{
+  "processId": "semantic-ai-core-meta1-meta6",
+  "date": "2026-06-04",
+  "branch": "codex/meta1-meta6-semantic-ai-core",
+  "worktree": "C:\\Projekte\\NETGRID_META1_META6_SEMANTIC_AI_CORE",
+  "currentStep": "process_defined",
+  "completedSteps": [],
+  "blocked": false,
+  "cutoverAllowed": false,
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "actualDecisionContract": "legacy_until_meta4_same_action_confirmation_meta5_test_internal_only",
+  "hardGates": {
+    "illegalSemanticDecisionCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "engineRejectCount": 0,
+    "nonEngineLegalAssumptionCount": 0,
+    "determinismFailureCount": 0,
+    "publicPayloadDeltaCount": 0,
+    "rollbackFailureCount": 0
+  }
+}
