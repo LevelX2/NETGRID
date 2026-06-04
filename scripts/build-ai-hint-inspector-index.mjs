@@ -98,6 +98,7 @@ export function buildAiHintInspectorIndex(options = {}) {
       const inspectorFunctionSignals = functionSignalsForInspector({
         hint,
         functionSignals,
+        tacticSignalById,
       });
       const rolesClassification = classifyValues(
         hint.roles ?? [],
@@ -316,18 +317,31 @@ function reviewedStrategySupportPairsFromLineSupport({
     );
 }
 
-function functionSignalsForInspector({ hint, functionSignals }) {
+function functionSignalsForInspector({ hint, functionSignals, tacticSignalById }) {
   const derivedSignals = functionSignals.signals ?? [];
+  const supportOnlyManualSignals = (hint.tacticSignals ?? []).filter((signalId) =>
+    tacticSignalAllowedAsSupportOnlyInspectorSignal(signalId, tacticSignalById),
+  );
   if (
     hint.side !== "corp" ||
     !["agenda", "upgrade"].includes(hint.cardType)
   ) {
-    return derivedSignals;
+    return sortedUnique([...derivedSignals, ...supportOnlyManualSignals]);
   }
   return sortedUnique([
     ...derivedSignals,
     ...(hint.tacticSignals ?? []),
   ]);
+}
+
+function tacticSignalAllowedAsSupportOnlyInspectorSignal(signalId, tacticSignalById) {
+  const signal = tacticSignalById.get(signalId);
+  if (!signal) return false;
+  return (
+    signal.supportOnly === true &&
+    signal.mayAnchorStrategy === false &&
+    (signal.allowedStrategyAnchors ?? []).length === 0
+  );
 }
 
 function supportingEvidenceOnlyForHint({ hint, functionSignals, tacticSignalById }) {

@@ -520,6 +520,117 @@ describe("buildActionSemanticCandidates", () => {
     expect(explicit.actionTacticSignals).toEqual(["tag.remove"]);
     expect(explicit.projectionIssues).not.toContain("ability_unresolved");
   });
+
+  it("projects Dropp break semantics as emergency prevention, not run access support", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("break_subroutine", 0, {
+          source: "dropp-instance",
+          abilityRef: {
+            sourceCardInstanceId: "dropp-instance",
+            abilityId: "dropp.break_subroutine",
+          },
+          payload: {
+            iceId: "ice-1",
+            subroutineIndex: 0,
+          },
+          targetRequirements: [
+            {
+              id: "subroutine",
+              kind: "subroutine",
+              side: "corp",
+              visibility: "public",
+            },
+          ],
+        }),
+      ],
+      selectedTargetsByActionId: {
+        "ai036-0-break_subroutine": {
+          subroutine: "ice-1:subroutine:0",
+        },
+      },
+      cardSemanticProfilesByCardId: {
+        "dropp-instance": {
+          cardId: "onr_v1_019_dropp",
+          tacticSignals: [],
+          strategySupport: [],
+          abilitySemantics: [
+            {
+              abilityId: "dropp.break_subroutine",
+              tacticSignals: [
+                "breaker.break_any_subroutine",
+                "encounter.emergency_subroutine_prevention",
+                "defense.encounter_threat_mitigation",
+              ],
+              strategySupport: [],
+              risks: [
+                {
+                  kind: "risk.ends_run_on_use",
+                  severity: "high",
+                  evidence: ["Dropp break ability ends the run after use"],
+                },
+                {
+                  kind: "risk.access_loss_on_use",
+                  severity: "high",
+                  evidence: ["Ending the run prevents access"],
+                },
+                {
+                  kind: "risk.blocks_run_continuation",
+                  severity: "high",
+                  evidence: ["Use cannot support run continuation"],
+                },
+              ],
+              constraints: [
+                {
+                  kind: "not_access_enabling_breaker",
+                  status: "satisfied",
+                  evidence: ["Dropp is emergency-only coverage"],
+                },
+                {
+                  kind: "not_reachability_coverage",
+                  status: "satisfied",
+                  evidence: ["Run-ending break does not prove access"],
+                },
+              ],
+              additionalCosts: ["ends_run"],
+              targetProfileMatches: [
+                {
+                  targetProfileId: "dropp_emergency_subroutine_target",
+                  status: "unknown",
+                  issues: [],
+                  evidence: ["Visible legal subroutine target only"],
+                },
+              ],
+            },
+          ],
+        },
+      },
+    });
+
+    if (!candidate) throw new Error("Expected Dropp candidate");
+    expect(candidate.actionTacticSignals).toEqual([
+      "breaker.break_any_subroutine",
+      "encounter.emergency_subroutine_prevention",
+      "defense.encounter_threat_mitigation",
+    ]);
+    expect(candidate.strategySupport).toEqual([]);
+    expect(candidate.risks.map((risk) => risk.kind)).toEqual([
+      "risk.ends_run_on_use",
+      "risk.access_loss_on_use",
+      "risk.blocks_run_continuation",
+    ]);
+    expect(candidate.constraints.map((constraint) => constraint.kind)).toEqual([
+      "not_access_enabling_breaker",
+      "not_reachability_coverage",
+    ]);
+    expect(candidate.costProfile.additionalCosts).toContain("ends_run");
+    expect(candidate.targetContext?.targetKind).toBe("subroutine");
+    expect(candidate.targetContext?.targetProfileMatches).toEqual([
+      expect.objectContaining({
+        targetProfileId: "dropp_emergency_subroutine_target",
+      }),
+    ]);
+  });
 });
 
 function legalAction(

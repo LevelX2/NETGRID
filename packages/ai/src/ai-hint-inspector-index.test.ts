@@ -295,11 +295,22 @@ describe("AI005 hint inspector index", () => {
 
     expect(dropp.derivedFunctionSignals).toEqual(
       expect.arrayContaining([
+        "breaker.break_any_subroutine",
         "breaker.ends_run_after_use",
-        "breaker.universal",
+        "defense.encounter_threat_mitigation",
+        "encounter.emergency_subroutine_prevention",
       ]),
     );
+    expect(dropp.derivedFunctionSignals).not.toContain("breaker.universal");
     expect(dropp.derivedStrategyAnchors).toEqual([]);
+    expect(dropp.supportingEvidenceOnly).toEqual(
+      expect.arrayContaining([
+        "breaker.break_any_subroutine",
+        "breaker.ends_run_after_use",
+        "defense.encounter_threat_mitigation",
+        "encounter.emergency_subroutine_prevention",
+      ]),
+    );
 
     expect(flak.derivedFunctionSignals).toContain("breaker.ap");
     expect(flak.derivedFunctionSignals).not.toContain(
