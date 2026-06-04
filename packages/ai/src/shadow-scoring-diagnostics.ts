@@ -12,6 +12,9 @@ import {
 export const SHADOW_SCORING_FIXTURE_DESIGN_SCHEMA_VERSION =
   "shadow-scoring-fixture-design-v1" as const;
 
+export const SHADOW_ACTION_RANKING_REPORT_SCHEMA_VERSION =
+  "shadow-action-ranking-report-v1" as const;
+
 export type ShadowFixtureSide = "runner" | "corp";
 
 export type ShadowFixtureHiddenInfoPolicy =
@@ -103,6 +106,70 @@ export type ShadowScoringFixtureDesignReport = {
   };
   recommendedAI048Scope: string[];
   summary: ShadowScoringFixtureDesignSummary;
+  productiveUseAllowed: false;
+  noEffectFlags: DiagnosticNoEffectFlags;
+};
+
+export type ShadowActionOrderingBucket =
+  | "score_draft_available"
+  | "blocked_by_gap"
+  | "blocked_by_gate"
+  | "not_scored";
+
+export type ShadowActionRankingCandidateDraft = {
+  scenarioId: string;
+  side: ShadowFixtureSide;
+  candidateId: string;
+  actionType: string;
+  scoreStatus: ShadowScoreDraftStatus;
+  goalMatches: TacticalGoalFamily[];
+  hardGateFailures: ActionGateId[];
+  unresolvedGaps: ActionProjectionIssue[];
+  positiveEvidence: string[];
+  negativeEvidence: string[];
+  riskEvidence: string[];
+  missingEvidence: string[];
+};
+
+export type ShadowActionRankingEntry = {
+  scenarioId: string;
+  candidateId: string;
+  actionType: string;
+  reportOnlyOrderIndex: number;
+  bucket: ShadowActionOrderingBucket;
+  scoreStatus: ShadowScoreDraftStatus;
+  goalMatches: TacticalGoalFamily[];
+  hardGateFailures: ActionGateId[];
+  unresolvedGaps: ActionProjectionIssue[];
+  reasons: string[];
+  evidence: string[];
+};
+
+export type ShadowActionRankingScenarioReport = {
+  scenarioId: string;
+  side: ShadowFixtureSide;
+  legacyActionRef?: string;
+  orderedCandidates: ShadowActionRankingEntry[];
+  unresolvedGapCategories: ActionProjectionIssue[];
+  hardGateFailureCategories: ActionGateId[];
+};
+
+export type ShadowActionRankingSummary = {
+  scenarioCount: number;
+  candidateCount: number;
+  scoreDraftAvailable: number;
+  blockedByGap: number;
+  blockedByGate: number;
+  notScored: number;
+};
+
+export type ShadowActionRankingReport = {
+  schemaVersion: typeof SHADOW_ACTION_RANKING_REPORT_SCHEMA_VERSION;
+  scope: "report_only_shadow_ordering";
+  rankingPolicy: "status_bucket_then_fixture_order";
+  scenarioReports: ShadowActionRankingScenarioReport[];
+  summary: ShadowActionRankingSummary;
+  semanticExecutionAllowed: false;
   productiveUseAllowed: false;
   noEffectFlags: DiagnosticNoEffectFlags;
 };
@@ -295,6 +362,28 @@ export function buildShadowScoringFixtureDesignReport(
   };
 }
 
+export function buildShadowActionRankingReport(
+  fixtureCorpus: readonly ShadowScoringFixtureScenario[] =
+    DEFAULT_SHADOW_SCORING_FIXTURE_CORPUS,
+  candidateDrafts: readonly ShadowActionRankingCandidateDraft[] =
+    buildDefaultShadowRankingCandidateDrafts(fixtureCorpus),
+): ShadowActionRankingReport {
+  const scenarioReports = fixtureCorpus.map((scenario) =>
+    buildShadowRankingScenarioReport(scenario, candidateDrafts),
+  );
+
+  return {
+    schemaVersion: SHADOW_ACTION_RANKING_REPORT_SCHEMA_VERSION,
+    scope: "report_only_shadow_ordering",
+    rankingPolicy: "status_bucket_then_fixture_order",
+    scenarioReports,
+    summary: summarizeShadowActionRanking(scenarioReports),
+    semanticExecutionAllowed: false,
+    productiveUseAllowed: false,
+    noEffectFlags: DIAGNOSTIC_NO_EFFECT_FLAGS,
+  };
+}
+
 function runnerFixture(
   scenarioId: string,
   boardSituationSummary: string,
@@ -394,6 +483,159 @@ function copyFixtureScenario(
   };
 }
 
+function buildDefaultShadowRankingCandidateDrafts(
+  fixtureCorpus: readonly ShadowScoringFixtureScenario[],
+): ShadowActionRankingCandidateDraft[] {
+  return fixtureCorpus.flatMap((scenario) =>
+    scenario.availableLegalActions.map((action) => {
+      const hiddenInfoBlocked =
+        scenario.hiddenInfoPolicy === "hidden_info_blocked" ||
+        action.knownGaps.includes("hidden_info_blocked");
+      const unresolvedGaps = uniqueProjectionIssues(action.knownGaps);
+      const scoreStatus: ShadowScoreDraftStatus = hiddenInfoBlocked
+        ? "blocked_by_gate"
+        : unresolvedGaps.length > 0
+          ? "blocked_by_gap"
+          : "score_draft_available";
+
+      return {
+        scenarioId: scenario.scenarioId,
+        side: scenario.side,
+        candidateId: `${scenario.scenarioId}.${action.actionRef}`,
+        actionType: action.actionType,
+        scoreStatus,
+        goalMatches: [...scenario.expectedRelevantGoals],
+        hardGateFailures: hiddenInfoBlocked ? ["hidden_info"] : [],
+        unresolvedGaps,
+        positiveEvidence:
+          scoreStatus === "score_draft_available"
+            ? [`AI048 report-only evidence for ${action.semanticActionType}`]
+            : [],
+        negativeEvidence: [],
+        riskEvidence:
+          scoreStatus === "blocked_by_gate"
+            ? ["Hidden-info gate blocks report-only scoring draft."]
+            : [],
+        missingEvidence: unresolvedGaps.map((gap) => `Missing evidence: ${gap}`),
+      };
+    }),
+  );
+}
+
+function buildShadowRankingScenarioReport(
+  scenario: ShadowScoringFixtureScenario,
+  candidateDrafts: readonly ShadowActionRankingCandidateDraft[],
+): ShadowActionRankingScenarioReport {
+  const drafts = candidateDrafts.filter(
+    (candidate) => candidate.scenarioId === scenario.scenarioId,
+  );
+  const orderedCandidates = [...drafts]
+    .sort(
+      (left, right) =>
+        orderWeightForStatus(left.scoreStatus) -
+        orderWeightForStatus(right.scoreStatus),
+    )
+    .map((candidate, index) => rankingEntry(candidate, index));
+
+  return {
+    scenarioId: scenario.scenarioId,
+    side: scenario.side,
+    ...(scenario.legacySelectedAction !== undefined
+      ? { legacyActionRef: scenario.legacySelectedAction }
+      : {}),
+    orderedCandidates,
+    unresolvedGapCategories: uniqueProjectionIssues(
+      orderedCandidates.flatMap((candidate) => candidate.unresolvedGaps),
+    ),
+    hardGateFailureCategories: uniqueGateIds(
+      orderedCandidates.flatMap((candidate) => candidate.hardGateFailures),
+    ),
+  };
+}
+
+function rankingEntry(
+  candidate: ShadowActionRankingCandidateDraft,
+  reportOnlyOrderIndex: number,
+): ShadowActionRankingEntry {
+  return {
+    scenarioId: candidate.scenarioId,
+    candidateId: candidate.candidateId,
+    actionType: candidate.actionType,
+    reportOnlyOrderIndex,
+    bucket: bucketForScoreStatus(candidate.scoreStatus),
+    scoreStatus: candidate.scoreStatus,
+    goalMatches: [...candidate.goalMatches],
+    hardGateFailures: [...candidate.hardGateFailures],
+    unresolvedGaps: [...candidate.unresolvedGaps],
+    reasons: reasonsForRankingCandidate(candidate),
+    evidence: [
+      ...candidate.positiveEvidence,
+      ...candidate.negativeEvidence,
+      ...candidate.riskEvidence,
+      ...candidate.missingEvidence,
+    ],
+  };
+}
+
+function reasonsForRankingCandidate(
+  candidate: ShadowActionRankingCandidateDraft,
+): string[] {
+  if (candidate.scoreStatus === "blocked_by_gate") {
+    return candidate.hardGateFailures.map(
+      (gateId) => `Hard gate blocks report-only score draft: ${gateId}`,
+    );
+  }
+  if (candidate.scoreStatus === "blocked_by_gap") {
+    return candidate.unresolvedGaps.map(
+      (gap) => `Gap blocks report-only score draft: ${gap}`,
+    );
+  }
+  if (candidate.scoreStatus === "not_scored") {
+    return ["Candidate was not scored in this fixture design."];
+  }
+  return ["Candidate is eligible for report-only shadow ordering."];
+}
+
+function summarizeShadowActionRanking(
+  scenarioReports: readonly ShadowActionRankingScenarioReport[],
+): ShadowActionRankingSummary {
+  const candidates = scenarioReports.flatMap(
+    (scenario) => scenario.orderedCandidates,
+  );
+
+  return {
+    scenarioCount: scenarioReports.length,
+    candidateCount: candidates.length,
+    scoreDraftAvailable: candidates.filter(
+      (candidate) => candidate.scoreStatus === "score_draft_available",
+    ).length,
+    blockedByGap: candidates.filter(
+      (candidate) => candidate.scoreStatus === "blocked_by_gap",
+    ).length,
+    blockedByGate: candidates.filter(
+      (candidate) => candidate.scoreStatus === "blocked_by_gate",
+    ).length,
+    notScored: candidates.filter((candidate) => candidate.scoreStatus === "not_scored")
+      .length,
+  };
+}
+
+function orderWeightForStatus(status: ShadowScoreDraftStatus): number {
+  if (status === "score_draft_available") return 0;
+  if (status === "blocked_by_gap") return 1;
+  if (status === "blocked_by_gate") return 2;
+  return 3;
+}
+
+function bucketForScoreStatus(
+  status: ShadowScoreDraftStatus,
+): ShadowActionOrderingBucket {
+  if (status === "score_draft_available") return "score_draft_available";
+  if (status === "blocked_by_gap") return "blocked_by_gap";
+  if (status === "blocked_by_gate") return "blocked_by_gate";
+  return "not_scored";
+}
+
 function summarizeFixtureDesign(
   fixtureCorpus: readonly ShadowScoringFixtureScenario[],
 ): ShadowScoringFixtureDesignSummary {
@@ -416,5 +658,9 @@ function summarizeFixtureDesign(
 function uniqueProjectionIssues(
   values: readonly ActionProjectionIssue[],
 ): ActionProjectionIssue[] {
+  return [...new Set(values)];
+}
+
+function uniqueGateIds(values: readonly ActionGateId[]): ActionGateId[] {
   return [...new Set(values)];
 }

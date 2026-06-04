@@ -1,0 +1,66 @@
+{
+  "step": "AI048",
+  "title": "Shadow-only Action Ranking Report",
+  "date": "2026-06-04",
+  "status": "done",
+  "sourceCommit": "67bd106d",
+  "runtimeConsumerStatus": "none",
+  "diagnosticScope": "report_only_shadow_ordering",
+  "schemaVersion": "shadow-action-ranking-report-v1",
+  "implementationFiles": [
+    "packages/ai/src/shadow-scoring-diagnostics.ts",
+    "packages/ai/src/shadow-scoring-diagnostics.test.ts"
+  ],
+  "rankingPolicy": "status_bucket_then_fixture_order",
+  "semanticExecutionAllowed": false,
+  "productiveUseAllowed": false,
+  "fixtureSummary": {
+    "scenarioCount": 14,
+    "candidateCount": 26,
+    "scoreDraftAvailable": 15,
+    "blockedByGap": 10,
+    "blockedByGate": 1,
+    "notScored": 0
+  },
+  "reportOnlyBuckets": [
+    "score_draft_available",
+    "blocked_by_gap",
+    "blocked_by_gate",
+    "not_scored"
+  ],
+  "gapBuckets": [
+    "target_context_unavailable",
+    "ability_unresolved",
+    "card_semantics_unavailable"
+  ],
+  "hardGateBuckets": ["hidden_info"],
+  "runtimeFilesTouched": [],
+  "forbiddenInThisStepConfirmedAbsent": [
+    "productive chooseSemanticAiAction",
+    "live numeric scoring",
+    "productive ranking",
+    "action selection",
+    "planner weights",
+    "runtime consumer",
+    "hidden-info projection",
+    "legality generation"
+  ],
+  "verification": [
+    "node scripts/check-ai047-shadow-scoring-fixture-design.mjs",
+    "node scripts/check-ai048-shadow-only-action-ranking-report.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- shadow-scoring-diagnostics.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "git diff --check"
+  ],
+  "noEffectFlags": {
+    "planner": false,
+    "actionScore": false,
+    "planWeight": false,
+    "targetingAi": false,
+    "engine": false,
+    "legality": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivation": false,
+    "hiddenInfoLeak": false
+  }
+}

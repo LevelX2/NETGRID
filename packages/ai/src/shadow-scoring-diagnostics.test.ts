@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   DEFAULT_SHADOW_SCORING_FIXTURE_CORPUS,
+  buildShadowActionRankingReport,
   buildShadowScoringFixtureDesignReport,
 } from "./shadow-scoring-diagnostics";
 
@@ -74,5 +75,62 @@ describe("buildShadowScoringFixtureDesignReport", () => {
     expect(serialized).not.toContain("chooseSemanticAiAction");
     expect(serialized).not.toContain("selectedActionId");
     expect(serialized).not.toContain("rankedAlternatives");
+  });
+});
+
+describe("buildShadowActionRankingReport", () => {
+  it("creates report-only shadow ordering without semantic execution", () => {
+    const report = buildShadowActionRankingReport();
+    const serialized = JSON.stringify(report);
+
+    expect(report.scope).toBe("report_only_shadow_ordering");
+    expect(report.semanticExecutionAllowed).toBe(false);
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.summary).toEqual({
+      scenarioCount: 14,
+      candidateCount: 26,
+      scoreDraftAvailable: 15,
+      blockedByGap: 10,
+      blockedByGate: 1,
+      notScored: 0,
+    });
+    expect(serialized).not.toContain("chooseSemanticAiAction");
+    expect(serialized).not.toContain("selectedActionId");
+    expect(serialized).not.toContain("rankedAlternatives");
+  });
+
+  it("orders available report-only candidates before blocked gap candidates per scenario", () => {
+    const report = buildShadowActionRankingReport();
+    const accessScenario = report.scenarioReports.find(
+      (scenario) => scenario.scenarioId === "ai047-runner-access-decision",
+    );
+
+    expect(accessScenario?.orderedCandidates.map((candidate) => candidate.bucket)).toEqual([
+      "score_draft_available",
+      "score_draft_available",
+      "blocked_by_gap",
+    ]);
+    expect(accessScenario?.orderedCandidates[2]).toEqual(
+      expect.objectContaining({
+        candidateId: "ai047-runner-access-decision.trash_accessed_card",
+        unresolvedGaps: ["target_context_unavailable"],
+      }),
+    );
+  });
+
+  it("keeps hidden-info fixtures blocked by gate with explicit evidence", () => {
+    const report = buildShadowActionRankingReport();
+    const ambushScenario = report.scenarioReports.find(
+      (scenario) => scenario.scenarioId === "ai047-corp-ambush-access-punish",
+    );
+
+    expect(ambushScenario?.hardGateFailureCategories).toEqual(["hidden_info"]);
+    expect(ambushScenario?.orderedCandidates[0]).toEqual(
+      expect.objectContaining({
+        bucket: "blocked_by_gate",
+        hardGateFailures: ["hidden_info"],
+        reportOnlyOrderIndex: 0,
+      }),
+    );
   });
 });
