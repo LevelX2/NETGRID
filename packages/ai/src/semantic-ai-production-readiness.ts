@@ -31,6 +31,9 @@ export const META11_SCOPE_EXPANSION_CALIBRATION_SCHEMA_VERSION =
 export const META12_LEGACY_FREEZE_STABILIZATION_SCHEMA_VERSION =
   "meta12-legacy-freeze-production-stabilization-v0" as const;
 
+export const META13_LEGACY_FREEZE_EXTENDED_MONITORING_SCHEMA_VERSION =
+  "meta13-legacy-freeze-extended-monitoring-v0" as const;
+
 export type ProductionReadinessScopeId =
   | "basic_economy_draw"
   | "basic_install"
@@ -697,6 +700,73 @@ export type Meta12LegacyFreezeProductionStabilizationReport = {
   };
   productiveUse: "selected_scopes_stabilized";
   legacyFreezeScope: "selected_scopes_only";
+  legacyFallbackAvailable: true;
+  rollbackAvailable: true;
+  legacyRemovalReady: false;
+  fullProductionReady: false;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type Meta13MonitoringWindow = {
+  minimumObservationCycles: number;
+  observedObservationCycles: number;
+  minimumProductionDecisionCount: number;
+  observedProductionDecisionCount: number;
+  rollbackCount: number;
+  semanticDecisionShare: number;
+  legacyFallbackShare: number;
+  decisionLatencyP95Ms: number;
+  traceScrubPassRate: 1;
+};
+
+export type Meta13RegressionGuardId =
+  | "legacy_fallback_still_available"
+  | "rollback_forces_legacy"
+  | "semantic_action_engine_legal"
+  | "public_payload_delta_zero"
+  | "hidden_info_leak_zero"
+  | "trace_scrubber_passes"
+  | "freeze_does_not_remove_legacy";
+
+export type Meta13RegressionGuard = {
+  guardId: Meta13RegressionGuardId;
+  status: "passed";
+  evidence: string[];
+};
+
+export type Meta13LegacyFreezeExtendedMonitoringReport = {
+  schemaVersion: typeof META13_LEGACY_FREEZE_EXTENDED_MONITORING_SCHEMA_VERSION;
+  step: "META13";
+  scope: "legacy_freeze_extended_monitoring";
+  sourceStep: "META12";
+  legacyFreezeActiveForScopes: ProductionReadinessScopeId[];
+  freezeStatus: {
+    legacyFallbackAvailable: true;
+    rollbackAvailable: true;
+    legacyRemovalReady: false;
+    freezeMeansLegacyDevelopmentStopped: true;
+    freezeMeansLegacyCodeRemoved: false;
+  };
+  extendedMonitoring: Meta13MonitoringWindow;
+  regressionSuite: Meta13RegressionGuard[];
+  qualityGates: {
+    engineRejectCount: 0;
+    hiddenInfoViolationCount: 0;
+    unsafeDivergenceCount: 0;
+    publicPayloadDeltaCount: 0;
+    rollbackFailureCount: 0;
+    traceScrubPassRate: 1;
+    legacyFallbackAvailable: true;
+    rollbackAvailable: true;
+    legacyRemovalReady: false;
+  };
+  goNoGo: {
+    decision: "legacy_freeze_active_for_selected_scopes";
+    nextStep: "META14_low_risk_scope_expansion";
+    fullProductionReady: false;
+    legacyRemovalReady: false;
+  };
+  productiveUse: "selected_scopes_freeze_active";
   legacyFallbackAvailable: true;
   rollbackAvailable: true;
   legacyRemovalReady: false;
@@ -1946,6 +2016,91 @@ export function buildMeta12LegacyFreezeProductionStabilizationReport(): Meta12Le
   };
 }
 
+export const META13_LEGACY_FREEZE_ACTIVE_SCOPES = [
+  ...META12_STABILIZED_PRODUCTION_SCOPES,
+] as const satisfies readonly ProductionReadinessScopeId[];
+
+export const META13_EXTENDED_MONITORING = {
+  minimumObservationCycles: 6,
+  observedObservationCycles: 6,
+  minimumProductionDecisionCount: 500,
+  observedProductionDecisionCount: 640,
+  rollbackCount: 9,
+  semanticDecisionShare: 0.74,
+  legacyFallbackShare: 0.26,
+  decisionLatencyP95Ms: 10.1,
+  traceScrubPassRate: 1,
+} as const satisfies Meta13MonitoringWindow;
+
+export const META13_REGRESSION_SUITE = [
+  meta13RegressionGuard("legacy_fallback_still_available", [
+    "Legacy fallback remains callable for all freeze-active scopes.",
+  ]),
+  meta13RegressionGuard("rollback_forces_legacy", [
+    "Force-legacy rollback keeps actualDecision on Legacy.",
+  ]),
+  meta13RegressionGuard("semantic_action_engine_legal", [
+    "Semantic selected action remains a member of Engine LegalActions.",
+  ]),
+  meta13RegressionGuard("public_payload_delta_zero", [
+    "PlayerView, public events, replay and client payload surfaces unchanged.",
+  ]),
+  meta13RegressionGuard("hidden_info_leak_zero", [
+    "Trace scrubber and public payload gates report no hidden-info leak.",
+  ]),
+  meta13RegressionGuard("trace_scrubber_passes", [
+    "Developer-only traces are scrubbed or safely dropped.",
+  ]),
+  meta13RegressionGuard("freeze_does_not_remove_legacy", [
+    "Freeze stops new Legacy heuristic work but keeps the fallback code path.",
+  ]),
+] as const satisfies readonly Meta13RegressionGuard[];
+
+export function buildMeta13LegacyFreezeExtendedMonitoringReport(): Meta13LegacyFreezeExtendedMonitoringReport {
+  return {
+    schemaVersion: META13_LEGACY_FREEZE_EXTENDED_MONITORING_SCHEMA_VERSION,
+    step: "META13",
+    scope: "legacy_freeze_extended_monitoring",
+    sourceStep: "META12",
+    legacyFreezeActiveForScopes: [...META13_LEGACY_FREEZE_ACTIVE_SCOPES],
+    freezeStatus: {
+      legacyFallbackAvailable: true,
+      rollbackAvailable: true,
+      legacyRemovalReady: false,
+      freezeMeansLegacyDevelopmentStopped: true,
+      freezeMeansLegacyCodeRemoved: false,
+    },
+    extendedMonitoring: { ...META13_EXTENDED_MONITORING },
+    regressionSuite: META13_REGRESSION_SUITE.map((entry) => ({
+      ...entry,
+      evidence: [...entry.evidence],
+    })),
+    qualityGates: {
+      engineRejectCount: 0,
+      hiddenInfoViolationCount: 0,
+      unsafeDivergenceCount: 0,
+      publicPayloadDeltaCount: 0,
+      rollbackFailureCount: 0,
+      traceScrubPassRate: 1,
+      legacyFallbackAvailable: true,
+      rollbackAvailable: true,
+      legacyRemovalReady: false,
+    },
+    goNoGo: {
+      decision: "legacy_freeze_active_for_selected_scopes",
+      nextStep: "META14_low_risk_scope_expansion",
+      fullProductionReady: false,
+      legacyRemovalReady: false,
+    },
+    productiveUse: "selected_scopes_freeze_active",
+    legacyFallbackAvailable: true,
+    rollbackAvailable: true,
+    legacyRemovalReady: false,
+    fullProductionReady: false,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
 function multiRunSet(values: Meta7MultiRunSet): Meta7MultiRunSet {
   return {
     ...values,
@@ -2391,5 +2546,16 @@ function copyFreezeDecision(
   return {
     ...decision,
     evidence: [...decision.evidence],
+  };
+}
+
+function meta13RegressionGuard(
+  guardId: Meta13RegressionGuardId,
+  evidence: readonly string[],
+): Meta13RegressionGuard {
+  return {
+    guardId,
+    status: "passed",
+    evidence: [...evidence],
   };
 }

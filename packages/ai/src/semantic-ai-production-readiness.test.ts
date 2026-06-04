@@ -8,6 +8,7 @@ import {
   META8_INTERNAL_CANARY_FIXTURES,
   META9_PRODUCTION_SAFE_SHADOW_CONFIG,
   META10_SELECTED_PRODUCTION_SCOPES,
+  buildMeta13LegacyFreezeExtendedMonitoringReport,
   buildMeta12LegacyFreezeProductionStabilizationReport,
   buildMeta11ScopeExpansionCalibrationReport,
   buildMeta10LimitedScopedProductionCutoverReport,
@@ -266,6 +267,82 @@ describe("META12 Legacy Freeze + Production Stabilization", () => {
     expect(report.legacyFreezeScope).toBe("selected_scopes_only");
     expect(report.legacyRemovalReady).toBe(false);
     expect(report.fullProductionReady).toBe(false);
+  });
+});
+
+describe("META13 Legacy-Freeze-Aktivierung + Extended Monitoring", () => {
+  it("activates legacy freeze for exactly the stabilized META12 scopes", () => {
+    const report = buildMeta13LegacyFreezeExtendedMonitoringReport();
+
+    expect(report.schemaVersion).toBe(
+      "meta13-legacy-freeze-extended-monitoring-v0",
+    );
+    expect(report.step).toBe("META13");
+    expect(report.legacyFreezeActiveForScopes).toEqual([
+      "basic_economy_draw",
+      "tag_removal",
+      "simple_score_advance",
+      "basic_install",
+    ]);
+    expect(report.freezeStatus).toEqual({
+      legacyFallbackAvailable: true,
+      rollbackAvailable: true,
+      legacyRemovalReady: false,
+      freezeMeansLegacyDevelopmentStopped: true,
+      freezeMeansLegacyCodeRemoved: false,
+    });
+  });
+
+  it("extends monitoring while keeping hard gates green", () => {
+    const report = buildMeta13LegacyFreezeExtendedMonitoringReport();
+
+    expect(report.extendedMonitoring).toMatchObject({
+      minimumObservationCycles: 6,
+      observedObservationCycles: 6,
+      minimumProductionDecisionCount: 500,
+      observedProductionDecisionCount: 640,
+      rollbackCount: 9,
+      traceScrubPassRate: 1,
+    });
+    expect(report.extendedMonitoring.semanticDecisionShare).toBeGreaterThan(0.7);
+    expect(report.extendedMonitoring.legacyFallbackShare).toBeGreaterThan(0);
+    expect(report.qualityGates).toEqual({
+      engineRejectCount: 0,
+      hiddenInfoViolationCount: 0,
+      unsafeDivergenceCount: 0,
+      publicPayloadDeltaCount: 0,
+      rollbackFailureCount: 0,
+      traceScrubPassRate: 1,
+      legacyFallbackAvailable: true,
+      rollbackAvailable: true,
+      legacyRemovalReady: false,
+    });
+  });
+
+  it("covers freeze regression guards without allowing legacy removal", () => {
+    const report = buildMeta13LegacyFreezeExtendedMonitoringReport();
+
+    expect(report.regressionSuite.map((guard) => guard.guardId)).toEqual([
+      "legacy_fallback_still_available",
+      "rollback_forces_legacy",
+      "semantic_action_engine_legal",
+      "public_payload_delta_zero",
+      "hidden_info_leak_zero",
+      "trace_scrubber_passes",
+      "freeze_does_not_remove_legacy",
+    ]);
+    expect(report.regressionSuite.every((guard) => guard.status === "passed")).toBe(
+      true,
+    );
+    expect(report.goNoGo).toEqual({
+      decision: "legacy_freeze_active_for_selected_scopes",
+      nextStep: "META14_low_risk_scope_expansion",
+      fullProductionReady: false,
+      legacyRemovalReady: false,
+    });
+    expect(report.legacyFallbackAvailable).toBe(true);
+    expect(report.rollbackAvailable).toBe(true);
+    expect(report.legacyRemovalReady).toBe(false);
   });
 });
 

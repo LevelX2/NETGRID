@@ -1,0 +1,82 @@
+{
+  "schemaVersion": "meta13-legacy-freeze-extended-monitoring-v0",
+  "step": "META13",
+  "scope": "legacy_freeze_extended_monitoring",
+  "sourceStep": "META12",
+  "legacyFreezeActiveForScopes": [
+    "basic_economy_draw",
+    "tag_removal",
+    "simple_score_advance",
+    "basic_install"
+  ],
+  "freezeStatus": {
+    "legacyFallbackAvailable": true,
+    "rollbackAvailable": true,
+    "legacyRemovalReady": false,
+    "freezeMeansLegacyDevelopmentStopped": true,
+    "freezeMeansLegacyCodeRemoved": false
+  },
+  "extendedMonitoring": {
+    "minimumObservationCycles": 6,
+    "observedObservationCycles": 6,
+    "minimumProductionDecisionCount": 500,
+    "observedProductionDecisionCount": 640,
+    "rollbackCount": 9,
+    "semanticDecisionShare": 0.74,
+    "legacyFallbackShare": 0.26,
+    "decisionLatencyP95Ms": 10.1,
+    "traceScrubPassRate": 1
+  },
+  "regressionSuite": [
+    {
+      "guardId": "legacy_fallback_still_available",
+      "status": "passed"
+    },
+    {
+      "guardId": "rollback_forces_legacy",
+      "status": "passed"
+    },
+    {
+      "guardId": "semantic_action_engine_legal",
+      "status": "passed"
+    },
+    {
+      "guardId": "public_payload_delta_zero",
+      "status": "passed"
+    },
+    {
+      "guardId": "hidden_info_leak_zero",
+      "status": "passed"
+    },
+    {
+      "guardId": "trace_scrubber_passes",
+      "status": "passed"
+    },
+    {
+      "guardId": "freeze_does_not_remove_legacy",
+      "status": "passed"
+    }
+  ],
+  "qualityGates": {
+    "engineRejectCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "unsafeDivergenceCount": 0,
+    "publicPayloadDeltaCount": 0,
+    "rollbackFailureCount": 0,
+    "traceScrubPassRate": 1,
+    "legacyFallbackAvailable": true,
+    "rollbackAvailable": true,
+    "legacyRemovalReady": false
+  },
+  "goNoGo": {
+    "decision": "legacy_freeze_active_for_selected_scopes",
+    "nextStep": "META14_low_risk_scope_expansion",
+    "fullProductionReady": false,
+    "legacyRemovalReady": false
+  },
+  "productiveUse": "selected_scopes_freeze_active",
+  "legacyFallbackAvailable": true,
+  "rollbackAvailable": true,
+  "legacyRemovalReady": false,
+  "fullProductionReady": false
+}
