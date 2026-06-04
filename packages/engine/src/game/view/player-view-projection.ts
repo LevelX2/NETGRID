@@ -13,6 +13,7 @@ import {
   counterDisplaysField,
   poxCounterDisplaysForServer,
   purgeableRunnerVirusCounterDisplaysForServer,
+  spyCounterDisplaysForServer,
   visibleCorpArchives,
   visibleCorpCard,
   visibleCorpIdentityCard,
@@ -53,6 +54,7 @@ export function buildPlayerViewProjection(
       ...counterDisplaysField([
         ...(poxCounterDisplaysForServer(state, server.id) ?? []),
         ...(purgeableRunnerVirusCounterDisplaysForServer(state, server.id) ?? []),
+        ...(spyCounterDisplaysForServer(state, server.id) ?? []),
       ]),
     };
   });

@@ -2599,16 +2599,17 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     state.runner.credits = 10;
     state.corp.credits = 10;
     const iSpyId = installRunnerProgramForTest(state, "onr_v1_032_i-spy");
-    putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+    const rootId = putCorpRootInRemote(state, "simple_economy_asset");
+    const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
 
     state.phase = "run";
     state.timingPoint = "access.resolve_card";
     state.activeSide = "runner";
     state.run = {
       runId: "p359_i_spy_run",
-      attackedServerId: "rd",
+      attackedServerId: "remote_1",
       phase: "access",
-      position: { kind: "server", serverId: "rd" },
+      position: { kind: "server", serverId: "remote_1" },
       brokenSubroutineIndexes: [],
       resolvedSubroutineIndexes: [],
       successful: true,
@@ -2621,9 +2622,30 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         action.payload?.runnerUtilityAbility === "i_spy_put_spy_counter" &&
         action.payload?.cardId === iSpyId,
     );
-    expect(state.spyCountersByServer?.rd).toBe(1);
+    expect(state.spyCountersByServer?.remote_1).toBe(1);
     expect(state.runner.heap).toContain(iSpyId);
-    expect(getPlayerView(state, "runner").servers.find((server) => server.id === "rd")?.ice[0]?.known).toBe(true);
+    const runnerSpyServerView = getPlayerView(state, "runner").servers.find(
+      (server) => server.id === "remote_1",
+    );
+    expect(runnerSpyServerView?.counterDisplays).toContainEqual({
+      id: "spy",
+      amount: 1,
+      displayKind: "generic_counter",
+      label: "Spy-Counter",
+      ariaLabel: "1 Spy-Counter auf diesem Server",
+      counterType: "spy",
+      usageHint: "status_marker",
+    });
+    expect(runnerSpyServerView?.ice.find((card) => card.instanceId === iceId)).toMatchObject({
+      known: true,
+      rezzed: false,
+      title: "Simple Barrier ICE",
+    });
+    expect(runnerSpyServerView?.root.find((card) => card.instanceId === rootId)).toMatchObject({
+      known: true,
+      rezzed: false,
+      title: "Simple Economy Asset",
+    });
 
     delete state.run;
     state.phase = "corp_action_phase";
@@ -2636,9 +2658,25 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       (action) =>
         action.type === "trigger_ability" &&
         action.payload?.corpAbility === "remove_spy_counter" &&
-        action.payload?.serverId === "rd",
+        action.payload?.serverId === "remote_1",
     );
-    expect(state.spyCountersByServer?.rd).toBe(0);
+    expect(state.spyCountersByServer?.remote_1).toBe(0);
+    const runnerAfterRemovalServerView = getPlayerView(state, "runner").servers.find(
+      (server) => server.id === "remote_1",
+    );
+    expect(runnerAfterRemovalServerView?.counterDisplays).toBeUndefined();
+    expect(
+      runnerAfterRemovalServerView?.ice.find((card) => card.instanceId !== undefined),
+    ).toMatchObject({
+      known: false,
+      rezzed: false,
+    });
+    expect(
+      runnerAfterRemovalServerView?.root.find((card) => card.instanceId !== undefined),
+    ).toMatchObject({
+      known: false,
+      rezzed: false,
+    });
   });
 
   it("rolls Quest for Cattekin at Runner start through replay-safe random", () => {

@@ -586,6 +586,25 @@ export function poxCounterDisplaysForServer(
   ];
 }
 
+export function spyCounterDisplaysForServer(
+  state: GameState,
+  serverId: Exclude<ServerId, "new_remote">,
+): VisibleCard["counterDisplays"] {
+  const amount = spyCountersForServer(state, serverId);
+  if (amount <= 0) return undefined;
+  return [
+    {
+      id: "spy",
+      amount,
+      displayKind: "generic_counter",
+      label: "Spy-Counter",
+      ariaLabel: `${amount} Spy-Counter auf diesem Server`,
+      counterType: "spy",
+      usageHint: "status_marker",
+    },
+  ];
+}
+
 export function purgeableRunnerVirusCounterDisplaysForServer(
   state: GameState,
   serverId: Exclude<ServerId, "new_remote">,

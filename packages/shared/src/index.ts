@@ -158,6 +158,7 @@ export type CounterType =
   | "socket_hq"
   | "socket_rd"
   | "pipe"
+  | "spy"
   | "doppelganger_antibody"
   | "pattel_antibody"
   | "cerberus"

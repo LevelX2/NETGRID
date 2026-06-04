@@ -2977,6 +2977,7 @@ function counterLabel(counterType: unknown): string {
   if (counterType === "tax") return "Tax-Counter";
   if (counterType === "vienna") return "Vienna-Counter";
   if (counterType === "pipe") return "Pipe-Counter";
+  if (counterType === "spy") return "Spy-Counter";
   if (isSocketCounterType(counterType)) return "Socket-Counter";
   if (counterType === "recurring_credit") return "Recurring Credits";
   if (counterType === "bit") return "Bit";

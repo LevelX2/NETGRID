@@ -115,6 +115,29 @@ describe("V1.0.5 action board UI helpers", () => {
     expect(actionButtonLabel(bonusRun)).toBe("Bonus-Run auf HQ");
   });
 
+  it("keeps Corp Spy-counter removal visible in the main action panel", () => {
+    const removeSpyCounter = legalAction(
+      "corp",
+      "trigger_ability",
+      "game_rule",
+      "Spy-Counter in Remote 1 entfernen",
+      {
+        serverId: "remote_1",
+        corpAbility: "remove_spy_counter",
+        counterType: "spy",
+        removedCounterAmount: 1,
+      },
+    );
+
+    const split = splitLegalActions([removeSpyCounter]);
+
+    expect(split.primaryActions).toEqual([removeSpyCounter]);
+    expect(split.contextualActions).toEqual([]);
+    expect(actionButtonLabel(removeSpyCounter)).toBe(
+      "Spy-Counter in Remote 1 entfernen",
+    );
+  });
+
   it("keeps Olivia Salazar reduced rez source and paid cost visible in the button label", () => {
     const action = legalAction(
       "corp",
@@ -476,6 +499,12 @@ describe("V1.0.5 action board UI helpers", () => {
       trashCost: 4
     };
     const rezzedNode = card("node_1", "Simple Economy Asset", "asset", true);
+    const exposedUnrezzedUpgrade = card(
+      "exposed_upgrade",
+      "Simple Upgrade",
+      "upgrade",
+      false,
+    );
     const leakedUpgradeB: VisibleCard = {
       instanceId: "upgrade_b",
       known: false,
@@ -486,9 +515,19 @@ describe("V1.0.5 action board UI helpers", () => {
       trashCost: 4
     };
 
-    const runnerCards = corpRootCardsForDisplay("runner", "remote_1", [leakedUpgradeA, rezzedNode, leakedUpgradeB]);
+    const runnerCards = corpRootCardsForDisplay("runner", "remote_1", [
+      leakedUpgradeA,
+      rezzedNode,
+      exposedUnrezzedUpgrade,
+      leakedUpgradeB,
+    ]);
 
-    expect(runnerCards.map((entry) => entry.instanceId)).toEqual(["upgrade_a", "node_1", "upgrade_b"]);
+    expect(runnerCards.map((entry) => entry.instanceId)).toEqual([
+      "upgrade_a",
+      "node_1",
+      "exposed_upgrade",
+      "upgrade_b",
+    ]);
     expect(runnerCards[1]).toMatchObject({
       known: true,
       title: "Simple Economy Asset",
@@ -496,7 +535,15 @@ describe("V1.0.5 action board UI helpers", () => {
       type: "asset",
       rezzed: true
     });
-    for (const hiddenCard of [runnerCards[0], runnerCards[2]]) {
+    expect(runnerCards[2]).toMatchObject({
+      known: true,
+      title: "Simple Upgrade",
+      definitionId: "exposed_upgrade",
+      type: "upgrade",
+      rezzed: false,
+    });
+    expect(corpInstalledCardState(runnerCards[2]!)).toBe("unrezzed");
+    for (const hiddenCard of [runnerCards[0], runnerCards[3]]) {
       expect(hiddenCard).toMatchObject({ known: false, rezzed: false });
       expect(hiddenCard).not.toHaveProperty("title");
       expect(hiddenCard).not.toHaveProperty("definitionId");
@@ -1448,6 +1495,15 @@ describe("V1.0.6 resource and card-display helpers", () => {
           usageHint: "status_marker"
         },
         {
+          id: "spy",
+          amount: 1,
+          displayKind: "generic_counter",
+          label: "Spy-Counter",
+          ariaLabel: "1 Spy-Counter auf diesem Server",
+          counterType: "spy",
+          usageHint: "status_marker"
+        },
+        {
           id: "advancement",
           amount: 3,
           displayKind: "advancement",
@@ -1479,6 +1535,13 @@ describe("V1.0.6 resource and card-display helpers", () => {
         label: "Pox",
         ariaLabel: "2 Pox-Counter auf diesem Server",
         tooltip: "Pox: Je 2 Pox-Counter in diesem Fort erhöhen die Korp-Installationskosten in oder auf diesem Fort um 1 Credit. Purgefähig: Die Korp kann alle Runner-Virus-Counter entfernen; danach muss sie ihre nächsten 3 Aktionen aussetzen."
+      },
+      {
+        key: "spy",
+        amount: 1,
+        label: "Spy",
+        ariaLabel: "1 Spy-Counter auf diesem Server",
+        tooltip: "I Spy: Solange der Spy-Counter auf diesem Fort liegt, bleiben alle installierten Korp-Karten in oder auf diesem Fort für den Runner sichtbar. Die Korp kann 1 Aktion nehmen und 4 Credits zahlen, um 1 Spy-Counter zu entfernen."
       }
     ]);
   });

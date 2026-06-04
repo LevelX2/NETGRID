@@ -286,6 +286,8 @@ export function counterDisplayTooltipText(display: NonNullable<VisibleCard["coun
       return `Viral Pipeline: Socket-Counter auf R&D. Sobald je 1 Socket auf Archives, HQ und R&D liegt, werden diese drei Socket-Counter in 1 Pipe-Counter umgewandelt. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
     case "pipe":
       return `Viral Pipeline: Zu Beginn jedes Korp-Zugs muss die Korp pro Pipe-Counter 1 Aktion aussetzen. ${PURGEABLE_RUNNER_VIRUS_HELP}`;
+    case "spy":
+      return "I Spy: Solange der Spy-Counter auf diesem Fort liegt, bleiben alle installierten Korp-Karten in oder auf diesem Fort für den Runner sichtbar. Die Korp kann 1 Aktion nehmen und 4 Credits zahlen, um 1 Spy-Counter zu entfernen.";
     case "doppelganger_antibody":
       return `Doppelganger Antibody: Zu Beginn jedes Runner-Zugs verliert der Runner pro Doppelganger-Counter 1 Credit. Der Runner kann 1 Aktion nehmen und 4 Credits zahlen, um 1 Doppelganger-Counter zu entfernen.`;
     case "pattel_antibody":
@@ -466,6 +468,7 @@ export function isContextualLegalAction(action: LegalAction): boolean {
   if (action.type === "gain_credit" && cardRefsForAction(action).length > 0 && action.source !== "basic_action" && action.source !== "game_rule") return true;
   if ((action.type === "pump_breaker" || action.type === "break_subroutine") && cardRefsForAction(action).length > 0) return true;
   if (isApproachIceExposeAction(action)) return false;
+  if (isRemoveSpyCounterAction(action)) return false;
   if (action.type === "trigger_ability" && cardRefsForAction(action).length > 0) return true;
   if (isPriorityAction(action)) return false;
   return cardRefsForAction(action).length > 0 || objectBoundAction(action);
@@ -1678,6 +1681,13 @@ function isApproachIceExposeAction(action: Partial<Pick<LegalAction, "type" | "p
     action.type === "trigger_ability" &&
     (typeof action.payload?.approachIceExposeDecision === "string" ||
       typeof action.payload?.approachIceExposeViewDecision === "string")
+  );
+}
+
+function isRemoveSpyCounterAction(action: Partial<Pick<LegalAction, "type" | "payload">>): boolean {
+  return (
+    action.type === "trigger_ability" &&
+    action.payload?.corpAbility === "remove_spy_counter"
   );
 }
 
