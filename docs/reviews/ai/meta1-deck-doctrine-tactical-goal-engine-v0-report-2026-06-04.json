@@ -1,0 +1,71 @@
+{
+  "schemaVersion": "meta1-deck-doctrine-tactical-goal-engine-v0",
+  "step": "META1",
+  "scope": "deck_doctrine_tactical_goal_engine_v0",
+  "inputBaseline": {
+    "previousReadiness": "broad_shadow_ready",
+    "sourceProcess": "AI061-SR-AI068-SR",
+    "cutoverAllowed": false
+  },
+  "schemaCoverage": {
+    "deckStrategicProfileSchema": true,
+    "deckDoctrineSchema": true,
+    "tacticalGoalStateSchema": true,
+    "neutralDoctrineRule": true,
+    "boardstatePivotRules": 8,
+    "runnerGoalFamilies": 13,
+    "corpGoalFamilies": 11
+  },
+  "sampleProfiles": [
+    {
+      "profileId": "meta1-neutral-runner-profile",
+      "side": "runner",
+      "sourceDeckId": "neutral_runner_fixture",
+      "primaryStrategyCount": 0,
+      "secondaryStrategyCount": 0,
+      "supportPackageCount": 2,
+      "neutralDoctrine": true,
+      "warnings": ["NeutralDoctrine: support packages were not promoted to strategy."]
+    },
+    {
+      "profileId": "meta1-rnd-pressure-runner-profile",
+      "side": "runner",
+      "sourceDeckId": "rnd_pressure_runner_fixture",
+      "primaryStrategyCount": 1,
+      "secondaryStrategyCount": 0,
+      "supportPackageCount": 2,
+      "neutralDoctrine": false
+    },
+    {
+      "profileId": "meta1-tag-punish-corp-profile",
+      "side": "corp",
+      "sourceDeckId": "tag_punish_corp_fixture",
+      "primaryStrategyCount": 1,
+      "secondaryStrategyCount": 0,
+      "supportPackageCount": 2,
+      "neutralDoctrine": false
+    }
+  ],
+  "sampleDoctrineCount": 3,
+  "tacticalGoalStateCount": 14,
+  "boardstateOverrideExampleCount": 4,
+  "gates": {
+    "noProductiveActionSelection": true,
+    "noPlannerWeights": true,
+    "noRuntimeConsumer": true,
+    "noHiddenInfoProjection": true,
+    "neutralDoctrineDoesNotInventStrategy": true,
+    "boardstateMayOverrideDoctrine": true
+  },
+  "hardGates": {
+    "illegalSemanticDecisionCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "runtimeConsumerCount": 0,
+    "actionSelectionCount": 0,
+    "plannerWeightChangeCount": 0
+  },
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "runtimeConsumerStatus": "none",
+  "noRuntimeEffect": true
+}
