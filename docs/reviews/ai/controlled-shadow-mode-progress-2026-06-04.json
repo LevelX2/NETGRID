@@ -1,0 +1,49 @@
+{
+  "processId": "controlled-shadow-mode",
+  "date": "2026-06-04",
+  "status": "in_progress",
+  "currentStep": "AI051",
+  "completedSteps": [],
+  "blocked": false,
+  "lastGreenCommit": null,
+  "nextStep": "AI052",
+  "branch": "codex/ai051-ai060-controlled-shadow-mode",
+  "worktree": "C:\\Projekte\\NETGRID_AI051_AI060_CONTROLLED_SHADOW_MODE",
+  "integrationWorkspace": "C:\\Projekte\\NETGRID",
+  "baselineCommit": "8cac7f2e2f3ec4eb036b4be061e2f15dcef30d23",
+  "actualDecisionContract": "legacyDecision",
+  "broaderShadowSimulationReadiness": "ready_with_constraints",
+  "productiveCutoverReadiness": "blocked",
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "preflightVerification": [
+    {
+      "command": "node scripts/check-ai047-shadow-scoring-fixture-design.mjs",
+      "status": "passed"
+    },
+    {
+      "command": "node scripts/check-ai048-shadow-only-action-ranking-report.mjs",
+      "status": "passed"
+    },
+    {
+      "command": "node scripts/check-ai049-legacy-vs-semantic-comparison-harness.mjs",
+      "status": "passed"
+    },
+    {
+      "command": "node scripts/check-ai050-hard-gate-rollback-readiness-review.mjs",
+      "status": "passed"
+    },
+    {
+      "command": "node scripts/check-ai047-050-shadow-scoring-final-report.mjs",
+      "status": "passed"
+    }
+  ]
+}
