@@ -11,6 +11,7 @@ import {
   buildShadowScenarioCorpusReport,
   buildShadowModeTraceContractReport,
   buildRuntimeShadowHarnessReport,
+  buildShadowEvaluationBatchReport,
   DEFAULT_SEMANTIC_AI_SHADOW_MODE_CONFIG,
   runRuntimeShadowHarness,
   type ShadowDecisionTrace,
@@ -555,6 +556,61 @@ describe("buildRuntimeShadowHarnessReport", () => {
     );
     expect(report.runtimeConsumerStatus).toBe("none");
     expect(report.publicPayloadChangesAllowed).toBe(false);
+    expect(report.noRuntimeEffect).toBe(true);
+  });
+});
+
+describe("buildShadowEvaluationBatchReport", () => {
+  it("runs the diagnostic harness over every fixture with no hard gate failures", () => {
+    const report = buildShadowEvaluationBatchReport();
+
+    expect(report.schemaVersion).toBe("shadow-evaluation-batch-v1");
+    expect(report.taskId).toBe("AI058");
+    expect(report.scenarioCount).toBe(33);
+    expect(report.decisionPointCount).toBe(33);
+    expect(report.scenarioResults).toHaveLength(33);
+    expect(report.hardGateFailures).toEqual([]);
+    expect(report.knownBadDecisions).toEqual([]);
+    expect(report.actualDecisionOverrideCount).toBe(0);
+    expect(report.runtimeEffectCount).toBe(0);
+  });
+
+  it("proves every batch actualDecision remains the legacy decision", () => {
+    const report = buildShadowEvaluationBatchReport();
+
+    expect(
+      report.scenarioResults.every(
+        (result) =>
+          result.actualDecisionEqualsLegacyDecision === true &&
+          result.actualDecisionActionId === result.legacyDecisionActionId,
+      ),
+    ).toBe(true);
+  });
+
+  it("summarizes top semantic gaps and recommended followups", () => {
+    const report = buildShadowEvaluationBatchReport();
+
+    expect(report.topSemanticGaps).toEqual([
+      { gapId: "target_context_unavailable", count: 13 },
+      { gapId: "card_semantics_unavailable", count: 7 },
+      { gapId: "ability_unresolved", count: 6 },
+      { gapId: "cost_unknown", count: 4 },
+      { gapId: "hidden_info_blocked", count: 3 },
+    ]);
+    expect(report.recommendedFollowups).toEqual(
+      expect.arrayContaining([
+        "Project side-safe TargetContext for target-sensitive LegalActions.",
+        "Keep hidden-info boundary fixtures blocked and review only their visibility policy.",
+      ]),
+    );
+  });
+
+  it("keeps the batch report diagnostic only", () => {
+    const report = buildShadowEvaluationBatchReport();
+
+    expect(report.runtimeConsumerStatus).toBe("none");
+    expect(report.semanticExecutionAllowed).toBe(false);
+    expect(report.productiveUseAllowed).toBe(false);
     expect(report.noRuntimeEffect).toBe(true);
   });
 });

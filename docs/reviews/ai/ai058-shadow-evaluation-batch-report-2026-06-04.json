@@ -1,0 +1,68 @@
+{
+  "taskId": "AI058",
+  "title": "Shadow Evaluation Batch Report",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai051-ai060-controlled-shadow-mode",
+  "schemaVersion": "shadow-evaluation-batch-v1",
+  "scenarioCount": 33,
+  "decisionPointCount": 33,
+  "legacySemanticComparison": {
+    "comparisonCount": 33,
+    "sameAction": 8,
+    "semanticBlocked": 25,
+    "comparisonUnavailable": 0
+  },
+  "hardGateFailures": [],
+  "deltaTriage": {
+    "triageEntryCount": 41,
+    "humanReviewItemCount": 33
+  },
+  "topSemanticGaps": [
+    {"gapId": "target_context_unavailable", "count": 13},
+    {"gapId": "card_semantics_unavailable", "count": 7},
+    {"gapId": "ability_unresolved", "count": 6},
+    {"gapId": "cost_unknown", "count": 4},
+    {"gapId": "hidden_info_blocked", "count": 3}
+  ],
+  "topPotentialImprovements": [],
+  "knownBadDecisions": [],
+  "recommendedFollowups": [
+    "Project side-safe TargetContext for target-sensitive LegalActions.",
+    "Bind multi-ability card LegalActions to explicit side-safe ability ids.",
+    "Add side-safe card semantic profiles before treating card-sourced strategy as available.",
+    "Normalize cost and timing evidence for X-value, trace and access trash decisions.",
+    "Keep hidden-info boundary fixtures blocked and review only their visibility policy."
+  ],
+  "actualDecisionOverrideCount": 0,
+  "runtimeEffectCount": 0,
+  "runtimeConsumerStatus": "none",
+  "semanticExecutionAllowed": false,
+  "productiveUseAllowed": false,
+  "noRuntimeEffect": true,
+  "runtimeFilesTouched": [],
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "verification": [
+    "node scripts/check-ai058-shadow-evaluation-batch-report.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- controlled-shadow-mode.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "node scripts/check-ai057-runtime-shadow-harness.mjs",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "doneGate": {
+    "allFixturesRun": true,
+    "reportComplete": true,
+    "hardGateErrors": 0,
+    "noRuntimeEffect": true
+  }
+}

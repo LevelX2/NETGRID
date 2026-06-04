@@ -29,6 +29,9 @@ export const SHADOW_METRICS_GATES_SCHEMA_VERSION =
 export const RUNTIME_SHADOW_HARNESS_SCHEMA_VERSION =
   "runtime-shadow-harness-v1" as const;
 
+export const SHADOW_EVALUATION_BATCH_SCHEMA_VERSION =
+  "shadow-evaluation-batch-v1" as const;
+
 export const CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS = {
   actualDecisionOverride: false,
   productiveScoring: false,
@@ -532,6 +535,50 @@ export type RuntimeShadowHarnessReport = {
   productiveUseAllowed: false;
   semanticExecutionAllowed: false;
   publicPayloadChangesAllowed: false;
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type ShadowEvaluationBatchScenarioResult = {
+  scenarioId: string;
+  actorSide: ShadowActorSide;
+  legacyDecisionActionId: string;
+  actualDecisionActionId: string;
+  actualDecisionEqualsLegacyDecision: true;
+  semanticScoreStatus: SemanticShadowScoreStatus;
+  comparisonAgreement: LegacySemanticAgreement;
+  triageClasses: DeviationTriageClass[];
+  hardGateFailures: [];
+};
+
+export type ShadowSemanticGapSummary = {
+  gapId:
+    | "target_context_unavailable"
+    | "ability_unresolved"
+    | "card_semantics_unavailable"
+    | "cost_unknown"
+    | "hidden_info_blocked";
+  count: number;
+};
+
+export type ShadowEvaluationBatchReport = {
+  schemaVersion: typeof SHADOW_EVALUATION_BATCH_SCHEMA_VERSION;
+  taskId: "AI058";
+  scenarioCount: number;
+  decisionPointCount: number;
+  legacySemanticComparison: LegacySemanticComparisonSummary;
+  hardGateFailures: [];
+  deltaTriage: DeviationTriageSummary;
+  topSemanticGaps: ShadowSemanticGapSummary[];
+  topPotentialImprovements: [];
+  knownBadDecisions: [];
+  recommendedFollowups: string[];
+  scenarioResults: ShadowEvaluationBatchScenarioResult[];
+  actualDecisionOverrideCount: 0;
+  runtimeEffectCount: 0;
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "none";
   noRuntimeEffect: true;
   noEffectFlags: ShadowModeNoEffectFlags;
 };
@@ -1124,6 +1171,44 @@ export function buildRuntimeShadowHarnessReport(): RuntimeShadowHarnessReport {
     productiveUseAllowed: false,
     semanticExecutionAllowed: false,
     publicPayloadChangesAllowed: false,
+    noRuntimeEffect: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildShadowEvaluationBatchReport(
+  fixtures: readonly ShadowScenarioFixture[] = DEFAULT_SHADOW_SCENARIO_CORPUS,
+): ShadowEvaluationBatchReport {
+  const comparisonReport = buildLegacySemanticComparisonReport(fixtures);
+  const triageReport = buildDeviationTriageReport(comparisonReport);
+  const scenarioResults = fixtures.map((fixture) =>
+    evaluateShadowBatchScenario(fixture, comparisonReport, triageReport),
+  );
+
+  return {
+    schemaVersion: SHADOW_EVALUATION_BATCH_SCHEMA_VERSION,
+    taskId: "AI058",
+    scenarioCount: fixtures.length,
+    decisionPointCount: fixtures.length,
+    legacySemanticComparison: comparisonReport.summary,
+    hardGateFailures: [],
+    deltaTriage: triageReport.summary,
+    topSemanticGaps: topSemanticGapsFromTriage(triageReport),
+    topPotentialImprovements: [],
+    knownBadDecisions: [],
+    recommendedFollowups: [
+      "Project side-safe TargetContext for target-sensitive LegalActions.",
+      "Bind multi-ability card LegalActions to explicit side-safe ability ids.",
+      "Add side-safe card semantic profiles before treating card-sourced strategy as available.",
+      "Normalize cost and timing evidence for X-value, trace and access trash decisions.",
+      "Keep hidden-info boundary fixtures blocked and review only their visibility policy.",
+    ],
+    scenarioResults,
+    actualDecisionOverrideCount: 0,
+    runtimeEffectCount: 0,
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "none",
     noRuntimeEffect: true,
     noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
   };
@@ -2058,4 +2143,81 @@ function tacticalGoalFamilyForTrace(goalId: string): TacticalGoalFamily {
   if (goalId.startsWith("corp_central")) return "corp_central_defense";
   if (goalId.startsWith("corp_ice")) return "corp_ice_tax";
   return "corp_tag_trace_punish";
+}
+
+function evaluateShadowBatchScenario(
+  fixture: ShadowScenarioFixture,
+  comparisonReport: LegacySemanticComparisonReport,
+  triageReport: DeviationTriageReport,
+): ShadowEvaluationBatchScenarioResult {
+  const legacyDecision = syntheticLegacyDecisionForFixture(fixture);
+  const harnessResult = runRuntimeShadowHarness({
+    legacyDecision,
+    fixture,
+    stateVersion: 1,
+    config: {
+      ...DEFAULT_SEMANTIC_AI_SHADOW_MODE_CONFIG,
+      semanticAiShadowModeEnabled: true,
+    },
+  });
+  const comparison = comparisonReport.comparisons.find(
+    (entry) => entry.scenarioId === fixture.scenarioId,
+  );
+  const triageClasses = [
+    ...new Set(
+      triageReport.triageEntries
+        .filter((entry) => entry.scenarioId === fixture.scenarioId)
+        .map((entry) => entry.triageClass),
+    ),
+  ];
+
+  return {
+    scenarioId: fixture.scenarioId,
+    actorSide: fixture.side,
+    legacyDecisionActionId: legacyDecision.selectedActionId,
+    actualDecisionActionId: harnessResult.actualDecision.selectedActionId,
+    actualDecisionEqualsLegacyDecision: true,
+    semanticScoreStatus:
+      harnessResult.semanticShadowDecision?.scoreStatus ?? "no_candidate",
+    comparisonAgreement: comparison?.agreement ?? "comparison_unavailable",
+    triageClasses,
+    hardGateFailures: [],
+  };
+}
+
+function syntheticLegacyDecisionForFixture(
+  fixture: ShadowScenarioFixture,
+): RuntimeShadowLegacyDecisionLike {
+  const actionType = fixture.expectedLegalActionTypes[0] ?? "unknown";
+  return {
+    selectedActionId: `${fixture.scenarioId}.${actionType}.1`,
+    selectedActionType: actionType,
+  };
+}
+
+function topSemanticGapsFromTriage(
+  triageReport: DeviationTriageReport,
+): ShadowSemanticGapSummary[] {
+  return [
+    {
+      gapId: "target_context_unavailable",
+      count: triageReport.summary.missingTargetContext,
+    },
+    {
+      gapId: "card_semantics_unavailable",
+      count: triageReport.summary.needsCardSemanticsReview,
+    },
+    {
+      gapId: "ability_unresolved",
+      count: triageReport.summary.missingAbilityBinding,
+    },
+    {
+      gapId: "cost_unknown",
+      count: triageReport.summary.missingCostOrTiming,
+    },
+    {
+      gapId: "hidden_info_blocked",
+      count: triageReport.summary.hiddenInfoBlocker,
+    },
+  ];
 }
