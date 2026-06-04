@@ -126,8 +126,12 @@ for (const requiredText of [
 }
 
 if (!progress.completedSteps.includes("META5")) fail("progress missing META5");
-if (progress.currentStep !== "META5_done") {
-  fail("progress currentStep must be META5_done");
+if (
+  !["META5_done", "integration_preflight", "merged_to_main", "worktree_removed", "complete"].includes(
+    progress.currentStep,
+  )
+) {
+  fail("progress currentStep must be META5_done or a later integration state");
 }
 
 const allowedChangedFiles = [
