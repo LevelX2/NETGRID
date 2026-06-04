@@ -1,0 +1,75 @@
+{
+  "step": "AI043",
+  "title": "Diagnostic Doctrine/Goal Bridge Handoff",
+  "date": "2026-06-04",
+  "status": "done",
+  "runtimeConsumerStatus": "none",
+  "handoffScope": "diagnostic_only",
+  "fieldReadinessMatrix": [
+    {
+      "nextField": "DeckDoctrine v2",
+      "readyCandidateFields": ["sourceCardId", "cardContextSignals", "strategySupport", "conditions", "risks", "constraints"],
+      "missingOrPartialFields": ["abilityId for unresolved multi-ability cards", "cardSemanticProfilesByCardId production source"],
+      "allowedNextUse": "readiness report only"
+    },
+    {
+      "nextField": "TacticalGoal generation",
+      "readyCandidateFields": ["semanticActionType", "actionTacticSignals", "targetContext", "costProfile", "timingProfile", "hardGates"],
+      "missingOrPartialFields": ["full TargetProfile matching", "goal schema", "goal lifecycle gates"],
+      "allowedNextUse": "shadow-only fixture design"
+    },
+    {
+      "nextField": "Action-to-goal matching",
+      "readyCandidateFields": ["actionId", "actionType", "primaryProjectionStatus", "projectionIssues", "evidence"],
+      "missingOrPartialFields": ["goal ids", "match explanations", "no production consumer"],
+      "allowedNextUse": "diagnostic mapping table only"
+    },
+    {
+      "nextField": "Shadow-only fixtures",
+      "readyCandidateFields": ["all candidate fields", "coverage gates", "scenarioCoverage"],
+      "missingOrPartialFields": ["curated scenario snapshots", "expected shadow diagnostics"],
+      "allowedNextUse": "non-runtime fixture proposal"
+    }
+  ],
+  "missingDataCategories": [
+    "ability_unresolved",
+    "target_context_unavailable",
+    "card_semantics_unavailable",
+    "target_profile_match_deferred",
+    "cost_unknown_for_non_click_credit_costs"
+  ],
+  "proposedFollowUpBatches": [
+    {
+      "batch": "DeckDoctrine-v2 readiness schema",
+      "scope": "diagnostic schema and report only"
+    },
+    {
+      "batch": "TacticalGoal schema and lifecycle gates",
+      "scope": "shadow-only schema proposal"
+    },
+    {
+      "batch": "Action-to-goal diagnostic matching fixtures",
+      "scope": "fixture design without ranking or selection"
+    }
+  ],
+  "forbiddenInThisStepConfirmedAbsent": [
+    "productive chooseSemanticAiAction",
+    "numeric action scores",
+    "ranked alternatives",
+    "action selection simulation",
+    "planner weights",
+    "feature flag cutover",
+    "legacy removal"
+  ],
+  "noEffectFlags": {
+    "planner": false,
+    "actionScore": false,
+    "planWeight": false,
+    "targetingAi": false,
+    "engine": false,
+    "legality": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivation": false,
+    "hiddenInfoLeak": false
+  }
+}

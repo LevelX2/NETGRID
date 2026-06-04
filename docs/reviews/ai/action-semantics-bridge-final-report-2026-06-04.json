@@ -1,0 +1,29 @@
+{
+  "processId": "action-semantics-bridge",
+  "date": "2026-06-04",
+  "status": "ready_for_integration_preflight",
+  "completedSteps": ["AI034", "AI035", "AI036", "AI037", "AI038", "AI039", "AI040", "AI041", "AI042", "AI043"],
+  "lastCompletedCommitBeforeFinalReport": "bb2309d9",
+  "branch": "codex/ai-action-semantics-bridge",
+  "worktree": "C:\\Projekte\\NETGRID_AI_ACTION_SEMANTICS_BRIDGE",
+  "integrationTarget": "C:\\Projekte\\NETGRID main",
+  "summary": {
+    "legalActionInventory": "32 current ActionTypes inventoried.",
+    "neutralProjection": "32/32 neutral projected in documented scenario corpus.",
+    "basicSemantics": "Basic and broad ActionType semantics classified without card hints.",
+    "sourceAbilityTargetCostTimingJoin": "Read-only optional builders added with side-safe inputs only.",
+    "coverage": "0 hidden-info leaks, 0 runtime behavior changes, 0 action selection changes, 0 non-engine legal assumptions.",
+    "handoff": "Diagnostic-only readiness matrix for DeckDoctrine v2, TacticalGoal and shadow-only fixtures."
+  },
+  "noEffectFlags": {
+    "planner": false,
+    "actionScore": false,
+    "planWeight": false,
+    "targetingAi": false,
+    "engine": false,
+    "legality": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivation": false,
+    "hiddenInfoLeak": false
+  }
+}
