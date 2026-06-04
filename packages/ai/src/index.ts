@@ -3507,25 +3507,265 @@ function semanticRuntimeCorpScore(
   let score = 0;
   const credits = input.playerView.own.credits;
   if (action.type === "score_agenda") score += 1200;
-  if (action.type === "advance_card") score += 600;
+  if (action.type === "advance_card") {
+    score += 600;
+    score += semanticRuntimeCorpAdvanceRemoteScore(input, action);
+  }
   if (action.type === "rez_ice") {
     score += credits >= actionCreditCost(action) ? 750 : -1200;
   }
   if (action.type === "install_card") {
     const roles = rolesForAction(input, action);
-    if (roles.some((role) => role.startsWith("agenda_"))) score += 550;
-    if (roles.some((role) => role.includes("ice") || role.includes("protect"))) {
+    if (semanticRuntimeCorpActionIsScoreLine(input, action, roles)) {
+      score += 550;
+    }
+    if (
+      action.payload?.placement === "ice" ||
+      roles.some((role) => role.includes("ice") || role.includes("protect"))
+    ) {
       score += 650;
     }
     if (roles.some((role) => role.includes("economy"))) score += 500;
+    score += semanticRuntimeCorpInstallRemoteScore(input, action, roles);
   }
-  if (action.type === "gain_credit" && credits < 6) score += 700;
+  if (action.type === "gain_credit" && credits < 6) {
+    score += 700;
+    if (semanticRuntimeCorpHasRemoteInstability(input)) score += 250;
+  }
   if (action.type === "draw_card" && input.playerView.own.gripOrHq.length < 4) {
     score += 450;
+    if (semanticRuntimeCorpHasRemoteInstability(input)) score += 200;
   }
   if (action.type === "decline_rez" && scopeId === "simple_rez") score -= 700;
   if (action.type === "end_turn" && input.playerView.own.clicks > 0) score -= 1400;
   return score;
+}
+
+function semanticRuntimeCorpInstallRemoteScore(
+  input: AiDecisionInput,
+  action: LegalAction,
+  roles: string[],
+): number {
+  const serverId = semanticRuntimeCorpActionServerId(input, action);
+  const server = semanticRuntimeCorpServer(input, serverId);
+  const placement = action.payload?.placement;
+  const installsIce = placement === "ice";
+  const hasStabilizingAlternative =
+    semanticRuntimeCorpHasStabilizingAlternative(input, action);
+
+  if (installsIce && (serverId === "hq" || serverId === "rd")) {
+    return (server?.ice.length ?? 0) === 0 ? 1200 : 850;
+  }
+  if (installsIce && serverId === "archives") return 350;
+  if (!isRemoteServerTarget(serverId)) return 0;
+
+  const emptyRemoteCount = semanticRuntimeCorpEmptyRemoteCount(input);
+  const protectedRemote = semanticRuntimeCorpRemoteIsProtected(server);
+  const hasRoot = (server?.root.length ?? 0) > 0;
+  const targetIsScoreLine = semanticRuntimeCorpActionIsScoreLine(
+    input,
+    action,
+    roles,
+  );
+
+  if (installsIce) {
+    if (semanticRuntimeCorpRemoteHasScoreLine(server)) {
+      return protectedRemote ? 650 : 950;
+    }
+    let score = serverId === "new_remote" ? -1600 : -900;
+    if (!hasRoot) score -= Math.min(1200, emptyRemoteCount * 350);
+    if (hasStabilizingAlternative) score -= 500;
+    return score;
+  }
+
+  if (targetIsScoreLine) {
+    if (protectedRemote) return 950;
+    return hasStabilizingAlternative ? -2700 : -1700;
+  }
+
+  if (serverId === "new_remote" && emptyRemoteCount > 0) {
+    return hasStabilizingAlternative ? -900 : -350;
+  }
+  return protectedRemote ? 250 : -150;
+}
+
+function semanticRuntimeCorpAdvanceRemoteScore(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number {
+  const serverId = semanticRuntimeCorpActionServerId(input, action);
+  if (!isRemoteServerTarget(serverId)) return 0;
+  const server = semanticRuntimeCorpServer(input, serverId);
+  if (semanticRuntimeCorpAdvanceCompletesScore(input, action)) return 1100;
+  if (semanticRuntimeCorpRemoteIsProtected(server)) return 900;
+  return semanticRuntimeCorpHasStabilizingAlternative(input, action)
+    ? -2700
+    : -1700;
+}
+
+function semanticRuntimeCorpActionServerId(
+  input: AiDecisionInput,
+  action: LegalAction,
+): string | undefined {
+  const payloadServerId = semanticRuntimeServerId(action);
+  if (payloadServerId) return payloadServerId;
+  const sourceLocation = semanticRuntimeCorpVisibleServerCard(
+    input,
+    action.source,
+  );
+  if (sourceLocation) return sourceLocation.server.id;
+  const targetCardId =
+    typeof action.payload?.targetCardId === "string"
+      ? action.payload.targetCardId
+      : undefined;
+  return targetCardId
+    ? semanticRuntimeCorpVisibleServerCard(input, targetCardId)?.server.id
+    : undefined;
+}
+
+function semanticRuntimeCorpServer(
+  input: AiDecisionInput,
+  serverId: string | undefined,
+): AiDecisionInput["playerView"]["servers"][number] | undefined {
+  return input.playerView.servers.find((server) => server.id === serverId);
+}
+
+function semanticRuntimeCorpActionSourceCard(
+  input: AiDecisionInput,
+  action: LegalAction,
+): VisibleCard | undefined {
+  if (action.source !== "basic_action" && action.source !== "game_rule") {
+    const sourceCard = findVisibleCard(input, action.source);
+    if (sourceCard) return sourceCard;
+  }
+  const targetCardId =
+    typeof action.payload?.targetCardId === "string"
+      ? action.payload.targetCardId
+      : undefined;
+  return targetCardId ? findVisibleCard(input, targetCardId) : undefined;
+}
+
+function semanticRuntimeCorpVisibleServerCard(
+  input: AiDecisionInput,
+  cardId: string,
+):
+  | {
+      card: VisibleCard;
+      server: AiDecisionInput["playerView"]["servers"][number];
+    }
+  | undefined {
+  if (cardId === "basic_action" || cardId === "game_rule") return undefined;
+  return findVisibleCorpServerCard(input, cardId);
+}
+
+function semanticRuntimeCorpActionIsScoreLine(
+  input: AiDecisionInput,
+  action: LegalAction,
+  roles = rolesForAction(input, action),
+): boolean {
+  const sourceCard = semanticRuntimeCorpActionSourceCard(input, action);
+  return (
+    sourceCard?.type === "agenda" ||
+    action.payload?.cardType === "agenda" ||
+    action.payload?.targetCardType === "agenda" ||
+    roles.some(semanticRuntimeRoleIsAgenda)
+  );
+}
+
+function semanticRuntimeRoleIsAgenda(role: string): boolean {
+  return (
+    role === "agenda" ||
+    role === "corp_score_agenda" ||
+    role === "score_agenda" ||
+    role.startsWith("agenda_")
+  );
+}
+
+function semanticRuntimeCorpAdvanceCompletesScore(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (action.type !== "advance_card") return false;
+  const card = semanticRuntimeCorpActionSourceCard(input, action);
+  if (card?.type !== "agenda") return false;
+  if (typeof card.advancementRequirement !== "number") return false;
+  return (card.advancementCounters ?? 0) + 1 >= card.advancementRequirement;
+}
+
+function semanticRuntimeCorpRemoteIsProtected(
+  server: AiDecisionInput["playerView"]["servers"][number] | undefined,
+): boolean {
+  return (server?.ice.length ?? 0) > 0;
+}
+
+function semanticRuntimeCorpRemoteHasScoreLine(
+  server: AiDecisionInput["playerView"]["servers"][number] | undefined,
+): boolean {
+  return (
+    server?.root.some(
+      (card) =>
+        (card.known && card.type === "agenda") ||
+        (card.advancementCounters ?? 0) > 0,
+    ) === true
+  );
+}
+
+function semanticRuntimeCorpEmptyRemoteCount(input: AiDecisionInput): number {
+  return input.playerView.servers.filter(
+    (server) =>
+      isRemoteServerTarget(server.id) &&
+      server.root.length === 0 &&
+      server.ice.length > 0,
+  ).length;
+}
+
+function semanticRuntimeCorpHasRemoteInstability(input: AiDecisionInput): boolean {
+  return (
+    semanticRuntimeCorpEmptyRemoteCount(input) > 0 ||
+    input.playerView.servers.some(
+      (server) =>
+        isRemoteServerTarget(server.id) &&
+        !semanticRuntimeCorpRemoteIsProtected(server) &&
+        semanticRuntimeCorpRemoteHasScoreLine(server),
+    ) ||
+    input.legalActions.some((action) =>
+      semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine(input, action),
+    )
+  );
+}
+
+function semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const serverId = semanticRuntimeCorpActionServerId(input, action);
+  if (
+    action.type !== "install_card" ||
+    action.payload?.placement === "ice" ||
+    !isRemoteServerTarget(serverId) ||
+    !semanticRuntimeCorpActionIsScoreLine(input, action)
+  )
+    return false;
+  const server = semanticRuntimeCorpServer(input, serverId);
+  return !semanticRuntimeCorpRemoteIsProtected(server);
+}
+
+function semanticRuntimeCorpHasStabilizingAlternative(
+  input: AiDecisionInput,
+  excludedAction: LegalAction,
+): boolean {
+  return input.legalActions.some((action) => {
+    if (action.actionId === excludedAction.actionId || action.side !== "corp")
+      return false;
+    if (action.type === "gain_credit" || action.type === "draw_card") return true;
+    if (
+      action.type !== "install_card" ||
+      action.payload?.placement !== "ice"
+    )
+      return false;
+    const serverId = semanticRuntimeCorpActionServerId(input, action);
+    return serverId === "hq" || serverId === "rd";
+  });
 }
 
 function semanticRuntimeServerId(action: LegalAction): string | undefined {
@@ -3546,7 +3786,93 @@ function semanticRuntimeEvidence(
     `own_credits:${input.playerView.own.credits}`,
     `own_clicks:${input.playerView.own.clicks}`,
     `own_tags:${input.playerView.own.tags}`,
+    ...semanticRuntimeCorpEvidence(input, action),
   ];
+}
+
+function semanticRuntimeCorpEvidence(
+  input: AiDecisionInput,
+  action: LegalAction,
+): string[] {
+  if (input.side !== "corp") return [];
+  const evidence = [
+    `corp_empty_remote_count:${semanticRuntimeCorpEmptyRemoteCount(input)}`,
+  ];
+  if (semanticRuntimeCorpHasRemoteInstability(input)) {
+    evidence.push("corp_remote_risk:present");
+  }
+  if (semanticRuntimeCorpHasNakedScoreLine(input)) {
+    evidence.push("corp_remote_risk:naked_score_line_present");
+  }
+  if (semanticRuntimeCorpHasUnsafeRemoteScoreAction(input)) {
+    evidence.push("corp_remote_risk:unsafe_score_action_available");
+  }
+  if (action.type === "gain_credit") {
+    evidence.push("corp_safe_alternative:economy");
+  }
+  if (action.type === "draw_card") {
+    evidence.push("corp_safe_alternative:draw");
+  }
+
+  const serverId = semanticRuntimeCorpActionServerId(input, action);
+  const server = semanticRuntimeCorpServer(input, serverId);
+  if (
+    action.type === "install_card" &&
+    action.payload?.placement === "ice" &&
+    (serverId === "hq" || serverId === "rd")
+  ) {
+    evidence.push("corp_protection:central_ice");
+  }
+  if (!isRemoteServerTarget(serverId)) return evidence;
+
+  evidence.push(
+    serverId === "new_remote"
+      ? "corp_remote_target:new_remote"
+      : "corp_remote_target:existing_remote",
+  );
+  evidence.push(
+    semanticRuntimeCorpRemoteIsProtected(server)
+      ? "corp_remote_protection:protected"
+      : "corp_remote_protection:unprotected",
+  );
+  if (
+    action.type === "install_card" &&
+    action.payload?.placement === "ice" &&
+    (server?.root.length ?? 0) === 0
+  ) {
+    evidence.push("corp_remote_risk:new_empty_remote");
+  }
+  if (semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine(input, action)) {
+    evidence.push("corp_remote_risk:naked_score_line");
+  }
+  if (
+    action.type === "advance_card" &&
+    !semanticRuntimeCorpRemoteIsProtected(server) &&
+    !semanticRuntimeCorpAdvanceCompletesScore(input, action)
+  ) {
+    evidence.push("corp_remote_risk:naked_advance_line");
+  }
+  if (semanticRuntimeCorpAdvanceCompletesScore(input, action)) {
+    evidence.push("corp_remote_score_line:scoreable_after_action");
+  }
+  return evidence;
+}
+
+function semanticRuntimeCorpHasNakedScoreLine(input: AiDecisionInput): boolean {
+  return input.playerView.servers.some(
+    (server) =>
+      isRemoteServerTarget(server.id) &&
+      !semanticRuntimeCorpRemoteIsProtected(server) &&
+      semanticRuntimeCorpRemoteHasScoreLine(server),
+  );
+}
+
+function semanticRuntimeCorpHasUnsafeRemoteScoreAction(
+  input: AiDecisionInput,
+): boolean {
+  return input.legalActions.some((action) =>
+    semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine(input, action),
+  );
 }
 
 function semanticRuntimeConfidence(scopeId: string, score: number): number {

@@ -63,6 +63,166 @@ describe("Semantic AI runtime cutover", () => {
     expect(decision.fallbackUsed).toBe(false);
   });
 
+  it("prefers central ICE protection over another empty remote shell", () => {
+    const input = aiInput("corp", [
+      legalAction(
+        "build-empty-new-remote",
+        "corp",
+        "install_card",
+        "Install ICE protecting a new remote",
+        { credits: 0 },
+        {
+          source: "ice-for-new-remote",
+          payload: { placement: "ice", serverId: "new_remote" },
+        },
+      ),
+      legalAction(
+        "protect-rd",
+        "corp",
+        "install_card",
+        "Install ICE protecting R&D",
+        { credits: 0 },
+        { source: "ice-for-rd", payload: { placement: "ice", serverId: "rd" } },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction("draw", "corp", "draw_card", "Draw 1", { credits: 0 }),
+    ]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("ice-for-new-remote", "corp", "ice"),
+      visibleCard("ice-for-rd", "corp", "ice"),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [visibleCard("remote-ice-1", "corp", "ice")]),
+      server("remote_2", [visibleCard("remote-ice-2", "corp", "ice")]),
+    ];
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision.actionId).toBe("protect-rd");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "corp_empty_remote_count:2",
+        "corp_remote_risk:present",
+        "corp_protection:central_ice",
+      ]),
+    );
+  });
+
+  it("defers a new naked remote agenda install when safe alternatives are legal", () => {
+    const input = aiInput("corp", [
+      legalAction(
+        "install-new-remote-agenda",
+        "corp",
+        "install_card",
+        "Install agenda in a new remote",
+        { credits: 0 },
+        {
+          source: "agenda-in-hq",
+          payload: { placement: "root", serverId: "new_remote" },
+        },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction("draw", "corp", "draw_card", "Draw 1", { credits: 0 }),
+    ]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("agenda-in-hq", "corp", "agenda", {
+        advancementRequirement: 3,
+      }),
+    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "corp_remote_risk:unsafe_score_action_available",
+        "corp_safe_alternative:economy",
+      ]),
+    );
+  });
+
+  it("does not advance a naked remote score line when safe alternatives are legal", () => {
+    const remoteAgenda = visibleCard("remote-agenda", "corp", "agenda", {
+      advancementCounters: 1,
+      advancementRequirement: 3,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "advance-naked-agenda",
+        "corp",
+        "advance_card",
+        "Advance installed agenda",
+        { credits: 1 },
+        { source: remoteAgenda.instanceId, payload: { serverId: "remote_1" } },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction("draw", "corp", "draw_card", "Draw 1", { credits: 0 }),
+    ]);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [remoteAgenda]),
+    ];
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "corp_remote_risk:naked_score_line_present",
+        "corp_safe_alternative:economy",
+      ]),
+    );
+  });
+
+  it("keeps a protected remote score line selectable", () => {
+    const remoteAgenda = visibleCard("protected-remote-agenda", "corp", "agenda", {
+      advancementCounters: 1,
+      advancementRequirement: 3,
+    });
+    const input = aiInput("corp", [
+      legalAction(
+        "advance-protected-agenda",
+        "corp",
+        "advance_card",
+        "Advance installed agenda",
+        { credits: 1 },
+        { source: remoteAgenda.instanceId, payload: { serverId: "remote_1" } },
+      ),
+      legalAction("gain-credit", "corp", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server(
+        "remote_1",
+        [visibleCard("remote-protection-ice", "corp", "ice")],
+        [remoteAgenda],
+      ),
+    ];
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision.actionId).toBe("advance-protected-agenda");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining(["corp_remote_protection:protected"]),
+    );
+  });
+
   it("keeps legacy available only through the explicit runtime kill switch", () => {
     process.env.NETGRID_SEMANTIC_AI_RUNTIME = "legacy";
     const input = aiInput("runner", [
@@ -149,23 +309,70 @@ function identityCard(side: Side): VisibleCard {
   };
 }
 
+function visibleCard(
+  instanceId: string,
+  side: Side,
+  type: NonNullable<VisibleCard["type"]>,
+  overrides: Omit<
+    Partial<VisibleCard>,
+    | "instanceId"
+    | "definitionId"
+    | "title"
+    | "owner"
+    | "controller"
+    | "type"
+    | "known"
+  > = {},
+): VisibleCard {
+  return {
+    instanceId,
+    definitionId: instanceId,
+    title: instanceId,
+    owner: side,
+    controller: side,
+    type,
+    known: true,
+    ...overrides,
+  };
+}
+
+function server(
+  id: PlayerView["servers"][number]["id"],
+  ice: VisibleCard[] = [],
+  root: VisibleCard[] = [],
+): PlayerView["servers"][number] {
+  return {
+    id,
+    label: id,
+    ice,
+    root,
+  };
+}
+
 function legalAction(
   actionId: string,
   side: Side,
   type: LegalAction["type"],
   label: string,
   cost: { credits: number },
+  options: {
+    source?: LegalAction["source"];
+    payload?: LegalAction["payload"];
+    visibility?: LegalAction["visibility"];
+  } = {},
 ): LegalAction {
-  return {
+  const action: LegalAction = {
     actionId,
     side,
     type,
     label,
-    source: "basic_action",
+    source: options.source ?? "basic_action",
     timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
     costs: [cost],
     targetRequirements: [],
-    visibility: "public",
+    visibility: options.visibility ?? "public",
     expiresAtStateVersion: 2,
   };
+  if (options.payload) action.payload = options.payload;
+  return action;
 }
