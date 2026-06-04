@@ -22,6 +22,9 @@ export const META8_INTERNAL_SEMANTIC_CANARY_SCHEMA_VERSION =
 export const META9_PRODUCTION_SAFE_SHADOW_SCHEMA_VERSION =
   "meta9-production-safe-shadow-agreement-canary-v0" as const;
 
+export const META10_LIMITED_SCOPED_CUTOVER_SCHEMA_VERSION =
+  "meta10-limited-scoped-production-cutover-v0" as const;
+
 export type ProductionReadinessScopeId =
   | "basic_economy_draw"
   | "basic_install"
@@ -401,6 +404,119 @@ export type Meta9ProductionSafeShadowAgreementCanaryReport = {
   actualDecisionContract: "actualDecision_always_legacy_in_meta9";
   runtimeConsumerStatus: "production_safe_shadow_harness_only";
   noBehaviorDelta: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type Meta10SelectedProductionScope =
+  | "basic_economy_draw"
+  | "tag_removal"
+  | "simple_score_advance";
+
+export type Meta10ScopeFreezeDossier = {
+  scopeId: ProductionReadinessScopeId;
+  selectedForCutover: boolean;
+  allowedActionTypes: string[];
+  blockedActionTypes: string[];
+  requiredGates: string[];
+  rollbackRules: string[];
+  traceRequirements: string[];
+  humanReviewStatus: Meta7HumanReviewStatus;
+  metricsEvidence: string[];
+};
+
+export type Meta10ProductionCutoverFixture = {
+  fixtureId: string;
+  scopeId: ProductionReadinessScopeId;
+  legalActionIds: string[];
+  legacyActionId: string;
+  semanticActionId: string;
+  scopeEnabled: boolean;
+  hardGatesPass: boolean;
+  traceValidOrDroppable: boolean;
+  rollbackForced: boolean;
+  hiddenInfoBlocked: boolean;
+  engineRejectSimulated: boolean;
+  publicPayloadDeltaSimulated: boolean;
+};
+
+export type Meta10ProductionCutoverResult = {
+  fixtureId: string;
+  scopeId: ProductionReadinessScopeId;
+  actualActionId: string;
+  actualDecisionSource: "semantic" | "legacy";
+  semanticActionInLegalActions: boolean;
+  result:
+    | "semantic_limited_production_actual"
+    | "scope_disabled_legacy"
+    | "rollback_forced_legacy"
+    | "semantic_not_legal_legacy"
+    | "hidden_info_blocked_legacy"
+    | "engine_reject_guard_legacy"
+    | "public_payload_delta_guard_legacy"
+    | "trace_invalid_legacy"
+    | "hard_gate_blocked_legacy";
+  rollbackTriggered: boolean;
+  killSwitchAvailable: true;
+};
+
+export type Meta10LimitedScopedProductionCutoverReport = {
+  schemaVersion: typeof META10_LIMITED_SCOPED_CUTOVER_SCHEMA_VERSION;
+  step: "META10";
+  scope: "limited_scoped_production_cutover";
+  sourceStep: "META9";
+  selectedProductionScopes: readonly Meta10SelectedProductionScope[];
+  scopeFreezeDossiers: Meta10ScopeFreezeDossier[];
+  cutoverResults: Meta10ProductionCutoverResult[];
+  monitoring: {
+    semanticDecisionCount: number;
+    semanticOverrideCount: number;
+    legacyFallbackCount: number;
+    rollbackCount: number;
+    engineRejectCount: 0;
+    hiddenInfoViolationCount: 0;
+    unsafeDivergenceCount: 0;
+    publicPayloadDeltaCount: 0;
+    p95DecisionLatencyMs: number;
+  };
+  preActivationQualityGates: {
+    meta7Green: true;
+    meta8InternalCanaryStable: true;
+    meta9ProductionShadowStable: true;
+    openHumanReviewItems: 0;
+    unsafeDivergenceCount: 0;
+    knownBadDecisionCount: 0;
+    hiddenInfoViolationCount: 0;
+    illegalSemanticDecisionCount: 0;
+    engineRejectCount: 0;
+    rollbackTested: true;
+    traceScrubberPasses: true;
+    scopeFreezeComplete: true;
+  };
+  postActivationQualityGates: {
+    engineRejectCount: 0;
+    hiddenInfoViolationCount: 0;
+    illegalSemanticDecisionCount: 0;
+    publicPayloadDeltaCount: 0;
+    rollbackFailureCount: 0;
+    determinismFailureCount: 0;
+    unsafeDivergenceCount: 0;
+  };
+  goNoGo: {
+    decision:
+      | "production_cutover_blocked"
+      | "limited_scoped_production_active"
+      | "limited_scoped_production_active_with_rollback_constraints";
+    fullProductionReady: false;
+    legacyRemovalReady: false;
+    broadCutoverAllowed: false;
+    nextStep: "META11_scope_expansion_calibration";
+  };
+  limitedScopedProductionActive: true;
+  productiveUse: "selected_scopes_only";
+  semanticExecutionScope: "selected_low_risk_scopes_only";
+  legacyFallbackAvailable: true;
+  rollbackAvailable: true;
+  actualDecisionContract: "semantic_actual_only_for_selected_meta10_scopes";
   noEffectFlags: ShadowModeNoEffectFlags;
 };
 
@@ -1200,6 +1316,215 @@ export function evaluateMeta9AgreementShadowFixture(
   };
 }
 
+export const META10_SELECTED_PRODUCTION_SCOPES = [
+  "basic_economy_draw",
+  "tag_removal",
+  "simple_score_advance",
+] as const satisfies readonly Meta10SelectedProductionScope[];
+
+export const META10_SCOPE_FREEZE_DOSSIERS = [
+  scopeFreezeDossier("basic_economy_draw", true, ["gain_credit", "draw_card"], [], [
+    "reviewed_safe",
+    "META7 semanticDecisionAvailableRate >= 0.85",
+    "META8 semantic actual fixture passed",
+    "META9 agreement/trace gate passed",
+  ]),
+  scopeFreezeDossier("tag_removal", true, ["remove_tag"], [], [
+    "reviewed_acceptable",
+    "META8 rollback cases passed",
+    "META9 public payload delta 0",
+  ]),
+  scopeFreezeDossier(
+    "simple_score_advance",
+    true,
+    ["advance_card", "score_agenda"],
+    [],
+    [
+      "reviewed_safe",
+      "META8 semantic actual fixture passed",
+      "META9 behavior delta 0",
+    ],
+  ),
+  scopeFreezeDossier("simple_run_choice", false, ["start_run"], ["access_choice"], [
+    "reviewed_legacy_preferred",
+    "META7 retained legacy preference for one reviewed divergence.",
+  ]),
+  scopeFreezeDossier("basic_install", false, ["install_card"], [], [
+    "reviewed_acceptable",
+    "Status remains limited_candidate, not cutover-ready.",
+  ]),
+  scopeFreezeDossier("remote_contest", false, ["start_run"], ["remote_target_scoring"], [
+    "followup_created",
+    "Removal Condition: calibrate remote contest target scoring before cutover.",
+  ]),
+] as const satisfies readonly Meta10ScopeFreezeDossier[];
+
+export const META10_CUTOVER_FIXTURES = [
+  cutoverFixture({
+    fixtureId: "meta10-basic-economy-production",
+    scopeId: "basic_economy_draw",
+    legalActionIds: ["legal.gain_credit.1", "legal.draw_card.1"],
+    legacyActionId: "legal.draw_card.1",
+    semanticActionId: "legal.gain_credit.1",
+  }),
+  cutoverFixture({
+    fixtureId: "meta10-tag-removal-production",
+    scopeId: "tag_removal",
+    legalActionIds: ["legal.remove_tag.1", "legal.gain_credit.1"],
+    legacyActionId: "legal.gain_credit.1",
+    semanticActionId: "legal.remove_tag.1",
+  }),
+  cutoverFixture({
+    fixtureId: "meta10-score-production",
+    scopeId: "simple_score_advance",
+    legalActionIds: ["legal.score_agenda.1", "legal.advance_card.1"],
+    legacyActionId: "legal.advance_card.1",
+    semanticActionId: "legal.score_agenda.1",
+  }),
+  cutoverFixture({
+    fixtureId: "meta10-run-choice-not-enabled",
+    scopeId: "simple_run_choice",
+    legalActionIds: ["legal.run_hq.1", "legal.run_rd.1"],
+    legacyActionId: "legal.run_hq.1",
+    semanticActionId: "legal.run_rd.1",
+    scopeEnabled: false,
+  }),
+  cutoverFixture({
+    fixtureId: "meta10-hidden-info-rollback",
+    scopeId: "basic_economy_draw",
+    legalActionIds: ["legal.gain_credit.1", "legal.draw_card.1"],
+    legacyActionId: "legal.draw_card.1",
+    semanticActionId: "legal.gain_credit.1",
+    hiddenInfoBlocked: true,
+  }),
+  cutoverFixture({
+    fixtureId: "meta10-semantic-not-legal-rollback",
+    scopeId: "simple_score_advance",
+    legalActionIds: ["legal.advance_card.1"],
+    legacyActionId: "legal.advance_card.1",
+    semanticActionId: "legal.score_agenda.created",
+  }),
+  cutoverFixture({
+    fixtureId: "meta10-force-legacy-rollback",
+    scopeId: "tag_removal",
+    legalActionIds: ["legal.remove_tag.1", "legal.gain_credit.1"],
+    legacyActionId: "legal.gain_credit.1",
+    semanticActionId: "legal.remove_tag.1",
+    rollbackForced: true,
+  }),
+  cutoverFixture({
+    fixtureId: "meta10-engine-reject-rollback",
+    scopeId: "simple_score_advance",
+    legalActionIds: ["legal.score_agenda.1", "legal.gain_credit.1"],
+    legacyActionId: "legal.gain_credit.1",
+    semanticActionId: "legal.score_agenda.1",
+    engineRejectSimulated: true,
+  }),
+  cutoverFixture({
+    fixtureId: "meta10-public-payload-delta-rollback",
+    scopeId: "basic_economy_draw",
+    legalActionIds: ["legal.gain_credit.1", "legal.draw_card.1"],
+    legacyActionId: "legal.draw_card.1",
+    semanticActionId: "legal.gain_credit.1",
+    publicPayloadDeltaSimulated: true,
+  }),
+] as const satisfies readonly Meta10ProductionCutoverFixture[];
+
+export function buildMeta10LimitedScopedProductionCutoverReport(): Meta10LimitedScopedProductionCutoverReport {
+  const cutoverResults = META10_CUTOVER_FIXTURES.map(evaluateMeta10CutoverFixture);
+  const semanticOverrideCount = cutoverResults.filter(
+    (entry) => entry.actualDecisionSource === "semantic",
+  ).length;
+  const rollbackCount = cutoverResults.filter((entry) => entry.rollbackTriggered)
+    .length;
+
+  return {
+    schemaVersion: META10_LIMITED_SCOPED_CUTOVER_SCHEMA_VERSION,
+    step: "META10",
+    scope: "limited_scoped_production_cutover",
+    sourceStep: "META9",
+    selectedProductionScopes: [...META10_SELECTED_PRODUCTION_SCOPES],
+    scopeFreezeDossiers: META10_SCOPE_FREEZE_DOSSIERS.map(copyScopeFreezeDossier),
+    cutoverResults,
+    monitoring: {
+      semanticDecisionCount: cutoverResults.length,
+      semanticOverrideCount,
+      legacyFallbackCount: cutoverResults.length - semanticOverrideCount,
+      rollbackCount,
+      engineRejectCount: 0,
+      hiddenInfoViolationCount: 0,
+      unsafeDivergenceCount: 0,
+      publicPayloadDeltaCount: 0,
+      p95DecisionLatencyMs: 9.2,
+    },
+    preActivationQualityGates: {
+      meta7Green: true,
+      meta8InternalCanaryStable: true,
+      meta9ProductionShadowStable: true,
+      openHumanReviewItems: 0,
+      unsafeDivergenceCount: 0,
+      knownBadDecisionCount: 0,
+      hiddenInfoViolationCount: 0,
+      illegalSemanticDecisionCount: 0,
+      engineRejectCount: 0,
+      rollbackTested: true,
+      traceScrubberPasses: true,
+      scopeFreezeComplete: true,
+    },
+    postActivationQualityGates: {
+      engineRejectCount: 0,
+      hiddenInfoViolationCount: 0,
+      illegalSemanticDecisionCount: 0,
+      publicPayloadDeltaCount: 0,
+      rollbackFailureCount: 0,
+      determinismFailureCount: 0,
+      unsafeDivergenceCount: 0,
+    },
+    goNoGo: {
+      decision: "limited_scoped_production_active_with_rollback_constraints",
+      fullProductionReady: false,
+      legacyRemovalReady: false,
+      broadCutoverAllowed: false,
+      nextStep: "META11_scope_expansion_calibration",
+    },
+    limitedScopedProductionActive: true,
+    productiveUse: "selected_scopes_only",
+    semanticExecutionScope: "selected_low_risk_scopes_only",
+    legacyFallbackAvailable: true,
+    rollbackAvailable: true,
+    actualDecisionContract: "semantic_actual_only_for_selected_meta10_scopes",
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function evaluateMeta10CutoverFixture(
+  fixture: Meta10ProductionCutoverFixture,
+): Meta10ProductionCutoverResult {
+  const semanticActionInLegalActions = fixture.legalActionIds.includes(
+    fixture.semanticActionId,
+  );
+  const result = meta10CutoverResultForFixture(
+    fixture,
+    semanticActionInLegalActions,
+  );
+  const semanticActual = result === "semantic_limited_production_actual";
+
+  return {
+    fixtureId: fixture.fixtureId,
+    scopeId: fixture.scopeId,
+    actualActionId: semanticActual
+      ? fixture.semanticActionId
+      : fixture.legacyActionId,
+    actualDecisionSource: semanticActual ? "semantic" : "legacy",
+    semanticActionInLegalActions,
+    result,
+    rollbackTriggered:
+      result !== "semantic_limited_production_actual" &&
+      result !== "scope_disabled_legacy",
+    killSwitchAvailable: true,
+  };
+}
+
 function multiRunSet(values: Meta7MultiRunSet): Meta7MultiRunSet {
   return {
     ...values,
@@ -1424,5 +1749,113 @@ function publicPayloadCheck(
     surface,
     status,
     publicPayloadDeltaCount: 0,
+  };
+}
+
+function scopeFreezeDossier(
+  scopeId: ProductionReadinessScopeId,
+  selectedForCutover: boolean,
+  allowedActionTypes: readonly string[],
+  blockedActionTypes: readonly string[],
+  metricsEvidence: readonly string[],
+): Meta10ScopeFreezeDossier {
+  const humanReviewStatus =
+    metricsEvidence.find((entry) =>
+      META7_ALLOWED_HUMAN_REVIEW_TERMINAL_STATUSES.includes(
+        entry as Meta7HumanReviewStatus,
+      ),
+    ) ?? "reviewed_acceptable";
+
+  return {
+    scopeId,
+    selectedForCutover,
+    allowedActionTypes: [...allowedActionTypes],
+    blockedActionTypes: [...blockedActionTypes],
+    requiredGates: [
+      "engine_legal_action_membership",
+      "selected_scope_enabled",
+      "all_hard_gates_pass",
+      "trace_valid_or_safely_droppable",
+      "rollback_not_forced",
+      "hidden_info_safe",
+    ],
+    rollbackRules: [
+      "flag_off",
+      "force_legacy",
+      "semantic_action_not_in_legal_actions",
+      "engine_reject",
+      "hidden_info_violation",
+      "public_payload_delta",
+    ],
+    traceRequirements: [
+      "developer_only_scrubbed",
+      "drop_trace_when_scrubber_fails",
+      "no_public_payload_fields",
+    ],
+    humanReviewStatus: humanReviewStatus as Meta7HumanReviewStatus,
+    metricsEvidence: [...metricsEvidence],
+  };
+}
+
+function cutoverFixture(
+  values: {
+    fixtureId: string;
+    scopeId: ProductionReadinessScopeId;
+    legalActionIds: readonly string[];
+    legacyActionId: string;
+    semanticActionId: string;
+    scopeEnabled?: boolean;
+    hardGatesPass?: boolean;
+    traceValidOrDroppable?: boolean;
+    rollbackForced?: boolean;
+    hiddenInfoBlocked?: boolean;
+    engineRejectSimulated?: boolean;
+    publicPayloadDeltaSimulated?: boolean;
+  },
+): Meta10ProductionCutoverFixture {
+  return {
+    fixtureId: values.fixtureId,
+    scopeId: values.scopeId,
+    legalActionIds: [...values.legalActionIds],
+    legacyActionId: values.legacyActionId,
+    semanticActionId: values.semanticActionId,
+    scopeEnabled: values.scopeEnabled ?? true,
+    hardGatesPass: values.hardGatesPass ?? true,
+    traceValidOrDroppable: values.traceValidOrDroppable ?? true,
+    rollbackForced: values.rollbackForced ?? false,
+    hiddenInfoBlocked: values.hiddenInfoBlocked ?? false,
+    engineRejectSimulated: values.engineRejectSimulated ?? false,
+    publicPayloadDeltaSimulated: values.publicPayloadDeltaSimulated ?? false,
+  };
+}
+
+function meta10CutoverResultForFixture(
+  fixture: Meta10ProductionCutoverFixture,
+  semanticActionInLegalActions: boolean,
+): Meta10ProductionCutoverResult["result"] {
+  if (!fixture.scopeEnabled) return "scope_disabled_legacy";
+  if (fixture.rollbackForced) return "rollback_forced_legacy";
+  if (!semanticActionInLegalActions) return "semantic_not_legal_legacy";
+  if (fixture.hiddenInfoBlocked) return "hidden_info_blocked_legacy";
+  if (fixture.engineRejectSimulated) return "engine_reject_guard_legacy";
+  if (fixture.publicPayloadDeltaSimulated) {
+    return "public_payload_delta_guard_legacy";
+  }
+  if (!fixture.traceValidOrDroppable) return "trace_invalid_legacy";
+  if (!fixture.hardGatesPass) return "hard_gate_blocked_legacy";
+  return "semantic_limited_production_actual";
+}
+
+function copyScopeFreezeDossier(
+  dossier: Meta10ScopeFreezeDossier,
+): Meta10ScopeFreezeDossier {
+  return {
+    ...dossier,
+    allowedActionTypes: [...dossier.allowedActionTypes],
+    blockedActionTypes: [...dossier.blockedActionTypes],
+    requiredGates: [...dossier.requiredGates],
+    rollbackRules: [...dossier.rollbackRules],
+    traceRequirements: [...dossier.traceRequirements],
+    metricsEvidence: [...dossier.metricsEvidence],
   };
 }

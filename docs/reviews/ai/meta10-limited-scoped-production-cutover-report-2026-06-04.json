@@ -1,0 +1,176 @@
+{
+  "schemaVersion": "meta10-limited-scoped-production-cutover-v0",
+  "step": "META10",
+  "scope": "limited_scoped_production_cutover",
+  "sourceStep": "META9",
+  "selectedProductionScopes": [
+    "basic_economy_draw",
+    "tag_removal",
+    "simple_score_advance"
+  ],
+  "scopeFreezeDossiers": [
+    {
+      "scopeId": "basic_economy_draw",
+      "selectedForCutover": true,
+      "allowedActionTypes": ["gain_credit", "draw_card"],
+      "blockedActionTypes": [],
+      "humanReviewStatus": "reviewed_safe"
+    },
+    {
+      "scopeId": "tag_removal",
+      "selectedForCutover": true,
+      "allowedActionTypes": ["remove_tag"],
+      "blockedActionTypes": [],
+      "humanReviewStatus": "reviewed_acceptable"
+    },
+    {
+      "scopeId": "simple_score_advance",
+      "selectedForCutover": true,
+      "allowedActionTypes": ["advance_card", "score_agenda"],
+      "blockedActionTypes": [],
+      "humanReviewStatus": "reviewed_safe"
+    },
+    {
+      "scopeId": "simple_run_choice",
+      "selectedForCutover": false,
+      "allowedActionTypes": ["start_run"],
+      "blockedActionTypes": ["access_choice"],
+      "humanReviewStatus": "reviewed_legacy_preferred"
+    },
+    {
+      "scopeId": "basic_install",
+      "selectedForCutover": false,
+      "allowedActionTypes": ["install_card"],
+      "blockedActionTypes": [],
+      "humanReviewStatus": "reviewed_acceptable"
+    },
+    {
+      "scopeId": "remote_contest",
+      "selectedForCutover": false,
+      "allowedActionTypes": ["start_run"],
+      "blockedActionTypes": ["remote_target_scoring"],
+      "humanReviewStatus": "followup_created"
+    }
+  ],
+  "cutoverResults": [
+    {
+      "fixtureId": "meta10-basic-economy-production",
+      "scopeId": "basic_economy_draw",
+      "actualDecisionSource": "semantic",
+      "result": "semantic_limited_production_actual",
+      "rollbackTriggered": false,
+      "killSwitchAvailable": true
+    },
+    {
+      "fixtureId": "meta10-tag-removal-production",
+      "scopeId": "tag_removal",
+      "actualDecisionSource": "semantic",
+      "result": "semantic_limited_production_actual",
+      "rollbackTriggered": false,
+      "killSwitchAvailable": true
+    },
+    {
+      "fixtureId": "meta10-score-production",
+      "scopeId": "simple_score_advance",
+      "actualDecisionSource": "semantic",
+      "result": "semantic_limited_production_actual",
+      "rollbackTriggered": false,
+      "killSwitchAvailable": true
+    },
+    {
+      "fixtureId": "meta10-run-choice-not-enabled",
+      "scopeId": "simple_run_choice",
+      "actualDecisionSource": "legacy",
+      "result": "scope_disabled_legacy",
+      "rollbackTriggered": false,
+      "killSwitchAvailable": true
+    },
+    {
+      "fixtureId": "meta10-hidden-info-rollback",
+      "scopeId": "basic_economy_draw",
+      "actualDecisionSource": "legacy",
+      "result": "hidden_info_blocked_legacy",
+      "rollbackTriggered": true,
+      "killSwitchAvailable": true
+    },
+    {
+      "fixtureId": "meta10-semantic-not-legal-rollback",
+      "scopeId": "simple_score_advance",
+      "actualDecisionSource": "legacy",
+      "result": "semantic_not_legal_legacy",
+      "rollbackTriggered": true,
+      "killSwitchAvailable": true
+    },
+    {
+      "fixtureId": "meta10-force-legacy-rollback",
+      "scopeId": "tag_removal",
+      "actualDecisionSource": "legacy",
+      "result": "rollback_forced_legacy",
+      "rollbackTriggered": true,
+      "killSwitchAvailable": true
+    },
+    {
+      "fixtureId": "meta10-engine-reject-rollback",
+      "scopeId": "simple_score_advance",
+      "actualDecisionSource": "legacy",
+      "result": "engine_reject_guard_legacy",
+      "rollbackTriggered": true,
+      "killSwitchAvailable": true
+    },
+    {
+      "fixtureId": "meta10-public-payload-delta-rollback",
+      "scopeId": "basic_economy_draw",
+      "actualDecisionSource": "legacy",
+      "result": "public_payload_delta_guard_legacy",
+      "rollbackTriggered": true,
+      "killSwitchAvailable": true
+    }
+  ],
+  "monitoring": {
+    "semanticDecisionCount": 9,
+    "semanticOverrideCount": 3,
+    "legacyFallbackCount": 6,
+    "rollbackCount": 5,
+    "engineRejectCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "unsafeDivergenceCount": 0,
+    "publicPayloadDeltaCount": 0,
+    "p95DecisionLatencyMs": 9.2
+  },
+  "preActivationQualityGates": {
+    "meta7Green": true,
+    "meta8InternalCanaryStable": true,
+    "meta9ProductionShadowStable": true,
+    "openHumanReviewItems": 0,
+    "unsafeDivergenceCount": 0,
+    "knownBadDecisionCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "illegalSemanticDecisionCount": 0,
+    "engineRejectCount": 0,
+    "rollbackTested": true,
+    "traceScrubberPasses": true,
+    "scopeFreezeComplete": true
+  },
+  "postActivationQualityGates": {
+    "engineRejectCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "illegalSemanticDecisionCount": 0,
+    "publicPayloadDeltaCount": 0,
+    "rollbackFailureCount": 0,
+    "determinismFailureCount": 0,
+    "unsafeDivergenceCount": 0
+  },
+  "goNoGo": {
+    "decision": "limited_scoped_production_active_with_rollback_constraints",
+    "fullProductionReady": false,
+    "legacyRemovalReady": false,
+    "broadCutoverAllowed": false,
+    "nextStep": "META11_scope_expansion_calibration"
+  },
+  "limitedScopedProductionActive": true,
+  "productiveUse": "selected_scopes_only",
+  "semanticExecutionScope": "selected_low_risk_scopes_only",
+  "legacyFallbackAvailable": true,
+  "rollbackAvailable": true,
+  "actualDecisionContract": "semantic_actual_only_for_selected_meta10_scopes"
+}

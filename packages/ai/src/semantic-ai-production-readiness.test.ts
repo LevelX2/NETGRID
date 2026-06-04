@@ -7,10 +7,13 @@ import {
   META8_INTERNAL_CANARY_CONFIG,
   META8_INTERNAL_CANARY_FIXTURES,
   META9_PRODUCTION_SAFE_SHADOW_CONFIG,
+  META10_SELECTED_PRODUCTION_SCOPES,
+  buildMeta10LimitedScopedProductionCutoverReport,
   buildMeta9ProductionSafeShadowAgreementCanaryReport,
   buildMeta8InternalSemanticCanaryReport,
   buildMeta7MultiRunSemanticEvaluationHumanReviewReport,
   buildMeta7ScopeReadinessPromotions,
+  evaluateMeta10CutoverFixture,
   evaluateMeta9AgreementShadowFixture,
   evaluateMeta9TraceScrubFixture,
   evaluateMeta8InternalCanaryFixture,
@@ -160,6 +163,169 @@ describe("META7 Multi-Run Evaluation + Human Review Closure", () => {
       nextStep: "META8_internal_semantic_canary",
     });
     expect(report.noRuntimeEffect).toBe(true);
+  });
+});
+
+describe("META10 Limited Scoped Production Cutover", () => {
+  it("freezes only selected low-risk scopes for limited production", () => {
+    const report = buildMeta10LimitedScopedProductionCutoverReport();
+
+    expect(report.schemaVersion).toBe(
+      "meta10-limited-scoped-production-cutover-v0",
+    );
+    expect(report.step).toBe("META10");
+    expect(report.selectedProductionScopes).toEqual(META10_SELECTED_PRODUCTION_SCOPES);
+    expect(report.selectedProductionScopes).toEqual([
+      "basic_economy_draw",
+      "tag_removal",
+      "simple_score_advance",
+    ]);
+    expect(report.scopeFreezeDossiers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          scopeId: "simple_run_choice",
+          selectedForCutover: false,
+          humanReviewStatus: "reviewed_legacy_preferred",
+        }),
+        expect.objectContaining({
+          scopeId: "remote_contest",
+          selectedForCutover: false,
+          humanReviewStatus: "followup_created",
+        }),
+      ]),
+    );
+  });
+
+  it("allows semantic actual decisions only for selected scopes", () => {
+    const report = buildMeta10LimitedScopedProductionCutoverReport();
+    const semanticActual = report.cutoverResults.filter(
+      (entry) => entry.actualDecisionSource === "semantic",
+    );
+
+    expect(semanticActual).toHaveLength(3);
+    expect(semanticActual.map((entry) => entry.scopeId)).toEqual([
+      "basic_economy_draw",
+      "tag_removal",
+      "simple_score_advance",
+    ]);
+    expect(
+      semanticActual.every(
+        (entry) => entry.result === "semantic_limited_production_actual",
+      ),
+    ).toBe(true);
+  });
+
+  it("rolls back to legacy for disabled scopes and hard gate violations", () => {
+    const report = buildMeta10LimitedScopedProductionCutoverReport();
+
+    expect(report.cutoverResults).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          fixtureId: "meta10-run-choice-not-enabled",
+          actualDecisionSource: "legacy",
+          result: "scope_disabled_legacy",
+          rollbackTriggered: false,
+        }),
+        expect.objectContaining({
+          fixtureId: "meta10-hidden-info-rollback",
+          actualDecisionSource: "legacy",
+          result: "hidden_info_blocked_legacy",
+          rollbackTriggered: true,
+        }),
+        expect.objectContaining({
+          fixtureId: "meta10-public-payload-delta-rollback",
+          actualDecisionSource: "legacy",
+          result: "public_payload_delta_guard_legacy",
+          rollbackTriggered: true,
+        }),
+      ]),
+    );
+    expect(
+      report.cutoverResults.every((entry) => entry.killSwitchAvailable),
+    ).toBe(true);
+  });
+
+  it("evaluates custom cutover fixtures with semantic and legacy outcomes", () => {
+    const semantic = evaluateMeta10CutoverFixture({
+      fixtureId: "semantic",
+      scopeId: "basic_economy_draw",
+      legalActionIds: ["legacy", "semantic"],
+      legacyActionId: "legacy",
+      semanticActionId: "semantic",
+      scopeEnabled: true,
+      hardGatesPass: true,
+      traceValidOrDroppable: true,
+      rollbackForced: false,
+      hiddenInfoBlocked: false,
+      engineRejectSimulated: false,
+      publicPayloadDeltaSimulated: false,
+    });
+    const legacy = evaluateMeta10CutoverFixture({
+      fixtureId: "legacy",
+      scopeId: "basic_economy_draw",
+      legalActionIds: ["legacy"],
+      legacyActionId: "legacy",
+      semanticActionId: "created",
+      scopeEnabled: true,
+      hardGatesPass: true,
+      traceValidOrDroppable: true,
+      rollbackForced: false,
+      hiddenInfoBlocked: false,
+      engineRejectSimulated: false,
+      publicPayloadDeltaSimulated: false,
+    });
+
+    expect(semantic).toMatchObject({
+      actualDecisionSource: "semantic",
+      result: "semantic_limited_production_actual",
+      rollbackTriggered: false,
+    });
+    expect(legacy).toMatchObject({
+      actualDecisionSource: "legacy",
+      result: "semantic_not_legal_legacy",
+      rollbackTriggered: true,
+    });
+  });
+
+  it("reports active limited scoped production without full production or legacy removal", () => {
+    const report = buildMeta10LimitedScopedProductionCutoverReport();
+
+    expect(report.preActivationQualityGates).toMatchObject({
+      meta7Green: true,
+      meta8InternalCanaryStable: true,
+      meta9ProductionShadowStable: true,
+      openHumanReviewItems: 0,
+      rollbackTested: true,
+      traceScrubberPasses: true,
+      scopeFreezeComplete: true,
+    });
+    expect(report.postActivationQualityGates).toEqual({
+      engineRejectCount: 0,
+      hiddenInfoViolationCount: 0,
+      illegalSemanticDecisionCount: 0,
+      publicPayloadDeltaCount: 0,
+      rollbackFailureCount: 0,
+      determinismFailureCount: 0,
+      unsafeDivergenceCount: 0,
+    });
+    expect(report.monitoring).toMatchObject({
+      semanticDecisionCount: 9,
+      semanticOverrideCount: 3,
+      legacyFallbackCount: 6,
+      rollbackCount: 5,
+      engineRejectCount: 0,
+      publicPayloadDeltaCount: 0,
+    });
+    expect(report.goNoGo).toEqual({
+      decision: "limited_scoped_production_active_with_rollback_constraints",
+      fullProductionReady: false,
+      legacyRemovalReady: false,
+      broadCutoverAllowed: false,
+      nextStep: "META11_scope_expansion_calibration",
+    });
+    expect(report.limitedScopedProductionActive).toBe(true);
+    expect(report.productiveUse).toBe("selected_scopes_only");
+    expect(report.legacyFallbackAvailable).toBe(true);
   });
 });
 
