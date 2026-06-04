@@ -15,6 +15,9 @@ export const SHADOW_SCORING_FIXTURE_DESIGN_SCHEMA_VERSION =
 export const SHADOW_ACTION_RANKING_REPORT_SCHEMA_VERSION =
   "shadow-action-ranking-report-v1" as const;
 
+export const LEGACY_SEMANTIC_COMPARISON_HARNESS_SCHEMA_VERSION =
+  "legacy-semantic-comparison-harness-v1" as const;
+
 export type ShadowFixtureSide = "runner" | "corp";
 
 export type ShadowFixtureHiddenInfoPolicy =
@@ -174,6 +177,51 @@ export type ShadowActionRankingReport = {
   noEffectFlags: DiagnosticNoEffectFlags;
 };
 
+export type LegacyActionReference = {
+  scenarioId: string;
+  legacyActionRef: string;
+  evidence: string[];
+};
+
+export type LegacySemanticComparisonCategory =
+  | "same_reference"
+  | "safe_divergence"
+  | "risky_divergence"
+  | "insufficient_evidence"
+  | "not_compared";
+
+export type LegacySemanticComparisonEntry = {
+  scenarioId: string;
+  side: ShadowFixtureSide;
+  category: LegacySemanticComparisonCategory;
+  legacyActionRef?: string;
+  semanticReportOnlyRef?: string;
+  semanticBucket?: ShadowActionOrderingBucket;
+  reasons: string[];
+  evidence: string[];
+};
+
+export type LegacySemanticComparisonSummary = {
+  scenarioCount: number;
+  comparedScenarios: number;
+  sameReference: number;
+  safeDivergence: number;
+  riskyDivergence: number;
+  insufficientEvidence: number;
+  notCompared: number;
+};
+
+export type LegacySemanticComparisonHarnessReport = {
+  schemaVersion: typeof LEGACY_SEMANTIC_COMPARISON_HARNESS_SCHEMA_VERSION;
+  scope: "diagnostic_legacy_semantic_comparison_only";
+  sourceRankingSchema: typeof SHADOW_ACTION_RANKING_REPORT_SCHEMA_VERSION;
+  entries: LegacySemanticComparisonEntry[];
+  summary: LegacySemanticComparisonSummary;
+  semanticExecutionAllowed: false;
+  productiveUseAllowed: false;
+  noEffectFlags: DiagnosticNoEffectFlags;
+};
+
 export const DEFAULT_SHADOW_SCORING_FIXTURE_CORPUS = [
   runnerFixture("ai047-runner-economy-stabilize", "Runner credits are low and basic economy actions are legal.", ["runner_economy_stabilize"], [
     actionRef("gain_credit", "gain_credit", "economy.gain_credit"),
@@ -312,6 +360,33 @@ export const SHADOW_SCORE_DRAFT_SCHEMA_DESCRIPTOR = {
   forbiddenFields: ["liveScore", "runtimeRank", "selectedAction"],
 } as const satisfies ShadowScoreDraftSchemaDescriptor;
 
+export const DEFAULT_LEGACY_ACTION_REFERENCES = [
+  legacyReference(
+    "ai047-runner-economy-stabilize",
+    "ai047-runner-economy-stabilize.gain_credit",
+  ),
+  legacyReference(
+    "ai047-runner-access-decision",
+    "ai047-runner-access-decision.trash_accessed_card",
+  ),
+  legacyReference(
+    "ai047-runner-run-continuation",
+    "ai047-runner-run-continuation.jack_out",
+  ),
+  legacyReference(
+    "ai047-corp-economy-stabilize",
+    "ai047-corp-economy-stabilize.gain_credit",
+  ),
+  legacyReference(
+    "ai047-corp-remote-score-window",
+    "ai047-corp-remote-score-window.score_agenda",
+  ),
+  legacyReference(
+    "ai047-corp-ambush-access-punish",
+    "ai047-corp-ambush-access-punish.trigger_ability",
+  ),
+] as const satisfies readonly LegacyActionReference[];
+
 export function buildShadowScoringFixtureDesignReport(
   fixtureCorpus: readonly ShadowScoringFixtureScenario[] =
     DEFAULT_SHADOW_SCORING_FIXTURE_CORPUS,
@@ -384,6 +459,27 @@ export function buildShadowActionRankingReport(
   };
 }
 
+export function buildLegacySemanticComparisonHarnessReport(
+  rankingReport: ShadowActionRankingReport = buildShadowActionRankingReport(),
+  legacyReferences: readonly LegacyActionReference[] =
+    DEFAULT_LEGACY_ACTION_REFERENCES,
+): LegacySemanticComparisonHarnessReport {
+  const entries = rankingReport.scenarioReports.map((scenario) =>
+    compareLegacyAndSemanticScenario(scenario, legacyReferences),
+  );
+
+  return {
+    schemaVersion: LEGACY_SEMANTIC_COMPARISON_HARNESS_SCHEMA_VERSION,
+    scope: "diagnostic_legacy_semantic_comparison_only",
+    sourceRankingSchema: SHADOW_ACTION_RANKING_REPORT_SCHEMA_VERSION,
+    entries,
+    summary: summarizeLegacySemanticComparison(entries),
+    semanticExecutionAllowed: false,
+    productiveUseAllowed: false,
+    noEffectFlags: DIAGNOSTIC_NO_EFFECT_FLAGS,
+  };
+}
+
 function runnerFixture(
   scenarioId: string,
   boardSituationSummary: string,
@@ -439,6 +535,17 @@ function actionRef(
     actionType,
     semanticActionType,
     knownGaps,
+  };
+}
+
+function legacyReference(
+  scenarioId: string,
+  legacyActionRef: string,
+): LegacyActionReference {
+  return {
+    scenarioId,
+    legacyActionRef,
+    evidence: [`AI049 fixture legacy reference: ${legacyActionRef}`],
   };
 }
 
@@ -550,6 +657,120 @@ function buildShadowRankingScenarioReport(
     hardGateFailureCategories: uniqueGateIds(
       orderedCandidates.flatMap((candidate) => candidate.hardGateFailures),
     ),
+  };
+}
+
+function compareLegacyAndSemanticScenario(
+  scenario: ShadowActionRankingScenarioReport,
+  legacyReferences: readonly LegacyActionReference[],
+): LegacySemanticComparisonEntry {
+  const legacyRef = legacyReferences.find(
+    (reference) => reference.scenarioId === scenario.scenarioId,
+  );
+  if (legacyRef === undefined) {
+    return {
+      scenarioId: scenario.scenarioId,
+      side: scenario.side,
+      category: "not_compared",
+      reasons: ["No legacy reference is documented for this fixture."],
+      evidence: [],
+    };
+  }
+
+  const semanticRef = scenario.orderedCandidates[0];
+  if (semanticRef === undefined) {
+    return {
+      scenarioId: scenario.scenarioId,
+      side: scenario.side,
+      category: "insufficient_evidence",
+      legacyActionRef: legacyRef.legacyActionRef,
+      reasons: ["No semantic report-only candidate exists for comparison."],
+      evidence: [...legacyRef.evidence],
+    };
+  }
+
+  const legacyCandidate = scenario.orderedCandidates.find(
+    (candidate) => candidate.candidateId === legacyRef.legacyActionRef,
+  );
+  const category = comparisonCategory(legacyRef, semanticRef, legacyCandidate);
+
+  return {
+    scenarioId: scenario.scenarioId,
+    side: scenario.side,
+    category,
+    legacyActionRef: legacyRef.legacyActionRef,
+    semanticReportOnlyRef: semanticRef.candidateId,
+    semanticBucket: semanticRef.bucket,
+    reasons: comparisonReasons(category, semanticRef, legacyCandidate),
+    evidence: [
+      ...legacyRef.evidence,
+      ...semanticRef.evidence,
+      ...(legacyCandidate?.evidence ?? []),
+    ],
+  };
+}
+
+function comparisonCategory(
+  legacyRef: LegacyActionReference,
+  semanticRef: ShadowActionRankingEntry,
+  legacyCandidate: ShadowActionRankingEntry | undefined,
+): LegacySemanticComparisonCategory {
+  if (semanticRef.bucket !== "score_draft_available") {
+    return "insufficient_evidence";
+  }
+  if (legacyRef.legacyActionRef === semanticRef.candidateId) {
+    return "same_reference";
+  }
+  if (legacyCandidate === undefined) return "not_compared";
+  if (legacyCandidate.bucket === "score_draft_available") return "safe_divergence";
+  return "risky_divergence";
+}
+
+function comparisonReasons(
+  category: LegacySemanticComparisonCategory,
+  semanticRef: ShadowActionRankingEntry,
+  legacyCandidate: ShadowActionRankingEntry | undefined,
+): string[] {
+  if (category === "same_reference") {
+    return ["Legacy and semantic report-only references point to the same candidate."];
+  }
+  if (category === "safe_divergence") {
+    return [
+      "Legacy differs from semantic report-only reference, but both candidates are score-draft-available.",
+    ];
+  }
+  if (category === "risky_divergence") {
+    return [
+      `Legacy differs and is not fully evidence-ready: ${legacyCandidate?.bucket ?? "missing"}.`,
+    ];
+  }
+  if (category === "insufficient_evidence") {
+    return [
+      `Semantic report-only reference is not score-draft-ready: ${semanticRef.bucket}.`,
+    ];
+  }
+  return ["Comparison is not available for this fixture."];
+}
+
+function summarizeLegacySemanticComparison(
+  entries: readonly LegacySemanticComparisonEntry[],
+): LegacySemanticComparisonSummary {
+  return {
+    scenarioCount: entries.length,
+    comparedScenarios: entries.filter((entry) => entry.category !== "not_compared")
+      .length,
+    sameReference: entries.filter((entry) => entry.category === "same_reference")
+      .length,
+    safeDivergence: entries.filter((entry) => entry.category === "safe_divergence")
+      .length,
+    riskyDivergence: entries.filter(
+      (entry) => entry.category === "risky_divergence",
+    ).length,
+    insufficientEvidence: entries.filter(
+      (entry) => entry.category === "insufficient_evidence",
+    ).length,
+    notCompared: entries.filter((entry) => entry.category === "not_compared")
+      .length,
   };
 }
 

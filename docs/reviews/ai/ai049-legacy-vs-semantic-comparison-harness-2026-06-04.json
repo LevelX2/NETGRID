@@ -1,0 +1,63 @@
+{
+  "step": "AI049",
+  "title": "Legacy-vs-Semantic Comparison Harness",
+  "date": "2026-06-04",
+  "status": "done",
+  "sourceCommit": "123960ee",
+  "runtimeConsumerStatus": "none",
+  "diagnosticScope": "legacy_semantic_comparison_only",
+  "schemaVersion": "legacy-semantic-comparison-harness-v1",
+  "implementationFiles": [
+    "packages/ai/src/shadow-scoring-diagnostics.ts",
+    "packages/ai/src/shadow-scoring-diagnostics.test.ts"
+  ],
+  "comparisonCategories": [
+    "same_reference",
+    "safe_divergence",
+    "risky_divergence",
+    "insufficient_evidence",
+    "not_compared"
+  ],
+  "summary": {
+    "scenarioCount": 14,
+    "comparedScenarios": 6,
+    "sameReference": 2,
+    "safeDivergence": 1,
+    "riskyDivergence": 1,
+    "insufficientEvidence": 2,
+    "notCompared": 8
+  },
+  "riskPolicy": "Risky divergence means the legacy reference points to a candidate that is not score-draft-ready while the semantic report-only reference is available. It is a review signal, not an action decision.",
+  "semanticExecutionAllowed": false,
+  "productiveUseAllowed": false,
+  "runtimeFilesTouched": [],
+  "forbiddenInThisStepConfirmedAbsent": [
+    "productive chooseSemanticAiAction",
+    "live numeric scoring",
+    "productive ranking",
+    "action selection",
+    "planner weights",
+    "runtime consumer",
+    "hidden-info projection",
+    "legality generation"
+  ],
+  "verification": [
+    "node scripts/check-ai047-shadow-scoring-fixture-design.mjs",
+    "node scripts/check-ai048-shadow-only-action-ranking-report.mjs",
+    "node scripts/check-ai049-legacy-vs-semantic-comparison-harness.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- shadow-scoring-diagnostics.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "git diff --check"
+  ],
+  "noEffectFlags": {
+    "planner": false,
+    "actionScore": false,
+    "planWeight": false,
+    "targetingAi": false,
+    "engine": false,
+    "legality": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivation": false,
+    "hiddenInfoLeak": false
+  }
+}
