@@ -12,6 +12,7 @@
 - `ki-zielbild-metaebene-2026-06-01-v5.md`: Zielbild der künftigen semantischen KI-Kette von Kartensemantik über DeckDoctrine und taktische Zwischenziele bis zu semantisch verstandenen LegalActions.
 - `ki-roadmap-neue-ki-spieler-2026-06-02-v1.md`: Roadmap für neue semantische KI-Spieler mit read-only Foundation, Action-Semantik-Brücke, Shadow Mode und bereichsweisem Cutover.
 - `taktiksignale-strategieanker-guide-2026-06-02-v3.md`: Leitfaden für Taktiksignale, Strategieanker, Rollen, TargetProfiles, Conditions, Risiken und Constraints.
+- `action-semantics-bridge-automation-process-2026-06-04.md`: sequenzieller AI034-bis-AI043-Prozess für die read-only Action-Semantik-Brücke mit Preflight, Szenario-Coverage, erweitertem Candidate-/Gate-Schema, eigenem Arbeits-Worktree, lokalen Merge-nach-`main`-Regeln und Handoff.
 
 ## Regel
 
