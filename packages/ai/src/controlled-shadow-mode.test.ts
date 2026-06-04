@@ -3,6 +3,8 @@ import { describe, expect, it } from "vitest";
 import {
   CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
   FORBIDDEN_SHADOW_TRACE_CONSUMERS,
+  buildSemanticShadowDecisionForFixture,
+  buildSemanticShadowDecisionReport,
   buildShadowScenarioCorpusReport,
   buildShadowModeTraceContractReport,
   type ShadowDecisionTrace,
@@ -158,6 +160,86 @@ describe("buildShadowScenarioCorpusReport", () => {
     expect(report.noRuntimeEffect).toBe(true);
     expect(Object.values(report.noEffectFlags).every((value) => value === false)).toBe(
       true,
+    );
+  });
+});
+
+describe("buildSemanticShadowDecisionReport", () => {
+  it("computes semantic shadow decisions for every AI052 fixture without runtime consumers", () => {
+    const report = buildSemanticShadowDecisionReport();
+
+    expect(report.schemaVersion).toBe("semantic-shadow-decision-v0");
+    expect(report.scope).toBe("semantic_shadow_decision_v0_report_only");
+    expect(report.runtimeConsumerStatus).toBe("none");
+    expect(report.semanticExecutionAllowed).toBe(false);
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.summary).toEqual({
+      scenarioCount: 33,
+      rankedShadowOnly: 8,
+      blockedByGate: 3,
+      blockedByGap: 22,
+      noCandidate: 0,
+      notScored: 0,
+      selectedActionCount: 8,
+      runtimeConsumerCount: 0,
+      illegalSemanticDecisionCount: 0,
+      hiddenInfoViolationCount: 0,
+    });
+  });
+
+  it("selects only a synthetic LegalAction candidate when no hard gate or gap blocks ranking", () => {
+    const corpus = buildShadowScenarioCorpusReport();
+    const fixture = corpus.fixtures.find(
+      (candidate) => candidate.scenarioId === "runner_draw_vs_credit",
+    );
+
+    expect(fixture).toBeDefined();
+    const decision = buildSemanticShadowDecisionForFixture(fixture!);
+
+    expect(decision.scoreStatus).toBe("ranked_shadow_only");
+    expect(decision.selectedActionId).toBe("runner_draw_vs_credit.draw_card.1");
+    expect(decision.selectedCandidateId).toBe(
+      "runner_draw_vs_credit.draw_card.1",
+    );
+    expect(decision.noRuntimeEffect).toBe(true);
+  });
+
+  it("blocks target, ability, card and cost gaps without guessing semantics", () => {
+    const report = buildSemanticShadowDecisionReport();
+    const blocked = report.scenarioResults.find(
+      (result) => result.scenarioId === "runner_break_subroutine",
+    );
+
+    expect(blocked?.decision.scoreStatus).toBe("blocked_by_gap");
+    expect(blocked?.decision.selectedActionId).toBeUndefined();
+    expect(blocked?.decision.blockingReasons).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          scoreStatus: "blocked_by_gap",
+          gap: "ability_unresolved",
+        }),
+        expect.objectContaining({
+          scoreStatus: "blocked_by_gap",
+          gap: "target_context_unavailable",
+        }),
+      ]),
+    );
+  });
+
+  it("keeps hidden-info boundary scenarios blocked by gate", () => {
+    const report = buildSemanticShadowDecisionReport();
+    const hidden = report.scenarioResults.find(
+      (result) => result.scenarioId === "hidden_info_boundary_unrezzed_ice",
+    );
+
+    expect(hidden?.decision.scoreStatus).toBe("blocked_by_gate");
+    expect(hidden?.decision.selectedActionId).toBeUndefined();
+    expect(hidden?.decision.blockingReasons[0]).toEqual(
+      expect.objectContaining({
+        scoreStatus: "blocked_by_gate",
+        gateId: "hidden_info",
+        gap: "hidden_info_blocked",
+      }),
     );
   });
 });

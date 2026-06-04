@@ -1,0 +1,70 @@
+{
+  "step": "AI053",
+  "title": "Semantic Shadow Decision v0",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai051-ai060-controlled-shadow-mode",
+  "schemaVersion": "semantic-shadow-decision-v0",
+  "scope": "semantic_shadow_decision_v0_report_only",
+  "runtimeConsumerStatus": "none",
+  "semanticExecutionAllowed": false,
+  "productiveUseAllowed": false,
+  "noRuntimeEffect": true,
+  "sourceCorpus": "data/scenarios/ai052-shadow-scenario-corpus-2026-06-04.json",
+  "summary": {
+    "scenarioCount": 33,
+    "rankedShadowOnly": 8,
+    "blockedByGate": 3,
+    "blockedByGap": 22,
+    "noCandidate": 0,
+    "notScored": 0,
+    "selectedActionCount": 8,
+    "runtimeConsumerCount": 0,
+    "illegalSemanticDecisionCount": 0,
+    "hiddenInfoViolationCount": 0
+  },
+  "scoreStatusPolicy": {
+    "hardGatesFirst": true,
+    "hiddenInfoBlockedStatus": "blocked_by_gate",
+    "requiredGapStatus": "blocked_by_gap",
+    "availableStatus": "ranked_shadow_only",
+    "rankingPolicy": "deterministic_input_order_without_numeric_planner_weight"
+  },
+  "implementationFiles": [
+    "packages/ai/src/controlled-shadow-mode.ts",
+    "packages/ai/src/controlled-shadow-mode.test.ts"
+  ],
+  "reportFiles": [
+    "docs/reviews/ai/ai053-semantic-shadow-decision-v0-2026-06-04.md",
+    "docs/reviews/ai/ai053-semantic-shadow-decision-v0-2026-06-04.json"
+  ],
+  "checkScripts": [
+    "scripts/check-ai053-semantic-shadow-decision-v0.mjs"
+  ],
+  "runtimeFilesTouched": [],
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "verification": [
+    "node scripts/check-ai053-semantic-shadow-decision-v0.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- controlled-shadow-mode.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "node scripts/check-ai052-shadow-scenario-corpus.mjs",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "doneGate": {
+    "fixturesComputeSemanticShadowDecision": true,
+    "productiveConsumers": 0,
+    "semanticExecutionPaths": 0,
+    "blockedCandidatesExplainable": true,
+    "noRuntimeEffect": true
+  }
+}

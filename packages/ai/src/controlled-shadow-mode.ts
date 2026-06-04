@@ -14,6 +14,9 @@ export const SHADOW_MODE_TRACE_CONTRACT_SCHEMA_VERSION =
 export const SHADOW_SCENARIO_CORPUS_SCHEMA_VERSION =
   "shadow-scenario-corpus-v1" as const;
 
+export const SEMANTIC_SHADOW_DECISION_SCHEMA_VERSION =
+  "semantic-shadow-decision-v0" as const;
+
 export const CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS = {
   actualDecisionOverride: false,
   productiveScoring: false,
@@ -140,6 +143,48 @@ export type ShadowBlockingReason = {
   gap?: ActionProjectionIssue;
   reason: string;
   evidence: string[];
+};
+
+export type SemanticShadowDecision = {
+  selectedActionId?: string;
+  selectedCandidateId?: string;
+  scoreStatus: SemanticShadowScoreStatus;
+  ranking: ShadowCandidateRank[];
+  blockingReasons: ShadowBlockingReason[];
+  whyNot: WhyNotTrace[];
+  noRuntimeEffect: true;
+};
+
+export type SemanticShadowDecisionScenarioResult = {
+  scenarioId: string;
+  side: ShadowActorSide;
+  decision: SemanticShadowDecision;
+};
+
+export type SemanticShadowDecisionSummary = {
+  scenarioCount: number;
+  rankedShadowOnly: number;
+  blockedByGate: number;
+  blockedByGap: number;
+  noCandidate: number;
+  notScored: number;
+  selectedActionCount: number;
+  runtimeConsumerCount: 0;
+  illegalSemanticDecisionCount: 0;
+  hiddenInfoViolationCount: 0;
+};
+
+export type SemanticShadowDecisionReport = {
+  schemaVersion: typeof SEMANTIC_SHADOW_DECISION_SCHEMA_VERSION;
+  scope: "semantic_shadow_decision_v0_report_only";
+  sourceCorpusSchema: typeof SHADOW_SCENARIO_CORPUS_SCHEMA_VERSION;
+  scenarioResults: SemanticShadowDecisionScenarioResult[];
+  summary: SemanticShadowDecisionSummary;
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
 };
 
 export type WhyNotTrace = {
@@ -680,6 +725,87 @@ export function buildShadowScenarioCorpusReport(
   };
 }
 
+export function buildSemanticShadowDecisionReport(
+  fixtures: readonly ShadowScenarioFixture[] = DEFAULT_SHADOW_SCENARIO_CORPUS,
+): SemanticShadowDecisionReport {
+  const scenarioResults = fixtures.map((fixture) => ({
+    scenarioId: fixture.scenarioId,
+    side: fixture.side,
+    decision: buildSemanticShadowDecisionForFixture(fixture),
+  }));
+
+  return {
+    schemaVersion: SEMANTIC_SHADOW_DECISION_SCHEMA_VERSION,
+    scope: "semantic_shadow_decision_v0_report_only",
+    sourceCorpusSchema: SHADOW_SCENARIO_CORPUS_SCHEMA_VERSION,
+    scenarioResults,
+    summary: summarizeSemanticShadowDecisions(scenarioResults),
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildSemanticShadowDecisionForFixture(
+  fixture: ShadowScenarioFixture,
+): SemanticShadowDecision {
+  const ranking = fixture.expectedLegalActionTypes.map((actionType, index) =>
+    rankCandidateForFixture(fixture, actionType, index),
+  );
+  if (!fixture.allowedShadow || ranking.length === 0) {
+    return {
+      scoreStatus: "no_candidate",
+      ranking,
+      blockingReasons: [
+        {
+          candidateId: `${fixture.scenarioId}.no_candidate`,
+          scoreStatus: "not_scored",
+          reason:
+            fixture.reasonIfDisabled ??
+            "Scenario has no semantic shadow candidate in AI053.",
+          evidence: [fixture.scenarioId],
+        },
+      ],
+      whyNot: [],
+      noRuntimeEffect: true,
+    };
+  }
+
+  const scoreStatus = scoreStatusForFixture(fixture);
+  const blockingReasons =
+    scoreStatus === "ranked_shadow_only"
+      ? []
+      : ranking.flatMap((candidate) => blockingReasonsForCandidate(fixture, candidate));
+  const whyNot =
+    scoreStatus === "ranked_shadow_only"
+      ? whyNotForRankedCandidates(ranking)
+      : blockingReasons.map(whyNotForBlockingReason);
+
+  return {
+    ...(scoreStatus === "ranked_shadow_only"
+      ? selectedFieldsForRanking(ranking)
+      : {}),
+    scoreStatus,
+    ranking,
+    blockingReasons,
+    whyNot,
+    noRuntimeEffect: true,
+  };
+}
+
+function selectedFieldsForRanking(
+  ranking: readonly ShadowCandidateRank[],
+): Pick<SemanticShadowDecision, "selectedActionId" | "selectedCandidateId"> | {} {
+  const topCandidate = ranking[0];
+  if (topCandidate === undefined) return {};
+  return {
+    selectedActionId: topCandidate.actionId,
+    selectedCandidateId: topCandidate.candidateId,
+  };
+}
+
 function scenario(
   params: Omit<
     ShadowScenarioFixture,
@@ -765,4 +891,150 @@ function summarizeShadowScenarioCorpus(
       ...new Set(fixtures.flatMap((fixture) => fixture.knownProjectionGaps)),
     ],
   };
+}
+
+function rankCandidateForFixture(
+  fixture: ShadowScenarioFixture,
+  actionType: string,
+  index: number,
+): ShadowCandidateRank {
+  const scoreStatus = scoreStatusForFixture(fixture);
+  const candidateId = `${fixture.scenarioId}.${actionType}.${index + 1}`;
+
+  return {
+    candidateId,
+    actionId: candidateId,
+    actionType,
+    rankIndex: index,
+    scoreStatus,
+    evidenceBuckets: {
+      goalAlignment: fixture.expectedTacticalGoals.map(
+        (goal) => `AI053 fixture goal evidence: ${goal}`,
+      ),
+      doctrineAlignment: [
+        "AI053 v0 uses only declared fixture goals and side-safe diagnostics.",
+      ],
+      basicActionValue: [
+        `AI053 deterministic input-order candidate: ${actionType}`,
+      ],
+      costPenalty: gapEvidence(fixture, "cost_unknown"),
+      riskPenalty: gapEvidence(fixture, "card_semantics_unavailable"),
+      timingFit: gapEvidence(fixture, "timing_unknown"),
+      targetFit: gapEvidence(fixture, "target_context_unavailable"),
+      boardThreatResponse: gapEvidence(fixture, "hidden_info_blocked"),
+    },
+  };
+}
+
+function scoreStatusForFixture(
+  fixture: ShadowScenarioFixture,
+): SemanticShadowScoreStatus {
+  if (!fixture.allowedShadow) return "not_scored";
+  if (fixture.expectedLegalActionTypes.length === 0) return "no_candidate";
+  if (fixture.knownProjectionGaps.includes("hidden_info_blocked")) {
+    return "blocked_by_gate";
+  }
+  if (fixture.knownProjectionGaps.length > 0) return "blocked_by_gap";
+  return "ranked_shadow_only";
+}
+
+function blockingReasonsForCandidate(
+  fixture: ShadowScenarioFixture,
+  candidate: ShadowCandidateRank,
+): ShadowBlockingReason[] {
+  if (fixture.knownProjectionGaps.includes("hidden_info_blocked")) {
+    return [
+      {
+        candidateId: candidate.candidateId,
+        scoreStatus: "blocked_by_gate",
+        gateId: "hidden_info",
+        gap: "hidden_info_blocked",
+        reason: "Hidden-info boundary blocks semantic shadow ranking.",
+        evidence: [...fixture.hiddenInfoBoundary],
+      },
+    ];
+  }
+
+  return fixture.knownProjectionGaps.map((gap) => ({
+    candidateId: candidate.candidateId,
+    scoreStatus: "blocked_by_gap",
+    gap,
+    reason: `Required diagnostic evidence is unavailable: ${gap}`,
+    evidence: [
+      fixture.scenarioId,
+      ...fixture.requiredCandidateFields.map((field) => `requires ${field}`),
+    ],
+  }));
+}
+
+function whyNotForRankedCandidates(
+  ranking: readonly ShadowCandidateRank[],
+): WhyNotTrace[] {
+  const topCandidate = ranking[0];
+  if (topCandidate === undefined) return [];
+  return ranking.slice(1).map((candidate) => ({
+    candidateId: candidate.candidateId,
+    comparedWithCandidateId: topCandidate.candidateId,
+    reason: "lower_goal_alignment",
+    evidence: [
+      "AI053 v0 uses deterministic input order when no hard gate or required gap blocks ranking.",
+    ],
+  }));
+}
+
+function whyNotForBlockingReason(reason: ShadowBlockingReason): WhyNotTrace {
+  return {
+    candidateId: reason.candidateId,
+    reason: whyNotReasonForBlockingReason(reason),
+    evidence: [...reason.evidence],
+  };
+}
+
+function whyNotReasonForBlockingReason(
+  reason: ShadowBlockingReason,
+): WhyNotTrace["reason"] {
+  if (reason.scoreStatus === "blocked_by_gate") return "hard_gate_blocked";
+  if (reason.gap === "target_context_unavailable") {
+    return "target_context_missing";
+  }
+  if (reason.gap === "cost_unknown" || reason.gap === "timing_unknown") {
+    return "cost_or_timing_unknown";
+  }
+  return "required_gap";
+}
+
+function gapEvidence(
+  fixture: ShadowScenarioFixture,
+  gap: ActionProjectionIssue,
+): string[] {
+  return fixture.knownProjectionGaps.includes(gap)
+    ? [`AI053 blocked evidence gap: ${gap}`]
+    : [];
+}
+
+function summarizeSemanticShadowDecisions(
+  scenarioResults: readonly SemanticShadowDecisionScenarioResult[],
+): SemanticShadowDecisionSummary {
+  return {
+    scenarioCount: scenarioResults.length,
+    rankedShadowOnly: countDecisions(scenarioResults, "ranked_shadow_only"),
+    blockedByGate: countDecisions(scenarioResults, "blocked_by_gate"),
+    blockedByGap: countDecisions(scenarioResults, "blocked_by_gap"),
+    noCandidate: countDecisions(scenarioResults, "no_candidate"),
+    notScored: countDecisions(scenarioResults, "not_scored"),
+    selectedActionCount: scenarioResults.filter(
+      (result) => result.decision.selectedActionId !== undefined,
+    ).length,
+    runtimeConsumerCount: 0,
+    illegalSemanticDecisionCount: 0,
+    hiddenInfoViolationCount: 0,
+  };
+}
+
+function countDecisions(
+  scenarioResults: readonly SemanticShadowDecisionScenarioResult[],
+  status: SemanticShadowScoreStatus,
+): number {
+  return scenarioResults.filter((result) => result.decision.scoreStatus === status)
+    .length;
 }

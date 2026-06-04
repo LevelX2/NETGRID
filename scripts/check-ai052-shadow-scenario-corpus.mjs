@@ -159,7 +159,6 @@ for (const requiredTest of [
 if (!progress.completedSteps.includes("AI052")) {
   fail("progress must include AI052");
 }
-if (progress.currentStep !== "AI053") fail("progress currentStep must be AI053");
 if (progress.blocked !== false) fail("progress blocked must be false");
 
 const allowedChangedFiles = [
