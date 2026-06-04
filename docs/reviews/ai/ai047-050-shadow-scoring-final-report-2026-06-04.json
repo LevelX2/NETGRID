@@ -1,0 +1,97 @@
+{
+  "step": "AI047-AI050-FINAL",
+  "title": "Shadow-only Scoring and Evaluation Follow-up Final Report",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai047-ai050-shadow-scoring",
+  "runtimeConsumerStatus": "none",
+  "scope": "AI047 Shadow-only Scoring Fixture Design, AI048 Shadow-only Action Ranking Report, AI049 Legacy-vs-Semantic Comparison Harness and AI050 Hard-Gate/Rollback Readiness Review",
+  "completedSteps": [
+    {
+      "step": "AI047",
+      "status": "done",
+      "commit": "67bd106d",
+      "artifact": "docs/reviews/ai/ai047-shadow-scoring-fixture-design-2026-06-04.json"
+    },
+    {
+      "step": "AI048",
+      "status": "done",
+      "commit": "123960ee",
+      "artifact": "docs/reviews/ai/ai048-shadow-only-action-ranking-report-2026-06-04.json"
+    },
+    {
+      "step": "AI049",
+      "status": "done",
+      "commit": "99db2807",
+      "artifact": "docs/reviews/ai/ai049-legacy-vs-semantic-comparison-harness-2026-06-04.json"
+    },
+    {
+      "step": "AI050",
+      "status": "done",
+      "commit": "1bf8fd75",
+      "artifact": "docs/reviews/ai/ai050-hard-gate-rollback-readiness-review-2026-06-04.json"
+    }
+  ],
+  "implementationFiles": [
+    "packages/ai/src/shadow-scoring-diagnostics.ts",
+    "packages/ai/src/shadow-scoring-diagnostics.test.ts"
+  ],
+  "reportFiles": [
+    "docs/reviews/ai/ai047-shadow-scoring-fixture-design-2026-06-04.md",
+    "docs/reviews/ai/ai047-shadow-scoring-fixture-design-2026-06-04.json",
+    "docs/reviews/ai/ai048-shadow-only-action-ranking-report-2026-06-04.md",
+    "docs/reviews/ai/ai048-shadow-only-action-ranking-report-2026-06-04.json",
+    "docs/reviews/ai/ai049-legacy-vs-semantic-comparison-harness-2026-06-04.md",
+    "docs/reviews/ai/ai049-legacy-vs-semantic-comparison-harness-2026-06-04.json",
+    "docs/reviews/ai/ai050-hard-gate-rollback-readiness-review-2026-06-04.md",
+    "docs/reviews/ai/ai050-hard-gate-rollback-readiness-review-2026-06-04.json"
+  ],
+  "checkScripts": [
+    "scripts/check-ai047-shadow-scoring-fixture-design.mjs",
+    "scripts/check-ai048-shadow-only-action-ranking-report.mjs",
+    "scripts/check-ai049-legacy-vs-semantic-comparison-harness.mjs",
+    "scripts/check-ai050-hard-gate-rollback-readiness-review.mjs"
+  ],
+  "broaderShadowSimulationReadiness": "ready_with_constraints",
+  "productiveCutoverReadiness": "blocked",
+  "recommendedNextStep": "broader_shadow_simulation",
+  "localMainMergePrecondition": "ready_after_final_verification",
+  "currentAiDevelopmentNeed": "The AI now needs broader shadow simulation over the documented scenario corpus, with zero hidden-info violations, zero illegal semantic references, resolved or explicitly blocked target and ability gaps, and reversible feature flags before any productive cutover can be reconsidered.",
+  "verification": [
+    "node scripts/check-ai047-shadow-scoring-fixture-design.mjs",
+    "node scripts/check-ai048-shadow-only-action-ranking-report.mjs",
+    "node scripts/check-ai049-legacy-vs-semantic-comparison-harness.mjs",
+    "node scripts/check-ai050-hard-gate-rollback-readiness-review.mjs",
+    "node scripts/check-ai043-r-readiness-audit-decision.mjs",
+    "node scripts/check-ai044-deck-doctrine-v2-diagnostic-schema.mjs",
+    "node scripts/check-ai045-tactical-goal-taxonomy.mjs",
+    "node scripts/check-ai046-action-goal-mapping-report.mjs",
+    "node scripts/check-ai044-046-diagnostic-doctrine-goal-final-report.mjs",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "corepack pnpm --filter @netgrid/ai test",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "stillForbidden": [
+    "productive scoring",
+    "live numeric scoring",
+    "productive ranking",
+    "action selection",
+    "planner weights",
+    "runtime consumer",
+    "hidden-info projection",
+    "legality generation",
+    "feature flag cutover"
+  ],
+  "noEffectFlags": {
+    "planner": false,
+    "actionScore": false,
+    "planWeight": false,
+    "targetingAi": false,
+    "engine": false,
+    "legality": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivation": false,
+    "hiddenInfoLeak": false
+  }
+}
