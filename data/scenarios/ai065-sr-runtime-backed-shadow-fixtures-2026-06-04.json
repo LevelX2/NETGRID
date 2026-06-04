@@ -1,0 +1,107 @@
+{
+  "schemaVersion": "ai065-sr-runtime-backed-shadow-fixture-promotion-v1",
+  "date": "2026-06-04",
+  "source": "AI065-SR Runtime-backed Shadow Fixture Promotion",
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "runtimeConsumerStatus": "none",
+  "noRuntimeEffect": true,
+  "fixtureSelectionPolicy": "safe_non_hidden_boundary_fixtures_only",
+  "promotedFixtures": [
+    {
+      "scenarioId": "runner_basic_economy",
+      "side": "runner",
+      "setupKind": "saved_state",
+      "stateRef": "data/scenarios/ai065-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_basic_economy",
+      "promotionReason": "safe_basic_economy",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "expectedLegalActionTypes": ["gain_credit"]
+    },
+    {
+      "scenarioId": "runner_draw_vs_credit",
+      "side": "runner",
+      "setupKind": "saved_state",
+      "stateRef": "data/scenarios/ai065-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_draw_vs_credit",
+      "promotionReason": "safe_draw_or_install",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "expectedLegalActionTypes": ["draw_card", "gain_credit"]
+    },
+    {
+      "scenarioId": "runner_install_program",
+      "side": "runner",
+      "setupKind": "saved_state",
+      "stateRef": "data/scenarios/ai065-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_install_program",
+      "promotionReason": "safe_draw_or_install",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "expectedLegalActionTypes": ["install_card"]
+    },
+    {
+      "scenarioId": "runner_start_hq_run",
+      "side": "runner",
+      "setupKind": "saved_state",
+      "stateRef": "data/scenarios/ai065-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_start_hq_run",
+      "promotionReason": "safe_side_safe_run_target",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "expectedLegalActionTypes": ["start_run"]
+    },
+    {
+      "scenarioId": "runner_access_steal_agenda",
+      "side": "runner",
+      "setupKind": "saved_state",
+      "stateRef": "data/scenarios/ai065-sr-runtime-backed-shadow-fixtures-2026-06-04.json#runner_access_steal_agenda",
+      "promotionReason": "safe_access_window",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "expectedLegalActionTypes": ["steal_agenda"]
+    },
+    {
+      "scenarioId": "corp_basic_economy",
+      "side": "corp",
+      "setupKind": "saved_state",
+      "stateRef": "data/scenarios/ai065-sr-runtime-backed-shadow-fixtures-2026-06-04.json#corp_basic_economy",
+      "promotionReason": "safe_basic_economy",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "expectedLegalActionTypes": ["gain_credit"]
+    },
+    {
+      "scenarioId": "corp_install_ice",
+      "side": "corp",
+      "setupKind": "saved_state",
+      "stateRef": "data/scenarios/ai065-sr-runtime-backed-shadow-fixtures-2026-06-04.json#corp_install_ice",
+      "promotionReason": "safe_corp_install_or_score",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "expectedLegalActionTypes": ["install_card"]
+    },
+    {
+      "scenarioId": "corp_score_agenda",
+      "side": "corp",
+      "setupKind": "saved_state",
+      "stateRef": "data/scenarios/ai065-sr-runtime-backed-shadow-fixtures-2026-06-04.json#corp_score_agenda",
+      "promotionReason": "safe_corp_install_or_score",
+      "deterministicReference": true,
+      "hiddenInfoRisk": "low",
+      "expectedLegalActionTypes": ["score_agenda"]
+    }
+  ],
+  "notPromotedPolicy": {
+    "hiddenInfoBoundaryFixturesRemainSynthetic": true,
+    "multiAbilityUnresolvedGuardRemainsSynthetic": true,
+    "laterRuntimeCaptureAllowedOnlyWithSameSafetyGates": true
+  },
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  }
+}

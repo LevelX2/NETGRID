@@ -6,13 +6,16 @@ import {
   AI062_SR_SIDE_SAFE_ABILITY_BINDINGS,
   AI063_SR_SIDE_SAFE_CARD_SEMANTICS_JOINS,
   AI064_SR_SIDE_SAFE_COST_TIMING_EVIDENCE,
+  AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTIONS,
   buildAi061SrTargetContextProjectionExpansionReport,
   buildAi062SrAbilityBindingExpansionReport,
   buildAi063SrCardSemanticsJoinCoverageReport,
   buildAi064SrCostTimingEvidenceExpansionReport,
+  buildAi065SrRuntimeBackedShadowFixturePromotionReport,
   buildFixturesAfterAbilityBindingExpansion,
   buildFixturesAfterCardSemanticsJoinCoverage,
   buildFixturesAfterCostTimingEvidenceExpansion,
+  buildFixturesAfterRuntimeBackedShadowFixturePromotion,
   buildFixturesAfterTargetContextProjection,
 } from "./shadow-readiness-expansion";
 
@@ -82,6 +85,64 @@ describe("AI061-SR TargetContext Projection Expansion", () => {
     expect(Object.values(batch.noEffectFlags).every((value) => value === false)).toBe(
       true,
     );
+  });
+});
+
+describe("AI065-SR Runtime-backed Shadow Fixture Promotion", () => {
+  it("promotes selected safe fixtures to saved-state references", () => {
+    const report = buildAi065SrRuntimeBackedShadowFixturePromotionReport();
+
+    expect(report.schemaVersion).toBe(
+      "ai065-sr-runtime-backed-shadow-fixture-promotion-v1",
+    );
+    expect(report.step).toBe("AI065-SR");
+    expect(report.runtimeBackedFixtureCountBefore).toBe(0);
+    expect(report.promotedFixtureCount).toBe(8);
+    expect(report.runtimeBackedFixtureCountAfter).toBe(8);
+    expect(report.runtimeBackedFixtureRateAfter).toBe(0.2424);
+    expect(report.fixtureFile).toBe(
+      "data/scenarios/ai065-sr-runtime-backed-shadow-fixtures-2026-06-04.json",
+    );
+  });
+
+  it("does not promote hidden-info or unresolved multi-ability guards", () => {
+    expect(
+      AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTIONS.map(
+        (promotion) => promotion.scenarioId,
+      ),
+    ).not.toEqual(
+      expect.arrayContaining([
+        "hidden_info_boundary_unrezzed_ice",
+        "hidden_resource_boundary",
+        "corp_ambush_or_remote_bait",
+        "multi_ability_card_unresolved",
+      ]),
+    );
+    expect(
+      AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTIONS.every(
+        (promotion) =>
+          promotion.promotedSetupKind === "saved_state" &&
+          promotion.deterministicReference === true &&
+          promotion.hiddenInfoRisk === "low" &&
+          promotion.productiveChangeAllowed === false,
+      ),
+    ).toBe(true);
+  });
+
+  it("updates fixture setup kinds while preserving diagnostic safety", () => {
+    const fixtures = buildFixturesAfterRuntimeBackedShadowFixturePromotion();
+    const saved = fixtures.filter((fixture) => fixture.setupKind === "saved_state");
+    const batch = buildShadowEvaluationBatchReport(fixtures);
+
+    expect(saved).toHaveLength(8);
+    expect(saved.every((fixture) => fixture.stateRef !== undefined)).toBe(true);
+    expect(
+      fixtures.find((fixture) => fixture.scenarioId === "hidden_resource_boundary")
+        ?.setupKind,
+    ).toBe("synthetic_legal_actions");
+    expect(batch.hardGateFailures).toEqual([]);
+    expect(batch.actualDecisionOverrideCount).toBe(0);
+    expect(batch.runtimeEffectCount).toBe(0);
   });
 });
 

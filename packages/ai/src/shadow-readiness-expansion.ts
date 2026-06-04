@@ -24,6 +24,9 @@ export const AI063_SR_CARD_SEMANTICS_JOIN_SCHEMA_VERSION =
 export const AI064_SR_COST_TIMING_EVIDENCE_SCHEMA_VERSION =
   "ai064-sr-cost-timing-evidence-expansion-v1" as const;
 
+export const AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTION_SCHEMA_VERSION =
+  "ai065-sr-runtime-backed-shadow-fixture-promotion-v1" as const;
+
 export const SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS =
   CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS;
 
@@ -198,6 +201,48 @@ export type Ai064SrCostTimingEvidenceExpansionReport = {
     ShadowEvaluationBatchReport,
     "scenarioCount" | "decisionPointCount" | "topSemanticGaps"
   >;
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type RuntimeBackedShadowFixturePromotion = {
+  scenarioId: string;
+  side: ShadowActorSide;
+  promotedSetupKind: "saved_state";
+  stateRef: string;
+  promotionReason:
+    | "safe_basic_economy"
+    | "safe_draw_or_install"
+    | "safe_side_safe_run_target"
+    | "safe_access_window"
+    | "safe_corp_install_or_score";
+  deterministicReference: true;
+  hiddenInfoRisk: "low";
+  hardGateExpectation: "zero_failures";
+  productiveChangeAllowed: false;
+};
+
+export type Ai065SrRuntimeBackedShadowFixturePromotionReport = {
+  schemaVersion: typeof AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTION_SCHEMA_VERSION;
+  step: "AI065-SR";
+  scope: "runtime_backed_shadow_fixture_promotion";
+  sourceReadinessStatus: "limited_shadow_ready";
+  runtimeBackedFixtureCountBefore: 0;
+  promotedFixtureCount: number;
+  runtimeBackedFixtureCountAfter: number;
+  runtimeBackedFixtureRateAfter: number;
+  fixtureFile: "data/scenarios/ai065-sr-runtime-backed-shadow-fixtures-2026-06-04.json";
+  promotions: RuntimeBackedShadowFixturePromotion[];
+  notPromoted: Array<{
+    scenarioId: string;
+    reason:
+      | "hidden_info_guard"
+      | "multi_ability_unresolved_guard"
+      | "kept_synthetic_for_later_runtime_capture";
+  }>;
   productiveUseAllowed: false;
   semanticExecutionAllowed: false;
   runtimeConsumerStatus: "none";
@@ -537,6 +582,41 @@ export const AI064_SR_SIDE_SAFE_COST_TIMING_EVIDENCE =
     ),
   ] as const satisfies readonly SideSafeCostTimingEvidence[];
 
+const AI065_SR_FIXTURE_FILE =
+  "data/scenarios/ai065-sr-runtime-backed-shadow-fixtures-2026-06-04.json" as const;
+
+export const AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTIONS =
+  [
+    runtimePromotion(
+      "runner_basic_economy",
+      "runner",
+      "safe_basic_economy",
+    ),
+    runtimePromotion(
+      "runner_draw_vs_credit",
+      "runner",
+      "safe_draw_or_install",
+    ),
+    runtimePromotion(
+      "runner_install_program",
+      "runner",
+      "safe_draw_or_install",
+    ),
+    runtimePromotion(
+      "runner_start_hq_run",
+      "runner",
+      "safe_side_safe_run_target",
+    ),
+    runtimePromotion(
+      "runner_access_steal_agenda",
+      "runner",
+      "safe_access_window",
+    ),
+    runtimePromotion("corp_basic_economy", "corp", "safe_basic_economy"),
+    runtimePromotion("corp_install_ice", "corp", "safe_corp_install_or_score"),
+    runtimePromotion("corp_score_agenda", "corp", "safe_corp_install_or_score"),
+  ] as const satisfies readonly RuntimeBackedShadowFixturePromotion[];
+
 export function buildFixturesAfterTargetContextProjection(
   fixtures: readonly ShadowScenarioFixture[] =
     buildShadowScenarioCorpusReport().fixtures,
@@ -750,6 +830,107 @@ export function buildAi064SrCostTimingEvidenceExpansionReport(
     noRuntimeEffect: true,
     noEffectFlags: SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS,
   };
+}
+
+export function buildFixturesAfterRuntimeBackedShadowFixturePromotion(
+  fixtures: readonly ShadowScenarioFixture[] =
+    buildFixturesAfterCostTimingEvidenceExpansion(),
+): ShadowScenarioFixture[] {
+  const promotionsByScenario = new Map(
+    AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTIONS.map((promotion) => [
+      promotion.scenarioId,
+      promotion,
+    ]),
+  );
+
+  return fixtures.map((fixture) => {
+    const promotion = promotionsByScenario.get(fixture.scenarioId);
+    if (promotion === undefined) {
+      return copyFixtureWithGaps(fixture, fixture.knownProjectionGaps);
+    }
+    return {
+      ...copyFixtureWithGaps(fixture, fixture.knownProjectionGaps),
+      setupKind: promotion.promotedSetupKind,
+      stateRef: promotion.stateRef,
+    };
+  });
+}
+
+export function buildAi065SrRuntimeBackedShadowFixturePromotionReport(
+  fixtures: readonly ShadowScenarioFixture[] =
+    buildFixturesAfterCostTimingEvidenceExpansion(),
+): Ai065SrRuntimeBackedShadowFixturePromotionReport {
+  const promotedFixtures =
+    buildFixturesAfterRuntimeBackedShadowFixturePromotion(fixtures);
+  const runtimeBackedFixtureCountAfter = promotedFixtures.filter(
+    (fixture) => fixture.setupKind !== "synthetic_legal_actions",
+  ).length;
+  const promotedIds = new Set(
+    AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTIONS.map(
+      (promotion) => promotion.scenarioId,
+    ),
+  );
+  const notPromoted = promotedFixtures
+    .filter((fixture) => !promotedIds.has(fixture.scenarioId))
+    .map((fixture) => ({
+      scenarioId: fixture.scenarioId,
+      reason: notPromotedReason(fixture),
+    }));
+
+  return {
+    schemaVersion: AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTION_SCHEMA_VERSION,
+    step: "AI065-SR",
+    scope: "runtime_backed_shadow_fixture_promotion",
+    sourceReadinessStatus: "limited_shadow_ready",
+    runtimeBackedFixtureCountBefore: 0,
+    promotedFixtureCount: AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTIONS.length,
+    runtimeBackedFixtureCountAfter,
+    runtimeBackedFixtureRateAfter: roundRate(
+      runtimeBackedFixtureCountAfter / promotedFixtures.length,
+    ),
+    fixtureFile: AI065_SR_FIXTURE_FILE,
+    promotions: [...AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTIONS],
+    notPromoted,
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    noEffectFlags: SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS,
+  };
+}
+
+function runtimePromotion(
+  scenarioId: string,
+  side: ShadowActorSide,
+  promotionReason: RuntimeBackedShadowFixturePromotion["promotionReason"],
+): RuntimeBackedShadowFixturePromotion {
+  return {
+    scenarioId,
+    side,
+    promotedSetupKind: "saved_state",
+    stateRef: `${AI065_SR_FIXTURE_FILE}#${scenarioId}`,
+    promotionReason,
+    deterministicReference: true,
+    hiddenInfoRisk: "low",
+    hardGateExpectation: "zero_failures",
+    productiveChangeAllowed: false,
+  };
+}
+
+function notPromotedReason(
+  fixture: ShadowScenarioFixture,
+): Ai065SrRuntimeBackedShadowFixturePromotionReport["notPromoted"][number]["reason"] {
+  if (fixture.knownProjectionGaps.includes("hidden_info_blocked")) {
+    return "hidden_info_guard";
+  }
+  if (fixture.scenarioId === "multi_ability_card_unresolved") {
+    return "multi_ability_unresolved_guard";
+  }
+  return "kept_synthetic_for_later_runtime_capture";
+}
+
+function roundRate(value: number): number {
+  return Math.round(value * 10000) / 10000;
 }
 
 function costTimingEvidence(

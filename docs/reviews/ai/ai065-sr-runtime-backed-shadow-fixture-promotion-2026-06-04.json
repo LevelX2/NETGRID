@@ -1,0 +1,57 @@
+{
+  "schemaVersion": "ai065-sr-runtime-backed-shadow-fixture-promotion-v1",
+  "step": "AI065-SR",
+  "title": "Runtime-backed Shadow Fixture Promotion",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai061-sr-ai067-shadow-readiness-expansion",
+  "scope": "runtime_backed_shadow_fixture_promotion",
+  "sourceReadinessStatus": "limited_shadow_ready",
+  "runtimeBackedFixtureCountBefore": 0,
+  "promotedFixtureCount": 8,
+  "runtimeBackedFixtureCountAfter": 8,
+  "runtimeBackedFixtureRateAfter": 0.2424,
+  "fixtureFile": "data/scenarios/ai065-sr-runtime-backed-shadow-fixtures-2026-06-04.json",
+  "promotedScenarioIds": [
+    "runner_basic_economy",
+    "runner_draw_vs_credit",
+    "runner_install_program",
+    "runner_start_hq_run",
+    "runner_access_steal_agenda",
+    "corp_basic_economy",
+    "corp_install_ice",
+    "corp_score_agenda"
+  ],
+  "notPromotedPolicy": {
+    "hiddenInfoBoundaryFixturesRemainSynthetic": true,
+    "multiAbilityUnresolvedGuardRemainsSynthetic": true,
+    "laterRuntimeCaptureAllowedOnlyWithSameSafetyGates": true
+  },
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "runtimeConsumerStatus": "none",
+  "noRuntimeEffect": true,
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "verification": [
+    "node scripts/check-ai065-sr-runtime-backed-shadow-fixture-promotion.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- shadow-readiness-expansion.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "doneGate": {
+    "runtimeBackedFixtureRateGreaterThanZero": true,
+    "deterministicReferences": true,
+    "hiddenInfoRiskyFixturesPromoted": false,
+    "actualDecisionRemainsLegacy": true
+  }
+}
