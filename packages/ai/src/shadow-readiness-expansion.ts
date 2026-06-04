@@ -18,6 +18,9 @@ export const AI061_SR_TARGET_CONTEXT_EXPANSION_SCHEMA_VERSION =
 export const AI062_SR_ABILITY_BINDING_EXPANSION_SCHEMA_VERSION =
   "ai062-sr-ability-binding-expansion-v1" as const;
 
+export const AI063_SR_CARD_SEMANTICS_JOIN_SCHEMA_VERSION =
+  "ai063-sr-card-semantics-join-coverage-v1" as const;
+
 export const SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS =
   CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS;
 
@@ -111,6 +114,45 @@ export type Ai062SrAbilityBindingExpansionReport = {
     retainedGaps: ActionProjectionIssue[];
   }>;
   batchAfterAbilityBindingExpansion: Pick<
+    ShadowEvaluationBatchReport,
+    "scenarioCount" | "decisionPointCount" | "topSemanticGaps"
+  >;
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type SideSafeCardSemanticsJoin = {
+  scenarioId: string;
+  side: ShadowActorSide;
+  joinStatus: "joined_side_safe";
+  cardContextSignalsStatus: "available";
+  actionTacticSignalsStatus:
+    | "available_ability_resolved"
+    | "available_basic_action"
+    | "card_context_only";
+  sourceCardStatus:
+    | "source_card_id_present"
+    | "visible_or_actor_private_card_context"
+    | "public_condition_context";
+  hiddenInfoPolicy: "no_hidden_info_projected";
+  evidence: string[];
+  removedGap: Extract<ActionProjectionIssue, "card_semantics_unavailable">;
+  productiveChangeAllowed: false;
+};
+
+export type Ai063SrCardSemanticsJoinCoverageReport = {
+  schemaVersion: typeof AI063_SR_CARD_SEMANTICS_JOIN_SCHEMA_VERSION;
+  step: "AI063-SR";
+  scope: "card_semantics_join_coverage";
+  sourceReadinessStatus: "limited_shadow_ready";
+  cardSemanticsUnavailableBefore: 7;
+  joinedCardSemanticsCount: number;
+  cardSemanticsUnavailableAfter: number;
+  joins: SideSafeCardSemanticsJoin[];
+  batchAfterCardSemanticsJoinCoverage: Pick<
     ShadowEvaluationBatchReport,
     "scenarioCount" | "decisionPointCount" | "topSemanticGaps"
   >;
@@ -327,6 +369,80 @@ export const AI062_SR_SIDE_SAFE_ABILITY_BINDINGS =
     ),
   ] as const satisfies readonly SideSafeAbilityBinding[];
 
+export const AI063_SR_SIDE_SAFE_CARD_SEMANTICS_JOINS =
+  [
+    cardSemanticsJoin(
+      "runner_install_program",
+      "runner",
+      "available_basic_action",
+      "visible_or_actor_private_card_context",
+      [
+        "Runner install card context is actor-private and may describe install role.",
+        "No hidden Corp card context is joined.",
+      ],
+    ),
+    cardSemanticsJoin(
+      "runner_install_breaker_for_known_ice",
+      "runner",
+      "available_ability_resolved",
+      "source_card_id_present",
+      [
+        "Breaker card context is joined only after AI062 side-safe ability binding.",
+        "Known ICE pressure remains limited to rezzed or legally known evidence.",
+      ],
+    ),
+    cardSemanticsJoin(
+      "runner_survival_damage_risk",
+      "runner",
+      "available_basic_action",
+      "public_condition_context",
+      [
+        "Visible damage pressure and actor-private survival context are allowed.",
+        "No hidden Corp kill-card identity is inferred.",
+      ],
+    ),
+    cardSemanticsJoin(
+      "corp_remote_score_window",
+      "corp",
+      "card_context_only",
+      "visible_or_actor_private_card_context",
+      [
+        "Remote score-window card context may describe Korp-private installed-card role.",
+        "Action tactic remains conservative when the fixture does not expose a specific ability id.",
+      ],
+    ),
+    cardSemanticsJoin(
+      "corp_tagged_runner_punish",
+      "corp",
+      "available_basic_action",
+      "source_card_id_present",
+      [
+        "Tag-punish operation/resource context is side-safe from Korp LegalAction evidence.",
+        "Runner hidden grip, stack and facedown resources are not inspected.",
+      ],
+    ),
+    cardSemanticsJoin(
+      "corp_damage_kill_window",
+      "corp",
+      "available_ability_resolved",
+      "source_card_id_present",
+      [
+        "Damage card semantics are joined only after AI062 payload/effect binding.",
+        "Runner hidden hand contents are not projected into damage evaluation.",
+      ],
+    ),
+    cardSemanticsJoin(
+      "corp_operation_play",
+      "corp",
+      "available_basic_action",
+      "source_card_id_present",
+      [
+        "Operation card context comes from Korp actor-private sourceCardId evidence.",
+        "No Runner hidden state is used.",
+      ],
+    ),
+  ] as const satisfies readonly SideSafeCardSemanticsJoin[];
+
 export function buildFixturesAfterTargetContextProjection(
   fixtures: readonly ShadowScenarioFixture[] =
     buildShadowScenarioCorpusReport().fixtures,
@@ -443,6 +559,73 @@ export function buildAi062SrAbilityBindingExpansionReport(
     runtimeConsumerStatus: "none",
     noRuntimeEffect: true,
     noEffectFlags: SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildFixturesAfterCardSemanticsJoinCoverage(
+  fixtures: readonly ShadowScenarioFixture[] =
+    buildFixturesAfterAbilityBindingExpansion(),
+): ShadowScenarioFixture[] {
+  return removeGapForProjectedScenarios(
+    fixtures,
+    "card_semantics_unavailable",
+    new Set(
+      AI063_SR_SIDE_SAFE_CARD_SEMANTICS_JOINS.map((join) => join.scenarioId),
+    ),
+  );
+}
+
+export function buildAi063SrCardSemanticsJoinCoverageReport(
+  fixtures: readonly ShadowScenarioFixture[] =
+    buildFixturesAfterAbilityBindingExpansion(),
+): Ai063SrCardSemanticsJoinCoverageReport {
+  const expandedFixtures = buildFixturesAfterCardSemanticsJoinCoverage(fixtures);
+  const batch = buildShadowEvaluationBatchReport(expandedFixtures);
+  const cardGapAfter =
+    batch.topSemanticGaps.find(
+      (gap) => gap.gapId === "card_semantics_unavailable",
+    )?.count ?? 0;
+
+  return {
+    schemaVersion: AI063_SR_CARD_SEMANTICS_JOIN_SCHEMA_VERSION,
+    step: "AI063-SR",
+    scope: "card_semantics_join_coverage",
+    sourceReadinessStatus: "limited_shadow_ready",
+    cardSemanticsUnavailableBefore: 7,
+    joinedCardSemanticsCount: AI063_SR_SIDE_SAFE_CARD_SEMANTICS_JOINS.length,
+    cardSemanticsUnavailableAfter: cardGapAfter,
+    joins: [...AI063_SR_SIDE_SAFE_CARD_SEMANTICS_JOINS],
+    batchAfterCardSemanticsJoinCoverage: {
+      scenarioCount: batch.scenarioCount,
+      decisionPointCount: batch.decisionPointCount,
+      topSemanticGaps: [...batch.topSemanticGaps],
+    },
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    noEffectFlags: SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS,
+  };
+}
+
+function cardSemanticsJoin(
+  scenarioId: string,
+  side: ShadowActorSide,
+  actionTacticSignalsStatus: SideSafeCardSemanticsJoin["actionTacticSignalsStatus"],
+  sourceCardStatus: SideSafeCardSemanticsJoin["sourceCardStatus"],
+  evidence: string[],
+): SideSafeCardSemanticsJoin {
+  return {
+    scenarioId,
+    side,
+    joinStatus: "joined_side_safe",
+    cardContextSignalsStatus: "available",
+    actionTacticSignalsStatus,
+    sourceCardStatus,
+    hiddenInfoPolicy: "no_hidden_info_projected",
+    evidence,
+    removedGap: "card_semantics_unavailable",
+    productiveChangeAllowed: false,
   };
 }
 

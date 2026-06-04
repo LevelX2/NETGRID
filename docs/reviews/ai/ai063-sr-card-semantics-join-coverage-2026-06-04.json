@@ -1,0 +1,66 @@
+{
+  "schemaVersion": "ai063-sr-card-semantics-join-coverage-v1",
+  "step": "AI063-SR",
+  "title": "Card-Semantics Join Coverage",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai061-sr-ai067-shadow-readiness-expansion",
+  "scope": "card_semantics_join_coverage",
+  "sourceReadinessStatus": "limited_shadow_ready",
+  "cardSemanticsUnavailableBefore": 7,
+  "joinedCardSemanticsCount": 7,
+  "cardSemanticsUnavailableAfter": 0,
+  "joinedScenarioIds": [
+    "runner_install_program",
+    "runner_install_breaker_for_known_ice",
+    "runner_survival_damage_risk",
+    "corp_remote_score_window",
+    "corp_tagged_runner_punish",
+    "corp_damage_kill_window",
+    "corp_operation_play"
+  ],
+  "joinPolicy": {
+    "cardContextSignalsAvailable": true,
+    "actionTacticSignalsOnlyWhenAbilityResolvedOrBasic": true,
+    "blindSignalTransferAllowed": false,
+    "multiAbilityWithoutExplicitIdReceivesActionTacticSignals": false,
+    "hiddenInfoProjectionAllowed": false,
+    "plannerWeightChangeAllowed": false,
+    "resolverPatchAllowedInStep": false
+  },
+  "batchAfterCardSemanticsJoinCoverage": {
+    "scenarioCount": 33,
+    "decisionPointCount": 33,
+    "hardGateFailures": 0,
+    "actualDecisionOverrideCount": 0,
+    "runtimeEffectCount": 0
+  },
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "runtimeConsumerStatus": "none",
+  "noRuntimeEffect": true,
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "verification": [
+    "node scripts/check-ai063-sr-card-semantics-join-coverage.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- shadow-readiness-expansion.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "doneGate": {
+    "cardContextSignalsImproved": true,
+    "actionTacticSignalsOnlyWhenAbilityResolved": true,
+    "blindSignalTransfer": false,
+    "hiddenInfoLeaks": 0,
+    "actualDecisionRemainsLegacy": true
+  }
+}

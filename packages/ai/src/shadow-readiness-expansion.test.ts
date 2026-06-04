@@ -4,9 +4,12 @@ import { buildShadowEvaluationBatchReport } from "./controlled-shadow-mode";
 import {
   AI061_SR_SIDE_SAFE_TARGET_CONTEXT_PROJECTIONS,
   AI062_SR_SIDE_SAFE_ABILITY_BINDINGS,
+  AI063_SR_SIDE_SAFE_CARD_SEMANTICS_JOINS,
   buildAi061SrTargetContextProjectionExpansionReport,
   buildAi062SrAbilityBindingExpansionReport,
+  buildAi063SrCardSemanticsJoinCoverageReport,
   buildFixturesAfterAbilityBindingExpansion,
+  buildFixturesAfterCardSemanticsJoinCoverage,
   buildFixturesAfterTargetContextProjection,
 } from "./shadow-readiness-expansion";
 
@@ -76,6 +79,62 @@ describe("AI061-SR TargetContext Projection Expansion", () => {
     expect(Object.values(batch.noEffectFlags).every((value) => value === false)).toBe(
       true,
     );
+  });
+});
+
+describe("AI063-SR Card-Semantics Join Coverage", () => {
+  it("joins side-safe card semantics for all AI058 card-semantics gaps", () => {
+    const report = buildAi063SrCardSemanticsJoinCoverageReport();
+
+    expect(report.schemaVersion).toBe(
+      "ai063-sr-card-semantics-join-coverage-v1",
+    );
+    expect(report.step).toBe("AI063-SR");
+    expect(report.cardSemanticsUnavailableBefore).toBe(7);
+    expect(report.joinedCardSemanticsCount).toBe(7);
+    expect(report.cardSemanticsUnavailableAfter).toBe(0);
+    expect(report.joins).toHaveLength(7);
+  });
+
+  it("separates card context signals from ability-resolved action tactics", () => {
+    expect(
+      AI063_SR_SIDE_SAFE_CARD_SEMANTICS_JOINS.every(
+        (join) =>
+          join.joinStatus === "joined_side_safe" &&
+          join.cardContextSignalsStatus === "available" &&
+          join.hiddenInfoPolicy === "no_hidden_info_projected" &&
+          join.productiveChangeAllowed === false,
+      ),
+    ).toBe(true);
+    expect(
+      AI063_SR_SIDE_SAFE_CARD_SEMANTICS_JOINS.filter(
+        (join) => join.actionTacticSignalsStatus === "available_ability_resolved",
+      ).map((join) => join.scenarioId),
+    ).toEqual(["runner_install_breaker_for_known_ice", "corp_damage_kill_window"]);
+    expect(
+      AI063_SR_SIDE_SAFE_CARD_SEMANTICS_JOINS.some(
+        (join) => join.actionTacticSignalsStatus === "card_context_only",
+      ),
+    ).toBe(true);
+  });
+
+  it("keeps batch safety green after card semantics coverage", () => {
+    const batch = buildShadowEvaluationBatchReport(
+      buildFixturesAfterCardSemanticsJoinCoverage(),
+    );
+
+    expect(
+      batch.topSemanticGaps.find(
+        (gap) => gap.gapId === "card_semantics_unavailable",
+      )?.count,
+    ).toBe(0);
+    expect(
+      batch.topSemanticGaps.find((gap) => gap.gapId === "ability_unresolved")
+        ?.count,
+    ).toBe(1);
+    expect(batch.hardGateFailures).toEqual([]);
+    expect(batch.actualDecisionOverrideCount).toBe(0);
+    expect(batch.runtimeEffectCount).toBe(0);
   });
 });
 
