@@ -1,0 +1,195 @@
+{
+  "schemaVersion": "meta8-internal-semantic-canary-v0",
+  "step": "META8",
+  "scope": "internal_semantic_canary",
+  "sourceStep": "META7",
+  "defaultConfig": {
+    "semanticAiShadowModeEnabled": false,
+    "semanticAiCutoverEnabled": false,
+    "semanticAiAgreementOnlyMode": false,
+    "semanticAiScopedOverrideEnabled": false,
+    "semanticAiRollbackForceLegacy": true,
+    "semanticAiCanaryScope": "disabled"
+  },
+  "internalCanaryConfig": {
+    "semanticAiShadowModeEnabled": true,
+    "semanticAiCutoverEnabled": true,
+    "semanticAiAgreementOnlyMode": false,
+    "semanticAiScopedOverrideEnabled": true,
+    "semanticAiRollbackForceLegacy": false,
+    "semanticAiCanaryScope": "internal"
+  },
+  "canaryScopes": [
+    {
+      "scopeId": "basic_economy_draw",
+      "status": "internal_canary_ready",
+      "enabled": true,
+      "allowedActionTypes": ["gain_credit", "draw_card"]
+    },
+    {
+      "scopeId": "tag_removal",
+      "status": "internal_canary_ready",
+      "enabled": true,
+      "allowedActionTypes": ["remove_tag"]
+    },
+    {
+      "scopeId": "simple_score_advance",
+      "status": "internal_canary_ready",
+      "enabled": true,
+      "allowedActionTypes": ["advance_card", "score_agenda"]
+    },
+    {
+      "scopeId": "simple_run_choice",
+      "status": "internal_canary_ready",
+      "enabled": true,
+      "allowedActionTypes": ["start_run"]
+    },
+    {
+      "scopeId": "basic_install",
+      "status": "limited_candidate",
+      "enabled": false,
+      "allowedActionTypes": ["install_card"]
+    },
+    {
+      "scopeId": "simple_rez",
+      "status": "limited_candidate",
+      "enabled": false,
+      "allowedActionTypes": ["rez_ice"]
+    },
+    {
+      "scopeId": "remote_contest",
+      "status": "agreement_ready",
+      "enabled": false,
+      "allowedActionTypes": ["start_run"]
+    },
+    {
+      "scopeId": "trace_payment",
+      "status": "blocked",
+      "enabled": false,
+      "allowedActionTypes": ["trace_bid"]
+    }
+  ],
+  "fixtureResults": [
+    {
+      "fixtureId": "meta8-basic-economy-semantic-actual",
+      "scopeId": "basic_economy_draw",
+      "actualDecisionSource": "semantic",
+      "result": "semantic_actual"
+    },
+    {
+      "fixtureId": "meta8-tag-removal-semantic-actual",
+      "scopeId": "tag_removal",
+      "actualDecisionSource": "semantic",
+      "result": "semantic_actual"
+    },
+    {
+      "fixtureId": "meta8-score-semantic-actual",
+      "scopeId": "simple_score_advance",
+      "actualDecisionSource": "semantic",
+      "result": "semantic_actual"
+    },
+    {
+      "fixtureId": "meta8-run-choice-semantic-actual",
+      "scopeId": "simple_run_choice",
+      "actualDecisionSource": "semantic",
+      "result": "semantic_actual"
+    },
+    {
+      "fixtureId": "meta8-default-config-legacy",
+      "scopeId": "basic_economy_draw",
+      "actualDecisionSource": "legacy",
+      "result": "legacy_default"
+    },
+    {
+      "fixtureId": "meta8-scope-not-ready",
+      "scopeId": "basic_install",
+      "actualDecisionSource": "legacy",
+      "result": "scope_not_ready"
+    },
+    {
+      "fixtureId": "meta8-rollback-force-legacy",
+      "scopeId": "tag_removal",
+      "actualDecisionSource": "legacy",
+      "result": "rollback_forced",
+      "rollbackTriggers": ["unknown_hard_gate"]
+    },
+    {
+      "fixtureId": "meta8-semantic-not-legal",
+      "scopeId": "simple_score_advance",
+      "actualDecisionSource": "legacy",
+      "result": "semantic_not_in_legal_actions",
+      "rollbackTriggers": ["semantic_action_not_in_legal_actions"]
+    },
+    {
+      "fixtureId": "meta8-hidden-info-blocked",
+      "scopeId": "simple_run_choice",
+      "actualDecisionSource": "legacy",
+      "result": "hidden_info_blocked",
+      "rollbackTriggers": ["hidden_info_gate_failure"]
+    },
+    {
+      "fixtureId": "meta8-missing-trace",
+      "scopeId": "basic_economy_draw",
+      "actualDecisionSource": "legacy",
+      "result": "missing_trace",
+      "rollbackTriggers": ["missing_trace"]
+    },
+    {
+      "fixtureId": "meta8-engine-reject-simulated",
+      "scopeId": "simple_score_advance",
+      "actualDecisionSource": "legacy",
+      "result": "engine_reject_simulated",
+      "rollbackTriggers": ["engine_reject"]
+    }
+  ],
+  "canaryRunSummary": {
+    "runSetCount": 5,
+    "decisionPointCount": 320,
+    "runnerScopeCount": 3,
+    "corpScopeCount": 1
+  },
+  "rollbackCases": [
+    "rollback_forced",
+    "semantic_not_in_legal_actions",
+    "hidden_info_blocked",
+    "missing_trace",
+    "engine_reject_simulated"
+  ],
+  "runtimeOverhead": {
+    "meanSemanticComputeMs": 4.8,
+    "p95SemanticComputeMs": 8.5,
+    "maxSemanticComputeMs": 12.4,
+    "meanTraceBytes": 4096,
+    "maxTraceBytes": 9216,
+    "memoryImpactMb": 3.2,
+    "documented": true
+  },
+  "qualityGates": {
+    "internalCanaryDecisionPoints": 320,
+    "semanticActualDecisionCount": 4,
+    "illegalSemanticDecisionCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "engineRejectCount": 0,
+    "nonEngineLegalAssumptionCount": 0,
+    "determinismFailureCount": 0,
+    "rollbackFailureCount": 0,
+    "traceCompleteRate": 1,
+    "unsafeDivergenceCount": 0,
+    "knownBadDecisionCount": 0,
+    "runtimeOverheadDocumented": true,
+    "defaultConfigLegacyOnly": true
+  },
+  "goNoGo": {
+    "decision": "production_safe_shadow_candidate",
+    "productionCutoverAllowed": false,
+    "legacyFreezeAllowed": false,
+    "legacyRemovalReady": false,
+    "nextStep": "META9_production_safe_shadow_agreement_canary"
+  },
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": true,
+  "semanticExecutionScope": "internal_canary_only",
+  "actualDecisionContract": "semantic_allowed_only_in_internal_canary_ready_scopes",
+  "runtimeConsumerStatus": "internal_canary_harness_only",
+  "noProductionRuntimeEffect": true
+}

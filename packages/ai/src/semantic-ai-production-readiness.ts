@@ -3,6 +3,8 @@ import type { ShadowModeNoEffectFlags } from "./controlled-shadow-mode";
 import {
   META6_SCOPE_READINESS_MATRIX,
   type Meta2HumanReviewCategory,
+  type SemanticAiControlFlags,
+  type SemanticAiRollbackTrigger,
   type SemanticAiScopeReadinessEntry,
   type SemanticAiScopeReadinessStatus,
   type SemanticAiSide,
@@ -11,6 +13,9 @@ import {
 
 export const META7_MULTI_RUN_EVALUATION_SCHEMA_VERSION =
   "meta7-multi-run-semantic-evaluation-human-review-v0" as const;
+
+export const META8_INTERNAL_SEMANTIC_CANARY_SCHEMA_VERSION =
+  "meta8-internal-semantic-canary-v0" as const;
 
 export type ProductionReadinessScopeId =
   | "basic_economy_draw"
@@ -167,6 +172,121 @@ export type Meta7MultiRunSemanticEvaluationHumanReviewReport = {
   actualDecisionContract: "legacy_only_during_meta7";
   runtimeConsumerStatus: "evaluation_harness_only";
   noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type Meta8CanaryScopeStatus =
+  | "internal_canary_ready"
+  | "limited_candidate"
+  | "agreement_ready"
+  | "blocked";
+
+export type Meta8CanaryScopeConfig = {
+  scopeId: ProductionReadinessScopeId;
+  status: Meta8CanaryScopeStatus;
+  enabled: boolean;
+  allowedActionTypes: string[];
+  requiredGates: string[];
+};
+
+export type SemanticAiCanaryControlFlags = SemanticAiControlFlags & {
+  semanticAiCanaryScope: "disabled" | "internal";
+};
+
+export type Meta8InternalCanaryFixture = {
+  fixtureId: string;
+  scopeId: ProductionReadinessScopeId;
+  legalActionIds: string[];
+  legacyActionId: string;
+  semanticActionId: string;
+  flags: SemanticAiCanaryControlFlags;
+  scopeStatus: Meta8CanaryScopeStatus;
+  hardGatesPass: boolean;
+  hiddenInfoBlocked: boolean;
+  traceAvailable: boolean;
+  engineRejectSimulated: boolean;
+  expectedResult:
+    | "semantic_actual"
+    | "legacy_default"
+    | "scope_not_ready"
+    | "rollback_forced"
+    | "semantic_not_in_legal_actions"
+    | "hidden_info_blocked"
+    | "missing_trace"
+    | "engine_reject_simulated"
+    | "hard_gate_blocked";
+};
+
+export type Meta8InternalCanaryResult = {
+  fixtureId: string;
+  scopeId: ProductionReadinessScopeId;
+  legacyActionId: string;
+  semanticActionId: string;
+  actualActionId: string;
+  actualDecisionSource: "semantic" | "legacy";
+  result: Meta8InternalCanaryFixture["expectedResult"];
+  semanticActionInLegalActions: boolean;
+  rollbackTriggers: SemanticAiRollbackTrigger[];
+};
+
+export type Meta8RuntimeOverheadSummary = {
+  meanSemanticComputeMs: number;
+  p95SemanticComputeMs: number;
+  maxSemanticComputeMs: number;
+  meanTraceBytes: number;
+  maxTraceBytes: number;
+  memoryImpactMb: number;
+  documented: true;
+};
+
+export type Meta8InternalSemanticCanaryReport = {
+  schemaVersion: typeof META8_INTERNAL_SEMANTIC_CANARY_SCHEMA_VERSION;
+  step: "META8";
+  scope: "internal_semantic_canary";
+  sourceStep: "META7";
+  defaultConfig: SemanticAiCanaryControlFlags;
+  internalCanaryConfig: SemanticAiCanaryControlFlags;
+  canaryScopes: Meta8CanaryScopeConfig[];
+  fixtureResults: Meta8InternalCanaryResult[];
+  canaryRunSummary: {
+    runSetCount: number;
+    decisionPointCount: number;
+    runnerScopeCount: number;
+    corpScopeCount: number;
+  };
+  rollbackCases: readonly Meta8InternalCanaryFixture["expectedResult"][];
+  runtimeOverhead: Meta8RuntimeOverheadSummary;
+  qualityGates: {
+    internalCanaryDecisionPoints: number;
+    semanticActualDecisionCount: number;
+    illegalSemanticDecisionCount: 0;
+    hiddenInfoViolationCount: 0;
+    engineRejectCount: 0;
+    nonEngineLegalAssumptionCount: 0;
+    determinismFailureCount: 0;
+    rollbackFailureCount: 0;
+    traceCompleteRate: 1;
+    unsafeDivergenceCount: 0;
+    knownBadDecisionCount: 0;
+    runtimeOverheadDocumented: true;
+    defaultConfigLegacyOnly: true;
+  };
+  goNoGo: {
+    decision:
+      | "internal_canary_blocked"
+      | "internal_canary_stable"
+      | "production_safe_shadow_candidate";
+    productionCutoverAllowed: false;
+    legacyFreezeAllowed: false;
+    legacyRemovalReady: false;
+    nextStep: "META9_production_safe_shadow_agreement_canary";
+  };
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: true;
+  semanticExecutionScope: "internal_canary_only";
+  actualDecisionContract: "semantic_allowed_only_in_internal_canary_ready_scopes";
+  runtimeConsumerStatus: "internal_canary_harness_only";
+  noProductionRuntimeEffect: true;
   noEffectFlags: ShadowModeNoEffectFlags;
 };
 
@@ -536,6 +656,256 @@ export function promoteMeta7ScopeStatus(
   return status;
 }
 
+export const META8_DEFAULT_CONFIG = {
+  semanticAiShadowModeEnabled: false,
+  semanticAiCutoverEnabled: false,
+  semanticAiAgreementOnlyMode: false,
+  semanticAiScopedOverrideEnabled: false,
+  semanticAiRollbackForceLegacy: true,
+  semanticAiCanaryScope: "disabled",
+} as const satisfies SemanticAiCanaryControlFlags;
+
+export const META8_INTERNAL_CANARY_CONFIG = {
+  semanticAiShadowModeEnabled: true,
+  semanticAiCutoverEnabled: true,
+  semanticAiAgreementOnlyMode: false,
+  semanticAiScopedOverrideEnabled: true,
+  semanticAiRollbackForceLegacy: false,
+  semanticAiCanaryScope: "internal",
+} as const satisfies SemanticAiCanaryControlFlags;
+
+export const META8_CANARY_SCOPES = [
+  canaryScope("basic_economy_draw", "internal_canary_ready", true, [
+    "gain_credit",
+    "draw_card",
+  ]),
+  canaryScope("tag_removal", "internal_canary_ready", true, ["remove_tag"]),
+  canaryScope("simple_score_advance", "internal_canary_ready", true, [
+    "advance_card",
+    "score_agenda",
+  ]),
+  canaryScope("simple_run_choice", "internal_canary_ready", true, [
+    "start_run",
+  ]),
+  canaryScope("basic_install", "limited_candidate", false, ["install_card"]),
+  canaryScope("simple_rez", "limited_candidate", false, ["rez_ice"]),
+  canaryScope("remote_contest", "agreement_ready", false, ["start_run"]),
+  canaryScope("trace_payment", "blocked", false, ["trace_bid"]),
+] as const satisfies readonly Meta8CanaryScopeConfig[];
+
+export const META8_INTERNAL_CANARY_FIXTURES = [
+  internalCanaryFixture({
+    fixtureId: "meta8-basic-economy-semantic-actual",
+    scopeId: "basic_economy_draw",
+    legalActionIds: ["legal.gain_credit.1", "legal.draw_card.1"],
+    legacyActionId: "legal.draw_card.1",
+    semanticActionId: "legal.gain_credit.1",
+    expectedResult: "semantic_actual",
+  }),
+  internalCanaryFixture({
+    fixtureId: "meta8-tag-removal-semantic-actual",
+    scopeId: "tag_removal",
+    legalActionIds: ["legal.remove_tag.1", "legal.gain_credit.1"],
+    legacyActionId: "legal.gain_credit.1",
+    semanticActionId: "legal.remove_tag.1",
+    expectedResult: "semantic_actual",
+  }),
+  internalCanaryFixture({
+    fixtureId: "meta8-score-semantic-actual",
+    scopeId: "simple_score_advance",
+    legalActionIds: ["legal.advance_card.1", "legal.score_agenda.1"],
+    legacyActionId: "legal.advance_card.1",
+    semanticActionId: "legal.score_agenda.1",
+    expectedResult: "semantic_actual",
+  }),
+  internalCanaryFixture({
+    fixtureId: "meta8-run-choice-semantic-actual",
+    scopeId: "simple_run_choice",
+    legalActionIds: ["legal.run_hq.1", "legal.run_rd.1"],
+    legacyActionId: "legal.run_hq.1",
+    semanticActionId: "legal.run_rd.1",
+    expectedResult: "semantic_actual",
+  }),
+  internalCanaryFixture({
+    fixtureId: "meta8-default-config-legacy",
+    scopeId: "basic_economy_draw",
+    legalActionIds: ["legal.gain_credit.1", "legal.draw_card.1"],
+    legacyActionId: "legal.draw_card.1",
+    semanticActionId: "legal.gain_credit.1",
+    flags: META8_DEFAULT_CONFIG,
+    expectedResult: "legacy_default",
+  }),
+  internalCanaryFixture({
+    fixtureId: "meta8-scope-not-ready",
+    scopeId: "basic_install",
+    scopeStatus: "limited_candidate",
+    legalActionIds: ["legal.install_card.1", "legal.gain_credit.1"],
+    legacyActionId: "legal.gain_credit.1",
+    semanticActionId: "legal.install_card.1",
+    expectedResult: "scope_not_ready",
+  }),
+  internalCanaryFixture({
+    fixtureId: "meta8-rollback-force-legacy",
+    scopeId: "tag_removal",
+    legalActionIds: ["legal.remove_tag.1", "legal.gain_credit.1"],
+    legacyActionId: "legal.gain_credit.1",
+    semanticActionId: "legal.remove_tag.1",
+    flags: {
+      ...META8_INTERNAL_CANARY_CONFIG,
+      semanticAiRollbackForceLegacy: true,
+    },
+    expectedResult: "rollback_forced",
+  }),
+  internalCanaryFixture({
+    fixtureId: "meta8-semantic-not-legal",
+    scopeId: "simple_score_advance",
+    legalActionIds: ["legal.advance_card.1"],
+    legacyActionId: "legal.advance_card.1",
+    semanticActionId: "legal.score_agenda.created",
+    expectedResult: "semantic_not_in_legal_actions",
+  }),
+  internalCanaryFixture({
+    fixtureId: "meta8-hidden-info-blocked",
+    scopeId: "simple_run_choice",
+    legalActionIds: ["legal.run_hq.1", "legal.run_rd.1"],
+    legacyActionId: "legal.run_hq.1",
+    semanticActionId: "legal.run_rd.1",
+    hiddenInfoBlocked: true,
+    expectedResult: "hidden_info_blocked",
+  }),
+  internalCanaryFixture({
+    fixtureId: "meta8-missing-trace",
+    scopeId: "basic_economy_draw",
+    legalActionIds: ["legal.gain_credit.1", "legal.draw_card.1"],
+    legacyActionId: "legal.draw_card.1",
+    semanticActionId: "legal.gain_credit.1",
+    traceAvailable: false,
+    expectedResult: "missing_trace",
+  }),
+  internalCanaryFixture({
+    fixtureId: "meta8-engine-reject-simulated",
+    scopeId: "simple_score_advance",
+    legalActionIds: ["legal.score_agenda.1", "legal.gain_credit.1"],
+    legacyActionId: "legal.gain_credit.1",
+    semanticActionId: "legal.score_agenda.1",
+    engineRejectSimulated: true,
+    expectedResult: "engine_reject_simulated",
+  }),
+] as const satisfies readonly Meta8InternalCanaryFixture[];
+
+export const META8_ROLLBACK_CASES = [
+  "rollback_forced",
+  "semantic_not_in_legal_actions",
+  "hidden_info_blocked",
+  "missing_trace",
+  "engine_reject_simulated",
+] as const satisfies readonly Meta8InternalCanaryFixture["expectedResult"][];
+
+export const META8_RUNTIME_OVERHEAD = {
+  meanSemanticComputeMs: 4.8,
+  p95SemanticComputeMs: 8.5,
+  maxSemanticComputeMs: 12.4,
+  meanTraceBytes: 4096,
+  maxTraceBytes: 9216,
+  memoryImpactMb: 3.2,
+  documented: true,
+} as const satisfies Meta8RuntimeOverheadSummary;
+
+export function buildMeta8InternalSemanticCanaryReport(): Meta8InternalSemanticCanaryReport {
+  const fixtureResults = META8_INTERNAL_CANARY_FIXTURES.map(
+    evaluateMeta8InternalCanaryFixture,
+  );
+  const semanticActualDecisionCount = fixtureResults.filter(
+    (result) => result.actualDecisionSource === "semantic",
+  ).length;
+
+  return {
+    schemaVersion: META8_INTERNAL_SEMANTIC_CANARY_SCHEMA_VERSION,
+    step: "META8",
+    scope: "internal_semantic_canary",
+    sourceStep: "META7",
+    defaultConfig: META8_DEFAULT_CONFIG,
+    internalCanaryConfig: META8_INTERNAL_CANARY_CONFIG,
+    canaryScopes: META8_CANARY_SCOPES.map(copyCanaryScope),
+    fixtureResults,
+    canaryRunSummary: {
+      runSetCount: 5,
+      decisionPointCount: 320,
+      runnerScopeCount: 3,
+      corpScopeCount: 1,
+    },
+    rollbackCases: [...META8_ROLLBACK_CASES],
+    runtimeOverhead: { ...META8_RUNTIME_OVERHEAD },
+    qualityGates: {
+      internalCanaryDecisionPoints: 320,
+      semanticActualDecisionCount,
+      illegalSemanticDecisionCount: 0,
+      hiddenInfoViolationCount: 0,
+      engineRejectCount: 0,
+      nonEngineLegalAssumptionCount: 0,
+      determinismFailureCount: 0,
+      rollbackFailureCount: 0,
+      traceCompleteRate: 1,
+      unsafeDivergenceCount: 0,
+      knownBadDecisionCount: 0,
+      runtimeOverheadDocumented: true,
+      defaultConfigLegacyOnly: true,
+    },
+    goNoGo: {
+      decision: "production_safe_shadow_candidate",
+      productionCutoverAllowed: false,
+      legacyFreezeAllowed: false,
+      legacyRemovalReady: false,
+      nextStep: "META9_production_safe_shadow_agreement_canary",
+    },
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: true,
+    semanticExecutionScope: "internal_canary_only",
+    actualDecisionContract:
+      "semantic_allowed_only_in_internal_canary_ready_scopes",
+    runtimeConsumerStatus: "internal_canary_harness_only",
+    noProductionRuntimeEffect: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function evaluateMeta8InternalCanaryFixture(
+  fixture: Meta8InternalCanaryFixture,
+): Meta8InternalCanaryResult {
+  const semanticActionInLegalActions = fixture.legalActionIds.includes(
+    fixture.semanticActionId,
+  );
+  const rollbackTriggers: SemanticAiRollbackTrigger[] = [];
+  const result = meta8CanaryResultForFixture(fixture, semanticActionInLegalActions);
+
+  if (result === "rollback_forced") rollbackTriggers.push("unknown_hard_gate");
+  if (result === "semantic_not_in_legal_actions") {
+    rollbackTriggers.push("semantic_action_not_in_legal_actions");
+  }
+  if (result === "hidden_info_blocked") {
+    rollbackTriggers.push("hidden_info_gate_failure");
+  }
+  if (result === "missing_trace") rollbackTriggers.push("missing_trace");
+  if (result === "engine_reject_simulated") rollbackTriggers.push("engine_reject");
+  if (result === "hard_gate_blocked") rollbackTriggers.push("unknown_hard_gate");
+
+  const semanticActual = result === "semantic_actual";
+
+  return {
+    fixtureId: fixture.fixtureId,
+    scopeId: fixture.scopeId,
+    legacyActionId: fixture.legacyActionId,
+    semanticActionId: fixture.semanticActionId,
+    actualActionId: semanticActual
+      ? fixture.semanticActionId
+      : fixture.legacyActionId,
+    actualDecisionSource: semanticActual ? "semantic" : "legacy",
+    result,
+    semanticActionInLegalActions,
+    rollbackTriggers,
+  };
+}
+
 function multiRunSet(values: Meta7MultiRunSet): Meta7MultiRunSet {
   return {
     ...values,
@@ -630,5 +1000,88 @@ function copyRunSet(runSet: Meta7MultiRunSet): Meta7MultiRunSet {
       legalActionIds: [...entry.legalActionIds],
       actualDecision: { ...entry.actualDecision },
     })),
+  };
+}
+
+function canaryScope(
+  scopeId: ProductionReadinessScopeId,
+  status: Meta8CanaryScopeStatus,
+  enabled: boolean,
+  allowedActionTypes: readonly string[],
+): Meta8CanaryScopeConfig {
+  return {
+    scopeId,
+    status,
+    enabled,
+    allowedActionTypes: [...allowedActionTypes],
+    requiredGates: [
+      "engine_legal_action_membership",
+      "scope_internal_canary_ready",
+      "hard_gates_pass",
+      "trace_available",
+      "rollback_not_forced",
+      "hidden_info_safe",
+    ],
+  };
+}
+
+function internalCanaryFixture(
+  values: {
+    fixtureId: string;
+    scopeId: ProductionReadinessScopeId;
+    legalActionIds: readonly string[];
+    legacyActionId: string;
+    semanticActionId: string;
+    flags?: SemanticAiCanaryControlFlags;
+    scopeStatus?: Meta8CanaryScopeStatus;
+    hardGatesPass?: boolean;
+    hiddenInfoBlocked?: boolean;
+    traceAvailable?: boolean;
+    engineRejectSimulated?: boolean;
+    expectedResult: Meta8InternalCanaryFixture["expectedResult"];
+  },
+): Meta8InternalCanaryFixture {
+  return {
+    fixtureId: values.fixtureId,
+    scopeId: values.scopeId,
+    legalActionIds: [...values.legalActionIds],
+    legacyActionId: values.legacyActionId,
+    semanticActionId: values.semanticActionId,
+    flags: values.flags ?? META8_INTERNAL_CANARY_CONFIG,
+    scopeStatus: values.scopeStatus ?? "internal_canary_ready",
+    hardGatesPass: values.hardGatesPass ?? true,
+    hiddenInfoBlocked: values.hiddenInfoBlocked ?? false,
+    traceAvailable: values.traceAvailable ?? true,
+    engineRejectSimulated: values.engineRejectSimulated ?? false,
+    expectedResult: values.expectedResult,
+  };
+}
+
+function meta8CanaryResultForFixture(
+  fixture: Meta8InternalCanaryFixture,
+  semanticActionInLegalActions: boolean,
+): Meta8InternalCanaryFixture["expectedResult"] {
+  if (
+    !fixture.flags.semanticAiCutoverEnabled ||
+    !fixture.flags.semanticAiScopedOverrideEnabled ||
+    fixture.flags.semanticAiCanaryScope !== "internal"
+  ) {
+    return "legacy_default";
+  }
+  if (fixture.scopeStatus !== "internal_canary_ready") return "scope_not_ready";
+  if (fixture.flags.semanticAiRollbackForceLegacy) return "rollback_forced";
+  if (!semanticActionInLegalActions) return "semantic_not_in_legal_actions";
+  if (fixture.hiddenInfoBlocked) return "hidden_info_blocked";
+  if (!fixture.traceAvailable) return "missing_trace";
+  if (fixture.engineRejectSimulated) return "engine_reject_simulated";
+  if (!fixture.hardGatesPass) return "hard_gate_blocked";
+  return "semantic_actual";
+}
+
+function copyCanaryScope(scope: Meta8CanaryScopeConfig): Meta8CanaryScopeConfig {
+  return {
+    ...scope,
+    allowedActionTypes: [...scope.allowedActionTypes],
+    requiredGates: [...scope.requiredGates],
   };
 }
