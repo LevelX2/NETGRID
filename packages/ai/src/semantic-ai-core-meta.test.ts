@@ -10,10 +10,17 @@ import {
   META2_CONSUMER_GROUPS,
   META2_EVALUATION_ORDER,
   META2_HUMAN_REVIEW_CATEGORIES,
+  META3_CUTOVER_GATE,
+  META3_DEFAULT_FLAGS,
+  META3_ROLLBACK_TRIGGERS,
+  META3_SCOPE_MATRIX,
+  META3_TRACE_CONTRACT_FIELDS,
+  adaptSemanticDecisionToLegacyActual,
   buildDeckDoctrineFromProfile,
   buildDeckStrategicProfile,
   buildMeta1DeckDoctrineTacticalGoalEngineReport,
   buildMeta2SemanticDecisionCoreReport,
+  buildMeta3CutoverSafetyEnvelopeReport,
   buildSemanticDecisionScore,
 } from "./semantic-ai-core-meta";
 
@@ -118,6 +125,108 @@ describe("META1 DeckDoctrine + Multi-Turn TacticalGoal Engine v0", () => {
         }),
       ]),
     );
+  });
+});
+
+describe("META3 Cutover Safety Envelope", () => {
+  it("keeps cutover design allowed but execution and productive cutover blocked", () => {
+    const report = buildMeta3CutoverSafetyEnvelopeReport();
+
+    expect(report.schemaVersion).toBe("meta3-cutover-safety-envelope-v0");
+    expect(report.step).toBe("META3");
+    expect(report.cutoverGate).toEqual(META3_CUTOVER_GATE);
+    expect(report.cutoverGate).toEqual({
+      cutoverDesignAllowed: true,
+      cutoverExecutionAllowed: false,
+      productiveCutoverAllowed: false,
+    });
+    expect(report.defaultFlags).toEqual(META3_DEFAULT_FLAGS);
+    expect(report.defaultFlags).toMatchObject({
+      semanticAiShadowModeEnabled: false,
+      semanticAiCutoverEnabled: false,
+      semanticAiAgreementOnlyMode: false,
+      semanticAiScopedOverrideEnabled: false,
+      semanticAiRollbackForceLegacy: true,
+    });
+  });
+
+  it("adapts semantic decisions to legacy actual actions and cannot create actions", () => {
+    const validDifferent = adaptSemanticDecisionToLegacyActual({
+      legalActionIds: ["legacy", "semantic"],
+      legacyActionId: "legacy",
+      semanticActionId: "semantic",
+      hardGateStatus: "pass",
+      traceAvailable: true,
+    });
+    const invalidSemantic = adaptSemanticDecisionToLegacyActual({
+      legalActionIds: ["legacy"],
+      legacyActionId: "legacy",
+      semanticActionId: "semantic-created",
+      hardGateStatus: "pass",
+      traceAvailable: true,
+    });
+
+    expect(validDifferent).toMatchObject({
+      actualActionId: "legacy",
+      adapterStatus: "semantic_valid_but_execution_disabled",
+      semanticActionInLegalActions: true,
+    });
+    expect(invalidSemantic).toMatchObject({
+      actualActionId: "legacy",
+      adapterStatus: "semantic_not_in_legal_actions",
+      semanticActionInLegalActions: false,
+    });
+    expect(invalidSemantic.rollbackState.triggers).toContain(
+      "semantic_action_not_in_legal_actions",
+    );
+  });
+
+  it("defines rollback triggers, scope matrix and developer-only trace fields", () => {
+    const report = buildMeta3CutoverSafetyEnvelopeReport();
+
+    expect(META3_ROLLBACK_TRIGGERS).toEqual(
+      expect.arrayContaining([
+        "semantic_action_not_in_legal_actions",
+        "hidden_info_gate_failure",
+        "engine_reject",
+        "runtime_mutation",
+        "public_payload_delta",
+      ]),
+    );
+    expect(META3_SCOPE_MATRIX).toMatchObject({
+      agreementOnlyScopes: expect.arrayContaining(["gain_credit", "draw_card"]),
+      testOnlyOverrideScopes: expect.arrayContaining([
+        "runner_remove_tag_when_tagged",
+      ]),
+      blockedScopes: expect.arrayContaining([
+        "hidden_info_choices",
+        "multi_ability_unresolved",
+      ]),
+    });
+    expect(report.traceContract).toEqual({
+      requiredFields: META3_TRACE_CONTRACT_FIELDS,
+      visibilityScope: "developer_only",
+      publicPayloadChangesAllowed: false,
+    });
+  });
+
+  it("keeps every META3 safety quality gate closed for runtime use", () => {
+    const report = buildMeta3CutoverSafetyEnvelopeReport();
+
+    expect(report.qualityGates).toEqual({
+      productiveFlagsDefaultOff: true,
+      rollbackForceLegacyDefaultTrue: true,
+      adapterCannotCreateActions: true,
+      cutoverExecutionAllowed: false,
+      actualDecision: "legacy",
+      publicPayloadDeltaCount: 0,
+      illegalSemanticDecisionCount: 0,
+      hiddenInfoViolationCount: 0,
+      engineRejectCount: 0,
+    });
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.semanticExecutionAllowed).toBe(false);
+    expect(report.runtimeConsumerStatus).toBe("none");
   });
 });
 

@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "meta3-cutover-safety-envelope-v0",
+  "step": "META3",
+  "scope": "cutover_safety_envelope_design_only",
+  "cutoverGate": {
+    "cutoverDesignAllowed": true,
+    "cutoverExecutionAllowed": false,
+    "productiveCutoverAllowed": false
+  },
+  "defaultFlags": {
+    "semanticAiShadowModeEnabled": false,
+    "semanticAiCutoverEnabled": false,
+    "semanticAiAgreementOnlyMode": false,
+    "semanticAiScopedOverrideEnabled": false,
+    "semanticAiRollbackForceLegacy": true
+  },
+  "rollbackTriggerCount": 10,
+  "scopeMatrix": {
+    "agreementOnlyScopes": [
+      "gain_credit",
+      "draw_card",
+      "end_turn",
+      "simple_install",
+      "simple_score_agenda"
+    ],
+    "testOnlyOverrideScopes": [
+      "basic_economy_vs_draw",
+      "runner_remove_tag_when_tagged",
+      "corp_basic_economy",
+      "simple_score_when_legal",
+      "simple_hq_or_rnd_run_when_goal_evidence_ready"
+    ],
+    "blockedScopes": [
+      "hidden_info_choices",
+      "trace_payments",
+      "x_values",
+      "damage_prevention",
+      "multi_target_unresolved",
+      "multi_ability_unresolved",
+      "access_hidden_choices"
+    ]
+  },
+  "adapterSamples": {
+    "sampleCount": 3,
+    "actualActionIdAlwaysLegacy": true,
+    "semanticNotInLegalActionsRollsBack": true,
+    "missingTraceRollsBack": true
+  },
+  "traceContract": {
+    "visibilityScope": "developer_only",
+    "publicPayloadChangesAllowed": false,
+    "requiredFieldCount": 14
+  },
+  "qualityGates": {
+    "productiveFlagsDefaultOff": true,
+    "rollbackForceLegacyDefaultTrue": true,
+    "adapterCannotCreateActions": true,
+    "cutoverExecutionAllowed": false,
+    "actualDecision": "legacy",
+    "publicPayloadDeltaCount": 0,
+    "illegalSemanticDecisionCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "engineRejectCount": 0
+  },
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "runtimeConsumerStatus": "none",
+  "noRuntimeEffect": true
+}

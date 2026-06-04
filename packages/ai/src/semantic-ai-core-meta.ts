@@ -8,6 +8,9 @@ export const META1_DECK_DOCTRINE_TACTICAL_GOAL_ENGINE_SCHEMA_VERSION =
 export const META2_SEMANTIC_DECISION_CORE_SCHEMA_VERSION =
   "meta2-semantic-decision-core-quality-calibration-v0" as const;
 
+export const META3_CUTOVER_SAFETY_ENVELOPE_SCHEMA_VERSION =
+  "meta3-cutover-safety-envelope-v0" as const;
+
 export type SemanticAiSide = "runner" | "corp";
 
 export type SemanticAiConfidence = "low" | "medium" | "high";
@@ -416,6 +419,111 @@ export type Meta2SemanticDecisionCoreReport = {
   noEffectFlags: ShadowModeNoEffectFlags;
 };
 
+export type CutoverGate = {
+  cutoverDesignAllowed: true;
+  cutoverExecutionAllowed: false;
+  productiveCutoverAllowed: false;
+};
+
+export type SemanticAiControlFlags = {
+  semanticAiShadowModeEnabled: boolean;
+  semanticAiCutoverEnabled: boolean;
+  semanticAiAgreementOnlyMode: boolean;
+  semanticAiScopedOverrideEnabled: boolean;
+  semanticAiRollbackForceLegacy: boolean;
+};
+
+export type SemanticAiRollbackTrigger =
+  | "semantic_action_not_in_legal_actions"
+  | "hidden_info_gate_failure"
+  | "illegal_semantic_decision"
+  | "engine_reject"
+  | "non_determinism"
+  | "missing_trace"
+  | "unknown_hard_gate"
+  | "runtime_mutation"
+  | "public_payload_delta"
+  | "cost_timing_gate_unresolved_when_required";
+
+export type SemanticAiScopeMatrix = {
+  agreementOnlyScopes: string[];
+  testOnlyOverrideScopes: string[];
+  blockedScopes: string[];
+};
+
+export type SemanticDecisionAdapterInput = {
+  legalActionIds: readonly string[];
+  legacyActionId: string;
+  semanticActionId?: string;
+  hardGateStatus: "pass" | "blocked" | "unknown";
+  traceAvailable: boolean;
+};
+
+export type SemanticDecisionAdapterResult = {
+  legacyActionId: string;
+  semanticActionId?: string;
+  actualActionId: string;
+  adapterStatus:
+    | "legacy_only"
+    | "semantic_valid_but_execution_disabled"
+    | "semantic_not_in_legal_actions"
+    | "rollback_forced";
+  semanticActionInLegalActions: boolean;
+  rollbackState: {
+    forcedLegacy: true;
+    triggers: SemanticAiRollbackTrigger[];
+  };
+};
+
+export type SemanticAiTraceContract = {
+  legacyActionId: string;
+  semanticActionId?: string;
+  actualActionId: string;
+  featureFlags: SemanticAiControlFlags;
+  scopeDecision: "agreement_only" | "test_only_override" | "blocked" | "legacy_only";
+  adapterStatus: SemanticDecisionAdapterResult["adapterStatus"];
+  hardGates: string[];
+  rollbackState: SemanticDecisionAdapterResult["rollbackState"];
+  candidateEvidence: string[];
+  goalMatches: SemanticTacticalGoalFamily[];
+  scoreBreakdown: SemanticDecisionScore["components"];
+  whyNot: WhyNotEntry[];
+  stateVersion: number;
+  visibilityScope: "developer_only";
+};
+
+export type Meta3CutoverSafetyEnvelopeReport = {
+  schemaVersion: typeof META3_CUTOVER_SAFETY_ENVELOPE_SCHEMA_VERSION;
+  step: "META3";
+  scope: "cutover_safety_envelope_design_only";
+  cutoverGate: CutoverGate;
+  defaultFlags: SemanticAiControlFlags;
+  rollbackTriggers: readonly SemanticAiRollbackTrigger[];
+  scopeMatrix: SemanticAiScopeMatrix;
+  adapterSamples: SemanticDecisionAdapterResult[];
+  traceContract: {
+    requiredFields: readonly (keyof SemanticAiTraceContract)[];
+    visibilityScope: "developer_only";
+    publicPayloadChangesAllowed: false;
+  };
+  qualityGates: {
+    productiveFlagsDefaultOff: true;
+    rollbackForceLegacyDefaultTrue: true;
+    adapterCannotCreateActions: true;
+    cutoverExecutionAllowed: false;
+    actualDecision: "legacy";
+    publicPayloadDeltaCount: 0;
+    illegalSemanticDecisionCount: 0;
+    hiddenInfoViolationCount: 0;
+    engineRejectCount: 0;
+  };
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
 export const META1_RUNNER_GOAL_FAMILIES = [
   "runner_survive",
   "runner_remove_tags",
@@ -726,6 +834,76 @@ export const META2_DEFAULT_SCORE_FIXTURES = [
   }),
 ] as const satisfies readonly Meta2CandidateScoreFixture[];
 
+export const META3_CUTOVER_GATE = {
+  cutoverDesignAllowed: true,
+  cutoverExecutionAllowed: false,
+  productiveCutoverAllowed: false,
+} as const satisfies CutoverGate;
+
+export const META3_DEFAULT_FLAGS = {
+  semanticAiShadowModeEnabled: false,
+  semanticAiCutoverEnabled: false,
+  semanticAiAgreementOnlyMode: false,
+  semanticAiScopedOverrideEnabled: false,
+  semanticAiRollbackForceLegacy: true,
+} as const satisfies SemanticAiControlFlags;
+
+export const META3_ROLLBACK_TRIGGERS = [
+  "semantic_action_not_in_legal_actions",
+  "hidden_info_gate_failure",
+  "illegal_semantic_decision",
+  "engine_reject",
+  "non_determinism",
+  "missing_trace",
+  "unknown_hard_gate",
+  "runtime_mutation",
+  "public_payload_delta",
+  "cost_timing_gate_unresolved_when_required",
+] as const satisfies readonly SemanticAiRollbackTrigger[];
+
+export const META3_SCOPE_MATRIX = {
+  agreementOnlyScopes: [
+    "gain_credit",
+    "draw_card",
+    "end_turn",
+    "simple_install",
+    "simple_score_agenda",
+  ],
+  testOnlyOverrideScopes: [
+    "basic_economy_vs_draw",
+    "runner_remove_tag_when_tagged",
+    "corp_basic_economy",
+    "simple_score_when_legal",
+    "simple_hq_or_rnd_run_when_goal_evidence_ready",
+  ],
+  blockedScopes: [
+    "hidden_info_choices",
+    "trace_payments",
+    "x_values",
+    "damage_prevention",
+    "multi_target_unresolved",
+    "multi_ability_unresolved",
+    "access_hidden_choices",
+  ],
+} as const satisfies SemanticAiScopeMatrix;
+
+export const META3_TRACE_CONTRACT_FIELDS = [
+  "legacyActionId",
+  "semanticActionId",
+  "actualActionId",
+  "featureFlags",
+  "scopeDecision",
+  "adapterStatus",
+  "hardGates",
+  "rollbackState",
+  "candidateEvidence",
+  "goalMatches",
+  "scoreBreakdown",
+  "whyNot",
+  "stateVersion",
+  "visibilityScope",
+] as const satisfies readonly (keyof SemanticAiTraceContract)[];
+
 export function buildMeta1DeckDoctrineTacticalGoalEngineReport(): Meta1DeckDoctrineTacticalGoalEngineReport {
   const sampleProfiles = [
     buildDeckStrategicProfile({
@@ -896,6 +1074,107 @@ export function buildMeta2SemanticDecisionCoreReport(
     runtimeConsumerStatus: "none",
     noRuntimeEffect: true,
     noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildMeta3CutoverSafetyEnvelopeReport(): Meta3CutoverSafetyEnvelopeReport {
+  const adapterSamples = [
+    adaptSemanticDecisionToLegacyActual({
+      legalActionIds: ["legal.gain_credit.1", "legal.draw_card.1"],
+      legacyActionId: "legal.gain_credit.1",
+      semanticActionId: "legal.draw_card.1",
+      hardGateStatus: "pass",
+      traceAvailable: true,
+    }),
+    adaptSemanticDecisionToLegacyActual({
+      legalActionIds: ["legal.gain_credit.1"],
+      legacyActionId: "legal.gain_credit.1",
+      semanticActionId: "semantic.created.action",
+      hardGateStatus: "pass",
+      traceAvailable: true,
+    }),
+    adaptSemanticDecisionToLegacyActual({
+      legalActionIds: ["legal.gain_credit.1"],
+      legacyActionId: "legal.gain_credit.1",
+      semanticActionId: "legal.gain_credit.1",
+      hardGateStatus: "unknown",
+      traceAvailable: false,
+    }),
+  ];
+
+  return {
+    schemaVersion: META3_CUTOVER_SAFETY_ENVELOPE_SCHEMA_VERSION,
+    step: "META3",
+    scope: "cutover_safety_envelope_design_only",
+    cutoverGate: META3_CUTOVER_GATE,
+    defaultFlags: META3_DEFAULT_FLAGS,
+    rollbackTriggers: META3_ROLLBACK_TRIGGERS,
+    scopeMatrix: {
+      agreementOnlyScopes: [...META3_SCOPE_MATRIX.agreementOnlyScopes],
+      testOnlyOverrideScopes: [...META3_SCOPE_MATRIX.testOnlyOverrideScopes],
+      blockedScopes: [...META3_SCOPE_MATRIX.blockedScopes],
+    },
+    adapterSamples,
+    traceContract: {
+      requiredFields: META3_TRACE_CONTRACT_FIELDS,
+      visibilityScope: "developer_only",
+      publicPayloadChangesAllowed: false,
+    },
+    qualityGates: {
+      productiveFlagsDefaultOff: true,
+      rollbackForceLegacyDefaultTrue: true,
+      adapterCannotCreateActions: true,
+      cutoverExecutionAllowed: false,
+      actualDecision: "legacy",
+      publicPayloadDeltaCount: 0,
+      illegalSemanticDecisionCount: 0,
+      hiddenInfoViolationCount: 0,
+      engineRejectCount: 0,
+    },
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function adaptSemanticDecisionToLegacyActual(
+  input: SemanticDecisionAdapterInput,
+): SemanticDecisionAdapterResult {
+  const semanticActionInLegalActions =
+    input.semanticActionId !== undefined &&
+    input.legalActionIds.includes(input.semanticActionId);
+  const triggers: SemanticAiRollbackTrigger[] = [];
+
+  if (input.semanticActionId !== undefined && !semanticActionInLegalActions) {
+    triggers.push("semantic_action_not_in_legal_actions");
+  }
+  if (input.hardGateStatus === "blocked") triggers.push("unknown_hard_gate");
+  if (input.hardGateStatus === "unknown") {
+    triggers.push("cost_timing_gate_unresolved_when_required");
+  }
+  if (!input.traceAvailable) triggers.push("missing_trace");
+
+  return {
+    legacyActionId: input.legacyActionId,
+    ...(input.semanticActionId !== undefined
+      ? { semanticActionId: input.semanticActionId }
+      : {}),
+    actualActionId: input.legacyActionId,
+    adapterStatus:
+      triggers.length > 0
+        ? input.semanticActionId !== undefined && !semanticActionInLegalActions
+          ? "semantic_not_in_legal_actions"
+          : "rollback_forced"
+        : semanticActionInLegalActions
+          ? "semantic_valid_but_execution_disabled"
+          : "legacy_only",
+    semanticActionInLegalActions,
+    rollbackState: {
+      forcedLegacy: true,
+      triggers,
+    },
   };
 }
 
