@@ -1,0 +1,125 @@
+{
+  "step": "AI047",
+  "title": "Shadow-only Scoring Fixture Design",
+  "date": "2026-06-04",
+  "status": "done",
+  "sourceCommit": "8ef2049b",
+  "runtimeConsumerStatus": "none",
+  "diagnosticScope": "shadow_fixture_design_only",
+  "schemaVersion": "shadow-scoring-fixture-design-v1",
+  "implementationFiles": [
+    "packages/ai/src/shadow-scoring-diagnostics.ts",
+    "packages/ai/src/shadow-scoring-diagnostics.test.ts"
+  ],
+  "fixtureCorpus": {
+    "fixtureCount": 14,
+    "runnerFixtureCount": 7,
+    "corpFixtureCount": 7,
+    "runnerScenarios": [
+      "economy_stabilize",
+      "rig_setup_install_program",
+      "central_pressure",
+      "remote_contest",
+      "survival",
+      "access_decision",
+      "run_continuation"
+    ],
+    "corpScenarios": [
+      "economy_stabilize",
+      "remote_score_window",
+      "central_defense",
+      "ice_tax_rez_window",
+      "tag_trace_punish",
+      "advance_score",
+      "ambush_access_punish"
+    ]
+  },
+  "allowedScoringInputs": [
+    "action.semanticActionType",
+    "action.cardContextSignals",
+    "action.actionTacticSignals",
+    "action.strategySupport",
+    "action.conditions",
+    "action.risks",
+    "action.constraints",
+    "action.costProfile",
+    "action.timingProfile",
+    "action.targetContext.engine_provided_only",
+    "action.boardContext",
+    "action.hardGates",
+    "TacticalGoal.evidence",
+    "DeckDoctrineV2.readiness"
+  ],
+  "forbiddenScoringInputs": [
+    "full_game_state",
+    "opponent_hidden_cards",
+    "non_side_safe_targets",
+    "non_engine_provided_target_options",
+    "legacy_plan_role_as_truth",
+    "freeform_guessed_scores"
+  ],
+  "hardGateMatrix": [
+    "engine_legal_action",
+    "hidden_info",
+    "side_visibility",
+    "runtime_no_effect",
+    "target_context",
+    "ability_resolution",
+    "cost_known",
+    "timing_known"
+  ],
+  "scoreDraftSchema": {
+    "typeName": "ShadowActionScoreDraft",
+    "scoreStatuses": [
+      "not_scored",
+      "blocked_by_gate",
+      "blocked_by_gap",
+      "score_draft_available"
+    ],
+    "forbiddenFields": ["liveScore", "runtimeRank", "selectedAction"]
+  },
+  "blockedGapPolicy": {
+    "scoreStatus": "blocked_by_gap",
+    "topGaps": [
+      "target_context_unavailable",
+      "ability_unresolved",
+      "card_semantics_unavailable"
+    ]
+  },
+  "recommendedAI048Scope": [
+    "report-only shadow ordering",
+    "goal alignment explanations",
+    "hard gate failures",
+    "unresolved gap buckets",
+    "legacy action reference when already available"
+  ],
+  "productiveUseAllowed": false,
+  "runtimeFilesTouched": [],
+  "forbiddenInThisStepConfirmedAbsent": [
+    "productive chooseSemanticAiAction",
+    "live numeric scoring",
+    "productive ranking",
+    "action selection",
+    "planner weights",
+    "runtime consumer",
+    "hidden-info projection",
+    "legality generation"
+  ],
+  "verification": [
+    "node scripts/check-ai047-shadow-scoring-fixture-design.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- shadow-scoring-diagnostics.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "git diff --check"
+  ],
+  "noEffectFlags": {
+    "planner": false,
+    "actionScore": false,
+    "planWeight": false,
+    "targetingAi": false,
+    "engine": false,
+    "legality": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivation": false,
+    "hiddenInfoLeak": false
+  }
+}
