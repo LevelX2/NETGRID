@@ -67,6 +67,10 @@ const SKIVVISS_ID = "onr_v1_064_skivviss";
 const QUEST_FOR_CATTEKIN_ID = "onr_v1_172_quest-for-cattekin";
 const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
 
+export function isISpySuccessfulRunFollowupPayload(payload: Record<string, unknown>): boolean {
+  return payload.runnerUtilityAbility === "i_spy_put_spy_counter";
+}
+
 type EffectSummary = {
   category?: ChronicleCategory;
   suffix?: string;
@@ -1431,6 +1435,27 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       break;
     case "trigger_ability": {
       const resourceAbility = stringValue(payload.resourceAbility);
+      if (isISpySuccessfulRunFollowupPayload(payload)) {
+        const targetServerLabel =
+          serverLabel ??
+          displayServerLabel(stringValue(payload.targetServerLabel)) ??
+          "dem angegriffenen Fort";
+        const countersAfter = numberValue(payload.spyCountersAfter) ?? numberValue(payload.remainingCounters);
+        const exposedCount = numberValue(payload.exposedCount);
+        const sourceCardTitle = sourceTitle ?? titleForDefinitionId(sourceDefinitionId) ?? cardTitle ?? "I Spy";
+        category = "run";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = sourceDefinitionId ?? cardDefinitionId;
+        cardTitle = sourceCardTitle;
+        title = phrase(subject, `mit ${sourceCardTitle} einen Spy-Counter in ${targetServerLabel} platziert`);
+        description =
+          exposedCount !== undefined
+            ? `Solange der Spy-Counter dort liegt, ${exposedCount === 1 ? "bleibt 1 installierte Korp-Karte" : `bleiben ${exposedCount} installierte Korp-Karten`} in oder auf ${targetServerLabel} für den Runner sichtbar`
+            : `Solange der Spy-Counter dort liegt, bleiben installierte Korp-Karten in oder auf ${targetServerLabel} für den Runner sichtbar`;
+        chips.push("I Spy", "+1 Spy", targetServerLabel, ...(countersAfter !== undefined ? [`${countersAfter} dort`] : []));
+        break;
+      }
       if (abilityId === "fang_2_0_pay_to_run") {
         const paid =
           numberValue(payload.runnerRunLockCreditCost) ??

@@ -93,6 +93,7 @@ import {
   chronicleTurnGroupLabel,
   formatChronicleEvent,
   formatChronicleEffectItems,
+  isISpySuccessfulRunFollowupPayload,
   shouldSuppressChronicleEventItem,
   type ChronicleCategory,
   type ChronicleContext,
@@ -10218,7 +10219,7 @@ function chronicleEntriesWithRunGroups(
     const turnNumber = contextByEventId[event.eventId]?.turnNumber ?? null;
     const turnSide = contextByEventId[event.eventId]?.turnSide ?? actor;
     const turnGroup = turnSide ? { label: chronicleTurnGroupLabel(turnSide, turnNumber), kind: turnSide } : null;
-    if (runEndPending && !chronicleActionContinuesCompletedRun(actionType)) {
+    if (runEndPending && !chronicleActionContinuesCompletedRun(event, actionType)) {
       activeRunGroupLabel = null;
       activeRunGroupKey = null;
       runEndPending = false;
@@ -10334,7 +10335,8 @@ const chronicleRunContextActionTypes = new Set([
   "decline_trash"
 ]);
 
-function chronicleActionContinuesCompletedRun(actionType: string): boolean {
+function chronicleActionContinuesCompletedRun(event: PublicGameEvent, actionType: string): boolean {
+  if (actionType === "trigger_ability" && isISpySuccessfulRunFollowupPayload(event.publicPayload)) return true;
   return actionType === "access_card" || actionType === "resolve_choice" || actionType === "trash_accessed_card" || actionType === "steal_agenda" || actionType === "decline_trash";
 }
 

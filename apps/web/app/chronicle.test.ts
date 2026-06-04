@@ -181,6 +181,32 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(expect.arrayContaining(["Startup Immolator", "ICE getrasht", "Archive", "3 Credits"]));
   });
 
+  it("keeps I Spy successful-run follow-up in the run chronicle group", () => {
+    const item = formatChronicleEvent(
+      makeEvent("trigger_ability", {
+        actor: "runner",
+        aiReasonCode: "successful_run_followup",
+        label: "I Spy: Spy-Counter platzieren",
+        sourceDefinitionId: "onr_v1_032_i-spy",
+        runnerUtilityAbility: "i_spy_put_spy_counter",
+        counterType: "spy",
+        addedCounterAmount: 1,
+        serverLabel: "HQ"
+      }),
+      "corp"
+    );
+
+    expect(item.title).toBe("Die Runner-KI hat mit I Spy einen Spy-Counter in HQ platziert.");
+    expect(item.description).toBe("Solange der Spy-Counter dort liegt, bleiben installierte Korp-Karten in oder auf HQ für den Runner sichtbar.");
+    expect(item.category).toBe("run");
+    expect(item.importance).toBe("important");
+    expect(item.cardDefinitionId).toBe("onr_v1_032_i-spy");
+    expect(item.cardTitle).toBe("I Spy");
+    expect(item.groupLabel).toBe("Run auf HQ");
+    expect(item.chips).toEqual(expect.arrayContaining(["Runner", "KI", "I Spy", "+1 Spy", "HQ"]));
+    expect(item.chips).not.toContain("Kartenaktion");
+  });
+
   it("describes Olivia Salazar reduced ICE rez with source, ICE and paid cost", () => {
     const item = formatChronicleEvent(
       makeEvent("rez_ice", {
