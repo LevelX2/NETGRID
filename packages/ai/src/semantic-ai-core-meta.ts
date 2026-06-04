@@ -1,8 +1,12 @@
 import { CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS } from "./controlled-shadow-mode";
 import type { ShadowModeNoEffectFlags } from "./controlled-shadow-mode";
+import type { ActionGateResult } from "./action-semantic-candidate";
 
 export const META1_DECK_DOCTRINE_TACTICAL_GOAL_ENGINE_SCHEMA_VERSION =
   "meta1-deck-doctrine-tactical-goal-engine-v0" as const;
+
+export const META2_SEMANTIC_DECISION_CORE_SCHEMA_VERSION =
+  "meta2-semantic-decision-core-quality-calibration-v0" as const;
 
 export type SemanticAiSide = "runner" | "corp";
 
@@ -248,6 +252,170 @@ export type Meta1DeckDoctrineTacticalGoalEngineReport = {
   noEffectFlags: ShadowModeNoEffectFlags;
 };
 
+export type SignalConsumerGroupId =
+  | "economy"
+  | "draw"
+  | "setup_coverage"
+  | "run_access"
+  | "remote_contest"
+  | "survival"
+  | "corp_scoreline"
+  | "ice_portfolio"
+  | "tag_punish"
+  | "damage_kill"
+  | "target_selection"
+  | "risk_management";
+
+export type SignalConsumerGroupMatch = {
+  groupId: SignalConsumerGroupId;
+  matchedSignals: string[];
+  strength: "weak" | "medium" | "strong";
+  evidence: string[];
+};
+
+export type SemanticDecisionScoreStatus =
+  | "not_scored"
+  | "blocked_by_gate"
+  | "blocked_by_gap"
+  | "shadow_score_available";
+
+export type SemanticDecisionScore = {
+  candidateId: string;
+  scoreStatus: SemanticDecisionScoreStatus;
+  total?: number;
+  components: {
+    goalFit: number;
+    doctrineFit: number;
+    boardUrgency: number;
+    reachability: number;
+    costFit: number;
+    timingFit: number;
+    targetFit: number;
+    riskPenalty: number;
+    opportunityValue: number;
+  };
+  hardGateResults: ActionGateResult[];
+  evidence: string[];
+  whyNot?: string[];
+};
+
+export type WhyNotEntry = {
+  candidateId: string;
+  reasonCategory:
+    | "blocked_by_gate"
+    | "blocked_by_gap"
+    | "lower_goal_fit"
+    | "too_costly"
+    | "too_risky"
+    | "wrong_timing"
+    | "target_mismatch"
+    | "doctrine_less_relevant"
+    | "boardstate_override";
+  explanation: string[];
+};
+
+export type Meta2HumanReviewCategory =
+  | "semantic_better"
+  | "legacy_better"
+  | "acceptable_difference"
+  | "unsafe_divergence"
+  | "bad_goal_priority"
+  | "bad_risk_weight"
+  | "bad_target_choice"
+  | "missing_tactic_signal"
+  | "missing_card_semantics"
+  | "missing_action_context";
+
+export type Meta2ArchetypeFixture = {
+  fixtureId: string;
+  side: SemanticAiSide;
+  archetype:
+    | "neutral_runner"
+    | "economy_first_runner"
+    | "rig_setup_runner"
+    | "hq_pressure_runner"
+    | "rnd_pressure_runner"
+    | "remote_contest_runner"
+    | "survival_runner"
+    | "neutral_corp"
+    | "remote_scoring_corp"
+    | "ice_tax_corp"
+    | "tag_punish_corp"
+    | "damage_kill_corp"
+    | "asset_economy_corp"
+    | "central_stabilize_corp";
+  expectedConsumerGroups: SignalConsumerGroupId[];
+  expectedGoalFamilies: SemanticTacticalGoalFamily[];
+  hiddenInfoPolicy: "public_or_actor_private_only";
+};
+
+export type Meta2BoardstateOverrideFixture = {
+  fixtureId: string;
+  side: SemanticAiSide;
+  doctrinePreference: SemanticTacticalGoalFamily;
+  boardstateGoal: SemanticTacticalGoalFamily;
+  requiredPreferredActionType: string;
+  rationale: string;
+};
+
+export type Meta2CandidateScoreFixture = {
+  candidateId: string;
+  actionId: string;
+  actionType: string;
+  legalActionMember: boolean;
+  hiddenInfoSafe: boolean;
+  reachabilityReady: boolean;
+  costTimingReady: boolean;
+  targetAbilityCardReady: boolean;
+  matchedGoals: SemanticTacticalGoalFamily[];
+  doctrineGoals: SemanticTacticalGoalFamily[];
+  boardUrgency: TacticalGoalPriority;
+  consumerGroupMatches: SignalConsumerGroupMatch[];
+  riskPenalty: number;
+  opportunityValue: number;
+};
+
+export type Meta2SemanticDecisionCoreReport = {
+  schemaVersion: typeof META2_SEMANTIC_DECISION_CORE_SCHEMA_VERSION;
+  step: "META2";
+  scope: "semantic_decision_core_quality_calibration";
+  sourceStep: "META1";
+  consumerGroups: readonly SignalConsumerGroupId[];
+  evaluationOrder: readonly string[];
+  scoreSchema: {
+    scoreStatusValues: readonly SemanticDecisionScoreStatus[];
+    componentFields: readonly (keyof SemanticDecisionScore["components"])[];
+    hardGateBlocksTotal: true;
+    requiredEvidenceMissingBlocksByGap: true;
+  };
+  candidateScores: SemanticDecisionScore[];
+  whyNot: WhyNotEntry[];
+  archetypeFixtures: Meta2ArchetypeFixture[];
+  boardstateOverrideFixtures: Meta2BoardstateOverrideFixture[];
+  humanReviewCategories: readonly Meta2HumanReviewCategory[];
+  summary: {
+    archetypeFixtureCount: number;
+    boardstateOverrideFixtureCount: number;
+    shadowScoreAvailableCount: number;
+    blockedByGateCount: number;
+    blockedByGapCount: number;
+    whyNotCount: number;
+  };
+  qualityGates: {
+    unsafeDivergenceCount: 0;
+    illegalSemanticDecisionCount: 0;
+    hiddenInfoViolationCount: 0;
+    unreachablePreferredActionCount: 0;
+    scoreWithoutExplanationCount: 0;
+    actualDecision: "legacy";
+  };
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
 export const META1_RUNNER_GOAL_FAMILIES = [
   "runner_survive",
   "runner_remove_tags",
@@ -372,6 +540,192 @@ export const META1_BOARDSTATE_OVERRIDE_EXAMPLES = [
   ),
 ] as const satisfies readonly BoardstateOverrideExample[];
 
+export const META2_CONSUMER_GROUPS = [
+  "economy",
+  "draw",
+  "setup_coverage",
+  "run_access",
+  "remote_contest",
+  "survival",
+  "corp_scoreline",
+  "ice_portfolio",
+  "tag_punish",
+  "damage_kill",
+  "target_selection",
+  "risk_management",
+] as const satisfies readonly SignalConsumerGroupId[];
+
+export const META2_EVALUATION_ORDER = [
+  "Engine LegalAction membership",
+  "HiddenInfo / side visibility",
+  "Reachability",
+  "Cost / Timing",
+  "Required Target / Ability / Card Semantics",
+  "Board urgency",
+  "TacticalGoal fit",
+  "DeckDoctrine fit",
+  "Risk / Opportunity",
+  "WhyNot",
+] as const;
+
+export const META2_HUMAN_REVIEW_CATEGORIES = [
+  "semantic_better",
+  "legacy_better",
+  "acceptable_difference",
+  "unsafe_divergence",
+  "bad_goal_priority",
+  "bad_risk_weight",
+  "bad_target_choice",
+  "missing_tactic_signal",
+  "missing_card_semantics",
+  "missing_action_context",
+] as const satisfies readonly Meta2HumanReviewCategory[];
+
+export const META2_ARCHETYPE_FIXTURES = [
+  archetypeFixture("neutral_runner", "runner", ["economy", "draw"], [
+    "runner_economy_stabilize",
+    "runner_draw_find_tools",
+  ]),
+  archetypeFixture("economy_first_runner", "runner", ["economy"], [
+    "runner_economy_stabilize",
+  ]),
+  archetypeFixture("rig_setup_runner", "runner", ["setup_coverage"], [
+    "runner_rig_setup",
+  ]),
+  archetypeFixture("hq_pressure_runner", "runner", ["run_access"], [
+    "runner_pressure_hq",
+  ]),
+  archetypeFixture("rnd_pressure_runner", "runner", ["run_access"], [
+    "runner_pressure_rnd",
+  ]),
+  archetypeFixture("remote_contest_runner", "runner", ["remote_contest"], [
+    "runner_contest_remote",
+  ]),
+  archetypeFixture("survival_runner", "runner", ["survival"], [
+    "runner_survive",
+    "runner_remove_tags",
+  ]),
+  archetypeFixture("neutral_corp", "corp", ["economy", "ice_portfolio"], [
+    "corp_economy_stabilize",
+    "corp_defend_rnd",
+  ]),
+  archetypeFixture("remote_scoring_corp", "corp", ["corp_scoreline"], [
+    "corp_build_remote",
+    "corp_score_agenda",
+  ]),
+  archetypeFixture("ice_tax_corp", "corp", ["ice_portfolio"], [
+    "corp_rez_ice_tax",
+  ]),
+  archetypeFixture("tag_punish_corp", "corp", ["tag_punish"], [
+    "corp_tag_runner",
+    "corp_punish_tagged_runner",
+  ]),
+  archetypeFixture("damage_kill_corp", "corp", ["damage_kill"], [
+    "corp_damage_kill_window",
+  ]),
+  archetypeFixture("asset_economy_corp", "corp", ["economy"], [
+    "corp_economy_stabilize",
+  ]),
+  archetypeFixture("central_stabilize_corp", "corp", ["ice_portfolio"], [
+    "corp_defend_hq",
+    "corp_defend_rnd",
+  ]),
+] as const satisfies readonly Meta2ArchetypeFixture[];
+
+export const META2_BOARDSTATE_OVERRIDE_FIXTURES = [
+  meta2OverrideFixture(
+    "rnd-pressure-runner-must-contest-remote",
+    "runner",
+    "runner_pressure_rnd",
+    "runner_contest_remote",
+    "start_run",
+    "Remote threat has higher board urgency than R&D pressure.",
+  ),
+  meta2OverrideFixture(
+    "tag-punish-corp-without-tag-cannot-punish",
+    "corp",
+    "corp_punish_tagged_runner",
+    "corp_tag_runner",
+    "play_operation",
+    "Punish goal is blocked until Runner is tagged.",
+  ),
+  meta2OverrideFixture(
+    "runner-tagged-kill-threat-removes-tag",
+    "runner",
+    "runner_access_payoff",
+    "runner_remove_tags",
+    "remove_tag",
+    "Survival and tag removal beat value access under visible kill threat.",
+  ),
+  meta2OverrideFixture(
+    "corp-score-not-affordable-stabilizes-economy",
+    "corp",
+    "corp_score_agenda",
+    "corp_economy_stabilize",
+    "gain_credit",
+    "Cost gate and economy criticality beat score preference.",
+  ),
+  meta2OverrideFixture(
+    "runner-missing-breaker-coverage-prioritizes-setup",
+    "runner",
+    "runner_pressure_hq",
+    "runner_rig_setup",
+    "install_card",
+    "Reachability blocks central pressure until coverage improves.",
+  ),
+  meta2OverrideFixture(
+    "corp-open-rnd-prioritizes-central-defense",
+    "corp",
+    "corp_build_remote",
+    "corp_defend_rnd",
+    "install_card",
+    "Open R&D pressure raises central defense over remote build.",
+  ),
+] as const satisfies readonly Meta2BoardstateOverrideFixture[];
+
+export const META2_DEFAULT_SCORE_FIXTURES = [
+  scoreFixture({
+    candidateId: "meta2-runner-remove-tag",
+    actionId: "legal.remove_tag.1",
+    actionType: "remove_tag",
+    matchedGoals: ["runner_remove_tags", "runner_survive"],
+    doctrineGoals: ["runner_access_payoff"],
+    boardUrgency: "critical",
+    consumerGroupMatches: [
+      consumerGroup("survival", ["tag.remove", "kill_risk.visible"], "strong"),
+      consumerGroup("risk_management", ["avoid_damage"], "medium"),
+    ],
+    riskPenalty: 0,
+    opportunityValue: 3,
+  }),
+  scoreFixture({
+    candidateId: "meta2-runner-hidden-access-choice",
+    actionId: "legal.access_hidden.1",
+    actionType: "trash_accessed_card",
+    hiddenInfoSafe: false,
+    matchedGoals: ["runner_access_payoff"],
+    doctrineGoals: ["runner_access_payoff"],
+    boardUrgency: "medium",
+    consumerGroupMatches: [
+      consumerGroup("run_access", ["access.hidden_choice"], "weak"),
+    ],
+  }),
+  scoreFixture({
+    candidateId: "meta2-corp-score-gap",
+    actionId: "legal.score_agenda.1",
+    actionType: "score_agenda",
+    costTimingReady: false,
+    targetAbilityCardReady: false,
+    matchedGoals: ["corp_score_agenda"],
+    doctrineGoals: ["corp_score_agenda"],
+    boardUrgency: "high",
+    consumerGroupMatches: [
+      consumerGroup("corp_scoreline", ["score.window"], "strong"),
+    ],
+    opportunityValue: 4,
+  }),
+] as const satisfies readonly Meta2CandidateScoreFixture[];
+
 export function buildMeta1DeckDoctrineTacticalGoalEngineReport(): Meta1DeckDoctrineTacticalGoalEngineReport {
   const sampleProfiles = [
     buildDeckStrategicProfile({
@@ -473,6 +827,132 @@ export function buildMeta1DeckDoctrineTacticalGoalEngineReport(): Meta1DeckDoctr
     runtimeConsumerStatus: "none",
     noRuntimeEffect: true,
     noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildMeta2SemanticDecisionCoreReport(
+  fixtures: readonly Meta2CandidateScoreFixture[] = META2_DEFAULT_SCORE_FIXTURES,
+): Meta2SemanticDecisionCoreReport {
+  const candidateScores = fixtures.map(buildSemanticDecisionScore);
+  const whyNot = buildWhyNotEntries(candidateScores);
+
+  return {
+    schemaVersion: META2_SEMANTIC_DECISION_CORE_SCHEMA_VERSION,
+    step: "META2",
+    scope: "semantic_decision_core_quality_calibration",
+    sourceStep: "META1",
+    consumerGroups: META2_CONSUMER_GROUPS,
+    evaluationOrder: META2_EVALUATION_ORDER,
+    scoreSchema: {
+      scoreStatusValues: [
+        "not_scored",
+        "blocked_by_gate",
+        "blocked_by_gap",
+        "shadow_score_available",
+      ],
+      componentFields: [
+        "goalFit",
+        "doctrineFit",
+        "boardUrgency",
+        "reachability",
+        "costFit",
+        "timingFit",
+        "targetFit",
+        "riskPenalty",
+        "opportunityValue",
+      ],
+      hardGateBlocksTotal: true,
+      requiredEvidenceMissingBlocksByGap: true,
+    },
+    candidateScores,
+    whyNot,
+    archetypeFixtures: [...META2_ARCHETYPE_FIXTURES],
+    boardstateOverrideFixtures: [...META2_BOARDSTATE_OVERRIDE_FIXTURES],
+    humanReviewCategories: META2_HUMAN_REVIEW_CATEGORIES,
+    summary: {
+      archetypeFixtureCount: META2_ARCHETYPE_FIXTURES.length,
+      boardstateOverrideFixtureCount: META2_BOARDSTATE_OVERRIDE_FIXTURES.length,
+      shadowScoreAvailableCount: candidateScores.filter(
+        (score) => score.scoreStatus === "shadow_score_available",
+      ).length,
+      blockedByGateCount: candidateScores.filter(
+        (score) => score.scoreStatus === "blocked_by_gate",
+      ).length,
+      blockedByGapCount: candidateScores.filter(
+        (score) => score.scoreStatus === "blocked_by_gap",
+      ).length,
+      whyNotCount: whyNot.length,
+    },
+    qualityGates: {
+      unsafeDivergenceCount: 0,
+      illegalSemanticDecisionCount: 0,
+      hiddenInfoViolationCount: 0,
+      unreachablePreferredActionCount: 0,
+      scoreWithoutExplanationCount: 0,
+      actualDecision: "legacy",
+    },
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildSemanticDecisionScore(
+  fixture: Meta2CandidateScoreFixture,
+): SemanticDecisionScore {
+  const hardGateResults = hardGatesForScoreFixture(fixture);
+  const blockedByGate = hardGateResults.some((gate) => gate.status === "block");
+  const blockedByGap =
+    !blockedByGate &&
+    (!fixture.reachabilityReady ||
+      !fixture.costTimingReady ||
+      !fixture.targetAbilityCardReady);
+  const components = {
+    goalFit: fixture.matchedGoals.length * 2,
+    doctrineFit: fixture.doctrineGoals.length,
+    boardUrgency: priorityScore(fixture.boardUrgency),
+    reachability: fixture.reachabilityReady ? 2 : 0,
+    costFit: fixture.costTimingReady ? 2 : 0,
+    timingFit: fixture.costTimingReady ? 2 : 0,
+    targetFit: fixture.targetAbilityCardReady ? 2 : 0,
+    riskPenalty: fixture.riskPenalty,
+    opportunityValue: fixture.opportunityValue,
+  };
+  const scoreStatus: SemanticDecisionScoreStatus = blockedByGate
+    ? "blocked_by_gate"
+    : blockedByGap
+      ? "blocked_by_gap"
+      : "shadow_score_available";
+  const total =
+    scoreStatus === "shadow_score_available"
+      ? components.goalFit +
+        components.doctrineFit +
+        components.boardUrgency +
+        components.reachability +
+        components.costFit +
+        components.timingFit +
+        components.targetFit +
+        components.opportunityValue -
+        components.riskPenalty
+      : undefined;
+
+  return {
+    candidateId: fixture.candidateId,
+    scoreStatus,
+    ...(total !== undefined ? { total } : {}),
+    components,
+    hardGateResults,
+    evidence: [
+      `Evaluation order: ${META2_EVALUATION_ORDER.join(" -> ")}`,
+      ...fixture.consumerGroupMatches.flatMap((match) => match.evidence),
+      ...fixture.matchedGoals.map((goal) => `Goal fit: ${goal}`),
+      ...fixture.doctrineGoals.map((goal) => `Doctrine fit: ${goal}`),
+    ],
+    ...(scoreStatus !== "shadow_score_available"
+      ? { whyNot: whyNotForBlockedScore(scoreStatus, hardGateResults, fixture) }
+      : {}),
   };
 }
 
@@ -891,6 +1371,203 @@ function tacticalGoalState(params: {
     whyActive: [...params.whyActive],
     whyBlocked: [...(params.whyBlocked ?? [])],
   };
+}
+
+function archetypeFixture(
+  archetype: Meta2ArchetypeFixture["archetype"],
+  side: SemanticAiSide,
+  expectedConsumerGroups: readonly SignalConsumerGroupId[],
+  expectedGoalFamilies: readonly SemanticTacticalGoalFamily[],
+): Meta2ArchetypeFixture {
+  return {
+    fixtureId: `meta2-${archetype}`,
+    side,
+    archetype,
+    expectedConsumerGroups: [...expectedConsumerGroups],
+    expectedGoalFamilies: [...expectedGoalFamilies],
+    hiddenInfoPolicy: "public_or_actor_private_only",
+  };
+}
+
+function meta2OverrideFixture(
+  fixtureId: string,
+  side: SemanticAiSide,
+  doctrinePreference: SemanticTacticalGoalFamily,
+  boardstateGoal: SemanticTacticalGoalFamily,
+  requiredPreferredActionType: string,
+  rationale: string,
+): Meta2BoardstateOverrideFixture {
+  return {
+    fixtureId,
+    side,
+    doctrinePreference,
+    boardstateGoal,
+    requiredPreferredActionType,
+    rationale,
+  };
+}
+
+function scoreFixture(
+  values: Omit<
+    Meta2CandidateScoreFixture,
+    | "legalActionMember"
+    | "hiddenInfoSafe"
+    | "reachabilityReady"
+    | "costTimingReady"
+    | "targetAbilityCardReady"
+    | "riskPenalty"
+    | "opportunityValue"
+  > &
+    Partial<
+      Pick<
+        Meta2CandidateScoreFixture,
+        | "legalActionMember"
+        | "hiddenInfoSafe"
+        | "reachabilityReady"
+        | "costTimingReady"
+        | "targetAbilityCardReady"
+        | "riskPenalty"
+        | "opportunityValue"
+      >
+    >,
+): Meta2CandidateScoreFixture {
+  return {
+    legalActionMember: true,
+    hiddenInfoSafe: true,
+    reachabilityReady: true,
+    costTimingReady: true,
+    targetAbilityCardReady: true,
+    riskPenalty: 0,
+    opportunityValue: 0,
+    ...values,
+  };
+}
+
+function consumerGroup(
+  groupId: SignalConsumerGroupId,
+  matchedSignals: readonly string[],
+  strength: SignalConsumerGroupMatch["strength"],
+): SignalConsumerGroupMatch {
+  return {
+    groupId,
+    matchedSignals: [...matchedSignals],
+    strength,
+    evidence: [`META2 consumer group ${groupId}: ${matchedSignals.join(", ")}`],
+  };
+}
+
+function hardGatesForScoreFixture(
+  fixture: Meta2CandidateScoreFixture,
+): ActionGateResult[] {
+  return [
+    meta2Gate(
+      "engine_legal_action",
+      fixture.legalActionMember ? "pass" : "block",
+      fixture.legalActionMember
+        ? "Candidate references an Engine LegalAction actionId."
+        : "Candidate actionId is not in Engine LegalActions.",
+    ),
+    meta2Gate(
+      "hidden_info",
+      fixture.hiddenInfoSafe ? "pass" : "block",
+      fixture.hiddenInfoSafe
+        ? "Candidate uses only side-safe visible or actor-private information."
+        : "Candidate would require hidden-info projection.",
+    ),
+    meta2Gate(
+      "target_context",
+      fixture.targetAbilityCardReady ? "pass" : "unknown",
+      fixture.targetAbilityCardReady
+        ? "Target, ability and card semantics are sufficiently joined."
+        : "Required target, ability or card evidence is missing.",
+    ),
+    meta2Gate(
+      "cost_known",
+      fixture.costTimingReady ? "pass" : "unknown",
+      fixture.costTimingReady ? "Cost evidence is available." : "Cost evidence gap.",
+    ),
+    meta2Gate(
+      "timing_known",
+      fixture.costTimingReady ? "pass" : "unknown",
+      fixture.costTimingReady
+        ? "Timing evidence is available."
+        : "Timing evidence gap.",
+    ),
+  ];
+}
+
+function meta2Gate(
+  gateId: ActionGateResult["gateId"],
+  status: ActionGateResult["status"],
+  reason: string,
+): ActionGateResult {
+  return {
+    gateId,
+    status,
+    severity: status === "block" ? "error" : status === "unknown" ? "warning" : "info",
+    reason,
+    evidence: [`META2 ${gateId}`],
+  };
+}
+
+function priorityScore(priorityValue: TacticalGoalPriority): number {
+  if (priorityValue === "critical") return 4;
+  if (priorityValue === "high") return 3;
+  if (priorityValue === "medium") return 2;
+  return 1;
+}
+
+function whyNotForBlockedScore(
+  status: Exclude<SemanticDecisionScoreStatus, "shadow_score_available" | "not_scored">,
+  hardGateResults: readonly ActionGateResult[],
+  fixture: Meta2CandidateScoreFixture,
+): string[] {
+  if (status === "blocked_by_gate") {
+    return hardGateResults
+      .filter((gate) => gate.status === "block")
+      .map((gate) => `Hard gate blocked: ${gate.gateId}`);
+  }
+  return [
+    ...(!fixture.reachabilityReady ? ["Reachability evidence is missing."] : []),
+    ...(!fixture.costTimingReady ? ["Cost or timing evidence is missing."] : []),
+    ...(!fixture.targetAbilityCardReady
+      ? ["Target, ability or card semantic evidence is missing."]
+      : []),
+  ];
+}
+
+function buildWhyNotEntries(
+  scores: readonly SemanticDecisionScore[],
+): WhyNotEntry[] {
+  const top = scores
+    .filter((score) => score.scoreStatus === "shadow_score_available")
+    .sort((left, right) => (right.total ?? 0) - (left.total ?? 0))[0];
+
+  return scores
+    .filter((score) => score.candidateId !== top?.candidateId)
+    .map((score) => {
+      if (score.scoreStatus === "blocked_by_gate") {
+        return {
+          candidateId: score.candidateId,
+          reasonCategory: "blocked_by_gate" as const,
+          explanation: score.whyNot ?? ["Hard gate blocked this candidate."],
+        };
+      }
+      if (score.scoreStatus === "blocked_by_gap") {
+        return {
+          candidateId: score.candidateId,
+          reasonCategory: "blocked_by_gap" as const,
+          explanation: score.whyNot ?? ["Required semantic evidence is missing."],
+        };
+      }
+      return {
+        candidateId: score.candidateId,
+        reasonCategory: "lower_goal_fit" as const,
+        explanation: [
+          `Score ${score.total ?? 0} did not beat top score ${top?.total ?? 0}.`,
+        ],
+      };
+    });
 }
 
 function supportedActionTypesForGoal(

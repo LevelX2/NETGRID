@@ -1,0 +1,69 @@
+{
+  "schemaVersion": "meta2-semantic-decision-core-quality-calibration-v0",
+  "step": "META2",
+  "scope": "semantic_decision_core_quality_calibration",
+  "sourceStep": "META1",
+  "consumerGroupCount": 12,
+  "evaluationOrder": [
+    "Engine LegalAction membership",
+    "HiddenInfo / side visibility",
+    "Reachability",
+    "Cost / Timing",
+    "Required Target / Ability / Card Semantics",
+    "Board urgency",
+    "TacticalGoal fit",
+    "DeckDoctrine fit",
+    "Risk / Opportunity",
+    "WhyNot"
+  ],
+  "scoreSchema": {
+    "scoreStatusValues": [
+      "not_scored",
+      "blocked_by_gate",
+      "blocked_by_gap",
+      "shadow_score_available"
+    ],
+    "componentFields": [
+      "goalFit",
+      "doctrineFit",
+      "boardUrgency",
+      "reachability",
+      "costFit",
+      "timingFit",
+      "targetFit",
+      "riskPenalty",
+      "opportunityValue"
+    ],
+    "hardGateBlocksTotal": true,
+    "requiredEvidenceMissingBlocksByGap": true
+  },
+  "summary": {
+    "archetypeFixtureCount": 14,
+    "boardstateOverrideFixtureCount": 6,
+    "shadowScoreAvailableCount": 1,
+    "blockedByGateCount": 1,
+    "blockedByGapCount": 1,
+    "whyNotCount": 2
+  },
+  "requiredBoardstateOverrideFixtures": [
+    "rnd-pressure-runner-must-contest-remote",
+    "tag-punish-corp-without-tag-cannot-punish",
+    "runner-tagged-kill-threat-removes-tag",
+    "corp-score-not-affordable-stabilizes-economy",
+    "runner-missing-breaker-coverage-prioritizes-setup",
+    "corp-open-rnd-prioritizes-central-defense"
+  ],
+  "humanReviewCategoryCount": 10,
+  "qualityGates": {
+    "unsafeDivergenceCount": 0,
+    "illegalSemanticDecisionCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "unreachablePreferredActionCount": 0,
+    "scoreWithoutExplanationCount": 0,
+    "actualDecision": "legacy"
+  },
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "runtimeConsumerStatus": "none",
+  "noRuntimeEffect": true
+}
