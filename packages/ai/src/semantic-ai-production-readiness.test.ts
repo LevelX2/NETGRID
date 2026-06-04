@@ -8,6 +8,7 @@ import {
   META8_INTERNAL_CANARY_FIXTURES,
   META9_PRODUCTION_SAFE_SHADOW_CONFIG,
   META10_SELECTED_PRODUCTION_SCOPES,
+  buildMeta17SemanticDefaultEligibleScopesReport,
   buildMeta16BroadScopedProductionExpansionReport,
   buildMeta15ComplexScopeEnablementReport,
   buildMeta14LowRiskScopeExpansionReport,
@@ -20,6 +21,7 @@ import {
   buildMeta7MultiRunSemanticEvaluationHumanReviewReport,
   buildMeta7ScopeReadinessPromotions,
   evaluateMeta10CutoverFixture,
+  evaluateMeta17SemanticDefaultFixture,
   evaluateMeta9AgreementShadowFixture,
   evaluateMeta9TraceScrubFixture,
   evaluateMeta8InternalCanaryFixture,
@@ -591,6 +593,111 @@ describe("META16 Broad Scoped Production Expansion", () => {
       globalSemanticDefaultAllowed: false,
       legacyRemovalReady: false,
       nextStep: "META17_semantic_default_eligible_scopes",
+    });
+    expect(report.legacyFallbackAvailable).toBe(true);
+    expect(report.rollbackAvailable).toBe(true);
+  });
+});
+
+describe("META17 Semantic Default for Eligible Scopes", () => {
+  it("makes semantic default active only for eligible scopes", () => {
+    const report = buildMeta17SemanticDefaultEligibleScopesReport();
+
+    expect(report.schemaVersion).toBe(
+      "meta17-semantic-default-eligible-scopes-v0",
+    );
+    expect(report.step).toBe("META17");
+    expect(report.semanticDefaultActive).toBe(true);
+    expect(report.eligibleSemanticDefaultScopes).toEqual([
+      "basic_economy_draw",
+      "tag_removal",
+      "simple_score_advance",
+      "basic_install",
+      "simple_rez",
+      "simple_run_choice",
+      "remote_contest",
+      "simple_hq_or_rnd_pressure",
+    ]);
+    expect(report.nonEligibleScopes).toEqual(
+      expect.arrayContaining([
+        "trace_payment",
+        "damage_prevention",
+        "multi_target_multi_ability",
+      ]),
+    );
+  });
+
+  it("evaluates semantic default fixtures with legal-action and rollback guards", () => {
+    const semantic = evaluateMeta17SemanticDefaultFixture({
+      fixtureId: "semantic",
+      scopeId: "simple_rez",
+      legalActionIds: ["legacy", "semantic"],
+      legacyActionId: "legacy",
+      semanticActionId: "semantic",
+      gatesPass: true,
+      rollbackForced: false,
+    });
+    const rollback = evaluateMeta17SemanticDefaultFixture({
+      fixtureId: "rollback",
+      scopeId: "simple_rez",
+      legalActionIds: ["legacy", "semantic"],
+      legacyActionId: "legacy",
+      semanticActionId: "semantic",
+      gatesPass: true,
+      rollbackForced: true,
+    });
+    const blocked = evaluateMeta17SemanticDefaultFixture({
+      fixtureId: "blocked",
+      scopeId: "trace_payment",
+      legalActionIds: ["legacy", "semantic"],
+      legacyActionId: "legacy",
+      semanticActionId: "semantic",
+      gatesPass: true,
+      rollbackForced: false,
+    });
+
+    expect(semantic).toMatchObject({
+      actualDecisionSource: "semantic",
+      result: "semantic_default_actual",
+    });
+    expect(rollback).toMatchObject({
+      actualDecisionSource: "legacy",
+      result: "rollback_forced_legacy",
+    });
+    expect(blocked).toMatchObject({
+      actualDecisionSource: "legacy",
+      result: "scope_not_eligible_legacy",
+    });
+  });
+
+  it("keeps fallback available while reporting semantic default go/no-go", () => {
+    const report = buildMeta17SemanticDefaultEligibleScopesReport();
+
+    expect(report.runtimeRule).toEqual({
+      semanticDefaultOnlyForEligibleScopes: true,
+      semanticActionMustBeEngineLegal: true,
+      rollbackOverridesSemanticDefault: true,
+      blockedScopesRemainLegacyOnly: true,
+    });
+    expect(report.qualityGates).toMatchObject({
+      previousSemanticDefaultScopeCount: 0,
+      semanticDefaultScopeCount: 8,
+      legacyFallbackShareTrend: "down",
+      rollbackWorks: true,
+      engineRejectCount: 0,
+      hiddenInfoViolationCount: 0,
+      unsafeDivergenceCount: 0,
+      publicPayloadDeltaCount: 0,
+      determinismFailureCount: 0,
+      performanceWithinLimit: true,
+    });
+    expect(report.goNoGo).toEqual({
+      decision: "semantic_default_for_eligible_scopes",
+      fallbackRemoved: false,
+      blockedScopesSemanticDefault: false,
+      nextStep: "META18_legacy_retirement_full_takeover_decision",
+      fullProductionReady: false,
+      legacyRemovalReady: false,
     });
     expect(report.legacyFallbackAvailable).toBe(true);
     expect(report.rollbackAvailable).toBe(true);

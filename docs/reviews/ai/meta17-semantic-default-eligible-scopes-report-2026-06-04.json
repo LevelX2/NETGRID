@@ -1,0 +1,90 @@
+{
+  "schemaVersion": "meta17-semantic-default-eligible-scopes-v0",
+  "step": "META17",
+  "scope": "semantic_default_eligible_scopes",
+  "sourceStep": "META16",
+  "eligibleSemanticDefaultScopes": [
+    "basic_economy_draw",
+    "tag_removal",
+    "simple_score_advance",
+    "basic_install",
+    "simple_rez",
+    "simple_run_choice",
+    "remote_contest",
+    "simple_hq_or_rnd_pressure"
+  ],
+  "nonEligibleScopes": [
+    "simple_advance_score",
+    "basic_setup_install",
+    "access_trash_steal",
+    "trace_payment",
+    "damage_prevention",
+    "multi_target_multi_ability"
+  ],
+  "fixtureResults": [
+    {
+      "fixtureId": "meta17-basic-economy-default",
+      "scopeId": "basic_economy_draw",
+      "actualActionId": "semantic.gain_credit",
+      "actualDecisionSource": "semantic",
+      "result": "semantic_default_actual"
+    },
+    {
+      "fixtureId": "meta17-remote-contest-default",
+      "scopeId": "remote_contest",
+      "actualActionId": "semantic.run_remote",
+      "actualDecisionSource": "semantic",
+      "result": "semantic_default_actual"
+    },
+    {
+      "fixtureId": "meta17-trace-payment-legacy-only",
+      "scopeId": "trace_payment",
+      "actualActionId": "legacy.pay_zero",
+      "actualDecisionSource": "legacy",
+      "result": "scope_not_eligible_legacy"
+    },
+    {
+      "fixtureId": "meta17-semantic-not-legal",
+      "scopeId": "simple_rez",
+      "actualActionId": "legacy.no_rez",
+      "actualDecisionSource": "legacy",
+      "result": "semantic_not_legal_legacy"
+    },
+    {
+      "fixtureId": "meta17-rollback-forced",
+      "scopeId": "simple_run_choice",
+      "actualActionId": "legacy.draw",
+      "actualDecisionSource": "legacy",
+      "result": "rollback_forced_legacy"
+    }
+  ],
+  "runtimeRule": {
+    "semanticDefaultOnlyForEligibleScopes": true,
+    "semanticActionMustBeEngineLegal": true,
+    "rollbackOverridesSemanticDefault": true,
+    "blockedScopesRemainLegacyOnly": true
+  },
+  "qualityGates": {
+    "previousSemanticDefaultScopeCount": 0,
+    "semanticDefaultScopeCount": 8,
+    "legacyFallbackShareTrend": "down",
+    "rollbackWorks": true,
+    "engineRejectCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "unsafeDivergenceCount": 0,
+    "publicPayloadDeltaCount": 0,
+    "determinismFailureCount": 0,
+    "performanceWithinLimit": true
+  },
+  "goNoGo": {
+    "decision": "semantic_default_for_eligible_scopes",
+    "fallbackRemoved": false,
+    "blockedScopesSemanticDefault": false,
+    "nextStep": "META18_legacy_retirement_full_takeover_decision",
+    "fullProductionReady": false,
+    "legacyRemovalReady": false
+  },
+  "semanticDefaultActive": true,
+  "legacyFallbackAvailable": true,
+  "rollbackAvailable": true
+}

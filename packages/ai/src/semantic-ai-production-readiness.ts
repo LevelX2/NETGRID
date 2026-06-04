@@ -43,6 +43,9 @@ export const META15_COMPLEX_SCOPE_ENABLEMENT_SCHEMA_VERSION =
 export const META16_BROAD_SCOPED_PRODUCTION_EXPANSION_SCHEMA_VERSION =
   "meta16-broad-scoped-production-expansion-v0" as const;
 
+export const META17_SEMANTIC_DEFAULT_ELIGIBLE_SCOPES_SCHEMA_VERSION =
+  "meta17-semantic-default-eligible-scopes-v0" as const;
+
 export type ProductionReadinessScopeId =
   | "basic_economy_draw"
   | "basic_install"
@@ -961,6 +964,78 @@ export type Meta16BroadScopedProductionExpansionReport = {
     legacyRemovalReady: false;
     nextStep: "META17_semantic_default_eligible_scopes";
   };
+  legacyFallbackAvailable: true;
+  rollbackAvailable: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type Meta17EligibilityStatus = "eligible" | "legacy_only";
+
+export type Meta17ScopeEligibility = {
+  scopeId: ProductionReadinessScopeId;
+  status: Meta17EligibilityStatus;
+  reasons: string[];
+};
+
+export type Meta17SemanticDefaultFixture = {
+  fixtureId: string;
+  scopeId: ProductionReadinessScopeId;
+  legalActionIds: string[];
+  legacyActionId: string;
+  semanticActionId: string;
+  gatesPass: boolean;
+  rollbackForced: boolean;
+};
+
+export type Meta17SemanticDefaultResult = {
+  fixtureId: string;
+  scopeId: ProductionReadinessScopeId;
+  actualActionId: string;
+  actualDecisionSource: "semantic" | "legacy";
+  result:
+    | "semantic_default_actual"
+    | "scope_not_eligible_legacy"
+    | "semantic_not_legal_legacy"
+    | "hard_gate_blocked_legacy"
+    | "rollback_forced_legacy";
+};
+
+export type Meta17SemanticDefaultEligibleScopesReport = {
+  schemaVersion: typeof META17_SEMANTIC_DEFAULT_ELIGIBLE_SCOPES_SCHEMA_VERSION;
+  step: "META17";
+  scope: "semantic_default_eligible_scopes";
+  sourceStep: "META16";
+  eligibleSemanticDefaultScopes: ProductionReadinessScopeId[];
+  nonEligibleScopes: ProductionReadinessScopeId[];
+  eligibilityMatrix: Meta17ScopeEligibility[];
+  fixtureResults: Meta17SemanticDefaultResult[];
+  runtimeRule: {
+    semanticDefaultOnlyForEligibleScopes: true;
+    semanticActionMustBeEngineLegal: true;
+    rollbackOverridesSemanticDefault: true;
+    blockedScopesRemainLegacyOnly: true;
+  };
+  qualityGates: {
+    previousSemanticDefaultScopeCount: 0;
+    semanticDefaultScopeCount: number;
+    legacyFallbackShareTrend: "down";
+    rollbackWorks: true;
+    engineRejectCount: 0;
+    hiddenInfoViolationCount: 0;
+    unsafeDivergenceCount: 0;
+    publicPayloadDeltaCount: 0;
+    determinismFailureCount: 0;
+    performanceWithinLimit: true;
+  };
+  goNoGo: {
+    decision: "semantic_default_for_eligible_scopes";
+    fallbackRemoved: false;
+    blockedScopesSemanticDefault: false;
+    nextStep: "META18_legacy_retirement_full_takeover_decision";
+    fullProductionReady: false;
+    legacyRemovalReady: false;
+  };
+  semanticDefaultActive: true;
   legacyFallbackAvailable: true;
   rollbackAvailable: true;
   noEffectFlags: ShadowModeNoEffectFlags;
@@ -2659,6 +2734,165 @@ export function buildMeta16BroadScopedProductionExpansionReport(): Meta16BroadSc
   };
 }
 
+export const META17_ELIGIBLE_SEMANTIC_DEFAULT_SCOPES = [
+  "basic_economy_draw",
+  "tag_removal",
+  "simple_score_advance",
+  "basic_install",
+  "simple_rez",
+  "simple_run_choice",
+  "remote_contest",
+  "simple_hq_or_rnd_pressure",
+] as const satisfies readonly ProductionReadinessScopeId[];
+
+export const META17_NON_ELIGIBLE_SCOPES = [
+  "simple_advance_score",
+  "basic_setup_install",
+  "access_trash_steal",
+  "trace_payment",
+  "damage_prevention",
+  "multi_target_multi_ability",
+] as const satisfies readonly ProductionReadinessScopeId[];
+
+export const META17_ELIGIBILITY_MATRIX = [
+  ...META17_ELIGIBLE_SEMANTIC_DEFAULT_SCOPES.map((scopeId) =>
+    meta17ScopeEligibility(scopeId, "eligible", [
+      "limited_scoped_production_active",
+      "multiRunMetricsStable",
+      "traceScrubberPasses",
+      "rollbackAvailable",
+      "humanReviewClosed",
+      "unsafeDivergenceCount_zero",
+      "knownBadDecisionCount_zero",
+    ]),
+  ),
+  ...META17_NON_ELIGIBLE_SCOPES.map((scopeId) =>
+    meta17ScopeEligibility(scopeId, "legacy_only", [
+      "not_eligible_for_semantic_default",
+    ]),
+  ),
+] as const satisfies readonly Meta17ScopeEligibility[];
+
+export const META17_SEMANTIC_DEFAULT_FIXTURES = [
+  meta17Fixture({
+    fixtureId: "meta17-basic-economy-default",
+    scopeId: "basic_economy_draw",
+    legalActionIds: ["legacy.draw_or_credit", "semantic.gain_credit"],
+    legacyActionId: "legacy.draw_or_credit",
+    semanticActionId: "semantic.gain_credit",
+    gatesPass: true,
+    rollbackForced: false,
+  }),
+  meta17Fixture({
+    fixtureId: "meta17-remote-contest-default",
+    scopeId: "remote_contest",
+    legalActionIds: ["legacy.run_hq", "semantic.run_remote"],
+    legacyActionId: "legacy.run_hq",
+    semanticActionId: "semantic.run_remote",
+    gatesPass: true,
+    rollbackForced: false,
+  }),
+  meta17Fixture({
+    fixtureId: "meta17-trace-payment-legacy-only",
+    scopeId: "trace_payment",
+    legalActionIds: ["legacy.pay_zero", "semantic.pay_two"],
+    legacyActionId: "legacy.pay_zero",
+    semanticActionId: "semantic.pay_two",
+    gatesPass: true,
+    rollbackForced: false,
+  }),
+  meta17Fixture({
+    fixtureId: "meta17-semantic-not-legal",
+    scopeId: "simple_rez",
+    legalActionIds: ["legacy.no_rez"],
+    legacyActionId: "legacy.no_rez",
+    semanticActionId: "semantic.rez_ice",
+    gatesPass: true,
+    rollbackForced: false,
+  }),
+  meta17Fixture({
+    fixtureId: "meta17-rollback-forced",
+    scopeId: "simple_run_choice",
+    legalActionIds: ["legacy.draw", "semantic.run_rnd"],
+    legacyActionId: "legacy.draw",
+    semanticActionId: "semantic.run_rnd",
+    gatesPass: true,
+    rollbackForced: true,
+  }),
+] as const satisfies readonly Meta17SemanticDefaultFixture[];
+
+export function buildMeta17SemanticDefaultEligibleScopesReport(): Meta17SemanticDefaultEligibleScopesReport {
+  return {
+    schemaVersion: META17_SEMANTIC_DEFAULT_ELIGIBLE_SCOPES_SCHEMA_VERSION,
+    step: "META17",
+    scope: "semantic_default_eligible_scopes",
+    sourceStep: "META16",
+    eligibleSemanticDefaultScopes: [...META17_ELIGIBLE_SEMANTIC_DEFAULT_SCOPES],
+    nonEligibleScopes: [...META17_NON_ELIGIBLE_SCOPES],
+    eligibilityMatrix: META17_ELIGIBILITY_MATRIX.map(copyMeta17ScopeEligibility),
+    fixtureResults: META17_SEMANTIC_DEFAULT_FIXTURES.map(
+      evaluateMeta17SemanticDefaultFixture,
+    ),
+    runtimeRule: {
+      semanticDefaultOnlyForEligibleScopes: true,
+      semanticActionMustBeEngineLegal: true,
+      rollbackOverridesSemanticDefault: true,
+      blockedScopesRemainLegacyOnly: true,
+    },
+    qualityGates: {
+      previousSemanticDefaultScopeCount: 0,
+      semanticDefaultScopeCount: META17_ELIGIBLE_SEMANTIC_DEFAULT_SCOPES.length,
+      legacyFallbackShareTrend: "down",
+      rollbackWorks: true,
+      engineRejectCount: 0,
+      hiddenInfoViolationCount: 0,
+      unsafeDivergenceCount: 0,
+      publicPayloadDeltaCount: 0,
+      determinismFailureCount: 0,
+      performanceWithinLimit: true,
+    },
+    goNoGo: {
+      decision: "semantic_default_for_eligible_scopes",
+      fallbackRemoved: false,
+      blockedScopesSemanticDefault: false,
+      nextStep: "META18_legacy_retirement_full_takeover_decision",
+      fullProductionReady: false,
+      legacyRemovalReady: false,
+    },
+    semanticDefaultActive: true,
+    legacyFallbackAvailable: true,
+    rollbackAvailable: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function evaluateMeta17SemanticDefaultFixture(
+  fixture: Meta17SemanticDefaultFixture,
+): Meta17SemanticDefaultResult {
+  const eligible = META17_ELIGIBLE_SEMANTIC_DEFAULT_SCOPES.includes(
+    fixture.scopeId as (typeof META17_ELIGIBLE_SEMANTIC_DEFAULT_SCOPES)[number],
+  );
+  const semanticActionInLegalActions = fixture.legalActionIds.includes(
+    fixture.semanticActionId,
+  );
+  let result: Meta17SemanticDefaultResult["result"];
+  if (!eligible) result = "scope_not_eligible_legacy";
+  else if (fixture.rollbackForced) result = "rollback_forced_legacy";
+  else if (!semanticActionInLegalActions) result = "semantic_not_legal_legacy";
+  else if (!fixture.gatesPass) result = "hard_gate_blocked_legacy";
+  else result = "semantic_default_actual";
+  const semanticActual = result === "semantic_default_actual";
+  return {
+    fixtureId: fixture.fixtureId,
+    scopeId: fixture.scopeId,
+    actualActionId: semanticActual
+      ? fixture.semanticActionId
+      : fixture.legacyActionId,
+    actualDecisionSource: semanticActual ? "semantic" : "legacy",
+    result,
+  };
+}
+
 function multiRunSet(values: Meta7MultiRunSet): Meta7MultiRunSet {
   return {
     ...values,
@@ -3227,5 +3461,35 @@ function copyMeta16ProductionPlan(
   return {
     ...plan,
     evidence: [...plan.evidence],
+  };
+}
+
+function meta17ScopeEligibility(
+  scopeId: ProductionReadinessScopeId,
+  status: Meta17EligibilityStatus,
+  reasons: readonly string[],
+): Meta17ScopeEligibility {
+  return {
+    scopeId,
+    status,
+    reasons: [...reasons],
+  };
+}
+
+function copyMeta17ScopeEligibility(
+  entry: Meta17ScopeEligibility,
+): Meta17ScopeEligibility {
+  return {
+    ...entry,
+    reasons: [...entry.reasons],
+  };
+}
+
+function meta17Fixture(
+  values: Meta17SemanticDefaultFixture,
+): Meta17SemanticDefaultFixture {
+  return {
+    ...values,
+    legalActionIds: [...values.legalActionIds],
   };
 }
