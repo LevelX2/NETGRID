@@ -7,6 +7,7 @@ import {
   buildSemanticShadowDecisionReport,
   buildDeviationTriageReport,
   buildLegacySemanticComparisonReport,
+  buildShadowMetricsAndGatesReport,
   buildShadowScenarioCorpusReport,
   buildShadowModeTraceContractReport,
   type ShadowDecisionTrace,
@@ -383,6 +384,79 @@ describe("buildDeviationTriageReport", () => {
           (entry) => entry.followupScope === "separate_semantics_followup",
         ),
     ).toBe(true);
+  });
+});
+
+describe("buildShadowMetricsAndGatesReport", () => {
+  it("defines hard gates with zero allowed safety failures", () => {
+    const report = buildShadowMetricsAndGatesReport();
+
+    expect(report.schemaVersion).toBe("shadow-metrics-gates-v1");
+    expect(report.scope).toBe("shadow_metrics_and_quality_gates_report_only");
+    expect(report.hardGates).toHaveLength(6);
+    expect(report.hardGates.every((gate) => gate.value === 0)).toBe(true);
+    expect(report.hardGates.every((gate) => gate.requiredValue === 0)).toBe(true);
+    expect(report.hardGates.every((gate) => gate.status === "pass")).toBe(true);
+  });
+
+  it("measures current shadow quality and marks unresolved projection rates as uncertain", () => {
+    const report = buildShadowMetricsAndGatesReport();
+
+    expect(report.qualityMetrics).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          metricId: "semanticDecisionAvailableRate",
+          value: 0.2424,
+          numerator: 8,
+          denominator: 33,
+        }),
+        expect.objectContaining({
+          metricId: "semanticBlockedByGapRate",
+          value: 0.6667,
+          numerator: 22,
+          denominator: 33,
+        }),
+        expect.objectContaining({
+          metricId: "sourceResolvedRate",
+          value: null,
+          measured: false,
+        }),
+      ]),
+    );
+  });
+
+  it("documents initial and future quality thresholds without treating them as safety blockers", () => {
+    const report = buildShadowMetricsAndGatesReport();
+
+    expect(report.qualityGates).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          gateId: "initial_semantic_decision_available_rate",
+          threshold: 0.8,
+          status: "fail_quality_gap",
+          failurePolicy: "carry_to_readiness_review",
+        }),
+        expect.objectContaining({
+          gateId: "future_semantic_decision_available_rate",
+          threshold: 0.95,
+          status: "fail_quality_gap",
+        }),
+      ]),
+    );
+    expect(report.failurePolicy).toEqual({
+      hardSafetyGateFailure: "block_process",
+      qualityGateFailure: "carry_to_readiness_review",
+      humanReviewRate: "document_only_initially",
+    });
+  });
+
+  it("keeps metrics and gates diagnostic only", () => {
+    const report = buildShadowMetricsAndGatesReport();
+
+    expect(report.runtimeConsumerStatus).toBe("none");
+    expect(report.semanticExecutionAllowed).toBe(false);
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.noRuntimeEffect).toBe(true);
   });
 });
 

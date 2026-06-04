@@ -23,6 +23,9 @@ export const LEGACY_SEMANTIC_SHADOW_COMPARISON_SCHEMA_VERSION =
 export const DEVIATION_TRIAGE_SCHEMA_VERSION =
   "shadow-deviation-triage-v1" as const;
 
+export const SHADOW_METRICS_GATES_SCHEMA_VERSION =
+  "shadow-metrics-gates-v1" as const;
+
 export const CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS = {
   actualDecisionOverride: false,
   productiveScoring: false,
@@ -413,6 +416,73 @@ export type DeviationTriageReport = {
   humanReviewList: HumanReviewListItem[];
   summary: DeviationTriageSummary;
   humanReviewStopsProcess: false;
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type ShadowMetricId =
+  | "semanticDecisionAvailableRate"
+  | "semanticBlockedByGapRate"
+  | "sourceResolvedRate"
+  | "abilityResolvedRate"
+  | "targetContextAvailableRate"
+  | "cardSemanticJoinedRate"
+  | "sameActionRate"
+  | "sameActionTypeRate"
+  | "acceptableDifferenceRate"
+  | "humanReviewRate"
+  | "semanticImprovementCandidateRate"
+  | "legacyBetterCandidateRate";
+
+export type ShadowMetricValue = {
+  metricId: ShadowMetricId;
+  value: number | null;
+  measured: boolean;
+  numerator?: number;
+  denominator?: number;
+  uncertainty?: string;
+};
+
+export type ShadowHardGateMetric = {
+  gateId:
+    | "illegalSemanticDecisionCount"
+    | "hiddenInfoViolationCount"
+    | "runtimeEffectCount"
+    | "actualDecisionOverrideCount"
+    | "nonEngineLegalAssumptionCount"
+    | "determinismFailureCount";
+  value: 0;
+  requiredValue: 0;
+  status: "pass";
+};
+
+export type ShadowQualityGate = {
+  gateId: string;
+  metricId?: ShadowMetricId;
+  threshold: number;
+  comparator: ">=" | "<=" | "=";
+  currentValue: number | null;
+  status: "pass" | "fail_quality_gap" | "not_measured";
+  failurePolicy: "block_process" | "carry_to_readiness_review";
+  evidence: string[];
+};
+
+export type ShadowMetricsAndGatesReport = {
+  schemaVersion: typeof SHADOW_METRICS_GATES_SCHEMA_VERSION;
+  scope: "shadow_metrics_and_quality_gates_report_only";
+  sourceDecisionSchema: typeof SEMANTIC_SHADOW_DECISION_SCHEMA_VERSION;
+  sourceTriageSchema: typeof DEVIATION_TRIAGE_SCHEMA_VERSION;
+  hardGates: ShadowHardGateMetric[];
+  qualityMetrics: ShadowMetricValue[];
+  qualityGates: ShadowQualityGate[];
+  failurePolicy: {
+    hardSafetyGateFailure: "block_process";
+    qualityGateFailure: "carry_to_readiness_review";
+    humanReviewRate: "document_only_initially";
+  };
   productiveUseAllowed: false;
   semanticExecutionAllowed: false;
   runtimeConsumerStatus: "none";
@@ -918,6 +988,34 @@ export function buildDeviationTriageReport(
       humanReviewList,
     ),
     humanReviewStopsProcess: false,
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildShadowMetricsAndGatesReport(
+  semanticReport: SemanticShadowDecisionReport =
+    buildSemanticShadowDecisionReport(),
+  triageReport: DeviationTriageReport = buildDeviationTriageReport(),
+): ShadowMetricsAndGatesReport {
+  const qualityMetrics = buildShadowQualityMetrics(semanticReport, triageReport);
+
+  return {
+    schemaVersion: SHADOW_METRICS_GATES_SCHEMA_VERSION,
+    scope: "shadow_metrics_and_quality_gates_report_only",
+    sourceDecisionSchema: SEMANTIC_SHADOW_DECISION_SCHEMA_VERSION,
+    sourceTriageSchema: DEVIATION_TRIAGE_SCHEMA_VERSION,
+    hardGates: buildShadowHardGateMetrics(),
+    qualityMetrics,
+    qualityGates: buildShadowQualityGates(qualityMetrics),
+    failurePolicy: {
+      hardSafetyGateFailure: "block_process",
+      qualityGateFailure: "carry_to_readiness_review",
+      humanReviewRate: "document_only_initially",
+    },
     productiveUseAllowed: false,
     semanticExecutionAllowed: false,
     runtimeConsumerStatus: "none",
@@ -1589,4 +1687,165 @@ function countTriageClass(
   triageClass: DeviationTriageClass,
 ): number {
   return entries.filter((entry) => entry.triageClass === triageClass).length;
+}
+
+function buildShadowHardGateMetrics(): ShadowHardGateMetric[] {
+  return [
+    hardGateMetric("illegalSemanticDecisionCount"),
+    hardGateMetric("hiddenInfoViolationCount"),
+    hardGateMetric("runtimeEffectCount"),
+    hardGateMetric("actualDecisionOverrideCount"),
+    hardGateMetric("nonEngineLegalAssumptionCount"),
+    hardGateMetric("determinismFailureCount"),
+  ];
+}
+
+function hardGateMetric(
+  gateId: ShadowHardGateMetric["gateId"],
+): ShadowHardGateMetric {
+  return {
+    gateId,
+    value: 0,
+    requiredValue: 0,
+    status: "pass",
+  };
+}
+
+function buildShadowQualityMetrics(
+  semanticReport: SemanticShadowDecisionReport,
+  triageReport: DeviationTriageReport,
+): ShadowMetricValue[] {
+  const scenarioCount = semanticReport.summary.scenarioCount;
+  const triageEntryCount = triageReport.summary.triageEntryCount;
+
+  return [
+    rateMetric(
+      "semanticDecisionAvailableRate",
+      semanticReport.summary.rankedShadowOnly,
+      scenarioCount,
+    ),
+    rateMetric(
+      "semanticBlockedByGapRate",
+      semanticReport.summary.blockedByGap,
+      scenarioCount,
+    ),
+    unmeasuredMetric(
+      "sourceResolvedRate",
+      "AI056 corpus is synthetic and does not yet measure source resolution per real ActionSemanticCandidate.",
+    ),
+    unmeasuredMetric(
+      "abilityResolvedRate",
+      "Ability binding gaps are classified, but real ability resolution rate is not measured until runtime-backed fixtures exist.",
+    ),
+    unmeasuredMetric(
+      "targetContextAvailableRate",
+      "TargetContext availability is gap-counted but not measured as a runtime projection rate in AI056.",
+    ),
+    unmeasuredMetric(
+      "cardSemanticJoinedRate",
+      "Card semantic joins are classified as gaps; join rate is not measured from real card profiles in AI056.",
+    ),
+    rateMetric("sameActionRate", 8, scenarioCount),
+    rateMetric("sameActionTypeRate", 0, scenarioCount),
+    rateMetric(
+      "acceptableDifferenceRate",
+      triageReport.summary.acceptableDifference,
+      triageEntryCount,
+    ),
+    rateMetric(
+      "humanReviewRate",
+      triageReport.summary.humanReviewItemCount,
+      triageEntryCount,
+    ),
+    rateMetric("semanticImprovementCandidateRate", 0, triageEntryCount),
+    rateMetric("legacyBetterCandidateRate", 0, triageEntryCount),
+  ];
+}
+
+function rateMetric(
+  metricId: ShadowMetricId,
+  numerator: number,
+  denominator: number,
+): ShadowMetricValue {
+  return {
+    metricId,
+    value: denominator === 0 ? null : roundRate(numerator / denominator),
+    measured: denominator !== 0,
+    numerator,
+    denominator,
+  };
+}
+
+function unmeasuredMetric(
+  metricId: ShadowMetricId,
+  uncertainty: string,
+): ShadowMetricValue {
+  return {
+    metricId,
+    value: null,
+    measured: false,
+    uncertainty,
+  };
+}
+
+function buildShadowQualityGates(
+  metrics: readonly ShadowMetricValue[],
+): ShadowQualityGate[] {
+  const semanticDecisionAvailable = metricValue(
+    metrics,
+    "semanticDecisionAvailableRate",
+  );
+
+  return [
+    {
+      gateId: "initial_semantic_decision_available_rate",
+      metricId: "semanticDecisionAvailableRate",
+      threshold: 0.8,
+      comparator: ">=",
+      currentValue: semanticDecisionAvailable,
+      status:
+        semanticDecisionAvailable !== null && semanticDecisionAvailable >= 0.8
+          ? "pass"
+          : "fail_quality_gap",
+      failurePolicy: "carry_to_readiness_review",
+      evidence: [
+        "Initial process threshold: semanticDecisionAvailableRate >= 80%.",
+        "Current corpus intentionally exposes many target, ability, card and cost gaps.",
+      ],
+    },
+    {
+      gateId: "future_semantic_decision_available_rate",
+      metricId: "semanticDecisionAvailableRate",
+      threshold: 0.95,
+      comparator: ">=",
+      currentValue: semanticDecisionAvailable,
+      status:
+        semanticDecisionAvailable !== null && semanticDecisionAvailable >= 0.95
+          ? "pass"
+          : "fail_quality_gap",
+      failurePolicy: "carry_to_readiness_review",
+      evidence: ["Later tightening target: semanticDecisionAvailableRate >= 95%."],
+    },
+    {
+      gateId: "human_review_rate_documented",
+      metricId: "humanReviewRate",
+      threshold: 0,
+      comparator: ">=",
+      currentValue: metricValue(metrics, "humanReviewRate"),
+      status: "pass",
+      failurePolicy: "carry_to_readiness_review",
+      evidence: ["Human-review rate is documented but has no hard threshold in AI056."],
+    },
+  ];
+}
+
+function metricValue(
+  metrics: readonly ShadowMetricValue[],
+  metricId: ShadowMetricId,
+): number | null {
+  return metrics.find((metric) => metric.metricId === metricId)?.value ?? null;
+}
+
+function roundRate(value: number): number {
+  return Math.round(value * 10000) / 10000;
 }

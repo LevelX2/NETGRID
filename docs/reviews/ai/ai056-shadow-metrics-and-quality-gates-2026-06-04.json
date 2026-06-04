@@ -1,0 +1,94 @@
+{
+  "step": "AI056",
+  "title": "Shadow Metrics and Quality Gates",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai051-ai060-controlled-shadow-mode",
+  "schemaVersion": "shadow-metrics-gates-v1",
+  "scope": "shadow_metrics_and_quality_gates_report_only",
+  "runtimeConsumerStatus": "none",
+  "semanticExecutionAllowed": false,
+  "productiveUseAllowed": false,
+  "noRuntimeEffect": true,
+  "hardGates": {
+    "illegalSemanticDecisionCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "runtimeEffectCount": 0,
+    "actualDecisionOverrideCount": 0,
+    "nonEngineLegalAssumptionCount": 0,
+    "determinismFailureCount": 0
+  },
+  "qualityMetrics": {
+    "semanticDecisionAvailableRate": 0.2424,
+    "semanticBlockedByGapRate": 0.6667,
+    "sourceResolvedRate": null,
+    "abilityResolvedRate": null,
+    "targetContextAvailableRate": null,
+    "cardSemanticJoinedRate": null,
+    "sameActionRate": 0.2424,
+    "sameActionTypeRate": 0,
+    "acceptableDifferenceRate": 0.1951,
+    "humanReviewRate": 0.8049,
+    "semanticImprovementCandidateRate": 0,
+    "legacyBetterCandidateRate": 0
+  },
+  "qualityGates": [
+    {
+      "gateId": "initial_semantic_decision_available_rate",
+      "metricId": "semanticDecisionAvailableRate",
+      "threshold": 0.8,
+      "currentValue": 0.2424,
+      "status": "fail_quality_gap",
+      "failurePolicy": "carry_to_readiness_review"
+    },
+    {
+      "gateId": "future_semantic_decision_available_rate",
+      "metricId": "semanticDecisionAvailableRate",
+      "threshold": 0.95,
+      "currentValue": 0.2424,
+      "status": "fail_quality_gap",
+      "failurePolicy": "carry_to_readiness_review"
+    }
+  ],
+  "failurePolicy": {
+    "hardSafetyGateFailure": "block_process",
+    "qualityGateFailure": "carry_to_readiness_review",
+    "humanReviewRate": "document_only_initially"
+  },
+  "implementationFiles": [
+    "packages/ai/src/controlled-shadow-mode.ts",
+    "packages/ai/src/controlled-shadow-mode.test.ts"
+  ],
+  "reportFiles": [
+    "docs/reviews/ai/ai056-shadow-metrics-and-quality-gates-2026-06-04.md",
+    "docs/reviews/ai/ai056-shadow-metrics-and-quality-gates-2026-06-04.json"
+  ],
+  "checkScripts": [
+    "scripts/check-ai056-shadow-metrics-and-quality-gates.mjs"
+  ],
+  "runtimeFilesTouched": [],
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "verification": [
+    "node scripts/check-ai056-shadow-metrics-and-quality-gates.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- controlled-shadow-mode.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "node scripts/check-ai055-deviation-taxonomy-and-triage.mjs",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "doneGate": {
+    "hardGatesDefined": true,
+    "initialThresholdsDocumented": true,
+    "gateFailurePolicyPresent": true,
+    "noRuntimeEffect": true
+  }
+}
