@@ -1,4 +1,5 @@
 import type {
+  ActionGateId,
   ActionProjectionIssue,
   ActionSemanticCandidate,
   ActionSemanticSourceKind,
@@ -6,6 +7,9 @@ import type {
 
 export const DECK_DOCTRINE_V2_DIAGNOSTIC_SCHEMA_VERSION =
   "deck-doctrine-v2-diagnostic-schema-v1" as const;
+
+export const TACTICAL_GOAL_TAXONOMY_SCHEMA_VERSION =
+  "tactical-goal-taxonomy-diagnostic-schema-v1" as const;
 
 export const DIAGNOSTIC_NO_EFFECT_FLAGS = {
   planner: false,
@@ -80,6 +84,298 @@ export type DeckDoctrineV2DiagnosticReadinessReport = {
   noEffectFlags: DiagnosticNoEffectFlags;
 };
 
+export type TacticalGoalSide = "runner" | "corp";
+
+export type TacticalGoalFamily =
+  | "runner_economy_stabilize"
+  | "runner_rig_setup"
+  | "runner_central_pressure"
+  | "runner_remote_contest"
+  | "runner_survival"
+  | "corp_economy_stabilize"
+  | "corp_remote_score_window"
+  | "corp_central_defense"
+  | "corp_ice_tax"
+  | "corp_tag_trace_punish";
+
+export type TacticalGoalLifecycleState =
+  | "proposed"
+  | "evidence_ready"
+  | "blocked_by_gap"
+  | "shadow_only";
+
+export type TacticalGoalCandidateField =
+  | "semanticActionType"
+  | "actionTacticSignals"
+  | "strategySupport"
+  | "conditions"
+  | "risks"
+  | "constraints"
+  | "costProfile"
+  | "timingProfile"
+  | "targetContext"
+  | "hardGates"
+  | "projectionIssues"
+  | "evidence";
+
+export type TacticalGoalEvidenceRequirement = {
+  field: TacticalGoalCandidateField;
+  requirement: "present" | "side_safe" | "not_blocked" | "gap_marked";
+  reason: string;
+};
+
+export type TacticalGoalBlockerPolicy = {
+  blockerId: string;
+  issues: ActionProjectionIssue[];
+  gateIds: ActionGateId[];
+  reason: string;
+  removalCondition: string;
+};
+
+export type TacticalGoalDefinition = {
+  goalId: string;
+  side: TacticalGoalSide;
+  family: TacticalGoalFamily;
+  lifecycleState: TacticalGoalLifecycleState;
+  label: string;
+  source: "neutral_doctrine" | "deck_doctrine" | "boardstate" | "threat";
+  requiredCandidateEvidence: TacticalGoalEvidenceRequirement[];
+  blockerPolicies: TacticalGoalBlockerPolicy[];
+  evidence: string[];
+};
+
+export type TacticalGoalTaxonomyValidationIssue = {
+  issueId: string;
+  severity: "warning" | "error";
+  message: string;
+  goalId?: string;
+};
+
+export type TacticalGoalTaxonomyDiagnosticSummary = {
+  totalGoals: number;
+  runnerGoals: number;
+  corpGoals: number;
+  lifecycleStates: Record<TacticalGoalLifecycleState, number>;
+  blockerPolicyCount: number;
+  validationIssues: TacticalGoalTaxonomyValidationIssue[];
+};
+
+export type TacticalGoalTaxonomyDiagnosticReport = {
+  schemaVersion: typeof TACTICAL_GOAL_TAXONOMY_SCHEMA_VERSION;
+  scope: "diagnostic_taxonomy_only";
+  definitions: TacticalGoalDefinition[];
+  summary: TacticalGoalTaxonomyDiagnosticSummary;
+  productiveUseAllowed: false;
+  noEffectFlags: DiagnosticNoEffectFlags;
+};
+
+export const DEFAULT_TACTICAL_GOAL_TAXONOMY = [
+  tacticalGoal({
+    goalId: "runner.economy_stabilize",
+    side: "runner",
+    family: "runner_economy_stabilize",
+    lifecycleState: "proposed",
+    label: "Runner economy stabilize",
+    source: "neutral_doctrine",
+    fields: ["semanticActionType", "costProfile", "timingProfile", "hardGates"],
+    blockerPolicies: [
+      blocker(
+        "runner_economy_hidden_info",
+        ["hidden_info_blocked"],
+        ["hidden_info"],
+        "Economy stabilization cannot use hidden opponent data.",
+      ),
+    ],
+    evidence: ["Roadmap Step 9: Runner can stabilize economy."],
+  }),
+  tacticalGoal({
+    goalId: "runner.rig_setup",
+    side: "runner",
+    family: "runner_rig_setup",
+    lifecycleState: "blocked_by_gap",
+    label: "Runner rig setup",
+    source: "deck_doctrine",
+    fields: [
+      "actionTacticSignals",
+      "strategySupport",
+      "costProfile",
+      "timingProfile",
+      "projectionIssues",
+    ],
+    blockerPolicies: [
+      blocker(
+        "runner_rig_missing_card_semantics",
+        ["card_semantics_unavailable", "ability_unresolved"],
+        ["ability_resolution"],
+        "Provide side-safe CardSemanticProfile and ability binding evidence.",
+      ),
+    ],
+    evidence: ["Roadmap Step 9: Runner can repair coverage or setup."],
+  }),
+  tacticalGoal({
+    goalId: "runner.central_pressure",
+    side: "runner",
+    family: "runner_central_pressure",
+    lifecycleState: "blocked_by_gap",
+    label: "Runner central pressure",
+    source: "deck_doctrine",
+    fields: ["actionTacticSignals", "targetContext", "costProfile", "hardGates"],
+    blockerPolicies: [
+      blocker(
+        "runner_central_target_context_missing",
+        ["target_context_unavailable"],
+        ["target_context"],
+        "Provide side-safe server target context from legal action options.",
+      ),
+    ],
+    evidence: ["Roadmap Step 9: Runner can take safe central runs."],
+  }),
+  tacticalGoal({
+    goalId: "runner.remote_contest",
+    side: "runner",
+    family: "runner_remote_contest",
+    lifecycleState: "blocked_by_gap",
+    label: "Runner remote contest",
+    source: "threat",
+    fields: ["targetContext", "costProfile", "timingProfile", "hardGates"],
+    blockerPolicies: [
+      blocker(
+        "runner_remote_hidden_target",
+        ["hidden_info_blocked", "target_context_unavailable"],
+        ["hidden_info", "target_context"],
+        "Keep hidden remote contents blocked unless legally revealed or side-safe.",
+      ),
+    ],
+    evidence: ["Roadmap Step 9: Boardstate threats can override strategy."],
+  }),
+  tacticalGoal({
+    goalId: "runner.survival",
+    side: "runner",
+    family: "runner_survival",
+    lifecycleState: "proposed",
+    label: "Runner survival",
+    source: "threat",
+    fields: ["semanticActionType", "risks", "costProfile", "hardGates"],
+    blockerPolicies: [
+      blocker(
+        "runner_survival_risk_missing",
+        ["card_semantics_unavailable"],
+        ["source_resolution"],
+        "Risk evidence must be explicit or the gap must remain marked.",
+      ),
+    ],
+    evidence: ["Roadmap Step 9: Runner can remove tags or avoid visible danger."],
+  }),
+  tacticalGoal({
+    goalId: "corp.economy_stabilize",
+    side: "corp",
+    family: "corp_economy_stabilize",
+    lifecycleState: "proposed",
+    label: "Corp economy stabilize",
+    source: "neutral_doctrine",
+    fields: ["semanticActionType", "costProfile", "timingProfile", "hardGates"],
+    blockerPolicies: [
+      blocker(
+        "corp_economy_hidden_info",
+        ["hidden_info_blocked"],
+        ["hidden_info"],
+        "Economy stabilization cannot depend on hidden Runner information.",
+      ),
+    ],
+    evidence: ["Roadmap Step 9: Corp can stabilize economy."],
+  }),
+  tacticalGoal({
+    goalId: "corp.remote_score_window",
+    side: "corp",
+    family: "corp_remote_score_window",
+    lifecycleState: "blocked_by_gap",
+    label: "Corp remote score window",
+    source: "deck_doctrine",
+    fields: [
+      "strategySupport",
+      "conditions",
+      "targetContext",
+      "costProfile",
+      "hardGates",
+    ],
+    blockerPolicies: [
+      blocker(
+        "corp_remote_score_target_missing",
+        ["target_context_unavailable", "card_semantics_unavailable"],
+        ["target_context", "source_resolution"],
+        "Score-window diagnostics need side-safe target and card semantics.",
+      ),
+    ],
+    evidence: ["Roadmap Step 9: Corp can prepare or use score windows."],
+  }),
+  tacticalGoal({
+    goalId: "corp.central_defense",
+    side: "corp",
+    family: "corp_central_defense",
+    lifecycleState: "blocked_by_gap",
+    label: "Corp central defense",
+    source: "threat",
+    fields: ["targetContext", "costProfile", "timingProfile", "hardGates"],
+    blockerPolicies: [
+      blocker(
+        "corp_central_defense_target_missing",
+        ["target_context_unavailable"],
+        ["target_context"],
+        "Central-defense diagnostics need side-safe server or ICE context.",
+      ),
+    ],
+    evidence: ["Roadmap Step 9: Corp can protect HQ/R&D."],
+  }),
+  tacticalGoal({
+    goalId: "corp.ice_tax",
+    side: "corp",
+    family: "corp_ice_tax",
+    lifecycleState: "blocked_by_gap",
+    label: "Corp ICE tax",
+    source: "deck_doctrine",
+    fields: [
+      "actionTacticSignals",
+      "constraints",
+      "targetContext",
+      "costProfile",
+      "hardGates",
+    ],
+    blockerPolicies: [
+      blocker(
+        "corp_ice_tax_target_missing",
+        ["target_context_unavailable", "ability_unresolved"],
+        ["target_context", "ability_resolution"],
+        "ICE tax diagnostics need side-safe ICE/ability context.",
+      ),
+    ],
+    evidence: ["Guide V3: ICE tax and constraints must stay precise."],
+  }),
+  tacticalGoal({
+    goalId: "corp.tag_trace_punish",
+    side: "corp",
+    family: "corp_tag_trace_punish",
+    lifecycleState: "blocked_by_gap",
+    label: "Corp tag/trace punish",
+    source: "deck_doctrine",
+    fields: [
+      "actionTacticSignals",
+      "strategySupport",
+      "conditions",
+      "risks",
+      "hardGates",
+    ],
+    blockerPolicies: [
+      blocker(
+        "corp_tag_trace_missing_condition",
+        ["card_semantics_unavailable", "ability_unresolved"],
+        ["ability_resolution", "source_resolution"],
+        "Tag/trace punish diagnostics require explicit condition and ability evidence.",
+      ),
+    ],
+    evidence: ["Guide V3: Tag source, payoff and snowball must stay separated."],
+  }),
+] as const satisfies readonly TacticalGoalDefinition[];
+
 export function buildDeckDoctrineV2DiagnosticReadinessReport(
   candidates: readonly ActionSemanticCandidate[],
 ): DeckDoctrineV2DiagnosticReadinessReport {
@@ -91,6 +387,21 @@ export function buildDeckDoctrineV2DiagnosticReadinessReport(
     generatedFrom: "ActionSemanticCandidate",
     entries,
     summary: summarizeDeckDoctrineEntries(entries),
+    noEffectFlags: DIAGNOSTIC_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildTacticalGoalTaxonomyDiagnosticReport(
+  definitions: readonly TacticalGoalDefinition[] = DEFAULT_TACTICAL_GOAL_TAXONOMY,
+): TacticalGoalTaxonomyDiagnosticReport {
+  const copiedDefinitions = definitions.map(copyTacticalGoalDefinition);
+
+  return {
+    schemaVersion: TACTICAL_GOAL_TAXONOMY_SCHEMA_VERSION,
+    scope: "diagnostic_taxonomy_only",
+    definitions: copiedDefinitions,
+    summary: summarizeTacticalGoalTaxonomy(copiedDefinitions),
+    productiveUseAllowed: false,
     noEffectFlags: DIAGNOSTIC_NO_EFFECT_FLAGS,
   };
 }
@@ -373,6 +684,172 @@ function summarizeDeckDoctrineEntries(
     gapCategories: uniqueStrings(
       entries.flatMap((entry) => entry.deckDoctrineGaps),
     ),
+  };
+}
+
+function summarizeTacticalGoalTaxonomy(
+  definitions: readonly TacticalGoalDefinition[],
+): TacticalGoalTaxonomyDiagnosticSummary {
+  return {
+    totalGoals: definitions.length,
+    runnerGoals: definitions.filter((goal) => goal.side === "runner").length,
+    corpGoals: definitions.filter((goal) => goal.side === "corp").length,
+    lifecycleStates: {
+      proposed: definitions.filter(
+        (goal) => goal.lifecycleState === "proposed",
+      ).length,
+      evidence_ready: definitions.filter(
+        (goal) => goal.lifecycleState === "evidence_ready",
+      ).length,
+      blocked_by_gap: definitions.filter(
+        (goal) => goal.lifecycleState === "blocked_by_gap",
+      ).length,
+      shadow_only: definitions.filter(
+        (goal) => goal.lifecycleState === "shadow_only",
+      ).length,
+    },
+    blockerPolicyCount: definitions.reduce(
+      (sum, goal) => sum + goal.blockerPolicies.length,
+      0,
+    ),
+    validationIssues: validateTacticalGoalTaxonomy(definitions),
+  };
+}
+
+function validateTacticalGoalTaxonomy(
+  definitions: readonly TacticalGoalDefinition[],
+): TacticalGoalTaxonomyValidationIssue[] {
+  const issues: TacticalGoalTaxonomyValidationIssue[] = [];
+  const seenGoalIds = new Set<string>();
+
+  for (const goal of definitions) {
+    if (seenGoalIds.has(goal.goalId)) {
+      issues.push({
+        issueId: "duplicate_goal_id",
+        severity: "error",
+        goalId: goal.goalId,
+        message: `Duplicate TacticalGoal goalId: ${goal.goalId}`,
+      });
+    }
+    seenGoalIds.add(goal.goalId);
+
+    if (!goal.goalId.startsWith(`${goal.side}.`)) {
+      issues.push({
+        issueId: "side_goal_id_mismatch",
+        severity: "error",
+        goalId: goal.goalId,
+        message: "goalId must be side-prefixed.",
+      });
+    }
+
+    if (!goal.family.startsWith(`${goal.side}_`)) {
+      issues.push({
+        issueId: "side_family_mismatch",
+        severity: "error",
+        goalId: goal.goalId,
+        message: "TacticalGoal family must match the goal side.",
+      });
+    }
+
+    if (goal.requiredCandidateEvidence.length === 0) {
+      issues.push({
+        issueId: "missing_required_candidate_evidence",
+        severity: "error",
+        goalId: goal.goalId,
+        message: "TacticalGoal must declare candidate evidence requirements.",
+      });
+    }
+
+    if (goal.evidence.length === 0) {
+      issues.push({
+        issueId: "missing_goal_evidence",
+        severity: "warning",
+        goalId: goal.goalId,
+        message: "TacticalGoal should cite roadmap or guide evidence.",
+      });
+    }
+  }
+
+  return issues;
+}
+
+function copyTacticalGoalDefinition(
+  goal: TacticalGoalDefinition,
+): TacticalGoalDefinition {
+  return {
+    goalId: goal.goalId,
+    side: goal.side,
+    family: goal.family,
+    lifecycleState: goal.lifecycleState,
+    label: goal.label,
+    source: goal.source,
+    requiredCandidateEvidence: goal.requiredCandidateEvidence.map(
+      (requirement) => ({ ...requirement }),
+    ),
+    blockerPolicies: goal.blockerPolicies.map((policy) => ({
+      blockerId: policy.blockerId,
+      issues: [...policy.issues],
+      gateIds: [...policy.gateIds],
+      reason: policy.reason,
+      removalCondition: policy.removalCondition,
+    })),
+    evidence: [...goal.evidence],
+  };
+}
+
+function tacticalGoal(params: {
+  goalId: string;
+  side: TacticalGoalSide;
+  family: TacticalGoalFamily;
+  lifecycleState: TacticalGoalLifecycleState;
+  label: string;
+  source: TacticalGoalDefinition["source"];
+  fields: readonly TacticalGoalCandidateField[];
+  blockerPolicies: readonly TacticalGoalBlockerPolicy[];
+  evidence: readonly string[];
+}): TacticalGoalDefinition {
+  return {
+    goalId: params.goalId,
+    side: params.side,
+    family: params.family,
+    lifecycleState: params.lifecycleState,
+    label: params.label,
+    source: params.source,
+    requiredCandidateEvidence: params.fields.map((fieldId) => ({
+      field: fieldId,
+      requirement:
+        fieldId === "projectionIssues"
+          ? "gap_marked"
+          : fieldId === "hardGates"
+            ? "not_blocked"
+            : fieldId === "targetContext"
+              ? "side_safe"
+              : "present",
+      reason: `Required diagnostic evidence: ${fieldId}`,
+    })),
+    blockerPolicies: params.blockerPolicies.map((policy) => ({
+      blockerId: policy.blockerId,
+      issues: [...policy.issues],
+      gateIds: [...policy.gateIds],
+      reason: policy.reason,
+      removalCondition: policy.removalCondition,
+    })),
+    evidence: [...params.evidence],
+  };
+}
+
+function blocker(
+  blockerId: string,
+  issues: readonly ActionProjectionIssue[],
+  gateIds: readonly ActionGateId[],
+  removalCondition: string,
+): TacticalGoalBlockerPolicy {
+  return {
+    blockerId,
+    issues: [...issues],
+    gateIds: [...gateIds],
+    reason: "Diagnostic blocker for TacticalGoal readiness.",
+    removalCondition,
   };
 }
 

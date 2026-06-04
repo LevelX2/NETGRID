@@ -2,7 +2,12 @@ import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
-import { buildDeckDoctrineV2DiagnosticReadinessReport } from "./action-doctrine-goal-diagnostics";
+import {
+  DEFAULT_TACTICAL_GOAL_TAXONOMY,
+  buildDeckDoctrineV2DiagnosticReadinessReport,
+  buildTacticalGoalTaxonomyDiagnosticReport,
+  type TacticalGoalDefinition,
+} from "./action-doctrine-goal-diagnostics";
 
 describe("buildDeckDoctrineV2DiagnosticReadinessReport", () => {
   it("surfaces fully evidenced card fields while retaining partial projection status", () => {
@@ -174,6 +179,84 @@ describe("buildDeckDoctrineV2DiagnosticReadinessReport", () => {
       ]),
     );
     expect(serialized).not.toContain("secret-runner-resource-card");
+  });
+});
+
+describe("buildTacticalGoalTaxonomyDiagnosticReport", () => {
+  it("reports a side-balanced diagnostic TacticalGoal taxonomy without productive use", () => {
+    const report = buildTacticalGoalTaxonomyDiagnosticReport();
+    const serialized = JSON.stringify(report);
+
+    expect(report.scope).toBe("diagnostic_taxonomy_only");
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.summary).toMatchObject({
+      totalGoals: DEFAULT_TACTICAL_GOAL_TAXONOMY.length,
+      runnerGoals: 5,
+      corpGoals: 5,
+      blockerPolicyCount: 10,
+      validationIssues: [],
+    });
+    expect(report.summary.lifecycleStates.blocked_by_gap).toBeGreaterThan(0);
+    expect(report.definitions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          goalId: "runner.remote_contest",
+          side: "runner",
+          family: "runner_remote_contest",
+          lifecycleState: "blocked_by_gap",
+        }),
+        expect.objectContaining({
+          goalId: "corp.tag_trace_punish",
+          side: "corp",
+          family: "corp_tag_trace_punish",
+          lifecycleState: "blocked_by_gap",
+        }),
+      ]),
+    );
+    expect(serialized).not.toContain("selectedActionId");
+    expect(serialized).not.toContain("rankedAlternatives");
+    expect(serialized).not.toContain("numericActionScore");
+  });
+
+  it("keeps blocker removal conditions explicit for gap-marked goals", () => {
+    const report = buildTacticalGoalTaxonomyDiagnosticReport();
+    const runnerRig = report.definitions.find(
+      (goal) => goal.goalId === "runner.rig_setup",
+    );
+
+    expect(runnerRig?.blockerPolicies).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          blockerId: "runner_rig_missing_card_semantics",
+          issues: expect.arrayContaining([
+            "card_semantics_unavailable",
+            "ability_unresolved",
+          ]),
+          removalCondition:
+            "Provide side-safe CardSemanticProfile and ability binding evidence.",
+        }),
+      ]),
+    );
+  });
+
+  it("surfaces invalid taxonomy definitions as diagnostics instead of using them", () => {
+    const duplicateGoal: TacticalGoalDefinition = {
+      ...DEFAULT_TACTICAL_GOAL_TAXONOMY[0],
+      family: "corp_economy_stabilize",
+    };
+
+    const report = buildTacticalGoalTaxonomyDiagnosticReport([
+      DEFAULT_TACTICAL_GOAL_TAXONOMY[0],
+      duplicateGoal,
+    ]);
+
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.summary.validationIssues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({ issueId: "duplicate_goal_id" }),
+        expect.objectContaining({ issueId: "side_family_mismatch" }),
+      ]),
+    );
   });
 });
 
