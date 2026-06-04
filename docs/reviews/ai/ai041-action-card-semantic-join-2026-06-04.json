@@ -1,0 +1,59 @@
+{
+  "step": "AI041",
+  "title": "Action-to-Card-Semantic Join",
+  "date": "2026-06-04",
+  "status": "done",
+  "builderFile": "packages/ai/src/action-semantic-candidate.ts",
+  "testFile": "packages/ai/src/action-semantic-candidate.test.ts",
+  "runtimeConsumerStatus": "none",
+  "scenarioCorpus": {
+    "id": "ai041_card_semantic_join_fixture",
+    "source": "packages/ai/src/action-semantic-candidate.test.ts",
+    "coverageClaim": "Card-Semantic-Join ist fuer die dokumentierte Fixture geprueft; keine Aussage ueber alle theoretischen Spielzustaende.",
+    "fixtureCases": 3
+  },
+  "joinPolicy": {
+    "profileInput": "cardSemanticProfilesByCardId",
+    "cardLevelTacticSignalPolicy": "Card-Level tacticSignals werden nur als cardContextSignals uebernommen.",
+    "actionTacticSignalPolicy": "actionTacticSignals werden nur aus abilitySemantics uebernommen, wenn abilityId explizit oder single_legal_ability_inferred side-safe gebunden ist.",
+    "multiAbilityWithoutIdPolicy": "Nur cardContextSignals; projectionIssues enthaelt ability_unresolved.",
+    "targetProfilePolicy": "TargetProfileMatches werden nur ueber uebergebene Profile in vorhandenen TargetContext kopiert; keine Zielbewertung."
+  },
+  "metrics": {
+    "fixtureCases": 3,
+    "cardContextJoined": 3,
+    "actionTacticSignalsJoined": 2,
+    "singleAbilityJoined": 1,
+    "multiAbilityWithIdJoined": 1,
+    "multiAbilityWithoutIdBroadOnly": 1,
+    "targetProfileMatchesJoined": 1,
+    "runtimeConsumers": 0
+  },
+  "gapsForwarded": [
+    {
+      "gapId": "AI041-G001",
+      "category": "card_profile_absent",
+      "description": "Wenn fuer eine sourceCardId kein uebergebenes CardSemanticProfile existiert, bleibt card_semantics_unavailable reportbar.",
+      "primaryProjectionStatus": "partial_projected",
+      "projectionIssues": ["card_semantics_unavailable"]
+    },
+    {
+      "gapId": "AI041-G002",
+      "category": "multi_ability_without_id",
+      "description": "Multi-Ability-Karten ohne abilityId bleiben broad; keine blinde Signalübernahme in actionTacticSignals.",
+      "primaryProjectionStatus": "partial_projected",
+      "projectionIssues": ["ability_unresolved"]
+    }
+  ],
+  "noEffectFlags": {
+    "planner": false,
+    "actionScore": false,
+    "planWeight": false,
+    "targetingAi": false,
+    "engine": false,
+    "legality": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivation": false,
+    "hiddenInfoLeak": false
+  }
+}

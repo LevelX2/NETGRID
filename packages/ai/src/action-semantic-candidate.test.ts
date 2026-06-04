@@ -410,6 +410,116 @@ describe("buildActionSemanticCandidates", () => {
       window: "corp_action.main",
     });
   });
+
+  it("joins card semantics only when source and ability binding are side-safe", () => {
+    const candidates = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("activated_card_ability", 0, {
+          source: "single-ability-card",
+          targetRequirements: [
+            {
+              id: "target",
+              kind: "card",
+              side: "runner",
+              visibility: "known_to_actor",
+            },
+          ],
+        }),
+        legalAction("activated_card_ability", 1, {
+          source: "multi-ability-card",
+        }),
+        legalAction("trigger_ability", 2, {
+          source: "multi-ability-bound-card",
+          abilityRef: {
+            sourceCardInstanceId: "multi-ability-bound-card",
+            abilityId: "ability.b",
+          },
+        }),
+      ],
+      selectedTargetsByActionId: {
+        "ai036-0-activated_card_ability": {
+          target: "runner-card-1",
+        },
+      },
+      sideSafeAbilityBindings: [
+        {
+          actionId: "ai036-0-activated_card_ability",
+          sourceCardId: "single-ability-card",
+          abilityId: "ability.single",
+          method: "single_legal_ability_inferred",
+          evidence: ["AI041 test single ability binding"],
+        },
+      ],
+      cardSemanticProfilesByCardId: {
+        "single-ability-card": {
+          cardId: "single-ability-card",
+          tacticSignals: ["card.context.economy"],
+          abilitySemantics: [
+            {
+              abilityId: "ability.single",
+              tacticSignals: ["economy.burst"],
+              strategySupport: [
+                {
+                  strategyId: "runner.rig_setup",
+                  role: "support",
+                  confidence: "medium",
+                  evidence: "AI041 test support",
+                },
+              ],
+              targetProfileMatches: [
+                {
+                  targetProfileId: "tp.runner_card",
+                  status: "unknown",
+                  issues: [],
+                  evidence: ["AI041 test target profile"],
+                },
+              ],
+            },
+          ],
+        },
+        "multi-ability-card": {
+          cardId: "multi-ability-card",
+          tacticSignals: ["card.context.multi"],
+          abilitySemantics: [
+            { abilityId: "ability.a", tacticSignals: ["draw.card"] },
+            { abilityId: "ability.b", tacticSignals: ["economy.gain"] },
+          ],
+        },
+        "multi-ability-bound-card": {
+          cardId: "multi-ability-bound-card",
+          tacticSignals: ["card.context.bound"],
+          abilitySemantics: [
+            { abilityId: "ability.a", tacticSignals: ["draw.card"] },
+            { abilityId: "ability.b", tacticSignals: ["tag.remove"] },
+          ],
+        },
+      },
+    });
+
+    const single = candidates[0];
+    const unresolved = candidates[1];
+    const explicit = candidates[2];
+    if (!single || !unresolved || !explicit) {
+      throw new Error("Expected three AI041 candidates");
+    }
+
+    expect(single.cardContextSignals).toEqual(["card.context.economy"]);
+    expect(single.actionTacticSignals).toEqual(["economy.burst"]);
+    expect(single.strategySupport).toEqual([
+      expect.objectContaining({ strategyId: "runner.rig_setup" }),
+    ]);
+    expect(single.targetContext?.targetProfileMatches).toEqual([
+      expect.objectContaining({ targetProfileId: "tp.runner_card" }),
+    ]);
+
+    expect(unresolved.cardContextSignals).toEqual(["card.context.multi"]);
+    expect(unresolved.actionTacticSignals).toEqual([]);
+    expect(unresolved.projectionIssues).toContain("ability_unresolved");
+
+    expect(explicit.cardContextSignals).toEqual(["card.context.bound"]);
+    expect(explicit.actionTacticSignals).toEqual(["tag.remove"]);
+    expect(explicit.projectionIssues).not.toContain("ability_unresolved");
+  });
 });
 
 function legalAction(
