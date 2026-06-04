@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "ai066-sr-shadow-evaluation-rerun-v1",
+  "step": "AI066-SR",
+  "title": "Shadow Evaluation Re-Run",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai061-sr-ai067-shadow-readiness-expansion",
+  "scope": "shadow_evaluation_rerun",
+  "sourceReadinessStatus": "limited_shadow_ready",
+  "scenarioCount": 33,
+  "decisionPointCount": 33,
+  "semanticDecisionAvailableRateBefore": 0.2424,
+  "semanticDecisionAvailableRateAfter": 0.8788,
+  "semanticBlockedByGapRateBefore": 0.6667,
+  "semanticBlockedByGapRateAfter": 0.0303,
+  "runtimeBackedFixtureRateBefore": 0,
+  "runtimeBackedFixtureRateAfter": 0.2424,
+  "hardGateFailures": [],
+  "knownBadDecisions": [],
+  "actualDecisionOverrideCount": 0,
+  "runtimeEffectCount": 0,
+  "topSemanticGapsAfter": [
+    {"gapId": "target_context_unavailable", "count": 0},
+    {"gapId": "card_semantics_unavailable", "count": 0},
+    {"gapId": "ability_unresolved", "count": 1},
+    {"gapId": "cost_unknown", "count": 0},
+    {"gapId": "hidden_info_blocked", "count": 3}
+  ],
+  "readinessTrend": "clear_improvement",
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "runtimeConsumerStatus": "none",
+  "noRuntimeEffect": true,
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "verification": [
+    "node scripts/check-ai066-sr-shadow-evaluation-rerun.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- shadow-readiness-expansion.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "doneGate": {
+    "hardGateFailures": 0,
+    "actualDecisionOverrideCount": 0,
+    "knownBadDecisionCount": 0,
+    "runtimeEffectCount": 0,
+    "availabilityTrendClear": true,
+    "blockedByGapReduced": true
+  }
+}

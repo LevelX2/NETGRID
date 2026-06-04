@@ -27,6 +27,9 @@ export const AI064_SR_COST_TIMING_EVIDENCE_SCHEMA_VERSION =
 export const AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTION_SCHEMA_VERSION =
   "ai065-sr-runtime-backed-shadow-fixture-promotion-v1" as const;
 
+export const AI066_SR_SHADOW_EVALUATION_RERUN_SCHEMA_VERSION =
+  "ai066-sr-shadow-evaluation-rerun-v1" as const;
+
 export const SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS =
   CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS;
 
@@ -243,6 +246,35 @@ export type Ai065SrRuntimeBackedShadowFixturePromotionReport = {
       | "multi_ability_unresolved_guard"
       | "kept_synthetic_for_later_runtime_capture";
   }>;
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type Ai066SrShadowEvaluationRerunReport = {
+  schemaVersion: typeof AI066_SR_SHADOW_EVALUATION_RERUN_SCHEMA_VERSION;
+  step: "AI066-SR";
+  scope: "shadow_evaluation_rerun";
+  sourceReadinessStatus: "limited_shadow_ready";
+  scenarioCount: number;
+  decisionPointCount: number;
+  semanticDecisionAvailableRateBefore: 0.2424;
+  semanticDecisionAvailableRateAfter: number;
+  semanticBlockedByGapRateBefore: 0.6667;
+  semanticBlockedByGapRateAfter: number;
+  runtimeBackedFixtureRateBefore: 0;
+  runtimeBackedFixtureRateAfter: number;
+  hardGateFailures: [];
+  knownBadDecisions: [];
+  actualDecisionOverrideCount: 0;
+  runtimeEffectCount: 0;
+  topSemanticGapsAfter: ShadowEvaluationBatchReport["topSemanticGaps"];
+  readinessTrend:
+    | "clear_improvement"
+    | "partial_improvement"
+    | "no_material_improvement";
   productiveUseAllowed: false;
   semanticExecutionAllowed: false;
   runtimeConsumerStatus: "none";
@@ -891,6 +923,64 @@ export function buildAi065SrRuntimeBackedShadowFixturePromotionReport(
     fixtureFile: AI065_SR_FIXTURE_FILE,
     promotions: [...AI065_SR_RUNTIME_BACKED_FIXTURE_PROMOTIONS],
     notPromoted,
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    noEffectFlags: SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildAi066SrShadowEvaluationRerunReport(
+  fixtures: readonly ShadowScenarioFixture[] =
+    buildFixturesAfterRuntimeBackedShadowFixturePromotion(),
+): Ai066SrShadowEvaluationRerunReport {
+  const batch = buildShadowEvaluationBatchReport(fixtures);
+  const rankedShadowOnly = batch.scenarioResults.filter(
+    (result) => result.semanticScoreStatus === "ranked_shadow_only",
+  ).length;
+  const blockedByGap = batch.scenarioResults.filter(
+    (result) => result.semanticScoreStatus === "blocked_by_gap",
+  ).length;
+  const runtimeBacked = fixtures.filter(
+    (fixture) => fixture.setupKind !== "synthetic_legal_actions",
+  ).length;
+  const semanticDecisionAvailableRateAfter = roundRate(
+    rankedShadowOnly / batch.scenarioCount,
+  );
+  const semanticBlockedByGapRateAfter = roundRate(
+    blockedByGap / batch.scenarioCount,
+  );
+  const runtimeBackedFixtureRateAfter = roundRate(
+    runtimeBacked / batch.scenarioCount,
+  );
+
+  return {
+    schemaVersion: AI066_SR_SHADOW_EVALUATION_RERUN_SCHEMA_VERSION,
+    step: "AI066-SR",
+    scope: "shadow_evaluation_rerun",
+    sourceReadinessStatus: "limited_shadow_ready",
+    scenarioCount: batch.scenarioCount,
+    decisionPointCount: batch.decisionPointCount,
+    semanticDecisionAvailableRateBefore: 0.2424,
+    semanticDecisionAvailableRateAfter,
+    semanticBlockedByGapRateBefore: 0.6667,
+    semanticBlockedByGapRateAfter,
+    runtimeBackedFixtureRateBefore: 0,
+    runtimeBackedFixtureRateAfter,
+    hardGateFailures: [],
+    knownBadDecisions: [],
+    actualDecisionOverrideCount: 0,
+    runtimeEffectCount: 0,
+    topSemanticGapsAfter: [...batch.topSemanticGaps],
+    readinessTrend:
+      semanticDecisionAvailableRateAfter >= 0.8 &&
+      semanticBlockedByGapRateAfter <= 0.1 &&
+      runtimeBackedFixtureRateAfter > 0
+        ? "clear_improvement"
+        : semanticDecisionAvailableRateAfter > 0.2424
+          ? "partial_improvement"
+          : "no_material_improvement",
     productiveUseAllowed: false,
     semanticExecutionAllowed: false,
     runtimeConsumerStatus: "none",

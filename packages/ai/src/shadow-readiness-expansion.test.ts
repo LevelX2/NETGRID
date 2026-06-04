@@ -12,6 +12,7 @@ import {
   buildAi063SrCardSemanticsJoinCoverageReport,
   buildAi064SrCostTimingEvidenceExpansionReport,
   buildAi065SrRuntimeBackedShadowFixturePromotionReport,
+  buildAi066SrShadowEvaluationRerunReport,
   buildFixturesAfterAbilityBindingExpansion,
   buildFixturesAfterCardSemanticsJoinCoverage,
   buildFixturesAfterCostTimingEvidenceExpansion,
@@ -85,6 +86,47 @@ describe("AI061-SR TargetContext Projection Expansion", () => {
     expect(Object.values(batch.noEffectFlags).every((value) => value === false)).toBe(
       true,
     );
+  });
+});
+
+describe("AI066-SR Shadow Evaluation Re-Run", () => {
+  it("reruns shadow evaluation with improved availability and lower blocked-by-gap rate", () => {
+    const report = buildAi066SrShadowEvaluationRerunReport();
+
+    expect(report.schemaVersion).toBe("ai066-sr-shadow-evaluation-rerun-v1");
+    expect(report.step).toBe("AI066-SR");
+    expect(report.scenarioCount).toBe(33);
+    expect(report.decisionPointCount).toBe(33);
+    expect(report.semanticDecisionAvailableRateBefore).toBe(0.2424);
+    expect(report.semanticDecisionAvailableRateAfter).toBe(0.8788);
+    expect(report.semanticBlockedByGapRateBefore).toBe(0.6667);
+    expect(report.semanticBlockedByGapRateAfter).toBe(0.0303);
+    expect(report.runtimeBackedFixtureRateAfter).toBe(0.2424);
+    expect(report.readinessTrend).toBe("clear_improvement");
+  });
+
+  it("keeps hard gates, known bad decisions, runtime effects and overrides at zero", () => {
+    const report = buildAi066SrShadowEvaluationRerunReport();
+
+    expect(report.hardGateFailures).toEqual([]);
+    expect(report.knownBadDecisions).toEqual([]);
+    expect(report.actualDecisionOverrideCount).toBe(0);
+    expect(report.runtimeEffectCount).toBe(0);
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.semanticExecutionAllowed).toBe(false);
+    expect(report.noRuntimeEffect).toBe(true);
+  });
+
+  it("reports only the intentional residual ability and hidden-info gaps", () => {
+    const report = buildAi066SrShadowEvaluationRerunReport();
+
+    expect(report.topSemanticGapsAfter).toEqual([
+      { gapId: "target_context_unavailable", count: 0 },
+      { gapId: "card_semantics_unavailable", count: 0 },
+      { gapId: "ability_unresolved", count: 1 },
+      { gapId: "cost_unknown", count: 0 },
+      { gapId: "hidden_info_blocked", count: 3 },
+    ]);
   });
 });
 
