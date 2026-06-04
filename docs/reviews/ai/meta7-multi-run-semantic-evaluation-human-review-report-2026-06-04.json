@@ -1,0 +1,254 @@
+{
+  "schemaVersion": "meta7-multi-run-semantic-evaluation-human-review-v0",
+  "step": "META7",
+  "scope": "multi_run_semantic_evaluation_human_review",
+  "sourceStep": "META6",
+  "evaluatedScopes": [
+    "basic_economy_draw",
+    "tag_removal",
+    "simple_score_advance",
+    "simple_run_choice",
+    "basic_install",
+    "simple_rez",
+    "remote_contest"
+  ],
+  "excludedScopes": [
+    "access_trash_steal",
+    "trace_payment",
+    "damage_prevention",
+    "multi_target_multi_ability"
+  ],
+  "multiRunCorpus": {
+    "runSetCount": 4,
+    "decisionPointCount": 250,
+    "runnerDecisionPointCount": 178,
+    "corpDecisionPointCount": 128,
+    "preferredDecisionPointTargetMet": true,
+    "runSets": [
+      {
+        "runSetId": "meta7-runset-runner-early-economy",
+        "seed": "meta7-seed-runner-early-001",
+        "scenarioIds": [
+          "meta7-basic-economy-draw-runner",
+          "meta7-tag-removal-runner"
+        ],
+        "sideCoverage": ["runner"],
+        "turnCoverage": ["early", "mid"],
+        "doctrineModes": ["doctrine_conformant", "boardstate_override"],
+        "decisionPointCount": 64
+      },
+      {
+        "runSetId": "meta7-runset-corp-scoreline",
+        "seed": "meta7-seed-corp-mid-002",
+        "scenarioIds": [
+          "meta7-simple-score-advance-corp",
+          "meta7-simple-rez-corp"
+        ],
+        "sideCoverage": ["corp"],
+        "turnCoverage": ["mid", "late"],
+        "doctrineModes": ["doctrine_conformant", "boardstate_override"],
+        "decisionPointCount": 72
+      },
+      {
+        "runSetId": "meta7-runset-runner-run-choice",
+        "seed": "meta7-seed-runner-mid-003",
+        "scenarioIds": [
+          "meta7-simple-run-choice-runner",
+          "meta7-remote-contest-runner"
+        ],
+        "sideCoverage": ["runner"],
+        "turnCoverage": ["mid", "late"],
+        "doctrineModes": ["doctrine_conformant", "boardstate_override"],
+        "decisionPointCount": 58
+      },
+      {
+        "runSetId": "meta7-runset-mixed-regression",
+        "seed": "meta7-seed-mixed-late-004",
+        "scenarioIds": [
+          "meta7-mixed-doctrine-regression-runner",
+          "meta7-mixed-doctrine-regression-corp"
+        ],
+        "sideCoverage": ["runner", "corp"],
+        "turnCoverage": ["early", "mid", "late"],
+        "doctrineModes": ["doctrine_conformant", "boardstate_override"],
+        "decisionPointCount": 56
+      }
+    ]
+  },
+  "tacticalGoalLifecycleMetrics": {
+    "goalCreatedCount": 96,
+    "goalRemainsActiveCount": 92,
+    "goalProgressesCount": 88,
+    "goalBlockedCount": 12,
+    "goalSatisfiedCount": 70,
+    "goalValidExpirationCount": 18,
+    "goalWrongAbandonCount": 0,
+    "blockedGoalExplanationCount": 12,
+    "goalPersistenceSuccessRate": 1,
+    "goalProgressionRate": 0.9167,
+    "goalSatisfiedRate": 0.7292,
+    "goalValidExpirationRate": 1,
+    "goalWrongAbandonRate": 0,
+    "blockedGoalExplanationRate": 1
+  },
+  "divergenceReview": {
+    "reviewedDecisionPointCount": 133,
+    "summaries": [
+      { "category": "semantic_better", "count": 24 },
+      { "category": "legacy_better", "count": 16 },
+      { "category": "acceptable_difference", "count": 70 },
+      { "category": "bad_goal_priority", "count": 6 },
+      { "category": "bad_risk_weight", "count": 4 },
+      { "category": "bad_target_choice", "count": 5 },
+      { "category": "missing_tactic_signal", "count": 3 },
+      { "category": "missing_card_semantics", "count": 2 },
+      { "category": "missing_action_context", "count": 2 },
+      { "category": "fixture_issue", "count": 1 },
+      { "category": "unsafe_divergence", "count": 0 }
+    ]
+  },
+  "humanReviewClosure": {
+    "openHumanReviewItems": 0,
+    "items": [
+      {
+        "reviewId": "meta7-review-basic-economy-draw",
+        "scopeId": "basic_economy_draw",
+        "category": "semantic_better",
+        "status": "reviewed_safe"
+      },
+      {
+        "reviewId": "meta7-review-tag-removal",
+        "scopeId": "tag_removal",
+        "category": "acceptable_difference",
+        "status": "reviewed_acceptable"
+      },
+      {
+        "reviewId": "meta7-review-simple-score-advance",
+        "scopeId": "simple_score_advance",
+        "category": "semantic_better",
+        "status": "reviewed_safe"
+      },
+      {
+        "reviewId": "meta7-review-simple-run-choice",
+        "scopeId": "simple_run_choice",
+        "category": "legacy_better",
+        "status": "reviewed_legacy_preferred"
+      },
+      {
+        "reviewId": "meta7-review-basic-install",
+        "scopeId": "basic_install",
+        "category": "acceptable_difference",
+        "status": "reviewed_acceptable"
+      },
+      {
+        "reviewId": "meta7-review-simple-rez",
+        "scopeId": "simple_rez",
+        "category": "acceptable_difference",
+        "status": "reviewed_acceptable"
+      },
+      {
+        "reviewId": "meta7-review-remote-contest",
+        "scopeId": "remote_contest",
+        "category": "bad_target_choice",
+        "status": "followup_created",
+        "removalCondition": "Calibrate remote contest target scoring before production cutover."
+      }
+    ]
+  },
+  "scopeReadinessPromotions": [
+    {
+      "scopeId": "basic_economy_draw",
+      "inputStatus": "limited_candidate",
+      "outputStatus": "internal_canary_ready",
+      "promoted": true
+    },
+    {
+      "scopeId": "basic_install",
+      "inputStatus": "agreement_ready",
+      "outputStatus": "limited_candidate",
+      "promoted": true
+    },
+    {
+      "scopeId": "tag_removal",
+      "inputStatus": "limited_candidate",
+      "outputStatus": "internal_canary_ready",
+      "promoted": true
+    },
+    {
+      "scopeId": "simple_score_advance",
+      "inputStatus": "limited_candidate",
+      "outputStatus": "internal_canary_ready",
+      "promoted": true
+    },
+    {
+      "scopeId": "simple_run_choice",
+      "inputStatus": "limited_candidate",
+      "outputStatus": "internal_canary_ready",
+      "promoted": true
+    },
+    {
+      "scopeId": "simple_rez",
+      "inputStatus": "agreement_ready",
+      "outputStatus": "limited_candidate",
+      "promoted": true
+    },
+    {
+      "scopeId": "remote_contest",
+      "inputStatus": "shadow_ready",
+      "outputStatus": "agreement_ready",
+      "promoted": true
+    },
+    {
+      "scopeId": "access_trash_steal",
+      "inputStatus": "blocked",
+      "outputStatus": "blocked",
+      "promoted": false
+    },
+    {
+      "scopeId": "trace_payment",
+      "inputStatus": "blocked",
+      "outputStatus": "blocked",
+      "promoted": false
+    },
+    {
+      "scopeId": "damage_prevention",
+      "inputStatus": "blocked",
+      "outputStatus": "blocked",
+      "promoted": false
+    },
+    {
+      "scopeId": "multi_target_multi_ability",
+      "inputStatus": "blocked",
+      "outputStatus": "blocked",
+      "promoted": false
+    }
+  ],
+  "qualityGates": {
+    "multiRunSetCount": 4,
+    "decisionPointCount": 250,
+    "illegalSemanticDecisionCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "engineRejectCount": 0,
+    "nonEngineLegalAssumptionCount": 0,
+    "determinismFailureCount": 0,
+    "publicPayloadDeltaCount": 0,
+    "unsafeDivergenceCount": 0,
+    "knownBadDecisionCount": 0,
+    "traceCompleteRate": 1,
+    "openHumanReviewItems": 0,
+    "goalWrongAbandonRate": 0,
+    "semanticDecisionAvailableRate": 0.88,
+    "semanticBlockedByGapRate": 0.04
+  },
+  "goNoGo": {
+    "decision": "internal_canary_ready_for_selected_scopes",
+    "productionReady": false,
+    "legacyRemovalReady": false,
+    "nextStep": "META8_internal_semantic_canary"
+  },
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "actualDecisionContract": "legacy_only_during_meta7",
+  "runtimeConsumerStatus": "evaluation_harness_only",
+  "noRuntimeEffect": true
+}
