@@ -1,0 +1,42 @@
+{
+  "schemaVersion": "meta4-agreement-only-runtime-canary-v0",
+  "step": "META4",
+  "scope": "agreement_only_runtime_canary_contract",
+  "sourceStep": "META3",
+  "rule": "semantic_may_confirm_same_action_only",
+  "fixtureCount": 7,
+  "fixtureResults": [
+    "default_legacy",
+    "same_action_confirmed",
+    "semantic_differs_legacy",
+    "semantic_not_in_legal_actions",
+    "hidden_info_blocked",
+    "rollback_forced",
+    "missing_trace"
+  ],
+  "summary": {
+    "sameActionConfirmationCount": 1,
+    "semanticDifferingActionExecutedCount": 0,
+    "behaviorDeltaCount": 0,
+    "actualDecisionOverrideCount": 0,
+    "engineRejectCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "rollbackTested": true,
+    "defaultConfigLegacyOnly": true,
+    "traceCompleteRate": 1
+  },
+  "qualityGates": {
+    "behaviorDeltaCount": 0,
+    "actualDecisionOverrideCount": 0,
+    "semanticDifferingActionExecutedCount": 0,
+    "engineRejectCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "traceCompleteRate": 1,
+    "rollbackTested": true,
+    "defaultConfigLegacyOnly": true
+  },
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "runtimeConsumerStatus": "test_harness_only",
+  "noRuntimeEffect": true
+}

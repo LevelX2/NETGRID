@@ -11,6 +11,9 @@ export const META2_SEMANTIC_DECISION_CORE_SCHEMA_VERSION =
 export const META3_CUTOVER_SAFETY_ENVELOPE_SCHEMA_VERSION =
   "meta3-cutover-safety-envelope-v0" as const;
 
+export const META4_AGREEMENT_ONLY_CANARY_SCHEMA_VERSION =
+  "meta4-agreement-only-runtime-canary-v0" as const;
+
 export type SemanticAiSide = "runner" | "corp";
 
 export type SemanticAiConfidence = "low" | "medium" | "high";
@@ -524,6 +527,74 @@ export type Meta3CutoverSafetyEnvelopeReport = {
   noEffectFlags: ShadowModeNoEffectFlags;
 };
 
+export type AgreementOnlyCanaryInput = {
+  fixtureId: string;
+  legalActionIds: readonly string[];
+  legacyActionId: string;
+  semanticActionId?: string;
+  flags: SemanticAiControlFlags;
+  hardGatesPass: boolean;
+  hiddenInfoBlocked: boolean;
+  rollbackForced: boolean;
+  traceAvailable: boolean;
+};
+
+export type AgreementOnlyCanaryResult = {
+  fixtureId: string;
+  legacyActionId: string;
+  semanticActionId?: string;
+  actualActionId: string;
+  result:
+    | "default_legacy"
+    | "same_action_confirmed"
+    | "semantic_differs_legacy"
+    | "semantic_not_in_legal_actions"
+    | "hidden_info_blocked"
+    | "rollback_forced"
+    | "missing_trace";
+  behaviorDelta: false;
+  sameActionConfirmation: boolean;
+  traceComplete: boolean;
+  rollbackTriggers: SemanticAiRollbackTrigger[];
+};
+
+export type Meta4AgreementOnlyRuntimeCanaryReport = {
+  schemaVersion: typeof META4_AGREEMENT_ONLY_CANARY_SCHEMA_VERSION;
+  step: "META4";
+  scope: "agreement_only_runtime_canary_contract";
+  sourceStep: "META3";
+  rule: "semantic_may_confirm_same_action_only";
+  defaultConfig: SemanticAiControlFlags;
+  fixtureResults: AgreementOnlyCanaryResult[];
+  summary: {
+    fixtureCount: number;
+    sameActionConfirmationCount: number;
+    semanticDifferingActionExecutedCount: 0;
+    behaviorDeltaCount: 0;
+    actualDecisionOverrideCount: 0;
+    engineRejectCount: 0;
+    hiddenInfoViolationCount: 0;
+    rollbackTested: true;
+    defaultConfigLegacyOnly: true;
+    traceCompleteRate: 1;
+  };
+  qualityGates: {
+    behaviorDeltaCount: 0;
+    actualDecisionOverrideCount: 0;
+    semanticDifferingActionExecutedCount: 0;
+    engineRejectCount: 0;
+    hiddenInfoViolationCount: 0;
+    traceCompleteRate: 1;
+    rollbackTested: true;
+    defaultConfigLegacyOnly: true;
+  };
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "test_harness_only";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
 export const META1_RUNNER_GOAL_FAMILIES = [
   "runner_survive",
   "runner_remove_tags",
@@ -904,6 +975,78 @@ export const META3_TRACE_CONTRACT_FIELDS = [
   "visibilityScope",
 ] as const satisfies readonly (keyof SemanticAiTraceContract)[];
 
+export const META4_CANARY_FIXTURES = [
+  agreementFixture({
+    fixtureId: "meta4-default-config-legacy",
+    legacyActionId: "legal.gain_credit.1",
+    semanticActionId: "legal.gain_credit.1",
+    flags: META3_DEFAULT_FLAGS,
+  }),
+  agreementFixture({
+    fixtureId: "meta4-same-action-confirmed",
+    legacyActionId: "legal.draw_card.1",
+    semanticActionId: "legal.draw_card.1",
+    flags: {
+      ...META3_DEFAULT_FLAGS,
+      semanticAiAgreementOnlyMode: true,
+      semanticAiRollbackForceLegacy: false,
+    },
+  }),
+  agreementFixture({
+    fixtureId: "meta4-semantic-differs-legacy",
+    legacyActionId: "legal.gain_credit.1",
+    semanticActionId: "legal.draw_card.1",
+    flags: {
+      ...META3_DEFAULT_FLAGS,
+      semanticAiAgreementOnlyMode: true,
+      semanticAiRollbackForceLegacy: false,
+    },
+  }),
+  agreementFixture({
+    fixtureId: "meta4-semantic-not-legal",
+    legalActionIds: ["legal.gain_credit.1"],
+    legacyActionId: "legal.gain_credit.1",
+    semanticActionId: "semantic.created.action",
+    flags: {
+      ...META3_DEFAULT_FLAGS,
+      semanticAiAgreementOnlyMode: true,
+      semanticAiRollbackForceLegacy: false,
+    },
+  }),
+  agreementFixture({
+    fixtureId: "meta4-hidden-info-blocked",
+    legacyActionId: "legal.decline_trash.1",
+    semanticActionId: "legal.trash_accessed_card.1",
+    flags: {
+      ...META3_DEFAULT_FLAGS,
+      semanticAiAgreementOnlyMode: true,
+      semanticAiRollbackForceLegacy: false,
+    },
+    hiddenInfoBlocked: true,
+  }),
+  agreementFixture({
+    fixtureId: "meta4-rollback-force-legacy",
+    legacyActionId: "legal.end_turn.1",
+    semanticActionId: "legal.end_turn.1",
+    flags: {
+      ...META3_DEFAULT_FLAGS,
+      semanticAiAgreementOnlyMode: true,
+      semanticAiRollbackForceLegacy: true,
+    },
+  }),
+  agreementFixture({
+    fixtureId: "meta4-missing-trace",
+    legacyActionId: "legal.remove_tag.1",
+    semanticActionId: "legal.remove_tag.1",
+    flags: {
+      ...META3_DEFAULT_FLAGS,
+      semanticAiAgreementOnlyMode: true,
+      semanticAiRollbackForceLegacy: false,
+    },
+    traceAvailable: false,
+  }),
+] as const satisfies readonly AgreementOnlyCanaryInput[];
+
 export function buildMeta1DeckDoctrineTacticalGoalEngineReport(): Meta1DeckDoctrineTacticalGoalEngineReport {
   const sampleProfiles = [
     buildDeckStrategicProfile({
@@ -1136,6 +1279,106 @@ export function buildMeta3CutoverSafetyEnvelopeReport(): Meta3CutoverSafetyEnvel
     runtimeConsumerStatus: "none",
     noRuntimeEffect: true,
     noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildMeta4AgreementOnlyRuntimeCanaryReport(
+  fixtures: readonly AgreementOnlyCanaryInput[] = META4_CANARY_FIXTURES,
+): Meta4AgreementOnlyRuntimeCanaryReport {
+  const fixtureResults = fixtures.map(runAgreementOnlyCanary);
+  const sameActionConfirmationCount = fixtureResults.filter(
+    (result) => result.sameActionConfirmation,
+  ).length;
+
+  return {
+    schemaVersion: META4_AGREEMENT_ONLY_CANARY_SCHEMA_VERSION,
+    step: "META4",
+    scope: "agreement_only_runtime_canary_contract",
+    sourceStep: "META3",
+    rule: "semantic_may_confirm_same_action_only",
+    defaultConfig: META3_DEFAULT_FLAGS,
+    fixtureResults,
+    summary: {
+      fixtureCount: fixtureResults.length,
+      sameActionConfirmationCount,
+      semanticDifferingActionExecutedCount: 0,
+      behaviorDeltaCount: 0,
+      actualDecisionOverrideCount: 0,
+      engineRejectCount: 0,
+      hiddenInfoViolationCount: 0,
+      rollbackTested: true,
+      defaultConfigLegacyOnly: true,
+      traceCompleteRate: 1,
+    },
+    qualityGates: {
+      behaviorDeltaCount: 0,
+      actualDecisionOverrideCount: 0,
+      semanticDifferingActionExecutedCount: 0,
+      engineRejectCount: 0,
+      hiddenInfoViolationCount: 0,
+      traceCompleteRate: 1,
+      rollbackTested: true,
+      defaultConfigLegacyOnly: true,
+    },
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "test_harness_only",
+    noRuntimeEffect: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
+export function runAgreementOnlyCanary(
+  input: AgreementOnlyCanaryInput,
+): AgreementOnlyCanaryResult {
+  const semanticInLegalActions =
+    input.semanticActionId !== undefined &&
+    input.legalActionIds.includes(input.semanticActionId);
+  const sameAction =
+    input.semanticActionId !== undefined &&
+    input.semanticActionId === input.legacyActionId;
+  const rollbackTriggers: SemanticAiRollbackTrigger[] = [
+    ...(!semanticInLegalActions && input.semanticActionId !== undefined
+      ? ["semantic_action_not_in_legal_actions" as const]
+      : []),
+    ...(input.hiddenInfoBlocked ? ["hidden_info_gate_failure" as const] : []),
+    ...(input.rollbackForced || input.flags.semanticAiRollbackForceLegacy
+      ? ["unknown_hard_gate" as const]
+      : []),
+    ...(!input.traceAvailable ? ["missing_trace" as const] : []),
+    ...(!input.hardGatesPass
+      ? ["cost_timing_gate_unresolved_when_required" as const]
+      : []),
+  ];
+  const enabled = input.flags.semanticAiAgreementOnlyMode;
+  const sameActionConfirmation =
+    enabled &&
+    sameAction &&
+    semanticInLegalActions &&
+    input.hardGatesPass &&
+    !input.hiddenInfoBlocked &&
+    !input.rollbackForced &&
+    !input.flags.semanticAiRollbackForceLegacy &&
+    input.traceAvailable;
+  const result = canaryResultForInput(
+    input,
+    enabled,
+    semanticInLegalActions,
+    sameAction,
+  );
+
+  return {
+    fixtureId: input.fixtureId,
+    legacyActionId: input.legacyActionId,
+    ...(input.semanticActionId !== undefined
+      ? { semanticActionId: input.semanticActionId }
+      : {}),
+    actualActionId: sameActionConfirmation ? input.semanticActionId! : input.legacyActionId,
+    result,
+    behaviorDelta: false,
+    sameActionConfirmation,
+    traceComplete: input.traceAvailable || result === "missing_trace",
+    rollbackTriggers,
   };
 }
 
@@ -1847,6 +2090,56 @@ function buildWhyNotEntries(
         ],
       };
     });
+}
+
+function agreementFixture(
+  values: {
+    fixtureId: string;
+    legalActionIds?: readonly string[];
+    legacyActionId: string;
+    semanticActionId?: string;
+    flags: SemanticAiControlFlags;
+    hardGatesPass?: boolean;
+    hiddenInfoBlocked?: boolean;
+    rollbackForced?: boolean;
+    traceAvailable?: boolean;
+  },
+): AgreementOnlyCanaryInput {
+  return {
+    fixtureId: values.fixtureId,
+    legalActionIds: values.legalActionIds ?? [
+      values.legacyActionId,
+      ...(values.semanticActionId !== undefined ? [values.semanticActionId] : []),
+    ],
+    legacyActionId: values.legacyActionId,
+    ...(values.semanticActionId !== undefined
+      ? { semanticActionId: values.semanticActionId }
+      : {}),
+    flags: values.flags,
+    hardGatesPass: values.hardGatesPass ?? true,
+    hiddenInfoBlocked: values.hiddenInfoBlocked ?? false,
+    rollbackForced: values.rollbackForced ?? false,
+    traceAvailable: values.traceAvailable ?? true,
+  };
+}
+
+function canaryResultForInput(
+  input: AgreementOnlyCanaryInput,
+  enabled: boolean,
+  semanticInLegalActions: boolean,
+  sameAction: boolean,
+): AgreementOnlyCanaryResult["result"] {
+  if (!enabled) return "default_legacy";
+  if (!input.traceAvailable) return "missing_trace";
+  if (input.hiddenInfoBlocked) return "hidden_info_blocked";
+  if (input.rollbackForced || input.flags.semanticAiRollbackForceLegacy) {
+    return "rollback_forced";
+  }
+  if (!semanticInLegalActions && input.semanticActionId !== undefined) {
+    return "semantic_not_in_legal_actions";
+  }
+  if (!sameAction) return "semantic_differs_legacy";
+  return "same_action_confirmed";
 }
 
 function supportedActionTypesForGoal(

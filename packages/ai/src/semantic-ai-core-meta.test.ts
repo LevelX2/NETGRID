@@ -15,13 +15,16 @@ import {
   META3_ROLLBACK_TRIGGERS,
   META3_SCOPE_MATRIX,
   META3_TRACE_CONTRACT_FIELDS,
+  META4_CANARY_FIXTURES,
   adaptSemanticDecisionToLegacyActual,
   buildDeckDoctrineFromProfile,
   buildDeckStrategicProfile,
   buildMeta1DeckDoctrineTacticalGoalEngineReport,
   buildMeta2SemanticDecisionCoreReport,
   buildMeta3CutoverSafetyEnvelopeReport,
+  buildMeta4AgreementOnlyRuntimeCanaryReport,
   buildSemanticDecisionScore,
+  runAgreementOnlyCanary,
 } from "./semantic-ai-core-meta";
 
 describe("META1 DeckDoctrine + Multi-Turn TacticalGoal Engine v0", () => {
@@ -125,6 +128,112 @@ describe("META1 DeckDoctrine + Multi-Turn TacticalGoal Engine v0", () => {
         }),
       ]),
     );
+  });
+});
+
+describe("META4 Agreement-only Runtime Canary", () => {
+  it("keeps default config legacy-only and behavior delta at zero", () => {
+    const report = buildMeta4AgreementOnlyRuntimeCanaryReport();
+
+    expect(report.schemaVersion).toBe(
+      "meta4-agreement-only-runtime-canary-v0",
+    );
+    expect(report.step).toBe("META4");
+    expect(report.defaultConfig).toMatchObject({
+      semanticAiAgreementOnlyMode: false,
+      semanticAiRollbackForceLegacy: true,
+    });
+    expect(report.fixtureResults.find((entry) => entry.fixtureId === "meta4-default-config-legacy")).toMatchObject({
+      result: "default_legacy",
+      actualActionId: "legal.gain_credit.1",
+      behaviorDelta: false,
+      sameActionConfirmation: false,
+    });
+    expect(report.summary.behaviorDeltaCount).toBe(0);
+    expect(report.summary.actualDecisionOverrideCount).toBe(0);
+  });
+
+  it("confirms only same semantic and legacy action ids when every gate passes", () => {
+    const sameAction = runAgreementOnlyCanary({
+      fixtureId: "same",
+      legalActionIds: ["legal.draw_card.1"],
+      legacyActionId: "legal.draw_card.1",
+      semanticActionId: "legal.draw_card.1",
+      flags: {
+        semanticAiShadowModeEnabled: false,
+        semanticAiCutoverEnabled: false,
+        semanticAiAgreementOnlyMode: true,
+        semanticAiScopedOverrideEnabled: false,
+        semanticAiRollbackForceLegacy: false,
+      },
+      hardGatesPass: true,
+      hiddenInfoBlocked: false,
+      rollbackForced: false,
+      traceAvailable: true,
+    });
+
+    expect(sameAction).toMatchObject({
+      actualActionId: "legal.draw_card.1",
+      result: "same_action_confirmed",
+      behaviorDelta: false,
+      sameActionConfirmation: true,
+      rollbackTriggers: [],
+    });
+  });
+
+  it("falls back to legacy for differing, illegal, hidden-info, rollback and missing-trace cases", () => {
+    const report = buildMeta4AgreementOnlyRuntimeCanaryReport();
+
+    expect(META4_CANARY_FIXTURES).toHaveLength(7);
+    expect(report.fixtureResults).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          fixtureId: "meta4-semantic-differs-legacy",
+          actualActionId: "legal.gain_credit.1",
+          result: "semantic_differs_legacy",
+        }),
+        expect.objectContaining({
+          fixtureId: "meta4-semantic-not-legal",
+          actualActionId: "legal.gain_credit.1",
+          result: "semantic_not_in_legal_actions",
+        }),
+        expect.objectContaining({
+          fixtureId: "meta4-hidden-info-blocked",
+          actualActionId: "legal.decline_trash.1",
+          result: "hidden_info_blocked",
+        }),
+        expect.objectContaining({
+          fixtureId: "meta4-rollback-force-legacy",
+          actualActionId: "legal.end_turn.1",
+          result: "rollback_forced",
+        }),
+        expect.objectContaining({
+          fixtureId: "meta4-missing-trace",
+          actualActionId: "legal.remove_tag.1",
+          result: "missing_trace",
+        }),
+      ]),
+    );
+  });
+
+  it("reports canary quality gates without semantic differing action execution", () => {
+    const report = buildMeta4AgreementOnlyRuntimeCanaryReport();
+
+    expect(report.summary).toMatchObject({
+      fixtureCount: 7,
+      sameActionConfirmationCount: 1,
+      semanticDifferingActionExecutedCount: 0,
+      behaviorDeltaCount: 0,
+      actualDecisionOverrideCount: 0,
+      engineRejectCount: 0,
+      hiddenInfoViolationCount: 0,
+      rollbackTested: true,
+      defaultConfigLegacyOnly: true,
+      traceCompleteRate: 1,
+    });
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.semanticExecutionAllowed).toBe(false);
+    expect(report.runtimeConsumerStatus).toBe("test_harness_only");
   });
 });
 
