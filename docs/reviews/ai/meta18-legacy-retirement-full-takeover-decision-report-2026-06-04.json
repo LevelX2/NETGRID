@@ -1,0 +1,104 @@
+{
+  "schemaVersion": "meta18-legacy-retirement-full-takeover-decision-v0",
+  "step": "META18",
+  "scope": "legacy_retirement_full_takeover_decision",
+  "sourceStep": "META17",
+  "semanticDefaultForEligibleScopes": true,
+  "chosenModel": "legacy_retained_as_fallback",
+  "decisionOptions": [
+    {
+      "model": "legacy_retained_as_fallback",
+      "status": "selected"
+    },
+    {
+      "model": "legacy_retired_for_selected_scopes",
+      "status": "available_future_option"
+    },
+    {
+      "model": "full_legacy_retirement_ready",
+      "status": "blocked_without_signoff"
+    }
+  ],
+  "prerequisites": [
+    {
+      "conditionId": "minimum_observation_duration",
+      "status": "future_required"
+    },
+    {
+      "conditionId": "minimum_production_decision_count",
+      "status": "future_required"
+    },
+    {
+      "conditionId": "human_signoff_completed",
+      "status": "blocked"
+    },
+    {
+      "conditionId": "rollback_replacement_plan",
+      "status": "blocked"
+    },
+    {
+      "conditionId": "blocked_scopes_resolved_or_declared_legacy_only",
+      "status": "future_required"
+    },
+    {
+      "conditionId": "hard_gates_stable",
+      "status": "met"
+    },
+    {
+      "conditionId": "performance_stable",
+      "status": "met"
+    },
+    {
+      "conditionId": "determinism_stable",
+      "status": "met"
+    }
+  ],
+  "scopeDisposition": {
+    "semanticDefaultScopes": [
+      "basic_economy_draw",
+      "tag_removal",
+      "simple_score_advance",
+      "basic_install",
+      "simple_rez",
+      "simple_run_choice",
+      "remote_contest",
+      "simple_hq_or_rnd_pressure"
+    ],
+    "legacyOnlyScopes": [
+      "simple_advance_score",
+      "basic_setup_install",
+      "access_trash_steal",
+      "trace_payment",
+      "damage_prevention",
+      "multi_target_multi_ability"
+    ],
+    "retirementCandidateScopes": [
+      "basic_economy_draw",
+      "tag_removal",
+      "simple_score_advance",
+      "basic_install"
+    ]
+  },
+  "qualityGates": {
+    "legacyRemovalReady": false,
+    "fallbackReplacementAvailable": false,
+    "blockedScopesResolvedOrDeclaredLegacyOnly": false,
+    "humanSignoffRequired": "not_requested",
+    "longRunMetricsStable": true,
+    "hardGateFailureCount": 0,
+    "engineRejectCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "publicPayloadDeltaCount": 0,
+    "unsafeDivergenceCount": 0
+  },
+  "goNoGo": {
+    "decision": "legacy_retained_as_fallback",
+    "fullTakeoverDecision": "semantic_default_with_legacy_fallback",
+    "fullLegacyRetirementReady": false,
+    "scopewiseRetirementAllowedNow": false,
+    "nextStep": "post_meta18_monitor_or_new_retirement_signoff_process"
+  },
+  "legacyFallbackAvailable": true,
+  "rollbackAvailable": true,
+  "legacyRemovalReady": false
+}

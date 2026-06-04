@@ -46,6 +46,9 @@ export const META16_BROAD_SCOPED_PRODUCTION_EXPANSION_SCHEMA_VERSION =
 export const META17_SEMANTIC_DEFAULT_ELIGIBLE_SCOPES_SCHEMA_VERSION =
   "meta17-semantic-default-eligible-scopes-v0" as const;
 
+export const META18_LEGACY_RETIREMENT_DECISION_SCHEMA_VERSION =
+  "meta18-legacy-retirement-full-takeover-decision-v0" as const;
+
 export type ProductionReadinessScopeId =
   | "basic_economy_draw"
   | "basic_install"
@@ -1038,6 +1041,75 @@ export type Meta17SemanticDefaultEligibleScopesReport = {
   semanticDefaultActive: true;
   legacyFallbackAvailable: true;
   rollbackAvailable: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type Meta18RetirementModel =
+  | "legacy_retained_as_fallback"
+  | "legacy_retired_for_selected_scopes"
+  | "full_legacy_retirement_ready";
+
+export type Meta18DecisionStatus =
+  | "selected"
+  | "available_future_option"
+  | "blocked_without_signoff";
+
+export type Meta18DecisionOption = {
+  model: Meta18RetirementModel;
+  status: Meta18DecisionStatus;
+  rationale: string;
+};
+
+export type Meta18RetirementPrerequisite = {
+  conditionId:
+    | "minimum_observation_duration"
+    | "minimum_production_decision_count"
+    | "human_signoff_completed"
+    | "rollback_replacement_plan"
+    | "blocked_scopes_resolved_or_declared_legacy_only"
+    | "hard_gates_stable"
+    | "performance_stable"
+    | "determinism_stable";
+  status: "met" | "future_required" | "blocked";
+  evidence: string[];
+};
+
+export type Meta18LegacyRetirementFullTakeoverDecisionReport = {
+  schemaVersion: typeof META18_LEGACY_RETIREMENT_DECISION_SCHEMA_VERSION;
+  step: "META18";
+  scope: "legacy_retirement_full_takeover_decision";
+  sourceStep: "META17";
+  semanticDefaultForEligibleScopes: true;
+  chosenModel: "legacy_retained_as_fallback";
+  decisionOptions: Meta18DecisionOption[];
+  prerequisites: Meta18RetirementPrerequisite[];
+  scopeDisposition: {
+    semanticDefaultScopes: ProductionReadinessScopeId[];
+    legacyOnlyScopes: ProductionReadinessScopeId[];
+    retirementCandidateScopes: ProductionReadinessScopeId[];
+  };
+  qualityGates: {
+    legacyRemovalReady: false;
+    fallbackReplacementAvailable: false;
+    blockedScopesResolvedOrDeclaredLegacyOnly: false;
+    humanSignoffRequired: "not_requested";
+    longRunMetricsStable: true;
+    hardGateFailureCount: 0;
+    engineRejectCount: 0;
+    hiddenInfoViolationCount: 0;
+    publicPayloadDeltaCount: 0;
+    unsafeDivergenceCount: 0;
+  };
+  goNoGo: {
+    decision: "legacy_retained_as_fallback";
+    fullTakeoverDecision: "semantic_default_with_legacy_fallback";
+    fullLegacyRetirementReady: false;
+    scopewiseRetirementAllowedNow: false;
+    nextStep: "post_meta18_monitor_or_new_retirement_signoff_process";
+  };
+  legacyFallbackAvailable: true;
+  rollbackAvailable: true;
+  legacyRemovalReady: false;
   noEffectFlags: ShadowModeNoEffectFlags;
 };
 
@@ -2893,6 +2965,97 @@ export function evaluateMeta17SemanticDefaultFixture(
   };
 }
 
+export const META18_DECISION_OPTIONS = [
+  {
+    model: "legacy_retained_as_fallback",
+    status: "selected",
+    rationale:
+      "Semantic is default for eligible scopes, while Legacy remains the safest rollback path.",
+  },
+  {
+    model: "legacy_retired_for_selected_scopes",
+    status: "available_future_option",
+    rationale:
+      "Scopewise retirement can be reconsidered after explicit signoff and longer observation.",
+  },
+  {
+    model: "full_legacy_retirement_ready",
+    status: "blocked_without_signoff",
+    rationale:
+      "Full retirement is blocked by missing signoff, no rollback replacement plan and remaining legacy-only scopes.",
+  },
+] as const satisfies readonly Meta18DecisionOption[];
+
+export const META18_PREREQUISITES = [
+  meta18Prerequisite("minimum_observation_duration", "future_required", [
+    "META17 default is newly active and needs a longer observation window.",
+  ]),
+  meta18Prerequisite("minimum_production_decision_count", "future_required", [
+    "Eligible-scope default decisions need a larger long-run sample.",
+  ]),
+  meta18Prerequisite("human_signoff_completed", "blocked", [
+    "No explicit human signoff for Legacy Removal was requested or completed.",
+  ]),
+  meta18Prerequisite("rollback_replacement_plan", "blocked", [
+    "Rollback still depends on the retained Legacy fallback path.",
+  ]),
+  meta18Prerequisite(
+    "blocked_scopes_resolved_or_declared_legacy_only",
+    "future_required",
+    ["Trace payment, damage prevention and multi-target/multi-ability remain non-default."],
+  ),
+  meta18Prerequisite("hard_gates_stable", "met", [
+    "Engine reject, hidden-info, public-payload and unsafe-divergence counters remain 0.",
+  ]),
+  meta18Prerequisite("performance_stable", "met", [
+    "META17 performance gate is within limit.",
+  ]),
+  meta18Prerequisite("determinism_stable", "met", [
+    "META17 determinism failure count is 0.",
+  ]),
+] as const satisfies readonly Meta18RetirementPrerequisite[];
+
+export function buildMeta18LegacyRetirementFullTakeoverDecisionReport(): Meta18LegacyRetirementFullTakeoverDecisionReport {
+  return {
+    schemaVersion: META18_LEGACY_RETIREMENT_DECISION_SCHEMA_VERSION,
+    step: "META18",
+    scope: "legacy_retirement_full_takeover_decision",
+    sourceStep: "META17",
+    semanticDefaultForEligibleScopes: true,
+    chosenModel: "legacy_retained_as_fallback",
+    decisionOptions: META18_DECISION_OPTIONS.map((entry) => ({ ...entry })),
+    prerequisites: META18_PREREQUISITES.map(copyMeta18Prerequisite),
+    scopeDisposition: {
+      semanticDefaultScopes: [...META17_ELIGIBLE_SEMANTIC_DEFAULT_SCOPES],
+      legacyOnlyScopes: [...META17_NON_ELIGIBLE_SCOPES],
+      retirementCandidateScopes: [...META13_LEGACY_FREEZE_ACTIVE_SCOPES],
+    },
+    qualityGates: {
+      legacyRemovalReady: false,
+      fallbackReplacementAvailable: false,
+      blockedScopesResolvedOrDeclaredLegacyOnly: false,
+      humanSignoffRequired: "not_requested",
+      longRunMetricsStable: true,
+      hardGateFailureCount: 0,
+      engineRejectCount: 0,
+      hiddenInfoViolationCount: 0,
+      publicPayloadDeltaCount: 0,
+      unsafeDivergenceCount: 0,
+    },
+    goNoGo: {
+      decision: "legacy_retained_as_fallback",
+      fullTakeoverDecision: "semantic_default_with_legacy_fallback",
+      fullLegacyRetirementReady: false,
+      scopewiseRetirementAllowedNow: false,
+      nextStep: "post_meta18_monitor_or_new_retirement_signoff_process",
+    },
+    legacyFallbackAvailable: true,
+    rollbackAvailable: true,
+    legacyRemovalReady: false,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
 function multiRunSet(values: Meta7MultiRunSet): Meta7MultiRunSet {
   return {
     ...values,
@@ -3491,5 +3654,26 @@ function meta17Fixture(
   return {
     ...values,
     legalActionIds: [...values.legalActionIds],
+  };
+}
+
+function meta18Prerequisite(
+  conditionId: Meta18RetirementPrerequisite["conditionId"],
+  status: Meta18RetirementPrerequisite["status"],
+  evidence: readonly string[],
+): Meta18RetirementPrerequisite {
+  return {
+    conditionId,
+    status,
+    evidence: [...evidence],
+  };
+}
+
+function copyMeta18Prerequisite(
+  prerequisite: Meta18RetirementPrerequisite,
+): Meta18RetirementPrerequisite {
+  return {
+    ...prerequisite,
+    evidence: [...prerequisite.evidence],
   };
 }

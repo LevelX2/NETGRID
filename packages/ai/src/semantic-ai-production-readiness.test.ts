@@ -8,6 +8,7 @@ import {
   META8_INTERNAL_CANARY_FIXTURES,
   META9_PRODUCTION_SAFE_SHADOW_CONFIG,
   META10_SELECTED_PRODUCTION_SCOPES,
+  buildMeta18LegacyRetirementFullTakeoverDecisionReport,
   buildMeta17SemanticDefaultEligibleScopesReport,
   buildMeta16BroadScopedProductionExpansionReport,
   buildMeta15ComplexScopeEnablementReport,
@@ -701,6 +702,89 @@ describe("META17 Semantic Default for Eligible Scopes", () => {
     });
     expect(report.legacyFallbackAvailable).toBe(true);
     expect(report.rollbackAvailable).toBe(true);
+  });
+});
+
+describe("META18 Legacy Retirement / Full Takeover Decision", () => {
+  it("selects legacy retained as fallback instead of legacy removal", () => {
+    const report = buildMeta18LegacyRetirementFullTakeoverDecisionReport();
+
+    expect(report.schemaVersion).toBe(
+      "meta18-legacy-retirement-full-takeover-decision-v0",
+    );
+    expect(report.step).toBe("META18");
+    expect(report.semanticDefaultForEligibleScopes).toBe(true);
+    expect(report.chosenModel).toBe("legacy_retained_as_fallback");
+    expect(report.decisionOptions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          model: "legacy_retained_as_fallback",
+          status: "selected",
+        }),
+        expect.objectContaining({
+          model: "full_legacy_retirement_ready",
+          status: "blocked_without_signoff",
+        }),
+      ]),
+    );
+  });
+
+  it("keeps removal blocked until signoff and rollback replacement exist", () => {
+    const report = buildMeta18LegacyRetirementFullTakeoverDecisionReport();
+
+    expect(report.prerequisites).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          conditionId: "human_signoff_completed",
+          status: "blocked",
+        }),
+        expect.objectContaining({
+          conditionId: "rollback_replacement_plan",
+          status: "blocked",
+        }),
+        expect.objectContaining({
+          conditionId: "hard_gates_stable",
+          status: "met",
+        }),
+      ]),
+    );
+    expect(report.qualityGates).toEqual({
+      legacyRemovalReady: false,
+      fallbackReplacementAvailable: false,
+      blockedScopesResolvedOrDeclaredLegacyOnly: false,
+      humanSignoffRequired: "not_requested",
+      longRunMetricsStable: true,
+      hardGateFailureCount: 0,
+      engineRejectCount: 0,
+      hiddenInfoViolationCount: 0,
+      publicPayloadDeltaCount: 0,
+      unsafeDivergenceCount: 0,
+    });
+  });
+
+  it("records semantic default takeover with retained fallback as final decision", () => {
+    const report = buildMeta18LegacyRetirementFullTakeoverDecisionReport();
+
+    expect(report.scopeDisposition.semanticDefaultScopes).toContain("remote_contest");
+    expect(report.scopeDisposition.legacyOnlyScopes).toEqual(
+      expect.arrayContaining(["trace_payment", "multi_target_multi_ability"]),
+    );
+    expect(report.scopeDisposition.retirementCandidateScopes).toEqual([
+      "basic_economy_draw",
+      "tag_removal",
+      "simple_score_advance",
+      "basic_install",
+    ]);
+    expect(report.goNoGo).toEqual({
+      decision: "legacy_retained_as_fallback",
+      fullTakeoverDecision: "semantic_default_with_legacy_fallback",
+      fullLegacyRetirementReady: false,
+      scopewiseRetirementAllowedNow: false,
+      nextStep: "post_meta18_monitor_or_new_retirement_signoff_process",
+    });
+    expect(report.legacyFallbackAvailable).toBe(true);
+    expect(report.rollbackAvailable).toBe(true);
+    expect(report.legacyRemovalReady).toBe(false);
   });
 });
 
