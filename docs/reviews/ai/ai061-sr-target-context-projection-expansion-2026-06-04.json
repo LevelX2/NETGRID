@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "ai061-sr-target-context-projection-expansion-v1",
+  "step": "AI061-SR",
+  "title": "TargetContext Projection Expansion",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai061-sr-ai067-shadow-readiness-expansion",
+  "scope": "target_context_projection_expansion",
+  "sourceReadinessStatus": "limited_shadow_ready",
+  "targetContextGapBefore": 13,
+  "targetContextGapAfter": 0,
+  "projectedTargetContextCount": 13,
+  "hiddenInfoGuardedTargetContextNotProjectedCount": 1,
+  "projectedScenarioIds": [
+    "runner_install_program",
+    "runner_remote_contest",
+    "runner_access_trash_asset",
+    "runner_break_subroutine",
+    "corp_install_ice",
+    "corp_rez_ice_window",
+    "corp_advance_agenda",
+    "corp_score_agenda",
+    "corp_remote_score_window",
+    "corp_defend_hq",
+    "corp_defend_rnd",
+    "multi_target_choice",
+    "source_target_advancement_counter"
+  ],
+  "notProjected": [
+    {
+      "scenarioId": "corp_ambush_or_remote_bait",
+      "reason": "hidden_info_guard_remains_blocked",
+      "retainedGaps": ["target_context_unavailable", "hidden_info_blocked"]
+    }
+  ],
+  "projectionPolicy": {
+    "engineLegalActionEvidenceOnly": true,
+    "engineChoicePayloadAllowed": true,
+    "actorPrivateInstallContextAllowed": true,
+    "boardStateTargetReconstructionAllowed": false,
+    "hiddenInfoProjectionAllowed": false,
+    "targetingAiAllowed": false,
+    "legalityGenerationAllowed": false
+  },
+  "batchAfterTargetContextExpansion": {
+    "scenarioCount": 33,
+    "decisionPointCount": 33,
+    "hardGateFailures": 0,
+    "actualDecisionOverrideCount": 0,
+    "runtimeEffectCount": 0
+  },
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "runtimeConsumerStatus": "none",
+  "noRuntimeEffect": true,
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "verification": [
+    "node scripts/check-ai061-sr-target-context-projection-expansion.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- shadow-readiness-expansion.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "doneGate": {
+    "targetContextGapListBeforeAfter": true,
+    "hiddenInfoLeaks": 0,
+    "targetingAiIntroduced": false,
+    "newLegalityIntroduced": false
+  }
+}
