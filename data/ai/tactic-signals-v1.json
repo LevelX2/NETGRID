@@ -1276,6 +1276,40 @@
       "notes": "Reserved controlled signal; AI017 does not use it for generic universal breakers."
     },
     {
+      "signalId": "breaker.break_any_subroutine",
+      "group": "breaker_emergency",
+      "sideScope": "runner",
+      "description": "Can break any legal visible subroutine as an encounter emergency without implying access reachability.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "reviewed emergency breaker semantics"
+      ],
+      "examples": [
+        "Dropp"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Must be paired with run-ending risks or not-reachability constraints when the break use blocks run continuation."
+    },
+    {
+      "signalId": "breaker.subroutine_prevention",
+      "group": "breaker_emergency",
+      "sideScope": "runner",
+      "description": "Prevents selected legal subroutines from resolving during an encounter.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "reviewed emergency breaker semantics"
+      ],
+      "examples": [
+        "Dropp"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Support-only encounter mitigation; it is not a generic run or access enabler."
+    },
+    {
       "signalId": "breaker.emergency_search",
       "group": "breaker_search_install",
       "sideScope": "runner",
@@ -2831,6 +2865,23 @@
       "notes": "Support-only AI020 Runner-hardware signal; it has no planner, engine, legality, targeting, action-score, plan-weight, profile/default or UI-derivation effect."
     },
     {
+      "signalId": "defense.encounter_threat_mitigation",
+      "group": "defense",
+      "sideScope": "runner",
+      "description": "Mitigates dangerous visible encounter effects without proving the run can continue to access.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "reviewed emergency encounter semantics"
+      ],
+      "examples": [
+        "Dropp"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Use as emergency defense evidence only; access reachability remains a separate legal-path assessment."
+    },
+    {
       "signalId": "defense.base_link",
       "group": "ai019_defense",
       "sideScope": "runner",
@@ -3222,6 +3273,23 @@
       "examples": [],
       "targetProfileRelevant": false,
       "notes": "AI026-1 read-only semantics only. It does not create planner, engine, legality, targeting, profile/default, action-score, plan-weight, UI or hidden-info behavior."
+    },
+    {
+      "signalId": "encounter.emergency_subroutine_prevention",
+      "group": "encounter_emergency",
+      "sideScope": "runner",
+      "description": "Emergency prevention of a dangerous legal subroutine during the current ICE encounter.",
+      "supportOnly": true,
+      "mayAnchorStrategy": false,
+      "allowedStrategyAnchors": [],
+      "sourceKinds": [
+        "reviewed emergency breaker semantics"
+      ],
+      "examples": [
+        "Dropp"
+      ],
+      "targetProfileRelevant": true,
+      "notes": "Support-only encounter signal; it must not become run.make_run, reachability or access coverage."
     },
     {
       "signalId": "economy.action",

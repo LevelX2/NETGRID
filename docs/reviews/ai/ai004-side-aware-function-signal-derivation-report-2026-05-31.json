@@ -5,7 +5,7 @@
   "generatedAt": "2026-05-31",
   "status": "pass_with_warnings",
   "hardErrorCount": 0,
-  "warningCount": 184,
+  "warningCount": 188,
   "source": {
     "activeHintsPath": "data/ai/ai-card-hints-active.json",
     "compiledHintsPath": "data/ai/ai-card-hints-compiled.json",
@@ -589,7 +589,7 @@
       "virus.trigger_remote",
       "virus.trigger_rnd"
     ],
-    "tacticSignalCatalogCount": 524,
+    "tacticSignalCatalogCount": 528,
     "tacticSignalCatalogIds": [
       "access.agenda_ambush",
       "access.agenda_net_damage",
@@ -662,6 +662,7 @@
       "breaker.ap",
       "breaker.ap_subtype_limited",
       "breaker.black_ice",
+      "breaker.break_any_subroutine",
       "breaker.code_gate",
       "breaker.configurable_coverage",
       "breaker.delayed_action_cost",
@@ -680,6 +681,7 @@
       "breaker.sentry_subtype_limited",
       "breaker.stealth_payment_loss",
       "breaker.strength_bonus_vs_chosen_ice",
+      "breaker.subroutine_prevention",
       "breaker.subtype.bloodhound",
       "breaker.subtype.hellbolt",
       "breaker.subtype.hellhound",
@@ -767,6 +769,7 @@
       "defense.damage_prevention_during_run",
       "defense.damage_recovery_draw",
       "defense.damage_retaliation",
+      "defense.encounter_threat_mitigation",
       "defense.finite_damage_prevention",
       "defense.flatline_prevention",
       "defense.installed_card_trash_prevention",
@@ -834,6 +837,7 @@
       "economy.trash_for_credit",
       "economy.turn_start_credit",
       "economy.upgrade_trash_credit",
+      "encounter.emergency_subroutine_prevention",
       "expose.corp_prevention",
       "fort.all_rezzed_ice_trash",
       "fort.all_rezzed_ice_trash_tag_risk",
@@ -1180,13 +1184,13 @@
       "breakerProfile.configurableCoverage": 2,
       "breakerProfile.coverage": 47,
       "breakerProfile.coverageCandidates": 2,
-      "breakerProfile.maxSubroutinesPerBreak": 3,
-      "breakerProfile.multiSubroutineBreak": 3,
+      "breakerProfile.maxSubroutinesPerBreak": 4,
+      "breakerProfile.multiSubroutineBreak": 4,
       "breakerProfile.oneTimeModeChoice": 1,
       "breakerProfile.pumpCost": 44,
       "breakerProfile.pumpStrengthAmount": 1,
       "breakerProfile.reconfigurableType": 1,
-      "breakerProfile.restrictions": 3,
+      "breakerProfile.restrictions": 4,
       "breakerProfile.scalingStrength": 2,
       "breakerProfile.sideEffects": 15,
       "breakerProfile.strengthBonusVsChosenIce": 1,
@@ -1195,6 +1199,7 @@
       "cardType": 564,
       "conditions": 330,
       "conditions[].kind": 595,
+      "constraints": 1,
       "costProfile": 73,
       "costProfile.agendaPoints": 1,
       "costProfile.clicks": 59,
@@ -1242,23 +1247,23 @@
       "side": 564,
       "strategicNotes": 3,
       "strategicRole": 209,
-      "tacticSignals": 272,
-      "targetProfiles": 69,
-      "targetProfiles[].avoid": 70,
-      "targetProfiles[].hiddenInfoPolicy": 73,
+      "tacticSignals": 273,
+      "targetProfiles": 70,
+      "targetProfiles[].avoid": 71,
+      "targetProfiles[].hiddenInfoPolicy": 74,
       "targetProfiles[].installCost": 3,
       "targetProfiles[].installsTarget": 3,
-      "targetProfiles[].kind": 73,
+      "targetProfiles[].kind": 74,
       "targetProfiles[].lookCount": 1,
       "targetProfiles[].oncePerRun": 1,
-      "targetProfiles[].preferences": 65,
-      "targetProfiles[].purpose": 73,
-      "targetProfiles[].schemaVersion": 73,
+      "targetProfiles[].preferences": 66,
+      "targetProfiles[].purpose": 74,
+      "targetProfiles[].schemaVersion": 74,
       "targetProfiles[].showToOpponent": 1,
       "targetProfiles[].shuffleAfter": 3,
       "targetProfiles[].targetCardType": 3,
-      "targetProfiles[].targetType": 73,
-      "targetProfiles[].timing": 73,
+      "targetProfiles[].targetType": 74,
+      "targetProfiles[].timing": 74,
       "targetProfiles[].zone": 3,
       "valueHints": 564,
       "valueHints.access": 8,
@@ -1296,11 +1301,11 @@
       "valueHints.remote": 11,
       "valueHints.rezBeforeRunnerRunPriority": 1,
       "valueHints.rig": 2,
-      "valueHints.rigCoverage": 42,
+      "valueHints.rigCoverage": 41,
       "valueHints.risk": 1,
       "valueHints.run": 7,
       "valueHints.run_safety": 1,
-      "valueHints.runPressure": 70,
+      "valueHints.runPressure": 69,
       "valueHints.runStartTaxCredits": 1,
       "valueHints.scoring": 33,
       "valueHints.setup": 5,
@@ -1321,12 +1326,12 @@
       "valueHints.traceBidSupport": 1,
       "valueHints.traceDefense": 1,
       "valueHints.trashEconomy": 1,
-      "valueHints.utility": 78,
+      "valueHints.utility": 79,
       "valueHints.virus": 1
     }
   },
   "wildGrowth": {
-    "roleValueCount": 235,
+    "roleValueCount": 236,
     "planRoleValueCount": 102,
     "lineSupportValueCount": 16,
     "lineSupportLegacyStatus": "legacy_warn_only_in_ai003"
@@ -1387,7 +1392,7 @@
       "breaker.emergency_search": 1,
       "breaker.ends_run_after_use": 1,
       "breaker.hosted_strength_penalty": 2,
-      "breaker.multi_subroutine_break": 3,
+      "breaker.multi_subroutine_break": 4,
       "breaker.one_time_mode_choice": 1,
       "breaker.reconfigurable_type": 1,
       "breaker.risky": 4,
@@ -1408,7 +1413,7 @@
       "breaker.support": 5,
       "breaker.targeted_ice_bonus": 1,
       "breaker.trace": 1,
-      "breaker.universal": 4,
+      "breaker.universal": 3,
       "breaker.wall": 15,
       "corp.action_denial": 1,
       "corp.advertisement_punish": 1,
@@ -2100,8 +2105,7 @@
     "runnerEndRunBreaker": {
       "cardId": "ai018_smoke_end_run_breaker",
       "signals": [
-        "breaker.ends_run_after_use",
-        "breaker.universal"
+        "breaker.ends_run_after_use"
       ],
       "anchorStrategyIds": []
     },
@@ -2314,24 +2318,24 @@
   },
   "aliasSummary": {
     "totals": {
-      "roles": 235,
+      "roles": 236,
       "planRoles": 102,
       "lineSupport": 16,
-      "allValues": 353
+      "allValues": 354
     },
     "categoryCounts": {
       "alias_to_strategy_goal": 75,
       "deferred_requires_human_review": 1,
       "descriptor_gap": 8,
       "exact_strategy_goal": 16,
-      "function_signal_only": 208,
+      "function_signal_only": 209,
       "legacy_role_only": 44,
       "remove_or_deprecate": 1
     },
     "mappedCounts": {
       "exactStrategyGoal": 16,
       "aliasToStrategyGoal": 75,
-      "functionSignalOnly": 208,
+      "functionSignalOnly": 209,
       "legacyRoleOnly": 44,
       "unknownUnmapped": 0,
       "shouldBeRemovedFromLineSupport": 0
@@ -16436,27 +16440,6 @@
         ]
       },
       {
-        "value": "run_pressure",
-        "count": 20,
-        "mappingCategory": "alias_to_strategy_goal",
-        "triageCategory": "strategy_alias",
-        "triageSource": "classifier",
-        "mapsTo": [
-          "runner.run_event_tempo"
-        ],
-        "rationale": "Legacy role or planRole aliases to a normalized strategy.",
-        "examples": [
-          "onr_v1_018_dogcatcher",
-          "onr_v1_019_dropp",
-          "onr_v1_108_score",
-          "onr_v1_294_new-blood",
-          "onr_proteus_101_all-hands",
-          "onr_proteus_102_blackmail",
-          "onr_proteus_104_decoy-signal",
-          "onr_proteus_105_demolition-run"
-        ]
-      },
-      {
         "value": "code_gate_ice",
         "count": 19,
         "mappingCategory": "function_signal_only",
@@ -16473,6 +16456,27 @@
           "onr_v1_256_mazer",
           "onr_v1_257_nerve-labyrinth",
           "onr_v1_261_quandary"
+        ]
+      },
+      {
+        "value": "run_pressure",
+        "count": 19,
+        "mappingCategory": "alias_to_strategy_goal",
+        "triageCategory": "strategy_alias",
+        "triageSource": "classifier",
+        "mapsTo": [
+          "runner.run_event_tempo"
+        ],
+        "rationale": "Legacy role or planRole aliases to a normalized strategy.",
+        "examples": [
+          "onr_v1_018_dogcatcher",
+          "onr_v1_108_score",
+          "onr_v1_294_new-blood",
+          "onr_proteus_101_all-hands",
+          "onr_proteus_102_blackmail",
+          "onr_proteus_104_decoy-signal",
+          "onr_proteus_105_demolition-run",
+          "onr_proteus_106_disgruntled-ice-technician"
         ]
       },
       {
@@ -18782,6 +18786,18 @@
         ]
       },
       {
+        "value": "emergency_breaker",
+        "count": 1,
+        "mappingCategory": "function_signal_only",
+        "triageCategory": "function_signal_only",
+        "triageSource": "classifier",
+        "mapsTo": [],
+        "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor.",
+        "examples": [
+          "onr_v1_019_dropp"
+        ]
+      },
+      {
         "value": "etr_tax",
         "count": 1,
         "mappingCategory": "function_signal_only",
@@ -19501,7 +19517,7 @@
     "planRoles": [
       {
         "value": "build_rig",
-        "count": 167,
+        "count": 166,
         "mappingCategory": "alias_to_strategy_goal",
         "triageCategory": "strategy_alias",
         "triageSource": "classifier",
@@ -19564,7 +19580,7 @@
       },
       {
         "value": "safe_probe_run",
-        "count": 78,
+        "count": 77,
         "mappingCategory": "alias_to_strategy_goal",
         "triageCategory": "strategy_alias",
         "triageSource": "classifier",
@@ -19710,27 +19726,6 @@
         ]
       },
       {
-        "value": "contest_remote",
-        "count": 16,
-        "mappingCategory": "alias_to_strategy_goal",
-        "triageCategory": "strategy_alias",
-        "triageSource": "classifier",
-        "mapsTo": [
-          "runner.remote_contest"
-        ],
-        "rationale": "Legacy role or planRole aliases to a normalized strategy.",
-        "examples": [
-          "onr_v1_018_dogcatcher",
-          "onr_v1_019_dropp",
-          "onr_v1_042_mouse",
-          "onr_v1_058_seeya",
-          "onr_v1_076_all-nighter",
-          "onr_v1_083_desperate-competitor",
-          "onr_v1_084_edited-shipping-manifests",
-          "onr_v1_088_fortress-respecification"
-        ]
-      },
-      {
         "value": "runner_install_program",
         "count": 16,
         "mappingCategory": "alias_to_strategy_goal",
@@ -19749,6 +19744,27 @@
           "onr_v1_037_japanese-water-torture",
           "onr_v1_044_netspace-inverter",
           "onr_v1_045_newsgroup-filter"
+        ]
+      },
+      {
+        "value": "contest_remote",
+        "count": 15,
+        "mappingCategory": "alias_to_strategy_goal",
+        "triageCategory": "strategy_alias",
+        "triageSource": "classifier",
+        "mapsTo": [
+          "runner.remote_contest"
+        ],
+        "rationale": "Legacy role or planRole aliases to a normalized strategy.",
+        "examples": [
+          "onr_v1_018_dogcatcher",
+          "onr_v1_042_mouse",
+          "onr_v1_058_seeya",
+          "onr_v1_076_all-nighter",
+          "onr_v1_083_desperate-competitor",
+          "onr_v1_084_edited-shipping-manifests",
+          "onr_v1_088_fortress-respecification",
+          "onr_v1_090_hot-tip-for-wns"
         ]
       },
       {
@@ -22517,6 +22533,17 @@
       "signalId": "trace.corp_credit_support",
       "strategyAnchorFor": [
         "corp.tag_trace_punish"
+      ]
+    },
+    {
+      "kind": "dormant_tactic_signals_warn_only",
+      "count": 4,
+      "message": "Some cataloged tactic signals are reserved for controlled future descriptors and have no derivation rule yet.",
+      "items": [
+        "breaker.break_any_subroutine",
+        "breaker.subroutine_prevention",
+        "defense.encounter_threat_mitigation",
+        "encounter.emergency_subroutine_prevention"
       ]
     },
     {

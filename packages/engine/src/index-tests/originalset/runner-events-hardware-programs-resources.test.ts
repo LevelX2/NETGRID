@@ -1079,6 +1079,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
       { id: "simple_code_gate_ice", quantity: 2 },
       { id: "simple_sentry_ice", quantity: 2 },
       { id: "onr_v1_243_fetch-4-0-1", quantity: 1 },
+      { id: "onr_v1_239_endless-corridor", quantity: 1 },
+      { id: "onr_v1_355_crystal-palace-station-grid", quantity: 1 },
       { id: "simple_economy_operation", quantity: 8 },
     ],
   };
@@ -1331,7 +1333,9 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
           (action) =>
             action.type === "break_subroutine" &&
             String(action.payload?.breakerId) === breakerId &&
-            action.payload?.subroutineIndex === 0,
+            (breakerDefinitionId === "onr_v1_019_dropp"
+              ? action.payload?.breakAllMatchingSubroutines === true
+              : action.payload?.subroutineIndex === 0),
         );
         if (breakAction) break;
         const pumpAction = getLegalActions(state, "runner").find(
@@ -1390,6 +1394,137 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Core hardening", () =>
       expect(replay.ok, breakerDefinitionId).toBe(true);
       expect(hashState(replay.state), breakerDefinitionId).toBe(hashState(state));
     }
+  });
+
+  it("applies Dropp errata as break-all then unsuccessful run end", () => {
+    let state = programCoreGame("spotcheck-runner-program-core-dropp-errata");
+    state.runner.credits = 20;
+    state.corp.credits = 20;
+    const droppId = installRunnerProgramForTest(state, "onr_v1_019_dropp");
+    const crystalId = putCorpRootInRemote(
+      state,
+      "onr_v1_355_crystal-palace-station-grid",
+    );
+    state.cardInstances[crystalId] = {
+      ...state.cardInstances[crystalId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    const iceId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_239_endless-corridor",
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) => action.type === "rez_ice" && action.source === iceId,
+    );
+
+    const cannotPayAll = structuredClone(state);
+    cannotPayAll.runner.credits = 1;
+    expect(
+      getLegalActions(cannotPayAll, "runner").some(
+        (action) =>
+          action.type === "break_subroutine" &&
+          String(action.payload?.breakerId) === droppId,
+      ),
+    ).toBe(false);
+
+    const pumpAction = mustAction(
+      state,
+      "runner",
+      (action) =>
+        action.type === "pump_breaker" &&
+        String(action.payload?.breakerId) === droppId,
+    );
+    state = apply(state, "runner", (action) => action.actionId === pumpAction.actionId);
+    expect(state.run?.phase).toBe("encounter_ice");
+    expect(state.timingPoint).toBe("run.encounter_ice");
+
+    const droppBreakActions = getLegalActions(state, "runner").filter(
+      (action) =>
+        action.type === "break_subroutine" &&
+        String(action.payload?.breakerId) === droppId,
+    );
+    expect(droppBreakActions).toHaveLength(1);
+    expect(droppBreakActions[0]?.payload).toMatchObject({
+      subroutineIndexes: "0,1",
+      breakSubroutineCount: 2,
+      multiBreakSubroutines: true,
+      breakAllMatchingSubroutines: true,
+      breakerEndsRunAfterBreak: true,
+      targetIceDefinitionId: "onr_v1_239_endless-corridor",
+      targetIceTitle: "Endless Corridor",
+      breakSubroutineBaseCost: 0,
+      breakSubroutineAdditionalCost: 2,
+      breakSubroutineTotalCost: 2,
+    });
+    expect(droppBreakActions[0]?.payload?.subroutineIndex).toBeUndefined();
+    expect(droppBreakActions[0]?.costs).toEqual([{ credits: 2 }]);
+
+    const breakAction = droppBreakActions[0]!;
+    const wrongSide = applyAction(state, {
+      matchId: state.matchId,
+      side: "corp",
+      actionId: breakAction.actionId,
+      clientKnownStateVersion: state.stateVersion,
+      idempotencyKey: "dropp-errata-break-wrong-side",
+    });
+    expect(wrongSide.ok).toBe(false);
+    const stale = applyAction(state, {
+      matchId: state.matchId,
+      side: "runner",
+      actionId: breakAction.actionId,
+      clientKnownStateVersion: state.stateVersion - 1,
+      idempotencyKey: "dropp-errata-break-stale",
+    });
+    expect(stale.ok).toBe(false);
+    const removed = structuredClone(state);
+    removeEverywhere(removed, droppId);
+    const removedSource = applyAction(removed, {
+      matchId: removed.matchId,
+      side: "runner",
+      actionId: breakAction.actionId,
+      clientKnownStateVersion: removed.stateVersion,
+      idempotencyKey: "dropp-errata-break-removed-source",
+    });
+    expect(removedSource.ok).toBe(false);
+
+    state = apply(state, "runner", (action) => action.actionId === breakAction.actionId);
+    expect(state.run).toBeUndefined();
+    expect(state.timingPoint).toBe("runner_action.main");
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "break_subroutine",
+      cardDefinitionId: "onr_v1_019_dropp",
+      targetIceDefinitionId: "onr_v1_239_endless-corridor",
+      subroutineIndexes: "0,1",
+      breakSubroutineCount: 2,
+      breakAllMatchingSubroutines: true,
+      breakerEndsRunAfterBreak: true,
+      breakSubroutineAdditionalCost: 2,
+      breakSubroutineTotalCost: 2,
+    });
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      privatePayloadMarkers,
+    );
+    const runActionTypes = state.eventLog
+      .slice(replayStart)
+      .map((event) => event.publicPayload?.actionType);
+    expect(runActionTypes).not.toContain("continue_run");
+    expect(runActionTypes).not.toContain("access_card");
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 });
 

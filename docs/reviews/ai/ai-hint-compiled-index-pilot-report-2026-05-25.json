@@ -9729,8 +9729,12 @@
         "cardId": "onr_v1_019_dropp",
         "side": "runner",
         "cardType": "program",
-        "roles": ["breaker_end_run", "icebreaker", "program", "run_pressure"],
-        "planRoles": ["build_rig", "contest_remote", "safe_probe_run"],
+        "roles": [
+          "breaker_end_run",
+          "emergency_breaker",
+          "icebreaker",
+          "program"
+        ],
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
@@ -9755,11 +9759,14 @@
       "strategyFieldsFromOverlay": [],
       "duplicatedActiveMechanicalFields": ["breakerProfile", "effects"],
       "activeMonolithOnlyFields": [
+        "constraints",
         "costProfile",
         "quality",
         "requiredMechanics",
         "riskTags",
         "scenarioRefs",
+        "tacticSignals",
+        "targetProfiles",
         "valueHints"
       ],
       "generatedOnlyFields": ["breakerProfile"],

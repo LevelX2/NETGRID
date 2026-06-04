@@ -10,48 +10,48 @@
   },
   "summary": {
     "totals": {
-      "roles": 235,
+      "roles": 236,
       "planRoles": 102,
       "lineSupport": 16,
-      "allValues": 353
+      "allValues": 354
     },
     "categoryCounts": {
       "alias_to_strategy_goal": 75,
       "deferred_requires_human_review": 1,
       "descriptor_gap": 8,
       "exact_strategy_goal": 16,
-      "function_signal_only": 208,
+      "function_signal_only": 209,
       "legacy_role_only": 44,
       "remove_or_deprecate": 1
     },
     "mappedCounts": {
       "exactStrategyGoal": 16,
       "aliasToStrategyGoal": 75,
-      "functionSignalOnly": 208,
+      "functionSignalOnly": 209,
       "legacyRoleOnly": 44,
       "unknownUnmapped": 0,
       "shouldBeRemovedFromLineSupport": 0
     }
   },
   "totals": {
-    "roles": 235,
+    "roles": 236,
     "planRoles": 102,
     "lineSupport": 16,
-    "allValues": 353
+    "allValues": 354
   },
   "categoryCounts": {
     "alias_to_strategy_goal": 75,
     "deferred_requires_human_review": 1,
     "descriptor_gap": 8,
     "exact_strategy_goal": 16,
-    "function_signal_only": 208,
+    "function_signal_only": 209,
     "legacy_role_only": 44,
     "remove_or_deprecate": 1
   },
   "mappedCounts": {
     "exactStrategyGoal": 16,
     "aliasToStrategyGoal": 75,
-    "functionSignalOnly": 208,
+    "functionSignalOnly": 209,
     "legacyRoleOnly": 44,
     "unknownUnmapped": 0,
     "shouldBeRemovedFromLineSupport": 0
@@ -426,27 +426,6 @@
       ]
     },
     {
-      "value": "run_pressure",
-      "count": 20,
-      "mappingCategory": "alias_to_strategy_goal",
-      "triageCategory": "strategy_alias",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.run_event_tempo"
-      ],
-      "rationale": "Legacy role or planRole aliases to a normalized strategy.",
-      "examples": [
-        "onr_v1_018_dogcatcher",
-        "onr_v1_019_dropp",
-        "onr_v1_108_score",
-        "onr_v1_294_new-blood",
-        "onr_proteus_101_all-hands",
-        "onr_proteus_102_blackmail",
-        "onr_proteus_104_decoy-signal",
-        "onr_proteus_105_demolition-run"
-      ]
-    },
-    {
       "value": "code_gate_ice",
       "count": 19,
       "mappingCategory": "function_signal_only",
@@ -463,6 +442,27 @@
         "onr_v1_256_mazer",
         "onr_v1_257_nerve-labyrinth",
         "onr_v1_261_quandary"
+      ]
+    },
+    {
+      "value": "run_pressure",
+      "count": 19,
+      "mappingCategory": "alias_to_strategy_goal",
+      "triageCategory": "strategy_alias",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "runner.run_event_tempo"
+      ],
+      "rationale": "Legacy role or planRole aliases to a normalized strategy.",
+      "examples": [
+        "onr_v1_018_dogcatcher",
+        "onr_v1_108_score",
+        "onr_v1_294_new-blood",
+        "onr_proteus_101_all-hands",
+        "onr_proteus_102_blackmail",
+        "onr_proteus_104_decoy-signal",
+        "onr_proteus_105_demolition-run",
+        "onr_proteus_106_disgruntled-ice-technician"
       ]
     },
     {
@@ -2772,6 +2772,18 @@
       ]
     },
     {
+      "value": "emergency_breaker",
+      "count": 1,
+      "mappingCategory": "function_signal_only",
+      "triageCategory": "function_signal_only",
+      "triageSource": "classifier",
+      "mapsTo": [],
+      "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor.",
+      "examples": [
+        "onr_v1_019_dropp"
+      ]
+    },
+    {
       "value": "etr_tax",
       "count": 1,
       "mappingCategory": "function_signal_only",
@@ -3491,7 +3503,7 @@
   "planRoles": [
     {
       "value": "build_rig",
-      "count": 167,
+      "count": 166,
       "mappingCategory": "alias_to_strategy_goal",
       "triageCategory": "strategy_alias",
       "triageSource": "classifier",
@@ -3554,7 +3566,7 @@
     },
     {
       "value": "safe_probe_run",
-      "count": 78,
+      "count": 77,
       "mappingCategory": "alias_to_strategy_goal",
       "triageCategory": "strategy_alias",
       "triageSource": "classifier",
@@ -3700,27 +3712,6 @@
       ]
     },
     {
-      "value": "contest_remote",
-      "count": 16,
-      "mappingCategory": "alias_to_strategy_goal",
-      "triageCategory": "strategy_alias",
-      "triageSource": "classifier",
-      "mapsTo": [
-        "runner.remote_contest"
-      ],
-      "rationale": "Legacy role or planRole aliases to a normalized strategy.",
-      "examples": [
-        "onr_v1_018_dogcatcher",
-        "onr_v1_019_dropp",
-        "onr_v1_042_mouse",
-        "onr_v1_058_seeya",
-        "onr_v1_076_all-nighter",
-        "onr_v1_083_desperate-competitor",
-        "onr_v1_084_edited-shipping-manifests",
-        "onr_v1_088_fortress-respecification"
-      ]
-    },
-    {
       "value": "runner_install_program",
       "count": 16,
       "mappingCategory": "alias_to_strategy_goal",
@@ -3739,6 +3730,27 @@
         "onr_v1_037_japanese-water-torture",
         "onr_v1_044_netspace-inverter",
         "onr_v1_045_newsgroup-filter"
+      ]
+    },
+    {
+      "value": "contest_remote",
+      "count": 15,
+      "mappingCategory": "alias_to_strategy_goal",
+      "triageCategory": "strategy_alias",
+      "triageSource": "classifier",
+      "mapsTo": [
+        "runner.remote_contest"
+      ],
+      "rationale": "Legacy role or planRole aliases to a normalized strategy.",
+      "examples": [
+        "onr_v1_018_dogcatcher",
+        "onr_v1_042_mouse",
+        "onr_v1_058_seeya",
+        "onr_v1_076_all-nighter",
+        "onr_v1_083_desperate-competitor",
+        "onr_v1_084_edited-shipping-manifests",
+        "onr_v1_088_fortress-respecification",
+        "onr_v1_090_hot-tip-for-wns"
       ]
     },
     {

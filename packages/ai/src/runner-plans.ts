@@ -35,6 +35,7 @@ import {
   type KnownRezzedIcePathAssessment,
 } from "./visible-run-analysis";
 import {
+  breakerCardBlocksAccessReachability,
   estimateBreakerCostProfileFromOntology,
   estimateStructuredBreakerCostForIce,
   getStructuredBreakerProfileForCard,
@@ -6329,19 +6330,22 @@ function isRunnerInstallableRelevantBreaker(
   action: LegalAction,
 ): boolean {
   if (action.type !== "install_card") return false;
+  const definitionId = sourceDefinitionIdForAction(input, action);
+  if (breakerCardBlocksAccessReachability(definitionId)) return false;
   const roles = rolesForAction(input, action).filter((role) =>
     role.startsWith("breaker_"),
   );
   const features = extractRunnerFeatures(input);
   if (roles.length > 0 && roles.some((role) => !features.rigRoles.has(role)))
     return true;
-  const definitionId = sourceDefinitionIdForAction(input, action);
   const profile = getStructuredBreakerProfileForCard(definitionId);
   if (!profile) return false;
   const installedCoverage = new Set(
     (input.playerView.own.rig ?? []).flatMap(
-      (card) =>
-        getStructuredBreakerProfileForCard(card.definitionId)?.coverage ?? [],
+      (card) => {
+        if (breakerCardBlocksAccessReachability(card.definitionId)) return [];
+        return getStructuredBreakerProfileForCard(card.definitionId)?.coverage ?? [];
+      },
     ),
   );
   return (profile.coverage ?? []).some(
@@ -6356,7 +6360,9 @@ function isStructuredBreakerInstallAction(
   if (action.type !== "install_card") return false;
   const definitionId = sourceDefinitionIdForAction(input, action);
   return Boolean(
-    definitionId && estimateBreakerCostProfileFromOntology(definitionId),
+    definitionId &&
+      !breakerCardBlocksAccessReachability(definitionId) &&
+      estimateBreakerCostProfileFromOntology(definitionId),
   );
 }
 

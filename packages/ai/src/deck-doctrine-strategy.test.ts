@@ -79,6 +79,28 @@ describe("DeckDoctrine strategy aggregation diagnostics", () => {
     );
   });
 
+  it("does not treat Dropp as Runner access coverage or a strategy anchor", () => {
+    const profile = buildDeckStrategyProfile({
+      deckSnapshotId: "ai006-runner-dropp-emergency-only-diagnostic",
+      side: "runner",
+      cards: [{ cardId: "onr_v1_019_dropp", quantity: 3 }],
+    });
+
+    expect(profile.functionSignalCounts["breaker.ends_run_after_use"]).toBe(3);
+    expect(profile.functionSignalCounts["breaker.break_any_subroutine"]).toBe(3);
+    expect(profile.functionSignalCounts["breaker.universal"] ?? 0).toBe(0);
+    expect(profile.runnerProfile?.coverageProfile.universal.count).toBe(0);
+    expect(profile.runnerProfile?.coverageProfile.wall.count).toBe(0);
+    expect(profile.strategyScores["runner.rig_first"]?.supportGaps).toEqual(
+      expect.arrayContaining([
+        "missing_wall_coverage",
+        "missing_code_gate_coverage",
+        "weak_sentry_coverage",
+      ]),
+    );
+    expect(profile.primaryStrategies).toEqual([]);
+  });
+
   it("pairs Corp tag sources and punish payoff for tag-trace-punish diagnostics", () => {
     const profile = buildDeckStrategyProfile(
       snapshotById("onr_origin_corp_ai_tag_ops_snapshot_v1"),

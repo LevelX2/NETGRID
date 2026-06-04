@@ -601,7 +601,7 @@
         "advancementRequirement": null,
         "agendaPoints": null
       },
-      "text": "0 credits: Break ice subroutine.\n1 credit: +1 strength.\nUsing Dropp ends your run.",
+      "text": "0 credits: Break all subroutines of a piece of ice, and end the run.\n1 credit: +1 strength.",
       "displayOnlyText": true,
       "faction": "onr1996_neutral",
       "setName": "Originalset V1",

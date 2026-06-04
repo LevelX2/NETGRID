@@ -1955,6 +1955,7 @@ export type CardIcebreakerAbilityImplementation =
       };
       matches: CardIcebreakerBreakMatcherImplementation;
       count?: number;
+      breakTarget?: "all_matching_subroutines";
       onSuccessfulBreak?: readonly CardIcebreakerBreakSideEffectImplementation[];
       special?: CardIcebreakerBreakSpecialImplementation;
       onUse?: readonly CardIcebreakerUseSideEffectImplementation[];

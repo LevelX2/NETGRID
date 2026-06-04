@@ -208,8 +208,8 @@ function executeBreakSubroutineAction(
   const breakAbility = host.breaker.breakAbilityForLegalAction(legalAction);
   if (
     breakerId &&
-    (breakAbility?.count ?? 1) > 1 &&
-    typeof legalAction.payload?.subroutineIndexes === "string"
+    (breakAbility?.breakAllMatchingSubroutines ||
+      (breakAbility?.count ?? 1) > 1)
   ) {
     host.breaker.resolveMultiBreakSubroutinesAction(breakerId, legalAction);
     host.tracking.recordBartmossEncounterUsage(breakerId);

@@ -2232,8 +2232,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         sourceDefinition(droppPump, action) === "onr_v1_019_dropp",
     );
     droppPump = apply(droppPump, "runner", (action) => action.actionId === droppPumpAction.actionId);
-    expect(droppPump.run).toBeUndefined();
-    expect(droppPump.timingPoint).toBe("runner_action.main");
+    expect(droppPump.run?.phase).toBe("encounter_ice");
+    expect(droppPump.timingPoint).toBe("run.encounter_ice");
 
     let japanese = p344EncounterState(
       "p345-japanese-variable-pump",

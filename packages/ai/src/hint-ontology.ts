@@ -284,6 +284,7 @@ export const KNOWN_HINT_TARGET_PROFILE_TARGET_TYPES = [
   "hosted_program",
   "server",
   "card",
+  "subroutine",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_PREFERENCES = [
@@ -312,6 +313,11 @@ export const KNOWN_HINT_TARGET_PROFILE_PREFERENCES = [
   "currently_used_breaker",
   "breaker_matching_current_ice",
   "breaker_matching_common_problem_ice",
+  "prevent_high_damage_subroutine",
+  "prevent_program_trash_subroutine",
+  "prevent_hardware_trash_subroutine",
+  "prevent_dangerous_tag_subroutine",
+  "prevent_run_lock_subroutine",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
@@ -323,6 +329,9 @@ export const KNOWN_HINT_TARGET_PROFILE_AVOIDS = [
   "hidden_info_dependent_choice",
   "low_value_program",
   "target_would_break_host_limit",
+  "pure_end_the_run_subroutine",
+  "normal_breaker_available_without_run_end",
+  "access_goal_blocked_after_use",
 ] as const;
 
 export const KNOWN_HINT_TARGET_PROFILE_HIDDEN_INFO_POLICIES = [

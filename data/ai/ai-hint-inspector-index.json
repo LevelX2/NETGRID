@@ -15,15 +15,15 @@
   "summary": {
     "cardCount": 564,
     "cardsWithMechanicalFacts": 524,
-    "cardsWithGeneratedFacts": 334,
+    "cardsWithGeneratedFacts": 335,
     "cardsWithOverlays": 6,
-    "cardsWithFunctionSignals": 504,
+    "cardsWithFunctionSignals": 539,
     "cardsWithStrategyAnchors": 231,
-    "cardsWithWarnings": 123,
+    "cardsWithWarnings": 122,
     "warningCategoryCounts": {
       "deferred_requires_human_review": 45,
       "descriptor_gap": 45,
-      "function_signal_descriptor_gap": 28,
+      "function_signal_descriptor_gap": 27,
       "legacy_fallback_only": 40
     }
   },
@@ -1257,7 +1257,10 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "damage.payoff"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
@@ -1375,7 +1378,10 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -1463,6 +1469,9 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.rez_economy",
+        "corp_ice.trace_source",
+        "damage.payoff",
         "economy.generic"
       ],
       "derivedStrategyAnchors": [],
@@ -1565,6 +1574,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -1661,6 +1671,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.rez_economy",
         "economy.generic",
         "tax.ice"
       ],
@@ -1773,7 +1784,11 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.rez_economy",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -1862,6 +1877,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.self_bounce_or_maintenance_drawback",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -1959,6 +1976,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.optional_self_bounce_gain",
         "damage.payoff",
         "ice.etr"
       ],
@@ -2088,7 +2107,10 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "damage.payoff"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
@@ -2206,7 +2228,10 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "damage.payoff"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
@@ -2324,7 +2349,9 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
@@ -2434,7 +2461,10 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -2521,7 +2551,9 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
@@ -2631,7 +2663,10 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.trace_source"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
@@ -2751,7 +2786,9 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.tag_source"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
@@ -2998,7 +3035,10 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -3086,6 +3126,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.self_bounce_or_maintenance_drawback",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -3182,7 +3224,10 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "damage.payoff"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.damage_kill",
@@ -3320,6 +3365,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.future_pressure"
       ],
       "derivedStrategyAnchors": [
@@ -3440,6 +3486,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.rez_economy",
         "economy.generic"
       ],
       "derivedStrategyAnchors": [],
@@ -3557,6 +3604,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.mobile_position_change",
         "damage.payoff",
         "ice.etr"
       ],
@@ -3771,6 +3820,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.random_or_guessing",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -3867,7 +3918,9 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
@@ -3978,6 +4031,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.optional_self_bounce_gain",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -4075,6 +4130,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.rez_economy",
         "economy.generic"
       ],
       "derivedStrategyAnchors": [],
@@ -4191,7 +4247,10 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -4278,7 +4337,10 @@
         "legacyFallbackOnly": true,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.type_choice_or_mode_choice"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -4366,6 +4428,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -4462,6 +4525,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.optional_self_bounce_gain",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -4559,6 +4624,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.self_bounce_or_maintenance_drawback",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -4656,6 +4723,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.mobile_position_change",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -4753,6 +4822,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.rez_economy",
         "economy.generic"
       ],
       "derivedStrategyAnchors": [],
@@ -4836,7 +4906,10 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "action.corp_future_extra_action",
+        "risk.agenda_forfeit_drawback"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -4903,6 +4976,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_credit_burst",
         "economy.generic"
       ],
       "derivedStrategyAnchors": [],
@@ -4973,6 +5047,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "condition.node_trashed_last_turn",
         "tag.source"
       ],
       "derivedStrategyAnchors": [
@@ -5069,7 +5144,10 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "ice.corp_temporary_rez",
+        "risk.temporary_rez_liability"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
@@ -5160,6 +5238,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "condition.last_turn_run",
         "tag.source",
         "trace.source"
       ],
@@ -5257,7 +5336,10 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "ice.corp_deferred_rez",
+        "ice.corp_installment_rez"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -5324,6 +5406,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "condition.run_this_game",
         "tag.source",
         "trace.source"
       ],
@@ -5422,6 +5505,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "condition.resource_installed_last_turn",
         "tag.source",
         "trace.source"
       ],
@@ -5521,6 +5605,7 @@
       },
       "derivedFunctionSignals": [
         "access.corp_rnd_net_damage_ambush",
+        "access.rnd_reveal_requirement",
         "damage.payoff",
         "rnd.corp_self_shuffle_access"
       ],
@@ -5621,7 +5706,10 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "advance.corp_counter_bank",
+        "damage.payoff"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.damage_kill"
@@ -5712,7 +5800,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "expose.corp_prevention"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -5776,8 +5866,10 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "access.archives_safe_exception",
         "access.corp_credit_loss_counter",
         "access.punish",
+        "access.rnd_reveal_requirement",
         "economy.counter",
         "tax.runner_credit",
         "tax.runner_persistent"
@@ -5881,7 +5973,9 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.generic"
+        "economy.generic",
+        "risk.random_discard_cost",
+        "risk.temporary_credit_drawback"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
@@ -5976,7 +6070,9 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.generic"
+        "advance.corp_counter_bank",
+        "economy.generic",
+        "risk.temporary_credit_drawback"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
@@ -6149,7 +6245,9 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "economy.trace_credit"
+        "advance.corp_counter_bank",
+        "economy.trace_credit",
+        "risk.temporary_credit_drawback"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
@@ -6851,7 +6949,9 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "access.corp_icebreaker_strength_counter"
+        "access.archives_safe_exception",
+        "access.corp_icebreaker_strength_counter",
+        "access.rnd_reveal_requirement"
       ],
       "derivedStrategyAnchors": [
         "corp.ambush_bluff"
@@ -7655,7 +7755,8 @@
       "derivedFunctionSignals": [
         "economy.corp_asset_cashout",
         "economy.generic",
-        "ice.corp_self_trash_cost"
+        "ice.corp_self_trash_cost",
+        "risk.trash_own_rezzed_ice"
       ],
       "derivedStrategyAnchors": [
         "corp.asset_economy",
@@ -17211,27 +17312,40 @@
         "aiSupportStatus": "ai_supported",
         "compiledHintFound": true,
         "mechanicalFactsFound": true,
-        "generatedFactsFound": false,
+        "generatedFactsFound": true,
         "overlayFields": [],
         "legacyFallbackOnly": false,
-        "warningCount": 1
+        "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "breaker.break_any_subroutine",
         "breaker.ends_run_after_use",
-        "breaker.universal"
+        "breaker.multi_subroutine_break",
+        "defense.encounter_threat_mitigation",
+        "encounter.emergency_subroutine_prevention"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
       "reviewedStrategySupportPairs": [],
       "supportingEvidenceOnly": [
+        "breaker.break_any_subroutine",
         "breaker.ends_run_after_use",
-        "breaker.universal"
+        "breaker.multi_subroutine_break",
+        "defense.encounter_threat_mitigation",
+        "encounter.emergency_subroutine_prevention"
       ],
       "lineSupportClassification": [],
       "rolesClassification": [
         {
           "value": "breaker_end_run",
+          "category": "function_signal_only",
+          "triageCategory": "function_signal_only",
+          "mapsTo": [],
+          "rationale": "Value describes a card function or tactical support signal, not a direct strategy anchor."
+        },
+        {
+          "value": "emergency_breaker",
           "category": "function_signal_only",
           "triageCategory": "function_signal_only",
           "mapsTo": [],
@@ -17250,77 +17364,30 @@
           "triageCategory": "legacy_role_only",
           "mapsTo": [],
           "rationale": "Value is retained as legacy role/catalog/review context and is not a strategy goal."
-        },
-        {
-          "value": "run_pressure",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
         }
       ],
-      "planRolesClassification": [
-        {
-          "value": "build_rig",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.rig_first"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "contest_remote",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.remote_contest"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        },
-        {
-          "value": "safe_probe_run",
-          "category": "alias_to_strategy_goal",
-          "triageCategory": "strategy_alias",
-          "mapsTo": [
-            "runner.run_event_tempo"
-          ],
-          "rationale": "Legacy role or planRole aliases to a normalized strategy."
-        }
-      ],
-      "warningCategories": [
-        "function_signal_descriptor_gap"
-      ],
-      "descriptorGaps": [
-        {
-          "gapId": "remote_contest_pressure_not_first_class",
-          "description": "Current structured hints can describe some remoteRole and access costs, but direct Runner remote-contest intent remains mostly planner context.",
-          "affectedSignalsOrValues": [
-            "remote_contest",
-            "contest_remote",
-            "server_development"
-          ],
-          "batchMigrationDecision": "do_not_bulk_migrate_in_AI004",
-          "needsSchemaOrDescriptorExtension": true
-        }
-      ],
+      "planRolesClassification": [],
+      "warningCategories": [],
+      "descriptorGaps": [],
       "legacyStatus": {
         "rolesPresent": true,
-        "planRolesPresent": true,
+        "planRolesPresent": false,
         "legacyLineSupportPresent": false,
         "activeMechanicalFactFields": [
           "effects",
           "costProfile",
-          "breakerProfile"
+          "breakerProfile",
+          "targetProfiles"
         ],
         "compiledMechanicalFactFields": [
           "effects",
           "costProfile",
+          "breakerProfile",
+          "targetProfiles"
+        ],
+        "generatedFactFields": [
           "breakerProfile"
         ],
-        "generatedFactFields": [],
         "overlayFields": []
       },
       "strategicRoleStatus": {
@@ -38207,6 +38274,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.trace_source",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -38326,6 +38395,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.future_pressure",
         "tax.ice"
       ],
@@ -38468,6 +38538,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -39011,6 +39082,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.trace_source",
         "damage.payoff",
         "ice.etr",
         "tax.runner_persistent",
@@ -39165,6 +39238,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.trace_source",
         "damage.payoff",
         "ice.etr",
         "trace.source"
@@ -39325,6 +39400,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "damage.payoff",
         "ice.etr"
       ],
@@ -39454,6 +39530,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -39550,6 +39627,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "damage.payoff",
         "ice.etr"
       ],
@@ -39698,6 +39776,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -39794,6 +39873,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -39985,6 +40065,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -40097,6 +40178,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
         "tag.source",
         "tax.runner_persistent",
         "trace.source"
@@ -40240,6 +40323,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -40336,6 +40420,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -40432,6 +40517,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -40528,6 +40614,9 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.end_run",
+        "corp_ice.trace_source",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -40655,6 +40744,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.trace_source",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -40900,6 +40991,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
         "tag.source",
         "trace.source"
       ],
@@ -41003,6 +41096,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -41099,6 +41193,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -41195,6 +41290,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.trace_source",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -41435,6 +41532,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.trace_source",
         "damage.payoff",
         "ice.etr"
       ],
@@ -41589,6 +41688,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
         "tag.source",
         "trace.source"
       ],
@@ -41692,6 +41793,7 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -41804,6 +41906,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
         "tag.source"
       ],
       "derivedStrategyAnchors": [
@@ -41939,6 +42043,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -42035,6 +42140,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "damage.payoff",
         "ice.etr"
       ],
@@ -42140,6 +42246,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "damage.payoff",
         "ice.etr"
       ],
@@ -42269,6 +42376,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
+        "corp_ice.trace_source",
         "damage.payoff",
         "ice.etr",
         "tax.ice",
@@ -42400,6 +42509,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -42496,6 +42606,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "damage.payoff",
         "ice.etr"
       ],
@@ -42730,6 +42841,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -42826,6 +42938,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.tag_source",
+        "corp_ice.trace_source",
         "economy.trace_credit",
         "tag.source"
       ],
@@ -42930,6 +43044,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -43026,6 +43141,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "damage.payoff",
         "ice.etr"
       ],
@@ -43131,6 +43247,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -43227,6 +43344,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.trace_source",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -43346,6 +43465,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -43442,6 +43562,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -43538,6 +43659,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -43769,6 +43891,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "damage.payoff",
         "ice.etr"
       ],
@@ -43874,6 +43997,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -43970,6 +44094,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -44105,7 +44230,10 @@
         "legacyFallbackOnly": false,
         "warningCount": 1
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.conditional_end_run",
+        "corp_ice.random_or_guessing"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -44211,6 +44339,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -44313,7 +44442,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.end_run"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.ice_tax_glacier"
@@ -44425,7 +44556,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "corp_ice.random_or_guessing"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -44755,6 +44888,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "damage.payoff",
         "ice.etr"
       ],
@@ -44905,6 +45039,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "ice.etr"
       ],
       "derivedStrategyAnchors": [
@@ -45001,6 +45136,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "corp_ice.end_run",
         "damage.payoff",
         "ice.etr"
       ],
@@ -45121,6 +45257,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_credit_burst",
         "economy.generic"
       ],
       "derivedStrategyAnchors": [],
@@ -45199,7 +45336,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "draw.corp_draw"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -45274,6 +45413,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "condition.multiple_runs_last_turn",
         "tag.source",
         "trace.source"
       ],
@@ -45413,6 +45553,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "condition.last_turn_run",
         "tag.source",
         "trace.source"
       ],
@@ -45553,6 +45694,7 @@
       },
       "derivedFunctionSignals": [
         "economy.counter",
+        "risk.requires_tagged_runner",
         "tag.payoff",
         "tax.runner_credit"
       ],
@@ -45682,6 +45824,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "risk.requires_tagged_runner",
         "tag.payoff"
       ],
       "derivedStrategyAnchors": [
@@ -45806,6 +45949,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "risk.requires_tagged_runner",
         "tag.payoff",
         "tag.source"
       ],
@@ -45931,6 +46075,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "draw.corp_draw",
+        "economy.corp_credit_burst",
         "economy.generic"
       ],
       "derivedStrategyAnchors": [],
@@ -46017,7 +46163,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "action.corp_install_action_bundle"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -46100,6 +46248,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_credit_burst",
         "economy.generic"
       ],
       "derivedStrategyAnchors": [],
@@ -46396,7 +46545,9 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_credit_burst",
         "economy.generic",
+        "risk.requires_tagged_runner",
         "tag.payoff",
         "tag.source"
       ],
@@ -46534,7 +46685,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "ice.corp_rearrange_conceal"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -46614,6 +46767,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "draw.corp_draw",
+        "economy.corp_credit_burst",
         "economy.generic"
       ],
       "derivedStrategyAnchors": [],
@@ -46700,7 +46855,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "archives.corp_recovery"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -46788,7 +46945,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "action.corp_extra_action_support"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -46862,7 +47021,10 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "rnd.corp_topdeck_reorder",
+        "rnd.corp_topdeck_setup"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -46950,6 +47112,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "risk.requires_tagged_runner",
         "tag.payoff"
       ],
       "derivedStrategyAnchors": [
@@ -47176,6 +47339,7 @@
       },
       "derivedFunctionSignals": [
         "damage.payoff",
+        "risk.requires_tagged_runner",
         "tag.payoff"
       ],
       "derivedStrategyAnchors": [
@@ -47314,6 +47478,7 @@
       },
       "derivedFunctionSignals": [
         "damage.payoff",
+        "risk.requires_tagged_runner",
         "tag.payoff"
       ],
       "derivedStrategyAnchors": [
@@ -47449,6 +47614,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "condition.agenda_stolen_last_turn",
+        "economy.corp_conditional_credit",
         "economy.generic"
       ],
       "derivedStrategyAnchors": [],
@@ -47772,6 +47939,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "condition.agenda_stolen_last_turn",
         "tag.source"
       ],
       "derivedStrategyAnchors": [
@@ -47895,6 +48063,7 @@
       },
       "derivedFunctionSignals": [
         "damage.payoff",
+        "risk.requires_tagged_runner",
         "tag.payoff"
       ],
       "derivedStrategyAnchors": [
@@ -48030,9 +48199,12 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_credit_burst",
         "economy.counter",
         "economy.generic",
-        "remote.asset_economy"
+        "remote.asset_economy",
+        "risk.agenda_point_cost",
+        "risk.loss_condition"
       ],
       "derivedStrategyAnchors": [
         "corp.asset_economy"
@@ -48168,6 +48340,7 @@
       },
       "derivedFunctionSignals": [
         "economy.action",
+        "economy.corp_installed_credit_drip",
         "economy.counter",
         "economy.finite_pool",
         "economy.generic",
@@ -48408,6 +48581,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_installed_credit_drip",
         "economy.counter",
         "economy.finite_pool",
         "economy.generic",
@@ -48672,7 +48846,8 @@
       },
       "derivedFunctionSignals": [
         "tag.payoff",
-        "tag.source"
+        "tag.source",
+        "tax.runner_credit"
       ],
       "derivedStrategyAnchors": [
         "corp.tag_trace_punish"
@@ -48785,7 +48960,9 @@
       },
       "derivedFunctionSignals": [
         "economy.corp_hq_agenda_reveal_credit",
-        "remote.asset_economy"
+        "info.hq_agenda_reveal",
+        "remote.asset_economy",
+        "risk.reveal_hq_agendas"
       ],
       "derivedStrategyAnchors": [
         "corp.asset_economy"
@@ -48909,6 +49086,7 @@
       },
       "derivedFunctionSignals": [
         "access.punish",
+        "advance.corp_counter_bank",
         "remote.ambush"
       ],
       "derivedStrategyAnchors": [
@@ -49024,7 +49202,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "hq.corp_installed_card_bounce"
+        "hq.corp_installed_card_bounce",
+        "install.corp_uninstall_to_hq"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
@@ -49249,6 +49428,7 @@
       "derivedFunctionSignals": [
         "economy.corp_action_charged_bank",
         "economy.corp_charge_bank",
+        "economy.corp_counter_bank",
         "economy.counter",
         "economy.finite_pool",
         "economy.generic"
@@ -49360,7 +49540,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "virus.corp_counter_prevention"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -49748,6 +49930,7 @@
       },
       "derivedFunctionSignals": [
         "access.punish",
+        "advance.corp_counter_bank",
         "remote.ambush"
       ],
       "derivedStrategyAnchors": [
@@ -50111,6 +50294,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_installed_credit_drip",
         "economy.counter",
         "economy.finite_pool",
         "economy.generic",
@@ -50242,6 +50426,7 @@
       },
       "derivedFunctionSignals": [
         "damage.payoff",
+        "risk.requires_tagged_runner",
         "tag.payoff"
       ],
       "derivedStrategyAnchors": [
@@ -50380,6 +50565,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "advance.corp_counter_bank",
         "economy.corp_counter_cashout",
         "economy.generic",
         "remote.asset_economy"
@@ -50496,6 +50682,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_counter_bank",
+        "economy.corp_installed_credit_drip",
         "economy.finite_pool",
         "economy.generic",
         "economy.recurring",
@@ -50730,7 +50918,11 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "action.corp_repeatable_extra_action",
+        "risk.leaves_play_loss",
+        "risk.loss_condition"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -50810,7 +51002,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
-        "tax.remote"
+        "tax.remote",
+        "tax.runner_credit"
       ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
@@ -50918,6 +51111,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "risk.requires_tagged_runner",
         "tag.payoff",
         "tag.source"
       ],
@@ -51024,7 +51218,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "advance.corp_counter_bank"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [
         "corp.fast_advance"
@@ -51130,7 +51326,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "action.corp_repeatable_extra_action"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -51213,6 +51411,7 @@
       },
       "derivedFunctionSignals": [
         "draw.corp_draw",
+        "hq.corp_hand_filter",
         "hq.corp_hand_refresh",
         "rnd.corp_shuffle_hq_into_rnd"
       ],
@@ -51313,6 +51512,7 @@
       },
       "derivedFunctionSignals": [
         "economy.action",
+        "economy.corp_installed_credit_drip",
         "economy.counter",
         "economy.finite_pool",
         "economy.generic",
@@ -51522,6 +51722,8 @@
       },
       "derivedFunctionSignals": [
         "damage.payoff",
+        "risk.random_action",
+        "risk.requires_tagged_runner",
         "tag.payoff"
       ],
       "derivedStrategyAnchors": [
@@ -51693,8 +51895,10 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "access.archives_safe_exception",
         "access.corp_net_damage_ambush",
         "access.punish",
+        "access.rnd_reveal_requirement",
         "damage.payoff",
         "remote.ambush"
       ],
@@ -51950,6 +52154,7 @@
       },
       "derivedFunctionSignals": [
         "damage.payoff",
+        "risk.requires_tagged_runner",
         "tag.payoff"
       ],
       "derivedStrategyAnchors": [
@@ -52195,6 +52400,8 @@
       },
       "derivedFunctionSignals": [
         "economy.action",
+        "economy.corp_counter_bank",
+        "economy.corp_installed_credit_drip",
         "economy.counter",
         "economy.finite_pool",
         "economy.generic",
@@ -52327,8 +52534,10 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "access.archives_safe_exception",
         "access.corp_net_damage_ambush",
         "access.corp_tag_ambush",
+        "access.rnd_reveal_requirement",
         "damage.payoff",
         "tag.source"
       ],
@@ -52475,6 +52684,7 @@
       "derivedFunctionSignals": [
         "access.corp_brain_damage_ambush",
         "access.punish",
+        "advance.corp_counter_bank",
         "damage.payoff",
         "remote.ambush"
       ],
@@ -52611,6 +52821,8 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "advance.corp_counter_bank",
+        "economy.corp_counter_bank",
         "economy.generic"
       ],
       "derivedStrategyAnchors": [],
@@ -52720,7 +52932,10 @@
         "warningCount": 1
       },
       "derivedFunctionSignals": [
+        "access.archives_safe_exception",
         "access.corp_net_damage_ambush",
+        "access.rnd_reveal_requirement",
+        "advance.corp_counter_bank",
         "damage.payoff"
       ],
       "derivedStrategyAnchors": [
@@ -56621,7 +56836,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "draw.corp_draw"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -56692,6 +56909,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_credit_burst",
         "economy.generic"
       ],
       "derivedStrategyAnchors": [],
@@ -56843,6 +57061,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_credit_burst",
         "economy.generic"
       ],
       "derivedStrategyAnchors": [],
@@ -57404,6 +57623,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "risk.requires_tagged_runner",
         "tag.payoff"
       ],
       "derivedStrategyAnchors": [
@@ -57702,7 +57922,9 @@
         "legacyFallbackOnly": false,
         "warningCount": 0
       },
-      "derivedFunctionSignals": [],
+      "derivedFunctionSignals": [
+        "draw.corp_draw"
+      ],
       "derivedStrategyAnchors": [],
       "cardLevelStrategyAnchors": [],
       "derivedPossibleStrategyAnchors": [],
@@ -57840,6 +58062,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_credit_burst",
         "economy.generic"
       ],
       "derivedStrategyAnchors": [],
@@ -57924,6 +58147,7 @@
         "warningCount": 0
       },
       "derivedFunctionSignals": [
+        "economy.corp_credit_burst",
         "economy.generic"
       ],
       "derivedStrategyAnchors": [],

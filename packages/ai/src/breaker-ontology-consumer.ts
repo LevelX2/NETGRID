@@ -11,6 +11,12 @@ import type {
 } from "./hint-ontology";
 
 const AI_HINTS = createAiHintsByCard();
+const ACCESS_BLOCKING_BREAKER_RESTRICTIONS = new Set([
+  "not_access_enabling_breaker",
+  "not_reachability_coverage",
+  "constraint.not_access_enabling_breaker",
+  "constraint.not_reachability_coverage",
+]);
 
 const COVERAGE_BY_ICE_SUBTYPE: Record<string, KnownHintBreakerCoverage> = {
   wall: "wall",
@@ -46,6 +52,24 @@ export function getStructuredBreakerProfileForCard(
 ): AiHintBreakerProfile | undefined {
   if (!cardId) return undefined;
   return AI_HINTS.get(cardId)?.breakerProfile;
+}
+
+export function breakerCardBlocksAccessReachability(
+  cardId: string | undefined,
+): boolean {
+  return breakerProfileBlocksAccessReachability(
+    getStructuredBreakerProfileForCard(cardId),
+  );
+}
+
+export function breakerProfileBlocksAccessReachability(
+  profile: AiHintBreakerProfile | undefined,
+): boolean {
+  if (!profile) return false;
+  if (profile.sideEffects?.includes("ends_run_after_use")) return true;
+  return (profile.restrictions ?? []).some((restriction) =>
+    ACCESS_BLOCKING_BREAKER_RESTRICTIONS.has(restriction),
+  );
 }
 
 export function classifyBreakerCoverageFromOntology(
@@ -119,7 +143,13 @@ export function structuredBreakerProfileCoversIce(
 ): boolean {
   const profile = getStructuredBreakerProfileForCard(breakerDefinitionId);
   const coverage = structuredIceCoverageRequirements(iceDefinitionId);
-  if (!profile || coverage.length === 0) return false;
+  if (
+    !profile ||
+    coverage.length === 0 ||
+    breakerProfileBlocksAccessReachability(profile)
+  ) {
+    return false;
+  }
   return coverage.some((target) => profileCoversCoverage(profile, target));
 }
 
@@ -131,7 +161,13 @@ export function estimateStructuredBreakerCostForIce(
   additionalBreakCostPerSubroutine = 0,
 ): StructuredBreakerIceCostEstimate | undefined {
   const profile = getStructuredBreakerProfileForCard(breakerDefinitionId);
-  if (!profile || !ice.definitionId) return undefined;
+  if (
+    !profile ||
+    !ice.definitionId ||
+    breakerProfileBlocksAccessReachability(profile)
+  ) {
+    return undefined;
+  }
   const coverage = structuredIceCoverageRequirements(ice.definitionId).find(
     (target) => profileCoversCoverage(profile, target),
   );
@@ -194,6 +230,7 @@ function profileCoversCoverage(
   coverage: KnownHintBreakerCoverage | undefined,
 ): boolean {
   if (!profile || !coverage) return false;
+  if (breakerProfileBlocksAccessReachability(profile)) return false;
   const profileCoverage = profile.coverage ?? [];
   return (
     profileCoverage.includes("universal") || profileCoverage.includes(coverage)

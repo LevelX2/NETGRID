@@ -2572,7 +2572,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     breakCost: 0,
     pumpCost: 1,
     rulesText:
-      "0 Credits: Break 1 ice subroutine. 1 Credits: +1 strength. Using Dropp ends your run.",
+      "0 Credits: Break all subroutines of a piece of ice, and end the run. 1 Credits: +1 strength.",
   }),
   onrBreaker({
     id: "onr_v1_052_raffles",

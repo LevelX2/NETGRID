@@ -232,10 +232,11 @@ const CATALOG_AI_HINT_EXPECTATIONS = [
     ],
   },
   {
-    title: "exposes late-core remote-contest program hints",
+    title: "exposes Dropp emergency breaker hints",
     cardId: "onr_v1_019_dropp",
-    roles: ["program"],
-    planRoles: ["contest_remote"],
+    roles: ["program", "icebreaker", "breaker_end_run", "emergency_breaker"],
+    requiredMechanics: ["end_run_after_breaker_use"],
+    riskTags: ["risk.access_loss_on_use"],
     scenarioRefs: [
       "data/scenarios/ai-deck-legal-v195-v198-smokes.json#runner_v198_dogcatcher_and_dropp_breakers",
     ],
@@ -671,15 +672,13 @@ describe("catalog API filters", () => {
       {
         cardId: "onr_v1_019_dropp",
         catalogContains: [
-          "0 credits: Break ice subroutine.",
+          "0 credits: Break all subroutines of a piece of ice, and end the run.",
           "1 credit: +1 strength.",
-          "Using Dropp ends your run.",
         ],
         sharedContains: [
-          "0 Credits: Break 1 ice subroutine.",
-          "Using Dropp ends your run.",
+          "0 Credits: Break all subroutines of a piece of ice, and end the run.",
         ],
-        notContains: ["2 credits: +1 strength."],
+        notContains: ["2 credits: +1 strength.", "Using Dropp ends your run."],
       },
       {
         cardId: "onr_v1_036_jackhammer",

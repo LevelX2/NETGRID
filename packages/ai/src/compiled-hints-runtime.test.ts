@@ -7,8 +7,11 @@ import {
   getStructuredBreakerProfileForCard,
   getStructuredRemoteRoleForCard,
   classifyTagPunishPayoffFromOntology,
+  estimateStructuredBreakerCostForIce,
 } from "./index";
 import { createAiHintsByCard } from "./ai-hints";
+import { breakerCardBlocksAccessReachability } from "./breaker-ontology-consumer";
+import { canBreakerDefinitionBreakIce } from "./visible-run-analysis";
 
 const PILOT_IDS = [
   "onr_v1_040_loony-goon",
@@ -163,6 +166,31 @@ describe("compiled AI hints runtime full coverage", () => {
         breakCost: 2,
       }),
     );
+  });
+
+  it("keeps Dropp emergency breaker hints out of access reachability consumers", () => {
+    expect(getStructuredBreakerProfileForCard("onr_v1_019_dropp")).toEqual(
+      expect.objectContaining({
+        coverage: ["universal"],
+        multiSubroutineBreak: true,
+        sideEffects: ["ends_run_after_use"],
+        restrictions: expect.arrayContaining([
+          "not_access_enabling_breaker",
+          "not_reachability_coverage",
+          "break_ability_ends_run",
+        ]),
+      }),
+    );
+    expect(breakerCardBlocksAccessReachability("onr_v1_019_dropp")).toBe(true);
+    expect(
+      canBreakerDefinitionBreakIce("onr_v1_019_dropp", "onr_v1_237_data-wall"),
+    ).toBe(false);
+    expect(
+      estimateStructuredBreakerCostForIce("onr_v1_019_dropp", {
+        definitionId: "onr_v1_237_data-wall",
+        strength: 0,
+      }),
+    ).toBeUndefined();
   });
 
   it("serves compiled runner search facts without Self-Modifying Code install discount", () => {

@@ -1209,16 +1209,18 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         const subroutineLabel = breakSubroutineLabel(payload, breakSubroutineCount);
         const targetIceTitle = stringValue(payload.targetIceTitle);
         const targetIceSuffix = targetIceTitle ? ` auf ${targetIceTitle}` : "";
-        description = `${breakSubroutineTotalCost !== undefined ? `${creditText(breakSubroutineTotalCost)}: ` : ""}${subroutineLabel}${targetIceSuffix} gebrochen.`;
+        const endsRunAfterBreak = payload.breakerEndsRunAfterBreak === true;
+        description = `${breakSubroutineTotalCost !== undefined ? `${creditText(breakSubroutineTotalCost)}: ` : ""}${subroutineLabel}${targetIceSuffix} gebrochen${endsRunAfterBreak ? "; der Run endet durch diesen Break-Effekt, ohne dass das ICE als passiert gilt" : ""}.`;
         chips.push(
           "Subroutine",
           subroutineLabel,
           "Gebrochen",
+          ...(endsRunAfterBreak ? ["Run endet", "ICE nicht passiert"] : []),
           ...(breakSubroutineTotalCost !== undefined ? [`${breakSubroutineTotalCost} ${creditLabel(breakSubroutineTotalCost)}`] : []),
           ...(cardTitle ? [cardTitle] : []),
           ...(targetIceTitle ? [targetIceTitle] : [])
         );
-        title = phrase(subject, `${cardTitle ? `mit ${cardTitle} ` : ""}${subroutineLabel}${targetIceSuffix} gebrochen`);
+        title = phrase(subject, `${cardTitle ? `mit ${cardTitle} ` : ""}${subroutineLabel}${targetIceSuffix} gebrochen${endsRunAfterBreak ? " und den Run beendet" : ""}`);
       }
       break;
     case "continue_run":
@@ -2658,6 +2660,7 @@ function hqCardCountText(amount: number): string {
 }
 
 function breakSubroutineLabel(payload: Record<string, unknown>, fallbackCount: number): string {
+  if (payload.breakAllMatchingSubroutines === true) return "alle Subroutinen";
   const rawIndex = numberValue(payload.subroutineIndex);
   if (rawIndex !== undefined && Number.isInteger(rawIndex) && rawIndex >= 0) return `Subroutine ${rawIndex + 1}`;
   const rawIndexes = stringValue(payload.subroutineIndexes);

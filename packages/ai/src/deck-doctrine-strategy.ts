@@ -160,6 +160,10 @@ type CompiledAiHint = {
   effects?: Array<{ kind?: string; scope?: string; timing?: string }>;
   remoteRole?: { kind?: string; serverScope?: string; threatLevel?: string };
   costProfile?: { reserveRisk?: string; opportunityCost?: string };
+  breakerProfile?: {
+    sideEffects?: string[];
+    restrictions?: string[];
+  };
 };
 
 type InspectorClassification = {
@@ -207,6 +211,7 @@ type DeckCardStrategyFacts = {
   warningCategories: string[];
   requiredMechanics: string[];
   riskTags: string[];
+  accessBreakerCoverageBlocked: boolean;
   effects: Array<{ kind?: string; scope?: string; timing?: string }>;
   remoteRoleKind?: string;
   costProfileReserveRisk?: string;
@@ -250,6 +255,23 @@ const ANCHOR_STRATEGIC_ROLES = new Set([
 const ALLOWED_LINE_SUPPORT_TRIAGE = new Set([
   "normalized_strategy_id",
   "safe_strategy_anchor_alias",
+]);
+const ACCESS_BLOCKING_BREAKER_RESTRICTIONS = new Set([
+  "not_access_enabling_breaker",
+  "not_reachability_coverage",
+  "constraint.not_access_enabling_breaker",
+  "constraint.not_reachability_coverage",
+]);
+const BREAKER_COVERAGE_SIGNAL_IDS = new Set([
+  "breaker.ap",
+  "breaker.black_ice",
+  "breaker.code_gate",
+  "breaker.sentry",
+  "breaker.trace",
+  "breaker.universal",
+  "breaker.unknown_special",
+  "breaker.wall",
+  "breaker.watchdog",
 ]);
 
 export function buildDeckStrategyProfile(
@@ -352,8 +374,15 @@ function deckStrategyStats(snapshot: AiDeckDoctrineDeckSnapshot): DeckStrategySt
       ...(hint?.strategicRole ?? []),
       ...(inspector?.strategicRoleStatus?.validValues ?? []),
     ]);
+    const accessBreakerCoverageBlocked = breakerProfileBlocksAccessCoverage(
+      hint?.breakerProfile,
+    );
 
-    for (const signal of functionSignals) {
+    for (const signal of functionSignals.filter(
+      (signal) =>
+        !accessBreakerCoverageBlocked ||
+        !BREAKER_COVERAGE_SIGNAL_IDS.has(signal),
+    )) {
       increment(functionSignalCounts, signal, quantity);
     }
     for (const role of roles) increment(legacySignalCounts, `role:${role}`, quantity);
@@ -380,6 +409,7 @@ function deckStrategyStats(snapshot: AiDeckDoctrineDeckSnapshot): DeckStrategySt
         warningCategories: sortedUnique(inspector?.warningCategories ?? []),
         requiredMechanics: sortedUnique(hint?.requiredMechanics ?? []),
         riskTags: sortedUnique(hint?.riskTags ?? []),
+        accessBreakerCoverageBlocked,
         effects: hint?.effects ?? [],
         ...(hint?.remoteRole?.kind ? { remoteRoleKind: hint.remoteRole.kind } : {}),
         ...(hint?.costProfile?.reserveRisk
@@ -766,14 +796,37 @@ function evidenceFromSignalsAndType(
   };
 }
 
+function accessCapableSignalCount(
+  stats: DeckStrategyStats,
+  signalId: string,
+): number {
+  return stats.cards
+    .filter((card) => !card.accessBreakerCoverageBlocked)
+    .filter((card) => card.functionSignals.includes(signalId))
+    .reduce((sum, card) => sum + card.quantity, 0);
+}
+
+function breakerProfileBlocksAccessCoverage(
+  profile:
+    | { sideEffects?: string[]; restrictions?: string[] }
+    | undefined,
+): boolean {
+  if (!profile) return false;
+  if (profile.sideEffects?.includes("ends_run_after_use")) return true;
+  return (profile.restrictions ?? []).some((restriction) =>
+    ACCESS_BLOCKING_BREAKER_RESTRICTIONS.has(restriction),
+  );
+}
+
 function breakerCoverageSupport(
   stats: DeckStrategyStats,
   dimension: string,
 ): { score: number; evidence: DeckStrategyEvidence[] } {
-  const universal = stats.functionSignalCounts["breaker.universal"] ?? 0;
-  const wall = universal + (stats.functionSignalCounts["breaker.wall"] ?? 0);
-  const codeGate = universal + (stats.functionSignalCounts["breaker.code_gate"] ?? 0);
-  const sentry = universal + (stats.functionSignalCounts["breaker.sentry"] ?? 0);
+  const universal = accessCapableSignalCount(stats, "breaker.universal");
+  const wall = universal + accessCapableSignalCount(stats, "breaker.wall");
+  const codeGate =
+    universal + accessCapableSignalCount(stats, "breaker.code_gate");
+  const sentry = universal + accessCapableSignalCount(stats, "breaker.sentry");
   const covered = [wall, codeGate, sentry].filter((count) => count > 0).length;
   const score = covered === 3 ? 100 : covered === 2 ? 72 : covered === 1 ? 38 : 0;
   return {
@@ -781,11 +834,14 @@ function breakerCoverageSupport(
     evidence: sortedEvidence(
       stats.cards
         .filter((card) =>
-          card.functionSignals.some((signal) => signal.startsWith("breaker.")),
+          !card.accessBreakerCoverageBlocked &&
+          card.functionSignals.some((signal) =>
+            BREAKER_COVERAGE_SIGNAL_IDS.has(signal),
+          ),
         )
         .flatMap((card) =>
           card.functionSignals
-            .filter((signal) => signal.startsWith("breaker."))
+            .filter((signal) => BREAKER_COVERAGE_SIGNAL_IDS.has(signal))
             .map((signal) => ({
               cardId: card.cardId,
               quantity: card.quantity,
@@ -965,14 +1021,17 @@ function runnerGapsForDimension(
   switch (dimension) {
     case "breakerCoverage": {
       const gaps: string[] = [];
-      const universal = stats.functionSignalCounts["breaker.universal"] ?? 0;
-      if ((stats.functionSignalCounts["breaker.wall"] ?? 0) + universal === 0) {
+      const universal = accessCapableSignalCount(stats, "breaker.universal");
+      if (accessCapableSignalCount(stats, "breaker.wall") + universal === 0) {
         gaps.push("missing_wall_coverage");
       }
-      if ((stats.functionSignalCounts["breaker.code_gate"] ?? 0) + universal === 0) {
+      if (
+        accessCapableSignalCount(stats, "breaker.code_gate") + universal ===
+        0
+      ) {
         gaps.push("missing_code_gate_coverage");
       }
-      if ((stats.functionSignalCounts["breaker.sentry"] ?? 0) + universal === 0) {
+      if (accessCapableSignalCount(stats, "breaker.sentry") + universal === 0) {
         gaps.push("weak_sentry_coverage");
       }
       return gaps.length > 0 ? gaps : ["weak_breaker_coverage"];
@@ -1052,13 +1111,13 @@ function buildRunnerProfiles(
   strategyScores: Record<string, DeckStrategyScore>,
 ): RunnerDeckStrategyProfiles {
   const search = stats.functionSignalCounts["setup.search"] ?? 0;
-  const universal = stats.functionSignalCounts["breaker.universal"] ?? 0;
+  const universal = accessCapableSignalCount(stats, "breaker.universal");
   const special =
-    (stats.functionSignalCounts["breaker.ap"] ?? 0) +
-    (stats.functionSignalCounts["breaker.trace"] ?? 0) +
-    (stats.functionSignalCounts["breaker.watchdog"] ?? 0) +
-    (stats.functionSignalCounts["breaker.black_ice"] ?? 0) +
-    (stats.functionSignalCounts["breaker.unknown_special"] ?? 0);
+    accessCapableSignalCount(stats, "breaker.ap") +
+    accessCapableSignalCount(stats, "breaker.trace") +
+    accessCapableSignalCount(stats, "breaker.watchdog") +
+    accessCapableSignalCount(stats, "breaker.black_ice") +
+    accessCapableSignalCount(stats, "breaker.unknown_special");
   const memoryCount = memorySupport(stats, "memory").evidence.reduce(
     (sum, entry) => sum + entry.quantity,
     0,
@@ -1066,12 +1125,18 @@ function buildRunnerProfiles(
   const programTrashCount = legacyValueCount(stats, "program_trash");
   return {
     coverageProfile: {
-      wall: coverageBucket((stats.functionSignalCounts["breaker.wall"] ?? 0) + universal, search),
-      code_gate: coverageBucket(
-        (stats.functionSignalCounts["breaker.code_gate"] ?? 0) + universal,
+      wall: coverageBucket(
+        accessCapableSignalCount(stats, "breaker.wall") + universal,
         search,
       ),
-      sentry: coverageBucket((stats.functionSignalCounts["breaker.sentry"] ?? 0) + universal, search),
+      code_gate: coverageBucket(
+        accessCapableSignalCount(stats, "breaker.code_gate") + universal,
+        search,
+      ),
+      sentry: coverageBucket(
+        accessCapableSignalCount(stats, "breaker.sentry") + universal,
+        search,
+      ),
       universal: coverageBucket(universal, search),
       special: coverageBucket(special, search),
     },

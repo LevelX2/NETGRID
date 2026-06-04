@@ -801,6 +801,35 @@ describe("MVP 0.3 AI controller contract", () => {
     });
   });
 
+  it("does not count Dropp as access-reachable ETR breaker coverage", () => {
+    const cardsById = createRuntimeCardsById();
+    const dataWall = runtimeVisibleIce(cardsById["onr_v1_237_data-wall"]);
+    const dropp = runtimeVisibleBreaker(cardsById["onr_v1_019_dropp"]);
+
+    expect(
+      canBreakerDefinitionBreakIce(
+        "onr_v1_019_dropp",
+        "onr_v1_237_data-wall",
+      ),
+    ).toBe(false);
+    expect(
+      minimumCreditsToBreakEndTheRunSubroutines(
+        dataWall,
+        [dropp],
+        endTheRunSubroutineCount("onr_v1_237_data-wall"),
+        new Map(),
+      ),
+    ).toBeUndefined();
+    expect(assessKnownRezzedIcePath([dataWall], [dropp], 6)).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      knownPathBlockedByUnbreakableIce: true,
+      knownPathBlockedByMissingCoverage: true,
+      knownPathBlockedByEtr: true,
+      noAccessReason: "missing_breaker_coverage",
+    });
+  });
+
   it("ignores visible root identities unless the engine exposes an effective quote", () => {
     const cardsById = createRuntimeCardsById();
     const ice = runtimeVisibleIce(cardsById["onr_v1_232_crystal-wall"]);

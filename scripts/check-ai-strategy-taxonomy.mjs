@@ -66,6 +66,12 @@ const VALID_TACTIC_SIGNAL_SIDE_SCOPES = new Set([
   "corp",
   "neutral",
 ]);
+const ACCESS_BLOCKING_BREAKER_RESTRICTIONS = new Set([
+  "not_access_enabling_breaker",
+  "not_reachability_coverage",
+  "constraint.not_access_enabling_breaker",
+  "constraint.not_reachability_coverage",
+]);
 
 const HIDDEN_INFO_RISK_FIELDS = [
   "opponentDeckList",
@@ -1494,6 +1500,12 @@ function ruleBaseMatchesHint(rule, hint) {
 }
 
 function ruleGatesMatch(rule, hint, effect) {
+  if (
+    rule.source === "breakerProfile.coverage" &&
+    breakerProfileBlocksAccessCoverage(hint.breakerProfile)
+  ) {
+    return false;
+  }
   const gates = rule.gates;
   if (!isRecord(gates)) return true;
   if (!matchesGateValue(hint.side, gates.side)) return false;
@@ -1537,6 +1549,22 @@ function ruleGatesMatch(rule, hint, effect) {
     }
   }
   return true;
+}
+
+function breakerProfileBlocksAccessCoverage(profile) {
+  if (!profile) return false;
+  if (
+    Array.isArray(profile.sideEffects) &&
+    profile.sideEffects.includes("ends_run_after_use")
+  ) {
+    return true;
+  }
+  return (
+    Array.isArray(profile.restrictions) &&
+    profile.restrictions.some((restriction) =>
+      ACCESS_BLOCKING_BREAKER_RESTRICTIONS.has(restriction),
+    )
+  );
 }
 
 function matchesGateValue(actual, expected) {

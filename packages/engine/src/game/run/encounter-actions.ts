@@ -288,7 +288,8 @@ export function buildRunnerEncounterActions(
         run.blinkUsedSubroutinesByBreakerThisEncounter?.[breakerId] ?? [];
       const subroutines = encounterSubroutines;
       const multiBreakAbility = breakAbilities.find(
-        (ability) => (ability.count ?? 1) > 1,
+        (ability) =>
+          ability.breakAllMatchingSubroutines || (ability.count ?? 1) > 1,
       );
       if (multiBreakAbility) {
         actions.push(
@@ -629,6 +630,43 @@ function multiBreakSubroutineActions(
         !run.resolvedSubroutineIndexes.includes(index),
     )
     .map(({ index }) => index);
+  if (breakAbility.breakAllMatchingSubroutines) {
+    if (eligibleIndexes.length === 0) return [];
+    const breakCost = host.costs.breakSubroutineCostBreakdown(
+      breakAbility.cost.credits,
+      eligibleIndexes.length,
+    );
+    if (host.payment.availableRunnerRunCredits(breakerId) < breakCost.totalCost)
+      return [];
+    const label = breakAbility.onUseEndRun
+      ? `${breakerTitle}: alle Subroutinen brechen und Run beenden`
+      : `${breakerTitle}: alle Subroutinen brechen`;
+    return [
+      host.actions.buildLegalAction(
+        "break_subroutine",
+        label,
+        breakerId,
+        [{ credits: breakCost.totalCost }],
+        {
+          breakerId,
+          iceId: encounteredIceId,
+          subroutineIndexes: eligibleIndexes.join(","),
+          breakSubroutineCount: eligibleIndexes.length,
+          multiBreakSubroutines: true,
+          breakAllMatchingSubroutines: true,
+          ...(breakAbility.onUseEndRun ? { breakerEndsRunAfterBreak: true } : {}),
+          targetIceDefinitionId: iceDefinition.id,
+          targetIceTitle: iceDefinition.title,
+          ...breakCost.publicPayload,
+        },
+        host.actions.abilityMetadata(
+          breakerId,
+          breakAbility.id,
+          encounteredIceId,
+        ),
+      ),
+    ];
+  }
   const maxCount = Math.min(breakAbility.count ?? 4, eligibleIndexes.length);
   const actions: LegalAction[] = [];
   const selected: number[] = [];

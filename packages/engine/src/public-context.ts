@@ -332,6 +332,8 @@ export function publicContextForAction(
       "breakSubroutineBaseCost",
       "breakSubroutineAdditionalCost",
       "breakSubroutineTotalCost",
+      "breakAllMatchingSubroutines",
+      "breakerEndsRunAfterBreak",
     ]) {
       const value = legalAction.payload?.[key];
       if (value !== undefined) context[key] = value;

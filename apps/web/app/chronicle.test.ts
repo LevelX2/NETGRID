@@ -1560,6 +1560,27 @@ describe("formatChronicleEvent", () => {
     expect(breakAction.chips).toEqual(expect.arrayContaining(["Subroutine", "Subroutine 1", "Gebrochen", "2 Credits", "Krash", "Filter"]));
   });
 
+  it("describes Dropp errata break as all subroutines and run-ending", () => {
+    const item = formatChronicleEvent(
+      makeEvent("break_subroutine", {
+        actor: "runner",
+        title: "Dropp™",
+        aiReasonCode: "runner.encounter.break_etr",
+        breakSubroutineBaseCost: 0,
+        breakSubroutineCount: 2,
+        subroutineIndexes: "0,1",
+        breakAllMatchingSubroutines: true,
+        breakerEndsRunAfterBreak: true,
+        targetIceTitle: "Banpei"
+      }),
+      "corp"
+    );
+
+    expect(item.title).toBe("Die Runner-KI hat mit Dropp™ alle Subroutinen auf Banpei gebrochen und den Run beendet.");
+    expect(item.description).toBe("0 Credits: alle Subroutinen auf Banpei gebrochen; der Run endet durch diesen Break-Effekt, ohne dass das ICE als passiert gilt.");
+    expect(item.chips).toEqual(expect.arrayContaining(["Subroutine", "alle Subroutinen", "Gebrochen", "Run endet", "ICE nicht passiert", "Dropp™", "Banpei"]));
+  });
+
   it("names visible Runner installs from the public label and Rig zone", () => {
     const item = formatChronicleEvent(
       makeEvent("install_card", {

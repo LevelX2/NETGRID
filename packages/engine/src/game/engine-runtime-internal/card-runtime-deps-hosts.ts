@@ -932,14 +932,32 @@ export function createCardRuntimeDepsHosts(
       .split(",")
       .map((value) => Number(value));
     const subroutines = subroutinesForCurrentEncounter(state, iceDefinition);
+    const eligibleIndexes = subroutines
+      .map((subroutine, index) => ({ subroutine, index }))
+      .filter(
+        ({ subroutine, index }) =>
+          breakAbilityMatchesSubroutine(ability, subroutine) &&
+          !run.brokenSubroutineIndexes.includes(index) &&
+          !run.resolvedSubroutineIndexes.includes(index),
+      )
+      .map(({ index }) => index);
+    const maxSelectableCount = ability.breakAllMatchingSubroutines
+      ? eligibleIndexes.length
+      : Math.min(ability.count ?? 4, subroutines.length);
     if (
       subroutineIndexes.length < 1 ||
-      subroutineIndexes.length >
-        Math.min(ability.count ?? 4, subroutines.length) ||
+      subroutineIndexes.length > maxSelectableCount ||
       new Set(subroutineIndexes).size !== subroutineIndexes.length ||
       subroutineIndexes.some((index) => !Number.isInteger(index) || index < 0)
     ) {
       throw new Error("Multi-Break hat ungueltige Subroutine-Ziele.");
+    }
+    if (
+      ability.breakAllMatchingSubroutines &&
+      (subroutineIndexes.length !== eligibleIndexes.length ||
+        eligibleIndexes.some((index) => !subroutineIndexes.includes(index)))
+    ) {
+      throw new Error("Dieser Break muss alle passenden Subroutinen brechen.");
     }
     for (const subroutineIndex of subroutineIndexes) {
       const subroutine = subroutines[subroutineIndex];
@@ -985,8 +1003,13 @@ export function createCardRuntimeDepsHosts(
       ...(legalAction.payload ?? {}),
       breakSubroutineCount: subroutineIndexes.length,
       multiBreakSubroutines: true,
-      // Kept for PublicContext and older Pile Driver regression tests.
-      pileDriverMultiBreak: true,
+      ...(ability.breakAllMatchingSubroutines
+        ? { breakAllMatchingSubroutines: true }
+        : {
+            // Kept for PublicContext and older Pile Driver regression tests.
+            pileDriverMultiBreak: true,
+          }),
+      ...(ability.onUseEndRun ? { breakerEndsRunAfterBreak: true } : {}),
       sourceDefinitionId: breakerDefinition.id,
     };
     applyPostBreakStealthLoss(
@@ -1038,6 +1061,8 @@ export function createCardRuntimeDepsHosts(
       throw new Error("Der gewählte Icebreaker-Typ passt nicht zum ICE.");
     if (!breakAbilityMatchesSubroutine(ability, subroutine))
       throw new Error("Breaker kann diese Subroutine nicht brechen.");
+    if (ability.breakAllMatchingSubroutines)
+      throw new Error("Diese Break-Faehigkeit muss als Multi-Break genutzt werden.");
     const breakerStrength =
       (breakerDefinition.strength ?? 0) +
       mustInstance(state.cardInstances, breakerId).strengthModifier +

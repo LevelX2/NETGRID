@@ -17,6 +17,7 @@ export type RuntimeIcebreakerAbility = AbilityDefinition & {
   variableStrength?: { min: number };
   postBreakStealthLossMode?: "total_if_available" | "up_to_if_available";
   onUseEndRun?: boolean;
+  breakAllMatchingSubroutines?: boolean;
   special?:
     | "ai_boon_run_start_random_strength"
     | "blink_random_break_or_net_damage"
@@ -74,8 +75,14 @@ function abilityForImplementation(
     id: abilityId,
     type: "break_subroutine",
     cost: { credits: ability.cost.amount },
-    count: ability.count ?? 1,
+    count:
+      ability.breakTarget === "all_matching_subroutines"
+        ? Number.MAX_SAFE_INTEGER
+        : ability.count ?? 1,
     timingPoint: "run.encounter_ice",
+    ...(ability.breakTarget === "all_matching_subroutines"
+      ? { breakAllMatchingSubroutines: true }
+      : {}),
     ...(stealthLoss
       ? {
           postBreakStealthLoss: stealthLoss.amount,

@@ -1224,13 +1224,9 @@
         "program",
         "icebreaker",
         "breaker_end_run",
-        "run_pressure"
+        "emergency_breaker"
       ],
-      "planRoles": [
-        "build_rig",
-        "contest_remote",
-        "safe_probe_run"
-      ],
+      "planRoles": [],
       "requiredMechanics": [
         "install_program",
         "memory",
@@ -1240,12 +1236,23 @@
         "end_run_after_breaker_use"
       ],
       "valueHints": {
-        "runPressure": 2,
-        "rigCoverage": 1
+        "utility": 1
       },
       "riskTags": [
         "encounter",
-        "timing_window"
+        "timing_window",
+        "risk.ends_run_on_use",
+        "risk.access_loss_on_use",
+        "risk.blocks_run_continuation"
+      ],
+      "tacticSignals": [
+        "breaker.break_any_subroutine",
+        "encounter.emergency_subroutine_prevention",
+        "defense.encounter_threat_mitigation"
+      ],
+      "constraints": [
+        "constraint.not_access_enabling_breaker",
+        "constraint.not_reachability_coverage"
       ],
       "aiSupportStatus": "ai_supported",
       "scenarioRefs": [
@@ -1272,17 +1279,47 @@
         "baseStrength": 4,
         "pumpCost": 1,
         "breakCost": 0,
+        "multiSubroutineBreak": true,
+        "maxSubroutinesPerBreak": 99,
         "sideEffects": [
           "ends_run_after_use"
+        ],
+        "restrictions": [
+          "not_access_enabling_breaker",
+          "not_reachability_coverage",
+          "break_ability_ends_run"
         ]
       },
+      "targetProfiles": [
+        {
+          "schemaVersion": "target-profile-v1",
+          "kind": "use_target",
+          "timing": "during_ice_encounter",
+          "targetType": "subroutine",
+          "purpose": "dropp_emergency_subroutine_target",
+          "preferences": [
+            "prevent_high_damage_subroutine",
+            "prevent_program_trash_subroutine",
+            "prevent_hardware_trash_subroutine",
+            "prevent_dangerous_tag_subroutine",
+            "prevent_run_lock_subroutine"
+          ],
+          "avoid": [
+            "pure_end_the_run_subroutine",
+            "normal_breaker_available_without_run_end",
+            "access_goal_blocked_after_use",
+            "hidden_info_dependent_choice"
+          ],
+          "hiddenInfoPolicy": "visible_or_known_only"
+        }
+      ],
       "quality": {
         "benchmarkCovered": false,
         "hintReviewed": true,
         "strategyCovered": false,
-        "confidence": "medium",
+        "confidence": "high",
         "needsHumanReview": false,
-        "reviewedDate": "2026-05-25",
+        "reviewedDate": "2026-06-04",
         "reviewedBy": "codex"
       }
     },

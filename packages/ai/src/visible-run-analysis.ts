@@ -6,6 +6,7 @@ import {
   type VisibleEffectiveIceRunQuote,
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "./ai-hints";
+import { breakerCardBlocksAccessReachability } from "./breaker-ontology-consumer";
 
 type IceCardLike = {
   definitionId?: string;
@@ -334,6 +335,9 @@ export function creditsToBreakEndTheRunSubroutinesWithBreaker(
 ): BreakAssessment | undefined {
   if (!breakerCard.known || !breakerCard.definitionId || !ice.definitionId)
     return undefined;
+  if (breakerCardBlocksAccessReachability(breakerCard.definitionId)) {
+    return undefined;
+  }
   const breakerDefinition = visibleRunCardDefinition(breakerCard.definitionId);
   const iceDefinition = visibleRunCardDefinition(ice.definitionId);
   if (
@@ -389,6 +393,7 @@ export function canBreakerDefinitionBreakIce(
   breakerDefinitionId: string,
   iceDefinitionId: string,
 ): boolean {
+  if (breakerCardBlocksAccessReachability(breakerDefinitionId)) return false;
   const breakerDefinition = visibleRunCardDefinition(breakerDefinitionId);
   const iceDefinition = visibleRunCardDefinition(iceDefinitionId);
   if (!breakerDefinition || !iceDefinition) return false;
