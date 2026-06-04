@@ -11,6 +11,9 @@ export const DECK_DOCTRINE_V2_DIAGNOSTIC_SCHEMA_VERSION =
 export const TACTICAL_GOAL_TAXONOMY_SCHEMA_VERSION =
   "tactical-goal-taxonomy-diagnostic-schema-v1" as const;
 
+export const ACTION_TO_GOAL_MAPPING_DIAGNOSTIC_SCHEMA_VERSION =
+  "action-to-goal-mapping-diagnostic-report-v1" as const;
+
 export const DIAGNOSTIC_NO_EFFECT_FLAGS = {
   planner: false,
   actionScore: false,
@@ -165,6 +168,50 @@ export type TacticalGoalTaxonomyDiagnosticReport = {
   scope: "diagnostic_taxonomy_only";
   definitions: TacticalGoalDefinition[];
   summary: TacticalGoalTaxonomyDiagnosticSummary;
+  productiveUseAllowed: false;
+  noEffectFlags: DiagnosticNoEffectFlags;
+};
+
+export type ActionGoalMappingStatus =
+  | "compatible"
+  | "blocked"
+  | "unknown"
+  | "not_applicable";
+
+export type ActionGoalDiagnosticMapping = {
+  actionId: string;
+  actionType: string;
+  goalId: string;
+  goalFamily: TacticalGoalFamily;
+  side: TacticalGoalSide;
+  status: ActionGoalMappingStatus;
+  inputOrder: {
+    candidateIndex: number;
+    goalIndex: number;
+  };
+  missingCandidateFields: TacticalGoalCandidateField[];
+  blockerIds: string[];
+  reasons: string[];
+  evidence: string[];
+};
+
+export type ActionGoalDiagnosticMappingSummary = {
+  totalCandidates: number;
+  totalGoals: number;
+  totalMappings: number;
+  compatible: number;
+  blocked: number;
+  unknown: number;
+  notApplicable: number;
+};
+
+export type ActionGoalDiagnosticMappingReport = {
+  schemaVersion: typeof ACTION_TO_GOAL_MAPPING_DIAGNOSTIC_SCHEMA_VERSION;
+  scope: "diagnostic_mapping_only";
+  candidateSource: "ActionSemanticCandidate";
+  goalSource: "TacticalGoalDefinition";
+  mappings: ActionGoalDiagnosticMapping[];
+  summary: ActionGoalDiagnosticMappingSummary;
   productiveUseAllowed: false;
   noEffectFlags: DiagnosticNoEffectFlags;
 };
@@ -401,6 +448,32 @@ export function buildTacticalGoalTaxonomyDiagnosticReport(
     scope: "diagnostic_taxonomy_only",
     definitions: copiedDefinitions,
     summary: summarizeTacticalGoalTaxonomy(copiedDefinitions),
+    productiveUseAllowed: false,
+    noEffectFlags: DIAGNOSTIC_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildActionToGoalDiagnosticMappingReport(
+  candidates: readonly ActionSemanticCandidate[],
+  goals: readonly TacticalGoalDefinition[] = DEFAULT_TACTICAL_GOAL_TAXONOMY,
+): ActionGoalDiagnosticMappingReport {
+  const mappings = candidates.flatMap((candidate, candidateIndex) =>
+    goals.map((goal, goalIndex) =>
+      buildActionGoalDiagnosticMapping(candidate, candidateIndex, goal, goalIndex),
+    ),
+  );
+
+  return {
+    schemaVersion: ACTION_TO_GOAL_MAPPING_DIAGNOSTIC_SCHEMA_VERSION,
+    scope: "diagnostic_mapping_only",
+    candidateSource: "ActionSemanticCandidate",
+    goalSource: "TacticalGoalDefinition",
+    mappings,
+    summary: summarizeActionGoalMappings(
+      candidates.length,
+      goals.length,
+      mappings,
+    ),
     productiveUseAllowed: false,
     noEffectFlags: DIAGNOSTIC_NO_EFFECT_FLAGS,
   };
@@ -713,6 +786,165 @@ function summarizeTacticalGoalTaxonomy(
       0,
     ),
     validationIssues: validateTacticalGoalTaxonomy(definitions),
+  };
+}
+
+function buildActionGoalDiagnosticMapping(
+  candidate: ActionSemanticCandidate,
+  candidateIndex: number,
+  goal: TacticalGoalDefinition,
+  goalIndex: number,
+): ActionGoalDiagnosticMapping {
+  const sideMismatch = candidate.actorSide !== goal.side;
+  const activeBlockers = sideMismatch
+    ? []
+    : goal.blockerPolicies.filter((policy) =>
+        tacticalGoalBlockerApplies(candidate, policy),
+      );
+  const missingCandidateFields = sideMismatch
+    ? []
+    : goal.requiredCandidateEvidence
+        .filter((requirement) => !candidateSatisfiesRequirement(candidate, requirement))
+        .map((requirement) => requirement.field);
+  const status = sideMismatch
+    ? "not_applicable"
+    : activeBlockers.length > 0
+      ? "blocked"
+      : missingCandidateFields.length > 0
+        ? "unknown"
+        : "compatible";
+
+  return {
+    actionId: candidate.actionId,
+    actionType: candidate.actionType,
+    goalId: goal.goalId,
+    goalFamily: goal.family,
+    side: goal.side,
+    status,
+    inputOrder: {
+      candidateIndex,
+      goalIndex,
+    },
+    missingCandidateFields,
+    blockerIds: activeBlockers.map((policy) => policy.blockerId),
+    reasons: mappingReasons(sideMismatch, activeBlockers, missingCandidateFields),
+    evidence: uniqueStrings([...goal.evidence, ...candidate.evidence]),
+  };
+}
+
+function tacticalGoalBlockerApplies(
+  candidate: ActionSemanticCandidate,
+  policy: TacticalGoalBlockerPolicy,
+): boolean {
+  const issueBlocked = policy.issues.some((issue) =>
+    candidate.projectionIssues.includes(issue),
+  );
+  const gateBlocked = policy.gateIds.some((gateId) =>
+    candidate.hardGates.some(
+      (gate) =>
+        gate.gateId === gateId &&
+        (gate.status === "block" || gate.severity === "error"),
+    ),
+  );
+  return issueBlocked || gateBlocked;
+}
+
+function candidateSatisfiesRequirement(
+  candidate: ActionSemanticCandidate,
+  requirement: TacticalGoalEvidenceRequirement,
+): boolean {
+  if (requirement.requirement === "gap_marked") {
+    return Array.isArray(candidate.projectionIssues);
+  }
+  if (requirement.requirement === "not_blocked") {
+    return candidate.hardGates.every(
+      (gate) => gate.status !== "block" && gate.severity !== "error",
+    );
+  }
+  if (requirement.requirement === "side_safe") {
+    return sideSafeCandidateFieldPresent(candidate, requirement.field);
+  }
+  return candidateFieldPresent(candidate, requirement.field);
+}
+
+function sideSafeCandidateFieldPresent(
+  candidate: ActionSemanticCandidate,
+  fieldId: TacticalGoalCandidateField,
+): boolean {
+  if (fieldId === "targetContext") {
+    return (
+      candidate.targetContext !== undefined &&
+      candidate.targetContext.hiddenInfoPolicy !== "hidden_info_blocked"
+    );
+  }
+  return candidateFieldPresent(candidate, fieldId);
+}
+
+function candidateFieldPresent(
+  candidate: ActionSemanticCandidate,
+  fieldId: TacticalGoalCandidateField,
+): boolean {
+  if (fieldId === "semanticActionType") {
+    return candidate.semanticActionType !== "unknown";
+  }
+  if (fieldId === "actionTacticSignals") {
+    return candidate.actionTacticSignals.length > 0;
+  }
+  if (fieldId === "strategySupport") {
+    return candidate.strategySupport.length > 0;
+  }
+  if (fieldId === "conditions") return candidate.conditions.length > 0;
+  if (fieldId === "risks") return candidate.risks.length > 0;
+  if (fieldId === "constraints") return candidate.constraints.length > 0;
+  if (fieldId === "costProfile") {
+    return candidate.costProfile.costKnownStatus !== "unknown";
+  }
+  if (fieldId === "timingProfile") {
+    return candidate.timingProfile.window !== undefined;
+  }
+  if (fieldId === "targetContext") return candidate.targetContext !== undefined;
+  if (fieldId === "hardGates") return candidate.hardGates.length > 0;
+  if (fieldId === "projectionIssues") {
+    return Array.isArray(candidate.projectionIssues);
+  }
+  return candidate.evidence.length > 0;
+}
+
+function mappingReasons(
+  sideMismatch: boolean,
+  activeBlockers: readonly TacticalGoalBlockerPolicy[],
+  missingCandidateFields: readonly TacticalGoalCandidateField[],
+): string[] {
+  if (sideMismatch) return ["Candidate actor side does not match TacticalGoal side."];
+  if (activeBlockers.length > 0) {
+    return activeBlockers.map(
+      (policy) => `${policy.blockerId}: ${policy.removalCondition}`,
+    );
+  }
+  if (missingCandidateFields.length > 0) {
+    return missingCandidateFields.map(
+      (fieldId) => `Required diagnostic field is not present: ${fieldId}`,
+    );
+  }
+  return ["All required diagnostic fields are present and no blocker applies."];
+}
+
+function summarizeActionGoalMappings(
+  totalCandidates: number,
+  totalGoals: number,
+  mappings: readonly ActionGoalDiagnosticMapping[],
+): ActionGoalDiagnosticMappingSummary {
+  return {
+    totalCandidates,
+    totalGoals,
+    totalMappings: mappings.length,
+    compatible: mappings.filter((mapping) => mapping.status === "compatible")
+      .length,
+    blocked: mappings.filter((mapping) => mapping.status === "blocked").length,
+    unknown: mappings.filter((mapping) => mapping.status === "unknown").length,
+    notApplicable: mappings.filter(
+      (mapping) => mapping.status === "not_applicable",
+    ).length,
   };
 }
 

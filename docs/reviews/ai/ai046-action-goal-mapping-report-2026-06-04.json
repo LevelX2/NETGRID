@@ -1,0 +1,49 @@
+{
+  "step": "AI046",
+  "title": "Action-to-Goal Mapping Report",
+  "date": "2026-06-04",
+  "status": "done",
+  "runtimeConsumerStatus": "none",
+  "diagnosticScope": "action_to_goal_mapping_only",
+  "schemaVersion": "action-to-goal-mapping-diagnostic-report-v1",
+  "implementationFiles": [
+    "packages/ai/src/action-doctrine-goal-diagnostics.ts",
+    "packages/ai/src/action-doctrine-goal-diagnostics.test.ts"
+  ],
+  "mappingPolicy": "Mappings are generated in candidate input order and TacticalGoal taxonomy order. They are not sorted, ranked, scored or selected.",
+  "mappingStatuses": ["compatible", "blocked", "unknown", "not_applicable"],
+  "fixtureSummary": {
+    "candidateFixtureCount": 3,
+    "tacticalGoalCount": 10,
+    "totalMappings": 30,
+    "compatible": 3,
+    "blocked": 2,
+    "unknown": 10,
+    "notApplicable": 15
+  },
+  "hiddenInfoPolicy": "hidden_info_blocked produces blocked mappings with explicit removal conditions and does not project target ids or hidden card data.",
+  "missingEvidencePolicy": "Missing required candidate fields produce unknown mappings; no action-goal fit is inferred.",
+  "productiveUseAllowed": false,
+  "runtimeFilesTouched": [],
+  "forbiddenInThisStepConfirmedAbsent": [
+    "productive action-goal matching",
+    "numeric action scores",
+    "ranked alternatives",
+    "action selection",
+    "planner weights",
+    "runtime consumer",
+    "hidden-info projection",
+    "legality generation"
+  ],
+  "noEffectFlags": {
+    "planner": false,
+    "actionScore": false,
+    "planWeight": false,
+    "targetingAi": false,
+    "engine": false,
+    "legality": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivation": false,
+    "hiddenInfoLeak": false
+  }
+}

@@ -4,6 +4,7 @@ import { describe, expect, it } from "vitest";
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import {
   DEFAULT_TACTICAL_GOAL_TAXONOMY,
+  buildActionToGoalDiagnosticMappingReport,
   buildDeckDoctrineV2DiagnosticReadinessReport,
   buildTacticalGoalTaxonomyDiagnosticReport,
   type TacticalGoalDefinition,
@@ -257,6 +258,137 @@ describe("buildTacticalGoalTaxonomyDiagnosticReport", () => {
         expect.objectContaining({ issueId: "side_family_mismatch" }),
       ]),
     );
+  });
+});
+
+describe("buildActionToGoalDiagnosticMappingReport", () => {
+  it("builds an input-ordered diagnostic mapping table without ranking or selection", () => {
+    const candidates = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("gain_credit", 0, {
+          source: "basic_action",
+          side: "runner",
+          costs: [{ clicks: 1 }],
+        }),
+        legalAction("rez_ice", 1, {
+          source: "corp-ice",
+          side: "corp",
+          costs: [{ credits: 3 }],
+          targetRequirements: [
+            {
+              id: "ice",
+              kind: "card",
+              side: "corp",
+              visibility: "known_to_actor",
+            },
+          ],
+        }),
+        legalAction("trash_resource", 2, {
+          source: "basic_action",
+          side: "runner",
+          targetRequirements: [
+            {
+              id: "hidden-resource",
+              kind: "card",
+              side: "runner",
+              visibility: "engine_only",
+            },
+          ],
+        }),
+      ],
+      selectedTargetsByActionId: {
+        "ai044-1-rez_ice": {
+          ice: "outermost-ice",
+        },
+      },
+    });
+
+    const report = buildActionToGoalDiagnosticMappingReport(candidates);
+    const serialized = JSON.stringify(report);
+
+    expect(report.scope).toBe("diagnostic_mapping_only");
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.summary).toEqual({
+      totalCandidates: 3,
+      totalGoals: DEFAULT_TACTICAL_GOAL_TAXONOMY.length,
+      totalMappings: 30,
+      compatible: 3,
+      blocked: 2,
+      unknown: 10,
+      notApplicable: 15,
+    });
+    expect(report.mappings[0]).toMatchObject({
+      actionId: "ai044-0-gain_credit",
+      goalId: "runner.economy_stabilize",
+      status: "compatible",
+      inputOrder: { candidateIndex: 0, goalIndex: 0 },
+    });
+    expect(serialized).not.toContain("selectedActionId");
+    expect(serialized).not.toContain("rankedAlternatives");
+    expect(serialized).not.toContain("numericActionScore");
+  });
+
+  it("blocks hidden-info mappings with explicit removal conditions", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("trash_resource", 0, {
+          source: "basic_action",
+          side: "runner",
+          targetRequirements: [
+            {
+              id: "hidden-resource",
+              kind: "card",
+              side: "runner",
+              visibility: "engine_only",
+            },
+          ],
+        }),
+      ],
+    });
+    if (!candidate) throw new Error("Expected one candidate");
+
+    const report = buildActionToGoalDiagnosticMappingReport([candidate]);
+    const remoteContest = report.mappings.find(
+      (mapping) => mapping.goalId === "runner.remote_contest",
+    );
+
+    expect(remoteContest).toMatchObject({
+      actionId: "ai044-0-trash_resource",
+      status: "blocked",
+      blockerIds: ["runner_remote_hidden_target"],
+    });
+    expect(remoteContest?.reasons[0]).toContain(
+      "Keep hidden remote contents blocked",
+    );
+    expect(JSON.stringify(remoteContest)).not.toContain(
+      "secret-runner-resource-card",
+    );
+  });
+
+  it("marks missing evidence as unknown instead of inferring action-goal fit", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("start_run", 0, {
+          source: "basic_action",
+          side: "runner",
+        }),
+      ],
+    });
+    if (!candidate) throw new Error("Expected one candidate");
+
+    const report = buildActionToGoalDiagnosticMappingReport([candidate]);
+    const centralPressure = report.mappings.find(
+      (mapping) => mapping.goalId === "runner.central_pressure",
+    );
+
+    expect(centralPressure).toMatchObject({
+      status: "unknown",
+      missingCandidateFields: expect.arrayContaining([
+        "actionTacticSignals",
+        "targetContext",
+      ]),
+      blockerIds: [],
+    });
   });
 });
 
