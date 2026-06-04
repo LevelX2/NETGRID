@@ -1,0 +1,75 @@
+{
+  "step": "AI054",
+  "title": "Legacy-vs-Semantic Comparison Report",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai051-ai060-controlled-shadow-mode",
+  "schemaVersion": "legacy-semantic-shadow-comparison-v1",
+  "scope": "legacy_semantic_shadow_comparison_report_only",
+  "runtimeConsumerStatus": "none",
+  "semanticExecutionAllowed": false,
+  "productiveUseAllowed": false,
+  "noRuntimeEffect": true,
+  "legacyReferenceSource": "synthetic_fixture_legal_action_order",
+  "sourceDecisionSchema": "semantic-shadow-decision-v0",
+  "summary": {
+    "comparisonCount": 33,
+    "sameAction": 8,
+    "sameActionType": 0,
+    "differentButPlausible": 0,
+    "semanticBetterCandidate": 0,
+    "legacyBetterCandidate": 0,
+    "semanticBlocked": 25,
+    "comparisonUnavailable": 0,
+    "hardGateErrorCount": 0,
+    "hiddenInfoBasedSemanticDecisionCount": 0,
+    "unreachableSemanticDecisionCount": 0,
+    "nonEngineLegalSemanticDecisionCount": 0
+  },
+  "deltaCategories": [
+    "same_exact_action",
+    "semantic_blocked_by_target_context",
+    "semantic_blocked_by_ability_gap",
+    "semantic_blocked_by_cost_gap",
+    "semantic_lacks_card_semantics",
+    "semantic_avoids_hidden_info"
+  ],
+  "implementationFiles": [
+    "packages/ai/src/controlled-shadow-mode.ts",
+    "packages/ai/src/controlled-shadow-mode.test.ts"
+  ],
+  "reportFiles": [
+    "docs/reviews/ai/ai054-legacy-vs-semantic-comparison-report-2026-06-04.md",
+    "docs/reviews/ai/ai054-legacy-vs-semantic-comparison-report-2026-06-04.json"
+  ],
+  "checkScripts": [
+    "scripts/check-ai054-legacy-vs-semantic-comparison-report.mjs"
+  ],
+  "runtimeFilesTouched": [],
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "verification": [
+    "node scripts/check-ai054-legacy-vs-semantic-comparison-report.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- controlled-shadow-mode.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "node scripts/check-ai053-semantic-shadow-decision-v0.mjs",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "doneGate": {
+    "allFixturesCompared": true,
+    "deviationsCategorized": true,
+    "illegalSemanticDecisionCount": 0,
+    "hiddenInfoBasedSemanticDecisionCount": 0,
+    "unreachableSemanticDecisionCount": 0,
+    "nonEngineLegalSemanticDecisionCount": 0
+  }
+}

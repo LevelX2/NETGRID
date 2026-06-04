@@ -17,6 +17,9 @@ export const SHADOW_SCENARIO_CORPUS_SCHEMA_VERSION =
 export const SEMANTIC_SHADOW_DECISION_SCHEMA_VERSION =
   "semantic-shadow-decision-v0" as const;
 
+export const LEGACY_SEMANTIC_SHADOW_COMPARISON_SCHEMA_VERSION =
+  "legacy-semantic-shadow-comparison-v1" as const;
+
 export const CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS = {
   actualDecisionOverride: false,
   productiveScoring: false,
@@ -294,6 +297,57 @@ export type LegacySemanticComparisonTrace = {
     | "comparison_unavailable";
   deltaCategory: LegacySemanticDeltaCategory[];
   explanation: string[];
+};
+
+export type LegacySemanticAgreement =
+  | "same_action"
+  | "same_action_type"
+  | "different_but_plausible"
+  | "semantic_better_candidate"
+  | "legacy_better_candidate"
+  | "semantic_blocked"
+  | "comparison_unavailable";
+
+export type LegacySemanticComparison = {
+  scenarioId: string;
+  actorSide: ShadowActorSide;
+  legacyActionId: string;
+  legacyActionType: string;
+  semanticActionId?: string;
+  semanticActionType?: string;
+  agreement: LegacySemanticAgreement;
+  deltaCategory: LegacySemanticDeltaCategory[];
+  explanation: string[];
+  legacyReferenceSource: "synthetic_fixture_legal_action_order";
+  hardGateStatus: "pass" | "blocked_by_gate" | "blocked_by_gap";
+};
+
+export type LegacySemanticComparisonSummary = {
+  comparisonCount: number;
+  sameAction: number;
+  sameActionType: number;
+  differentButPlausible: number;
+  semanticBetterCandidate: number;
+  legacyBetterCandidate: number;
+  semanticBlocked: number;
+  comparisonUnavailable: number;
+  hardGateErrorCount: 0;
+  hiddenInfoBasedSemanticDecisionCount: 0;
+  unreachableSemanticDecisionCount: 0;
+  nonEngineLegalSemanticDecisionCount: 0;
+};
+
+export type LegacySemanticComparisonReport = {
+  schemaVersion: typeof LEGACY_SEMANTIC_SHADOW_COMPARISON_SCHEMA_VERSION;
+  scope: "legacy_semantic_shadow_comparison_report_only";
+  sourceDecisionSchema: typeof SEMANTIC_SHADOW_DECISION_SCHEMA_VERSION;
+  comparisons: LegacySemanticComparison[];
+  summary: LegacySemanticComparisonSummary;
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
 };
 
 export type ShadowDecisionTrace = {
@@ -748,6 +802,32 @@ export function buildSemanticShadowDecisionReport(
   };
 }
 
+export function buildLegacySemanticComparisonReport(
+  fixtures: readonly ShadowScenarioFixture[] = DEFAULT_SHADOW_SCENARIO_CORPUS,
+  semanticReport: SemanticShadowDecisionReport =
+    buildSemanticShadowDecisionReport(fixtures),
+): LegacySemanticComparisonReport {
+  const comparisons = fixtures.map((fixture) => {
+    const result = semanticReport.scenarioResults.find(
+      (candidate) => candidate.scenarioId === fixture.scenarioId,
+    );
+    return compareLegacyAndSemanticShadowFixture(fixture, result?.decision);
+  });
+
+  return {
+    schemaVersion: LEGACY_SEMANTIC_SHADOW_COMPARISON_SCHEMA_VERSION,
+    scope: "legacy_semantic_shadow_comparison_report_only",
+    sourceDecisionSchema: SEMANTIC_SHADOW_DECISION_SCHEMA_VERSION,
+    comparisons,
+    summary: summarizeLegacySemanticComparisons(comparisons),
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
 export function buildSemanticShadowDecisionForFixture(
   fixture: ShadowScenarioFixture,
 ): SemanticShadowDecision {
@@ -803,6 +883,98 @@ function selectedFieldsForRanking(
   return {
     selectedActionId: topCandidate.actionId,
     selectedCandidateId: topCandidate.candidateId,
+  };
+}
+
+function compareLegacyAndSemanticShadowFixture(
+  fixture: ShadowScenarioFixture,
+  decision: SemanticShadowDecision | undefined,
+): LegacySemanticComparison {
+  const legacyActionType = fixture.expectedLegalActionTypes[0] ?? "unknown";
+  const legacyActionId = `${fixture.scenarioId}.${legacyActionType}.1`;
+  if (decision === undefined || decision.scoreStatus === "no_candidate") {
+    return {
+      scenarioId: fixture.scenarioId,
+      actorSide: fixture.side,
+      legacyActionId,
+      legacyActionType,
+      agreement: "comparison_unavailable",
+      deltaCategory: ["legacy_selected_unknown_semantics"],
+      explanation: [
+        "Semantic shadow decision is unavailable for this fixture.",
+        "Legacy reference is synthetic fixture order, not runtime truth.",
+      ],
+      legacyReferenceSource: "synthetic_fixture_legal_action_order",
+      hardGateStatus: "blocked_by_gap",
+    };
+  }
+
+  if (
+    decision.scoreStatus === "blocked_by_gate" ||
+    decision.scoreStatus === "blocked_by_gap" ||
+    decision.scoreStatus === "not_scored"
+  ) {
+    return {
+      scenarioId: fixture.scenarioId,
+      actorSide: fixture.side,
+      legacyActionId,
+      legacyActionType,
+      agreement: "semantic_blocked",
+      deltaCategory: deltaCategoriesForBlockedDecision(fixture, decision),
+      explanation: [
+        `Semantic shadow decision is ${decision.scoreStatus}.`,
+        ...decision.blockingReasons.map((reason) => reason.reason),
+        "Legacy reference remains the synthetic fixture LegalAction reference.",
+      ],
+      legacyReferenceSource: "synthetic_fixture_legal_action_order",
+      hardGateStatus:
+        decision.scoreStatus === "blocked_by_gate"
+          ? "blocked_by_gate"
+          : "blocked_by_gap",
+    };
+  }
+
+  const semanticActionId = decision.selectedActionId;
+  const semanticActionType = decision.ranking[0]?.actionType;
+  if (semanticActionId === legacyActionId) {
+    return {
+      scenarioId: fixture.scenarioId,
+      actorSide: fixture.side,
+      legacyActionId,
+      legacyActionType,
+      semanticActionId,
+      ...(semanticActionType !== undefined ? { semanticActionType } : {}),
+      agreement: "same_action",
+      deltaCategory: ["same_exact_action"],
+      explanation: [
+        "Legacy synthetic reference and semantic shadow reference point to the same LegalAction fixture candidate.",
+      ],
+      legacyReferenceSource: "synthetic_fixture_legal_action_order",
+      hardGateStatus: "pass",
+    };
+  }
+
+  return {
+    scenarioId: fixture.scenarioId,
+    actorSide: fixture.side,
+    legacyActionId,
+    legacyActionType,
+    ...(semanticActionId !== undefined ? { semanticActionId } : {}),
+    ...(semanticActionType !== undefined ? { semanticActionType } : {}),
+    agreement:
+      semanticActionType === legacyActionType
+        ? "same_action_type"
+        : "different_but_plausible",
+    deltaCategory:
+      semanticActionType === legacyActionType
+        ? ["same_action_type_different_target"]
+        : deltaCategoriesForActionType(semanticActionType),
+    explanation: [
+      "Semantic shadow decision differs from the synthetic legacy reference but remains an Engine LegalAction fixture candidate.",
+      "This is report-only and does not affect actualDecision.",
+    ],
+    legacyReferenceSource: "synthetic_fixture_legal_action_order",
+    hardGateStatus: "pass",
   };
 }
 
@@ -1036,5 +1208,94 @@ function countDecisions(
   status: SemanticShadowScoreStatus,
 ): number {
   return scenarioResults.filter((result) => result.decision.scoreStatus === status)
+    .length;
+}
+
+function deltaCategoriesForBlockedDecision(
+  fixture: ShadowScenarioFixture,
+  decision: SemanticShadowDecision,
+): LegacySemanticDeltaCategory[] {
+  if (decision.scoreStatus === "blocked_by_gate") {
+    return fixture.knownProjectionGaps.includes("hidden_info_blocked")
+      ? ["semantic_avoids_hidden_info"]
+      : ["semantic_selected_risky_action"];
+  }
+
+  const categories = fixture.knownProjectionGaps.flatMap((gap) => {
+    if (gap === "target_context_unavailable") {
+      return ["semantic_blocked_by_target_context" as const];
+    }
+    if (gap === "ability_unresolved") {
+      return ["semantic_blocked_by_ability_gap" as const];
+    }
+    if (gap === "cost_unknown" || gap === "timing_unknown") {
+      return ["semantic_blocked_by_cost_gap" as const];
+    }
+    if (gap === "card_semantics_unavailable") {
+      return ["semantic_lacks_card_semantics" as const];
+    }
+    if (gap === "hidden_info_blocked") {
+      return ["semantic_avoids_hidden_info" as const];
+    }
+    return ["legacy_selected_unknown_semantics" as const];
+  });
+
+  return categories.length > 0 ? [...new Set(categories)] : [
+    "legacy_selected_unknown_semantics",
+  ];
+}
+
+function deltaCategoriesForActionType(
+  actionType: string | undefined,
+): LegacySemanticDeltaCategory[] {
+  if (actionType === undefined) return ["legacy_selected_unknown_semantics"];
+  if (actionType === "gain_credit" || actionType === "draw_card") {
+    return ["semantic_prefers_economy"];
+  }
+  if (actionType === "install_card") return ["semantic_prefers_setup"];
+  if (actionType === "start_run") return ["semantic_prefers_run_pressure"];
+  if (actionType === "score_agenda" || actionType === "advance_card") {
+    return ["semantic_prefers_score_window"];
+  }
+  if (actionType === "rez_ice") return ["semantic_prefers_defense"];
+  return ["legacy_selected_unknown_semantics"];
+}
+
+function summarizeLegacySemanticComparisons(
+  comparisons: readonly LegacySemanticComparison[],
+): LegacySemanticComparisonSummary {
+  return {
+    comparisonCount: comparisons.length,
+    sameAction: countComparisons(comparisons, "same_action"),
+    sameActionType: countComparisons(comparisons, "same_action_type"),
+    differentButPlausible: countComparisons(
+      comparisons,
+      "different_but_plausible",
+    ),
+    semanticBetterCandidate: countComparisons(
+      comparisons,
+      "semantic_better_candidate",
+    ),
+    legacyBetterCandidate: countComparisons(
+      comparisons,
+      "legacy_better_candidate",
+    ),
+    semanticBlocked: countComparisons(comparisons, "semantic_blocked"),
+    comparisonUnavailable: countComparisons(
+      comparisons,
+      "comparison_unavailable",
+    ),
+    hardGateErrorCount: 0,
+    hiddenInfoBasedSemanticDecisionCount: 0,
+    unreachableSemanticDecisionCount: 0,
+    nonEngineLegalSemanticDecisionCount: 0,
+  };
+}
+
+function countComparisons(
+  comparisons: readonly LegacySemanticComparison[],
+  agreement: LegacySemanticAgreement,
+): number {
+  return comparisons.filter((comparison) => comparison.agreement === agreement)
     .length;
 }

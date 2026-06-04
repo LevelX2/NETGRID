@@ -2,9 +2,9 @@ import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 
 const mdPath =
-  "docs/reviews/ai/ai053-semantic-shadow-decision-v0-2026-06-04.md";
+  "docs/reviews/ai/ai054-legacy-vs-semantic-comparison-report-2026-06-04.md";
 const jsonPath =
-  "docs/reviews/ai/ai053-semantic-shadow-decision-v0-2026-06-04.json";
+  "docs/reviews/ai/ai054-legacy-vs-semantic-comparison-report-2026-06-04.json";
 const codePath = "packages/ai/src/controlled-shadow-mode.ts";
 const testPath = "packages/ai/src/controlled-shadow-mode.test.ts";
 const progressPath =
@@ -15,7 +15,7 @@ function read(path) {
 }
 
 function fail(message) {
-  console.error(`AI053 check failed: ${message}`);
+  console.error(`AI054 check failed: ${message}`);
   process.exit(1);
 }
 
@@ -38,8 +38,8 @@ const code = read(codePath);
 const test = read(testPath);
 const progress = JSON.parse(read(progressPath));
 
-if (report.step !== "AI053") fail("JSON step must be AI053");
-if (report.schemaVersion !== "semantic-shadow-decision-v0")
+if (report.step !== "AI054") fail("JSON step must be AI054");
+if (report.schemaVersion !== "legacy-semantic-shadow-comparison-v1")
   fail("schemaVersion mismatch");
 if (report.runtimeConsumerStatus !== "none")
   fail("runtimeConsumerStatus must be none");
@@ -50,22 +50,27 @@ if (report.productiveUseAllowed !== false)
 if (report.noRuntimeEffect !== true) fail("noRuntimeEffect must be true");
 if (report.runtimeFilesTouched.length !== 0)
   fail("runtimeFilesTouched must be empty");
+if (report.legacyReferenceSource !== "synthetic_fixture_legal_action_order") {
+  fail("legacyReferenceSource mismatch");
+}
 
 for (const [flag, value] of Object.entries(report.noEffectFlags ?? {})) {
   if (value !== false) fail(`No-effect flag must be false: ${flag}`);
 }
 
 const expectedSummary = {
-  scenarioCount: 33,
-  rankedShadowOnly: 8,
-  blockedByGate: 3,
-  blockedByGap: 22,
-  noCandidate: 0,
-  notScored: 0,
-  selectedActionCount: 8,
-  runtimeConsumerCount: 0,
-  illegalSemanticDecisionCount: 0,
-  hiddenInfoViolationCount: 0,
+  comparisonCount: 33,
+  sameAction: 8,
+  sameActionType: 0,
+  differentButPlausible: 0,
+  semanticBetterCandidate: 0,
+  legacyBetterCandidate: 0,
+  semanticBlocked: 25,
+  comparisonUnavailable: 0,
+  hardGateErrorCount: 0,
+  hiddenInfoBasedSemanticDecisionCount: 0,
+  unreachableSemanticDecisionCount: 0,
+  nonEngineLegalSemanticDecisionCount: 0,
 };
 for (const [field, value] of Object.entries(expectedSummary)) {
   if (report.summary?.[field] !== value) {
@@ -73,20 +78,26 @@ for (const [field, value] of Object.entries(expectedSummary)) {
   }
 }
 
-if (report.scoreStatusPolicy?.rankingPolicy !==
-  "deterministic_input_order_without_numeric_planner_weight") {
-  fail("rankingPolicy must remain deterministic input order");
+for (const category of [
+  "same_exact_action",
+  "semantic_blocked_by_target_context",
+  "semantic_blocked_by_ability_gap",
+  "semantic_blocked_by_cost_gap",
+  "semantic_lacks_card_semantics",
+  "semantic_avoids_hidden_info",
+]) {
+  if (!report.deltaCategories.includes(category)) {
+    fail(`delta category missing: ${category}`);
+  }
 }
 
 for (const requiredCode of [
-  "SEMANTIC_SHADOW_DECISION_SCHEMA_VERSION",
-  "SemanticShadowDecision",
-  "buildSemanticShadowDecisionForFixture",
-  "buildSemanticShadowDecisionReport",
-  "blocked_by_gate",
-  "blocked_by_gap",
-  "ranked_shadow_only",
-  "noRuntimeEffect: true",
+  "LEGACY_SEMANTIC_SHADOW_COMPARISON_SCHEMA_VERSION",
+  "LegacySemanticComparison",
+  "buildLegacySemanticComparisonReport",
+  "synthetic_fixture_legal_action_order",
+  "semantic_blocked_by_target_context",
+  "semantic_avoids_hidden_info",
 ]) {
   if (!code.includes(requiredCode)) fail(`code missing: ${requiredCode}`);
 }
@@ -113,26 +124,26 @@ for (const runtimeFile of [
 }
 
 for (const requiredText of [
-  "Hard gates before ranking",
-  "`blocked_by_gate` | 3",
-  "`blocked_by_gap` | 22",
-  "Runtime consumers | 0",
-  "AI053 is complete",
+  "synthetic_fixture_legal_action_order",
+  "`same_action` | 8",
+  "`semantic_blocked` | 25",
+  "Hard gate errors | 0",
+  "AI054 is complete",
 ]) {
   if (!md.includes(requiredText)) fail(`Markdown report missing: ${requiredText}`);
 }
 
 for (const requiredTest of [
-  "computes semantic shadow decisions for every AI052 fixture",
-  "selects only a synthetic LegalAction candidate",
-  "blocks target, ability, card and cost gaps without guessing semantics",
-  "keeps hidden-info boundary scenarios blocked by gate",
+  "creates one comparison for every semantic shadow fixture",
+  "marks ranked synthetic legacy and semantic references as same action",
+  "categorizes semantic target and ability gap blocks",
+  "keeps hidden-info semantic cases blocked instead of selecting them",
 ]) {
   if (!test.includes(requiredTest)) fail(`test coverage missing: ${requiredTest}`);
 }
 
-if (!progress.completedSteps.includes("AI053")) {
-  fail("progress must include AI053");
+if (!progress.completedSteps.includes("AI054")) {
+  fail("progress must include AI054");
 }
 if (progress.blocked !== false) fail("progress blocked must be false");
 
@@ -141,15 +152,15 @@ const allowedChangedFiles = [
   jsonPath,
   codePath,
   testPath,
-  "scripts/check-ai052-shadow-scenario-corpus.mjs",
   "scripts/check-ai053-semantic-shadow-decision-v0.mjs",
+  "scripts/check-ai054-legacy-vs-semantic-comparison-report.mjs",
   progressPath,
 ];
 const unexpectedChanges = changedFiles().filter(
   (file) => !allowedChangedFiles.includes(file),
 );
 if (unexpectedChanges.length > 0) {
-  fail(`Unexpected changed files for AI053: ${unexpectedChanges.join(", ")}`);
+  fail(`Unexpected changed files for AI054: ${unexpectedChanges.join(", ")}`);
 }
 
-console.log("AI053_SEMANTIC_SHADOW_DECISION_V0 OK ranked=8 blocked=25");
+console.log("AI054_LEGACY_VS_SEMANTIC_COMPARISON_REPORT OK comparisons=33");

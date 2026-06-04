@@ -5,6 +5,7 @@ import {
   FORBIDDEN_SHADOW_TRACE_CONSUMERS,
   buildSemanticShadowDecisionForFixture,
   buildSemanticShadowDecisionReport,
+  buildLegacySemanticComparisonReport,
   buildShadowScenarioCorpusReport,
   buildShadowModeTraceContractReport,
   type ShadowDecisionTrace,
@@ -241,6 +242,85 @@ describe("buildSemanticShadowDecisionReport", () => {
         gap: "hidden_info_blocked",
       }),
     );
+  });
+});
+
+describe("buildLegacySemanticComparisonReport", () => {
+  it("creates one comparison for every semantic shadow fixture", () => {
+    const report = buildLegacySemanticComparisonReport();
+
+    expect(report.schemaVersion).toBe("legacy-semantic-shadow-comparison-v1");
+    expect(report.scope).toBe(
+      "legacy_semantic_shadow_comparison_report_only",
+    );
+    expect(report.runtimeConsumerStatus).toBe("none");
+    expect(report.semanticExecutionAllowed).toBe(false);
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.summary).toEqual({
+      comparisonCount: 33,
+      sameAction: 8,
+      sameActionType: 0,
+      differentButPlausible: 0,
+      semanticBetterCandidate: 0,
+      legacyBetterCandidate: 0,
+      semanticBlocked: 25,
+      comparisonUnavailable: 0,
+      hardGateErrorCount: 0,
+      hiddenInfoBasedSemanticDecisionCount: 0,
+      unreachableSemanticDecisionCount: 0,
+      nonEngineLegalSemanticDecisionCount: 0,
+    });
+  });
+
+  it("marks ranked synthetic legacy and semantic references as same action", () => {
+    const report = buildLegacySemanticComparisonReport();
+    const comparison = report.comparisons.find(
+      (entry) => entry.scenarioId === "runner_draw_vs_credit",
+    );
+
+    expect(comparison).toEqual(
+      expect.objectContaining({
+        legacyActionId: "runner_draw_vs_credit.draw_card.1",
+        semanticActionId: "runner_draw_vs_credit.draw_card.1",
+        agreement: "same_action",
+        deltaCategory: ["same_exact_action"],
+        hardGateStatus: "pass",
+      }),
+    );
+  });
+
+  it("categorizes semantic target and ability gap blocks", () => {
+    const report = buildLegacySemanticComparisonReport();
+    const comparison = report.comparisons.find(
+      (entry) => entry.scenarioId === "runner_break_subroutine",
+    );
+
+    expect(comparison).toEqual(
+      expect.objectContaining({
+        agreement: "semantic_blocked",
+        hardGateStatus: "blocked_by_gap",
+        deltaCategory: expect.arrayContaining([
+          "semantic_blocked_by_ability_gap",
+          "semantic_blocked_by_target_context",
+        ]),
+      }),
+    );
+  });
+
+  it("keeps hidden-info semantic cases blocked instead of selecting them", () => {
+    const report = buildLegacySemanticComparisonReport();
+    const comparison = report.comparisons.find(
+      (entry) => entry.scenarioId === "hidden_info_boundary_unrezzed_ice",
+    );
+
+    expect(comparison).toEqual(
+      expect.objectContaining({
+        agreement: "semantic_blocked",
+        hardGateStatus: "blocked_by_gate",
+        deltaCategory: ["semantic_avoids_hidden_info"],
+      }),
+    );
+    expect(comparison?.semanticActionId).toBeUndefined();
   });
 });
 
