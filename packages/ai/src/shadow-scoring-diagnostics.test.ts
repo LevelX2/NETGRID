@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 
 import {
   DEFAULT_SHADOW_SCORING_FIXTURE_CORPUS,
+  buildHardGateRollbackReadinessReviewReport,
   buildLegacySemanticComparisonHarnessReport,
   buildShadowActionRankingReport,
   buildShadowScoringFixtureDesignReport,
@@ -76,6 +77,70 @@ describe("buildShadowScoringFixtureDesignReport", () => {
     expect(serialized).not.toContain("chooseSemanticAiAction");
     expect(serialized).not.toContain("selectedActionId");
     expect(serialized).not.toContain("rankedAlternatives");
+  });
+});
+
+describe("buildHardGateRollbackReadinessReviewReport", () => {
+  it("allows broader shadow simulation but blocks productive cutover", () => {
+    const report = buildHardGateRollbackReadinessReviewReport();
+    const serialized = JSON.stringify(report);
+
+    expect(report.scope).toBe("hard_gate_rollback_readiness_review_only");
+    expect(report.broaderShadowSimulationReadiness).toBe("ready_with_constraints");
+    expect(report.productiveCutoverReadiness).toBe("blocked");
+    expect(report.semanticExecutionAllowed).toBe(false);
+    expect(report.productiveUseAllowed).toBe(false);
+    expect(report.recommendedNextStep).toBe("broader_shadow_simulation");
+    expect(serialized).not.toContain("chooseSemanticAiAction");
+    expect(serialized).not.toContain("selectedActionId");
+    expect(serialized).not.toContain("rankedAlternatives");
+  });
+
+  it("keeps unresolved top gaps as cutover blockers with removal conditions", () => {
+    const report = buildHardGateRollbackReadinessReviewReport();
+
+    expect(report.gates).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          gateId: "target_context",
+          state: "blocked",
+          removalCondition: expect.stringContaining("engine-provided"),
+        }),
+        expect.objectContaining({
+          gateId: "ability_resolution",
+          state: "blocked",
+          removalCondition: expect.stringContaining("side-safe ability binding"),
+        }),
+        expect.objectContaining({
+          gateId: "card_semantics",
+          state: "blocked",
+          removalCondition: expect.stringContaining("CardSemanticProfiles"),
+        }),
+      ]),
+    );
+  });
+
+  it("documents proposed feature flags as default-off rollback candidates", () => {
+    const report = buildHardGateRollbackReadinessReviewReport();
+
+    expect(report.proposedFeatureFlags).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          flagId: "semanticAi.shadowReport",
+          defaultState: "off",
+        }),
+        expect.objectContaining({
+          flagId: "semanticAi.cutover.basicActions",
+          defaultState: "off",
+        }),
+      ]),
+    );
+    expect(report.rollbackRules).toEqual(
+      expect.arrayContaining([
+        "Legacy decision remains the only executed action during shadow mode.",
+        "All future productive flags must default to off and be reversible without migration.",
+      ]),
+    );
   });
 });
 

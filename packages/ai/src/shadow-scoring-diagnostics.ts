@@ -18,6 +18,9 @@ export const SHADOW_ACTION_RANKING_REPORT_SCHEMA_VERSION =
 export const LEGACY_SEMANTIC_COMPARISON_HARNESS_SCHEMA_VERSION =
   "legacy-semantic-comparison-harness-v1" as const;
 
+export const HARD_GATE_ROLLBACK_READINESS_REVIEW_SCHEMA_VERSION =
+  "hard-gate-rollback-readiness-review-v1" as const;
+
 export type ShadowFixtureSide = "runner" | "corp";
 
 export type ShadowFixtureHiddenInfoPolicy =
@@ -217,6 +220,40 @@ export type LegacySemanticComparisonHarnessReport = {
   sourceRankingSchema: typeof SHADOW_ACTION_RANKING_REPORT_SCHEMA_VERSION;
   entries: LegacySemanticComparisonEntry[];
   summary: LegacySemanticComparisonSummary;
+  semanticExecutionAllowed: false;
+  productiveUseAllowed: false;
+  noEffectFlags: DiagnosticNoEffectFlags;
+};
+
+export type ShadowReadinessState =
+  | "ready_with_constraints"
+  | "blocked"
+  | "not_evaluated";
+
+export type HardGateRollbackReadinessGate = {
+  gateId: string;
+  state: ShadowReadinessState;
+  evidence: string[];
+  removalCondition?: string;
+};
+
+export type ProposedSemanticFeatureFlag = {
+  flagId: string;
+  intendedScope: string;
+  defaultState: "off";
+  rollbackRule: string;
+};
+
+export type HardGateRollbackReadinessReviewReport = {
+  schemaVersion: typeof HARD_GATE_ROLLBACK_READINESS_REVIEW_SCHEMA_VERSION;
+  scope: "hard_gate_rollback_readiness_review_only";
+  broaderShadowSimulationReadiness: ShadowReadinessState;
+  productiveCutoverReadiness: Extract<ShadowReadinessState, "blocked">;
+  gates: HardGateRollbackReadinessGate[];
+  proposedFeatureFlags: ProposedSemanticFeatureFlag[];
+  rollbackRules: string[];
+  missingBeforeCutover: string[];
+  recommendedNextStep: "broader_shadow_simulation";
   semanticExecutionAllowed: false;
   productiveUseAllowed: false;
   noEffectFlags: DiagnosticNoEffectFlags;
@@ -474,6 +511,39 @@ export function buildLegacySemanticComparisonHarnessReport(
     sourceRankingSchema: SHADOW_ACTION_RANKING_REPORT_SCHEMA_VERSION,
     entries,
     summary: summarizeLegacySemanticComparison(entries),
+    semanticExecutionAllowed: false,
+    productiveUseAllowed: false,
+    noEffectFlags: DIAGNOSTIC_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildHardGateRollbackReadinessReviewReport(
+  comparisonReport: LegacySemanticComparisonHarnessReport =
+    buildLegacySemanticComparisonHarnessReport(),
+): HardGateRollbackReadinessReviewReport {
+  const broaderShadowReady =
+    comparisonReport.summary.comparedScenarios > 0
+      ? "ready_with_constraints"
+      : "not_evaluated";
+
+  return {
+    schemaVersion: HARD_GATE_ROLLBACK_READINESS_REVIEW_SCHEMA_VERSION,
+    scope: "hard_gate_rollback_readiness_review_only",
+    broaderShadowSimulationReadiness: broaderShadowReady,
+    productiveCutoverReadiness: "blocked",
+    gates: readinessGates(comparisonReport),
+    proposedFeatureFlags: proposedSemanticFeatureFlags(),
+    rollbackRules: rollbackRules(),
+    missingBeforeCutover: [
+      "broader_shadow_simulation_results",
+      "zero_hidden_info_violations_in_shadow",
+      "zero_illegal_semantic_references",
+      "resolved_or_explicitly_blocked_target_context_gaps",
+      "resolved_or_explicitly_blocked_ability_gaps",
+      "runtime_feature_flags_with_rollback",
+      "public_debug_scrubber_review",
+    ],
+    recommendedNextStep: "broader_shadow_simulation",
     semanticExecutionAllowed: false,
     productiveUseAllowed: false,
     noEffectFlags: DIAGNOSTIC_NO_EFFECT_FLAGS,
@@ -772,6 +842,111 @@ function summarizeLegacySemanticComparison(
     notCompared: entries.filter((entry) => entry.category === "not_compared")
       .length,
   };
+}
+
+function readinessGates(
+  comparisonReport: LegacySemanticComparisonHarnessReport,
+): HardGateRollbackReadinessGate[] {
+  return [
+    {
+      gateId: "shadow_fixture_corpus",
+      state: "ready_with_constraints",
+      evidence: ["AI047 fixture corpus covers runner and corp scenario families."],
+    },
+    {
+      gateId: "report_only_shadow_ordering",
+      state: "ready_with_constraints",
+      evidence: ["AI048 report-only ordering exists without semantic execution."],
+    },
+    {
+      gateId: "legacy_semantic_comparison",
+      state:
+        comparisonReport.summary.comparedScenarios > 0
+          ? "ready_with_constraints"
+          : "not_evaluated",
+      evidence: [
+        `Compared scenarios: ${comparisonReport.summary.comparedScenarios}`,
+        `Risky divergences: ${comparisonReport.summary.riskyDivergence}`,
+        `Insufficient evidence: ${comparisonReport.summary.insufficientEvidence}`,
+      ],
+    },
+    {
+      gateId: "hidden_info",
+      state: "ready_with_constraints",
+      evidence: ["Hidden-info cases stay blocked_by_gate in AI048/AI049."],
+    },
+    {
+      gateId: "target_context",
+      state: "blocked",
+      evidence: ["target_context_unavailable remains a top gap."],
+      removalCondition:
+        "Broader shadow fixtures must keep target-sensitive candidates blocked unless targetContext is engine-provided and side-safe.",
+    },
+    {
+      gateId: "ability_resolution",
+      state: "blocked",
+      evidence: ["ability_unresolved remains a top gap."],
+      removalCondition:
+        "Multi-ability card scoring must stay blocked until side-safe ability binding is present.",
+    },
+    {
+      gateId: "card_semantics",
+      state: "blocked",
+      evidence: ["card_semantics_unavailable remains a top gap."],
+      removalCondition:
+        "CardSemanticProfiles must be explicit and side-safe before strategy evidence is treated as score-draft-ready.",
+    },
+    {
+      gateId: "runtime_feature_flag",
+      state: "blocked",
+      evidence: ["No runtime selector or rollback flag is implemented in AI047-AI050."],
+      removalCondition:
+        "A later cutover slice needs feature flags default-off and explicit rollback behavior.",
+    },
+  ];
+}
+
+function proposedSemanticFeatureFlags(): ProposedSemanticFeatureFlag[] {
+  return [
+    featureFlag(
+      "semanticAi.shadowReport",
+      "write diagnostic shadow reports while legacy continues executing",
+    ),
+    featureFlag(
+      "semanticAi.shadowRanking",
+      "enable report-only semantic ordering in simulation reports",
+    ),
+    featureFlag(
+      "semanticAi.compareLegacy",
+      "compare legacy and semantic report-only references",
+    ),
+    featureFlag(
+      "semanticAi.cutover.basicActions",
+      "future default-off productive basic-action cutover candidate",
+    ),
+  ];
+}
+
+function featureFlag(
+  flagId: string,
+  intendedScope: string,
+): ProposedSemanticFeatureFlag {
+  return {
+    flagId,
+    intendedScope,
+    defaultState: "off",
+    rollbackRule: `Disable ${flagId} and fall back to legacy execution.`,
+  };
+}
+
+function rollbackRules(): string[] {
+  return [
+    "Legacy decision remains the only executed action during shadow mode.",
+    "Any hidden-info violation blocks semantic output and requires fixture review.",
+    "Any illegal semantic reference blocks cutover and requires LegalAction trace review.",
+    "Any unresolved required gate keeps the candidate in blocked_by_gap or blocked_by_gate.",
+    "All future productive flags must default to off and be reversible without migration.",
+  ];
 }
 
 function rankingEntry(

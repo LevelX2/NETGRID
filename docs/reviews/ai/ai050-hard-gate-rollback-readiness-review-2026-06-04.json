@@ -1,0 +1,91 @@
+{
+  "step": "AI050",
+  "title": "Hard-Gate and Rollback Readiness Review",
+  "date": "2026-06-04",
+  "status": "done",
+  "sourceCommit": "99db2807",
+  "runtimeConsumerStatus": "none",
+  "diagnosticScope": "hard_gate_rollback_readiness_review_only",
+  "schemaVersion": "hard-gate-rollback-readiness-review-v1",
+  "implementationFiles": [
+    "packages/ai/src/shadow-scoring-diagnostics.ts",
+    "packages/ai/src/shadow-scoring-diagnostics.test.ts"
+  ],
+  "broaderShadowSimulationReadiness": "ready_with_constraints",
+  "productiveCutoverReadiness": "blocked",
+  "recommendedNextStep": "broader_shadow_simulation",
+  "blockedCutoverGates": [
+    "target_context",
+    "ability_resolution",
+    "card_semantics",
+    "runtime_feature_flag"
+  ],
+  "proposedFeatureFlags": [
+    {
+      "flagId": "semanticAi.shadowReport",
+      "defaultState": "off"
+    },
+    {
+      "flagId": "semanticAi.shadowRanking",
+      "defaultState": "off"
+    },
+    {
+      "flagId": "semanticAi.compareLegacy",
+      "defaultState": "off"
+    },
+    {
+      "flagId": "semanticAi.cutover.basicActions",
+      "defaultState": "off"
+    }
+  ],
+  "rollbackRules": [
+    "Legacy decision remains the only executed action during shadow mode.",
+    "Any hidden-info violation blocks semantic output and requires fixture review.",
+    "Any illegal semantic reference blocks cutover and requires LegalAction trace review.",
+    "Any unresolved required gate keeps the candidate in blocked_by_gap or blocked_by_gate.",
+    "All future productive flags must default to off and be reversible without migration."
+  ],
+  "missingBeforeCutover": [
+    "broader_shadow_simulation_results",
+    "zero_hidden_info_violations_in_shadow",
+    "zero_illegal_semantic_references",
+    "resolved_or_explicitly_blocked_target_context_gaps",
+    "resolved_or_explicitly_blocked_ability_gaps",
+    "runtime_feature_flags_with_rollback",
+    "public_debug_scrubber_review"
+  ],
+  "semanticExecutionAllowed": false,
+  "productiveUseAllowed": false,
+  "runtimeFilesTouched": [],
+  "forbiddenInThisStepConfirmedAbsent": [
+    "productive chooseSemanticAiAction",
+    "live numeric scoring",
+    "productive ranking",
+    "action selection",
+    "planner weights",
+    "runtime consumer",
+    "hidden-info projection",
+    "legality generation",
+    "feature flag cutover"
+  ],
+  "verification": [
+    "node scripts/check-ai047-shadow-scoring-fixture-design.mjs",
+    "node scripts/check-ai048-shadow-only-action-ranking-report.mjs",
+    "node scripts/check-ai049-legacy-vs-semantic-comparison-harness.mjs",
+    "node scripts/check-ai050-hard-gate-rollback-readiness-review.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- shadow-scoring-diagnostics.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "git diff --check"
+  ],
+  "noEffectFlags": {
+    "planner": false,
+    "actionScore": false,
+    "planWeight": false,
+    "targetingAi": false,
+    "engine": false,
+    "legality": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivation": false,
+    "hiddenInfoLeak": false
+  }
+}
