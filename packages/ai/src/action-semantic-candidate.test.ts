@@ -48,6 +48,7 @@ describe("buildActionSemanticCandidates", () => {
       legalActions: actions,
       observerSide: "system",
       stateVersion: 42,
+      projectionMode: "neutral_only",
     });
 
     expect(candidates).toHaveLength(actions.length);
@@ -101,6 +102,7 @@ describe("buildActionSemanticCandidates", () => {
 
     const [candidate] = buildActionSemanticCandidates({
       legalActions: [action],
+      projectionMode: "neutral_only",
     });
     if (!candidate) throw new Error("Expected one neutral candidate");
 
@@ -109,6 +111,55 @@ describe("buildActionSemanticCandidates", () => {
       "targetCardId",
     ]);
     expect(JSON.stringify(candidate)).not.toContain("secret-unseen-card");
+  });
+
+  it("adds controlled basic action semantics without card hints", () => {
+    const candidates = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("gain_credit", 0, { source: "basic_action" }),
+        legalAction("resolve_choice", 1, { source: "game_rule" }),
+        legalAction("install_card", 2, {
+          source: "card-install-source",
+          payload: { placement: "remote" },
+        }),
+        legalAction("break_subroutine", 3, {
+          source: "breaker-source",
+          payload: { iceId: "ice-1", subroutineIndex: 0 },
+        }),
+      ],
+    });
+
+    const gainCredit = candidates[0];
+    const choice = candidates[1];
+    const install = candidates[2];
+    const breakSubroutine = candidates[3];
+    if (!gainCredit || !choice || !install || !breakSubroutine) {
+      throw new Error("Expected four AI037 candidates");
+    }
+
+    expect(gainCredit.semanticActionType).toBe("economy.gain_credit");
+    expect(gainCredit.sourceKind).toBe("basic_action");
+    expect(gainCredit.primaryProjectionStatus).toBe("projected");
+    expect(gainCredit.projectionIssues).toEqual([]);
+
+    expect(choice.semanticActionType).toBe("choice.resolve");
+    expect(choice.sourceKind).toBe("choice");
+    expect(choice.primaryProjectionStatus).toBe("partial_projected");
+    expect(choice.projectionIssues).toEqual(["target_context_unavailable"]);
+
+    expect(install.semanticActionType).toBe("install.card");
+    expect(install.sourceKind).toBe("unknown");
+    expect(install.primaryProjectionStatus).toBe("partial_projected");
+    expect(install.projectionIssues).toEqual(["target_context_unavailable"]);
+
+    expect(breakSubroutine.semanticActionType).toBe(
+      "breaker.break_subroutine",
+    );
+    expect(breakSubroutine.sourceKind).toBe("unknown");
+    expect(breakSubroutine.projectionIssues).toEqual([
+      "ability_unresolved",
+      "target_context_unavailable",
+    ]);
   });
 });
 
