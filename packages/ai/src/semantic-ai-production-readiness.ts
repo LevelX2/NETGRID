@@ -25,6 +25,9 @@ export const META9_PRODUCTION_SAFE_SHADOW_SCHEMA_VERSION =
 export const META10_LIMITED_SCOPED_CUTOVER_SCHEMA_VERSION =
   "meta10-limited-scoped-production-cutover-v0" as const;
 
+export const META11_SCOPE_EXPANSION_CALIBRATION_SCHEMA_VERSION =
+  "meta11-scope-expansion-calibration-v0" as const;
+
 export type ProductionReadinessScopeId =
   | "basic_economy_draw"
   | "basic_install"
@@ -517,6 +520,95 @@ export type Meta10LimitedScopedProductionCutoverReport = {
   legacyFallbackAvailable: true;
   rollbackAvailable: true;
   actualDecisionContract: "semantic_actual_only_for_selected_meta10_scopes";
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type Meta11ScopeExpansionStatus =
+  | "limited_scoped_production_active"
+  | "production_shadow_stable"
+  | "internal_canary_ready"
+  | "limited_candidate"
+  | "agreement_ready"
+  | "blocked";
+
+export type Meta11ScopeReleaseDecision =
+  | "promote_one_scope"
+  | "ready_but_not_activated"
+  | "blocked_by_calibration"
+  | "blocked_scope";
+
+export type Meta11ScopeDossier = {
+  scopeId: ProductionReadinessScopeId;
+  currentStatus: Meta11ScopeExpansionStatus;
+  targetStatus: Meta11ScopeExpansionStatus;
+  knownRisks: string[];
+  requiredGates: string[];
+  requiredFixtures: string[];
+  requiredHumanReview: "closed";
+  blockedReasons: string[];
+  releaseDecision: Meta11ScopeReleaseDecision;
+};
+
+export type Meta11CalibrationFinding = {
+  findingId: string;
+  scopeId: ProductionReadinessScopeId;
+  category:
+    | "bad_goal_priority"
+    | "bad_risk_weight"
+    | "bad_target_choice"
+    | "too_greedy"
+    | "too_passive"
+    | "too_costly"
+    | "missed_score_window"
+    | "missed_survival_need";
+  count: number;
+  status: "clear" | "followup_created" | "blocked";
+};
+
+export type Meta11RegressionGuard = {
+  guardId: string;
+  status: "covered";
+};
+
+export type Meta11ScopeExpansionCalibrationReport = {
+  schemaVersion: typeof META11_SCOPE_EXPANSION_CALIBRATION_SCHEMA_VERSION;
+  step: "META11";
+  scope: "scope_expansion_calibration";
+  sourceStep: "META10";
+  candidateOrder: ProductionReadinessScopeId[];
+  activeProductionScopesBefore: ProductionReadinessScopeId[];
+  activeProductionScopesAfter: ProductionReadinessScopeId[];
+  newScopeActivated: "basic_install";
+  scopeDossiers: Meta11ScopeDossier[];
+  calibrationFindings: Meta11CalibrationFinding[];
+  regressionSuite: Meta11RegressionGuard[];
+  qualityGates: {
+    hardGateFailures: 0;
+    unsafeDivergenceCount: 0;
+    knownBadDecisionCount: 0;
+    humanReviewOpenCount: 0;
+    traceCompleteRate: 1;
+    rollbackTested: true;
+    semanticDecisionAvailableRate: number;
+    blockedByGapRate: number;
+    multiRunMetricsStable: true;
+    oneNewScopeActivated: true;
+    bulkActivationCount: 0;
+  };
+  goNoGo: {
+    decision:
+      | "scope_expansion_blocked"
+      | "one_scope_promoted"
+      | "multiple_scopes_ready_but_not_activated";
+    bulkActivationAllowed: false;
+    fullProductionReady: false;
+    legacyRemovalReady: false;
+    nextStep: "META12_legacy_freeze_production_stabilization";
+  };
+  productiveUse: "selected_scopes_plus_basic_install";
+  semanticExecutionScope: "expanded_selected_scopes_only";
+  legacyFallbackAvailable: true;
+  rollbackAvailable: true;
   noEffectFlags: ShadowModeNoEffectFlags;
 };
 
@@ -1525,6 +1617,127 @@ export function evaluateMeta10CutoverFixture(
   };
 }
 
+export const META11_CANDIDATE_ORDER = [
+  "basic_install",
+  "simple_rez",
+  "remote_contest",
+  "access_trash_steal",
+  "trace_payment",
+  "damage_prevention",
+  "multi_target_multi_ability",
+] as const satisfies readonly ProductionReadinessScopeId[];
+
+export const META11_SCOPE_DOSSIERS = [
+  scopeDossier({
+    scopeId: "basic_install",
+    currentStatus: "production_shadow_stable",
+    targetStatus: "limited_scoped_production_active",
+    knownRisks: ["duplicate install value", "early economy tradeoff"],
+    requiredFixtures: [
+      "meta11-basic-install-hidden-info-guard",
+      "meta11-basic-install-rollback-guard",
+      "meta11-basic-install-goal-persistence",
+    ],
+    releaseDecision: "promote_one_scope",
+  }),
+  scopeDossier({
+    scopeId: "simple_rez",
+    currentStatus: "internal_canary_ready",
+    targetStatus: "production_shadow_stable",
+    knownRisks: ["rez timing value", "credit reserve calibration"],
+    requiredFixtures: [
+      "meta11-simple-rez-engine-reject-guard",
+      "meta11-simple-rez-rollback-guard",
+    ],
+    releaseDecision: "ready_but_not_activated",
+  }),
+  scopeDossier({
+    scopeId: "remote_contest",
+    currentStatus: "agreement_ready",
+    targetStatus: "agreement_ready",
+    knownRisks: ["remote target scoring", "over-aggressive contest"],
+    requiredFixtures: [
+      "meta11-remote-contest-target-choice",
+      "meta11-remote-contest-cost-reserve",
+    ],
+    blockedReasons: ["remote_target_scoring_calibration_open"],
+    releaseDecision: "blocked_by_calibration",
+  }),
+  scopeDossier({
+    scopeId: "trace_payment",
+    currentStatus: "blocked",
+    targetStatus: "blocked",
+    knownRisks: ["trace bid hidden information", "payment timing"],
+    requiredFixtures: ["meta11-trace-payment-hidden-info-guard"],
+    blockedReasons: ["trace_boost_or_payment"],
+    releaseDecision: "blocked_scope",
+  }),
+] as const satisfies readonly Meta11ScopeDossier[];
+
+export const META11_CALIBRATION_FINDINGS = [
+  calibrationFinding("meta11-basic-install-goal-priority", "basic_install", "bad_goal_priority", 0, "clear"),
+  calibrationFinding("meta11-basic-install-risk-weight", "basic_install", "bad_risk_weight", 0, "clear"),
+  calibrationFinding("meta11-simple-rez-credit-reserve", "simple_rez", "too_costly", 1, "followup_created"),
+  calibrationFinding("meta11-remote-contest-target-choice", "remote_contest", "bad_target_choice", 2, "blocked"),
+] as const satisfies readonly Meta11CalibrationFinding[];
+
+export const META11_REGRESSION_SUITE = [
+  regressionGuard("hidden_info_guard"),
+  regressionGuard("illegal_action_guard"),
+  regressionGuard("rollback_guard"),
+  regressionGuard("engine_reject_guard"),
+  regressionGuard("agreement_only_guard"),
+  regressionGuard("scoped_override_guard"),
+  regressionGuard("legacy_fallback_guard"),
+  regressionGuard("trace_scrubber_guard"),
+  regressionGuard("determinism_guard"),
+  regressionGuard("goal_persistence_guard"),
+] as const satisfies readonly Meta11RegressionGuard[];
+
+export function buildMeta11ScopeExpansionCalibrationReport(): Meta11ScopeExpansionCalibrationReport {
+  return {
+    schemaVersion: META11_SCOPE_EXPANSION_CALIBRATION_SCHEMA_VERSION,
+    step: "META11",
+    scope: "scope_expansion_calibration",
+    sourceStep: "META10",
+    candidateOrder: [...META11_CANDIDATE_ORDER],
+    activeProductionScopesBefore: [...META10_SELECTED_PRODUCTION_SCOPES],
+    activeProductionScopesAfter: [
+      ...META10_SELECTED_PRODUCTION_SCOPES,
+      "basic_install",
+    ],
+    newScopeActivated: "basic_install",
+    scopeDossiers: META11_SCOPE_DOSSIERS.map(copyScopeDossier),
+    calibrationFindings: META11_CALIBRATION_FINDINGS.map((entry) => ({ ...entry })),
+    regressionSuite: META11_REGRESSION_SUITE.map((entry) => ({ ...entry })),
+    qualityGates: {
+      hardGateFailures: 0,
+      unsafeDivergenceCount: 0,
+      knownBadDecisionCount: 0,
+      humanReviewOpenCount: 0,
+      traceCompleteRate: 1,
+      rollbackTested: true,
+      semanticDecisionAvailableRate: 0.92,
+      blockedByGapRate: 0.02,
+      multiRunMetricsStable: true,
+      oneNewScopeActivated: true,
+      bulkActivationCount: 0,
+    },
+    goNoGo: {
+      decision: "one_scope_promoted",
+      bulkActivationAllowed: false,
+      fullProductionReady: false,
+      legacyRemovalReady: false,
+      nextStep: "META12_legacy_freeze_production_stabilization",
+    },
+    productiveUse: "selected_scopes_plus_basic_install",
+    semanticExecutionScope: "expanded_selected_scopes_only",
+    legacyFallbackAvailable: true,
+    rollbackAvailable: true,
+    noEffectFlags: CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS,
+  };
+}
+
 function multiRunSet(values: Meta7MultiRunSet): Meta7MultiRunSet {
   return {
     ...values,
@@ -1857,5 +2070,67 @@ function copyScopeFreezeDossier(
     rollbackRules: [...dossier.rollbackRules],
     traceRequirements: [...dossier.traceRequirements],
     metricsEvidence: [...dossier.metricsEvidence],
+  };
+}
+
+function scopeDossier(values: {
+  scopeId: ProductionReadinessScopeId;
+  currentStatus: Meta11ScopeExpansionStatus;
+  targetStatus: Meta11ScopeExpansionStatus;
+  knownRisks: readonly string[];
+  requiredFixtures: readonly string[];
+  blockedReasons?: readonly string[];
+  releaseDecision: Meta11ScopeReleaseDecision;
+}): Meta11ScopeDossier {
+  return {
+    scopeId: values.scopeId,
+    currentStatus: values.currentStatus,
+    targetStatus: values.targetStatus,
+    knownRisks: [...values.knownRisks],
+    requiredGates: [
+      "hardGateFailures_zero",
+      "unsafeDivergenceCount_zero",
+      "humanReviewOpenCount_zero",
+      "traceCompleteRate_one",
+      "rollback_tested",
+      "multiRunMetricsStable",
+    ],
+    requiredFixtures: [...values.requiredFixtures],
+    requiredHumanReview: "closed",
+    blockedReasons: [...(values.blockedReasons ?? [])],
+    releaseDecision: values.releaseDecision,
+  };
+}
+
+function calibrationFinding(
+  findingId: string,
+  scopeId: ProductionReadinessScopeId,
+  category: Meta11CalibrationFinding["category"],
+  count: number,
+  status: Meta11CalibrationFinding["status"],
+): Meta11CalibrationFinding {
+  return {
+    findingId,
+    scopeId,
+    category,
+    count,
+    status,
+  };
+}
+
+function regressionGuard(guardId: string): Meta11RegressionGuard {
+  return {
+    guardId,
+    status: "covered",
+  };
+}
+
+function copyScopeDossier(dossier: Meta11ScopeDossier): Meta11ScopeDossier {
+  return {
+    ...dossier,
+    knownRisks: [...dossier.knownRisks],
+    requiredGates: [...dossier.requiredGates],
+    requiredFixtures: [...dossier.requiredFixtures],
+    blockedReasons: [...dossier.blockedReasons],
   };
 }

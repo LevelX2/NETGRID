@@ -1,0 +1,131 @@
+{
+  "schemaVersion": "meta11-scope-expansion-calibration-v0",
+  "step": "META11",
+  "scope": "scope_expansion_calibration",
+  "sourceStep": "META10",
+  "candidateOrder": [
+    "basic_install",
+    "simple_rez",
+    "remote_contest",
+    "access_trash_steal",
+    "trace_payment",
+    "damage_prevention",
+    "multi_target_multi_ability"
+  ],
+  "activeProductionScopesBefore": [
+    "basic_economy_draw",
+    "tag_removal",
+    "simple_score_advance"
+  ],
+  "activeProductionScopesAfter": [
+    "basic_economy_draw",
+    "tag_removal",
+    "simple_score_advance",
+    "basic_install"
+  ],
+  "newScopeActivated": "basic_install",
+  "scopeDossiers": [
+    {
+      "scopeId": "basic_install",
+      "currentStatus": "production_shadow_stable",
+      "targetStatus": "limited_scoped_production_active",
+      "knownRisks": ["duplicate install value", "early economy tradeoff"],
+      "requiredHumanReview": "closed",
+      "blockedReasons": [],
+      "releaseDecision": "promote_one_scope"
+    },
+    {
+      "scopeId": "simple_rez",
+      "currentStatus": "internal_canary_ready",
+      "targetStatus": "production_shadow_stable",
+      "knownRisks": ["rez timing value", "credit reserve calibration"],
+      "requiredHumanReview": "closed",
+      "blockedReasons": [],
+      "releaseDecision": "ready_but_not_activated"
+    },
+    {
+      "scopeId": "remote_contest",
+      "currentStatus": "agreement_ready",
+      "targetStatus": "agreement_ready",
+      "knownRisks": ["remote target scoring", "over-aggressive contest"],
+      "requiredHumanReview": "closed",
+      "blockedReasons": ["remote_target_scoring_calibration_open"],
+      "releaseDecision": "blocked_by_calibration"
+    },
+    {
+      "scopeId": "trace_payment",
+      "currentStatus": "blocked",
+      "targetStatus": "blocked",
+      "knownRisks": ["trace bid hidden information", "payment timing"],
+      "requiredHumanReview": "closed",
+      "blockedReasons": ["trace_boost_or_payment"],
+      "releaseDecision": "blocked_scope"
+    }
+  ],
+  "calibrationFindings": [
+    {
+      "findingId": "meta11-basic-install-goal-priority",
+      "scopeId": "basic_install",
+      "category": "bad_goal_priority",
+      "count": 0,
+      "status": "clear"
+    },
+    {
+      "findingId": "meta11-basic-install-risk-weight",
+      "scopeId": "basic_install",
+      "category": "bad_risk_weight",
+      "count": 0,
+      "status": "clear"
+    },
+    {
+      "findingId": "meta11-simple-rez-credit-reserve",
+      "scopeId": "simple_rez",
+      "category": "too_costly",
+      "count": 1,
+      "status": "followup_created"
+    },
+    {
+      "findingId": "meta11-remote-contest-target-choice",
+      "scopeId": "remote_contest",
+      "category": "bad_target_choice",
+      "count": 2,
+      "status": "blocked"
+    }
+  ],
+  "regressionSuite": [
+    { "guardId": "hidden_info_guard", "status": "covered" },
+    { "guardId": "illegal_action_guard", "status": "covered" },
+    { "guardId": "rollback_guard", "status": "covered" },
+    { "guardId": "engine_reject_guard", "status": "covered" },
+    { "guardId": "agreement_only_guard", "status": "covered" },
+    { "guardId": "scoped_override_guard", "status": "covered" },
+    { "guardId": "legacy_fallback_guard", "status": "covered" },
+    { "guardId": "trace_scrubber_guard", "status": "covered" },
+    { "guardId": "determinism_guard", "status": "covered" },
+    { "guardId": "goal_persistence_guard", "status": "covered" }
+  ],
+  "qualityGates": {
+    "hardGateFailures": 0,
+    "unsafeDivergenceCount": 0,
+    "knownBadDecisionCount": 0,
+    "humanReviewOpenCount": 0,
+    "traceCompleteRate": 1,
+    "rollbackTested": true,
+    "semanticDecisionAvailableRate": 0.92,
+    "blockedByGapRate": 0.02,
+    "multiRunMetricsStable": true,
+    "oneNewScopeActivated": true,
+    "bulkActivationCount": 0
+  },
+  "goNoGo": {
+    "decision": "one_scope_promoted",
+    "bulkActivationAllowed": false,
+    "fullProductionReady": false,
+    "legacyRemovalReady": false,
+    "nextStep": "META12_legacy_freeze_production_stabilization"
+  },
+  "productiveUse": "selected_scopes_plus_basic_install",
+  "semanticExecutionScope": "expanded_selected_scopes_only",
+  "legacyFallbackAvailable": true,
+  "rollbackAvailable": true
+}

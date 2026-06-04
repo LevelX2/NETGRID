@@ -8,6 +8,7 @@ import {
   META8_INTERNAL_CANARY_FIXTURES,
   META9_PRODUCTION_SAFE_SHADOW_CONFIG,
   META10_SELECTED_PRODUCTION_SCOPES,
+  buildMeta11ScopeExpansionCalibrationReport,
   buildMeta10LimitedScopedProductionCutoverReport,
   buildMeta9ProductionSafeShadowAgreementCanaryReport,
   buildMeta8InternalSemanticCanaryReport,
@@ -163,6 +164,115 @@ describe("META7 Multi-Run Evaluation + Human Review Closure", () => {
       nextStep: "META8_internal_semantic_canary",
     });
     expect(report.noRuntimeEffect).toBe(true);
+  });
+});
+
+describe("META11 Scope Expansion + Calibration", () => {
+  it("promotes exactly one new scope after META10", () => {
+    const report = buildMeta11ScopeExpansionCalibrationReport();
+
+    expect(report.schemaVersion).toBe("meta11-scope-expansion-calibration-v0");
+    expect(report.step).toBe("META11");
+    expect(report.activeProductionScopesBefore).toEqual([
+      "basic_economy_draw",
+      "tag_removal",
+      "simple_score_advance",
+    ]);
+    expect(report.activeProductionScopesAfter).toEqual([
+      "basic_economy_draw",
+      "tag_removal",
+      "simple_score_advance",
+      "basic_install",
+    ]);
+    expect(report.newScopeActivated).toBe("basic_install");
+    expect(report.qualityGates.oneNewScopeActivated).toBe(true);
+    expect(report.qualityGates.bulkActivationCount).toBe(0);
+  });
+
+  it("keeps simple_rez and remote_contest out of the same activation iteration", () => {
+    const report = buildMeta11ScopeExpansionCalibrationReport();
+
+    expect(report.scopeDossiers).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          scopeId: "basic_install",
+          releaseDecision: "promote_one_scope",
+          targetStatus: "limited_scoped_production_active",
+        }),
+        expect.objectContaining({
+          scopeId: "simple_rez",
+          releaseDecision: "ready_but_not_activated",
+          targetStatus: "production_shadow_stable",
+        }),
+        expect.objectContaining({
+          scopeId: "remote_contest",
+          releaseDecision: "blocked_by_calibration",
+          blockedReasons: ["remote_target_scoring_calibration_open"],
+        }),
+      ]),
+    );
+  });
+
+  it("records calibration findings and covers required regression guards", () => {
+    const report = buildMeta11ScopeExpansionCalibrationReport();
+
+    expect(report.calibrationFindings).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          scopeId: "basic_install",
+          category: "bad_goal_priority",
+          count: 0,
+          status: "clear",
+        }),
+        expect.objectContaining({
+          scopeId: "remote_contest",
+          category: "bad_target_choice",
+          count: 2,
+          status: "blocked",
+        }),
+      ]),
+    );
+    expect(report.regressionSuite.map((guard) => guard.guardId)).toEqual([
+      "hidden_info_guard",
+      "illegal_action_guard",
+      "rollback_guard",
+      "engine_reject_guard",
+      "agreement_only_guard",
+      "scoped_override_guard",
+      "legacy_fallback_guard",
+      "trace_scrubber_guard",
+      "determinism_guard",
+      "goal_persistence_guard",
+    ]);
+    expect(report.regressionSuite.every((guard) => guard.status === "covered")).toBe(
+      true,
+    );
+  });
+
+  it("reports one-scope promotion without full production or legacy removal", () => {
+    const report = buildMeta11ScopeExpansionCalibrationReport();
+
+    expect(report.qualityGates).toMatchObject({
+      hardGateFailures: 0,
+      unsafeDivergenceCount: 0,
+      knownBadDecisionCount: 0,
+      humanReviewOpenCount: 0,
+      traceCompleteRate: 1,
+      rollbackTested: true,
+      semanticDecisionAvailableRate: 0.92,
+      blockedByGapRate: 0.02,
+      multiRunMetricsStable: true,
+    });
+    expect(report.goNoGo).toEqual({
+      decision: "one_scope_promoted",
+      bulkActivationAllowed: false,
+      fullProductionReady: false,
+      legacyRemovalReady: false,
+      nextStep: "META12_legacy_freeze_production_stabilization",
+    });
+    expect(report.productiveUse).toBe("selected_scopes_plus_basic_install");
+    expect(report.legacyFallbackAvailable).toBe(true);
+    expect(report.rollbackAvailable).toBe(true);
   });
 });
 
