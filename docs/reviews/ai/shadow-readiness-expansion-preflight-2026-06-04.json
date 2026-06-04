@@ -1,0 +1,51 @@
+{
+  "processId": "shadow-readiness-expansion",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai061-sr-ai067-shadow-readiness-expansion",
+  "worktree": "C:\\Projekte\\NETGRID_AI061_SR_AI067_SHADOW_READINESS_EXPANSION",
+  "sourceReadinessStatus": "limited_shadow_ready",
+  "targetMetaStep": "broad_shadow_ready_without_cutover",
+  "cutoverAllowed": false,
+  "actualDecisionContract": "actualDecision_equals_legacyDecision",
+  "semanticAiShadowModeEnabledDefault": false,
+  "hardGates": {
+    "illegalSemanticDecisionCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "runtimeEffectCount": 0,
+    "actualDecisionOverrideCount": 0,
+    "nonEngineLegalAssumptionCount": 0,
+    "determinismFailureCount": 0
+  },
+  "inputMetrics": {
+    "semanticDecisionAvailableRate": 0.2424,
+    "semanticBlockedByGapRate": 0.6667,
+    "runtimeBackedFixtureRate": 0
+  },
+  "inputTopSemanticGaps": [
+    {"gapId": "target_context_unavailable", "count": 13},
+    {"gapId": "card_semantics_unavailable", "count": 7},
+    {"gapId": "ability_unresolved", "count": 6},
+    {"gapId": "cost_unknown", "count": 4},
+    {"gapId": "hidden_info_blocked", "count": 3}
+  ],
+  "plannedSteps": [
+    "AI061-SR",
+    "AI062-SR",
+    "AI063-SR",
+    "AI064-SR",
+    "AI065-SR",
+    "AI066-SR",
+    "AI067-SR"
+  ],
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  }
+}
