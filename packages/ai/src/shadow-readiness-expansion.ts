@@ -15,6 +15,9 @@ export const SHADOW_READINESS_EXPANSION_PROCESS_SCHEMA_VERSION =
 export const AI061_SR_TARGET_CONTEXT_EXPANSION_SCHEMA_VERSION =
   "ai061-sr-target-context-projection-expansion-v1" as const;
 
+export const AI062_SR_ABILITY_BINDING_EXPANSION_SCHEMA_VERSION =
+  "ai062-sr-ability-binding-expansion-v1" as const;
+
 export const SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS =
   CONTROLLED_SHADOW_MODE_NO_EFFECT_FLAGS;
 
@@ -58,6 +61,56 @@ export type Ai061SrTargetContextProjectionExpansionReport = {
     retainedGaps: ActionProjectionIssue[];
   }>;
   batchAfterTargetContextExpansion: Pick<
+    ShadowEvaluationBatchReport,
+    "scenarioCount" | "decisionPointCount" | "topSemanticGaps"
+  >;
+  productiveUseAllowed: false;
+  semanticExecutionAllowed: false;
+  runtimeConsumerStatus: "none";
+  noRuntimeEffect: true;
+  noEffectFlags: ShadowModeNoEffectFlags;
+};
+
+export type SideSafeAbilityBinding = {
+  scenarioId: string;
+  side: ShadowActorSide;
+  bindingStatus: "bound_side_safe";
+  bindingMethod:
+    | "explicit_ability_id"
+    | "engine_payload"
+    | "effect_ref"
+    | "single_legal_ability_inferred";
+  abilityBindingMethod:
+    | "explicit"
+    | "payload"
+    | "effect_ref"
+    | "single_legal_ability_inferred";
+  sourceCardStatus:
+    | "source_card_id_present"
+    | "source_card_not_required"
+    | "source_card_context_side_safe";
+  abilityIdStatus: "stable_side_safe_reference";
+  hiddenInfoPolicy: "no_hidden_info_projected";
+  evidence: string[];
+  removedGap: Extract<ActionProjectionIssue, "ability_unresolved">;
+  productiveChangeAllowed: false;
+};
+
+export type Ai062SrAbilityBindingExpansionReport = {
+  schemaVersion: typeof AI062_SR_ABILITY_BINDING_EXPANSION_SCHEMA_VERSION;
+  step: "AI062-SR";
+  scope: "ability_binding_expansion";
+  sourceReadinessStatus: "limited_shadow_ready";
+  abilityUnresolvedBefore: 6;
+  resolvedAbilityBindingCount: number;
+  abilityUnresolvedAfter: number;
+  bindings: SideSafeAbilityBinding[];
+  unresolved: Array<{
+    scenarioId: string;
+    reason: "multi_ability_without_explicit_side_safe_id";
+    retainedGaps: ActionProjectionIssue[];
+  }>;
+  batchAfterAbilityBindingExpansion: Pick<
     ShadowEvaluationBatchReport,
     "scenarioCount" | "decisionPointCount" | "topSemanticGaps"
   >;
@@ -215,6 +268,65 @@ export const AI061_SR_SIDE_SAFE_TARGET_CONTEXT_PROJECTIONS =
     ),
   ] as const satisfies readonly SideSafeTargetContextProjection[];
 
+export const AI062_SR_SIDE_SAFE_ABILITY_BINDINGS =
+  [
+    abilityBinding(
+      "runner_install_breaker_for_known_ice",
+      "runner",
+      "single_legal_ability_inferred",
+      "single_legal_ability_inferred",
+      "source_card_context_side_safe",
+      [
+        "The fixture has one side-safe install ability family for the selected breaker action.",
+        "Known ICE pressure is limited to rezzed or legally known ICE evidence.",
+      ],
+    ),
+    abilityBinding(
+      "runner_break_subroutine",
+      "runner",
+      "engine_payload",
+      "payload",
+      "source_card_id_present",
+      [
+        "Breaker ability and subroutine target references are tied to Engine LegalAction payload fields.",
+        "No unrezzed ICE details are projected.",
+      ],
+    ),
+    abilityBinding(
+      "corp_tag_trace_window",
+      "corp",
+      "effect_ref",
+      "effect_ref",
+      "source_card_context_side_safe",
+      [
+        "Trace effect reference is explicit in the legal trace choice context.",
+        "Runner hidden cards remain outside the binding.",
+      ],
+    ),
+    abilityBinding(
+      "corp_damage_kill_window",
+      "corp",
+      "engine_payload",
+      "payload",
+      "source_card_context_side_safe",
+      [
+        "Damage ability payload is available only as side-safe legal action evidence.",
+        "No hidden hand contents are inspected to score the damage line.",
+      ],
+    ),
+    abilityBinding(
+      "source_target_advancement_counter",
+      "corp",
+      "effect_ref",
+      "effect_ref",
+      "source_card_id_present",
+      [
+        "Advancement-counter source and effect references remain explicit in the Engine choice payload.",
+        "The binding does not infer hidden card identity.",
+      ],
+    ),
+  ] as const satisfies readonly SideSafeAbilityBinding[];
+
 export function buildFixturesAfterTargetContextProjection(
   fixtures: readonly ShadowScenarioFixture[] =
     buildShadowScenarioCorpusReport().fixtures,
@@ -274,6 +386,86 @@ export function buildAi061SrTargetContextProjectionExpansionReport(
     runtimeConsumerStatus: "none",
     noRuntimeEffect: true,
     noEffectFlags: SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS,
+  };
+}
+
+export function buildFixturesAfterAbilityBindingExpansion(
+  fixtures: readonly ShadowScenarioFixture[] =
+    buildFixturesAfterTargetContextProjection(),
+): ShadowScenarioFixture[] {
+  return removeGapForProjectedScenarios(
+    fixtures,
+    "ability_unresolved",
+    new Set(
+      AI062_SR_SIDE_SAFE_ABILITY_BINDINGS.map((binding) => binding.scenarioId),
+    ),
+  );
+}
+
+export function buildAi062SrAbilityBindingExpansionReport(
+  fixtures: readonly ShadowScenarioFixture[] =
+    buildFixturesAfterTargetContextProjection(),
+): Ai062SrAbilityBindingExpansionReport {
+  const expandedFixtures = buildFixturesAfterAbilityBindingExpansion(fixtures);
+  const batch = buildShadowEvaluationBatchReport(expandedFixtures);
+  const abilityGapAfter =
+    batch.topSemanticGaps.find((gap) => gap.gapId === "ability_unresolved")
+      ?.count ?? 0;
+  const unresolved = expandedFixtures
+    .filter(
+      (fixture) =>
+        fixture.scenarioId === "multi_ability_card_unresolved" &&
+        fixture.knownProjectionGaps.includes("ability_unresolved"),
+    )
+    .map((fixture) => ({
+      scenarioId: fixture.scenarioId,
+      reason: "multi_ability_without_explicit_side_safe_id" as const,
+      retainedGaps: [...fixture.knownProjectionGaps],
+    }));
+
+  return {
+    schemaVersion: AI062_SR_ABILITY_BINDING_EXPANSION_SCHEMA_VERSION,
+    step: "AI062-SR",
+    scope: "ability_binding_expansion",
+    sourceReadinessStatus: "limited_shadow_ready",
+    abilityUnresolvedBefore: 6,
+    resolvedAbilityBindingCount: AI062_SR_SIDE_SAFE_ABILITY_BINDINGS.length,
+    abilityUnresolvedAfter: abilityGapAfter,
+    bindings: [...AI062_SR_SIDE_SAFE_ABILITY_BINDINGS],
+    unresolved,
+    batchAfterAbilityBindingExpansion: {
+      scenarioCount: batch.scenarioCount,
+      decisionPointCount: batch.decisionPointCount,
+      topSemanticGaps: [...batch.topSemanticGaps],
+    },
+    productiveUseAllowed: false,
+    semanticExecutionAllowed: false,
+    runtimeConsumerStatus: "none",
+    noRuntimeEffect: true,
+    noEffectFlags: SHADOW_READINESS_EXPANSION_NO_EFFECT_FLAGS,
+  };
+}
+
+function abilityBinding(
+  scenarioId: string,
+  side: ShadowActorSide,
+  bindingMethod: SideSafeAbilityBinding["bindingMethod"],
+  abilityBindingMethod: SideSafeAbilityBinding["abilityBindingMethod"],
+  sourceCardStatus: SideSafeAbilityBinding["sourceCardStatus"],
+  evidence: string[],
+): SideSafeAbilityBinding {
+  return {
+    scenarioId,
+    side,
+    bindingStatus: "bound_side_safe",
+    bindingMethod,
+    abilityBindingMethod,
+    sourceCardStatus,
+    abilityIdStatus: "stable_side_safe_reference",
+    hiddenInfoPolicy: "no_hidden_info_projected",
+    evidence,
+    removedGap: "ability_unresolved",
+    productiveChangeAllowed: false,
   };
 }
 

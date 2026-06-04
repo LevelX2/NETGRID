@@ -1,0 +1,72 @@
+{
+  "schemaVersion": "ai062-sr-ability-binding-expansion-v1",
+  "step": "AI062-SR",
+  "title": "Ability Binding Expansion",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai061-sr-ai067-shadow-readiness-expansion",
+  "scope": "ability_binding_expansion",
+  "sourceReadinessStatus": "limited_shadow_ready",
+  "abilityUnresolvedBefore": 6,
+  "resolvedAbilityBindingCount": 5,
+  "abilityUnresolvedAfter": 1,
+  "boundScenarioIds": [
+    "runner_install_breaker_for_known_ice",
+    "runner_break_subroutine",
+    "corp_tag_trace_window",
+    "corp_damage_kill_window",
+    "source_target_advancement_counter"
+  ],
+  "unresolved": [
+    {
+      "scenarioId": "multi_ability_card_unresolved",
+      "reason": "multi_ability_without_explicit_side_safe_id",
+      "retainedGaps": ["ability_unresolved"]
+    }
+  ],
+  "bindingPolicy": {
+    "explicitAbilityIdPreferred": true,
+    "abilityRefAllowed": true,
+    "effectRefAllowed": true,
+    "enginePayloadAllowed": true,
+    "singleLegalAbilityInferenceAllowedWhenSideSafe": true,
+    "multiAbilityWithoutExplicitIdRemainsUnresolved": true,
+    "hiddenInfoProjectionAllowed": false,
+    "plannerWeightChangeAllowed": false,
+    "resolverPatchAllowedInStep": false
+  },
+  "batchAfterAbilityBindingExpansion": {
+    "scenarioCount": 33,
+    "decisionPointCount": 33,
+    "hardGateFailures": 0,
+    "actualDecisionOverrideCount": 0,
+    "runtimeEffectCount": 0
+  },
+  "productiveUseAllowed": false,
+  "semanticExecutionAllowed": false,
+  "runtimeConsumerStatus": "none",
+  "noRuntimeEffect": true,
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "verification": [
+    "node scripts/check-ai062-sr-ability-binding-expansion.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- shadow-readiness-expansion.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "doneGate": {
+    "moreCardActionsWithBinding": true,
+    "multiAbilityWithoutExplicitIdRemainsUnresolved": true,
+    "hiddenInfoLeaks": 0,
+    "actualDecisionRemainsLegacy": true
+  }
+}
