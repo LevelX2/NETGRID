@@ -148,18 +148,85 @@ describe("buildActionSemanticCandidates", () => {
     expect(choice.projectionIssues).toEqual(["target_context_unavailable"]);
 
     expect(install.semanticActionType).toBe("install.card");
-    expect(install.sourceKind).toBe("unknown");
+    expect(install.sourceKind).toBe("card");
+    expect(install.sourceCardId).toBe("card-install-source");
     expect(install.primaryProjectionStatus).toBe("partial_projected");
     expect(install.projectionIssues).toEqual(["target_context_unavailable"]);
 
     expect(breakSubroutine.semanticActionType).toBe(
       "breaker.break_subroutine",
     );
-    expect(breakSubroutine.sourceKind).toBe("unknown");
+    expect(breakSubroutine.sourceKind).toBe("card");
+    expect(breakSubroutine.sourceCardId).toBe("breaker-source");
     expect(breakSubroutine.projectionIssues).toEqual([
       "ability_unresolved",
       "target_context_unavailable",
     ]);
+  });
+
+  it("binds card source and ability only from side-safe LegalAction evidence", () => {
+    const candidates = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("break_subroutine", 0, {
+          source: "breaker-1",
+          abilityRef: {
+            sourceCardInstanceId: "breaker-1",
+            abilityId: "icebreaker.break.1",
+          },
+        }),
+        legalAction("trigger_ability", 1, {
+          source: "scored-agenda-1",
+          payload: { abilityId: "agenda.when_scored" },
+        }),
+        legalAction("activated_card_ability", 2, {
+          source: "single-ability-card",
+        }),
+        legalAction("activated_card_ability", 3, {
+          source: "ambiguous-card",
+          payload: {
+            cardImplementationAbility: "activated",
+            cardImplementationAbilityIndex: 0,
+          },
+        }),
+      ],
+      sideSafeAbilityBindings: [
+        {
+          actionId: "ai036-2-activated_card_ability",
+          sourceCardId: "single-ability-card",
+          abilityId: "single.legal.ability",
+          method: "single_legal_ability_inferred",
+          evidence: ["AI038 test side-safe single legal ability"],
+        },
+      ],
+    });
+
+    const explicit = candidates[0];
+    const payload = candidates[1];
+    const inferred = candidates[2];
+    const unresolved = candidates[3];
+    if (!explicit || !payload || !inferred || !unresolved) {
+      throw new Error("Expected four AI038 candidates");
+    }
+
+    expect(explicit.sourceCardId).toBe("breaker-1");
+    expect(explicit.abilityId).toBe("icebreaker.break.1");
+    expect(explicit.abilityBindingMethod).toBe("explicit_ability_id");
+    expect(explicit.projectionIssues).not.toContain("ability_unresolved");
+
+    expect(payload.sourceCardId).toBe("scored-agenda-1");
+    expect(payload.abilityId).toBe("agenda.when_scored");
+    expect(payload.abilityBindingMethod).toBe("engine_payload");
+
+    expect(inferred.sourceCardId).toBe("single-ability-card");
+    expect(inferred.abilityId).toBe("single.legal.ability");
+    expect(inferred.abilityBindingMethod).toBe(
+      "single_legal_ability_inferred",
+    );
+
+    expect(unresolved.sourceCardId).toBe("ambiguous-card");
+    expect(unresolved.abilityId).toBeUndefined();
+    expect(unresolved.abilityBindingMethod).toBe("unresolved");
+    expect(unresolved.projectionIssues).toContain("ability_unresolved");
   });
 });
 

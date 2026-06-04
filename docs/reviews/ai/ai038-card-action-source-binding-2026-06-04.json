@@ -1,0 +1,64 @@
+{
+  "step": "AI038",
+  "title": "Card Action Source Binding",
+  "date": "2026-06-04",
+  "status": "done",
+  "builderFile": "packages/ai/src/action-semantic-candidate.ts",
+  "testFile": "packages/ai/src/action-semantic-candidate.test.ts",
+  "runtimeConsumerStatus": "none",
+  "scenarioCorpus": {
+    "id": "ai038_source_ability_binding_fixture",
+    "source": "packages/ai/src/action-semantic-candidate.test.ts",
+    "coverageClaim": "Source-/Ability-Bindung ist fuer die dokumentierte Fixture geprueft; keine Aussage ueber alle theoretischen Spielzustaende.",
+    "fixtureCases": 4
+  },
+  "bindingPolicy": {
+    "sourcePreferredOrder": ["abilityRef.sourceCardInstanceId", "LegalAction.source"],
+    "abilityPreferredOrder": ["abilityRef.abilityId", "payload.abilityId", "sideSafeAbilityBindings"],
+    "cardImplementationAbilityIndexPolicy": "not_used_as_ability_id",
+    "hiddenInfoPolicy": "no Full State, no hidden zones, no opponent private data, no card text inference"
+  },
+  "metrics": {
+    "fixtureCases": 4,
+    "sourceBound": 4,
+    "abilityExplicitAbilityRef": 1,
+    "abilityEnginePayload": 1,
+    "abilitySingleLegalInferred": 1,
+    "abilityUnresolved": 1,
+    "cardHintImports": 0,
+    "runtimeConsumers": 0
+  },
+  "abilityBindingMethods": [
+    "explicit_ability_id",
+    "engine_payload",
+    "single_legal_ability_inferred",
+    "unresolved"
+  ],
+  "gapsForwarded": [
+    {
+      "gapId": "AI038-G001",
+      "category": "multi_ability_without_id",
+      "description": "CardImplementation payloads with only cardImplementationAbilityIndex are not treated as stable abilityId and remain ability_unresolved.",
+      "primaryProjectionStatus": "partial_projected",
+      "projectionIssues": ["ability_unresolved"]
+    },
+    {
+      "gapId": "AI038-G002",
+      "category": "source_without_card_visibility_context",
+      "description": "LegalAction.source is accepted as side-safe only within the candidate visibility scope; no Full State lookup or hidden card reconstruction occurs.",
+      "primaryProjectionStatus": "partial_projected",
+      "projectionIssues": []
+    }
+  ],
+  "noEffectFlags": {
+    "planner": false,
+    "actionScore": false,
+    "planWeight": false,
+    "targetingAi": false,
+    "engine": false,
+    "legality": false,
+    "profileOrDefaultSwitch": false,
+    "uiDerivation": false,
+    "hiddenInfoLeak": false
+  }
+}
