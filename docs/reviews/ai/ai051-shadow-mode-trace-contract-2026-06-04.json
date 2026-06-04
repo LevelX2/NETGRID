@@ -1,0 +1,111 @@
+{
+  "step": "AI051",
+  "title": "Shadow Mode Trace Contract",
+  "date": "2026-06-04",
+  "status": "done",
+  "branch": "codex/ai051-ai060-controlled-shadow-mode",
+  "schemaVersion": "shadow-mode-trace-contract-v1",
+  "scope": "trace_contract_only",
+  "runtimeConsumerStatus": "none",
+  "visibilityScope": "developer_only",
+  "noRuntimeEffect": true,
+  "productiveUseAllowed": false,
+  "actualDecisionContract": "actualDecision_equals_legacyDecision",
+  "implementationFiles": [
+    "packages/ai/src/controlled-shadow-mode.ts",
+    "packages/ai/src/controlled-shadow-mode.test.ts"
+  ],
+  "reportFiles": [
+    "docs/reviews/ai/ai051-shadow-mode-trace-contract-2026-06-04.md",
+    "docs/reviews/ai/ai051-shadow-mode-trace-contract-2026-06-04.json"
+  ],
+  "checkScripts": [
+    "scripts/check-ai051-shadow-mode-trace-contract.mjs"
+  ],
+  "runtimeFilesTouched": [],
+  "requiredTraceFields": [
+    "traceId",
+    "stateVersion",
+    "actorSide",
+    "legacyDecision",
+    "legalActionSummary",
+    "candidateSummary",
+    "tacticalGoals",
+    "doctrineReadiness",
+    "hardGates",
+    "visibilityScope",
+    "noRuntimeEffect"
+  ],
+  "requiredLegacyDecisionFields": [
+    "selectedActionId",
+    "selectedActionType",
+    "source",
+    "selectedFromLegalActions",
+    "evidence"
+  ],
+  "requiredSemanticDecisionFields": [
+    "scoreStatus",
+    "topCandidates",
+    "blockedCandidates",
+    "whyNot",
+    "noRuntimeEffect"
+  ],
+  "requiredLegalActionSummaryFields": [
+    "actionId",
+    "actionType",
+    "source"
+  ],
+  "requiredCandidateSummaryFields": [
+    "candidateId",
+    "primaryProjectionStatus",
+    "hardGateStatus"
+  ],
+  "forbiddenConsumers": [
+    "applyAction",
+    "PlayerAction",
+    "PublicEvent",
+    "PlayerView",
+    "WebSocket payload",
+    "Reconnect payload",
+    "Undo preview",
+    "Replay payload",
+    "Client error",
+    "Planner weights",
+    "Productive feature flag"
+  ],
+  "hardGateCounters": {
+    "illegalSemanticDecisionCount": 0,
+    "hiddenInfoViolationCount": 0,
+    "runtimeEffectCount": 0,
+    "actualDecisionOverrideCount": 0,
+    "nonEngineLegalAssumptionCount": 0
+  },
+  "noEffectFlags": {
+    "actualDecisionOverride": false,
+    "productiveScoring": false,
+    "plannerWeightChange": false,
+    "engineMutation": false,
+    "legalityGeneration": false,
+    "publicPayloadChange": false,
+    "hiddenInfoLeak": false,
+    "featureFlagCutover": false
+  },
+  "verification": [
+    "node scripts/check-ai051-shadow-mode-trace-contract.mjs",
+    "corepack pnpm --filter @netgrid/ai test -- controlled-shadow-mode.test.ts",
+    "corepack pnpm --filter @netgrid/ai typecheck",
+    "node scripts/check-ai047-shadow-scoring-fixture-design.mjs",
+    "node scripts/check-ai048-shadow-only-action-ranking-report.mjs",
+    "node scripts/check-ai049-legacy-vs-semantic-comparison-harness.mjs",
+    "node scripts/check-ai050-hard-gate-rollback-readiness-review.mjs",
+    "git diff --check"
+  ],
+  "verificationStatus": "passed",
+  "doneGate": {
+    "traceSchemaExists": true,
+    "developerOnly": true,
+    "noRuntimeExecution": true,
+    "noHiddenInfoProjection": true,
+    "noProductiveImports": true
+  }
+}
