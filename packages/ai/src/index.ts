@@ -82,6 +82,7 @@ import {
   getTacticalPlanMemorySnapshot,
   rememberTacticalPlanRuntime,
   type PlanStepMappingResult,
+  type TacticalPlan,
   type TacticalPlanRuntimeResult,
 } from "./tactical-plans";
 import {
@@ -3590,10 +3591,62 @@ function tacticalPlanDebugItems(planRuntime: TacticalPlanRuntimeResult): string[
             .join("|")}`,
         ]
       : []),
-    ...planRuntime.planAlternatives.slice(0, 6).map(
-      (plan) => `plan:${plan.planId}:${plan.status}:${plan.priority}`,
+    ...planRuntime.planAlternatives.slice(0, 8).map((plan, index) =>
+      tacticalPlanRankDebugItem(plan, index + 1, selectedPlan?.planId === plan.planId),
     ),
   ];
+}
+
+function tacticalPlanRankDebugItem(
+  plan: TacticalPlan,
+  rank: number,
+  selected: boolean,
+): string {
+  const fields: Array<[string, string | number | boolean | undefined]> = [
+    ["rank", rank],
+    ["id", plan.planId],
+    ["type", plan.type],
+    ["target", tacticalPlanTargetDebugValue(plan.target)],
+    ["target_label", plan.target?.label],
+    ["priority", plan.priority],
+    ["status", plan.status],
+    ["step", plan.currentStep.kind],
+    ["selected", selected],
+    ["blockers", plan.blockers.map((blocker) => blocker.kind).join(",")],
+    ["capabilities", plan.requiredCapabilities.map((capability) => capability.kind).join(",")],
+    ["scores", tacticalPlanScoreDebugValue(plan)],
+  ];
+  return `plan_rank|${fields
+    .filter(([, value]) => value !== undefined && String(value).length > 0)
+    .map(([key, value]) => `${key}=${tacticalPlanDebugFieldValue(value!)}`)
+    .join("|")}`;
+}
+
+function tacticalPlanTargetDebugValue(target: TacticalPlan["target"]): string {
+  if (!target) return "";
+  return [target.kind, target.id].filter(Boolean).join(":");
+}
+
+function tacticalPlanScoreDebugValue(plan: TacticalPlan): string {
+  return plan.scoreBreakdown
+    .slice(0, 5)
+    .map((component) => `${component.label}:${round(component.value)}`)
+    .join(",");
+}
+
+function tacticalPlanDebugFieldValue(value: string | number | boolean): string {
+  return String(value).replace(/[|\r\n]+/g, " ").trim();
+}
+
+function uniqueDebugStrings(values: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const value of values) {
+    if (seen.has(value)) continue;
+    seen.add(value);
+    result.push(value);
+  }
+  return result;
 }
 
 function semanticRuntimeMemoryDebug(input: AiDecisionInput): {
@@ -3608,11 +3661,9 @@ function semanticRuntimeMemoryDebug(input: AiDecisionInput): {
   const belief = reconstructBeliefState(input);
   const facts = belief.entries
     .filter((entry) => entry.kind === "public_fact" || entry.kind === "revealed_opponent_fact")
-    .slice(0, 6)
     .map((entry) => semanticRuntimeBeliefEntrySummary(entry.subject));
   const hypotheses = belief.entries
     .filter((entry) => entry.kind === "hypothesis" || entry.kind === "unknown")
-    .slice(0, 6)
     .map((entry) => `${semanticRuntimeBeliefEntrySummary(entry.subject)}:${round(entry.confidence)}`);
   const opponentModel = input.side === "runner"
     ? semanticRuntimeRunnerOpponentMemorySummary(belief.runnerOpponentModel)
@@ -3626,8 +3677,8 @@ function semanticRuntimeMemoryDebug(input: AiDecisionInput): {
   ];
   return {
     memoryVersion: belief.version,
-    facts,
-    hypotheses,
+    facts: uniqueDebugStrings(facts).slice(0, 6),
+    hypotheses: uniqueDebugStrings(hypotheses).slice(0, 6),
     invalidations: belief.invalidationLog.slice(0, 6),
     beliefUncertainty: belief.uncertainty.slice(0, 6),
     ...(opponentModel ? { opponentModel } : {}),

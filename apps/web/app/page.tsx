@@ -9630,9 +9630,6 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
   ];
   const visibleReasons = safeStringList(detail.visibleReasons, 5);
   const whyNot = safeStringList(detail.whyNot, 5);
-  const longTermPlan = safeStringList(detail.longTermPlan, 5);
-  const tacticalPlanItems = aiDecisionDebugDetailSectionItems(detail, "tactical_plan", 12);
-  const planLayerItems = [...longTermPlan, ...tacticalPlanItems];
   const title = mode === "preview" ? aiDecisionPreviewTitle(trace) : aiTraceTitle(trace);
   return (
     <div className="aiDecisionDebugContent">
@@ -9644,7 +9641,7 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
       <AiDecisionDebugChips title="Warnmarker" items={warningItems} tone="warning" />
       <AiDecisionDebugChips title="Gründe" items={visibleReasons} />
       <AiDecisionDebugChips title="Why-not" items={whyNot} />
-      <AiDecisionDebugCollapsibleChips title="Planebene" items={planLayerItems} defaultOpen />
+      <AiDecisionDebugPlanLayer detail={detail} defaultOpen />
       {actionRows.length > 0 ? (
         <AiDecisionDebugCollapsibleSection title={mode === "preview" ? "LegalAction-Ebene" : "Action-Level-Ranking"} defaultOpen>
           <div className="aiDecisionDebugActions">
@@ -9697,6 +9694,297 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
       <AiDecisionDebugChips title="Folgepunkte" items={notes} tone="muted" />
     </div>
   );
+}
+
+type AiDecisionDebugPlanEntry = {
+  rank: number;
+  id: string;
+  type: string;
+  target?: string;
+  targetLabel?: string;
+  priority?: number;
+  status?: string;
+  step?: string;
+  selected: boolean;
+  blockers: string[];
+  capabilities: string[];
+  scores: Array<[string, string]>;
+};
+
+function AiDecisionDebugPlanLayer({ detail, defaultOpen = true }: { detail: Record<string, unknown>; defaultOpen?: boolean }) {
+  const planLayer = aiDecisionDebugPlanLayer(detail);
+  if (planLayer.summaryRows.length === 0 && planLayer.entries.length === 0 && planLayer.fallbackItems.length === 0) return null;
+  return (
+    <AiDecisionDebugCollapsibleSection title="Planebene" defaultOpen={defaultOpen}>
+      {planLayer.summaryRows.length > 0 ? <AiDecisionDebugRows rows={planLayer.summaryRows} /> : null}
+      {planLayer.entries.length > 0 ? (
+        <div className="aiDecisionDebugPlanList">
+          {planLayer.entries.map((plan) => (
+            <div className={`aiDecisionDebugPlanCard ${plan.selected ? "selected" : ""} ${plan.status === "blocked" ? "blocked" : ""}`} key={`${plan.rank}:${plan.id}`}>
+              <div>
+                <strong>#{plan.rank} {aiTracePlanLabel(plan.type)}</strong>
+                <span>
+                  {[
+                    aiDecisionDebugPlanTargetLabel(plan),
+                    plan.priority !== undefined ? `Priorität ${plan.priority.toFixed(0)}` : undefined,
+                    aiDecisionDebugPlanStatusLabel(plan.status)
+                  ].filter(Boolean).join(" · ")}
+                </span>
+              </div>
+              {plan.step ? <p>Nächster Schritt: {aiDecisionDebugPlanStepLabel(plan.step)}</p> : null}
+              {plan.blockers.length > 0 ? (
+                <div className="aiDecisionDebugChipRow">
+                  {plan.blockers.map((blocker) => <span key={blocker}>Blocker: {aiDecisionDebugPlanBlockerLabel(blocker)}</span>)}
+                </div>
+              ) : null}
+              {plan.capabilities.length > 0 ? (
+                <div className="aiDecisionDebugChipRow muted">
+                  {plan.capabilities.slice(0, 4).map((capability) => <span key={capability}>{aiDecisionDebugPlanCapabilityLabel(capability)}</span>)}
+                </div>
+              ) : null}
+              {plan.scores.length > 0 ? (
+                <details className="aiDecisionDebugActionDetails">
+                  <summary>Plan-Score</summary>
+                  <AiDecisionDebugRows rows={plan.scores} />
+                </details>
+              ) : null}
+            </div>
+          ))}
+        </div>
+      ) : null}
+      {planLayer.fallbackItems.length > 0 ? <AiDecisionDebugChips title="Rohdiagnose" items={planLayer.fallbackItems} tone="muted" /> : null}
+    </AiDecisionDebugCollapsibleSection>
+  );
+}
+
+function aiDecisionDebugPlanLayer(detail: Record<string, unknown>): {
+  summaryRows: Array<[string, string]>;
+  entries: AiDecisionDebugPlanEntry[];
+  fallbackItems: string[];
+} {
+  const longTermPlan = safeStringList(detail.longTermPlan, 12);
+  const tacticalPlanItems = aiDecisionDebugDetailSectionItems(detail, "tactical_plan", 64);
+  const items = uniqueDisplayStrings([...longTermPlan, ...tacticalPlanItems]);
+  const entries = items
+    .map(aiDecisionDebugParsePlanEntry)
+    .filter((entry): entry is AiDecisionDebugPlanEntry => Boolean(entry))
+    .sort((left, right) => left.rank - right.rank);
+  const selectedEntry = entries.find((entry) => entry.selected);
+  const selectedType = selectedEntry?.type ?? aiDecisionDebugTagValue(items, "selected_plan_type") ?? aiDecisionDebugTagValue(items, "tactical_plan_type");
+  const selectedStatus = selectedEntry?.status ?? aiDecisionDebugTagValue(items, "selected_plan_status");
+  const selectedStep = selectedEntry?.step ?? aiDecisionDebugTagValue(items, "selected_step_kind") ?? aiDecisionDebugTagValue(items, "tactical_step");
+  const selectedTarget = selectedEntry ? aiDecisionDebugPlanTargetLabel(selectedEntry) : "";
+  const selectedPriority = selectedEntry?.priority !== undefined ? ` · Priorität ${selectedEntry.priority.toFixed(0)}` : "";
+  const previousType = aiDecisionDebugTagValue(items, "previous_plan_type");
+  const previousStatus = aiDecisionDebugTagValue(items, "previous_plan_status");
+  const previousTtl = aiDecisionDebugTagValue(items, "previous_plan_ttl");
+  const planProgression = aiDecisionDebugTagValue(items, "plan_progression_reason");
+  const whyAbandoned = aiDecisionDebugTagValue(items, "why_plan_abandoned");
+  const mapping = aiDecisionDebugTagValue(items, "selected_step_mapping");
+  const mappedActions = aiDecisionDebugTagValue(items, "mapped_legal_actions");
+  const alternativeCount = aiDecisionDebugTagValue(items, "plan_alternative_count");
+  const blockedCount = aiDecisionDebugTagValue(items, "blocked_plan_count");
+  const summaryRows: Array<[string, string]> = [];
+  if (selectedType) {
+    summaryRows.push([
+      "Ausgewählter Plan",
+      [
+        aiTracePlanLabel(selectedType),
+        selectedTarget || undefined,
+        selectedStatus ? aiDecisionDebugPlanStatusLabel(selectedStatus) : undefined
+      ].filter(Boolean).join(" · ") + selectedPriority
+    ]);
+  }
+  if (selectedStep) summaryRows.push(["Aktueller Schritt", aiDecisionDebugPlanStepLabel(selectedStep)]);
+  if (mapping || mappedActions) {
+    const actionCount = mappedActions ? mappedActions.split("|").filter(Boolean).length : 0;
+    summaryRows.push(["Step-Mapping", `${mapping ? aiDecisionDebugPlanMappingLabel(mapping) : "-"}${actionCount > 0 ? ` · ${actionCount} LegalAction${actionCount === 1 ? "" : "s"}` : ""}`]);
+  }
+  if (previousType && previousType !== "none") {
+    summaryRows.push([
+      "Vorheriger Plan",
+      [
+        aiTracePlanLabel(previousType),
+        previousStatus ? aiDecisionDebugPlanStatusLabel(previousStatus) : undefined,
+        previousTtl ? `TTL ${previousTtl}` : undefined
+      ].filter(Boolean).join(" · ")
+    ]);
+  }
+  if (planProgression) summaryRows.push(["Fortschreibung", aiDecisionDebugPlanProgressionLabel(planProgression)]);
+  if (whyAbandoned) summaryRows.push(["Verworfen", whyAbandoned]);
+  if (alternativeCount || blockedCount) summaryRows.push(["Plan-Kandidaten", `${alternativeCount ?? entries.length} bewertet · ${blockedCount ?? entries.filter((entry) => entry.status === "blocked").length} blockiert`]);
+  const fallbackItems = entries.length === 0
+    ? items.filter((item) => !item.startsWith("plan_rank|")).slice(0, 16)
+    : [];
+  return { summaryRows, entries, fallbackItems };
+}
+
+function aiDecisionDebugParsePlanEntry(item: string): AiDecisionDebugPlanEntry | undefined {
+  if (!item.startsWith("plan_rank|")) return undefined;
+  const fields = new Map<string, string>();
+  for (const part of item.split("|").slice(1)) {
+    const separator = part.indexOf("=");
+    if (separator <= 0) continue;
+    fields.set(part.slice(0, separator), part.slice(separator + 1));
+  }
+  const rank = aiDecisionDebugNumber(fields.get("rank")) ?? 0;
+  const id = fields.get("id") ?? `plan-${rank}`;
+  const type = fields.get("type") ?? "Plan";
+  const target = fields.get("target") || undefined;
+  const targetLabel = fields.get("target_label") || undefined;
+  const priority = aiDecisionDebugNumber(fields.get("priority"));
+  const status = fields.get("status") || undefined;
+  const step = fields.get("step") || undefined;
+  return {
+    rank,
+    id,
+    type,
+    ...(target ? { target } : {}),
+    ...(targetLabel ? { targetLabel } : {}),
+    ...(priority !== undefined ? { priority } : {}),
+    ...(status ? { status } : {}),
+    ...(step ? { step } : {}),
+    selected: fields.get("selected") === "true",
+    blockers: aiDecisionDebugCsv(fields.get("blockers")),
+    capabilities: aiDecisionDebugCsv(fields.get("capabilities")),
+    scores: aiDecisionDebugScoreCsv(fields.get("scores"))
+  };
+}
+
+function aiDecisionDebugTagValue(items: string[], key: string): string | undefined {
+  const prefix = `${key}:`;
+  const item = items.find((candidate) => candidate.startsWith(prefix));
+  return item ? item.slice(prefix.length) : undefined;
+}
+
+function aiDecisionDebugNumber(value: string | undefined): number | undefined {
+  if (value === undefined) return undefined;
+  const numberValue = Number(value);
+  return Number.isFinite(numberValue) ? numberValue : undefined;
+}
+
+function uniqueDisplayStrings(values: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const value of values) {
+    if (seen.has(value)) continue;
+    seen.add(value);
+    result.push(value);
+  }
+  return result;
+}
+
+function aiDecisionDebugCsv(value: string | undefined): string[] {
+  if (!value) return [];
+  return value.split(",").map((entry) => entry.trim()).filter(Boolean);
+}
+
+function aiDecisionDebugScoreCsv(value: string | undefined): Array<[string, string]> {
+  if (!value) return [];
+  return value.split(",").map((entry): [string, string] | undefined => {
+    const separator = entry.lastIndexOf(":");
+    if (separator <= 0) return undefined;
+    return [entry.slice(0, separator), entry.slice(separator + 1)];
+  }).filter((entry): entry is [string, string] => Boolean(entry));
+}
+
+function aiDecisionDebugPlanTargetLabel(plan: AiDecisionDebugPlanEntry): string {
+  if (plan.targetLabel) return plan.targetLabel;
+  if (!plan.target) return "";
+  const [, id = plan.target] = plan.target.split(":");
+  if (id === "hq") return "HQ";
+  if (id === "rd") return "R&D";
+  if (id === "archives") return "Archive";
+  if (id.startsWith("remote_")) return `Remote ${id.slice("remote_".length)}`;
+  return id;
+}
+
+function aiDecisionDebugPlanStatusLabel(value: string | undefined): string {
+  const labels: Record<string, string> = {
+    abandoned: "verworfen",
+    active: "aktiv",
+    blocked: "blockiert",
+    expired: "abgelaufen",
+    failed: "fehlgeschlagen",
+    progressing: "wird fortgeführt",
+    proposed: "Kandidat",
+    satisfied: "erfüllt"
+  };
+  return value ? labels[value] ?? value : "-";
+}
+
+function aiDecisionDebugPlanStepLabel(value: string): string {
+  const labels: Record<string, string> = {
+    advance_score_card: "Score-Karte advancen",
+    build_bank_counter: "Credit-Bank aufbauen",
+    cash_out_bank: "Credit-Bank auszahlen",
+    draw_for_answer: "Karte ziehen / Antwort suchen",
+    gain_credits: "Credits nehmen",
+    install_breaker: "Breaker installieren",
+    probe_central: "Zentralserver prüfen",
+    rez_outer_ice: "äußeres ICE rezzen",
+    run_target: "Run auf Zielserver",
+    score_agenda: "Agenda punkten",
+    search_for_answer: "Such-/Antwortkarte nutzen"
+  };
+  return labels[value] ?? value;
+}
+
+function aiDecisionDebugPlanMappingLabel(value: string): string {
+  const labels: Record<string, string> = {
+    blocked_missing_capability: "blockiert: Voraussetzung fehlt",
+    blocked_no_legal_action: "blockiert: keine LegalAction",
+    blocked_timing: "blockiert: falsches Timing",
+    blocked_too_expensive: "blockiert: zu teuer",
+    defer_to_reactive_window: "reaktives Fenster",
+    matched: "gemappt",
+    unmapped: "nicht gemappt"
+  };
+  return labels[value] ?? value;
+}
+
+function aiDecisionDebugPlanProgressionLabel(value: string): string {
+  const labels: Record<string, string> = {
+    continued_previous_plan: "vorheriger Plan fortgesetzt",
+    previous_central_probe_ttl_expired: "Zentralserver-Probe abgelaufen, zurück zum Blockerplan",
+    previous_plan_considered: "vorheriger Plan wurde berücksichtigt",
+    selected_new_plan: "neuer Plan gewählt"
+  };
+  return labels[value] ?? value;
+}
+
+function aiDecisionDebugPlanBlockerLabel(value: string): string {
+  const labels: Record<string, string> = {
+    missing_breaker_coverage: "Breaker-Abdeckung fehlt",
+    missing_credits: "Credits fehlen",
+    missing_legal_action: "keine passende LegalAction",
+    missing_remote_protection: "Remote-Schutz fehlt",
+    reactive_window: "reaktives Fenster",
+    timing_window_unavailable: "Timingfenster fehlt"
+  };
+  return labels[value] ?? value;
+}
+
+function aiDecisionDebugPlanCapabilityLabel(value: string): string {
+  const labels: Record<string, string> = {
+    agenda_score_window: "Score-Fenster",
+    bank_capacity: "Bank-Kapazität",
+    bank_payout: "Bank-Auszahlung",
+    breaker_ap: "AP-Breaker",
+    breaker_code_gate: "Code-Gate-Breaker",
+    breaker_coverage: "Breaker-Abdeckung",
+    breaker_sentry: "Sentry-Breaker",
+    breaker_trace: "Trace-Breaker",
+    breaker_universal: "Universal-Breaker",
+    breaker_wall: "Wall-Breaker",
+    card_draw: "Karten ziehen",
+    card_search: "Kartensuche",
+    credits: "Credits",
+    remote_protection: "Remote-Schutz",
+    rez_window: "Rez-Fenster",
+    server_access: "Serverzugriff"
+  };
+  return labels[value] ?? value;
 }
 
 function AiDecisionDebugCollapsibleSection({
@@ -9755,10 +10043,10 @@ function AiDecisionDebugRows({ rows }: { rows: Array<[string, string]> }) {
 
 function AiDecisionDebugMemory({ detail }: { detail: Record<string, unknown> }) {
   const rows = aiDecisionDebugMemoryRows(detail);
-  const facts = safeStringList(detail.facts, 4);
-  const hypotheses = safeStringList(detail.hypotheses, 4);
-  const uncertainty = safeStringList(detail.beliefUncertainty, 4);
-  const invalidations = safeStringList(detail.invalidations, 4);
+  const facts = aiDecisionDebugMemoryChipList(detail.facts, 6);
+  const hypotheses = aiDecisionDebugMemoryChipList(detail.hypotheses, 6);
+  const uncertainty = aiDecisionDebugMemoryChipList(detail.beliefUncertainty, 4);
+  const invalidations = aiDecisionDebugMemoryChipList(detail.invalidations, 5);
   if (rows.length === 0 && facts.length === 0 && hypotheses.length === 0 && uncertainty.length === 0 && invalidations.length === 0) return null;
   return (
     <details className="aiDecisionDebugSection aiDecisionMemoryDetails">
@@ -9779,10 +10067,10 @@ function aiDecisionDebugMemoryRows(detail: Record<string, unknown>): Array<[stri
   if (!model) return rows;
   const rnd = aiDecisionDebugRecord(model.rndTopFreshness);
   if (rnd) {
-    const freshness = typeof rnd.freshness === "string" ? rnd.freshness : "-";
+    const freshness = typeof rnd.freshness === "string" ? aiDecisionDebugRndFreshnessLabel(rnd.freshness) : "-";
     const known = rnd.knownToRunner === true ? "bekannt" : "nicht bekannt";
     const knownTop = aiDecisionDebugCardLabel(aiDecisionDebugRecord(rnd.knownTopCard));
-    rows.push(["R&D-Top", `${knownTop ? `${knownTop} · ` : ""}${freshness} · ${known}`]);
+    rows.push(["R&D-Top-Wissen", `${knownTop ? `${knownTop} · ` : ""}${freshness} · ${known}`]);
     const sequence = aiDecisionDebugPositionCardList(rnd.knownSequence, 6);
     if (sequence) rows.push(["R&D-Sequenz", sequence]);
   }
@@ -9791,25 +10079,29 @@ function aiDecisionDebugMemoryRows(detail: Record<string, unknown>): Array<[stri
     const knownCount = typeof hq.knownCount === "number" ? hq.knownCount : 0;
     const handCountValue = typeof hq.handCount === "number" ? hq.handCount : undefined;
     const handCount = handCountValue ?? "?";
-    const allKnown = hq.allCardsKnown === true ? "vollständig" : "teilweise";
-    rows.push(["HQ-Hand", `${knownCount}/${handCount} bekannt · ${allKnown}`]);
+    const knowledgeStatus = hq.allCardsKnown === true
+      ? "vollständig"
+      : knownCount <= 0
+        ? "keine bekannt"
+        : "teilweise";
+    rows.push(["HQ-Hand-Wissen", `${knownCount}/${handCount} Karten namentlich bekannt · ${knowledgeStatus}`]);
     const knownCards = aiDecisionDebugCardList(hq.knownCards, 8);
     const unknownCount = handCountValue !== undefined ? Math.max(0, handCountValue - knownCount) : 0;
     if (knownCards || unknownCount > 0) {
       rows.push([
-        "HQ-Karten",
-        [knownCards, unknownCount > 0 ? `? x${unknownCount}` : ""].filter(Boolean).join(" · ")
+        "HQ-Hand-Inhalt",
+        [knownCards, unknownCount > 0 ? `${unknownCount} unbekannt` : ""].filter(Boolean).join(" · ")
       ]);
     }
   }
   const knownPositions = aiDecisionDebugPositionCardList(model.knownPositionMemory, 6);
   if (knownPositions) {
-    rows.push(["Bekannte Positionen", knownPositions]);
+    rows.push(["Positionswissen", knownPositions]);
   } else if (typeof model.knownPositionMemoryCount === "number") {
-    rows.push(["Bekannte Positionen", String(model.knownPositionMemoryCount)]);
+    rows.push(["Positionswissen", model.knownPositionMemoryCount === 0 ? "keine" : String(model.knownPositionMemoryCount)]);
   }
   const remoteBeliefs = Array.isArray(model.remoteCardBelief) ? model.remoteCardBelief.length : undefined;
-  if (remoteBeliefs !== undefined) rows.push(["Remote-Hypothesen", String(remoteBeliefs)]);
+  if (remoteBeliefs !== undefined) rows.push(["Remote-Hypothesen", remoteBeliefs === 0 ? "keine" : String(remoteBeliefs)]);
   const remoteCandidates = aiDecisionDebugRecordList(model.hiddenRemoteCandidateMemory);
   if (remoteCandidates.length > 0) {
     rows.push([
@@ -9838,10 +10130,70 @@ function aiDecisionDebugMemoryRows(detail: Record<string, unknown>): Array<[stri
       `HQ ${aiDecisionDebugPercent(threat.hqPressure)} · R&D ${aiDecisionDebugPercent(threat.rndPressure)} · Remote ${aiDecisionDebugPercent(threat.remotePressure)}`
     ]);
   }
-  if (typeof model.hqAgendaDensityEstimate === "number") rows.push(["HQ-Agenda-Schätzung", aiDecisionDebugPercent(model.hqAgendaDensityEstimate)]);
-  if (typeof model.rndValueEstimate === "number") rows.push(["R&D-Wert-Schätzung", aiDecisionDebugPercent(model.rndValueEstimate)]);
+  if (typeof model.hqAgendaDensityEstimate === "number") rows.push(["HQ-Agenda-Heuristik", `${aiDecisionDebugPercent(model.hqAgendaDensityEstimate)} · grobe Schätzung`]);
+  if (typeof model.rndValueEstimate === "number") rows.push(["R&D-Zugriffsheuristik", `${aiDecisionDebugPercent(model.rndValueEstimate)} · grobe Schätzung`]);
   if (typeof model.corpCreditReserveInterpretation === "string") rows.push(["Korp-Creditreserve", model.corpCreditReserveInterpretation]);
   return rows;
+}
+
+function aiDecisionDebugMemoryChipList(value: unknown, limit: number): string[] {
+  return uniqueDisplayStrings(safeStringList(value, 32).map(aiDecisionDebugMemoryChipLabel)).slice(0, limit);
+}
+
+function aiDecisionDebugMemoryChipLabel(value: string): string {
+  if (value.startsWith("revealed_opponent_card:")) return `Gesehene Karte: ${value.slice("revealed_opponent_card:".length)}`;
+  if (value.startsWith("public_card:")) {
+    const [, server = "Server", title = "Karte"] = value.split(":");
+    return `Offene Karte ${aiDecisionDebugServerLabel(server)}: ${title}`;
+  }
+  if (value.startsWith("server_shape:")) {
+    const parts = value.split(":");
+    const server = aiDecisionDebugServerLabel(parts[1] ?? "Server");
+    const ice = parts[3] ?? "?";
+    const root = parts[5] ?? "?";
+    return `Serverform ${server}: ${ice} ICE, ${root} Root`;
+  }
+  if (value.startsWith("remote_card_hypothesis:")) {
+    const parts = value.split(":");
+    return `Remote-Hypothese ${aiDecisionDebugServerLabel(parts[1] ?? "Remote")}: ${parts[2] ?? "unbekannte Karte"}`;
+  }
+  if (value.startsWith("unrezzed_ice_risk:")) {
+    const parts = value.split(":");
+    const score = parts[3] ? ` (${Math.round(Number(parts[3]) * 100)}%)` : "";
+    return `Unrezzed-ICE-Risiko ${aiDecisionDebugServerLabel(parts[1] ?? "Server")}${score}`;
+  }
+  if (value.startsWith("opponent_hidden_hand_cards:")) return `${value.slice("opponent_hidden_hand_cards:".length)} unbekannte gegnerische Handkarten`;
+  const labels: Record<string, string> = {
+    corp_draw_event: "Korp hat gezogen",
+    known_projection_only: "nur bekannte Projektion",
+    remote_state_changed: "Remote-Zustand geändert",
+    unknown_opponent_hand_or_hidden_zones: "unbekannte Hand oder Hidden-Zonen",
+    unknown_remote_cards_remain_hypotheses: "Remote-Hypothesen bleiben unsicher",
+    unrezzed_ice_titles_remain_unknown: "unrezzed ICE-Titel unbekannt"
+  };
+  const parts = value.split(":");
+  const key = parts[0] ?? "";
+  const suffix = parts[1];
+  return suffix && labels[key] ? `${labels[key]}: ${suffix}` : labels[value] ?? value;
+}
+
+function aiDecisionDebugRndFreshnessLabel(value: string): string {
+  const labels: Record<string, string> = {
+    fresh: "frisch",
+    fresh_known_same_top: "frisch bekannte Topkarte",
+    invalidated: "invalidiert",
+    stale_known_same_top: "alte bekannte Topkarte",
+    unknown: "unbekannt"
+  };
+  return labels[value] ?? value;
+}
+
+function aiDecisionDebugServerLabel(value: string): string {
+  if (value === "hq") return "HQ";
+  if (value === "rd") return "R&D";
+  if (value === "archives") return "Archive";
+  if (value.startsWith("remote_")) return `Remote ${value.slice("remote_".length)}`;
+  return value;
 }
 
 function aiDecisionDebugCardLabel(entry: Record<string, unknown> | undefined): string {

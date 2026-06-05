@@ -10583,6 +10583,10 @@ select,
   color: var(--muted);
 }
 
+.aiDecisionDebugChipRow.muted span {
+  color: var(--muted);
+}
+
 .aiDecisionDebugChipRow {
   display: flex;
   flex-wrap: wrap;
@@ -10633,6 +10637,49 @@ select,
 
 .aiDecisionDebugAction > div:first-child span,
 .aiDecisionDebugAction p {
+  margin: 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.aiDecisionDebugPlanList {
+  display: grid;
+  gap: 6px;
+}
+
+.aiDecisionDebugPlanCard {
+  min-width: 0;
+  display: grid;
+  gap: 5px;
+  padding: 7px;
+  border: 1px solid color-mix(in srgb, var(--line), transparent 10%);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--field-bg), transparent 18%);
+}
+
+.aiDecisionDebugPlanCard.selected {
+  border-color: color-mix(in srgb, var(--runner), var(--line) 25%);
+  background: color-mix(in srgb, var(--runner), var(--field-bg) 86%);
+}
+
+.aiDecisionDebugPlanCard.blocked {
+  opacity: 0.82;
+  border-style: dashed;
+}
+
+.aiDecisionDebugPlanCard > div:first-child {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.aiDecisionDebugPlanCard strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.aiDecisionDebugPlanCard > div:first-child span,
+.aiDecisionDebugPlanCard p {
   margin: 0;
   color: var(--muted);
   overflow-wrap: anywhere;
