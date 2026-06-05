@@ -152,6 +152,191 @@ export type TacticalPlanRuntimeResult = {
   selectedMapping?: PlanStepMappingResult;
 };
 
+export function buildTacticalPlans(
+  _context: TacticalPlanBuildContext,
+): TacticalPlan[] {
+  return [];
+}
+
+export function evaluateTacticalPlans(
+  context: TacticalPlanBuildContext,
+): TacticalPlanRuntimeResult {
+  const planAlternatives = rankTacticalPlans(buildTacticalPlans(context));
+  const blockedPlans = planAlternatives.filter((plan) => plan.status === "blocked");
+  const candidates = context.candidates ?? [];
+  for (const plan of planAlternatives) {
+    const mapping = mapPlanStepToLegalActions(
+      plan,
+      plan.currentStep,
+      candidates,
+      context.input,
+    );
+    if (mapping.status === "matched" && mapping.legalActions.length > 0) {
+      return {
+        planAlternatives,
+        blockedPlans,
+        selectedPlan: plan,
+        selectedStep: mapping.step,
+        selectedMapping: mapping,
+      };
+    }
+  }
+  return {
+    planAlternatives,
+    blockedPlans,
+  };
+}
+
+export function mapPlanStepToLegalActions(
+  plan: TacticalPlan,
+  step: PlanStep,
+  candidates: readonly ActionSemanticCandidate[],
+  input: AiDecisionInput,
+): PlanStepMappingResult {
+  const legalActionsById = new Map(
+    input.legalActions.map((action) => [action.actionId, action]),
+  );
+  const matchedCandidateIds = candidates
+    .filter((candidate) => candidateMatchesStep(plan, step, candidate))
+    .map((candidate) => candidate.actionId);
+  const legalActions = matchedCandidateIds
+    .map((actionId) => legalActionsById.get(actionId))
+    .filter((action): action is LegalAction => Boolean(action));
+  const status = mappingStatusForStep(step, legalActions);
+  return {
+    plan,
+    step: {
+      ...step,
+      mappingStatus: status,
+      actionCandidateIds: matchedCandidateIds,
+    },
+    status,
+    actionCandidateIds: matchedCandidateIds,
+    legalActions,
+    rationale: [
+      ...step.rationale,
+      `mapped_candidate_count:${matchedCandidateIds.length}`,
+      `mapped_legal_action_count:${legalActions.length}`,
+    ],
+  };
+}
+
+function mappingStatusForStep(
+  step: PlanStep,
+  legalActions: readonly LegalAction[],
+): PlanMappingStatus {
+  if (legalActions.length > 0) return "matched";
+  if (
+    step.requiredCapabilities.some(
+      (capability) =>
+        capability.kind === "breaker_coverage" ||
+        capability.kind === "remote_protection" ||
+        capability.kind === "bank_payout",
+    )
+  ) {
+    return "blocked_missing_capability";
+  }
+  return "blocked_no_legal_action";
+}
+
+function candidateMatchesStep(
+  plan: TacticalPlan,
+  step: PlanStep,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  if (candidate.actorSide !== plan.side) return false;
+  if (
+    candidate.primaryProjectionStatus === "blocked" ||
+    candidate.primaryProjectionStatus === "hidden_info_blocked"
+  ) {
+    return false;
+  }
+  if (step.desiredActionSemantics.includes(candidate.semanticActionType)) {
+    return candidateTargetMatchesPlan(plan, candidate);
+  }
+  if (candidate.actionTacticSignals.some((signal) => step.desiredActionSemantics.includes(signal))) {
+    return candidateTargetMatchesPlan(plan, candidate);
+  }
+  if (candidate.cardContextSignals.some((signal) => step.desiredActionSemantics.includes(signal))) {
+    return candidateTargetMatchesPlan(plan, candidate);
+  }
+  return actionTypeMatchesStep(step, candidate.actionType) &&
+    candidateTargetMatchesPlan(plan, candidate) &&
+    bankStepMatchesCandidate(step, candidate);
+}
+
+function actionTypeMatchesStep(step: PlanStep, actionType: string): boolean {
+  switch (step.kind) {
+    case "install_breaker":
+      return actionType === "install_card";
+    case "draw_for_answer":
+      return actionType === "draw_card";
+    case "search_for_answer":
+      return (
+        actionType === "trigger_ability" ||
+        actionType === "activated_card_ability" ||
+        actionType === "play_event" ||
+        actionType === "draw_card"
+      );
+    case "gain_credits":
+      return actionType === "gain_credit";
+    case "build_bank_counter":
+    case "cash_out_bank":
+      return actionType === "trigger_ability" || actionType === "activated_card_ability";
+    case "run_target":
+    case "probe_central":
+      return actionType === "start_run";
+    case "rez_outer_ice":
+      return actionType === "rez_ice";
+    case "advance_score_card":
+      return actionType === "advance_card";
+    case "score_agenda":
+      return actionType === "score_agenda";
+  }
+}
+
+function candidateTargetMatchesPlan(
+  plan: TacticalPlan,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  if (!plan.target) return true;
+  if (plan.target.kind !== "server") return true;
+  const selectedServer = candidate.targetContext?.selectedTargets.find(
+    (target) => target.targetKind === "server",
+  );
+  if (selectedServer) return selectedServer.targetId === plan.target.id;
+  return candidate.legalActionRef.originalPayloadKeys.includes("serverId");
+}
+
+function bankStepMatchesCandidate(
+  step: PlanStep,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  if (step.kind !== "build_bank_counter" && step.kind !== "cash_out_bank") {
+    return true;
+  }
+  const evidence = candidate.evidence.join(" ").toLowerCase();
+  const signals = [
+    ...candidate.actionTacticSignals,
+    ...candidate.cardContextSignals,
+    candidate.semanticActionType,
+  ].join(" ").toLowerCase();
+  if (step.kind === "build_bank_counter") {
+    return (
+      evidence.includes("auf broker legen") ||
+      signals.includes("bank") ||
+      signals.includes("counter_bank") ||
+      signals.includes("temporary_resource_bank")
+    );
+  }
+  return (
+    evidence.includes("von broker nehmen") ||
+    signals.includes("cash") ||
+    signals.includes("payout") ||
+    signals.includes("bank")
+  );
+}
+
 export function createPlanStep(params: {
   stepId: string;
   kind: PlanStepKind;

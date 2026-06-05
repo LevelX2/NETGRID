@@ -3,8 +3,11 @@ import { describe, expect, it } from "vitest";
 import {
   createPlanStep,
   createTacticalPlan,
+  mapPlanStepToLegalActions,
   rankTacticalPlans,
 } from "./tactical-plans";
+import type { ActionSemanticCandidate } from "./action-semantic-candidate";
+import type { AiDecisionInput, LegalAction, PlayerView, Side } from "@netgrid/shared";
 
 describe("tactical plan model", () => {
   it("creates a blocked plan with a next remediation step", () => {
@@ -85,4 +88,180 @@ describe("tactical plan model", () => {
       "runner.contest_remote:remote_1",
     ]);
   });
+
+  it("maps a plan step through ActionSemanticCandidate back to LegalAction", () => {
+    const action = legalAction("run-hq", "runner", "start_run", {
+      serverId: "hq",
+    });
+    const plan = createTacticalPlan({
+      planId: "runner.opportunistic_central_run:hq",
+      side: "runner",
+      type: "runner.opportunistic_central_run",
+      status: "active",
+      priority: 700,
+      horizonTurns: 1,
+      target: { kind: "server", id: "hq" },
+      currentStep: createPlanStep({
+        stepId: "probe_central:hq",
+        kind: "probe_central",
+        desiredActionSemantics: ["run"],
+      }),
+      stateVersion: 1,
+    });
+
+    const mapping = mapPlanStepToLegalActions(
+      plan,
+      plan.currentStep,
+      [candidateForAction(action)],
+      aiInput("runner", [action]),
+    );
+
+    expect(mapping.status).toBe("matched");
+    expect(mapping.actionCandidateIds).toEqual(["run-hq"]);
+    expect(mapping.legalActions[0]?.actionId).toBe("run-hq");
+    expect(mapping.step.mappingStatus).toBe("matched");
+  });
 });
+
+function aiInput(side: Side, legalActions: LegalAction[]): AiDecisionInput {
+  return {
+    side,
+    playerView: playerView(side, legalActions),
+    eventTail: [],
+    legalActions,
+    difficulty: "normal",
+    seed: "tactical-plan-test",
+    decisionId: `tactical-plan-test:${side}`,
+    actionNumber: 1,
+    profileId: `${side}-tactical-plan-test`,
+  };
+}
+
+function playerView(side: Side, legalActions: LegalAction[]): PlayerView {
+  const opponentSide = side === "runner" ? "corp" : "runner";
+  return {
+    stateVersion: 1,
+    side,
+    activeSide: side,
+    phase: side === "runner" ? "runner_action_phase" : "corp_action_phase",
+    timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
+    own: {
+      identity: visibleIdentity(side),
+      credits: 5,
+      clicks: 3,
+      agendaPoints: 0,
+      gripOrHq: [],
+      stackOrRdCount: 0,
+      heapOrArchives: [],
+      scoreArea: [],
+      maxHandSize: 5,
+      tags: 0,
+    },
+    opponent: {
+      identity: visibleIdentity(opponentSide),
+      credits: 5,
+      clicks: 3,
+      agendaPoints: 0,
+      tags: 0,
+      handCount: 5,
+      maxHandSize: 5,
+      deckCount: 0,
+      discardCount: 0,
+      scoreArea: [],
+    },
+    servers: [],
+    publicEvents: [],
+    legalActions,
+    winner: null,
+    agendaPointsToWin: 7,
+  };
+}
+
+function visibleIdentity(side: Side): PlayerView["own"]["identity"] {
+  return {
+    instanceId: `${side}-identity`,
+    definitionId: `${side}-identity`,
+    title: `${side} identity`,
+    owner: side,
+    controller: side,
+    type: "identity",
+    known: true,
+  };
+}
+
+function legalAction(
+  actionId: string,
+  side: Side,
+  type: LegalAction["type"],
+  payload: LegalAction["payload"] = {},
+): LegalAction {
+  return {
+    actionId,
+    side,
+    type,
+    label: actionId,
+    source: "basic_action",
+    timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
+    costs: [{ credits: 0 }],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 2,
+    payload,
+  };
+}
+
+function candidateForAction(action: LegalAction): ActionSemanticCandidate {
+  return {
+    actionId: action.actionId,
+    actionType: action.type,
+    actorSide: action.side,
+    visibilityScope: "public",
+    legalActionRef: {
+      actionId: action.actionId,
+      actionType: action.type,
+      originalPayloadKeys: Object.keys(action.payload ?? {}),
+    },
+    sourceKind: "basic_action",
+    abilityBindingMethod: "unresolved",
+    semanticActionType: "run",
+    cardContextSignals: [],
+    actionTacticSignals: [],
+    strategySupport: [],
+    conditions: [],
+    risks: [],
+    constraints: [],
+    costProfile: {
+      costKnownStatus: "known",
+      additionalCosts: [],
+    },
+    timingProfile: {},
+    targetContext: {
+      selectedTargets: [
+        {
+          targetId: String(action.payload?.serverId ?? "unknown"),
+          targetKind: "server",
+          targetSide: "corp",
+          visibilityScope: "public",
+          evidence: ["test"],
+        },
+      ],
+      targetKind: "server",
+      targetZones: [],
+      targetSide: "corp",
+      hiddenInfoPolicy: "side_safe",
+      availableTargetsStatus: "engine_provided",
+      targetProfileMatches: [],
+      targetConstraintResults: [],
+    },
+    boardContext: {
+      source: "ai_decision_input",
+      sideSafe: true,
+      notes: [],
+    },
+    confidence: "high",
+    primaryProjectionStatus: "projected",
+    projectionIssues: [],
+    hardGates: [],
+    evidence: ["test candidate"],
+  };
+}

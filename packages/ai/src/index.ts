@@ -76,6 +76,12 @@ import {
   type StructuredTagPunishPayoffKind,
 } from "./tag-punish-ontology-consumer";
 import { buildAiDecisionInputDto } from "./input-dto";
+import { buildActionSemanticCandidates } from "./action-semantic-candidate";
+import {
+  evaluateTacticalPlans,
+  type PlanStepMappingResult,
+  type TacticalPlanRuntimeResult,
+} from "./tactical-plans";
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE,
@@ -3262,7 +3268,29 @@ function chooseSemanticRuntimeAction(
     };
   }
   const choices = semanticRuntimeChoices(input);
+  const reactiveChoice =
+    choices.find(
+      (candidate) =>
+        !candidate.exclusion &&
+        candidate.score > 0 &&
+        semanticRuntimeChoiceIsReactive(candidate),
+    ) ?? choices.find(
+      (candidate) => !candidate.exclusion && semanticRuntimeChoiceIsReactive(candidate),
+    );
+  const planRuntime = reactiveChoice
+    ? emptyTacticalPlanRuntimeResult()
+    : evaluateTacticalPlans({
+        input,
+        candidates: buildActionSemanticCandidates({
+          legalActions: input.legalActions,
+          observerSide: input.side,
+          stateVersion: input.playerView.stateVersion,
+        }),
+      });
+  const mappedChoice = tacticalPlanMappedChoice(choices, planRuntime.selectedMapping);
   const choice =
+    reactiveChoice ??
+    mappedChoice ??
     choices.find((candidate) => !candidate.exclusion && candidate.score > 0) ??
     choices.find((candidate) => !candidate.exclusion);
   if (!choice) {
@@ -3301,12 +3329,57 @@ function chooseSemanticRuntimeAction(
       choices,
       legacyDecision,
       legacyActionType,
+      planRuntime,
     ),
     timeoutUsed: Boolean(legacyDecision.timeoutUsed),
     profileId: input.profileId,
     difficulty: input.difficulty,
     reason: choice.reasonCode,
   };
+}
+
+function emptyTacticalPlanRuntimeResult(): TacticalPlanRuntimeResult {
+  return {
+    planAlternatives: [],
+    blockedPlans: [],
+  };
+}
+
+function tacticalPlanMappedChoice(
+  choices: readonly SemanticRuntimeChoice[],
+  mapping: PlanStepMappingResult | undefined,
+): SemanticRuntimeChoice | undefined {
+  if (!mapping) return undefined;
+  const mappedActionIds = new Set(mapping.legalActions.map((action) => action.actionId));
+  return choices.find(
+    (choice) =>
+      !choice.exclusion &&
+      mappedActionIds.has(choice.action.actionId) &&
+      choice.score > 0,
+  ) ?? choices.find(
+    (choice) => !choice.exclusion && mappedActionIds.has(choice.action.actionId),
+  );
+}
+
+function semanticRuntimeChoiceIsReactive(choice: SemanticRuntimeChoice): boolean {
+  return semanticRuntimeActionTypeIsReactive(choice.action.type);
+}
+
+function semanticRuntimeActionTypeIsReactive(type: LegalAction["type"]): boolean {
+  return (
+    type === "mandatory_draw" ||
+    type === "resolve_choice" ||
+    type === "access_card" ||
+    type === "steal_agenda" ||
+    type === "trash_accessed_card" ||
+    type === "decline_trash" ||
+    type === "break_subroutine" ||
+    type === "pump_breaker" ||
+    type === "continue_run" ||
+    type === "jack_out" ||
+    type === "rez_ice" ||
+    type === "decline_rez"
+  );
 }
 
 function semanticRuntimeForcedLegacy(): boolean {
@@ -3369,6 +3442,7 @@ function semanticRuntimeDecisionDebug(
   rankedChoices: SemanticRuntimeChoice[],
   legacyDecision: AiDecision,
   legacyActionType: LegalAction["type"] | undefined,
+  planRuntime: TacticalPlanRuntimeResult,
 ): AiDecisionDebug {
   const legacyDebug = legacyDecision.decisionDebug;
   const legacyPlanKind = legacyDebug?.planKind;
@@ -3387,12 +3461,15 @@ function semanticRuntimeDecisionDebug(
     ...(legacyPlanKind ? [`legacy_reference_plan:${legacyPlanKind}`] : []),
     ...(legacyDebugSelectedActionType ? [`legacy_debug_selected_action_type:${legacyDebugSelectedActionType}`] : [])
   ];
+  const selectedPlan = planRuntime.selectedPlan;
+  const selectedStep = planRuntime.selectedStep;
+  const selectedMapping = planRuntime.selectedMapping;
   return {
     schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
     aiLevel: legacyDebug?.aiLevel ?? 2,
     summary: selected.explanation,
-    planId: `semantic_runtime:${selected.scopeId}`,
-    planKind: selected.scopeId,
+    planId: selectedPlan?.planId ?? `semantic_runtime:${selected.scopeId}`,
+    planKind: selectedPlan?.type ?? selected.scopeId,
     selectedActionType: selected.action.type,
     score: selected.score,
     ...(selected.confidence !== undefined ? { confidence: selected.confidence } : {}),
@@ -3404,7 +3481,13 @@ function semanticRuntimeDecisionDebug(
       ? [`legacy_reference_action_type:${legacyActionType}`]
       : [],
     longTermPlan: [
-      `semantic_runtime_scope:${selected.scopeId}`,
+      ...(selectedPlan
+        ? [
+            `tactical_plan:${selectedPlan.planId}`,
+            `tactical_plan_type:${selectedPlan.type}`,
+            ...(selectedStep ? [`tactical_step:${selectedStep.kind}`] : []),
+          ]
+        : [`semantic_runtime_scope:${selected.scopeId}`]),
       ...(legacyPlanKind ? [`legacy_reference_plan:${legacyPlanKind}`] : [])
     ],
     ...(memoryDebug.memoryVersion ? { memoryVersion: memoryDebug.memoryVersion } : {}),
@@ -3420,6 +3503,13 @@ function semanticRuntimeDecisionDebug(
         title: "Semantic Runtime",
         items: detailItems
       },
+      ...(planRuntime.planAlternatives.length > 0
+        ? [{
+            id: "tactical_plan",
+            title: "Tactical Plan",
+            items: tacticalPlanDebugItems(planRuntime)
+          }]
+        : []),
       ...(memoryDebug.items.length > 0
         ? [{
             id: "semantic_memory",
@@ -3436,6 +3526,40 @@ function semanticRuntimeDecisionDebug(
     profileId: input.profileId,
     timeoutUsed: Boolean(legacyDecision.timeoutUsed)
   };
+}
+
+function tacticalPlanDebugItems(planRuntime: TacticalPlanRuntimeResult): string[] {
+  const selectedPlan = planRuntime.selectedPlan;
+  const selectedStep = planRuntime.selectedStep;
+  const selectedMapping = planRuntime.selectedMapping;
+  return [
+    `plan_alternative_count:${planRuntime.planAlternatives.length}`,
+    `blocked_plan_count:${planRuntime.blockedPlans.length}`,
+    ...(selectedPlan
+      ? [
+          `selected_plan:${selectedPlan.planId}`,
+          `selected_plan_type:${selectedPlan.type}`,
+          `selected_plan_status:${selectedPlan.status}`,
+        ]
+      : ["selected_plan:none"]),
+    ...(selectedStep
+      ? [
+          `selected_step:${selectedStep.stepId}`,
+          `selected_step_kind:${selectedStep.kind}`,
+        ]
+      : []),
+    ...(selectedMapping
+      ? [
+          `selected_step_mapping:${selectedMapping.status}`,
+          `mapped_legal_actions:${selectedMapping.legalActions
+            .map((action) => action.actionId)
+            .join("|")}`,
+        ]
+      : []),
+    ...planRuntime.planAlternatives.slice(0, 6).map(
+      (plan) => `plan:${plan.planId}:${plan.status}:${plan.priority}`,
+    ),
+  ];
 }
 
 function semanticRuntimeMemoryDebug(input: AiDecisionInput): {
