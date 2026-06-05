@@ -5400,7 +5400,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const breakStep = await advanceRunnerAiStep("break Filter with Krash");
     expect(breakStep.publicEvent?.publicPayload).toMatchObject({
       actionType: "break_subroutine",
-      aiReasonCode: "runner.encounter.break_etr"
+      aiReasonCode: "runner.semantic.encounter_survival"
     });
 
     const passIceStep = await advanceRunnerAiStep("continue after broken Filter");
@@ -5411,7 +5411,7 @@ describe("MVP 0.2 multiplayer service", () => {
 
     const accessWindowStep = await advanceRunnerAiStep("continue from server movement to access");
     expect(accessWindowStep.publicEvent?.publicPayload.actionType).toBe("continue_run");
-    expect(["runner.plan.safe_probe_run", "runner.encounter.continue"]).toContain(
+    expect(["runner.plan.safe_probe_run", "runner.encounter.continue", "runner.semantic.simple_run_choice"]).toContain(
       accessWindowStep.publicEvent?.publicPayload.aiReasonCode
     );
     expect(JSON.stringify(accessWindowStep.publicEvent?.publicPayload)).not.toMatch(
@@ -5421,7 +5421,7 @@ describe("MVP 0.2 multiplayer service", () => {
     const accessStep = await advanceRunnerAiStep("access R&D");
     expect(accessStep.publicEvent?.publicPayload).toMatchObject({
       actionType: "access_card",
-      aiReasonCode: "runner.access.open_card"
+      aiReasonCode: "runner.semantic.access_trash_steal"
     });
     expect(actionTypes).toEqual([
       "break_subroutine",

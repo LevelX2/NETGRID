@@ -3206,26 +3206,39 @@ function oppositeSide(side: Side): Side {
   return side === "runner" ? "corp" : "runner";
 }
 
-export function chooseAiAction(input: AiDecisionInput): AiDecision {
+type AiDecisionRuntimeOptions = {
+  persistTacticalPlanMemory?: boolean;
+};
+
+export function chooseAiAction(
+  input: AiDecisionInput,
+  options: AiDecisionRuntimeOptions = {},
+): AiDecision {
   return input.side === "runner"
-    ? chooseRunnerAction(input)
-    : chooseCorpAction(input);
+    ? chooseRunnerAction(input, options)
+    : chooseCorpAction(input, options);
 }
 
-export function chooseCorpAction(input: AiDecisionInput): AiDecision {
+export function chooseCorpAction(
+  input: AiDecisionInput,
+  options: AiDecisionRuntimeOptions = {},
+): AiDecision {
   const baselineDecision = chooseCorpBaselineAction(input);
   const legacyDecision = hasCorpPlanAction(input) &&
     !isCorpReactiveBaselineDecision(baselineDecision)
     ? chooseCorpPlanAction(input, baselineDecision)
     : baselineDecision;
-  return chooseSemanticRuntimeAction(input, legacyDecision);
+  return chooseSemanticRuntimeAction(input, legacyDecision, options);
 }
 
 export function chooseCorpBaselineAction(input: AiDecisionInput): AiDecision {
   return decisionFromChoices(input, scoreActions(input, "corp"));
 }
 
-export function chooseRunnerAction(input: AiDecisionInput): AiDecision {
+export function chooseRunnerAction(
+  input: AiDecisionInput,
+  options: AiDecisionRuntimeOptions = {},
+): AiDecision {
   const baselineDecision = chooseRunnerBaselineAction(input);
   const baselineAction = input.legalActions.find(
     (candidate) => candidate.actionId === baselineDecision.actionId,
@@ -3238,7 +3251,7 @@ export function chooseRunnerAction(input: AiDecisionInput): AiDecision {
   const legacyDecision = shouldUsePlanAction
     ? chooseRunnerPlanAction(input, baselineDecision)
     : baselineDecision;
-  return chooseSemanticRuntimeAction(input, legacyDecision);
+  return chooseSemanticRuntimeAction(input, legacyDecision, options);
 }
 
 export function chooseRunnerBaselineAction(input: AiDecisionInput): AiDecision {
@@ -3260,6 +3273,7 @@ type SemanticRuntimeExclusion = {
 function chooseSemanticRuntimeAction(
   input: AiDecisionInput,
   legacyDecision: AiDecision,
+  options: AiDecisionRuntimeOptions,
 ): AiDecision {
   if (semanticRuntimeForcedLegacy()) {
     return {
@@ -3311,7 +3325,10 @@ function chooseSemanticRuntimeAction(
     (action) => action.actionId === legacyDecision.actionId,
   )?.type;
   const selectedChoices = selectedChoicesForDecision(input, choice.action);
-  const updatedPlanMemory = rememberTacticalPlanRuntime(input, planRuntime, choice.action);
+  const persistTacticalPlanMemory = options.persistTacticalPlanMemory !== false;
+  const updatedPlanMemory = persistTacticalPlanMemory
+    ? rememberTacticalPlanRuntime(input, planRuntime, choice.action)
+    : undefined;
   return {
     actionId: choice.action.actionId,
     ...(selectedChoices ? { selectedChoices } : {}),
@@ -3338,6 +3355,9 @@ function chooseSemanticRuntimeAction(
             `tactical_plan_memory_status:${updatedPlanMemory.status}`,
             `tactical_plan_progression:${updatedPlanMemory.planProgressionReason}`,
           ]
+        : []),
+      ...(!persistTacticalPlanMemory && planRuntime.selectedPlan
+        ? ["tactical_plan_memory_preview_only:true"]
         : []),
       `legacy_reference_reason:${legacyDecision.reasonCode}`,
       ...(legacyActionType

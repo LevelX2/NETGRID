@@ -1646,7 +1646,8 @@ export class MultiplayerService {
           decisionId: `${record.match.matchId}:${record.gameState.stateVersion}:${activeAiSide}`,
           actionNumber: record.gameState.stateVersion,
           ...(ownDeckSnapshot ? { ownDeckSnapshot } : {})
-        })
+        }),
+        { persistTacticalPlanMemory: false }
       );
       const legalAction = legalActions.find((candidate) => candidate.actionId === decision.actionId) ?? legalActions.slice().sort((left, right) => left.actionId.localeCompare(right.actionId))[0];
       if (!legalAction) {

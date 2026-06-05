@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 
 import { chooseCorpAction, chooseRunnerAction } from "./index";
-import { resetTacticalPlanMemory } from "./tactical-plans";
+import { getTacticalPlanMemorySnapshot, resetTacticalPlanMemory } from "./tactical-plans";
 import type {
   AiDecisionInput,
   AiDifficulty,
@@ -274,6 +274,46 @@ describe("Semantic AI runtime cutover", () => {
         }),
       ]),
     );
+  });
+
+  it("keeps preview decisions from advancing tactical plan memory", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
+    ]);
+    input.playerView.own.rig = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-wall", "corp", "ice", { rezzed: true }),
+      ]),
+    ];
+
+    const previewDecision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(previewDecision.actionId).toBe("draw");
+    expect(previewDecision.evidence).toContain(
+      "tactical_plan_memory_preview_only:true",
+    );
+    expect(getTacticalPlanMemorySnapshot(input)).toBeUndefined();
+
+    const liveDecision = chooseRunnerAction(input);
+
+    expect(liveDecision.actionId).toBe(previewDecision.actionId);
+    expect(getTacticalPlanMemorySnapshot(input)).toMatchObject({
+      type: "runner.obtain_breaker_coverage",
+    });
   });
 
   it("keeps an opportunistic central run available while a remote plan is blocked", () => {
