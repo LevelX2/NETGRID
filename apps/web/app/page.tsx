@@ -294,6 +294,7 @@ import {
   aiTraceDebugGapNotes,
   aiTraceDoctrineRows,
   aiTraceMetaRows,
+  aiTracePlanLabel,
   aiTraceScoreRows,
   aiTraceTitle,
   buildMaintenanceAiTraceEnablePath,
@@ -496,6 +497,24 @@ type LobbyClientPayload = ApiLobbyPayload;
 type ServerMessage = ApiServerMessage;
 type CreateMatchResponse = ApiCreateMatchResponse;
 type JoinMatchResponse = ApiJoinMatchResponse;
+type AiDecisionPreview = {
+  matchId: string;
+  matchVersion: number;
+  stateVersion: number;
+  requestedBy: Side;
+  side: Side;
+  generatedAt: string;
+  actionId: string;
+  actionType: LegalAction["type"];
+  actionLabel: string;
+  reasonCode: string;
+  explanation: string;
+  fallbackUsed: boolean;
+  timeoutUsed?: boolean;
+  confidence?: number;
+  selectedChoices?: Record<string, unknown>;
+  detail: Record<string, unknown>;
+};
 
 function removePendingUndo<T extends { pendingUndo?: unknown }>(payload: T): Omit<T, "pendingUndo"> {
   const { pendingUndo: _pendingUndo, ...withoutPendingUndo } = payload;
@@ -2331,6 +2350,8 @@ export default function Page() {
   );
   const [aiDecisionDebugStatus, setAiDecisionDebugStatus] = useState<AiDecisionDebugOverlayStatus>("off");
   const [aiDecisionDebugError, setAiDecisionDebugError] = useState("");
+  const [aiDecisionDebugPreview, setAiDecisionDebugPreview] = useState<AiDecisionPreview | null>(null);
+  const [aiDecisionDebugPreviewError, setAiDecisionDebugPreviewError] = useState("");
   const [aiDecisionDebugTraceIndex, setAiDecisionDebugTraceIndex] = useState<MaintenanceAiTraceIndexEntry[]>([]);
   const [aiDecisionDebugTrace, setAiDecisionDebugTrace] = useState<MaintenanceAiTraceDetail | null>(null);
   const [topbarHeightPx, setTopbarHeightPx] = useState(0);
@@ -3323,6 +3344,8 @@ export default function Page() {
     if (!aiDecisionDebugOverlayEnabled || !aiDecisionDebugMatchId) {
       setAiDecisionDebugStatus("off");
       setAiDecisionDebugError("");
+      setAiDecisionDebugPreview(null);
+      setAiDecisionDebugPreviewError("");
       setAiDecisionDebugTraceIndex([]);
       setAiDecisionDebugTrace(null);
       aiDecisionDebugEnabledMatchRef.current = null;
@@ -3337,6 +3360,8 @@ export default function Page() {
       }
       setAiDecisionDebugStatus("activating");
       setAiDecisionDebugError("");
+      setAiDecisionDebugPreview(null);
+      setAiDecisionDebugPreviewError("");
       setAiDecisionDebugTraceIndex([]);
       setAiDecisionDebugTrace(null);
       aiDecisionDebugTraceIdRef.current = null;
@@ -3391,6 +3416,42 @@ export default function Page() {
       window.clearInterval(timer);
     };
   }, [aiDecisionDebugOverlayEnabled, aiDecisionDebugMatchId, aiDecisionDebugStatus]);
+
+  useEffect(() => {
+    if (!aiDecisionDebugOverlayEnabled || !session || !payload || !aiTurnPresentation?.canAdvanceAi || payload.winner) {
+      setAiDecisionDebugPreview(null);
+      setAiDecisionDebugPreviewError("");
+      return;
+    }
+    let closed = false;
+    const loadPreview = async () => {
+      try {
+        const preview = await fetchAiDecisionPreview(session, payload);
+        if (closed) return;
+        setAiDecisionDebugPreview(preview);
+        setAiDecisionDebugPreviewError("");
+      } catch (error) {
+        if (closed) return;
+        setAiDecisionDebugPreview(null);
+        setAiDecisionDebugPreviewError(error instanceof Error ? error.message : "KI-Preview konnte nicht geladen werden.");
+      }
+    };
+    void loadPreview();
+    return () => {
+      closed = true;
+    };
+  }, [
+    aiDecisionDebugOverlayEnabled,
+    session?.matchId,
+    session?.side,
+    session?.sessionToken,
+    payload?.matchId,
+    payload?.matchVersion,
+    payload?.playerView.stateVersion,
+    payload?.winner,
+    aiTurnPresentation?.activeAiSide,
+    aiTurnPresentation?.canAdvanceAi
+  ]);
 
   useEffect(() => {
     if (runnerSnapshots.length === 0) return;
@@ -4458,6 +4519,8 @@ export default function Page() {
     if (!session || !payload || !aiTurnPresentation?.canAdvanceAi) return false;
     if (!ensureSocketConnected()) return false;
     try {
+      setAiDecisionDebugPreview(null);
+      setAiDecisionDebugPreviewError("");
       socketRef.current?.send(
         JSON.stringify({
           type: "advance_ai",
@@ -5818,6 +5881,8 @@ export default function Page() {
           position={aiDecisionDebugOverlayPosition}
           status={aiDecisionDebugStatus}
           error={aiDecisionDebugError}
+          preview={aiDecisionDebugPreview}
+          previewError={aiDecisionDebugPreviewError}
           trace={aiDecisionDebugTrace}
           traceCount={aiDecisionDebugTraceIndex.length}
           onPosition={setAiDecisionDebugOverlayPosition}
@@ -9367,6 +9432,8 @@ function FloatingAiDecisionDebugOverlay({
   position,
   status,
   error,
+  preview,
+  previewError,
   trace,
   traceCount,
   onPosition,
@@ -9375,6 +9442,8 @@ function FloatingAiDecisionDebugOverlay({
   position: RunOverlayPositionPreference;
   status: AiDecisionDebugOverlayStatus;
   error: string;
+  preview: AiDecisionPreview | null;
+  previewError: string;
   trace: MaintenanceAiTraceDetail | null;
   traceCount: number;
   onPosition(position: RunOverlayPositionPreference): void;
@@ -9425,7 +9494,7 @@ function FloatingAiDecisionDebugOverlay({
     if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
   };
   const positionStyle: CSSProperties = position.kind === "custom" ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, transform: "none" } : {};
-  const statusText = aiDecisionDebugStatusLabel(status, traceCount);
+  const statusText = preview ? "Nächster Schritt" : aiDecisionDebugStatusLabel(status, traceCount);
 
   const overlay = (
     <div ref={overlayRef} className={`aiDecisionDebugOverlay ${position.kind === "custom" ? "custom" : ""}`} style={positionStyle} data-testid="ai-decision-debug-overlay">
@@ -9459,7 +9528,7 @@ function FloatingAiDecisionDebugOverlay({
           </div>
         </div>
         <div className="aiDecisionDebugBody">
-          <AiDecisionDebugOverlayBody status={status} error={error} trace={trace} />
+          <AiDecisionDebugOverlayBody status={status} error={error} preview={preview} previewError={previewError} trace={trace} />
         </div>
       </section>
     </div>
@@ -9472,12 +9541,22 @@ function FloatingAiDecisionDebugOverlay({
 function AiDecisionDebugOverlayBody({
   status,
   error,
+  preview,
+  previewError,
   trace
 }: {
   status: AiDecisionDebugOverlayStatus;
   error: string;
+  preview: AiDecisionPreview | null;
+  previewError: string;
   trace: MaintenanceAiTraceDetail | null;
 }) {
+  if (preview) {
+    return <AiDecisionDebugTraceView trace={aiDecisionPreviewAsTrace(preview)} mode="preview" />;
+  }
+  if (previewError) {
+    return <p className="aiDecisionDebugNotice error" role="alert">{previewError}</p>;
+  }
   if (status === "error") {
     return <p className="aiDecisionDebugNotice error" role="alert">{error || "KI-Trace konnte nicht geladen werden."}</p>;
   }
@@ -9487,11 +9566,60 @@ function AiDecisionDebugOverlayBody({
   return <AiDecisionDebugTraceView trace={trace} />;
 }
 
-function AiDecisionDebugTraceView({ trace }: { trace: MaintenanceAiTraceDetail }) {
+function aiDecisionPreviewAsTrace(preview: AiDecisionPreview): MaintenanceAiTraceDetail {
+  const score = typeof preview.detail.score === "number" ? preview.detail.score : undefined;
+  const confidence = typeof preview.detail.confidence === "number" ? preview.detail.confidence : preview.confidence;
+  const planKind = typeof preview.detail.planKind === "string" ? preview.detail.planKind : undefined;
+  return {
+    traceId: `ai_preview_${preview.matchId}_${preview.stateVersion}`,
+    matchId: preview.matchId,
+    eventId: "preview",
+    stateVersion: preview.stateVersion,
+    matchVersion: preview.matchVersion,
+    side: preview.side,
+    turn: preview.stateVersion,
+    decisionIndex: 0,
+    selectedActionId: preview.actionId,
+    selectedActionType: preview.actionType,
+    ...(planKind ? { planKind } : {}),
+    ...(score !== undefined ? { score } : {}),
+    ...(confidence !== undefined ? { confidence } : {}),
+    createdAt: preview.generatedAt,
+    schemaVersion: "ai-decision-preview-v1",
+    meta: {},
+    detail: {
+      ...preview.detail,
+      selectedActionId: preview.actionId,
+      selectedActionType: preview.actionType,
+      debugSelectionMatchesApplied: true,
+      summary: preview.explanation
+    }
+  };
+}
+
+function aiDecisionPreviewTitle(trace: MaintenanceAiTraceDetail): string {
+  const side = trace.side === "runner" ? "Runner" : "Korp";
+  return `Nächster KI-Schritt · ${side} · ${aiDecisionTraceSelectedActionLabel(trace)}`;
+}
+
+function aiDecisionTraceSelectedActionLabel(trace: MaintenanceAiTraceDetail): string {
+  const action = trace.detail.selectedActionType ?? trace.selectedActionType ?? "KI-Aktion";
+  const label = aiDecisionDebugRecordList(trace.detail.actionAlternatives).find((entry) => entry.actionId === trace.selectedActionId)?.label;
+  return String(label ?? action);
+}
+
+function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: MaintenanceAiTraceDetail; mode?: "trace" | "preview" }) {
   const detail = trace.detail;
-  const metaRows = aiTraceMetaRows(trace).filter(([label]) => ["Entscheidung", "Seite", "State", "Aktion", "Plan", "Score", "Vertrauen"].includes(label));
-  const actionRows = aiTraceActionRows(detail).slice(0, 6);
-  const rankedAlternatives = aiDecisionDebugRecordList(detail.rankedAlternatives).slice(0, 4);
+  const metaRows = aiTraceMetaRows(trace)
+    .filter(([label]) => ["Entscheidung", "Seite", "State", "Ausgeführt", "Debug-Auswahl", "Debug-Kopplung", "Plan", "Score", "Vertrauen"].includes(label))
+    .map(([label, value]): [string, string] => {
+      if (mode !== "preview") return [label, value];
+      if (label === "Entscheidung") return ["Vorschau", "Nächster KI-Schritt"];
+      if (label === "Ausgeführt") return ["Geplant", aiDecisionTraceSelectedActionLabel(trace)];
+      return [label, value];
+    });
+  const actionRows = aiTraceActionRows(detail, mode === "preview" ? 32 : 8);
+  const rankedAlternatives = aiDecisionDebugRecordList(detail.rankedAlternatives).slice(0, mode === "preview" ? 12 : 4);
   const scoreRows = aiTraceScoreRows(detail, 8);
   const doctrineRows = aiTraceDoctrineRows(detail);
   const notes = aiTraceDebugGapNotes(detail).slice(0, 3);
@@ -9503,10 +9631,11 @@ function AiDecisionDebugTraceView({ trace }: { trace: MaintenanceAiTraceDetail }
   const visibleReasons = safeStringList(detail.visibleReasons, 5);
   const whyNot = safeStringList(detail.whyNot, 5);
   const longTermPlan = safeStringList(detail.longTermPlan, 5);
+  const title = mode === "preview" ? aiDecisionPreviewTitle(trace) : aiTraceTitle(trace);
   return (
     <div className="aiDecisionDebugContent">
       <div className="aiDecisionDebugTraceHead">
-        <strong>{aiTraceTitle(trace)}</strong>
+        <strong>{title}</strong>
         <span>{new Date(trace.createdAt).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
       </div>
       <AiDecisionDebugRows rows={metaRows} />
@@ -9516,13 +9645,13 @@ function AiDecisionDebugTraceView({ trace }: { trace: MaintenanceAiTraceDetail }
       <AiDecisionDebugChips title="Plan" items={longTermPlan} />
       {actionRows.length > 0 ? (
         <div className="aiDecisionDebugSection">
-          <strong>Aktionsranking</strong>
+          <strong>{mode === "preview" ? "Legale Aktionen nach KI-Score" : "Action-Level-Ranking"}</strong>
           <div className="aiDecisionDebugActions">
             {actionRows.map((action) => (
               <div className={`aiDecisionDebugAction ${action.selected ? "selected" : ""}`} key={action.key}>
                 <div>
                   <strong>#{action.rank} {action.label}</strong>
-                  <span>{action.selected ? "gewählt" : "Alternative"} · Priorität {action.priority}</span>
+                  <span>{action.selected ? (mode === "preview" ? "geplant" : "ausgeführt") : action.debugSelected ? "Debug-Auswahl" : "Alternative"} · Priorität {action.priority}</span>
                 </div>
                 <p>{action.reason}</p>
                 {action.metrics.length > 0 ? <div className="aiDecisionDebugChipRow">{action.metrics.map((metric) => <span key={metric}>{metric}</span>)}</div> : null}
@@ -9537,7 +9666,7 @@ function AiDecisionDebugTraceView({ trace }: { trace: MaintenanceAiTraceDetail }
           <div className="aiDecisionDebugCompactList">
             {rankedAlternatives.map((alternative, index) => (
               <div key={`${String(alternative.planId ?? alternative.planKind ?? "plan")}-${index}`}>
-                <span>#{String(alternative.rank ?? index + 1)} {String(alternative.planKind ?? alternative.selectedActionType ?? "Plan")}</span>
+                <span>#{String(alternative.rank ?? index + 1)} {typeof alternative.planKind === "string" ? aiTracePlanLabel(alternative.planKind) : String(alternative.selectedActionType ?? "Plan")}</span>
                 <strong>{typeof alternative.score === "number" ? alternative.score.toFixed(2) : "-"}</strong>
               </div>
             ))}
@@ -16095,6 +16224,31 @@ async function fetchAiDecisionDebugTraceDetail(traceId: string): Promise<Mainten
   const markers = findForbiddenMaintenanceMarkers(payload);
   if (markers.length > 0) throw new Error("KI-Trace-Detail wurde wegen Redaktionsprüfung blockiert.");
   return payload as MaintenanceAiTraceDetail;
+}
+
+async function fetchAiDecisionPreview(session: SessionInfo, payload: ClientPayload): Promise<AiDecisionPreview> {
+  let response: Response;
+  try {
+    response = await fetch(`${SERVER_HTTP}/api/matches/${encodeURIComponent(session.matchId)}/ai-preview`, {
+      method: "POST",
+      headers: {
+        "content-type": "application/json",
+        authorization: `Bearer ${session.sessionToken}`
+      },
+      body: JSON.stringify({
+        side: session.side,
+        knownStateVersion: payload.playerView.stateVersion,
+        knownMatchVersion: payload.matchVersion
+      })
+    });
+  } catch {
+    throw new ServerConnectionError();
+  }
+  const previewPayload = (await response.json()) as { ok?: boolean; preview?: AiDecisionPreview; error?: { message?: string } };
+  const markers = findForbiddenMaintenanceMarkers(previewPayload.preview ?? previewPayload.error ?? {});
+  if (markers.length > 0) throw new Error("KI-Preview wurde wegen Redaktionsprüfung blockiert.");
+  if (!response.ok || !previewPayload.preview) throw new Error(previewPayload.error?.message ?? "KI-Preview konnte nicht geladen werden.");
+  return previewPayload.preview;
 }
 
 function playerSlotForSide(lobby: MatchStartLobby, side: Side): "player_a" | "player_b" {

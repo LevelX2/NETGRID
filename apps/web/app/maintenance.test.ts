@@ -10,6 +10,7 @@ import {
   aiTraceDebugGapNotes,
   aiTraceDoctrineRows,
   aiTraceMetaRows,
+  aiTracePlanLabel,
   aiTraceScoreRows,
   aiTraceTitle,
   DEFAULT_MAINTENANCE_CLEANUP_FILTERS,
@@ -113,8 +114,10 @@ describe("Backend 0.5 maintenance UI helpers", () => {
       schemaVersion: "ai-decision-trace-v1",
       meta: {}
     };
-    expect(aiTraceTitle(trace)).toBe("#2 Korp · build_scoring_remote");
+    expect(aiTraceTitle(trace)).toBe("#2 Korp · install_card · build_scoring_remote");
+    expect(aiTraceMetaRows(trace)).toContainEqual(["Ausgeführt", "install_card"]);
     expect(aiTraceMetaRows(trace)).toContainEqual(["Vertrauen", "73%"]);
+    expect(aiTracePlanLabel("access_trash_steal")).toBe("Zugriff / Trash / Steal");
   });
 
   it("formats AI trace action-level rows for Broker versus basic credit", () => {
@@ -165,6 +168,7 @@ describe("Backend 0.5 maintenance UI helpers", () => {
     expect(rows[0]).toMatchObject({
       label: "Credit nehmen",
       selected: true,
+      debugSelected: true,
       source: "basic_action",
       priority: "65",
       reason: "selected_action"
@@ -173,6 +177,7 @@ describe("Backend 0.5 maintenance UI helpers", () => {
     expect(rows[1]).toMatchObject({
       label: "Broker laden",
       selected: false,
+      debugSelected: false,
       source: "Broker",
       priority: "42",
       reason: "pool_build_deferred_for_credit_need"
@@ -180,6 +185,76 @@ describe("Backend 0.5 maintenance UI helpers", () => {
     expect(rows[1]?.metrics).toEqual(["jetzt 0", "Pool nachher 3", "Bedarf acute"]);
     expect(aiTraceActionRows({ rankedAlternatives: [] })).toEqual([]);
     expect(findForbiddenMaintenanceMarkers({ detail: { actionAlternatives: [{ meta: { decisionDebug: true } }] } }).length).toBeGreaterThan(0);
+  });
+
+  it("keeps applied and diagnostic AI trace selections separate", () => {
+    const trace = {
+      traceId: "trace_1",
+      matchId: "match_1",
+      eventId: "evt_1",
+      stateVersion: 9,
+      matchVersion: 10,
+      side: "runner" as const,
+      turn: 3,
+      decisionIndex: 3,
+      selectedActionId: "runner.start_run.hq",
+      selectedActionType: "start_run",
+      planKind: "build_rig",
+      score: 877.75,
+      createdAt: "2026-06-05T10:54:51.000Z",
+      schemaVersion: "ai-decision-trace-v1",
+      meta: {},
+      detail: {
+        selectedActionId: "runner.start_run.hq",
+        selectedActionType: "start_run",
+        debugSelectedActionType: "install_card",
+        debugSelectionMatchesApplied: false,
+        actionAlternatives: [
+          {
+            rank: 1,
+            actionId: "runner.install.card",
+            actionType: "install_card",
+            label: "Install Card",
+            source: "visible_card",
+            selected: true,
+            priority: 142,
+            whyChosen: ["selected_action"]
+          },
+          {
+            rank: 2,
+            actionId: "runner.start_run.hq",
+            actionType: "start_run",
+            label: "Run auf HQ",
+            source: "basic_action",
+            selected: false,
+            priority: 130,
+            whyNot: ["lower_action_priority"]
+          }
+        ]
+      }
+    };
+
+    expect(aiTraceTitle(trace)).toBe("#3 Runner · start_run · build_rig");
+    expect(aiTraceMetaRows(trace)).toEqual(expect.arrayContaining([
+      ["Ausgeführt", "start_run"],
+      ["Debug-Auswahl", "install_card"],
+      ["Debug-Kopplung", "abweichend"]
+    ]));
+    const rows = aiTraceActionRows(trace.detail);
+    expect(rows[0]).toMatchObject({
+      label: "Install Card",
+      selected: false,
+      debugSelected: true,
+      reason: "Debug-Auswahl, nicht ausgeführt"
+    });
+    expect(rows[1]).toMatchObject({
+      label: "Run auf HQ",
+      selected: true,
+      debugSelected: false
+    });
+    expect(aiTraceDebugGapNotes(trace.detail)).toContain(
+      "Debug-Auswahl weicht von der ausgeführten Action ab; Semantic- und Legacy-/Plan-Diagnose getrennt prüfen."
+    );
   });
 
   it("formats in-game AI trace score and doctrine rows without inventing missing values", () => {

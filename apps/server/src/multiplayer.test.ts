@@ -533,6 +533,38 @@ describe("Backend 0.5 private storage maintenance", () => {
     });
     const tracedSetup = await submitChoice(service, traced.matchId, { side: "runner", sessionToken: traced.hostSessionToken, reconnectToken: traced.hostReconnectToken }, "keep", "ai-trace-on-setup");
     const untracedSetup = await submitChoice(service, untraced.matchId, { side: "runner", sessionToken: untraced.hostSessionToken, reconnectToken: untraced.hostReconnectToken }, "keep", "ai-trace-off-setup");
+    const beforePreview = await service.loadForTest(traced.matchId);
+    let previewActionId = "";
+    let previewActionType = "";
+    const preview = await service.previewAi({
+      matchId: traced.matchId,
+      side: "runner",
+      sessionToken: traced.hostSessionToken,
+      knownStateVersion: tracedSetup.playerView.stateVersion,
+      knownMatchVersion: tracedSetup.matchVersion
+    });
+    const afterPreview = await service.loadForTest(traced.matchId);
+    expect(preview.ok).toBe(true);
+    if (preview.ok) {
+      expect(preview.preview).toMatchObject({
+        matchId: traced.matchId,
+        requestedBy: "runner",
+        side: "corp",
+        actionId: expect.any(String),
+        actionType: expect.any(String),
+        detail: expect.objectContaining({
+          selectedActionId: expect.any(String),
+          selectedActionType: expect.any(String),
+          debugSelectionMatchesApplied: true,
+          actionAlternatives: expect.any(Array)
+        })
+      });
+      previewActionId = preview.preview.actionId;
+      previewActionType = preview.preview.actionType;
+      expect(Array.isArray(preview.preview.detail.actionAlternatives) ? preview.preview.detail.actionAlternatives.length : 0).toBeGreaterThan(0);
+    }
+    expect(afterPreview?.eventLog.length).toBe(beforePreview?.eventLog.length);
+    expect(afterPreview?.gameState?.stateVersion).toBe(beforePreview?.gameState?.stateVersion);
     const tracedAdvanced = await service.advanceAi({ matchId: traced.matchId, side: "runner", sessionToken: traced.hostSessionToken, knownStateVersion: tracedSetup.playerView.stateVersion, mode: "single_step" });
     const untracedAdvanced = await service.advanceAi({ matchId: untraced.matchId, side: "runner", sessionToken: untraced.hostSessionToken, knownStateVersion: untracedSetup.playerView.stateVersion, mode: "single_step" });
     expect(tracedAdvanced.ok).toBe(true);
@@ -561,10 +593,18 @@ describe("Backend 0.5 private storage maintenance", () => {
     expect(cursorIndex?.some((entry) => entry.traceId === index?.[0]?.traceId)).toBe(false);
     const details = await Promise.all((index ?? []).map((entry) => reopenedService.storageMaintenanceAiDecisionTraceDetail(entry.traceId)));
     const detail = details[0];
+    const previewExecutionDetail = details.at(-1);
+    expect(detail?.selectedActionId).toBeDefined();
+    expect(detail?.selectedActionType).toBeDefined();
+    expect(previewExecutionDetail?.selectedActionId).toBe(previewActionId);
+    expect(previewExecutionDetail?.selectedActionType).toBe(previewActionType);
     expect(detail?.detail).toMatchObject({
       schemaVersion: "ai-decision-trace-v1",
       actor: "corp",
-      debugSchemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION
+      debugSchemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      selectedActionId: detail?.selectedActionId,
+      selectedActionType: detail?.selectedActionType,
+      debugSelectionMatchesApplied: true
     });
     expect(await reopenedService.storageMaintenanceAiDecisionTraceIndex(untraced.matchId)).toEqual([]);
     expect(JSON.stringify({ matches, index, details })).not.toMatch(/sessionToken|reconnectToken|joinToken|tokenHash|sha256:[a-f0-9]{64}|cardInstances|privatePayload|privateDeckSnapshots|decklist|fullGameState|FullState|AIInput|C:\\Users/i);

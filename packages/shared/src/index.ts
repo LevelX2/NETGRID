@@ -1885,7 +1885,7 @@ export function sanitizeAiDecisionDebug(debug: unknown): AiDecisionDebug | undef
 function sanitizeAiDecisionRankedAlternatives(value: unknown): AiDecisionRankedAlternative[] | undefined {
   if (!Array.isArray(value)) return undefined;
   const alternatives = value
-    .slice(0, 5)
+    .slice(0, 24)
     .map((entry): AiDecisionRankedAlternative | undefined => {
       if (!entry || typeof entry !== "object" || Array.isArray(entry)) return undefined;
       const source = entry as Record<string, unknown>;
@@ -1915,7 +1915,7 @@ function sanitizeAiDecisionRankedAlternatives(value: unknown): AiDecisionRankedA
 function sanitizeAiDecisionActionAlternatives(value: unknown): AiDecisionActionAlternative[] | undefined {
   if (!Array.isArray(value)) return undefined;
   const alternatives = value
-    .slice(0, 8)
+    .slice(0, 32)
     .map((entry): AiDecisionActionAlternative | undefined => {
       if (!entry || typeof entry !== "object" || Array.isArray(entry)) return undefined;
       const source = entry as Record<string, unknown>;

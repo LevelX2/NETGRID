@@ -121,6 +121,7 @@ export type MaintenanceAiTraceActionRow = {
   rank: number;
   label: string;
   selected: boolean;
+  debugSelected: boolean;
   source: string;
   priority: string;
   metrics: string[];
@@ -359,27 +360,55 @@ export function buildMaintenanceAiTraceNdjsonExport(input: { matchId: string; ge
 
 export function aiTraceTitle(trace: Pick<MaintenanceAiTraceIndexEntry, "decisionIndex" | "side" | "planKind" | "selectedActionType">): string {
   const side = trace.side === "runner" ? "Runner" : "Korp";
-  const plan = trace.planKind ?? trace.selectedActionType ?? "KI-Entscheidung";
-  return `#${trace.decisionIndex} ${side} · ${plan}`;
+  const action = trace.selectedActionType ?? "KI-Entscheidung";
+  const plan = trace.planKind && trace.planKind !== action ? ` · ${aiTracePlanLabel(trace.planKind)}` : "";
+  return `#${trace.decisionIndex} ${side} · ${action}${plan}`;
+}
+
+export function aiTracePlanLabel(value: string): string {
+  const labels: Record<string, string> = {
+    access_trash_steal: "Zugriff / Trash / Steal",
+    basic_economy_draw: "Credits / Karten ziehen",
+    basic_install: "Installieren / Aufbau",
+    board_safety: "Board-Sicherheit",
+    choice_resolution: "Auswahl auflösen",
+    encounter_survival: "ICE-Begegnung überstehen",
+    end_turn: "Zug beenden",
+    mandatory_draw: "Pflichtkarte ziehen",
+    remote_contest: "Remote angreifen",
+    simple_hq_or_rnd_pressure: "HQ/R&D-Druck",
+    simple_rez: "ICE rezzen",
+    simple_run_choice: "Run fortsetzen",
+    simple_score_advance: "Agenda punkten/advancen",
+    tag_removal: "Tags entfernen"
+  };
+  return labels[value] ?? value;
 }
 
 export function aiTraceMetaRows(trace: MaintenanceAiTraceDetail | MaintenanceAiTraceIndexEntry): Array<[string, string]> {
+  const detail = "detail" in trace ? trace.detail : trace.meta;
+  const debugSelectedActionType = typeof detail.debugSelectedActionType === "string" ? detail.debugSelectedActionType : undefined;
+  const debugSelectionMatchesApplied = typeof detail.debugSelectionMatchesApplied === "boolean" ? detail.debugSelectionMatchesApplied : undefined;
   return [
     ["Entscheidung", String(trace.decisionIndex)],
     ["Seite", trace.side === "runner" ? "Runner" : "Korp"],
     ["State", String(trace.stateVersion)],
     ["Match-Version", String(trace.matchVersion)],
-    ["Aktion", trace.selectedActionType ?? "-"],
-    ["Plan", trace.planKind ?? "-"],
+    ["Ausgeführt", trace.selectedActionType ?? "-"],
+    ...(debugSelectedActionType ? [["Debug-Auswahl", debugSelectedActionType] as [string, string]] : []),
+    ...(debugSelectionMatchesApplied === false ? [["Debug-Kopplung", "abweichend"] as [string, string]] : []),
+    ["Plan", trace.planKind ? aiTracePlanLabel(trace.planKind) : "-"],
     ["Score", typeof trace.score === "number" ? trace.score.toFixed(2) : "-"],
     ["Vertrauen", typeof trace.confidence === "number" ? `${Math.round(trace.confidence * 100)}%` : "-"]
   ];
 }
 
-export function aiTraceActionRows(detail: Record<string, unknown>): MaintenanceAiTraceActionRow[] {
+export function aiTraceActionRows(detail: Record<string, unknown>, limit = 8): MaintenanceAiTraceActionRow[] {
   const alternatives = Array.isArray(detail.actionAlternatives) ? detail.actionAlternatives : [];
+  const appliedActionId = typeof detail.selectedActionId === "string" ? detail.selectedActionId : "";
+  const trustDebugSelected = appliedActionId.length === 0 && detail.debugSelectionMatchesApplied !== false;
   return alternatives
-    .slice(0, 8)
+    .slice(0, Math.max(0, limit))
     .map((entry, index): MaintenanceAiTraceActionRow | undefined => {
       if (!entry || typeof entry !== "object" || Array.isArray(entry)) return undefined;
       const action = entry as Record<string, unknown>;
@@ -389,16 +418,19 @@ export function aiTraceActionRows(detail: Record<string, unknown>): MaintenanceA
       const economy = action.economy && typeof action.economy === "object" && !Array.isArray(action.economy) ? action.economy as Record<string, unknown> : undefined;
       const sourceTitle = typeof action.sourceTitle === "string" ? action.sourceTitle : "";
       const rawLabel = typeof action.label === "string" ? action.label : actionType;
-      const selected = action.selected === true;
+      const debugSelected = action.selected === true;
+      const selected = appliedActionId.length > 0 ? actionId === appliedActionId : trustDebugSelected && debugSelected;
+      const debugOnlySelection = debugSelected && !selected;
       return {
         key: `${rank}:${actionId}`,
         rank,
         label: aiTraceActionLabel(rawLabel, actionType, sourceTitle, economy),
         selected,
+        debugSelected,
         source: sourceTitle || (typeof action.source === "string" ? action.source : "-"),
         priority: typeof action.priority === "number" && Number.isFinite(action.priority) ? action.priority.toFixed(0) : "-",
         metrics: aiTraceActionMetrics(economy),
-        reason: aiTraceActionReason(selected ? action.whyChosen : action.whyNot)
+        reason: debugOnlySelection ? "Debug-Auswahl, nicht ausgeführt" : aiTraceActionReason(selected ? action.whyChosen : action.whyNot)
       };
     })
     .filter((entry): entry is MaintenanceAiTraceActionRow => Boolean(entry));
@@ -434,7 +466,14 @@ export function aiTraceDoctrineRows(detail: Record<string, unknown>): Array<[str
 
 export function aiTraceDebugGapNotes(detail: Record<string, unknown>): string[] {
   const notes: string[] = [];
-  if (aiTraceActionRows(detail).length === 0 && recordList(detail.rankedAlternatives).length === 0) {
+  const actionRows = aiTraceActionRows(detail);
+  if (detail.debugSelectionMatchesApplied === false) {
+    notes.push("Debug-Auswahl weicht von der ausgeführten Action ab; Semantic- und Legacy-/Plan-Diagnose getrennt prüfen.");
+  }
+  if (typeof detail.selectedActionId === "string" && actionRows.length > 0 && !actionRows.some((row) => row.selected)) {
+    notes.push("Ausgeführte Action ist nicht im Action-Level-Ranking des Trace enthalten.");
+  }
+  if (actionRows.length === 0 && recordList(detail.rankedAlternatives).length === 0) {
     notes.push("Keine Top-Alternativen im aktuellen Trace.");
   }
   if (aiTraceScoreRows(detail).length === 0) {

@@ -3251,7 +3251,8 @@ function chooseSemanticRuntimeAction(
       ],
     };
   }
-  const choice = chooseSemanticRuntimeChoice(input);
+  const choices = semanticRuntimeChoices(input);
+  const choice = choices.find((candidate) => candidate.score > 0);
   if (!choice) {
     return {
       ...legacyDecision,
@@ -3282,9 +3283,13 @@ function chooseSemanticRuntimeAction(
         ? [`legacy_reference_action_type:${legacyActionType}`]
         : []),
     ]),
-    ...(legacyDecision.decisionDebug !== undefined
-      ? { decisionDebug: legacyDecision.decisionDebug }
-      : {}),
+    decisionDebug: semanticRuntimeDecisionDebug(
+      input,
+      choice,
+      choices,
+      legacyDecision,
+      legacyActionType,
+    ),
     timeoutUsed: Boolean(legacyDecision.timeoutUsed),
     profileId: input.profileId,
     difficulty: input.difficulty,
@@ -3296,16 +3301,19 @@ function semanticRuntimeForcedLegacy(): boolean {
   return process.env.NETGRID_SEMANTIC_AI_RUNTIME === "legacy";
 }
 
-function chooseSemanticRuntimeChoice(
-  input: AiDecisionInput,
-): SemanticRuntimeChoice | undefined {
+function semanticRuntimeChoices(input: AiDecisionInput): SemanticRuntimeChoice[] {
   return input.legalActions
     .map((action) => scoreSemanticRuntimeAction(input, action))
-    .filter((choice): choice is SemanticRuntimeChoice => choice.score > 0)
     .sort(
       (left, right) =>
         right.score - left.score || compareAction(left.action, right.action),
-    )[0];
+    );
+}
+
+function chooseSemanticRuntimeChoice(
+  input: AiDecisionInput,
+): SemanticRuntimeChoice | undefined {
+  return semanticRuntimeChoices(input).find((candidate) => candidate.score > 0);
 }
 
 function scoreSemanticRuntimeAction(
@@ -3331,6 +3339,148 @@ function scoreSemanticRuntimeAction(
     ],
     confidence: semanticRuntimeConfidence(scopeId, score),
   };
+}
+
+function semanticRuntimeDecisionDebug(
+  input: AiDecisionInput,
+  selected: SemanticRuntimeChoice,
+  rankedChoices: SemanticRuntimeChoice[],
+  legacyDecision: AiDecision,
+  legacyActionType: LegalAction["type"] | undefined,
+): AiDecisionDebug {
+  const legacyDebug = legacyDecision.decisionDebug;
+  const legacyPlanKind = legacyDebug?.planKind;
+  const legacyDebugSelectedActionType = legacyDebug?.selectedActionType;
+  const actionTypesDiffer =
+    (legacyActionType !== undefined && legacyActionType !== selected.action.type) ||
+    (legacyDebugSelectedActionType !== undefined && legacyDebugSelectedActionType !== selected.action.type);
+  const warnings = actionTypesDiffer
+    ? ["semantic_runtime_actual_differs_from_legacy_debug"]
+    : [];
+  const detailItems = [
+    `semantic_runtime_scope:${selected.scopeId}`,
+    `semantic_actual_action_type:${selected.action.type}`,
+    ...(legacyActionType ? [`legacy_reference_action_type:${legacyActionType}`] : []),
+    ...(legacyPlanKind ? [`legacy_reference_plan:${legacyPlanKind}`] : []),
+    ...(legacyDebugSelectedActionType ? [`legacy_debug_selected_action_type:${legacyDebugSelectedActionType}`] : [])
+  ];
+  return {
+    schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+    aiLevel: legacyDebug?.aiLevel ?? 2,
+    summary: selected.explanation,
+    planId: `semantic_runtime:${selected.scopeId}`,
+    planKind: selected.scopeId,
+    selectedActionType: selected.action.type,
+    score: selected.score,
+    ...(selected.confidence !== undefined ? { confidence: selected.confidence } : {}),
+    visibleReasons: scrubEvidence(selected.evidence).slice(0, 8),
+    rankedAlternatives: semanticRuntimeRankedAlternatives(input, rankedChoices, selected.action.actionId),
+    actionAlternatives: semanticRuntimeActionAlternatives(rankedChoices, selected.action.actionId),
+    scoreBreakdown: semanticRuntimeScoreBreakdown(input, selected.action, selected.scopeId),
+    whyNot: legacyActionType && legacyActionType !== selected.action.type
+      ? [`legacy_reference_action_type:${legacyActionType}`]
+      : [],
+    longTermPlan: [
+      `semantic_runtime_scope:${selected.scopeId}`,
+      ...(legacyPlanKind ? [`legacy_reference_plan:${legacyPlanKind}`] : [])
+    ],
+    ...(warnings.length > 0 ? { warnings } : {}),
+    detailSections: [
+      {
+        id: "semantic_runtime",
+        title: "Semantic Runtime",
+        items: detailItems
+      }
+    ],
+    evidence: scrubEvidence([
+      ...selected.evidence,
+      ...(legacyDecision.evidence ?? []).map((entry) => `legacy_reference:${entry}`)
+    ]).slice(0, 12),
+    fallbackUsed: false,
+    profileId: input.profileId,
+    timeoutUsed: Boolean(legacyDecision.timeoutUsed)
+  };
+}
+
+function semanticRuntimeRankedAlternatives(
+  input: AiDecisionInput,
+  rankedChoices: SemanticRuntimeChoice[],
+  selectedActionId: string,
+): NonNullable<AiDecisionDebug["rankedAlternatives"]> {
+  return rankedChoices.slice(0, 24).map((choice, index) => ({
+    rank: index + 1,
+    planId: `semantic_runtime:${choice.scopeId}:${choice.action.type}`,
+    planKind: choice.scopeId,
+    selectedActionType: choice.action.type,
+    summary: choice.explanation,
+    score: choice.score,
+    ...(choice.confidence !== undefined ? { confidence: choice.confidence } : {}),
+    visibleReasons: scrubEvidence(choice.evidence).slice(0, 4),
+    scoreBreakdown: semanticRuntimeScoreBreakdown(input, choice.action, choice.scopeId),
+    whyNot: choice.action.actionId === selectedActionId ? ["selected_action"] : ["semantic_score_below_selected"]
+  }));
+}
+
+function semanticRuntimeActionAlternatives(
+  rankedChoices: SemanticRuntimeChoice[],
+  selectedActionId: string,
+): NonNullable<AiDecisionDebug["actionAlternatives"]> {
+  return rankedChoices.slice(0, 32).map((choice, index) => {
+    const selected = choice.action.actionId === selectedActionId;
+    return {
+      rank: index + 1,
+      actionId: choice.action.actionId,
+      actionType: choice.action.type,
+      label: choice.action.label,
+      source: String(choice.action.source),
+      selected,
+      priority: choice.score,
+      ...(selected
+        ? { whyChosen: ["semantic_runtime_actual"] }
+        : { whyNot: ["semantic_score_below_selected"] })
+    };
+  });
+}
+
+function semanticRuntimeScoreBreakdown(
+  input: AiDecisionInput,
+  action: LegalAction,
+  scopeId: string,
+): NonNullable<AiDecisionDebug["scoreBreakdown"]> {
+  const typePriority = semanticRuntimeTypePriority(action.type);
+  const sideScore = input.side === "runner"
+    ? semanticRuntimeRunnerScore(input, action, scopeId)
+    : semanticRuntimeCorpScore(input, action, scopeId);
+  const privateBonus = action.visibility === "private_to_actor" ? 25 : 0;
+  const costPenalty = -(actionCreditCost(action) * 35);
+  return [
+    {
+      key: "semantic_type_priority",
+      label: "Action-Typ-Priorität",
+      value: typePriority,
+      reason: action.type
+    },
+    {
+      key: "semantic_context_score",
+      label: "Board-Kontext",
+      value: sideScore,
+      reason: scopeId
+    },
+    ...(privateBonus !== 0
+      ? [{
+          key: "semantic_private_actor_bonus",
+          label: "Akteur-private Action",
+          value: privateBonus,
+          reason: "private_to_actor"
+        }]
+      : []),
+    {
+      key: "semantic_credit_cost_penalty",
+      label: "Credit-Kosten",
+      value: costPenalty,
+      reason: String(actionCreditCost(action))
+    }
+  ];
 }
 
 function semanticRuntimeScopeForAction(

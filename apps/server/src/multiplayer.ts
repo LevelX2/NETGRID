@@ -581,6 +581,37 @@ export type AdvanceAiResult =
       payload?: SidePayload;
     };
 
+export type AiDecisionPreview = {
+  matchId: string;
+  matchVersion: number;
+  stateVersion: number;
+  requestedBy: Side;
+  side: Side;
+  generatedAt: string;
+  actionId: string;
+  actionType: LegalAction["type"];
+  actionLabel: string;
+  reasonCode: string;
+  explanation: string;
+  fallbackUsed: boolean;
+  timeoutUsed?: boolean;
+  confidence?: number;
+  selectedChoices?: PlayerAction["selectedChoices"];
+  detail: Record<string, unknown>;
+};
+
+export type PreviewAiResult =
+  | {
+      ok: true;
+      preview: AiDecisionPreview;
+      payload: SidePayload;
+    }
+  | {
+      ok: false;
+      error: SafeErrorPayload;
+      payload?: SidePayload;
+    };
+
 export class InMemoryMatchStorage implements MultiplayerStorage {
   private readonly records = new Map<string, StoredMatch>();
 
@@ -1577,6 +1608,76 @@ export class MultiplayerService {
     });
   }
 
+  async previewAi(input: {
+    matchId: string;
+    side: Side;
+    sessionToken: string;
+    knownStateVersion?: number;
+    knownMatchVersion?: number;
+  }): Promise<PreviewAiResult> {
+    return this.withMatchLock(input.matchId, async () => {
+      const record = await this.mustLoad(input.matchId, { includeStateSnapshots: false });
+      if (!record) return { ok: false, error: safeError("not_found", "Dieses private Match ist nicht verfügbar.") };
+      const session = this.authenticate(record, input.side, input.sessionToken);
+      if (!session) return { ok: false, error: safeError("unauthorized", "Die Session ist nicht gültig.") };
+      if (this.isAiSide(record, input.side)) return { ok: false, error: safeError("ai_session_forbidden", "Nur eine menschliche Session darf die KI bewerten.") };
+      if (record.match.status !== "active" || !record.gameState) return { ok: false, error: safeError("match_not_active", "Das Match ist noch nicht aktiv.") };
+      const activeAiSide = this.aiControllableSide(record);
+      if (!activeAiSide) {
+        return { ok: false, error: safeError("ai_not_active", "Aktuell ist keine KI am Zug.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
+      }
+      if (input.knownStateVersion !== undefined && input.knownStateVersion !== record.gameState.stateVersion) {
+        return { ok: false, error: safeError("stale_state", "Der Spielzustand ist veraltet.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
+      }
+      if (input.knownMatchVersion !== undefined && input.knownMatchVersion !== record.match.matchVersion) {
+        return { ok: false, error: safeError("stale_match", "Der Matchzustand ist veraltet.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
+      }
+
+      const legalActions = getLegalActions(record.gameState, activeAiSide);
+      if (legalActions.length === 0) {
+        return { ok: false, error: safeError("ai_no_action", "Die KI hat aktuell keine legalen Aktionen.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
+      }
+      const controller = record.match.aiControllers?.[activeAiSide];
+      const ownDeckSnapshot = record.privateDeckSnapshots?.[activeAiSide];
+      const decision = chooseAiAction(
+        buildAiDecisionInput(record.gameState, activeAiSide, {
+          difficulty: controller?.difficulty ?? "normal",
+          profileId: controller?.profileId ?? `${activeAiSide}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
+          decisionId: `${record.match.matchId}:${record.gameState.stateVersion}:${activeAiSide}`,
+          actionNumber: record.gameState.stateVersion,
+          ...(ownDeckSnapshot ? { ownDeckSnapshot } : {})
+        })
+      );
+      const legalAction = legalActions.find((candidate) => candidate.actionId === decision.actionId) ?? legalActions.slice().sort((left, right) => left.actionId.localeCompare(right.actionId))[0];
+      if (!legalAction) {
+        return { ok: false, error: safeError("ai_no_action", "Die KI konnte aktuell keine Aktion bewerten.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
+      }
+      const safeDebug = sanitizeAiDecisionDebug(decision.decisionDebug);
+      const detail = safeDebug
+        ? aiDecisionTraceJson(safeDebug, activeAiSide, legalAction, "detailed")
+        : minimalAiPreviewDetail(activeAiSide, legalAction, decision);
+      const preview: AiDecisionPreview = {
+        matchId: record.match.matchId,
+        matchVersion: record.match.matchVersion,
+        stateVersion: record.gameState.stateVersion,
+        requestedBy: input.side,
+        side: activeAiSide,
+        generatedAt: this.now(),
+        actionId: legalAction.actionId,
+        actionType: legalAction.type,
+        actionLabel: legalAction.label,
+        reasonCode: decision.reasonCode,
+        explanation: decision.explanation,
+        fallbackUsed: decision.fallbackUsed,
+        ...(decision.timeoutUsed ? { timeoutUsed: true } : {}),
+        ...(typeof decision.confidence === "number" ? { confidence: decision.confidence } : {}),
+        ...(decision.selectedChoices ? { selectedChoices: decision.selectedChoices } : {}),
+        detail
+      };
+      return { ok: true, preview, payload: this.payloadFor(record, input.side) };
+    });
+  }
+
   async requestUndo(input: { matchId: string; side: Side; sessionToken: string; targetEventId: string; reason?: string }): Promise<UndoResult> {
     return this.withMatchLock(input.matchId, async () => {
       const record = await this.mustLoad(input.matchId);
@@ -2547,7 +2648,7 @@ export class MultiplayerService {
     const barrier = isHiddenInfoBarrier(event);
     record.stateSnapshots.push({ ...snapshot, hiddenInfoBarrier: barrier });
     const occurredAt = this.now();
-    const trace = aiDecisionTraceFor(record, event, side, decision, normalizeAiDecisionTraceMode(record.match.aiTraceMode), occurredAt);
+    const trace = aiDecisionTraceFor(record, event, side, legalAction, decision, normalizeAiDecisionTraceMode(record.match.aiTraceMode), occurredAt);
     if (trace) {
       const traces = record.aiDecisionTraces ?? [];
       traces.push(trace);
@@ -2998,8 +3099,8 @@ function replayDecisionDebug(debug: unknown, actor: Side | undefined): Record<st
   if (typeof safeDebug.summary === "string") result.summary = safeDebug.summary;
   if (typeof safeDebug.planKind === "string") result.planKind = safeDebug.planKind;
   if (typeof safeDebug.memoryVersion === "string") result.memoryVersion = safeDebug.memoryVersion;
-  if (Array.isArray(safeDebug.rankedAlternatives)) result.rankedAlternatives = safeDebug.rankedAlternatives.slice(0, 5);
-  if (Array.isArray(safeDebug.actionAlternatives)) result.actionAlternatives = safeDebug.actionAlternatives.slice(0, 8);
+  if (Array.isArray(safeDebug.rankedAlternatives)) result.rankedAlternatives = safeDebug.rankedAlternatives.slice(0, 24);
+  if (Array.isArray(safeDebug.actionAlternatives)) result.actionAlternatives = safeDebug.actionAlternatives.slice(0, 32);
   if (Array.isArray(safeDebug.scoreBreakdown)) result.scoreBreakdown = safeDebug.scoreBreakdown.slice(0, 16);
   if (Array.isArray(safeDebug.whyNot)) result.whyNot = safeDebug.whyNot.slice(0, 8);
   if (Array.isArray(safeDebug.longTermPlan)) result.longTermPlan = safeDebug.longTermPlan.slice(0, 8);
@@ -3015,13 +3116,13 @@ function replayDecisionDebug(debug: unknown, actor: Side | undefined): Record<st
   return result;
 }
 
-function aiDecisionTraceFor(record: StoredMatch, event: GameEvent, side: Side, decision: AiDecision, mode: AiDecisionTraceMode, createdAt: string): AiDecisionTraceRecord | undefined {
+function aiDecisionTraceFor(record: StoredMatch, event: GameEvent, side: Side, legalAction: LegalAction, decision: AiDecision, mode: AiDecisionTraceMode, createdAt: string): AiDecisionTraceRecord | undefined {
   if (mode === "off" || !decision.decisionDebug) return undefined;
   const safeDebug = sanitizeAiDecisionDebug(decision.decisionDebug);
   if (!safeDebug) return undefined;
-  const traceJson = aiDecisionTraceJson(safeDebug, side, mode);
+  const traceJson = aiDecisionTraceJson(safeDebug, side, legalAction, mode);
   const decisionIndex = (record.aiDecisionTraces?.length ?? 0) + 1;
-  const selectedActionType = typeof traceJson.selectedActionType === "string" ? traceJson.selectedActionType : undefined;
+  const selectedActionType = legalAction.type;
   const planKind = typeof traceJson.planKind === "string" ? traceJson.planKind : undefined;
   const score = typeof traceJson.score === "number" ? traceJson.score : undefined;
   const confidence = typeof traceJson.confidence === "number" ? traceJson.confidence : undefined;
@@ -3035,7 +3136,7 @@ function aiDecisionTraceFor(record: StoredMatch, event: GameEvent, side: Side, d
     turn: event.stateVersionBefore,
     decisionIndex,
     selectedActionId: decision.actionId,
-    ...(selectedActionType ? { selectedActionType } : {}),
+    selectedActionType,
     ...(planKind ? { planKind } : {}),
     ...(score !== undefined ? { score } : {}),
     ...(confidence !== undefined ? { confidence } : {}),
@@ -3045,14 +3146,21 @@ function aiDecisionTraceFor(record: StoredMatch, event: GameEvent, side: Side, d
   };
 }
 
-function aiDecisionTraceJson(debug: AiDecisionDebug, actor: Side, mode: Exclude<AiDecisionTraceMode, "off">): Record<string, unknown> {
+function aiDecisionTraceJson(debug: AiDecisionDebug, actor: Side, legalAction: LegalAction, mode: Exclude<AiDecisionTraceMode, "off">): Record<string, unknown> {
+  const debugSelectedActionType = typeof debug.selectedActionType === "string" ? debug.selectedActionType : undefined;
   const result: Record<string, unknown> = {
     schemaVersion: "ai-decision-trace-v1",
     debugSchemaVersion: debug.schemaVersion,
     actor,
-    aiLevel: debug.aiLevel
+    aiLevel: debug.aiLevel,
+    selectedActionId: legalAction.actionId,
+    selectedActionType: legalAction.type,
+    debugSelectionMatchesApplied: debugSelectedActionType === undefined || debugSelectedActionType === legalAction.type
   };
-  for (const field of ["summary", "planId", "planKind", "selectedActionType", "profileId", "memoryVersion"] as const) {
+  if (debugSelectedActionType !== undefined && debugSelectedActionType !== legalAction.type) {
+    result.debugSelectedActionType = debugSelectedActionType;
+  }
+  for (const field of ["summary", "planId", "planKind", "profileId", "memoryVersion"] as const) {
     const value = debug[field];
     if (typeof value === "string") result[field] = value;
   }
@@ -3068,8 +3176,8 @@ function aiDecisionTraceJson(debug: AiDecisionDebug, actor: Side, mode: Exclude<
     const value = debug[field];
     if (Array.isArray(value)) result[field] = value.slice(0, 8);
   }
-  if (Array.isArray(debug.rankedAlternatives)) result.rankedAlternatives = debug.rankedAlternatives.slice(0, mode === "summary" ? 3 : 5);
-  if (Array.isArray(debug.actionAlternatives)) result.actionAlternatives = debug.actionAlternatives.slice(0, 8);
+  if (Array.isArray(debug.rankedAlternatives)) result.rankedAlternatives = debug.rankedAlternatives.slice(0, mode === "summary" ? 6 : 24);
+  if (Array.isArray(debug.actionAlternatives)) result.actionAlternatives = debug.actionAlternatives.slice(0, 32);
   if (Array.isArray(debug.scoreBreakdown)) result.scoreBreakdown = debug.scoreBreakdown.slice(0, 16);
   if (mode === "detailed") {
     for (const field of ["facts", "hypotheses", "invalidations", "beliefUncertainty", "evidence"] as const) {
@@ -3081,6 +3189,33 @@ function aiDecisionTraceJson(debug: AiDecisionDebug, actor: Side, mode: Exclude<
     if (debug.ownDeckDoctrine) result.ownDeckDoctrine = debug.ownDeckDoctrine;
   }
   return result;
+}
+
+function minimalAiPreviewDetail(actor: Side, legalAction: LegalAction, decision: AiDecision): Record<string, unknown> {
+  return {
+    schemaVersion: "ai-decision-preview-v1",
+    actor,
+    selectedActionId: legalAction.actionId,
+    selectedActionType: legalAction.type,
+    debugSelectionMatchesApplied: true,
+    summary: decision.explanation,
+    confidence: decision.confidence,
+    fallbackUsed: decision.fallbackUsed,
+    timeoutUsed: Boolean(decision.timeoutUsed),
+    visibleReasons: decision.evidence?.slice(0, 8) ?? [decision.reasonCode],
+    actionAlternatives: [
+      {
+        rank: 1,
+        actionId: legalAction.actionId,
+        actionType: legalAction.type,
+        label: legalAction.label,
+        source: String(legalAction.source),
+        selected: true,
+        whyChosen: ["selected_action"]
+      }
+    ],
+    scoreBreakdown: []
+  };
 }
 
 function replayRandomDrawEntries(record: StoredMatch): ReplayRandomDrawEntry[] {

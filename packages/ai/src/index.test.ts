@@ -16620,6 +16620,59 @@ describe("V1.4.2 belief state and opponent model", () => {
     );
   });
 
+  it("uses Semantic Runtime actual actions in DecisionDebug instead of legacy plan winners", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "semantic-runtime-debug-actual-action" }),
+    );
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const legacyDecision = chooseRunnerAction(input);
+    const legacyActionType = input.legalActions.find(
+      (action) => action.actionId === legacyDecision.actionId,
+    )?.type;
+
+    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+    const decision = chooseRunnerAction(input);
+    const actualAction = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+
+    expect(actualAction).toBeDefined();
+    expect(decision.reasonCode).toContain(".semantic.");
+    expect(decision.decisionDebug).toMatchObject({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      selectedActionType: actualAction?.type,
+      score: expect.any(Number),
+      fallbackUsed: false,
+    });
+    expect(decision.decisionDebug?.actionAlternatives?.[0]).toMatchObject({
+      actionId: decision.actionId,
+      actionType: actualAction?.type,
+      selected: true,
+      whyChosen: ["semantic_runtime_actual"],
+    });
+    expect(decision.decisionDebug?.actionAlternatives?.length).toBe(
+      Math.min(input.legalActions.length, 32),
+    );
+    expect(
+      new Set(decision.decisionDebug?.actionAlternatives?.map((entry) => entry.actionId)),
+    ).toEqual(new Set(input.legalActions.slice(0, 32).map((action) => action.actionId)));
+    expect(decision.decisionDebug?.rankedAlternatives?.[0]).toMatchObject({
+      selectedActionType: actualAction?.type,
+      whyNot: ["selected_action"],
+    });
+    if (legacyActionType && legacyActionType !== actualAction?.type) {
+      expect(decision.decisionDebug?.warnings).toContain(
+        "semantic_runtime_actual_differs_from_legacy_debug",
+      );
+    }
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /privatePayload|cardInstances|fullGameState|sessionToken|reconnectToken|joinToken|decklist|Hidden Priority Agenda|hidden-card/i,
+    );
+  });
+
   it("redacts forbidden DecisionDebug key and value patterns deterministically", () => {
     const sanitized = sanitizeAiDecisionDebug({
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,

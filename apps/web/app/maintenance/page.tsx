@@ -1179,7 +1179,7 @@ function AiTraceDetailView({ trace }: { trace: MaintenanceAiTraceDetail }) {
               <div key={action.key} style={action.selected ? traceActionCardSelected : traceActionCard}>
                 <div style={traceActionHeader}>
                   <strong>#{action.rank} · {action.label}</strong>
-                  <span style={action.selected ? traceSelectedPill : traceMutedPill}>{action.selected ? "gewählt" : "Alternative"}</span>
+                  <span style={action.selected ? traceSelectedPill : traceMutedPill}>{action.selected ? "ausgeführt" : action.debugSelected ? "Debug-Auswahl" : "Alternative"}</span>
                 </div>
                 <MiniRows rows={[
                   ["Quelle", action.source],

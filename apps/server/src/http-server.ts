@@ -1067,6 +1067,24 @@ async function routeHttp(
         }
         return;
       }
+      if (request.method === "POST" && action === "ai-preview") {
+        if (!checkRateLimit(response, rateLimiter, "ai_advance", request, deploymentConfig, `ai-preview:${matchId}`)) return;
+        const body = await readJson(request);
+        const side = body.side === "corp" ? "corp" : "runner";
+        const preview = await service.previewAi({
+          matchId,
+          side,
+          sessionToken: bearerToken(request) ?? (typeof body.sessionToken === "string" ? body.sessionToken : ""),
+          ...(typeof body.knownStateVersion === "number" ? { knownStateVersion: body.knownStateVersion } : {}),
+          ...(typeof body.knownMatchVersion === "number" ? { knownMatchVersion: body.knownMatchVersion } : {})
+        });
+        if (preview.ok) {
+          sendJson(response, 200, { ok: true, preview: preview.preview });
+        } else {
+          sendJson(response, 409, preview);
+        }
+        return;
+      }
     }
 
     sendJson(response, 404, { error: { code: "not_found", message: "Route nicht gefunden." } });
