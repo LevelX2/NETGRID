@@ -845,7 +845,7 @@ describe("V1.0.6K Card Release", () => {
       strength: 0,
     });
     expect(DEMO_CARDS_BY_ID["onr_v1_245_fire-wall"]).toMatchObject({
-      rezCost: 1,
+      rezCost: 5,
       strength: 4,
     });
     expect(DEMO_CARDS_BY_ID["onr_v1_252_keeper"]).toMatchObject({
@@ -1181,6 +1181,28 @@ describe("V1.0.6K Card Release", () => {
       );
       expect(state.run).toBeUndefined();
     }
+  });
+
+  it("does not offer Fire Wall rez actions below its printed 5-credit rez cost", () => {
+    let state = toRunnerTurn(v106kCardReleaseGame("v106k-fire-wall-rez-cost"));
+    const fireWallId = putCorpIceOnServer(state, "rd", "onr_v1_245_fire-wall");
+    state.corp.credits = 4;
+
+    expect(quoteCorpRezCost(state, fireWallId).finalCredits).toBe(5);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "rez_ice" &&
+          sourceDefinition(state, action) === "onr_v1_245_fire-wall",
+      ),
+    ).toBe(false);
   });
 });
 

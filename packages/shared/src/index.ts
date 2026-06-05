@@ -7880,7 +7880,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     id: "onr_v1_245_fire-wall",
     title: "Fire Wall",
     subtypes: ["wall"],
-    rezCost: 1,
+    rezCost: 5,
     strength: 4,
     rulesText: "End the run.",
     subroutines: [onrEtr("onr_v1_245_fire_wall_etr")],
