@@ -10500,7 +10500,8 @@ select,
 
 .aiDecisionDebugTraceHead strong,
 .aiDecisionDebugAction strong,
-.aiDecisionDebugSection > strong {
+.aiDecisionDebugSection > strong,
+.aiDecisionDebugSection summary strong {
   min-width: 0;
   overflow-wrap: anywhere;
 }
@@ -10544,6 +10545,33 @@ select,
   min-width: 0;
   display: grid;
   gap: 6px;
+}
+
+.aiDecisionDebugCollapsible {
+  padding: 2px 0 0;
+}
+
+.aiDecisionDebugCollapsible > summary,
+.aiDecisionMemoryDetails > summary,
+.aiDecisionDebugActionDetails > summary {
+  cursor: pointer;
+  color: var(--text);
+  font-weight: 800;
+}
+
+.aiDecisionDebugCollapsible > summary {
+  display: list-item;
+  min-width: 0;
+}
+
+.aiDecisionDebugCollapsible[open] > summary {
+  margin-bottom: 2px;
+}
+
+.aiDecisionDebugCollapsible > summary::marker,
+.aiDecisionMemoryDetails > summary::marker,
+.aiDecisionDebugActionDetails > summary::marker {
+  color: var(--runner);
 }
 
 .aiDecisionDebugSection.warning .aiDecisionDebugChipRow span {

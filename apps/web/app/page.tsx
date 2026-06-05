@@ -9632,6 +9632,7 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
   const whyNot = safeStringList(detail.whyNot, 5);
   const longTermPlan = safeStringList(detail.longTermPlan, 5);
   const tacticalPlanItems = aiDecisionDebugDetailSectionItems(detail, "tactical_plan", 12);
+  const planLayerItems = [...longTermPlan, ...tacticalPlanItems];
   const title = mode === "preview" ? aiDecisionPreviewTitle(trace) : aiTraceTitle(trace);
   return (
     <div className="aiDecisionDebugContent">
@@ -9643,11 +9644,9 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
       <AiDecisionDebugChips title="Warnmarker" items={warningItems} tone="warning" />
       <AiDecisionDebugChips title="Gründe" items={visibleReasons} />
       <AiDecisionDebugChips title="Why-not" items={whyNot} />
-      <AiDecisionDebugChips title="Plan" items={longTermPlan} />
-      <AiDecisionDebugChips title="Taktische Ebene" items={tacticalPlanItems} />
+      <AiDecisionDebugCollapsibleChips title="Planebene" items={planLayerItems} defaultOpen />
       {actionRows.length > 0 ? (
-        <div className="aiDecisionDebugSection">
-          <strong>{mode === "preview" ? "Legale Aktionen nach KI-Score" : "Action-Level-Ranking"}</strong>
+        <AiDecisionDebugCollapsibleSection title={mode === "preview" ? "LegalAction-Ebene" : "Action-Level-Ranking"} defaultOpen>
           <div className="aiDecisionDebugActions">
             {actionRows.map((action) => (
               <div className={`aiDecisionDebugAction ${action.selected ? "selected" : ""} ${action.excluded ? "excluded" : ""}`} key={action.key}>
@@ -9670,11 +9669,10 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
               </div>
             ))}
           </div>
-        </div>
+        </AiDecisionDebugCollapsibleSection>
       ) : null}
       {rankedAlternatives.length > 0 ? (
-        <div className="aiDecisionDebugSection">
-          <strong>Semantic-Ranking</strong>
+        <AiDecisionDebugCollapsibleSection title="Semantic-Action-Ranking" defaultOpen={false}>
           <div className="aiDecisionDebugCompactList">
             {rankedAlternatives.map((alternative, index) => (
               <div key={`${String(alternative.planId ?? alternative.planKind ?? "plan")}-${index}`}>
@@ -9683,23 +9681,61 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
               </div>
             ))}
           </div>
-        </div>
+        </AiDecisionDebugCollapsibleSection>
       ) : null}
       {scoreRows.length > 0 ? (
-        <div className="aiDecisionDebugSection">
-          <strong>Score-Komponenten</strong>
+        <AiDecisionDebugCollapsibleSection title="Score-Komponenten" defaultOpen>
           <AiDecisionDebugRows rows={scoreRows} />
-        </div>
+        </AiDecisionDebugCollapsibleSection>
       ) : null}
       {doctrineRows.length > 0 ? (
-        <div className="aiDecisionDebugSection">
-          <strong>Plan / Doctrine</strong>
+        <AiDecisionDebugCollapsibleSection title="Deck-Doctrine" defaultOpen={false}>
           <AiDecisionDebugRows rows={doctrineRows} />
-        </div>
+        </AiDecisionDebugCollapsibleSection>
       ) : null}
       <AiDecisionDebugMemory detail={detail} />
       <AiDecisionDebugChips title="Folgepunkte" items={notes} tone="muted" />
     </div>
+  );
+}
+
+function AiDecisionDebugCollapsibleSection({
+  title,
+  children,
+  defaultOpen = true
+}: {
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  return (
+    <details className="aiDecisionDebugSection aiDecisionDebugCollapsible" open={defaultOpen}>
+      <summary><strong>{title}</strong></summary>
+      {children}
+    </details>
+  );
+}
+
+function AiDecisionDebugCollapsibleChips({
+  title,
+  items,
+  tone = "default",
+  defaultOpen = true
+}: {
+  title: string;
+  items: string[];
+  tone?: "default" | "warning" | "muted";
+  defaultOpen?: boolean;
+}) {
+  if (items.length === 0) return null;
+  return (
+    <AiDecisionDebugCollapsibleSection title={title} defaultOpen={defaultOpen}>
+      <div className={`aiDecisionDebugSection ${tone}`}>
+        <div className="aiDecisionDebugChipRow">
+          {items.map((item, index) => <span key={`${item}:${index}`}>{item}</span>)}
+        </div>
+      </div>
+    </AiDecisionDebugCollapsibleSection>
   );
 }
 
