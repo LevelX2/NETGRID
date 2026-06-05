@@ -37,6 +37,7 @@ import {
   type AiDecision,
   type AiDifficulty,
   type AiDecisionDebug,
+  type AiDecisionInput,
   type DeckPublicMetadata,
   type GameEvent,
   type GameState,
@@ -47,6 +48,7 @@ import {
   type PublicGameEvent,
   type RulesBaseline,
   type Side,
+  type VisibleCard,
   type Winner
 } from "@netgrid/shared";
 import {
@@ -1639,14 +1641,15 @@ export class MultiplayerService {
       }
       const controller = record.match.aiControllers?.[activeAiSide];
       const ownDeckSnapshot = record.privateDeckSnapshots?.[activeAiSide];
+      const aiInput = buildAiDecisionInput(record.gameState, activeAiSide, {
+        difficulty: controller?.difficulty ?? "normal",
+        profileId: controller?.profileId ?? `${activeAiSide}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
+        decisionId: `${record.match.matchId}:${record.gameState.stateVersion}:${activeAiSide}`,
+        actionNumber: record.gameState.stateVersion,
+        ...(ownDeckSnapshot ? { ownDeckSnapshot } : {})
+      });
       const decision = chooseAiAction(
-        buildAiDecisionInput(record.gameState, activeAiSide, {
-          difficulty: controller?.difficulty ?? "normal",
-          profileId: controller?.profileId ?? `${activeAiSide}-server-ai-v0.9-${controller?.difficulty ?? "normal"}`,
-          decisionId: `${record.match.matchId}:${record.gameState.stateVersion}:${activeAiSide}`,
-          actionNumber: record.gameState.stateVersion,
-          ...(ownDeckSnapshot ? { ownDeckSnapshot } : {})
-        }),
+        aiInput,
         { persistTacticalPlanMemory: false }
       );
       const legalAction = legalActions.find((candidate) => candidate.actionId === decision.actionId) ?? legalActions.slice().sort((left, right) => left.actionId.localeCompare(right.actionId))[0];
@@ -1654,9 +1657,12 @@ export class MultiplayerService {
         return { ok: false, error: safeError("ai_no_action", "Die KI konnte aktuell keine Aktion bewerten.", record.gameState, input.side), payload: this.payloadFor(record, input.side) };
       }
       const safeDebug = sanitizeAiDecisionDebug(decision.decisionDebug);
-      const detail = safeDebug
-        ? aiDecisionTraceJson(safeDebug, activeAiSide, legalAction, "detailed")
-        : minimalAiPreviewDetail(activeAiSide, legalAction, decision);
+      const detail = withAiPrivateHandPreview(
+        safeDebug
+          ? aiDecisionTraceJson(safeDebug, activeAiSide, legalAction, "detailed")
+          : minimalAiPreviewDetail(activeAiSide, legalAction, decision),
+        aiInput,
+      );
       const preview: AiDecisionPreview = {
         matchId: record.match.matchId,
         matchVersion: record.match.matchVersion,
@@ -3217,6 +3223,71 @@ function minimalAiPreviewDetail(actor: Side, legalAction: LegalAction, decision:
     ],
     scoreBreakdown: []
   };
+}
+
+function withAiPrivateHandPreview(detail: Record<string, unknown>, input: AiDecisionInput): Record<string, unknown> {
+  return {
+    ...detail,
+    aiPrivateHandPreview: aiPrivateHandPreview(input)
+  };
+}
+
+function aiPrivateHandPreview(input: AiDecisionInput): Record<string, unknown> {
+  const legalActionsBySource = new Map<string, LegalAction[]>();
+  for (const action of input.legalActions) {
+    const source = typeof action.source === "string" ? action.source : "";
+    if (!source || source === "basic_action" || source === "game_rule") continue;
+    const actions = legalActionsBySource.get(source) ?? [];
+    actions.push(action);
+    legalActionsBySource.set(source, actions);
+  }
+  return {
+    schemaVersion: "ai-private-hand-preview-v1",
+    visibility: "preview_only_not_persisted",
+    side: input.side,
+    credits: input.playerView.own.credits,
+    handCount: input.playerView.own.gripOrHq.length,
+    cards: input.playerView.own.gripOrHq.slice(0, 12).map((card, index) =>
+      aiPrivateHandCardPreview(card, index, input.playerView.own.credits, legalActionsBySource.get(card.instanceId) ?? []),
+    )
+  };
+}
+
+function aiPrivateHandCardPreview(card: VisibleCard, index: number, credits: number, legalActions: LegalAction[]): Record<string, unknown> {
+  const playCost = aiPrivateHandCardCost(card);
+  const missingCredits = playCost === undefined ? undefined : Math.max(0, playCost - credits);
+  return {
+    index,
+    instanceId: card.instanceId,
+    definitionId: card.definitionId ?? "",
+    title: card.title ?? card.definitionId ?? "Unbekannte Karte",
+    type: card.type ?? "unknown",
+    ...(card.subtypes && card.subtypes.length > 0 ? { subtypes: card.subtypes.slice(0, 4) } : {}),
+    ...(playCost !== undefined ? { playCost } : {}),
+    ...(missingCredits !== undefined ? { missingCredits } : {}),
+    availability:
+      legalActions.length > 0
+        ? "legal_now"
+        : missingCredits !== undefined && missingCredits > 0
+          ? "missing_credits"
+          : "not_legal_now",
+    legalActions: legalActions.slice(0, 4).map((action) => ({
+      actionId: action.actionId,
+      actionType: action.type,
+      label: action.label,
+      creditCost: actionCreditCost(action)
+    }))
+  };
+}
+
+function aiPrivateHandCardCost(card: VisibleCard): number | undefined {
+  if (typeof card.installCost === "number") return card.installCost;
+  if (typeof card.cost === "number") return card.cost;
+  return undefined;
+}
+
+function actionCreditCost(action: LegalAction): number {
+  return action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0);
 }
 
 function replayRandomDrawEntries(record: StoredMatch): ReplayRandomDrawEntry[] {

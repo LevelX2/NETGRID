@@ -9674,7 +9674,7 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
           <div className="aiDecisionDebugCompactList">
             {rankedAlternatives.map((alternative, index) => (
               <div key={`${String(alternative.planId ?? alternative.planKind ?? "plan")}-${index}`}>
-                <span>#{String(alternative.rank ?? index + 1)} {typeof alternative.planKind === "string" ? aiTracePlanLabel(alternative.planKind) : String(alternative.selectedActionType ?? "Plan")}</span>
+                <span>#{String(alternative.rank ?? index + 1)} {aiDecisionDebugSemanticRankingLabel(alternative)}</span>
                 <strong>{typeof alternative.score === "number" ? alternative.score.toFixed(2) : "-"}</strong>
               </div>
             ))}
@@ -9692,6 +9692,7 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
         </AiDecisionDebugCollapsibleSection>
       ) : null}
       <AiDecisionDebugMemory detail={detail} />
+      <AiDecisionDebugPrivateHand detail={detail} />
       <AiDecisionDebugChips title="Folgepunkte" items={notes} tone="muted" />
     </div>
   );
@@ -9711,6 +9712,95 @@ type AiDecisionDebugPlanEntry = {
   capabilities: string[];
   scores: Array<[string, string]>;
 };
+
+function aiDecisionDebugSemanticRankingLabel(alternative: Record<string, unknown>): string {
+  const actionLabel = aiDecisionDebugActionTypeLabel(
+    typeof alternative.selectedActionType === "string" ? alternative.selectedActionType : undefined,
+  );
+  const planLabel = typeof alternative.planKind === "string" ? aiTracePlanLabel(alternative.planKind) : "";
+  if (actionLabel && planLabel && actionLabel !== planLabel) return `${actionLabel} · ${planLabel}`;
+  return actionLabel || planLabel || "Plan";
+}
+
+function aiDecisionDebugActionTypeLabel(actionType: string | undefined): string {
+  const labels: Record<string, string> = {
+    access_card: "Karte accessen",
+    advance_card: "Karte advancen",
+    break_subroutine: "Subroutine brechen",
+    continue_run: "Run fortsetzen",
+    decline_rez: "Nicht rezzen",
+    decline_trash: "Nicht trashen",
+    draw_card: "Karte ziehen",
+    end_turn: "Zug beenden",
+    gain_credit: "1 Credit nehmen",
+    install_card: "Karte installieren",
+    jack_out: "Ausloggen",
+    mandatory_draw: "Pflichtkarte ziehen",
+    play_event: "Event spielen",
+    play_operation: "Operation spielen",
+    pump_breaker: "Breaker pumpen",
+    remove_tag: "Tag entfernen",
+    rez_ice: "ICE rezzen",
+    resolve_choice: "Auswahl treffen",
+    score_agenda: "Agenda punkten",
+    start_run: "Run starten",
+    steal_agenda: "Agenda stehlen",
+    trash_accessed_card: "Karte trashen",
+    trash_resource: "Resource trashen",
+    trigger_ability: "Fähigkeit nutzen",
+  };
+  return actionType ? labels[actionType] ?? actionType : "";
+}
+
+function AiDecisionDebugPrivateHand({ detail }: { detail: Record<string, unknown> }) {
+  const preview = aiDecisionDebugRecord(detail.aiPrivateHandPreview);
+  if (!preview) return null;
+  const cards = aiDecisionDebugRecordList(preview.cards);
+  const rows: Array<[string, string]> = [
+    ["Seite", preview.side === "runner" ? "Runner" : preview.side === "corp" ? "Korp" : String(preview.side ?? "-")],
+    ["Credits", String(preview.credits ?? "-")],
+    ["Handkarten", String(preview.handCount ?? cards.length)],
+    ["Sichtbarkeit", preview.visibility === "preview_only_not_persisted" ? "nur Vorschau, nicht gespeichert" : String(preview.visibility ?? "-")]
+  ];
+  return (
+    <AiDecisionDebugCollapsibleSection title="KI-Privathand" defaultOpen={false}>
+      <AiDecisionDebugRows rows={rows} />
+      <div className="aiDecisionDebugActions">
+        {cards.map((card, index) => {
+          const title = typeof card.title === "string" ? card.title : typeof card.definitionId === "string" ? card.definitionId : `Karte ${index + 1}`;
+          const type = typeof card.type === "string" ? card.type : "unknown";
+          const cost = typeof card.playCost === "number" ? `${card.playCost} Kosten` : "Kosten ?";
+          const availability = aiDecisionDebugPrivateHandAvailabilityLabel(card.availability, card.missingCredits);
+          const legalActions = aiDecisionDebugRecordList(card.legalActions);
+          return (
+            <div className="aiDecisionDebugAction" key={`${String(card.instanceId ?? title)}:${index}`}>
+              <div>
+                <strong>#{index + 1} {title}</strong>
+                <span>{[type, cost, availability].join(" · ")}</span>
+              </div>
+              {legalActions.length > 0 ? (
+                <p>{legalActions.map((action) => {
+                  const label = typeof action.label === "string" ? action.label : aiDecisionDebugActionTypeLabel(typeof action.actionType === "string" ? action.actionType : undefined);
+                  const creditCost = typeof action.creditCost === "number" ? ` (${action.creditCost} Credits)` : "";
+                  return `${label}${creditCost}`;
+                }).join(" · ")}</p>
+              ) : (
+                <p>Keine aktuelle LegalAction aus dieser Handkarte.</p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </AiDecisionDebugCollapsibleSection>
+  );
+}
+
+function aiDecisionDebugPrivateHandAvailabilityLabel(availability: unknown, missingCredits: unknown): string {
+  if (availability === "legal_now") return "jetzt legal";
+  if (availability === "missing_credits") return typeof missingCredits === "number" ? `${missingCredits} Credits fehlen` : "Credits fehlen";
+  if (availability === "not_legal_now") return "jetzt nicht legal";
+  return String(availability ?? "unbekannt");
+}
 
 function AiDecisionDebugPlanLayer({ detail, defaultOpen = true }: { detail: Record<string, unknown>; defaultOpen?: boolean }) {
   const planLayer = aiDecisionDebugPlanLayer(detail);
@@ -10064,6 +10154,26 @@ function AiDecisionDebugMemory({ detail }: { detail: Record<string, unknown> }) 
 function aiDecisionDebugMemoryRows(detail: Record<string, unknown>): Array<[string, string]> {
   const rows: Array<[string, string]> = [];
   if (typeof detail.memoryVersion === "string") rows.push(["Version", detail.memoryVersion]);
+  const memoryItems = aiDecisionDebugDetailSectionItems(detail, "semantic_memory", 64);
+  const ownHandCount = aiDecisionDebugTagValue(memoryItems, "own_hand_count");
+  const ownHandVisibility = aiDecisionDebugTagValue(memoryItems, "own_hand_content_visibility");
+  const ownHandLegalActions = aiDecisionDebugTagValue(memoryItems, "own_hand_current_legal_actions");
+  if (ownHandCount) {
+    rows.push([
+      "KI-eigene Hand",
+      [
+        `${ownHandCount} Karten`,
+        ownHandLegalActions ? `${ownHandLegalActions} aktuelle LegalActions aus der Hand` : undefined,
+        ownHandVisibility === "preview_private_section" ? "Details in KI-Privathand" : ownHandVisibility
+      ].filter(Boolean).join(" · ")
+    ]);
+  }
+  if (aiDecisionDebugTagValue(memoryItems, "own_hand_future_play_plan_model") === "not_modelled") {
+    rows.push([
+      "Handkarten-Planung",
+      "unbezahlbare Zukunftskarten noch nicht als eigener Plan modelliert"
+    ]);
+  }
   const model = aiDecisionDebugRecord(detail.opponentModel);
   if (!model) return rows;
   const rnd = aiDecisionDebugRecord(model.rndTopFreshness);

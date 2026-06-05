@@ -96,6 +96,42 @@ describe("tactical plan model", () => {
     ]);
   });
 
+  it("keeps a progressing plan above a fresh active alternative", () => {
+    const progressing = createTacticalPlan({
+      planId: "runner.obtain_breaker_coverage:rd",
+      side: "runner",
+      type: "runner.obtain_breaker_coverage",
+      status: "progressing",
+      priority: 700,
+      horizonTurns: 1,
+      currentStep: createPlanStep({
+        stepId: "draw_for_answer:rd",
+        kind: "draw_for_answer",
+        desiredActionSemantics: ["draw_for_answer"],
+      }),
+      stateVersion: 2,
+    });
+    const freshActive = createTacticalPlan({
+      planId: "runner.contest_remote:remote_2",
+      side: "runner",
+      type: "runner.contest_remote",
+      status: "active",
+      priority: 820,
+      horizonTurns: 1,
+      currentStep: createPlanStep({
+        stepId: "run_target:remote_2",
+        kind: "run_target",
+        desiredActionSemantics: ["run"],
+      }),
+      stateVersion: 2,
+    });
+
+    expect(rankTacticalPlans([freshActive, progressing]).map((plan) => plan.planId)).toEqual([
+      "runner.obtain_breaker_coverage:rd",
+      "runner.contest_remote:remote_2",
+    ]);
+  });
+
   it("maps a plan step through ActionSemanticCandidate back to LegalAction", () => {
     const action = legalAction("run-hq", "runner", "start_run", {
       serverId: "hq",
@@ -142,11 +178,11 @@ describe("tactical plan model", () => {
       server("rd"),
       server("archives"),
       server("remote_1", [
-        visibleCard("remote-wall", "corp", "ice", {
+        visibleCard("simple_barrier_ice", "corp", "ice", {
           rezzed: true,
           subtypes: ["Wall"],
         }),
-      ]),
+      ], [visibleCard("simple_agenda", "corp", "agenda")]),
     ];
 
     const plans = buildTacticalPlans({ input });
@@ -156,6 +192,117 @@ describe("tactical plan model", () => {
 
     expect(coveragePlan?.requiredCapabilities[0]?.kind).toBe("breaker_wall");
     expect(coveragePlan?.currentStep.rationale[0]).toContain("breaker_wall");
+  });
+
+  it("marks blocked central pressure as needing breaker coverage", () => {
+    const input = aiInput("runner", [
+      legalAction("run-rd", "runner", "start_run", {
+        serverId: "rd",
+      }),
+      legalAction("draw", "runner", "draw_card"),
+    ]);
+    input.playerView.own.rig = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("simple_barrier_ice", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["Wall"],
+        }),
+      ]),
+      server("archives"),
+    ];
+
+    const plans = buildTacticalPlans({ input });
+    const centralPlan = plans.find(
+      (plan) => plan.planId === "runner.opportunistic_central_run:rd",
+    );
+    const coveragePlan = plans.find(
+      (plan) => plan.planId === "runner.obtain_breaker_coverage:rd",
+    );
+
+    expect(centralPlan?.status).toBe("blocked");
+    expect(centralPlan?.blockers[0]).toMatchObject({
+      kind: "missing_breaker_coverage",
+      target: { kind: "server", id: "rd" },
+    });
+    expect(centralPlan?.currentStep.kind).toBe("draw_for_answer");
+    expect(coveragePlan?.status).toBe("active");
+    expect(coveragePlan?.requiredCapabilities[0]?.kind).toBe("breaker_wall");
+  });
+
+  it("funds an unaffordable matching breaker in hand instead of drawing", () => {
+    const input = aiInput("runner", [
+      legalAction("run-rd", "runner", "start_run", {
+        serverId: "rd",
+      }),
+      legalAction("draw", "runner", "draw_card"),
+      legalAction("gain", "runner", "gain_credit"),
+    ]);
+    input.playerView.own.credits = 1;
+    input.playerView.own.rig = [];
+    input.playerView.own.gripOrHq = [
+      visibleCard("expensive_fracter", "runner", "program", {
+        installCost: 6,
+        subtypes: ["Fracter"],
+        rulesText: "1 credit: Break 1 barrier subroutine.",
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("simple_barrier_ice", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["Wall"],
+        }),
+      ]),
+      server("archives"),
+    ];
+
+    const plans = buildTacticalPlans({ input });
+    const coveragePlan = plans.find(
+      (plan) => plan.planId === "runner.obtain_breaker_coverage:rd",
+    );
+    const centralPlan = plans.find(
+      (plan) => plan.planId === "runner.opportunistic_central_run:rd",
+    );
+
+    expect(coveragePlan?.currentStep.kind).toBe("gain_credits");
+    expect(coveragePlan?.currentStep.rationale).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("breaker is already in hand"),
+      ]),
+    );
+    expect(centralPlan?.blockers[0]?.removalStepKind).toBe("gain_credits");
+  });
+
+  it("does not create an active contest plan for an empty remote shell", () => {
+    const input = aiInput("runner", [
+      legalAction("run-remote-2", "runner", "start_run", {
+        serverId: "remote_2",
+      }),
+      legalAction("gain", "runner", "gain_credit"),
+    ]);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_2", [
+        visibleCard("remote-2-ice", "corp", "ice", {
+          rezzed: false,
+        }),
+      ]),
+    ];
+
+    const plans = buildTacticalPlans({ input });
+    const emptyRemotePlan = plans.find(
+      (plan) => plan.planId === "runner.contest_remote:remote_2",
+    );
+
+    expect(emptyRemotePlan?.status).toBe("abandoned");
+    expect(emptyRemotePlan?.scoreBreakdown[0]).toMatchObject({
+      key: "empty_remote_no_root_value",
+    });
   });
 });
 

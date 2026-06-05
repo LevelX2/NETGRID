@@ -246,8 +246,8 @@ describe("Semantic AI runtime cutover", () => {
       server("rd"),
       server("archives"),
       server("remote_1", [
-        visibleCard("remote-wall", "corp", "ice", { rezzed: true }),
-      ]),
+        visibleCard("onr_v1_279_wall-of-static", "corp", "ice", { rezzed: true }),
+      ], [visibleCard("simple_agenda", "corp", "agenda")]),
     ];
 
     const decision = chooseRunnerAction(input);
@@ -276,6 +276,88 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
+  it("builds credits when a matching blocked-server breaker is already in hand", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 1;
+    input.playerView.own.rig = [];
+    input.playerView.own.gripOrHq = [
+      visibleCard("expensive-fracter", "runner", "program", {
+        installCost: 6,
+        subtypes: ["Fracter"],
+        rulesText: "1 credit: Break 1 barrier subroutine.",
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("onr_v1_279_wall-of-static", "corp", "ice", {
+          rezzed: true,
+        }),
+      ], [visibleCard("simple_agenda", "corp", "agenda")]),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "tactical_plan_type:runner.obtain_breaker_coverage",
+        "tactical_step:gain_credits",
+      ]),
+    );
+    expect(decision.decisionDebug?.detailSections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "tactical_plan",
+          items: expect.arrayContaining(["selected_step_kind:gain_credits"]),
+        }),
+      ]),
+    );
+  });
+
+  it("builds toward an unaffordable economy payout card in hand", () => {
+    const input = aiInput("runner", [
+      legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 4;
+    input.playerView.own.gripOrHq = [
+      visibleCard("onr_v1_108_score", "runner", "event"),
+      visibleCard("filler-1", "runner", "event"),
+      visibleCard("filler-2", "runner", "event"),
+      visibleCard("filler-3", "runner", "event"),
+      visibleCard("filler-4", "runner", "event"),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_hand_funding_target",
+        }),
+      ]),
+    );
+  });
+
   it("keeps preview decisions from advancing tactical plan memory", () => {
     const input = aiInput("runner", [
       legalAction(
@@ -294,8 +376,8 @@ describe("Semantic AI runtime cutover", () => {
       server("rd"),
       server("archives"),
       server("remote_1", [
-        visibleCard("remote-wall", "corp", "ice", { rezzed: true }),
-      ]),
+        visibleCard("onr_v1_279_wall-of-static", "corp", "ice", { rezzed: true }),
+      ], [visibleCard("simple_agenda", "corp", "agenda")]),
     ];
 
     const previewDecision = chooseRunnerAction(input, {
@@ -341,8 +423,8 @@ describe("Semantic AI runtime cutover", () => {
       server("rd"),
       server("archives"),
       server("remote_1", [
-        visibleCard("remote-wall", "corp", "ice", { rezzed: true }),
-      ]),
+        visibleCard("onr_v1_279_wall-of-static", "corp", "ice", { rezzed: true }),
+      ], [visibleCard("simple_agenda", "corp", "agenda")]),
     ];
 
     const decision = chooseRunnerAction(input);
@@ -473,8 +555,8 @@ describe("Semantic AI runtime cutover", () => {
       server("rd"),
       server("archives"),
       server("remote_1", [
-        visibleCard("remote-wall", "corp", "ice", { rezzed: true }),
-      ]),
+        visibleCard("onr_v1_279_wall-of-static", "corp", "ice", { rezzed: true }),
+      ], [visibleCard("simple_agenda", "corp", "agenda")]),
     ];
 
     const centralDecision = chooseRunnerAction(centralInput);

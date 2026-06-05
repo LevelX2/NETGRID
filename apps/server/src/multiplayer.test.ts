@@ -559,6 +559,22 @@ describe("Backend 0.5 private storage maintenance", () => {
           actionAlternatives: expect.any(Array)
         })
       });
+      expect(preview.preview.detail.aiPrivateHandPreview).toMatchObject({
+        schemaVersion: "ai-private-hand-preview-v1",
+        visibility: "preview_only_not_persisted",
+        side: "corp",
+        credits: expect.any(Number),
+        handCount: expect.any(Number),
+        cards: expect.any(Array)
+      });
+      const privateHand = preview.preview.detail.aiPrivateHandPreview as { cards?: unknown[] };
+      expect(privateHand.cards?.length ?? 0).toBeGreaterThan(0);
+      expect(privateHand.cards?.[0]).toMatchObject({
+        title: expect.any(String),
+        definitionId: expect.any(String),
+        availability: expect.any(String),
+        legalActions: expect.any(Array)
+      });
       previewActionId = preview.preview.actionId;
       previewActionType = preview.preview.actionType;
       expect(Array.isArray(preview.preview.detail.actionAlternatives) ? preview.preview.detail.actionAlternatives.length : 0).toBeGreaterThan(0);

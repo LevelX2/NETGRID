@@ -148,6 +148,7 @@ describe("MVP 0.3 AI controller contract", () => {
     delete DEMO_CARDS_BY_ID.test_alpha_planless_runner_resource;
     delete DEMO_CARDS_BY_ID.test_zeta_planless_runner_resource;
     delete DEMO_CARDS_BY_ID.test_zeta_planless_corp_operation;
+    delete DEMO_CARDS_BY_ID.test_expensive_fracter;
   });
 
   it("builds side-neutral AI inputs without FullState or forbidden transport fields", () => {
@@ -2638,6 +2639,69 @@ describe("MVP 0.3 AI controller contract", () => {
       choiceId: lowCreditInput.playerView.pendingChoice?.choiceId,
       selectedOptionIds: ["card_discard_simple_run_event_1"],
     });
+  });
+
+  it("keeps plan-relevant expensive breakers and Bad-Publicity trace tech on discard", () => {
+    DEMO_CARDS_BY_ID.test_expensive_fracter = {
+      id: "test_expensive_fracter",
+      title: "Expensive Fracter",
+      side: "runner",
+      type: "program",
+      subtypes: ["Fracter"],
+      implementationStatus: "playable_mvp",
+      installCost: 6,
+      memoryCost: 1,
+      rulesText: "1 credit: Break 1 barrier subroutine.",
+      mechanics: ["install_program", "icebreaker"],
+    } satisfies CardDefinition;
+    const input = discardDecisionInputForTest("runner", {
+      credits: 1,
+      cards: [
+        "test_expensive_fracter",
+        "onr_proteus_129_back-door-to-netwatch",
+        "simple_run_event",
+      ],
+    });
+    input.playerView.servers = [
+      {
+        id: "hq",
+        label: "HQ",
+        ice: [],
+        root: [],
+      },
+      {
+        id: "rd",
+        label: "R&D",
+        ice: [
+          {
+            instanceId: "discard_test_wall",
+            definitionId: "simple_barrier_ice",
+            title: "Test Wall",
+            owner: "corp",
+            controller: "corp",
+            type: "ice",
+            known: true,
+            rezzed: true,
+            subtypes: ["Wall"],
+          },
+        ],
+        root: [],
+      },
+      {
+        id: "archives",
+        label: "Archives",
+        ice: [],
+        root: [],
+      },
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: ["card_discard_simple_run_event_2"],
+    });
+    expect(decision.evidence).toContain("discard_selection:keep_value");
   });
 
   it("uses discard keep values for Corp agenda, ICE and economy preservation", () => {
@@ -11403,6 +11467,71 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("preserves early Runner credits instead of trashing a central Fortress Architects access all-in", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ai-runner-central-fortress-trash-budget",
+        corpDeck: {
+          id: "ai_runner_central_fortress_trash_budget_corp",
+          name: "AI Runner Central Fortress Trash Budget Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_324_fortress-architects", quantity: 1 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    const assetId = moveCorpCardToHq(state, "onr_v1_324_fortress-architects");
+    keepOnlyCorpHqCard(state, assetId);
+    state.runner.credits = 3;
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+
+    expect(input.playerView.run?.accessedCard?.definitionId).toBe(
+      "onr_v1_324_fortress-architects",
+    );
+    expect(
+      input.legalActions.some((action) => action.type === "trash_accessed_card"),
+    ).toBe(true);
+    expect(
+      input.legalActions.some((action) => action.type === "decline_trash"),
+    ).toBe(true);
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "legacy";
+    const legacyDecision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+    expect(legacyDecision.reasonCode).toBe("runner.access.decline_trash");
+    expect(legacyDecision.evidence).toContain(
+      "central_access_trash_all_in_budget_risk:true",
+    );
+
+    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+    const semanticDecision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+    expect(
+      input.legalActions.find(
+        (action) => action.actionId === semanticDecision.actionId,
+      )?.type,
+    ).toBe("decline_trash");
+    expect(semanticDecision.evidence).toContain(
+      "central_access_trash_all_in_budget_risk:true",
+    );
+  });
+
   it("keeps hidden-state invariance for equal Runner-visible projections", () => {
     const stateA = toRunnerTurn(
       createGameAfterSetup({ seed: "ai-v141-invariance" }),
@@ -16760,7 +16889,10 @@ describe("V1.4.2 belief state and opponent model", () => {
       expect(rdAlternative?.priority).toBeGreaterThan(hqAlternative?.priority ?? 0);
       expect(rdAlternative?.scoreBreakdown?.some((component) => component.key === "runner_rnd_unknown_top")).toBe(true);
     }
-    expect(decision.decisionDebug?.rankedAlternatives?.[0]).toMatchObject({
+    const selectedRankedAlternative = decision.decisionDebug?.rankedAlternatives?.find(
+      (entry) => entry.whyNot?.includes("selected_action"),
+    );
+    expect(selectedRankedAlternative).toMatchObject({
       selectedActionType: actualAction?.type,
       whyNot: ["selected_action"],
     });
@@ -16890,6 +17022,48 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(gainAlternative?.rank ?? 0);
     expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(drawAlternative?.rank ?? 0);
     expect(decision.actionId).not.toBe(archivesRun.actionId);
+  });
+
+  it("excludes empty remote shells without root access value from semantic run choices", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "semantic-runtime-empty-remote-shell" }),
+    );
+    state.runner.credits = 1;
+    ensureRemoteServer(state, "remote_2");
+    addCorpIceToServerForTest(state, "remote_2", "onr_v1_279_wall-of-static");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const emptyRemoteRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "remote_2");
+    const gainCredit = input.legalActions.find((action) => action.type === "gain_credit");
+    const drawCard = input.legalActions.find((action) => action.type === "draw_card");
+    expect(emptyRemoteRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    expect(drawCard).toBeDefined();
+    if (!emptyRemoteRun || !gainCredit || !drawCard) {
+      throw new Error("Missing empty remote semantic fixture actions");
+    }
+
+    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [emptyRemoteRun, gainCredit, drawCard],
+    }, { persistTacticalPlanMemory: false });
+    const alternatives = new Map(
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [entry.actionId, entry]) ?? [],
+    );
+    const emptyRemoteAlternative = alternatives.get(emptyRemoteRun.actionId);
+    const gainAlternative = alternatives.get(gainCredit.actionId);
+    const drawAlternative = alternatives.get(drawCard.actionId);
+
+    expect(decision.actionId).not.toBe(emptyRemoteRun.actionId);
+    expect(emptyRemoteAlternative?.excluded).toBe(true);
+    expect(emptyRemoteAlternative?.priority).toBeUndefined();
+    expect(emptyRemoteAlternative?.whyNot).toContain("semantic_excluded:remote_empty_no_root");
+    expect(emptyRemoteAlternative?.scoreBreakdown?.some((component) => component.key === "semantic_action_excluded" && component.reason === "empty_remote_root:remote_2")).toBe(true);
+    expect(emptyRemoteAlternative?.rank ?? 0).toBeGreaterThan(gainAlternative?.rank ?? 0);
+    expect(emptyRemoteAlternative?.rank ?? 0).toBeGreaterThan(drawAlternative?.rank ?? 0);
   });
 
   it("drops remote runs behind known rezzed end-the-run ICE when no installed breaker can reach access", () => {
@@ -17134,6 +17308,20 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(JSON.stringify(sanitized)).not.toMatch(
       /runner-session-secret|privatePayload|FullState|hidden-deck-card|decklist/i,
     );
+  });
+
+  it("keeps extended DecisionDebug detail section items for plan diagnostics", () => {
+    const items = Array.from({ length: 30 }, (_, index) => `plan_rank|rank=${index + 1}|id=plan_${index + 1}`);
+    const sanitized = sanitizeAiDecisionDebug({
+      schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
+      aiLevel: 2,
+      detailSections: [
+        { id: "tactical_plan", title: "Tactical Plan", items },
+      ],
+    });
+
+    expect(sanitized?.detailSections?.[0]?.items).toHaveLength(30);
+    expect(sanitized?.detailSections?.[0]?.items.at(-1)).toBe("plan_rank|rank=30|id=plan_30");
   });
 
   it("does not mutate real game state hash while building belief state and choosing actions", () => {

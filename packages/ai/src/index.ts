@@ -3690,6 +3690,7 @@ function semanticRuntimeMemoryDebug(input: AiDecisionInput): {
     : semanticRuntimeCorpOpponentMemorySummary(belief.corpOpponentModel);
   const items = [
     `memory_version:${belief.version}`,
+    ...semanticRuntimeOwnHandMemoryItems(input),
     ...(input.side === "runner"
       ? semanticRuntimeRunnerMemoryItems(belief.runnerOpponentModel)
       : semanticRuntimeCorpMemoryItems(belief.corpOpponentModel)),
@@ -3704,6 +3705,21 @@ function semanticRuntimeMemoryDebug(input: AiDecisionInput): {
     ...(opponentModel ? { opponentModel } : {}),
     items
   };
+}
+
+function semanticRuntimeOwnHandMemoryItems(input: AiDecisionInput): string[] {
+  const ownHandInstanceIds = new Set(
+    input.playerView.own.gripOrHq.map((card) => card.instanceId),
+  );
+  const legalOwnHandActions = input.legalActions.filter((action) =>
+    ownHandInstanceIds.has(String(action.source)),
+  );
+  return [
+    `own_hand_count:${input.playerView.own.gripOrHq.length}`,
+    "own_hand_content_visibility:preview_private_section",
+    `own_hand_current_legal_actions:${legalOwnHandActions.length}`,
+    "own_hand_future_play_plan_model:not_modelled",
+  ];
 }
 
 function semanticRuntimeBeliefEntrySummary(subject: string): string {
@@ -3894,7 +3910,13 @@ function semanticRuntimeActionAlternatives(
   rankedChoices: SemanticRuntimeChoice[],
   selectedActionId: string,
 ): NonNullable<AiDecisionDebug["actionAlternatives"]> {
-  return rankedChoices.slice(0, 32).map((choice, index) => {
+  const orderedChoices = rankedChoices.slice().sort((left, right) => {
+    const leftSelected = left.action.actionId === selectedActionId;
+    const rightSelected = right.action.actionId === selectedActionId;
+    if (leftSelected !== rightSelected) return leftSelected ? -1 : 1;
+    return 0;
+  });
+  return orderedChoices.slice(0, 32).map((choice, index) => {
     const selected = choice.action.actionId === selectedActionId;
     return {
       rank: index + 1,
@@ -3975,6 +3997,10 @@ function semanticRuntimeActionExclusion(
     if (archivesExclusion) return archivesExclusion;
   }
   if (!server) return undefined;
+  if (isRemoteServerTarget(serverId)) {
+    const emptyRemoteExclusion = semanticRuntimeRunnerEmptyRemoteExclusion(server);
+    if (emptyRemoteExclusion) return emptyRemoteExclusion;
+  }
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     input.playerView.own.rig ?? [],
@@ -3988,6 +4014,17 @@ function semanticRuntimeActionExclusion(
       ? "Run-Ziel nicht erreichbar"
       : "Run-Ziel nicht bezahlbar",
     reason: semanticRuntimeKnownIcePathReason(assessment, server.id)
+  };
+}
+
+function semanticRuntimeRunnerEmptyRemoteExclusion(
+  server: AiDecisionInput["playerView"]["servers"][number],
+): SemanticRuntimeExclusion | undefined {
+  if (server.root.length > 0) return undefined;
+  return {
+    key: "remote_empty_no_root",
+    label: "Remote ohne Root-Ziel",
+    reason: `empty_remote_root:${server.id}`,
   };
 }
 
@@ -4198,6 +4235,17 @@ function semanticRuntimeRunnerScoreComponents(
       reason: `credits:${credits}`
     });
   }
+  if (action.type === "gain_credit") {
+    const fundingTarget = runnerHandFundingTarget(input);
+    if (fundingTarget) {
+      components.push({
+        key: "runner_hand_funding_target",
+        label: "Handkarte finanzieren",
+        value: fundingTarget.value,
+        reason: fundingTarget.reason,
+      });
+    }
+  }
   if (action.type === "draw_card" && input.playerView.own.gripOrHq.length < 5) {
     components.push({
       key: "runner_low_hand",
@@ -4208,6 +4256,7 @@ function semanticRuntimeRunnerScoreComponents(
   }
   if (action.type === "install_card") {
     const roles = rolesForAction(input, action);
+    const sourceCard = findVisibleCard(input, action.source);
     if (roles.some((role) => role.startsWith("breaker_"))) {
       components.push({
         key: "runner_install_breaker",
@@ -4230,6 +4279,14 @@ function semanticRuntimeRunnerScoreComponents(
         label: "Druck-Aufbau",
         value: 650,
         reason: "pressure_role"
+      });
+    }
+    if (runnerBadPublicityOrTraceTechCard(sourceCard, roles)) {
+      components.push({
+        key: "runner_install_bad_publicity_trace_tech",
+        label: "Bad-Publicity-/Trace-Tech",
+        value: 520,
+        reason: "bad_publicity_or_trace",
       });
     }
   }
@@ -4276,12 +4333,10 @@ function semanticRuntimeRunnerScoreComponents(
     components.push(...semanticRuntimeRepeatedRunTargetComponents(input, serverId));
   }
   if (action.type === "trash_accessed_card") {
-    components.push({
-      key: "runner_trash_affordability",
-      label: "Trash-Kosten zahlbar",
-      value: credits >= actionCreditCost(action) ? 600 : -1200,
-      reason: `credits:${credits};cost:${actionCreditCost(action)}`
-    });
+    components.push(...semanticRuntimeRunnerAccessTrashComponents(input, action));
+  }
+  if (action.type === "decline_trash") {
+    components.push(...semanticRuntimeRunnerAccessTrashComponents(input, action));
   }
   if (action.type === "jack_out" && scopeId === "simple_run_choice") {
     components.push({
@@ -4298,6 +4353,245 @@ function semanticRuntimeRunnerScoreComponents(
       value: -1500,
       reason: `actions:${input.playerView.own.clicks}`
     });
+  }
+  return components;
+}
+
+function runnerHandFundingTarget(
+  input: AiDecisionInput,
+): { value: number; reason: string } | undefined {
+  if (input.side !== "runner") return undefined;
+  const credits = input.playerView.own.credits;
+  const candidates = input.playerView.own.gripOrHq
+    .filter((card) => card.known && card.definitionId)
+    .map((card) => {
+      const roles = rolesForCardId(card.definitionId);
+      const cost = visibleCardPlayOrInstallCostForAi(card);
+      if (cost <= credits || cost <= 0) return undefined;
+      const reasons: string[] = [];
+      let value = 0;
+      if (runnerCardAddressesVisibleBreakerNeed(input, card)) {
+        value += 820;
+        reasons.push("breaker_in_hand");
+      }
+      if (
+        roles.some((role) => isRunnerEconomyRole(role)) ||
+        runnerCardLooksLikeCreditPayout(card)
+      ) {
+        value += 620;
+        reasons.push("economy_card_in_hand");
+      }
+      if (runnerBadPublicityOrTraceTechCard(card, roles)) {
+        value += 430;
+        reasons.push("bad_publicity_or_trace_card_in_hand");
+      }
+      if (
+        discardRolesMatch(roles, [
+          "setup",
+          "build_rig",
+          "memory",
+          "runner_program",
+        ])
+      ) {
+        value += 260;
+        reasons.push("setup_card_in_hand");
+      }
+      if (value <= 0) return undefined;
+      const missingCredits = cost - credits;
+      const nearTermBonus = Math.max(0, 160 - missingCredits * 25);
+      const strategicCreditThresholdBonus = cost >= 5 ? 130 : 0;
+      return {
+        value: Math.min(
+          900,
+          value + nearTermBonus + strategicCreditThresholdBonus,
+        ),
+        reason: sortedUnique([
+          ...reasons,
+          `missing_credits:${missingCredits}`,
+          `card_cost:${cost}`,
+        ]).join(","),
+      };
+    })
+    .filter(
+      (candidate): candidate is { value: number; reason: string } =>
+        Boolean(candidate),
+    )
+    .sort(
+      (left, right) =>
+        right.value - left.value || left.reason.localeCompare(right.reason),
+    );
+  return candidates[0];
+}
+
+function visibleCardPlayOrInstallCostForAi(card: VisibleCard): number {
+  const definition = card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId] : undefined;
+  const direct = card.installCost ?? card.cost ?? card.rezCost;
+  if (typeof direct === "number" && Number.isFinite(direct)) {
+    return Math.max(0, direct);
+  }
+  return Math.max(
+    0,
+    definition?.installCost ?? definition?.cost ?? definition?.rezCost ?? 0,
+  );
+}
+
+function runnerCardLooksLikeCreditPayout(card: VisibleCard): boolean {
+  const definition = card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId] : undefined;
+  const mechanics = definition?.mechanics ?? [];
+  if (mechanics.some((mechanic) => mechanic.includes("gain_credits"))) {
+    return true;
+  }
+  return /gain\s+\[?\d+\]?\s+credits/i.test(visibleCardTextForAi(card));
+}
+
+function runnerBadPublicityOrTraceTechCard(
+  card: VisibleCard | undefined,
+  roles: readonly string[] = [],
+): boolean {
+  const text = card ? visibleCardTextForAi(card) : "";
+  return (
+    roles.some(
+      (role) =>
+        role.includes("bad_publicity") ||
+        role.includes("trace") ||
+        role.includes("bad-publicity"),
+    ) ||
+    /bad publicity|bad_publicity|trace/i.test(text)
+  );
+}
+
+function runnerCardAddressesVisibleBreakerNeed(
+  input: AiDecisionInput,
+  card: VisibleCard,
+): boolean {
+  if (input.side !== "runner" || !isVisibleIcebreakerProgram(card)) return false;
+  return input.playerView.servers.some((server) => {
+    const assessment = assessKnownRezzedIcePath(
+      server.ice,
+      input.playerView.own.rig ?? [],
+      input.playerView.own.credits,
+      server.root,
+    );
+    if (assessment.assessedKnownIceCount <= 0 || assessment.canReachAccess) {
+      return false;
+    }
+    return server.ice.some(
+      (ice) =>
+        ice.known &&
+        ice.rezzed === true &&
+        visibleBreakerCardCanAddressIce(card, ice),
+    );
+  });
+}
+
+function visibleBreakerCardCanAddressIce(
+  breaker: VisibleCard,
+  ice: VisibleCard,
+): boolean {
+  const roles = visibleBreakerRolesForAi(breaker);
+  const breakerText = visibleCardTextForAi(breaker).toLowerCase();
+  if (
+    roles.includes("icebreaker") &&
+    /break (?:an? |one |\d+ )?ice subroutine|breaks? .*subroutine/.test(
+      breakerText,
+    )
+  ) {
+    return true;
+  }
+  const iceText = visibleCardTextForAi(ice).toLowerCase();
+  if (/wall|barrier/.test(iceText)) {
+    return roles.includes("fracter") || /fracter|wall|barrier/.test(breakerText);
+  }
+  if (/code gate|codegate/.test(iceText)) {
+    return roles.includes("decoder") || /decoder|code gate|codegate/.test(breakerText);
+  }
+  if (/sentry/.test(iceText)) {
+    return roles.includes("killer") || /killer|sentry/.test(breakerText);
+  }
+  return roles.length > 0 && /break/.test(breakerText);
+}
+
+function visibleCardTextForAi(card: VisibleCard): string {
+  const definition = card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId] : undefined;
+  return [
+    card.title,
+    card.definitionId,
+    ...(card.subtypes ?? []),
+    card.rulesText,
+    definition?.title,
+    ...(definition?.subtypes ?? []),
+    definition?.rulesText,
+    ...(definition?.mechanics ?? []),
+  ].filter(Boolean).join(" ");
+}
+
+function semanticRuntimeRunnerAccessTrashComponents(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent[] {
+  const components: AiDecisionScoreComponent[] = [];
+  const context = runnerRemoteTrashAccessContext(input, action);
+  if (!context.trashable) return components;
+  const takingTrash = action.type === "trash_accessed_card";
+  if (takingTrash) {
+    components.push({
+      key: "runner_trash_affordability",
+      label: "Trash-Kosten zahlbar",
+      value:
+        input.playerView.own.credits >= context.generalCreditCost
+          ? context.centralAccess
+            ? 220
+            : 600
+          : -1200,
+      reason: `credits:${input.playerView.own.credits};cost:${context.trashCost};general_cost:${context.generalCreditCost}`
+    });
+    if (context.centralAccess) {
+      components.push({
+        key: "runner_central_access_trash_low_corp_investment",
+        label: "Zentralzugriff ohne Korp-Install",
+        value: -900,
+        reason: context.accessServerId ?? "central"
+      });
+    }
+    if (context.deferredByBudget) {
+      components.push({
+        key: "runner_access_trash_deferred_by_budget",
+        label: "Budget nach Trash zu niedrig",
+        value: -5600,
+        reason: `credits_after:${context.creditsAfterGeneralTrash};reserve:${context.reserveTarget}`
+      });
+    }
+    if (context.role === "low_value") {
+      components.push({
+        key: "runner_access_trash_low_value",
+        label: "Niedriger Trash-Wert",
+        value: -5200,
+        reason: context.targetType ?? "unknown"
+      });
+    }
+  } else {
+    if (context.deferredByBudget) {
+      components.push({
+        key: "runner_decline_trash_preserve_budget",
+        label: "Budget erhalten",
+        value: 3600,
+        reason: `credits_after_trash:${context.creditsAfterGeneralTrash};reserve:${context.reserveTarget}`
+      });
+    } else if (context.role === "low_value") {
+      components.push({
+        key: "runner_decline_low_value_trash",
+        label: "Niedrigen Trash ablehnen",
+        value: 2600,
+        reason: context.targetType ?? "unknown"
+      });
+    } else if (context.affordableRelevant && context.highImpact) {
+      components.push({
+        key: "runner_decline_relevant_trash",
+        label: "Relevanten Trash liegenlassen",
+        value: -1800,
+        reason: context.role ?? "relevant"
+      });
+    }
   }
   return components;
 }
@@ -4980,8 +5274,20 @@ function semanticRuntimeEvidence(
     `own_credits:${input.playerView.own.credits}`,
     `own_clicks:${input.playerView.own.clicks}`,
     `own_tags:${input.playerView.own.tags}`,
+    ...semanticRuntimeRunnerEvidence(input, action),
     ...semanticRuntimeCorpEvidence(input, action),
   ];
+}
+
+function semanticRuntimeRunnerEvidence(
+  input: AiDecisionInput,
+  action: LegalAction,
+): string[] {
+  if (input.side !== "runner") return [];
+  if (action.type !== "trash_accessed_card" && action.type !== "decline_trash") {
+    return [];
+  }
+  return runnerRemoteTrashAccessContext(input, action).evidence;
 }
 
 function semanticRuntimeCorpEvidence(
@@ -9680,6 +9986,15 @@ function discardKeepScore(
   const roles = discardRolesForCardId(card.definitionId);
   const type = card.type ?? DEMO_CARDS_BY_ID[card.definitionId]?.type;
   const cost = discardVisibleCardCost(card);
+  const runnerPlanRelevantBreaker =
+    input.side === "runner" && runnerCardAddressesVisibleBreakerNeed(input, card);
+  const runnerBadPublicityTraceTech =
+    input.side === "runner" && runnerBadPublicityOrTraceTechCard(card, roles);
+  const runnerFundingEconomyCard =
+    input.side === "runner" &&
+    cost > input.playerView.own.credits &&
+    (roles.some((role) => isRunnerEconomyRole(role)) ||
+      runnerCardLooksLikeCreditPayout(card));
   const duplicateCount = input.playerView.own.gripOrHq.filter(
     (candidate) => candidate.definitionId === card.definitionId,
   ).length;
@@ -9722,6 +10037,9 @@ function discardKeepScore(
     if (roles.includes("draw")) baseValue += 55;
     if (roles.includes("run_pressure"))
       baseValue += input.playerView.own.credits < 4 ? 20 : 90;
+    if (runnerPlanRelevantBreaker) baseValue += 360;
+    if (runnerBadPublicityTraceTech) baseValue += 240;
+    if (runnerFundingEconomyCard) baseValue += 190;
   }
 
   if (
@@ -9733,9 +10051,16 @@ function discardKeepScore(
     baseValue += 90;
   if (duplicateCount > 1 && type !== "agenda")
     baseValue -= 75 * (duplicateCount - 1);
-  if (cost > input.playerView.own.credits + 3 && type !== "agenda")
+  if (
+    cost > input.playerView.own.credits + 3 &&
+    type !== "agenda" &&
+    !runnerPlanRelevantBreaker &&
+    !runnerBadPublicityTraceTech &&
+    !runnerFundingEconomyCard
+  )
     baseValue -= 70;
-  if (roles.length === 0 && type !== "agenda") baseValue -= 60;
+  if (roles.length === 0 && type !== "agenda" && !runnerBadPublicityTraceTech)
+    baseValue -= 60;
 
   const planFit = discardPlanFitBonus(input, roles, type);
   const doctrineFit = discardDoctrineFitBonus(input, roles, type, cost);
@@ -29014,13 +29339,19 @@ function runnerRemoteTrashAccessContext(
   bbsWhisperingCampaign: boolean;
   corpValueRemaining: number;
   legalTrashActionCount: number;
+  centralAccess: boolean;
+  allInGeneralTrash: boolean;
+  accessServerId?: string;
   evidence: string[];
   targetType?: RemoteTrashTargetType;
   role?: RemoteTrashRole;
 } {
   const run = input.playerView.run;
   const accessed = run?.accessedCard;
-  if (!run || !isRemoteServerTarget(run.attackedServerId) || !accessed?.known) {
+  const accessServerId = run?.attackedServerId;
+  const centralAccess = accessServerId === "hq" || accessServerId === "rd";
+  const remoteAccess = isRemoteServerTarget(accessServerId);
+  if (!run || (!remoteAccess && !centralAccess) || !accessed?.known) {
     return {
       trashable: false,
       relevant: false,
@@ -29041,6 +29372,9 @@ function runnerRemoteTrashAccessContext(
       bbsWhisperingCampaign: false,
       corpValueRemaining: 0,
       legalTrashActionCount: 0,
+      centralAccess: false,
+      allInGeneralTrash: false,
+      ...(accessServerId ? { accessServerId } : {}),
       evidence: ["remote_trash_access:none"],
     };
   }
@@ -29082,6 +29416,11 @@ function runnerRemoteTrashAccessContext(
     input.playerView.own.credits - generalCreditCost;
   const dropsBelowReserve =
     trashable && creditsAfterGeneralTrash < Math.max(2, reserveTarget - 1);
+  const allInGeneralTrash =
+    trashable &&
+    generalCreditCost > 0 &&
+    generalCreditCost >= input.playerView.own.credits &&
+    dedicatedTrashCredits <= 0;
   const expensive = trashCost >= 4 || generalCreditCost >= 4;
   const highImpact =
     relevant &&
@@ -29091,22 +29430,27 @@ function runnerRemoteTrashAccessContext(
       role === "economy" ||
       role === "tag_punish" ||
       finitePoolEconomy);
-  const acuteThreat = remoteTrashAccessProtectsAcuteThreatForMetrics(
-    input,
-    run.attackedServerId,
-  );
+  const acuteThreat = remoteAccess
+    ? remoteTrashAccessProtectsAcuteThreatForMetrics(input, run.attackedServerId)
+    : false;
   const highRemainingFinitePool =
     finitePoolEconomy &&
     corpValueRemaining >= Math.max(trashCost + 2, 8) &&
     trashCost > 0;
-  const deferredByBudget =
-    trashable &&
-    highImpact &&
-    expensive &&
-    dropsBelowReserve &&
-    dedicatedTrashCredits <= 0 &&
+  const centralBudgetDeferral =
+    centralAccess &&
+    allInGeneralTrash &&
     !acuteThreat &&
     !highRemainingFinitePool;
+  const deferredByBudget =
+    centralBudgetDeferral ||
+    (trashable &&
+      highImpact &&
+      expensive &&
+      dropsBelowReserve &&
+      dedicatedTrashCredits <= 0 &&
+      !acuteThreat &&
+      !highRemainingFinitePool);
   const affordableRelevant =
     relevant && trashAction !== undefined && !deferredByBudget;
   const relevantTaken =
@@ -29132,7 +29476,11 @@ function runnerRemoteTrashAccessContext(
     bbsWhisperingCampaign,
     corpValueRemaining,
     legalTrashActionCount,
+    centralAccess,
+    allInGeneralTrash,
     evidence: [
+      `access_trash_scope:${centralAccess ? "central" : "remote"}`,
+      `access_trash_server:${accessServerId}`,
       `remote_trash_role:${role}`,
       ...(structuredRemoteRole
         ? [
@@ -29159,10 +29507,13 @@ function runnerRemoteTrashAccessContext(
       `remote_trash_drops_below_reserve:${dropsBelowReserve}`,
       `remote_trash_acute_threat:${acuteThreat}`,
       `remote_trash_deferred_by_budget:${deferredByBudget}`,
+      `central_access_trash:${centralAccess}`,
+      `central_access_trash_all_in_budget_risk:${centralBudgetDeferral}`,
       `remote_trash_finite_pool_economy:${finitePoolEconomy}`,
       `remote_trash_bbs_whispering_campaign:${bbsWhisperingCampaign}`,
       `remote_trash_corp_value_remaining:${corpValueRemaining}`,
     ],
+    ...(accessServerId ? { accessServerId } : {}),
     ...(trashable ? { targetType } : {}),
     ...(trashable ? { role } : {}),
   };

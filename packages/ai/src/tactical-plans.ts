@@ -6,6 +6,7 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
+import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 
 export const TACTICAL_PLAN_SCHEMA_VERSION = "tactical-plan-v1" as const;
 
@@ -212,6 +213,7 @@ export function evaluateTacticalPlans(
   const blockedPlans = planAlternatives.filter((plan) => plan.status === "blocked");
   const candidates = context.candidates ?? [];
   for (const plan of planAlternatives) {
+    if (!planCanMapToCurrentAction(plan)) continue;
     const mapping = mapPlanStepToLegalActions(
       plan,
       plan.currentStep,
@@ -246,6 +248,15 @@ export function evaluateTacticalPlans(
       ? { whyPlanAbandoned: progression.whyPlanAbandoned }
       : {}),
   };
+}
+
+function planCanMapToCurrentAction(plan: TacticalPlan): boolean {
+  return (
+    plan.status !== "abandoned" &&
+    plan.status !== "expired" &&
+    plan.status !== "failed" &&
+    plan.status !== "satisfied"
+  );
 }
 
 export function getTacticalPlanMemorySnapshot(
@@ -370,6 +381,7 @@ export function mapPlanStepToLegalActions(
         step,
         candidate,
         legalActionsById.get(candidate.actionId),
+        input,
       ),
     )
     .map((candidate) => candidate.actionId);
@@ -403,7 +415,7 @@ function mappingStatusForStep(
   if (
     step.requiredCapabilities.some(
       (capability) =>
-        capability.kind === "breaker_coverage" ||
+        capability.kind.startsWith("breaker_") ||
         capability.kind === "remote_protection" ||
         capability.kind === "bank_payout",
     )
@@ -418,6 +430,7 @@ function candidateMatchesStep(
   step: PlanStep,
   candidate: ActionSemanticCandidate,
   action: LegalAction | undefined,
+  input: AiDecisionInput,
 ): boolean {
   if (!action) return false;
   if (candidate.actorSide !== plan.side) return false;
@@ -426,6 +439,19 @@ function candidateMatchesStep(
     candidate.primaryProjectionStatus === "hidden_info_blocked"
   ) {
     return false;
+  }
+  if (step.kind === "install_breaker" && action.type === "install_card") {
+    const requiredCoverage = planRequiredBreakerCoverage(plan, step);
+    const sourceCard = visibleCardByInstanceId(input.playerView, String(action.source));
+    if (!sourceCard && !/breaker|icebreaker|fracter|decoder|killer/i.test(action.label)) {
+      return false;
+    }
+    if (
+      sourceCard &&
+      !cardProvidesBreakerCoverage(sourceCard, requiredCoverage)
+    ) {
+      return false;
+    }
   }
   if (step.desiredActionSemantics.includes(candidate.semanticActionType)) {
     return candidateTargetMatchesPlan(plan, candidate, action);
@@ -439,6 +465,16 @@ function candidateMatchesStep(
   return actionTypeMatchesStep(step, candidate.actionType) &&
     candidateTargetMatchesPlan(plan, candidate, action) &&
     bankStepMatchesCandidate(step, candidate, action);
+}
+
+function planRequiredBreakerCoverage(
+  plan: TacticalPlan,
+  step: PlanStep,
+): RequiredCapabilityKind {
+  const capability = [...step.requiredCapabilities, ...plan.requiredCapabilities].find(
+    (candidate) => candidate.kind.startsWith("breaker_"),
+  );
+  return capability?.kind ?? "breaker_coverage";
 }
 
 function actionTypeMatchesStep(step: PlanStep, actionType: string): boolean {
@@ -530,13 +566,25 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
   const remoteRunActions = input.legalActions.filter(
     (action) => action.type === "start_run" && isRemoteServer(actionServerId(action)),
   );
+  const emptyRemoteRunActions = remoteRunActions.filter((action) =>
+    remoteRunHasNoRootValue(input.playerView, actionServerId(action)),
+  );
   const blockedRemoteRuns = remoteRunActions.filter((action) =>
-    remoteRunNeedsBreakerCoverage(input.playerView, actionServerId(action)),
+    !emptyRemoteRunActions.includes(action) &&
+    runNeedsBreakerCoverage(input.playerView, actionServerId(action)),
+  );
+  const centralRunActions = input.legalActions.filter(
+    (action) =>
+      action.type === "start_run" && isCentralServer(actionServerId(action)),
+  );
+  const blockedCentralRuns = centralRunActions.filter((action) =>
+    runNeedsBreakerCoverage(input.playerView, actionServerId(action)),
   );
   for (const action of blockedRemoteRuns) {
     const serverId = actionServerId(action);
     if (!serverId) continue;
     const missingCoverage = missingBreakerCoverageKind(input.playerView, serverId);
+    const coverageStep = runnerBreakerCoverageStep(input, serverId);
     plans.push(
       createTacticalPlan({
         planId: `runner.contest_remote:${serverId}`,
@@ -551,24 +599,14 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
             kind: "missing_breaker_coverage",
             severity: "soft",
             target: { kind: "server", id: serverId },
-            removalStepKind: "search_for_answer",
+            removalStepKind: coverageStep.kind,
             evidence: [
               "visible rezzed ICE path and no visible breaker coverage",
               `missing_coverage:${missingCoverage}`,
             ],
           },
         ],
-        currentStep: createPlanStep({
-          stepId: `runner.obtain_breaker_coverage:${serverId}`,
-          kind: "search_for_answer",
-          desiredActionSemantics: [
-            "card_ability.trigger",
-            "card_ability.unknown",
-            "play.runner_event",
-            "draw.card",
-          ],
-          rationale: ["remote contest is blocked until breaker coverage is improved"],
-        }),
+        currentStep: coverageStep,
         evidence: [`blocked_remote_run_action:${action.actionId}`],
         scoreBreakdown: [
           {
@@ -602,7 +640,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
             ],
           },
         ],
-        currentStep: runnerBreakerCoverageStep(input, serverId),
+        currentStep: coverageStep,
         nextSteps: [
           createPlanStep({
             stepId: `runner.contest_remote:${serverId}`,
@@ -624,9 +662,44 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
       }),
     );
   }
+  for (const action of emptyRemoteRunActions) {
+    const serverId = actionServerId(action);
+    if (!serverId) continue;
+    plans.push(
+      createTacticalPlan({
+        planId: `runner.contest_remote:${serverId}`,
+        side: "runner",
+        type: "runner.contest_remote",
+        status: "abandoned",
+        priority: -200,
+        horizonTurns: 1,
+        target: { kind: "server", id: serverId },
+        currentStep: createPlanStep({
+          stepId: `run_target:${serverId}`,
+          kind: "run_target",
+          desiredActionSemantics: ["run.start"],
+          rationale: ["remote has no installed root card to access"],
+        }),
+        evidence: [`empty_remote_root_run_action:${action.actionId}`],
+        scoreBreakdown: [
+          {
+            key: "empty_remote_no_root_value",
+            label: "Empty remote has no root value",
+            value: -200,
+            reason: serverId,
+          },
+        ],
+        stateVersion,
+      }),
+    );
+  }
   for (const action of remoteRunActions) {
     const serverId = actionServerId(action);
-    if (!serverId || blockedRemoteRuns.includes(action)) continue;
+    if (
+      !serverId ||
+      blockedRemoteRuns.includes(action) ||
+      emptyRemoteRunActions.includes(action)
+    ) continue;
     plans.push(
       createTacticalPlan({
         planId: `runner.contest_remote:${serverId}`,
@@ -647,12 +720,91 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
       }),
     );
   }
-  for (const action of input.legalActions.filter(
-    (candidate) =>
-      candidate.type === "start_run" && isCentralServer(actionServerId(candidate)),
-  )) {
+  for (const action of centralRunActions) {
     const serverId = actionServerId(action);
     if (!serverId) continue;
+    if (blockedCentralRuns.includes(action)) {
+      const missingCoverage = missingBreakerCoverageKind(input.playerView, serverId);
+      const coverageStep = runnerBreakerCoverageStep(input, serverId);
+      const basePriority = serverId === "rd" ? 760 : 740;
+      plans.push(
+        createTacticalPlan({
+          planId: `runner.opportunistic_central_run:${serverId}`,
+          side: "runner",
+          type: "runner.opportunistic_central_run",
+          priority: basePriority,
+          horizonTurns: 1,
+          target: { kind: "server", id: serverId },
+          blockers: [
+            {
+              blockerId: `missing_breaker_coverage:${serverId}`,
+              kind: "missing_breaker_coverage",
+              severity: "soft",
+              target: { kind: "server", id: serverId },
+              removalStepKind: coverageStep.kind,
+              evidence: [
+                "visible rezzed ICE path and no visible breaker coverage",
+                `missing_coverage:${missingCoverage}`,
+              ],
+            },
+          ],
+          currentStep: coverageStep,
+          evidence: [`blocked_central_run_action:${action.actionId}`],
+          scoreBreakdown: [
+            {
+              key: "central_run_blocked",
+              label: "Central run blocked",
+              value: basePriority,
+              reason: serverId,
+            },
+          ],
+          stateVersion,
+        }),
+      );
+      plans.push(
+        createTacticalPlan({
+          planId: `runner.obtain_breaker_coverage:${serverId}`,
+          side: "runner",
+          type: "runner.obtain_breaker_coverage",
+          status: "active",
+          priority: serverId === "rd" ? 900 : 880,
+          horizonTurns: 1,
+          target: { kind: "server", id: serverId },
+          requiredCapabilities: [
+            {
+              capabilityId: `breaker_coverage:${serverId}`,
+              kind: missingCoverage,
+              side: "runner",
+              target: { kind: "server", id: serverId },
+              evidence: [
+                "required to resume blocked central pressure",
+                `server:${serverId}`,
+              ],
+            },
+          ],
+          currentStep: coverageStep,
+          nextSteps: [
+            createPlanStep({
+              stepId: `runner.opportunistic_central_run:${serverId}`,
+              kind: "probe_central",
+              desiredActionSemantics: ["run.start"],
+              rationale: ["return to the blocked central after coverage improves"],
+            }),
+          ],
+          evidence: [`unblocks_plan:runner.opportunistic_central_run:${serverId}`],
+          scoreBreakdown: [
+            {
+              key: "unblocks_central_pressure",
+              label: "Unblocks central pressure",
+              value: serverId === "rd" ? 900 : 880,
+              reason: serverId,
+            },
+          ],
+          stateVersion,
+        }),
+      );
+      continue;
+    }
     plans.push(
       createTacticalPlan({
         planId: `runner.opportunistic_central_run:${serverId}`,
@@ -674,7 +826,10 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
     );
   }
   const bankBuildActions = input.legalActions.filter(isBankBuildAction);
-  const runnerFundingNeed = runnerHasConcreteFundingNeed(input, blockedRemoteRuns);
+  const runnerFundingNeed = runnerHasConcreteFundingNeed(input, [
+    ...blockedRemoteRuns,
+    ...blockedCentralRuns,
+  ]);
   if (
     bankBuildActions.length > 0 &&
     input.playerView.own.credits >= 4 &&
@@ -846,13 +1001,34 @@ function runnerBreakerCoverageStep(
   input: AiDecisionInput,
   serverId: string,
 ): PlanStep {
-  if (input.legalActions.some(isBreakerInstallAction(input.playerView))) {
+  const missingCoverage = missingBreakerCoverageKind(input.playerView, serverId);
+  const matchingHandBreaker = runnerHandBreakerForCoverage(
+    input.playerView,
+    missingCoverage,
+  );
+  if (input.legalActions.some(isBreakerInstallAction(input.playerView, missingCoverage))) {
     return createPlanStep({
       stepId: `install_breaker:${serverId}`,
       kind: "install_breaker",
       desiredActionSemantics: ["install.card"],
+      requiredCapabilities: [breakerCoverageCapability(missingCoverage, serverId)],
       rationale: [
-        `visible install action can add ${missingBreakerCoverageKind(input.playerView, serverId)} coverage`,
+        `visible install action can add ${missingCoverage} coverage`,
+      ],
+    });
+  }
+  if (
+    matchingHandBreaker &&
+    input.legalActions.some((action) => action.type === "gain_credit")
+  ) {
+    return createPlanStep({
+      stepId: `gain_credits:${serverId}`,
+      kind: "gain_credits",
+      desiredActionSemantics: ["economy.gain_credit"],
+      requiredCapabilities: [breakerCoverageCapability(missingCoverage, serverId)],
+      rationale: [
+        `matching ${missingCoverage} breaker is already in hand; credits are needed before install`,
+        `hand_breaker:${matchingHandBreaker.definitionId ?? matchingHandBreaker.title ?? "unknown"}`,
       ],
     });
   }
@@ -873,8 +1049,9 @@ function runnerBreakerCoverageStep(
         "play.runner_event",
         "draw.card",
       ],
+      requiredCapabilities: [breakerCoverageCapability(missingCoverage, serverId)],
       rationale: [
-        `search or event actions may find ${missingBreakerCoverageKind(input.playerView, serverId)} coverage`,
+        `search or event actions may find ${missingCoverage} coverage`,
       ],
     });
   }
@@ -883,8 +1060,9 @@ function runnerBreakerCoverageStep(
       stepId: `draw_for_answer:${serverId}`,
       kind: "draw_for_answer",
       desiredActionSemantics: ["draw.card"],
+      requiredCapabilities: [breakerCoverageCapability(missingCoverage, serverId)],
       rationale: [
-        `drawing is the safest available path toward ${missingBreakerCoverageKind(input.playerView, serverId)} coverage`,
+        `drawing is the safest available path toward ${missingCoverage} coverage`,
       ],
     });
   }
@@ -892,10 +1070,24 @@ function runnerBreakerCoverageStep(
     stepId: `gain_credits:${serverId}`,
     kind: "gain_credits",
     desiredActionSemantics: ["economy.gain_credit"],
+    requiredCapabilities: [breakerCoverageCapability(missingCoverage, serverId)],
     rationale: [
-      `no ${missingBreakerCoverageKind(input.playerView, serverId)} answer action is visible; credits preserve future options`,
+      `no ${missingCoverage} answer action is visible; credits preserve future options`,
     ],
   });
+}
+
+function breakerCoverageCapability(
+  kind: RequiredCapabilityKind,
+  serverId: string,
+): RequiredCapability {
+  return {
+    capabilityId: `breaker_coverage:${serverId}`,
+    kind,
+    side: "runner",
+    target: { kind: "server", id: serverId },
+    evidence: [`server:${serverId}`, `missing_coverage:${kind}`],
+  };
 }
 
 function actionServerId(action: LegalAction): string | undefined {
@@ -934,36 +1126,106 @@ function missingBreakerCoverageKind(
   return "breaker_universal";
 }
 
-function remoteRunNeedsBreakerCoverage(
+function runNeedsBreakerCoverage(
   playerView: PlayerView,
   serverId: string | undefined,
 ): boolean {
   if (!serverId) return false;
   const server = playerView.servers.find((candidate) => candidate.id === serverId);
   if (!server) return false;
-  const knownRezzedIce = server.ice.some((ice) => ice.known && ice.rezzed === true);
-  if (!knownRezzedIce) return false;
-  return !runnerHasVisibleBreaker(playerView);
+  const assessment = assessKnownRezzedIcePath(
+    server.ice,
+    playerView.own.rig ?? [],
+    playerView.own.credits,
+    server.root,
+  );
+  return assessment.assessedKnownIceCount > 0 && !assessment.canReachAccess;
 }
 
-function runnerHasVisibleBreaker(playerView: PlayerView): boolean {
-  return (playerView.own.rig ?? []).some(cardLooksLikeBreaker);
+function remoteRunHasNoRootValue(
+  playerView: PlayerView,
+  serverId: string | undefined,
+): boolean {
+  if (!serverId || !isRemoteServer(serverId)) return false;
+  const server = playerView.servers.find((candidate) => candidate.id === serverId);
+  return (server?.root.length ?? 0) === 0;
 }
 
-function isBreakerInstallAction(playerView: PlayerView) {
+function isBreakerInstallAction(
+  playerView: PlayerView,
+  requiredCoverage: RequiredCapabilityKind = "breaker_coverage",
+) {
   return (action: LegalAction): boolean => {
     if (action.type !== "install_card") return false;
     const sourceCard = visibleCardByInstanceId(playerView, String(action.source));
-    return sourceCard ? cardLooksLikeBreaker(sourceCard) : /breaker/i.test(action.label);
+    return sourceCard
+      ? cardProvidesBreakerCoverage(sourceCard, requiredCoverage)
+      : /breaker|fracter|decoder|killer/i.test(action.label);
   };
 }
 
 function cardLooksLikeBreaker(card: VisibleCard): boolean {
   return (
     card.type === "program" &&
-    ((card.subtypes ?? []).some((subtype) => /breaker|icebreaker/i.test(subtype)) ||
+    ((card.subtypes ?? []).some((subtype) =>
+      /breaker|icebreaker|fracter|decoder|killer/i.test(subtype),
+    ) ||
       /breaker|icebreaker/i.test(card.title ?? "") ||
       /breaker|icebreaker/i.test(card.definitionId ?? ""))
+  );
+}
+
+function runnerHandBreakerForCoverage(
+  playerView: PlayerView,
+  requiredCoverage: RequiredCapabilityKind,
+): VisibleCard | undefined {
+  return playerView.own.gripOrHq.find((card) =>
+    card.known && cardProvidesBreakerCoverage(card, requiredCoverage),
+  );
+}
+
+function cardProvidesBreakerCoverage(
+  card: VisibleCard,
+  requiredCoverage: RequiredCapabilityKind,
+): boolean {
+  if (!cardLooksLikeBreaker(card)) return false;
+  if (
+    requiredCoverage === "breaker_coverage" ||
+    requiredCoverage === "breaker_universal"
+  ) {
+    return true;
+  }
+  const text = cardCoverageSearchText(card);
+  if (cardLooksLikeUniversalBreaker(text)) return true;
+  switch (requiredCoverage) {
+    case "breaker_wall":
+      return /fracter|wall|barrier/.test(text);
+    case "breaker_code_gate":
+      return /decoder|code gate|codegate/.test(text);
+    case "breaker_sentry":
+      return /killer|sentry/.test(text);
+    case "breaker_ap":
+      return /\bap\b|anti-personnel/.test(text);
+    case "breaker_trace":
+      return /trace/.test(text);
+    default:
+      return false;
+  }
+}
+
+function cardCoverageSearchText(card: VisibleCard): string {
+  return [
+    card.title,
+    card.definitionId,
+    ...(card.subtypes ?? []),
+    card.rulesText,
+  ].filter(Boolean).join(" ").toLowerCase();
+}
+
+function cardLooksLikeUniversalBreaker(text: string): boolean {
+  return (
+    /break (?:an? |one |\d+ )?ice subroutine/.test(text) ||
+    /break(?:s)? .*subroutine/.test(text) && !/wall|barrier|code gate|codegate|sentry/.test(text)
   );
 }
 
@@ -1194,10 +1456,10 @@ export function rankTacticalPlans(plans: readonly TacticalPlan[]): TacticalPlan[
 
 function planStatusRank(status: PlanLifecycle): number {
   switch (status) {
+    case "progressing":
+      return 7;
     case "active":
       return 6;
-    case "progressing":
-      return 5;
     case "proposed":
       return 4;
     case "blocked":

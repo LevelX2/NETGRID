@@ -2000,7 +2000,7 @@ function sanitizeAiDecisionDetailSections(value: unknown): AiDecisionDetailSecti
       const source = entry as Record<string, unknown>;
       const id = sanitizeAiDecisionDebugString(source.id);
       const title = sanitizeAiDecisionDebugString(source.title);
-      const items = sanitizeAiDecisionDebugStringArray(source.items);
+      const items = sanitizeAiDecisionDebugStringArray(source.items, 96);
       if (!id || !title || !items) return undefined;
       return { id, title, items };
     })
@@ -2047,10 +2047,10 @@ function sanitizeAiDecisionDebugJson(value: unknown, depth = 0): unknown {
   return result;
 }
 
-function sanitizeAiDecisionDebugStringArray(value: unknown): string[] | undefined {
+function sanitizeAiDecisionDebugStringArray(value: unknown, limit = 16): string[] | undefined {
   if (!Array.isArray(value)) return undefined;
   return value
-    .slice(0, 16)
+    .slice(0, limit)
     .map((entry) => sanitizeAiDecisionDebugString(entry))
     .filter((entry): entry is string => entry !== undefined);
 }
