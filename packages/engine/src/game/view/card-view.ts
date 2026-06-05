@@ -831,6 +831,8 @@ export function visibleCorpCard(
     : false;
   const viewedApproachedIce =
     viewer === "runner" && state.run?.approachIceExposeViewingIceId === id;
+  const viewedInstalledExposeCard =
+    viewer === "runner" && pendingInstalledCorpExposeReviewCardId(state) === id;
   const visible =
     viewer === "corp" ||
     instance.faceup ||
@@ -838,6 +840,7 @@ export function visibleCorpCard(
     exposedBySpyCounter ||
     accessed ||
     viewedApproachedIce ||
+    viewedInstalledExposeCard ||
     state.corp.scoreArea.includes(id) ||
     (state.corp.archives.includes(id) && instance.faceup);
   if (!visible) {
@@ -852,6 +855,18 @@ export function visibleCorpCard(
     };
   }
   return visibleOwnCard(state, id);
+}
+
+function pendingInstalledCorpExposeReviewCardId(
+  state: GameState,
+): CardInstanceId | undefined {
+  const source = state.pendingChoice?.source ?? "";
+  if (!source.startsWith("p3_36.expose_installed_card_review:"))
+    return undefined;
+  const targetCardId = source.split(":")[1];
+  return targetCardId && state.cardInstances[targetCardId]
+    ? (targetCardId as CardInstanceId)
+    : undefined;
 }
 
 export function visibleCorpArchives(state: GameState, viewer: Side): VisibleCard[] {

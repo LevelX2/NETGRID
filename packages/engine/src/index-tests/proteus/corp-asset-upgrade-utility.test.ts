@@ -3,6 +3,7 @@ import {
   applyAction,
   createGameAfterSetup,
   getLegalActions,
+  getPlayerView,
   hashState,
   replayEvents,
 } from "../../index";
@@ -346,14 +347,33 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       "runner",
       (action) =>
         action.type === "activated_card_ability" &&
-        action.payload?.cardImplementationExposeTargetId === targetId,
+        action.payload?.cardId === "mouse_1",
     );
+    expect(state.pendingChoice?.source).toContain("p3_36.expose_installed_card");
+    const targetOptionId = state.pendingChoice?.options.find(
+      (option) => option.value === targetId,
+    )?.id;
+    expect(targetOptionId).toMatch(/^card_hidden_/);
+    state = applyChoice(state, "runner", targetOptionId ?? "");
     expect(state.pendingChoice?.source).toContain("corp.expose_prevention");
     expect(state.cardInstances[targetId]?.faceup).toBe(false);
 
     const passState = applyChoice(state, "corp", "pass");
     expect(passState.cardInstances[targetId]?.faceup).toBe(false);
-    expect(passState.pendingChoice).toBeUndefined();
+    expect(passState.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("p3_36.expose_installed_card_review:"),
+      prompt: "Karte ansehen",
+      kind: "select_option",
+      options: [{ id: "done", label: "Ansehen beenden", value: "done" }],
+    });
+    expect(
+      getPlayerView(passState, "runner")
+        .servers.flatMap((server) => server.root)
+        .some((card) => card.known && card.definitionId === GOVERNMENT_CONTRACT),
+    ).toBe(true);
+    const passFinished = applyChoice(passState, "runner", "done");
+    expect(passFinished.pendingChoice).toBeUndefined();
 
     const useBefore = baseState("pro014-department-use");
     const useTarget = addCorpRoot(useBefore, GOVERNMENT_CONTRACT, "target_asset_2", "remote_1", false);
@@ -364,8 +384,13 @@ describe("Proteus PRO014 Corp asset/upgrade utility suite", () => {
       "runner",
       (action) =>
         action.type === "activated_card_ability" &&
-        action.payload?.cardImplementationExposeTargetId === useTarget,
+        action.payload?.cardId === "mouse_2",
     );
+    const useTargetOptionId = state.pendingChoice?.options.find(
+      (option) => option.value === useTarget,
+    )?.id;
+    expect(useTargetOptionId).toMatch(/^card_hidden_/);
+    state = applyChoice(state, "runner", useTargetOptionId ?? "");
     state = applyChoice(state, "corp", "department_department_2");
     expect(state.cardInstances[useTarget]?.faceup).toBe(false);
     expect(state.cardInstances["department_2" as CardInstanceId]?.rezzed).toBe(true);

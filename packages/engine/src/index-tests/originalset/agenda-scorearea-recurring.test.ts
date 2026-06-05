@@ -2270,12 +2270,33 @@ describe("Originalset Spotcheck 2026-05-16 Prevention/Interface/Agenda Actions h
       (action) =>
         action.type === "activated_card_ability" &&
         String(action.payload?.cardId) === exposeRoninId &&
-        action.payload?.cardImplementationExposeTargetId === targetIceId,
+        action.payload?.cardImplementationAbilityIndex === 1,
+    );
+    expect(exposeState.pendingChoice).toMatchObject({
+      source: expect.stringContaining("p3_36.expose_installed_card:"),
+      prompt: "Installierte Korp-Karte exposen",
+      minSelections: 1,
+      maxSelections: 1,
+    });
+    expect(exposeState.pendingChoice?.options).toContainEqual({
+      id: expect.stringMatching(/^card_hidden_/),
+      label: "R&D ICE 1",
+      value: targetIceId,
+    });
+    const targetIceOptionId = exposeState.pendingChoice?.options.find(
+      (option) => option.value === targetIceId,
+    )?.id;
+    expect(targetIceOptionId).toMatch(/^card_hidden_/);
+    exposeState = applyChoice(exposeState, "runner", targetIceOptionId ?? "");
+    expect(exposeState.pendingChoice?.source).toContain(
+      "p3_36.expose_installed_card_review:",
     );
     expect(exposeState.eventLog.at(-1)?.publicPayload).toMatchObject({
       sourceDefinitionId: "onr_v1_175_ronin-around",
-      hiddenZoneAction: "v1911_expose_server_card",
+      hiddenZoneAction: "expose_installed_card_review",
     });
+    exposeState = applyChoice(exposeState, "runner", "done");
+    expect(exposeState.pendingChoice).toBeUndefined();
   });
 
   it("binds Hostile Takeover, Political Overthrow, Nevinyrral and Rustbelt to their live public sources", () => {

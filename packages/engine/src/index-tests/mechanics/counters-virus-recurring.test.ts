@@ -641,7 +641,10 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
     expect(JSON.stringify(getPlayerView(state, "runner").pendingChoice)).not.toContain(
       "Simple Upgrade",
     );
-    const optionId = getPlayerView(state, "runner").pendingChoice?.options.find(
+    expect(JSON.stringify(getPlayerView(state, "runner").pendingChoice)).not.toMatch(
+      /"value"|simple_barrier_ice/,
+    );
+    const optionId = state.pendingChoice?.options.find(
       (option) => option.value === exposedIceId,
     )?.id;
     expect(optionId).toBeDefined();

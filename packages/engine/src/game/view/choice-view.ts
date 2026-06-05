@@ -28,20 +28,13 @@ export function visibleChoice(
     kind: choice.kind,
     options: choice.options.map((option) => {
       const card = visibleChoiceCardForOption(state, choice, option);
+      const value = visibleChoiceOptionValue(state, choice, option);
       return {
         id: option.id,
         label: option.label,
         ...(option.publicLabel ? { publicLabel: option.publicLabel } : {}),
         ...(option.selectable === false ? { selectable: false } : {}),
-        ...(option.value !== undefined &&
-        !(
-          choice.visibility === "public" &&
-          option.publicLabel &&
-          typeof option.value === "string" &&
-          option.id.startsWith("ice_")
-        )
-          ? { value: option.value }
-          : {}),
+        ...(value !== undefined ? { value } : {}),
         ...(card ? { card } : {}),
       };
     }),
@@ -52,6 +45,48 @@ export function visibleChoice(
     ...(stackSearchResolution ? { stackSearchResolution } : {}),
     ...(cardSearchPresentation ? { cardSearchPresentation } : {}),
   };
+}
+
+function visibleChoiceOptionValue(
+  state: GameState,
+  choice: ChoiceRequest,
+  option: ChoiceRequest["options"][number],
+): ChoiceRequest["options"][number]["value"] | undefined {
+  if (option.value === undefined) return undefined;
+  if (
+    choice.visibility === "public" &&
+    option.publicLabel &&
+    typeof option.value === "string" &&
+    option.id.startsWith("ice_")
+  )
+    return undefined;
+  if (choiceOptionValueIsHiddenInstalledCorpExposeTarget(state, choice, option))
+    return undefined;
+  return option.value;
+}
+
+function choiceOptionValueIsHiddenInstalledCorpExposeTarget(
+  state: GameState,
+  choice: ChoiceRequest,
+  option: ChoiceRequest["options"][number],
+): boolean {
+  if (choice.kind !== "select_cards") return false;
+  if (
+    !choice.source.startsWith("p3_36.expose_installed_card:") &&
+    !choice.source.startsWith("p3_36.expose_installed_cards") &&
+    !choice.source.startsWith("v1912.hunt_club_bbs_expose")
+  )
+    return false;
+  if (typeof option.value !== "string") return false;
+  const instance = state.cardInstances[option.value as CardInstanceId];
+  if (
+    !instance ||
+    instance.owner !== "corp" ||
+    instance.zone.side !== "corp" ||
+    (instance.zone.zone !== "serverIce" && instance.zone.zone !== "serverRoot")
+  )
+    return false;
+  return !instance.faceup && !instance.rezzed;
 }
 
 function isRunnerStackSearchChoice(choice: ChoiceRequest): boolean {

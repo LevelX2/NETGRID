@@ -1862,7 +1862,7 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
           sourceDefinition(toolState, action) === definitionId,
       );
     }
-    putCorpRootInRemote(toolState, "simple_upgrade");
+    const mouseTargetId = putCorpRootInRemote(toolState, "simple_upgrade");
     const expose = mustAction(
       toolState,
       "runner",
@@ -1870,6 +1870,10 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
         action.type === "activated_card_ability" &&
         sourceDefinition(toolState, action) === "onr_v1_042_mouse",
     );
+    expect(expose.label).toBe("Mouse: installierte Korp-Karte exposen");
+    expect(expose.payload).not.toHaveProperty("targetDefinitionId");
+    expect(expose.payload).not.toHaveProperty("cardImplementationExposeTargetId");
+    expect(JSON.stringify(expose.payload)).not.toMatch(/simple_upgrade/);
     const removedMouse = structuredClone(toolState);
     const mouseId = toolState.runner.rig.programs.find(
       (id) => toolState.cardInstances[id]?.definitionId === "onr_v1_042_mouse",
@@ -1889,14 +1893,59 @@ describe("Originalset Spotcheck 2026-05-16 Runner Program Prevention Tools harde
     const exposeInitial = structuredClone(toolState);
     const exposeReplayStart = toolState.eventLog.length;
     toolState = apply(toolState, "runner", (action) => action.actionId === expose.actionId);
+    expect(toolState.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("p3_36.expose_installed_card:"),
+      prompt: "Installierte Korp-Karte exposen",
+      kind: "select_cards",
+      minSelections: 1,
+      maxSelections: 1,
+      visibility: "hidden_info_barrier",
+    });
+    expect(toolState.pendingChoice?.options).toContainEqual({
+      id: expect.stringMatching(/^card_hidden_/),
+      label: "Remote 1 Root 1",
+      value: mouseTargetId,
+    });
+    const mouseTargetOptionId = toolState.pendingChoice?.options.find(
+      (option) => option.value === mouseTargetId,
+    )?.id;
+    expect(mouseTargetOptionId).toMatch(/^card_hidden_/);
+    expect(JSON.stringify(getPlayerView(toolState, "runner").pendingChoice)).not.toMatch(
+      /"value"|simple_upgrade|Simple Upgrade/,
+    );
     expect(toolState.eventLog.at(-1)?.publicPayload).toMatchObject({
       hiddenZoneBarrier: true,
-      hiddenZoneAction: "v1911_expose_server_card",
+      hiddenZoneAction: "expose_installed_card_choice",
       sourceDefinitionId: "onr_v1_042_mouse",
+    });
+    expect(JSON.stringify(toolState.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"targetDefinitionId"|"cardImplementationExposeTargetId"|simple_upgrade/,
+    );
+    toolState = applyChoice(toolState, "runner", mouseTargetOptionId ?? "");
+    expect(toolState.pendingChoice?.source).toContain(
+      "p3_36.expose_installed_card_review:",
+    );
+    expect(toolState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneBarrier: true,
+      hiddenZoneAction: "expose_installed_card_review",
+      sourceDefinitionId: "onr_v1_042_mouse",
+      cardDefinitionId: "simple_upgrade",
     });
     expect(JSON.stringify(toolState.eventLog.at(-1)?.publicPayload)).not.toMatch(
       privatePayloadMarkers,
     );
+    expect(
+      getPlayerView(toolState, "runner")
+        .servers.flatMap((server) => server.root)
+        .some((card) => card.known && card.definitionId === "simple_upgrade"),
+    ).toBe(true);
+    toolState = applyChoice(toolState, "runner", "done");
+    expect(toolState.pendingChoice).toBeUndefined();
+    expect(toolState.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "expose_installed_card_finish",
+      sourceDefinitionId: "onr_v1_042_mouse",
+    });
     const exposeReplay = replayEvents(
       exposeInitial,
       toolState.eventLog.slice(exposeReplayStart),

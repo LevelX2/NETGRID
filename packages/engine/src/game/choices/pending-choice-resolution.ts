@@ -328,7 +328,11 @@ export function resolvePendingChoice(
     resolveSenatorialFieldTripChoice(state, legalAction, playerAction);
     return;
   }
-  if (state.pendingChoice.source.startsWith("p3_36.expose_installed_cards")) {
+  if (
+    state.pendingChoice.source.startsWith("p3_36.expose_installed_card_review:") ||
+    state.pendingChoice.source.startsWith("p3_36.expose_installed_card:") ||
+    state.pendingChoice.source.startsWith("p3_36.expose_installed_cards")
+  ) {
     resolveExposeInstalledCorpCardsChoice(state, legalAction, playerAction);
     return;
   }

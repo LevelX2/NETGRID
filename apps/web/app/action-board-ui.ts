@@ -978,6 +978,8 @@ export function retainedExposeReviewEvent(events: PublicGameEvent[], dismissedEv
     if (!event || event.eventId === dismissedEventId) return null;
     if (event.publicPayload.approachIceExposeViewDecision === "finish") return null;
     if (event.publicPayload.hiddenZoneAction === "approach_ice_expose_finish") return null;
+    if (event.publicPayload.hiddenZoneAction === "expose_installed_card_review") return null;
+    if (event.publicPayload.hiddenZoneAction === "expose_installed_card_finish") return null;
     if (event.publicPayload.publicRevealKind !== "expose") continue;
     if (event.publicPayload.hiddenZoneAction === "approach_ice_expose") return null;
     if (event.publicPayload.approachIceExposeDecision) return null;
@@ -995,6 +997,35 @@ export function approachIceExposeViewingIceId(actions: LegalAction[]): string | 
       typeof candidate.payload.iceId === "string"
   );
   return typeof action?.payload?.iceId === "string" ? action.payload.iceId : null;
+}
+
+export function isSingleInstalledCorpExposeChoice(
+  choice: NonNullable<PlayerView["pendingChoice"]> | null | undefined,
+): boolean {
+  return Boolean(
+    choice &&
+      choice.kind === "select_cards" &&
+      choice.source.startsWith("p3_36.expose_installed_card:") &&
+      choice.minSelections === 1 &&
+      choice.maxSelections === 1,
+  );
+}
+
+export function isInstalledCorpExposeReviewChoice(
+  choice: NonNullable<PlayerView["pendingChoice"]> | null | undefined,
+): boolean {
+  return Boolean(
+    choice &&
+      choice.kind === "select_option" &&
+      choice.source.startsWith("p3_36.expose_installed_card_review:"),
+  );
+}
+
+export function installedCorpExposeReviewCardId(
+  choice: NonNullable<PlayerView["pendingChoice"]> | null | undefined,
+): string | null {
+  if (!isInstalledCorpExposeReviewChoice(choice)) return null;
+  return choice?.source.split(":")[1] ?? null;
 }
 
 function accessRevealCanBeRetainedPast(newerEvent: PublicGameEvent, accessEvent: PublicGameEvent): boolean {
@@ -1164,9 +1195,9 @@ export function shouldUseFieldCardChoice(
   if (choice.cardSearchPresentation || choice.stackSearchResolution || choice.source.includes("search_stack")) return false;
   const selectableOptions = choice.options.filter((option) => option.selectable !== false);
   if (selectableOptions.length === 0) return false;
-  const fieldCardIds = visibleFieldCardIds(view);
+  const fieldCards = visibleFieldCards(view);
   return selectableOptions.every(
-    (option) => typeof option.value === "string" && fieldCardIds.has(option.value),
+    (option) => fieldCards.some((card) => fieldCardChoiceOptionTargetsCard(option, card)),
   );
 }
 
@@ -1176,7 +1207,17 @@ export function fieldCardChoiceOptionForCard(
   card: Pick<VisibleCard, "instanceId">,
 ): NonNullable<PlayerView["pendingChoice"]>["options"][number] | null {
   if (!choice || !shouldUseFieldCardChoice(choice, view)) return null;
-  return choice.options.find((option) => option.selectable !== false && option.value === card.instanceId) ?? null;
+  return choice.options.find((option) => option.selectable !== false && fieldCardChoiceOptionTargetsCard(option, card)) ?? null;
+}
+
+function fieldCardChoiceOptionTargetsCard(
+  option: NonNullable<PlayerView["pendingChoice"]>["options"][number],
+  card: Pick<VisibleCard, "instanceId">,
+): boolean {
+  return (
+    option.value === card.instanceId ||
+    option.id === `card_${card.instanceId}`
+  );
 }
 
 export function fieldCardChoiceInfo(
@@ -1199,10 +1240,6 @@ export function fieldCardChoiceInfo(
     submitLabel: selectedCount === 0 && minSelections === 0 ? "Ohne Auswahl übernehmen" : "Auswahl übernehmen",
     clearLabel: "Auswahl leeren"
   };
-}
-
-function visibleFieldCardIds(view: PlayerView): Set<string> {
-  return new Set(visibleFieldCards(view).map((card) => card.instanceId));
 }
 
 function visibleFieldCards(view: PlayerView): VisibleCard[] {

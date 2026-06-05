@@ -642,6 +642,10 @@ describe("Originalset Spotcheck 2026-05-16 Breaker/Ice Subtype Mix hardening", (
         action.type === "activated_card_ability" &&
         sourceDefinition(seeya, action) === "onr_v1_058_seeya",
     );
+    expect(expose.label).toBe("SeeYa: installierte Korp-Karte exposen");
+    expect(expose.payload).not.toHaveProperty("targetDefinitionId");
+    expect(expose.payload).not.toHaveProperty("cardImplementationExposeTargetId");
+    expect(JSON.stringify(expose.payload)).not.toMatch(/simple_upgrade/);
     const movedTarget = structuredClone(seeya);
     removeEverywhere(movedTarget, upgradeId);
     movedTarget.corp.archives.push(upgradeId);
@@ -660,13 +664,74 @@ describe("Originalset Spotcheck 2026-05-16 Breaker/Ice Subtype Mix hardening", (
       }).ok,
     ).toBe(false);
     seeya = apply(seeya, "runner", (action) => action.actionId === expose.actionId);
+    expect(seeya.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("p3_36.expose_installed_card:"),
+      prompt: "Installierte Korp-Karte exposen",
+      kind: "select_cards",
+      minSelections: 1,
+      maxSelections: 1,
+      visibility: "hidden_info_barrier",
+    });
+    expect(seeya.pendingChoice?.options).toContainEqual({
+      id: expect.stringMatching(/^card_hidden_/),
+      label: "Remote 1 Root 1",
+      value: upgradeId,
+    });
+    const upgradeOptionId = seeya.pendingChoice?.options.find(
+      (option) => option.value === upgradeId,
+    )?.id;
+    expect(upgradeOptionId).toMatch(/^card_hidden_/);
+    const runnerExposeChoice = getPlayerView(seeya, "runner").pendingChoice;
+    expect(runnerExposeChoice?.options).toContainEqual({
+      id: upgradeOptionId,
+      label: "Remote 1 Root 1",
+    });
+    expect(JSON.stringify(runnerExposeChoice)).not.toMatch(
+      /"card":|"definitionId"|"value"|Simple Upgrade|simple_upgrade/,
+    );
     expect(seeya.eventLog.at(-1)?.publicPayload).toMatchObject({
-      hiddenZoneAction: "v1911_expose_server_card",
+      hiddenZoneAction: "expose_installed_card_choice",
+      sourceDefinitionId: "onr_v1_058_seeya",
+    });
+    expect(JSON.stringify(seeya.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /"targetDefinitionId"|"cardImplementationExposeTargetId"|simple_upgrade/,
+    );
+    seeya = applyChoice(seeya, "runner", upgradeOptionId ?? "");
+    expect(seeya.pendingChoice).toMatchObject({
+      side: "runner",
+      source: expect.stringContaining("p3_36.expose_installed_card_review:"),
+      prompt: "Karte ansehen",
+      kind: "select_option",
+      options: [{ id: "done", label: "Ansehen beenden", value: "done" }],
+      minSelections: 1,
+      maxSelections: 1,
+      visibility: "hidden_info_barrier",
+    });
+    expect(seeya.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "expose_installed_card_review",
       cardDefinitionId: "simple_upgrade",
     });
     expect(JSON.stringify(seeya.eventLog.at(-1)?.publicPayload)).not.toMatch(
-      /"privatePayload"|"cardInstances"|"hq"|"rd"/,
+      /"privatePayload"|"cardInstances"|"hq"|"rd"|"exposedCardInstanceId"/,
     );
+    expect(getPlayerView(seeya, "corp").pendingChoice).toBeUndefined();
+    expect(
+      getPlayerView(seeya, "runner")
+        .servers.flatMap((server) => server.root)
+        .some((card) => card.known && card.definitionId === "simple_upgrade"),
+    ).toBe(true);
+    seeya = applyChoice(seeya, "runner", "done");
+    expect(seeya.pendingChoice).toBeUndefined();
+    expect(seeya.eventLog.at(-1)?.publicPayload).toMatchObject({
+      hiddenZoneAction: "expose_installed_card_finish",
+      sourceDefinitionId: "onr_v1_058_seeya",
+    });
+    expect(
+      JSON.stringify(
+        getPlayerView(seeya, "runner").servers.flatMap((server) => server.root),
+      ),
+    ).not.toMatch(/simple_upgrade|Simple Upgrade/);
 
     let smarteye = toRunnerTurn(
       createGameAfterSetup({

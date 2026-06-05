@@ -150,6 +150,7 @@ import {
   counterDisplayTooltipText,
   counterDisplaysForRendering,
   hostedOnDetailLabel,
+  installedCorpExposeReviewCardId,
   selectedSubtypeDetailLabel,
   selectedTargetDetailLabel,
   clampCuePosition,
@@ -173,6 +174,7 @@ import {
   orderedCardContextActions,
   parseCuePositionPreference,
   normalizeVisibleTerms,
+  isSingleInstalledCorpExposeChoice,
   latestRetainableAccessRevealEvent,
   retainedAccessRevealEvent,
   retainedExposeReviewEvent,
@@ -603,6 +605,7 @@ type CardChoiceShortcut = {
   onToggle(): void;
   label: string;
   selectedLabel: string;
+  icon?: "add" | "eye";
 };
 
 type FieldChoiceCardProps = {
@@ -2963,6 +2966,13 @@ export default function Page() {
       ? currentFieldCardChoiceSelection.selectedOptionIds.filter((optionId) => activeFieldCardChoiceOptionIds.has(optionId))
       : [];
   const selectedFieldCardChoiceOptionIdSet = useMemo(() => new Set(selectedFieldCardChoiceOptionIds), [selectedFieldCardChoiceOptionIds.join("|")]);
+  const activeFieldCardChoiceAction = activeFieldCardChoice
+    ? payload?.legalActions.find(
+        (action) =>
+          action.type === "resolve_choice" &&
+          action.payload?.choiceId === activeFieldCardChoice.choiceId,
+      )
+    : undefined;
   const latestEventId = payload?.eventTail.at(-1)?.eventId;
   const canReconnect = Boolean(session?.reconnectToken);
   const runnerSnapshots = deckSnapshots.filter((snapshot) => snapshot.side === "runner" && snapshot.validation.ok && snapshotAllowedForMatchCardPool(snapshot, matchCardPool));
@@ -3097,6 +3107,32 @@ export default function Page() {
   const fieldChoiceCardProps = (card: VisibleCard): FieldChoiceCardProps => {
     const option = fieldChoiceOptionForCard(card);
     if (!option) return {};
+    if (isSingleInstalledCorpExposeChoice(activeFieldCardChoice)) {
+      const disabled =
+        Boolean(payload?.winner) ||
+        connection !== "online" ||
+        !activeFieldCardChoiceAction;
+      const submitExposeTarget = () => {
+        if (!activeFieldCardChoice || !activeFieldCardChoiceAction) return;
+        submitChoiceOptions(
+          activeFieldCardChoiceAction,
+          activeFieldCardChoice.choiceId,
+          [option.id],
+        );
+      };
+      return {
+        choiceSelected: false,
+        choiceShortcut: {
+          selected: false,
+          disabled,
+          onToggle: submitExposeTarget,
+          label: "Karte ansehen",
+          selectedLabel: "Karte ansehen",
+          icon: "eye",
+        },
+        onSelect: submitExposeTarget,
+      };
+    }
     const selected = selectedFieldCardChoiceOptionIdSet.has(option.id);
     return {
       choiceSelected: selected,
@@ -3120,7 +3156,8 @@ export default function Page() {
   const exposeReviewEvent = payload ? retainedExposeReviewEvent(payload.eventTail, dismissedExposeReviewEventId) : null;
   const exposeReview = payload ? exposeReviewFromLatestEvent(exposeReviewEvent ?? undefined, catalogDetailsById, payload.side) : null;
   const viewedApproachIceId = approachIceExposeViewingIceId(payload?.legalActions ?? []);
-  const showExposeReview = Boolean(exposeReview && dismissedExposeReviewEventId !== exposeReview.eventId && !showAccessReveal && !viewedApproachIceId);
+  const viewedInstalledExposeCardId = installedCorpExposeReviewCardId(activeView?.pendingChoice);
+  const showExposeReview = Boolean(exposeReview && dismissedExposeReviewEventId !== exposeReview.eventId && !showAccessReveal && !viewedApproachIceId && !viewedInstalledExposeCardId);
   const resultSummary = payload?.resultSummary ?? null;
   const resultKey = resultSummary ? `${payload?.matchId ?? "match"}:${resultSummary.finalStateHash}` : null;
   const showResultModal = Boolean(resultSummary && resultKey && dismissedResultKey !== resultKey);
@@ -5921,7 +5958,10 @@ export default function Page() {
                             {...(lane.kind === "ice" && activeRunIceId === card.instanceId
                               ? { runPositionLabel: runPositionStatusLabel(activeView) ?? "Aktuelles ICE" }
                               : {})}
-                            viewMarkerActive={lane.kind === "ice" && viewedApproachIceId === card.instanceId}
+                            viewMarkerActive={
+                              (lane.kind === "ice" && viewedApproachIceId === card.instanceId) ||
+                              viewedInstalledExposeCardId === card.instanceId
+                            }
                             {...fieldChoiceCardProps(card)}
                             onAction={submitAction}
                             onFocus={focusCard}
@@ -9294,6 +9334,7 @@ function LegalActionsPanel({
   const genericChoiceAction = genericChoice ? primaryActions.find((action) => action.type === "resolve_choice") : undefined;
   if (genericChoice && genericChoiceAction) {
     if (shouldUseFieldCardChoice(genericChoice, view)) {
+      if (isSingleInstalledCorpExposeChoice(genericChoice)) return null;
       return (
         <FieldCardChoicePanel
           choice={genericChoice}
@@ -14794,7 +14835,13 @@ function CardView({
             choiceShortcut.onToggle();
           }}
         >
-          {choiceShortcut.selected ? <Check size={11} strokeWidth={2.5} /> : <Plus size={11} strokeWidth={2.35} />}
+          {choiceShortcut.selected ? (
+            <Check size={11} strokeWidth={2.5} />
+          ) : choiceShortcut.icon === "eye" ? (
+            <Eye size={11} strokeWidth={2.35} />
+          ) : (
+            <Plus size={11} strokeWidth={2.35} />
+          )}
         </button>
       ) : null}
       {tooltipElement && typeof document !== "undefined" ? createPortal(tooltipElement, document.body) : null}

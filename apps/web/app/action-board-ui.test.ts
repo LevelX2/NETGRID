@@ -33,6 +33,9 @@ import {
   corpRootCardsForDisplay,
   fieldCardChoiceInfo,
   fieldCardChoiceOptionForCard,
+  installedCorpExposeReviewCardId,
+  isInstalledCorpExposeReviewChoice,
+  isSingleInstalledCorpExposeChoice,
   showInstalledCorpState,
   shouldUseFieldCardChoice,
   shouldUseCardChoicePanel,
@@ -864,6 +867,38 @@ describe("V1.0.5 action board UI helpers", () => {
       minSelections: 1,
       maxSelections: 1
     };
+    const singleExposeChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...fieldChoice,
+      choiceId: "seeya_expose_choice",
+      source: "p3_36.expose_installed_card:seeya_1:onr_v1_058_seeya:any_installed:1",
+      prompt: "Installierte Korp-Karte exposen",
+      options: [
+        { id: "card_corp_bbs_1", label: "Remote 1 Root 1" },
+        { id: "card_corp_ice_1", label: "Remote 1 ICE 1" }
+      ],
+      minSelections: 1,
+      maxSelections: 1
+    };
+    const hiddenSlot = { ...ice, instanceId: "hidden_ice_slot", known: false };
+    const hiddenSlotBoard = view("runner", {
+      servers: [{ id: "remote_1", label: "Remote 1", ice: [hiddenSlot], root: [] }]
+    });
+    const hiddenSlotSingleExposeChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      ...singleExposeChoice,
+      options: [{ id: "card_hidden_ice_slot", label: "Remote 1 ICE 1" }]
+    };
+    const reviewChoice: NonNullable<PlayerView["pendingChoice"]> = {
+      choiceId: "seeya_expose_review",
+      side: "runner",
+      source: "p3_36.expose_installed_card_review:corp_ice_1:seeya_1:onr_v1_058_seeya:any_installed:2",
+      prompt: "Karte ansehen",
+      kind: "select_option",
+      options: [{ id: "done", label: "Ansehen beenden", value: "done" }],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 2,
+      visibility: "hidden_info_barrier"
+    };
     const offSiteArchiveChoice: NonNullable<PlayerView["pendingChoice"]> = {
       ...fieldChoice,
       choiceId: "v1922_corp_archives_to_hq_7",
@@ -883,16 +918,30 @@ describe("V1.0.5 action board UI helpers", () => {
 
     expect(shouldUseFieldCardChoice(fieldChoice, board)).toBe(true);
     expect(shouldUseFieldCardChoice(runnerRigChoice, board)).toBe(true);
+    expect(shouldUseFieldCardChoice(singleExposeChoice, board)).toBe(true);
+    expect(shouldUseFieldCardChoice(hiddenSlotSingleExposeChoice, hiddenSlotBoard)).toBe(true);
+    expect(isSingleInstalledCorpExposeChoice(singleExposeChoice)).toBe(true);
+    expect(isInstalledCorpExposeReviewChoice(reviewChoice)).toBe(true);
+    expect(installedCorpExposeReviewCardId(reviewChoice)).toBe("corp_ice_1");
     expect(shouldUseCardChoicePanel(fieldChoice)).toBe(true);
+    expect(shouldUseCardChoicePanel(singleExposeChoice)).toBe(false);
     expect(fieldCardChoiceOptionForCard(fieldChoice, board, bbs)?.id).toBe("card_bbs");
     expect(fieldCardChoiceOptionForCard(fieldChoice, board, runnerProgram)).toBeNull();
     expect(fieldCardChoiceOptionForCard(runnerRigChoice, board, runnerProgram)?.id).toBe("card_runner_program");
+    expect(fieldCardChoiceOptionForCard(singleExposeChoice, board, ice)?.id).toBe("card_corp_ice_1");
+    expect(fieldCardChoiceOptionForCard(hiddenSlotSingleExposeChoice, hiddenSlotBoard, hiddenSlot)?.id).toBe("card_hidden_ice_slot");
     expect(fieldCardChoiceInfo(fieldChoice, ["card_bbs"])).toMatchObject({
       title: "Feldkarten auswählen",
       counterLabel: "1/0-3",
       canSubmit: true,
       canClear: true,
       submitLabel: "Auswahl übernehmen"
+    });
+    expect(fieldCardChoiceInfo(singleExposeChoice, [])).toMatchObject({
+      title: "Feldkarte auswählen",
+      prompt: "Installierte Korp-Karte exposen",
+      counterLabel: "0/1",
+      canSubmit: false
     });
     expect(shouldUseFieldCardChoice(handChoice, board)).toBe(false);
     expect(shouldUseFieldCardChoice(stackChoice, board)).toBe(false);

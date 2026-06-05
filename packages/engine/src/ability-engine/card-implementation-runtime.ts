@@ -173,7 +173,7 @@ export type CardImplementationRuntimeDependencies = {
     sourceDefinitionId: CardDefinition["id"],
     min: number,
     max: number,
-    scope?: "any_installed" | "single_data_fort",
+    scope?: "any_installed" | "inside_data_fort" | "single_data_fort",
   ) => CardEffectHiddenInfoResult;
   exposeOutermostIceEachDataFort: (
     state: GameState,
@@ -1883,26 +1883,19 @@ export function pushActivatedCardImplementationActionsForTiming(
       continue;
     const exposeEffect = exposeInstalledCardEffect(ability);
     if (exposeEffect) {
-      for (const targetCardId of deps
-        .exposeInstalledCorpCardTargets(state, exposeEffect.scope)
-        .sort()) {
-        const targetDefinition = deps.definitionFor(state, targetCardId);
-        actions.push(
-          deps.createAction(
-            state,
-            side,
-            "activated_card_ability",
-            `${definition.title}: ${targetDefinition.title} exposen`,
-            sourceCardId,
-            activatedAbilityLegalActionCosts(ability),
-            {
-              ...activatedAbilityPayload(sourceCardId, ability, index),
-              cardImplementationExposeTargetId: targetCardId,
-              targetDefinitionId: targetDefinition.id,
-            },
-          ),
-        );
-      }
+      if (deps.exposeInstalledCorpCardTargets(state, exposeEffect.scope).length === 0)
+        continue;
+      actions.push(
+        deps.createAction(
+          state,
+          side,
+          "activated_card_ability",
+          ability.label ?? `${definition.title}: installierte Korp-Karte exposen`,
+          sourceCardId,
+          activatedAbilityLegalActionCosts(ability),
+          activatedAbilityPayload(sourceCardId, ability, index),
+        ),
+      );
       continue;
     }
     const moveTopTrashEffect = moveTopTrashToGripEffect(ability);
@@ -2073,11 +2066,11 @@ function validateActivatedCardImplementationAbility(
       const targetCardId = String(
         legalAction.payload?.cardImplementationExposeTargetId ?? "",
       );
-      if (
+      if (targetCardId && (
         !deps
           .exposeInstalledCorpCardTargets(state, exposeEffect.scope)
           .includes(targetCardId)
-      )
+      ))
         throw new Error("Die zu exposende Korp-Karte ist nicht mehr gueltig.");
     }
     return;
@@ -2344,15 +2337,29 @@ export function resolveActivatedCardImplementationAbility(
           zone,
           count,
         ),
-      exposeInstalledCard: (scope) =>
-        deps.exposeInstalledCorpCard(
-          state,
-          legalAction,
-          match.cardId,
-          match.definition.id,
-          String(legalAction.payload?.cardImplementationExposeTargetId ?? ""),
-          scope,
-        ),
+      exposeInstalledCard: (scope) => {
+        const targetId = String(
+          legalAction.payload?.cardImplementationExposeTargetId ?? "",
+        );
+        return targetId
+          ? deps.exposeInstalledCorpCard(
+              state,
+              legalAction,
+              match.cardId,
+              match.definition.id,
+              targetId,
+              scope,
+            )
+          : deps.startExposeInstalledCorpCardsChoice(
+              state,
+              legalAction,
+              match.cardId,
+              match.definition.id,
+              1,
+              1,
+              scope,
+            );
+      },
       startExposeInstalledCards: (min, max, scope) =>
         deps.startExposeInstalledCorpCardsChoice(
           state,
@@ -2640,15 +2647,29 @@ export function executeOnPlayCardImplementationAbility(
         >,
       startPrivateLook: (zone, count) =>
         deps.startPrivateLook(state, legalAction, cardId, definition.id, zone, count),
-      exposeInstalledCard: (scope) =>
-        deps.exposeInstalledCorpCard(
-          state,
-          legalAction,
-          cardId,
-          definition.id,
-          String(legalAction.payload?.cardImplementationExposeTargetId ?? ""),
-          scope,
-        ),
+      exposeInstalledCard: (scope) => {
+        const targetId = String(
+          legalAction.payload?.cardImplementationExposeTargetId ?? "",
+        );
+        return targetId
+          ? deps.exposeInstalledCorpCard(
+              state,
+              legalAction,
+              cardId,
+              definition.id,
+              targetId,
+              scope,
+            )
+          : deps.startExposeInstalledCorpCardsChoice(
+              state,
+              legalAction,
+              cardId,
+              definition.id,
+              1,
+              1,
+              scope,
+            );
+      },
       startExposeInstalledCards: (min, max, scope) =>
         deps.startExposeInstalledCorpCardsChoice(
           state,
