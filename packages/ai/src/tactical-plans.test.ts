@@ -1,13 +1,20 @@
 import { describe, expect, it } from "vitest";
 
 import {
+  buildTacticalPlans,
   createPlanStep,
   createTacticalPlan,
   mapPlanStepToLegalActions,
   rankTacticalPlans,
 } from "./tactical-plans";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
-import type { AiDecisionInput, LegalAction, PlayerView, Side } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  PlayerView,
+  Side,
+  VisibleCard,
+} from "@netgrid/shared";
 
 describe("tactical plan model", () => {
   it("creates a blocked plan with a next remediation step", () => {
@@ -121,6 +128,35 @@ describe("tactical plan model", () => {
     expect(mapping.legalActions[0]?.actionId).toBe("run-hq");
     expect(mapping.step.mappingStatus).toBe("matched");
   });
+
+  it("derives missing wall breaker coverage from visible rezzed ICE", () => {
+    const input = aiInput("runner", [
+      legalAction("run-remote", "runner", "start_run", {
+        serverId: "remote_1",
+      }),
+      legalAction("draw", "runner", "draw_card"),
+    ]);
+    input.playerView.own.rig = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-wall", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["Wall"],
+        }),
+      ]),
+    ];
+
+    const plans = buildTacticalPlans({ input });
+    const coveragePlan = plans.find(
+      (plan) => plan.type === "runner.obtain_breaker_coverage",
+    );
+
+    expect(coveragePlan?.requiredCapabilities[0]?.kind).toBe("breaker_wall");
+    expect(coveragePlan?.currentStep.rationale[0]).toContain("breaker_wall");
+  });
 });
 
 function aiInput(side: Side, legalActions: LegalAction[]): AiDecisionInput {
@@ -177,6 +213,46 @@ function playerView(side: Side, legalActions: LegalAction[]): PlayerView {
   };
 }
 
+function server(
+  id: PlayerView["servers"][number]["id"],
+  ice: VisibleCard[] = [],
+  root: VisibleCard[] = [],
+): PlayerView["servers"][number] {
+  return {
+    id,
+    label: id,
+    ice,
+    root,
+  };
+}
+
+function visibleCard(
+  instanceId: string,
+  side: Side,
+  type: NonNullable<VisibleCard["type"]>,
+  overrides: Omit<
+    Partial<VisibleCard>,
+    | "instanceId"
+    | "definitionId"
+    | "title"
+    | "owner"
+    | "controller"
+    | "type"
+    | "known"
+  > = {},
+): VisibleCard {
+  return {
+    instanceId,
+    definitionId: instanceId,
+    title: instanceId,
+    owner: side,
+    controller: side,
+    type,
+    known: true,
+    ...overrides,
+  };
+}
+
 function visibleIdentity(side: Side): PlayerView["own"]["identity"] {
   return {
     instanceId: `${side}-identity`,
@@ -206,7 +282,7 @@ function legalAction(
     targetRequirements: [],
     visibility: "public",
     expiresAtStateVersion: 2,
-    payload,
+    ...(Object.keys(payload).length > 0 ? { payload } : {}),
   };
 }
 

@@ -79,6 +79,8 @@ import { buildAiDecisionInputDto } from "./input-dto";
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
 import {
   evaluateTacticalPlans,
+  getTacticalPlanMemorySnapshot,
+  rememberTacticalPlanRuntime,
   type PlanStepMappingResult,
   type TacticalPlanRuntimeResult,
 } from "./tactical-plans";
@@ -3277,10 +3279,12 @@ function chooseSemanticRuntimeAction(
     ) ?? choices.find(
       (candidate) => !candidate.exclusion && semanticRuntimeChoiceIsReactive(candidate),
     );
+  const previousPlan = getTacticalPlanMemorySnapshot(input);
   const planRuntime = reactiveChoice
     ? emptyTacticalPlanRuntimeResult()
     : evaluateTacticalPlans({
         input,
+        ...(previousPlan ? { previousPlan } : {}),
         candidates: buildActionSemanticCandidates({
           legalActions: input.legalActions,
           observerSide: input.side,
@@ -3306,6 +3310,7 @@ function chooseSemanticRuntimeAction(
     (action) => action.actionId === legacyDecision.actionId,
   )?.type;
   const selectedChoices = selectedChoicesForDecision(input, choice.action);
+  const updatedPlanMemory = rememberTacticalPlanRuntime(input, planRuntime, choice.action);
   return {
     actionId: choice.action.actionId,
     ...(selectedChoices ? { selectedChoices } : {}),
@@ -3326,6 +3331,12 @@ function chooseSemanticRuntimeAction(
         : []),
       ...(planRuntime.selectedStep
         ? [`tactical_step:${planRuntime.selectedStep.kind}`]
+        : []),
+      ...(updatedPlanMemory
+        ? [
+            `tactical_plan_memory_status:${updatedPlanMemory.status}`,
+            `tactical_plan_progression:${updatedPlanMemory.planProgressionReason}`,
+          ]
         : []),
       `legacy_reference_reason:${legacyDecision.reasonCode}`,
       ...(legacyActionType
@@ -3511,7 +3522,7 @@ function semanticRuntimeDecisionDebug(
         title: "Semantic Runtime",
         items: detailItems
       },
-      ...(planRuntime.planAlternatives.length > 0
+      ...(planRuntime.planAlternatives.length > 0 || planRuntime.previousPlan
         ? [{
             id: "tactical_plan",
             title: "Tactical Plan",
@@ -3540,7 +3551,22 @@ function tacticalPlanDebugItems(planRuntime: TacticalPlanRuntimeResult): string[
   const selectedPlan = planRuntime.selectedPlan;
   const selectedStep = planRuntime.selectedStep;
   const selectedMapping = planRuntime.selectedMapping;
+  const previousPlan = planRuntime.previousPlan;
   return [
+    ...(previousPlan
+      ? [
+          `previous_plan:${previousPlan.planId}`,
+          `previous_plan_type:${previousPlan.type}`,
+          `previous_plan_status:${previousPlan.status}`,
+          `previous_plan_ttl:${previousPlan.ttlDecisionsRemaining}`,
+        ]
+      : ["previous_plan:none"]),
+    ...(planRuntime.planProgressionReason
+      ? [`plan_progression_reason:${planRuntime.planProgressionReason}`]
+      : []),
+    ...(planRuntime.whyPlanAbandoned
+      ? [`why_plan_abandoned:${planRuntime.whyPlanAbandoned}`]
+      : []),
     `plan_alternative_count:${planRuntime.planAlternatives.length}`,
     `blocked_plan_count:${planRuntime.blockedPlans.length}`,
     ...(selectedPlan
@@ -3868,6 +3894,8 @@ function semanticRuntimeActionExclusion(
   input: AiDecisionInput,
   action: LegalAction,
 ): SemanticRuntimeExclusion | undefined {
+  const planMemoryExclusion = semanticRuntimePlanMemoryActionExclusion(input, action);
+  if (planMemoryExclusion) return planMemoryExclusion;
   if (input.side !== "runner" || action.type !== "start_run") return undefined;
   const serverId = semanticRuntimeServerId(action);
   const server = input.playerView.servers.find((entry) => entry.id === serverId);
@@ -3890,6 +3918,27 @@ function semanticRuntimeActionExclusion(
       : "Run-Ziel nicht bezahlbar",
     reason: semanticRuntimeKnownIcePathReason(assessment, server.id)
   };
+}
+
+function semanticRuntimePlanMemoryActionExclusion(
+  input: AiDecisionInput,
+  action: LegalAction,
+): SemanticRuntimeExclusion | undefined {
+  const previousPlan = getTacticalPlanMemorySnapshot(input);
+  if (
+    input.side === "runner" &&
+    previousPlan?.type === "runner.build_credit_bank" &&
+    input.playerView.own.credits > 3 &&
+    action.type === "trigger_ability" &&
+    /von broker nehmen|take.*bank|cash.*bank/i.test(action.label)
+  ) {
+    return {
+      key: "bank_cashout_deferred_after_build",
+      label: "Bank-Auszahlung verschoben",
+      reason: "previous build_credit_bank plan is still stable and no concrete funding need is visible",
+    };
+  }
+  return undefined;
 }
 
 function semanticRuntimeRunnerArchivesExclusion(

@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it } from "vitest";
 
 import { chooseCorpAction, chooseRunnerAction } from "./index";
+import { resetTacticalPlanMemory } from "./tactical-plans";
 import type {
   AiDecisionInput,
   AiDifficulty,
@@ -14,6 +15,7 @@ describe("Semantic AI runtime cutover", () => {
   const originalRuntimeMode = process.env.NETGRID_SEMANTIC_AI_RUNTIME;
 
   afterEach(() => {
+    resetTacticalPlanMemory();
     if (originalRuntimeMode === undefined) {
       delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
     } else {
@@ -354,6 +356,129 @@ describe("Semantic AI runtime cutover", () => {
     expect(lowCreditDecision.actionId).toBe("broker-take");
     expect(lowCreditDecision.decisionDebug?.planKind).toBe(
       "runner.cash_out_credit_bank",
+    );
+  });
+
+  it("does not cash out Broker immediately after a stable bank-build plan", () => {
+    const stableInput = aiInput("runner", [
+      legalAction(
+        "broker-load",
+        "runner",
+        "trigger_ability",
+        "Credits auf Broker legen",
+        { credits: 0 },
+        { source: "broker" },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    stableInput.playerView.own.credits = 6;
+
+    const buildDecision = chooseRunnerAction(stableInput);
+    expect(buildDecision.actionId).toBe("broker-load");
+
+    const payoutInput = aiInput("runner", [
+      legalAction(
+        "broker-take",
+        "runner",
+        "trigger_ability",
+        "Credits von Broker nehmen",
+        { credits: 0 },
+        { source: "broker" },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    payoutInput.playerView.own.credits = 6;
+
+    const payoutDecision = chooseRunnerAction(payoutInput);
+
+    expect(payoutDecision.actionId).toBe("gain-credit");
+    expect(payoutDecision.decisionDebug?.detailSections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "tactical_plan",
+          items: expect.arrayContaining([
+            "previous_plan_type:runner.build_credit_bank",
+          ]),
+        }),
+      ]),
+    );
+  });
+
+  it("returns from an opportunistic central run to the blocked remote coverage plan", () => {
+    const centralInput = aiInput("runner", [
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction(
+        "run-hq",
+        "runner",
+        "start_run",
+        "Run HQ",
+        { credits: 0 },
+        { payload: { serverId: "hq" } },
+      ),
+    ]);
+    centralInput.playerView.own.rig = [];
+    centralInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-wall", "corp", "ice", { rezzed: true }),
+      ]),
+    ];
+
+    const centralDecision = chooseRunnerAction(centralInput);
+    expect(centralDecision.actionId).toBe("run-hq");
+
+    const followupInput = aiInput("runner", [
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction(
+        "run-hq",
+        "runner",
+        "start_run",
+        "Run HQ",
+        { credits: 0 },
+        { payload: { serverId: "hq" } },
+      ),
+      legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
+    ]);
+    followupInput.playerView.stateVersion = 2;
+    followupInput.playerView.own.rig = [];
+    followupInput.playerView.servers = centralInput.playerView.servers;
+
+    const followupDecision = chooseRunnerAction(followupInput);
+
+    expect(followupDecision.actionId).toBe("draw");
+    expect(followupDecision.decisionDebug?.planKind).toBe(
+      "runner.obtain_breaker_coverage",
+    );
+    expect(followupDecision.decisionDebug?.detailSections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "tactical_plan",
+          items: expect.arrayContaining([
+            "previous_plan_type:runner.opportunistic_central_run",
+            "plan_progression_reason:previous_central_probe_ttl_expired",
+          ]),
+        }),
+      ]),
     );
   });
 

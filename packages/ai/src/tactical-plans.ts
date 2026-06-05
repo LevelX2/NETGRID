@@ -16,7 +16,8 @@ export type PlanLifecycle =
   | "progressing"
   | "satisfied"
   | "failed"
-  | "expired";
+  | "expired"
+  | "abandoned";
 
 export type TacticalPlanType =
   | "runner.obtain_breaker_coverage"
@@ -52,6 +53,12 @@ export type PlanMappingStatus =
 
 export type RequiredCapabilityKind =
   | "breaker_coverage"
+  | "breaker_wall"
+  | "breaker_code_gate"
+  | "breaker_sentry"
+  | "breaker_ap"
+  | "breaker_trace"
+  | "breaker_universal"
   | "credits"
   | "card_draw"
   | "card_search"
@@ -136,10 +143,31 @@ export type TacticalPlanBuildContext = {
   previousPlan?: TacticalPlanSnapshot;
 };
 
-export type TacticalPlanSnapshot = Pick<
-  TacticalPlan,
-  "planId" | "type" | "status" | "target"
->;
+export type PlanProgressionStatus =
+  | "active"
+  | "blocked"
+  | "progressing"
+  | "satisfied"
+  | "abandoned";
+
+export type TacticalPlanMemorySnapshot = {
+  schemaVersion: typeof TACTICAL_PLAN_SCHEMA_VERSION;
+  memoryId: string;
+  side: Side;
+  planId: string;
+  type: TacticalPlanType;
+  status: PlanProgressionStatus;
+  target?: PlanTarget;
+  selectedStepKind?: PlanStepKind;
+  selectedActionId?: string;
+  blockedBy: string[];
+  ttlDecisionsRemaining: number;
+  planProgressionReason: string;
+  whyPlanAbandoned?: string;
+  updatedAtStateVersion: number;
+};
+
+export type TacticalPlanSnapshot = TacticalPlanMemorySnapshot;
 
 export type PlanStepMappingResult = {
   plan: TacticalPlan;
@@ -151,12 +179,17 @@ export type PlanStepMappingResult = {
 };
 
 export type TacticalPlanRuntimeResult = {
+  previousPlan?: TacticalPlanMemorySnapshot;
   planAlternatives: TacticalPlan[];
   blockedPlans: TacticalPlan[];
   selectedPlan?: TacticalPlan;
   selectedStep?: PlanStep;
   selectedMapping?: PlanStepMappingResult;
+  planProgressionReason?: string;
+  whyPlanAbandoned?: string;
 };
+
+const tacticalPlanMemoryByKey = new Map<string, TacticalPlanMemorySnapshot>();
 
 export function buildTacticalPlans(
   context: TacticalPlanBuildContext,
@@ -169,7 +202,13 @@ export function buildTacticalPlans(
 export function evaluateTacticalPlans(
   context: TacticalPlanBuildContext,
 ): TacticalPlanRuntimeResult {
-  const planAlternatives = rankTacticalPlans(buildTacticalPlans(context));
+  const previousPlan = context.previousPlan ?? getTacticalPlanMemorySnapshot(context.input);
+  const rawPlans = buildTacticalPlans({
+    ...context,
+    ...(previousPlan ? { previousPlan } : {}),
+  });
+  const progression = progressTacticalPlans(rawPlans, previousPlan);
+  const planAlternatives = rankTacticalPlans(progression.plans);
   const blockedPlans = planAlternatives.filter((plan) => plan.status === "blocked");
   const candidates = context.candidates ?? [];
   for (const plan of planAlternatives) {
@@ -181,18 +220,138 @@ export function evaluateTacticalPlans(
     );
     if (mapping.status === "matched" && mapping.legalActions.length > 0) {
       return {
+        ...(previousPlan ? { previousPlan } : {}),
         planAlternatives,
         blockedPlans,
         selectedPlan: plan,
         selectedStep: mapping.step,
         selectedMapping: mapping,
+        ...(progression.planProgressionReason
+          ? { planProgressionReason: progression.planProgressionReason }
+          : {}),
+        ...(progression.whyPlanAbandoned
+          ? { whyPlanAbandoned: progression.whyPlanAbandoned }
+          : {}),
       };
     }
   }
   return {
+    ...(previousPlan ? { previousPlan } : {}),
     planAlternatives,
     blockedPlans,
+    ...(progression.planProgressionReason
+      ? { planProgressionReason: progression.planProgressionReason }
+      : {}),
+    ...(progression.whyPlanAbandoned
+      ? { whyPlanAbandoned: progression.whyPlanAbandoned }
+      : {}),
   };
+}
+
+export function getTacticalPlanMemorySnapshot(
+  input: AiDecisionInput,
+): TacticalPlanMemorySnapshot | undefined {
+  return tacticalPlanMemoryByKey.get(tacticalPlanMemoryKey(input));
+}
+
+export function rememberTacticalPlanRuntime(
+  input: AiDecisionInput,
+  result: TacticalPlanRuntimeResult,
+  selectedAction: LegalAction,
+): TacticalPlanMemorySnapshot | undefined {
+  const selectedPlan = result.selectedPlan;
+  const selectedStep = result.selectedStep;
+  if (!selectedPlan || !selectedStep) return undefined;
+  const snapshot = createTacticalPlanMemorySnapshot({
+    input,
+    plan: selectedPlan,
+    step: selectedStep,
+    selectedAction,
+    ...(result.previousPlan ? { previousPlan: result.previousPlan } : {}),
+    ...(result.planProgressionReason
+      ? { planProgressionReason: result.planProgressionReason }
+      : {}),
+    ...(result.whyPlanAbandoned
+      ? { whyPlanAbandoned: result.whyPlanAbandoned }
+      : {}),
+  });
+  tacticalPlanMemoryByKey.set(tacticalPlanMemoryKey(input), snapshot);
+  return snapshot;
+}
+
+export function resetTacticalPlanMemory(): void {
+  tacticalPlanMemoryByKey.clear();
+}
+
+function tacticalPlanMemoryKey(input: AiDecisionInput): string {
+  return `${input.profileId}:${input.side}`;
+}
+
+function progressTacticalPlans(
+  plans: readonly TacticalPlan[],
+  previousPlan: TacticalPlanMemorySnapshot | undefined,
+): {
+  plans: TacticalPlan[];
+  planProgressionReason?: string;
+  whyPlanAbandoned?: string;
+} {
+  if (!previousPlan) return { plans: [...plans] };
+  const continued = plans.map((plan) => {
+    if (!samePlanLine(plan, previousPlan)) return plan;
+    return {
+      ...plan,
+      status: plan.status === "active" ? "progressing" : plan.status,
+      priority: plan.priority + 80,
+      evidence: [
+        ...plan.evidence,
+        `previous_plan:${previousPlan.planId}`,
+        `plan_progression:${previousPlan.status}->${plan.status}`,
+      ],
+      scoreBreakdown: [
+        ...plan.scoreBreakdown,
+        {
+          key: "previous_plan_continuity",
+          label: "Planfortschreibung",
+          value: 80,
+          reason: previousPlan.planId,
+        },
+      ],
+    } satisfies TacticalPlan;
+  });
+  if (
+    previousPlan.type === "runner.opportunistic_central_run" &&
+    previousPlan.ttlDecisionsRemaining <= 0 &&
+    continued.some((plan) => plan.type === "runner.obtain_breaker_coverage")
+  ) {
+    return {
+      plans: continued.map((plan) =>
+        plan.type === "runner.opportunistic_central_run"
+          ? {
+              ...plan,
+              status: "abandoned",
+              priority: plan.priority - 600,
+              evidence: [...plan.evidence, "central_probe_ttl_expired"],
+            }
+          : plan,
+      ),
+      planProgressionReason: "previous_central_probe_ttl_expired",
+      whyPlanAbandoned: "opportunistic central run was a one-decision probe; returning to blocker plan",
+    };
+  }
+  return {
+    plans: continued,
+    planProgressionReason: "previous_plan_considered",
+  };
+}
+
+function samePlanLine(
+  plan: TacticalPlan,
+  previousPlan: TacticalPlanMemorySnapshot,
+): boolean {
+  if (plan.type !== previousPlan.type) return false;
+  if (!plan.target && !previousPlan.target) return true;
+  return plan.target?.kind === previousPlan.target?.kind &&
+    plan.target?.id === previousPlan.target?.id;
 }
 
 export function mapPlanStepToLegalActions(
@@ -365,6 +524,7 @@ function bankStepMatchesCandidate(
 
 function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan[] {
   const input = context.input;
+  const previousPlan = context.previousPlan;
   const stateVersion = input.playerView.stateVersion;
   const plans: TacticalPlan[] = [];
   const remoteRunActions = input.legalActions.filter(
@@ -376,6 +536,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
   for (const action of blockedRemoteRuns) {
     const serverId = actionServerId(action);
     if (!serverId) continue;
+    const missingCoverage = missingBreakerCoverageKind(input.playerView, serverId);
     plans.push(
       createTacticalPlan({
         planId: `runner.contest_remote:${serverId}`,
@@ -391,7 +552,10 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
             severity: "soft",
             target: { kind: "server", id: serverId },
             removalStepKind: "search_for_answer",
-            evidence: ["visible rezzed ICE path and no visible breaker coverage"],
+            evidence: [
+              "visible rezzed ICE path and no visible breaker coverage",
+              `missing_coverage:${missingCoverage}`,
+            ],
           },
         ],
         currentStep: createPlanStep({
@@ -429,10 +593,13 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
         requiredCapabilities: [
           {
             capabilityId: `breaker_coverage:${serverId}`,
-            kind: "breaker_coverage",
+            kind: missingCoverage,
             side: "runner",
             target: { kind: "server", id: serverId },
-            evidence: ["required to resume blocked remote contest"],
+            evidence: [
+              "required to resume blocked remote contest",
+              `server:${serverId}`,
+            ],
           },
         ],
         currentStep: runnerBreakerCoverageStep(input, serverId),
@@ -507,7 +674,12 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
     );
   }
   const bankBuildActions = input.legalActions.filter(isBankBuildAction);
-  if (bankBuildActions.length > 0 && input.playerView.own.credits >= 4) {
+  const runnerFundingNeed = runnerHasConcreteFundingNeed(input, blockedRemoteRuns);
+  if (
+    bankBuildActions.length > 0 &&
+    input.playerView.own.credits >= 4 &&
+    !runnerFundingNeed
+  ) {
     plans.push(
       createTacticalPlan({
         planId: "runner.build_credit_bank",
@@ -529,7 +701,15 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
     );
   }
   const bankPayoutActions = input.legalActions.filter(isBankPayoutAction);
-  if (bankPayoutActions.length > 0 && input.playerView.own.credits <= 3) {
+  const mayCashOutBank =
+    bankPayoutActions.length > 0 &&
+    (input.playerView.own.credits <= 3 || runnerFundingNeed) &&
+    !(
+      previousPlan?.type === "runner.build_credit_bank" &&
+      input.playerView.own.credits > 3 &&
+      !runnerFundingNeed
+    );
+  if (mayCashOutBank) {
     plans.push(
       createTacticalPlan({
         planId: "runner.cash_out_credit_bank",
@@ -543,7 +723,11 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
           stepId: "cash_out_bank:runner",
           kind: "cash_out_bank",
           desiredActionSemantics: ["card_ability.trigger", "card_ability.unknown"],
-          rationale: ["low credits make stored bank credits immediately useful"],
+          rationale: [
+            runnerFundingNeed
+              ? "stored credits can fund an active plan"
+              : "low credits make stored bank credits immediately useful",
+          ],
         }),
         evidence: bankPayoutActions.map((action) => `bank_payout_action:${action.actionId}`),
         stateVersion,
@@ -630,7 +814,11 @@ function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan
     );
   }
   const bankBuildActions = input.legalActions.filter(isBankBuildAction);
-  if (bankBuildActions.length > 0 && input.playerView.own.credits >= 4) {
+  if (
+    bankBuildActions.length > 0 &&
+    input.playerView.own.credits >= 4 &&
+    context.previousPlan?.type !== "corp.build_credit_bank"
+  ) {
     plans.push(
       createTacticalPlan({
         planId: "corp.build_credit_bank",
@@ -663,7 +851,9 @@ function runnerBreakerCoverageStep(
       stepId: `install_breaker:${serverId}`,
       kind: "install_breaker",
       desiredActionSemantics: ["install.card"],
-      rationale: ["visible install action can add breaker coverage"],
+      rationale: [
+        `visible install action can add ${missingBreakerCoverageKind(input.playerView, serverId)} coverage`,
+      ],
     });
   }
   if (
@@ -683,7 +873,9 @@ function runnerBreakerCoverageStep(
         "play.runner_event",
         "draw.card",
       ],
-      rationale: ["search or event actions may find the missing breaker answer"],
+      rationale: [
+        `search or event actions may find ${missingBreakerCoverageKind(input.playerView, serverId)} coverage`,
+      ],
     });
   }
   if (input.legalActions.some((action) => action.type === "draw_card")) {
@@ -691,14 +883,18 @@ function runnerBreakerCoverageStep(
       stepId: `draw_for_answer:${serverId}`,
       kind: "draw_for_answer",
       desiredActionSemantics: ["draw.card"],
-      rationale: ["drawing is the safest available path toward a breaker answer"],
+      rationale: [
+        `drawing is the safest available path toward ${missingBreakerCoverageKind(input.playerView, serverId)} coverage`,
+      ],
     });
   }
   return createPlanStep({
     stepId: `gain_credits:${serverId}`,
     kind: "gain_credits",
     desiredActionSemantics: ["economy.gain_credit"],
-    rationale: ["no answer action is visible; credits preserve future options"],
+    rationale: [
+      `no ${missingBreakerCoverageKind(input.playerView, serverId)} answer action is visible; credits preserve future options`,
+    ],
   });
 }
 
@@ -713,6 +909,29 @@ function isRemoteServer(serverId: string | undefined): boolean {
 
 function isCentralServer(serverId: string | undefined): boolean {
   return serverId === "hq" || serverId === "rd";
+}
+
+function missingBreakerCoverageKind(
+  playerView: PlayerView,
+  serverId: string,
+): RequiredCapabilityKind {
+  const server = playerView.servers.find((candidate) => candidate.id === serverId);
+  const rezzedIce = server?.ice.find((ice) => ice.known && ice.rezzed === true);
+  if (!rezzedIce) return "breaker_coverage";
+  const text = [
+    rezzedIce.title,
+    rezzedIce.definitionId,
+    ...(rezzedIce.subtypes ?? []),
+    rezzedIce.rulesText,
+  ].filter(Boolean).join(" ").toLowerCase();
+  if (text.includes("wall") || text.includes("barrier")) return "breaker_wall";
+  if (text.includes("code gate") || text.includes("codegate")) {
+    return "breaker_code_gate";
+  }
+  if (text.includes("sentry")) return "breaker_sentry";
+  if (text.includes("ap")) return "breaker_ap";
+  if (text.includes("trace")) return "breaker_trace";
+  return "breaker_universal";
 }
 
 function remoteRunNeedsBreakerCoverage(
@@ -764,6 +983,24 @@ function isBankPayoutAction(action: LegalAction): boolean {
     (label.includes("take") && label.includes("bank")) ||
     (label.includes("cash") && label.includes("bank"))
   );
+}
+
+function runnerHasConcreteFundingNeed(
+  input: AiDecisionInput,
+  blockedRemoteRuns: readonly LegalAction[],
+): boolean {
+  if (input.playerView.own.credits <= 3) return true;
+  return blockedRemoteRuns.length === 0 &&
+    input.legalActions.some(
+      (action) =>
+        action.type === "start_run" &&
+        isRemoteServer(actionServerId(action)) &&
+        actionCreditCost(action) >= input.playerView.own.credits,
+    );
+}
+
+function actionCreditCost(action: LegalAction): number {
+  return action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0);
 }
 
 function visibleSourceServerId(
@@ -890,6 +1127,62 @@ export function createTacticalPlan(params: {
   };
 }
 
+export function createTacticalPlanMemorySnapshot(params: {
+  input: AiDecisionInput;
+  plan: TacticalPlan;
+  step: PlanStep;
+  selectedAction: LegalAction;
+  previousPlan?: TacticalPlanMemorySnapshot;
+  planProgressionReason?: string;
+  whyPlanAbandoned?: string;
+}): TacticalPlanMemorySnapshot {
+  const status = planMemoryStatus(params.plan, params.step);
+  const ttlDecisionsRemaining =
+    params.plan.type === "runner.opportunistic_central_run"
+      ? Math.max(0, (params.previousPlan?.ttlDecisionsRemaining ?? 1) - 1)
+      : 2;
+  return {
+    schemaVersion: TACTICAL_PLAN_SCHEMA_VERSION,
+    memoryId: tacticalPlanMemoryKey(params.input),
+    side: params.plan.side,
+    planId: params.plan.planId,
+    type: params.plan.type,
+    status,
+    ...(params.plan.target ? { target: params.plan.target } : {}),
+    selectedStepKind: params.step.kind,
+    selectedActionId: params.selectedAction.actionId,
+    blockedBy: params.plan.blockers.map((blocker) => blocker.kind),
+    ttlDecisionsRemaining,
+    planProgressionReason:
+      params.planProgressionReason ??
+      (params.previousPlan && samePlanLine(params.plan, params.previousPlan)
+        ? "continued_previous_plan"
+        : "selected_new_plan"),
+    ...(params.whyPlanAbandoned
+      ? { whyPlanAbandoned: params.whyPlanAbandoned }
+      : {}),
+    updatedAtStateVersion: params.input.playerView.stateVersion,
+  };
+}
+
+function planMemoryStatus(
+  plan: TacticalPlan,
+  step: PlanStep,
+): PlanProgressionStatus {
+  if (plan.status === "abandoned") return "abandoned";
+  if (plan.status === "blocked") return "blocked";
+  if (step.mappingStatus === "matched") {
+    if (plan.type === "runner.opportunistic_central_run") return "satisfied";
+    if (plan.type === "runner.cash_out_credit_bank") return "satisfied";
+    if (plan.type === "corp.rez_defense") return "satisfied";
+    if (plan.type === "corp.create_score_window" && step.kind === "score_agenda") {
+      return "satisfied";
+    }
+    return "progressing";
+  }
+  return "active";
+}
+
 export function rankTacticalPlans(plans: readonly TacticalPlan[]): TacticalPlan[] {
   return [...plans].sort(
     (left, right) =>
@@ -915,5 +1208,7 @@ function planStatusRank(status: PlanLifecycle): number {
       return 1;
     case "failed":
       return 0;
+    case "abandoned":
+      return -1;
   }
 }
