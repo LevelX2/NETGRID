@@ -1,0 +1,117 @@
+{
+  "schemaVersion": "ai-plan-layer-current-state-review-v1",
+  "date": "2026-06-05",
+  "status": "current_state_review",
+  "activeAgent": "architecture-review-agent",
+  "scope": {
+    "mode": "Lean Local Mode interpreted as current local live path",
+    "runtimeChange": false,
+    "cardSemanticChange": false,
+    "gateCascade": false
+  },
+  "summary": {
+    "hasNewLivePlanLayerBetweenDoctrineGoalAndLegalAction": false,
+    "liveSelectionModel": "direct_current_legal_action_scoring_via_semantic_runtime",
+    "legacyPerDecisionPlanHeuristicsExist": true,
+    "persistentTacticalPlanExists": false,
+    "persistentPlanStepExists": false,
+    "semanticCoreMetaRuntimeConsumer": false
+  },
+  "finalActionSelection": {
+    "server": [
+      "apps/server/src/multiplayer.ts:1643",
+      "apps/server/src/multiplayer.ts:2612"
+    ],
+    "ai": [
+      "packages/ai/src/index.ts:3200",
+      "packages/ai/src/index.ts:3206",
+      "packages/ai/src/index.ts:3219",
+      "packages/ai/src/index.ts:3251",
+      "packages/ai/src/index.ts:3316",
+      "packages/ai/src/index.ts:3333"
+    ]
+  },
+  "runtimeRoles": {
+    "AiDeckDoctrineProfile": "Live input from own deck snapshot; used mainly by legacy planners, mulligan/discard and debug.",
+    "DeckDoctrine": "Diagnostic/meta type in semantic-ai-core-meta.ts, not live selection.",
+    "TacticalGoalState": "Diagnostic/meta type in semantic-ai-core-meta.ts, no live persistence.",
+    "SemanticDecisionScore": "Diagnostic/meta score type, not the live Semantic Runtime score.",
+    "ActionSemanticCandidate": "Read-only projection exists and is tested, but is not called by live chooseSemanticRuntimeAction."
+  },
+  "requestedPlanTypes": {
+    "runner.obtain_breaker_coverage": {
+      "exists": false,
+      "approximation": ["build_rig", "draw_for_answers", "assessVisibleBreakerPressure", "runnerCoverageSearchAction"],
+      "gap": "No explicit plan target, no blocked-plan pivot, no return to original run target."
+    },
+    "runner.contest_remote": {
+      "exists": "partial",
+      "approximation": ["RunnerPlanKind.contest_remote", "semantic scope remote_contest"],
+      "gap": "No persistent TacticalPlan; live path directly scores or excludes current run LegalAction."
+    },
+    "runner.opportunistic_central_run": {
+      "exists": false,
+      "approximation": ["pressure_hq", "pressure_rnd", "safe_probe_run", "simple_hq_or_rnd_pressure"],
+      "gap": "No unified central plan with HQ/RD/Archives target selection and freshness memory."
+    },
+    "runner.build_credit_bank": {
+      "exists": false,
+      "approximation": ["pool_build installed economy assessment"],
+      "gap": "No multi-turn bank-building plan."
+    },
+    "runner.cash_out_credit_bank": {
+      "exists": false,
+      "approximation": ["pool_payout installed economy assessment"],
+      "gap": "No plan deciding payout timing against active goals."
+    },
+    "corp.create_score_window": {
+      "exists": "meta_only",
+      "approximation": ["SemanticTacticalGoalFamily.corp_create_score_window", "score_next_turn", "build_scoring_remote"],
+      "gap": "Goal family exists diagnostically; no live TacticalPlan lifecycle."
+    },
+    "corp.build_credit_bank": {
+      "exists": false,
+      "approximation": ["recover_economy", "installed economy pool logic"],
+      "gap": "No dedicated credit-bank plan."
+    },
+    "corp.rez_defense": {
+      "exists": false,
+      "approximation": ["simple_rez", "protect_hq", "protect_rnd", "build_scoring_remote"],
+      "gap": "No strategic rez-defense PlanStep tied to score/defense plan."
+    }
+  },
+  "implementationPlan": {
+    "phase1": "Introduce TacticalPlan and PlanStep model with lifecycle, blockers, required capabilities and side-safe debug.",
+    "phase2": "Map PlanStep to current LegalActions via ActionSemanticCandidate projection and explicit blocker statuses.",
+    "phase3": [
+      "runner.obtain_breaker_coverage",
+      "runner.contest_remote",
+      "runner.opportunistic_central_run",
+      "runner.build_credit_bank",
+      "runner.cash_out_credit_bank",
+      "corp.create_score_window",
+      "corp.build_credit_bank",
+      "corp.rez_defense"
+    ]
+  },
+  "verification": {
+    "executedAt": "2026-06-05",
+    "checks": [
+      {
+        "command": "corepack pnpm --filter @netgrid/ai typecheck",
+        "result": "passed"
+      },
+      {
+        "command": "corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-core-meta.test.ts src/action-semantic-candidate.test.ts",
+        "result": "passed",
+        "testFiles": 2,
+        "tests": 32
+      },
+      {
+        "command": "git diff --check",
+        "result": "passed"
+      }
+    ],
+    "result": "passed"
+  }
+}
