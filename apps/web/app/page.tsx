@@ -9648,13 +9648,23 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
           <strong>{mode === "preview" ? "Legale Aktionen nach KI-Score" : "Action-Level-Ranking"}</strong>
           <div className="aiDecisionDebugActions">
             {actionRows.map((action) => (
-              <div className={`aiDecisionDebugAction ${action.selected ? "selected" : ""}`} key={action.key}>
+              <div className={`aiDecisionDebugAction ${action.selected ? "selected" : ""} ${action.excluded ? "excluded" : ""}`} key={action.key}>
                 <div>
                   <strong>#{action.rank} {action.label}</strong>
-                  <span>{action.selected ? (mode === "preview" ? "geplant" : "ausgeführt") : action.debugSelected ? "Debug-Auswahl" : "Alternative"} · Priorität {action.priority}</span>
+                  <span>
+                    {action.excluded
+                      ? "Ausgeschlossen"
+                      : `${action.selected ? (mode === "preview" ? "geplant" : "ausgeführt") : action.debugSelected ? "Debug-Auswahl" : "Alternative"} · Priorität ${action.priority}`}
+                  </span>
                 </div>
                 <p>{action.reason}</p>
                 {action.metrics.length > 0 ? <div className="aiDecisionDebugChipRow">{action.metrics.map((metric) => <span key={metric}>{metric}</span>)}</div> : null}
+                {action.scoreRows.length > 0 ? (
+                  <details className="aiDecisionDebugActionDetails">
+                    <summary>Score-Faktoren</summary>
+                    <AiDecisionDebugRows rows={action.scoreRows} />
+                  </details>
+                ) : null}
               </div>
             ))}
           </div>
@@ -9685,6 +9695,7 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
           <AiDecisionDebugRows rows={doctrineRows} />
         </div>
       ) : null}
+      <AiDecisionDebugMemory detail={detail} />
       <AiDecisionDebugChips title="Folgepunkte" items={notes} tone="muted" />
     </div>
   );
@@ -9704,13 +9715,149 @@ function AiDecisionDebugRows({ rows }: { rows: Array<[string, string]> }) {
   );
 }
 
+function AiDecisionDebugMemory({ detail }: { detail: Record<string, unknown> }) {
+  const rows = aiDecisionDebugMemoryRows(detail);
+  const facts = safeStringList(detail.facts, 4);
+  const hypotheses = safeStringList(detail.hypotheses, 4);
+  const uncertainty = safeStringList(detail.beliefUncertainty, 4);
+  const invalidations = safeStringList(detail.invalidations, 4);
+  if (rows.length === 0 && facts.length === 0 && hypotheses.length === 0 && uncertainty.length === 0 && invalidations.length === 0) return null;
+  return (
+    <details className="aiDecisionDebugSection aiDecisionMemoryDetails">
+      <summary>KI-Speicher</summary>
+      <AiDecisionDebugRows rows={rows} />
+      <AiDecisionDebugChips title="Bekannt" items={facts} tone="muted" />
+      <AiDecisionDebugChips title="Hypothesen" items={hypotheses} tone="muted" />
+      <AiDecisionDebugChips title="Unsicherheit" items={uncertainty} tone="muted" />
+      <AiDecisionDebugChips title="Invalidierungen" items={invalidations} tone="muted" />
+    </details>
+  );
+}
+
+function aiDecisionDebugMemoryRows(detail: Record<string, unknown>): Array<[string, string]> {
+  const rows: Array<[string, string]> = [];
+  if (typeof detail.memoryVersion === "string") rows.push(["Version", detail.memoryVersion]);
+  const model = aiDecisionDebugRecord(detail.opponentModel);
+  if (!model) return rows;
+  const rnd = aiDecisionDebugRecord(model.rndTopFreshness);
+  if (rnd) {
+    const freshness = typeof rnd.freshness === "string" ? rnd.freshness : "-";
+    const known = rnd.knownToRunner === true ? "bekannt" : "nicht bekannt";
+    const knownTop = aiDecisionDebugCardLabel(aiDecisionDebugRecord(rnd.knownTopCard));
+    rows.push(["R&D-Top", `${knownTop ? `${knownTop} · ` : ""}${freshness} · ${known}`]);
+    const sequence = aiDecisionDebugPositionCardList(rnd.knownSequence, 6);
+    if (sequence) rows.push(["R&D-Sequenz", sequence]);
+  }
+  const hq = aiDecisionDebugRecord(model.hqHandMemory);
+  if (hq) {
+    const knownCount = typeof hq.knownCount === "number" ? hq.knownCount : 0;
+    const handCountValue = typeof hq.handCount === "number" ? hq.handCount : undefined;
+    const handCount = handCountValue ?? "?";
+    const allKnown = hq.allCardsKnown === true ? "vollständig" : "teilweise";
+    rows.push(["HQ-Hand", `${knownCount}/${handCount} bekannt · ${allKnown}`]);
+    const knownCards = aiDecisionDebugCardList(hq.knownCards, 8);
+    const unknownCount = handCountValue !== undefined ? Math.max(0, handCountValue - knownCount) : 0;
+    if (knownCards || unknownCount > 0) {
+      rows.push([
+        "HQ-Karten",
+        [knownCards, unknownCount > 0 ? `? x${unknownCount}` : ""].filter(Boolean).join(" · ")
+      ]);
+    }
+  }
+  const knownPositions = aiDecisionDebugPositionCardList(model.knownPositionMemory, 6);
+  if (knownPositions) {
+    rows.push(["Bekannte Positionen", knownPositions]);
+  } else if (typeof model.knownPositionMemoryCount === "number") {
+    rows.push(["Bekannte Positionen", String(model.knownPositionMemoryCount)]);
+  }
+  const remoteBeliefs = Array.isArray(model.remoteCardBelief) ? model.remoteCardBelief.length : undefined;
+  if (remoteBeliefs !== undefined) rows.push(["Remote-Hypothesen", String(remoteBeliefs)]);
+  const remoteCandidates = aiDecisionDebugRecordList(model.hiddenRemoteCandidateMemory);
+  if (remoteCandidates.length > 0) {
+    rows.push([
+      "Remote-Kandidaten",
+      remoteCandidates
+        .slice(0, 3)
+        .map((entry) => {
+          const candidates = aiDecisionDebugCardList(entry.candidateCards, 5) || `${String(entry.candidateCount ?? 0)} Kandidaten`;
+          const scope = entry.exhaustive === true ? "vollständig" : "offen";
+          return `${String(entry.serverId ?? "remote")}: ${candidates} · ${scope} · ${String(entry.agendaCandidateCount ?? 0)} Agenda · ${String(entry.relevantTrashCandidateCount ?? 0)} Trash`;
+        })
+        .join(" · ")
+    ]);
+  }
+  const runnerAggression = aiDecisionDebugRecord(model.runnerAggressionMemory);
+  if (runnerAggression) {
+    rows.push([
+      "Runner-Runs",
+      `${String(runnerAggression.runEvents ?? 0)} gesamt · ${String(runnerAggression.centralRuns ?? 0)} zentral · ${String(runnerAggression.remoteRuns ?? 0)} remote`
+    ]);
+  }
+  const threat = aiDecisionDebugRecord(model.runnerThreatModel);
+  if (threat) {
+    rows.push([
+      "Runner-Druck",
+      `HQ ${aiDecisionDebugPercent(threat.hqPressure)} · R&D ${aiDecisionDebugPercent(threat.rndPressure)} · Remote ${aiDecisionDebugPercent(threat.remotePressure)}`
+    ]);
+  }
+  if (typeof model.hqAgendaDensityEstimate === "number") rows.push(["HQ-Agenda-Schätzung", aiDecisionDebugPercent(model.hqAgendaDensityEstimate)]);
+  if (typeof model.rndValueEstimate === "number") rows.push(["R&D-Wert-Schätzung", aiDecisionDebugPercent(model.rndValueEstimate)]);
+  if (typeof model.corpCreditReserveInterpretation === "string") rows.push(["Korp-Creditreserve", model.corpCreditReserveInterpretation]);
+  return rows;
+}
+
+function aiDecisionDebugCardLabel(entry: Record<string, unknown> | undefined): string {
+  if (!entry) return "";
+  return typeof entry.title === "string"
+    ? entry.title
+    : typeof entry.definitionId === "string"
+      ? entry.definitionId
+      : "";
+}
+
+function aiDecisionDebugCardList(value: unknown, limit: number): string {
+  const entries = aiDecisionDebugRecordList(value).slice(0, limit);
+  if (entries.length === 0) return "";
+  const labels = entries.map((entry) => {
+    const label = aiDecisionDebugCardLabel(entry) || "?";
+    const count = typeof entry.count === "number" && entry.count > 1 ? ` x${entry.count}` : "";
+    const type = typeof entry.type === "string" ? ` (${entry.type})` : "";
+    return `${label}${count}${type}`;
+  });
+  const remainder = aiDecisionDebugRecordList(value).length - entries.length;
+  return remainder > 0 ? `${labels.join(", ")} +${remainder}` : labels.join(", ");
+}
+
+function aiDecisionDebugPositionCardList(value: unknown, limit: number): string {
+  const entries = aiDecisionDebugRecordList(value).slice(0, limit);
+  if (entries.length === 0) return "";
+  const labels = entries.map((entry) => {
+    const position =
+      typeof entry.position === "string"
+        ? entry.position
+        : [entry.zone, entry.positionKey].filter((part): part is string => typeof part === "string" && part.length > 0).join("/");
+    const label = aiDecisionDebugCardLabel(entry) || "?";
+    return position ? `${position}: ${label}` : label;
+  });
+  const remainder = aiDecisionDebugRecordList(value).length - entries.length;
+  return remainder > 0 ? `${labels.join(" · ")} · +${remainder}` : labels.join(" · ");
+}
+
+function aiDecisionDebugRecord(value: unknown): Record<string, unknown> | undefined {
+  return value && typeof value === "object" && !Array.isArray(value) ? value as Record<string, unknown> : undefined;
+}
+
+function aiDecisionDebugPercent(value: unknown): string {
+  return typeof value === "number" && Number.isFinite(value) ? `${Math.round(value * 100)}%` : "-";
+}
+
 function AiDecisionDebugChips({ title, items, tone = "default" }: { title: string; items: string[]; tone?: "default" | "warning" | "muted" }) {
   if (items.length === 0) return null;
   return (
     <div className={`aiDecisionDebugSection ${tone}`}>
       <strong>{title}</strong>
       <div className="aiDecisionDebugChipRow">
-        {items.map((item) => <span key={item}>{item}</span>)}
+        {items.map((item, index) => <span key={`${item}:${index}`}>{item}</span>)}
       </div>
     </div>
   );

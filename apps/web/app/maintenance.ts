@@ -122,9 +122,11 @@ export type MaintenanceAiTraceActionRow = {
   label: string;
   selected: boolean;
   debugSelected: boolean;
+  excluded: boolean;
   source: string;
   priority: string;
   metrics: string[];
+  scoreRows: Array<[string, string]>;
   reason: string;
 };
 
@@ -419,6 +421,7 @@ export function aiTraceActionRows(detail: Record<string, unknown>, limit = 8): M
       const sourceTitle = typeof action.sourceTitle === "string" ? action.sourceTitle : "";
       const rawLabel = typeof action.label === "string" ? action.label : actionType;
       const debugSelected = action.selected === true;
+      const excluded = action.excluded === true;
       const selected = appliedActionId.length > 0 ? actionId === appliedActionId : trustDebugSelected && debugSelected;
       const debugOnlySelection = debugSelected && !selected;
       return {
@@ -427,10 +430,16 @@ export function aiTraceActionRows(detail: Record<string, unknown>, limit = 8): M
         label: aiTraceActionLabel(rawLabel, actionType, sourceTitle, economy),
         selected,
         debugSelected,
+        excluded,
         source: sourceTitle || (typeof action.source === "string" ? action.source : "-"),
-        priority: typeof action.priority === "number" && Number.isFinite(action.priority) ? action.priority.toFixed(0) : "-",
+        priority: excluded ? "-" : typeof action.priority === "number" && Number.isFinite(action.priority) ? action.priority.toFixed(0) : "-",
         metrics: aiTraceActionMetrics(economy),
-        reason: debugOnlySelection ? "Debug-Auswahl, nicht ausgeführt" : aiTraceActionReason(selected ? action.whyChosen : action.whyNot)
+        scoreRows: aiTraceScoreRows(action, 12),
+        reason: excluded
+          ? aiTraceExcludedActionReason(action.whyNot)
+          : debugOnlySelection
+            ? "Debug-Auswahl, nicht ausgeführt"
+            : aiTraceActionReason(selected ? action.whyChosen : action.whyNot)
       };
     })
     .filter((entry): entry is MaintenanceAiTraceActionRow => Boolean(entry));
@@ -511,6 +520,15 @@ function aiTraceActionMetrics(economy: Record<string, unknown> | undefined): str
 function aiTraceActionReason(value: unknown): string {
   if (!Array.isArray(value)) return "-";
   return value.find((entry): entry is string => typeof entry === "string") ?? "-";
+}
+
+function aiTraceExcludedActionReason(value: unknown): string {
+  if (!Array.isArray(value)) return "Ausgeschlossen";
+  const readable = value.find((entry): entry is string => typeof entry === "string" && !entry.startsWith("semantic_excluded:"));
+  const marker = value.find((entry): entry is string => typeof entry === "string" && entry.startsWith("semantic_excluded:"));
+  if (readable) return `Ausgeschlossen · ${readable}`;
+  if (marker) return `Ausgeschlossen · ${marker.slice("semantic_excluded:".length)}`;
+  return "Ausgeschlossen";
 }
 
 function numberField(record: Record<string, unknown>, key: string): number | undefined {

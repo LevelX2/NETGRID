@@ -16620,6 +16620,95 @@ describe("V1.4.2 belief state and opponent model", () => {
     );
   });
 
+  it("names fair known cards and remote candidates in Runner DecisionDebug memory", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "ai-decision-debug-known-card-names" }),
+    );
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+
+    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+    const knownDebug = chooseRunnerAction({
+      ...baseInput,
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticHqPrivateLookEvent("ai-debug-known-hq", 100, [
+          "simple_agenda",
+          "simple_economy_operation",
+        ]),
+        syntheticCentralAccessEvent("ai-debug-known-rd", 101, "rd", "simple_agenda"),
+      ],
+    }).decisionDebug;
+    const knownModel = knownDebug?.opponentModel as Record<string, any> | undefined;
+
+    expect(knownModel?.hqHandMemory?.knownCards).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          definitionId: "simple_agenda",
+          title: "Simple Agenda",
+          type: "agenda",
+          count: 1,
+        }),
+        expect.objectContaining({
+          definitionId: "simple_economy_operation",
+          title: "Simple Economy Operation",
+          type: "operation",
+          count: 1,
+        }),
+      ]),
+    );
+    expect(knownModel?.rndTopFreshness?.knownTopCard).toMatchObject({
+      definitionId: "simple_agenda",
+      title: "Simple Agenda",
+      type: "agenda",
+    });
+    expect(knownDebug?.facts).toContain("revealed_opponent_card:Simple Agenda");
+
+    const remoteDebug = chooseRunnerAction({
+      ...baseInput,
+      playerView: {
+        ...baseInput.playerView,
+        opponent: {
+          ...baseInput.playerView.opponent,
+          handCount: 1,
+        },
+      },
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticHqPrivateLookEvent("ai-debug-remote-known-hq", 100, [
+          "simple_agenda",
+          "simple_economy_operation",
+        ]),
+        syntheticPlanActionEvent("ai-debug-remote-install", 101, "corp", "install_card", "remote_1"),
+      ],
+    }).decisionDebug;
+    const remoteModel = remoteDebug?.opponentModel as Record<string, any> | undefined;
+
+    expect(remoteModel?.hiddenRemoteCandidateMemory?.[0]).toMatchObject({
+      serverId: "remote_1",
+      candidateCount: 2,
+      agendaCandidateCount: 1,
+      exhaustive: true,
+      candidateCards: expect.arrayContaining([
+        expect.objectContaining({
+          definitionId: "simple_agenda",
+          title: "Simple Agenda",
+          count: 1,
+        }),
+        expect.objectContaining({
+          definitionId: "simple_economy_operation",
+          title: "Simple Economy Operation",
+          count: 1,
+        }),
+      ]),
+    });
+    expect(JSON.stringify(remoteDebug)).not.toMatch(
+      /privatePayload|cardInstances|fullGameState|sessionToken|reconnectToken|joinToken|decklist|hidden-card/i,
+    );
+  });
+
   it("uses Semantic Runtime actual actions in DecisionDebug instead of legacy plan winners", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({ seed: "semantic-runtime-debug-actual-action" }),
@@ -16652,6 +16741,7 @@ describe("V1.4.2 belief state and opponent model", () => {
       actionType: actualAction?.type,
       selected: true,
       whyChosen: ["semantic_runtime_actual"],
+      scoreBreakdown: expect.any(Array),
     });
     expect(decision.decisionDebug?.actionAlternatives?.length).toBe(
       Math.min(input.legalActions.length, 32),
@@ -16659,6 +16749,17 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(
       new Set(decision.decisionDebug?.actionAlternatives?.map((entry) => entry.actionId)),
     ).toEqual(new Set(input.legalActions.slice(0, 32).map((action) => action.actionId)));
+    const actionAlternativeById = new Map(
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [entry.actionId, entry]) ?? [],
+    );
+    const hqRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "hq");
+    const rdRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    if (hqRun && rdRun) {
+      const hqAlternative = actionAlternativeById.get(hqRun.actionId);
+      const rdAlternative = actionAlternativeById.get(rdRun.actionId);
+      expect(rdAlternative?.priority).toBeGreaterThan(hqAlternative?.priority ?? 0);
+      expect(rdAlternative?.scoreBreakdown?.some((component) => component.key === "runner_rnd_unknown_top")).toBe(true);
+    }
     expect(decision.decisionDebug?.rankedAlternatives?.[0]).toMatchObject({
       selectedActionType: actualAction?.type,
       whyNot: ["selected_action"],
@@ -16671,6 +16772,204 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /privatePayload|cardInstances|fullGameState|sessionToken|reconnectToken|joinToken|decklist|Hidden Priority Agenda|hidden-card/i,
     );
+  });
+
+  it("penalizes repeated semantic HQ runs and explains the run target score factors", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "semantic-runtime-run-target-memory" }),
+    );
+    const eventTail: PublicGameEvent[] = [1, 2, 3].map((index) => ({
+      eventId: `semantic_hq_repeat_${index}`,
+      type: "action",
+      stateVersionBefore: state.stateVersion + index,
+      stateVersionAfter: state.stateVersion + index + 1,
+      stateHashAfter: `fnv1a:semantic_hq_repeat_${index}`,
+      publicPayload: {
+        actor: "runner",
+        actionType: "start_run",
+        targetServerId: "hq"
+      }
+    }));
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+      eventTail
+    });
+
+    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+    const decision = chooseRunnerAction(input);
+    const alternatives = new Map(
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [entry.actionId, entry]) ?? [],
+    );
+    const hqRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "hq");
+    const rdRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    expect(hqRun).toBeDefined();
+    expect(rdRun).toBeDefined();
+    if (!hqRun || !rdRun) throw new Error("Expected HQ and R&D run actions");
+    const hqAlternative = alternatives.get(hqRun.actionId);
+    const rdAlternative = alternatives.get(rdRun.actionId);
+    expect(hqAlternative?.scoreBreakdown?.some((component) => component.key === "runner_recent_same_server_runs" && component.value < 0)).toBe(true);
+    expect(rdAlternative?.priority).toBeGreaterThan(hqAlternative?.priority ?? 0);
+  });
+
+  it("drops empty Archives far below meaningful semantic run targets", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "semantic-runtime-empty-archives-low-value" }),
+    );
+    state.corp.archives = [];
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const archivesRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "archives");
+    const hqRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "hq");
+    const rdRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    const gainCredit = input.legalActions.find((action) => action.type === "gain_credit");
+    expect(archivesRun).toBeDefined();
+    expect(hqRun).toBeDefined();
+    expect(rdRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!archivesRun || !hqRun || !rdRun || !gainCredit) throw new Error("Missing empty Archives fixture actions");
+
+    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [archivesRun, hqRun, rdRun, gainCredit],
+    });
+    const alternatives = new Map(
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [entry.actionId, entry]) ?? [],
+    );
+    const archivesAlternative = alternatives.get(archivesRun.actionId);
+    const hqAlternative = alternatives.get(hqRun.actionId);
+    const rdAlternative = alternatives.get(rdRun.actionId);
+    const gainAlternative = alternatives.get(gainCredit.actionId);
+
+    expect(archivesAlternative?.excluded).toBe(true);
+    expect(archivesAlternative?.priority).toBeUndefined();
+    expect(archivesAlternative?.whyNot).toContain("semantic_excluded:archives_empty");
+    expect(archivesAlternative?.scoreBreakdown?.some((component) => component.key === "semantic_action_excluded" && component.reason === "no_archives_cards")).toBe(true);
+    expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(gainAlternative?.rank ?? 0);
+    expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(hqAlternative?.rank ?? 0);
+    expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(rdAlternative?.rank ?? 0);
+  });
+
+  it("drops fully known non-agenda Archives below basic semantic actions", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "semantic-runtime-known-archives-low-value" }),
+    );
+    const assetId = moveCorpCardToArchives(state, "simple_economy_asset", true);
+    keepOnlyCorpArchivesCards(state, [assetId]);
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const archivesRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "archives");
+    const gainCredit = input.legalActions.find((action) => action.type === "gain_credit");
+    const drawCard = input.legalActions.find((action) => action.type === "draw_card");
+    expect(archivesRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    expect(drawCard).toBeDefined();
+    if (!archivesRun || !gainCredit || !drawCard) throw new Error("Missing known Archives fixture actions");
+
+    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [archivesRun, gainCredit, drawCard],
+    });
+    const alternatives = new Map(
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [entry.actionId, entry]) ?? [],
+    );
+    const archivesAlternative = alternatives.get(archivesRun.actionId);
+    const gainAlternative = alternatives.get(gainCredit.actionId);
+    const drawAlternative = alternatives.get(drawCard.actionId);
+
+    expect(archivesAlternative?.excluded).toBe(true);
+    expect(archivesAlternative?.priority).toBeUndefined();
+    expect(archivesAlternative?.whyNot).toContain("semantic_excluded:archives_known_no_agenda");
+    expect(archivesAlternative?.scoreBreakdown?.some((component) => component.key === "semantic_action_excluded" && component.reason === "known_non_agenda:1")).toBe(true);
+    expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(gainAlternative?.rank ?? 0);
+    expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(drawAlternative?.rank ?? 0);
+    expect(decision.actionId).not.toBe(archivesRun.actionId);
+  });
+
+  it("drops remote runs behind known rezzed end-the-run ICE when no installed breaker can reach access", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "semantic-runtime-blocked-remote-wall-no-breaker",
+        runnerDeck: {
+          id: "semantic_blocked_remote_runner",
+          name: "Semantic Blocked Remote Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "simple_fracter", quantity: 1 },
+            { id: "simple_economy_event", quantity: 8 },
+            { id: "simple_run_event", quantity: 4 },
+          ],
+        },
+        corpDeck: {
+          id: "semantic_blocked_remote_corp",
+          name: "Semantic Blocked Remote Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_279_wall-of-static", quantity: 1 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 5;
+    state.corp.credits = 5;
+    moveRunnerCardToGrip(state, "simple_fracter");
+    ensureRemoteServer(state, "remote_1");
+    const wallId = putCorpIceOnServer(state, "remote_1", "onr_v1_279_wall-of-static");
+    state.cardInstances[wallId] = {
+      ...state.cardInstances[wallId]!,
+      faceup: true,
+      rezzed: true,
+    };
+    putCorpRootInRemote(state, "simple_agenda", 0);
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const remoteRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    const breakerInstall = input.legalActions.find(
+      (action) => action.type === "install_card" && sourceDefinition(state, action) === "simple_fracter",
+    );
+    const gainCredit = input.legalActions.find((action) => action.type === "gain_credit");
+    const drawCard = input.legalActions.find((action) => action.type === "draw_card");
+    expect(remoteRun).toBeDefined();
+    expect(breakerInstall).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    expect(drawCard).toBeDefined();
+    if (!remoteRun || !breakerInstall || !gainCredit || !drawCard) {
+      throw new Error("Missing blocked remote semantic fixture actions");
+    }
+
+    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [remoteRun, breakerInstall, gainCredit, drawCard],
+    });
+    const alternatives = new Map(
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [entry.actionId, entry]) ?? [],
+    );
+    const remoteAlternative = alternatives.get(remoteRun.actionId);
+    const installAlternative = alternatives.get(breakerInstall.actionId);
+    const gainAlternative = alternatives.get(gainCredit.actionId);
+    const drawAlternative = alternatives.get(drawCard.actionId);
+
+    expect(remoteAlternative?.excluded).toBe(true);
+    expect(remoteAlternative?.priority).toBeUndefined();
+    expect(remoteAlternative?.whyNot).toContain("semantic_excluded:known_ice_path_no_access");
+    expect(remoteAlternative?.scoreBreakdown?.some((component) => component.key === "semantic_action_excluded" && component.reason?.includes("can_reach_access:false"))).toBe(true);
+    expect(remoteAlternative?.rank ?? 0).toBeGreaterThan(installAlternative?.rank ?? 0);
+    expect(remoteAlternative?.rank ?? 0).toBeGreaterThan(gainAlternative?.rank ?? 0);
+    expect(remoteAlternative?.rank ?? 0).toBeGreaterThan(drawAlternative?.rank ?? 0);
+    expect(decision.actionId).toBe(breakerInstall.actionId);
   });
 
   it("redacts forbidden DecisionDebug key and value patterns deterministically", () => {
@@ -16708,6 +17007,14 @@ describe("V1.4.2 belief state and opponent model", () => {
           sourceTitle: "privatePayload",
           selected: false,
           priority: 42,
+          scoreBreakdown: [
+            {
+              key: "decklist",
+              label: "Decklist",
+              value: 9,
+              reason: "hidden-card",
+            },
+          ],
           whyNot: ["decklist"],
           economy: {
             economyKind: "pool_build",
@@ -16753,6 +17060,14 @@ describe("V1.4.2 belief state and opponent model", () => {
             "label": "[redacted-debug-value]",
             "priority": 42,
             "rank": 1,
+            "scoreBreakdown": [
+              {
+                "key": "[redacted-debug-value]",
+                "label": "[redacted-debug-value]",
+                "reason": "[redacted-debug-value]",
+                "value": 9,
+              },
+            ],
             "selected": false,
             "source": "visible_card",
             "sourceTitle": "[redacted-debug-value]",

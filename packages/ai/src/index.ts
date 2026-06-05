@@ -41,7 +41,9 @@ import { chooseRunnerPlanAction, hasRunnerPlanAction } from "./runner-plans";
 import {
   beliefDebugSummary,
   reconstructBeliefState,
+  type CorpOpponentModel,
   type RndTopFreshnessMemory,
+  type RunnerOpponentModel,
 } from "./belief-state";
 import {
   buildDeckDoctrineProfile,
@@ -83,6 +85,7 @@ import {
   type AiDecision,
   type AiDecisionDebug,
   type AiDecisionInput,
+  type AiDecisionScoreComponent,
   type AiDifficulty,
   type CardInstanceId,
   type DeckDefinition,
@@ -3236,6 +3239,13 @@ export function chooseRunnerBaselineAction(input: AiDecisionInput): AiDecision {
 type SemanticRuntimeChoice = RankedChoice & {
   action: LegalAction;
   scopeId: string;
+  exclusion?: SemanticRuntimeExclusion;
+};
+
+type SemanticRuntimeExclusion = {
+  key: string;
+  label: string;
+  reason: string;
 };
 
 function chooseSemanticRuntimeAction(
@@ -3252,13 +3262,15 @@ function chooseSemanticRuntimeAction(
     };
   }
   const choices = semanticRuntimeChoices(input);
-  const choice = choices.find((candidate) => candidate.score > 0);
+  const choice =
+    choices.find((candidate) => !candidate.exclusion && candidate.score > 0) ??
+    choices.find((candidate) => !candidate.exclusion);
   if (!choice) {
     return {
       ...legacyDecision,
       evidence: [
         ...(legacyDecision.evidence ?? []),
-        "semantic_runtime_no_rankable_legal_action",
+        "semantic_runtime_no_non_excluded_legal_action",
       ],
     };
   }
@@ -3306,14 +3318,16 @@ function semanticRuntimeChoices(input: AiDecisionInput): SemanticRuntimeChoice[]
     .map((action) => scoreSemanticRuntimeAction(input, action))
     .sort(
       (left, right) =>
-        right.score - left.score || compareAction(left.action, right.action),
+        Number(Boolean(left.exclusion)) - Number(Boolean(right.exclusion)) ||
+        right.score - left.score ||
+        compareAction(left.action, right.action),
     );
 }
 
 function chooseSemanticRuntimeChoice(
   input: AiDecisionInput,
 ): SemanticRuntimeChoice | undefined {
-  return semanticRuntimeChoices(input).find((candidate) => candidate.score > 0);
+  return semanticRuntimeChoices(input).find((candidate) => !candidate.exclusion && candidate.score > 0);
 }
 
 function scoreSemanticRuntimeAction(
@@ -3321,12 +3335,13 @@ function scoreSemanticRuntimeAction(
   action: LegalAction,
 ): SemanticRuntimeChoice {
   const scopeId = semanticRuntimeScopeForAction(input, action);
-  const semanticScore = semanticRuntimeBaseScore(input, action, scopeId);
-  const costPenalty = actionCreditCost(action) * 35;
-  const score = semanticScore - costPenalty;
+  const exclusion = semanticRuntimeActionExclusion(input, action);
+  const scoreBreakdown = semanticRuntimeScoreBreakdown(input, action, scopeId, exclusion);
+  const score = semanticRuntimeScoreFromComponents(scoreBreakdown);
   return {
     action,
     scopeId,
+    ...(exclusion ? { exclusion } : {}),
     reasonCode: `${input.side}.semantic.${scopeId}`,
     explanation: semanticRuntimeExplanation(input.side, scopeId),
     score,
@@ -3335,6 +3350,13 @@ function scoreSemanticRuntimeAction(
       `semantic_scope:${scopeId}`,
       `semantic_score:${score}`,
       `credit_cost:${actionCreditCost(action)}`,
+      ...(exclusion
+        ? [
+            "semantic_excluded:true",
+            `semantic_exclusion:${exclusion.key}`,
+            `semantic_exclusion_reason:${exclusion.reason}`,
+          ]
+        : []),
       ...semanticRuntimeEvidence(input, action, scopeId),
     ],
     confidence: semanticRuntimeConfidence(scopeId, score),
@@ -3351,6 +3373,7 @@ function semanticRuntimeDecisionDebug(
   const legacyDebug = legacyDecision.decisionDebug;
   const legacyPlanKind = legacyDebug?.planKind;
   const legacyDebugSelectedActionType = legacyDebug?.selectedActionType;
+  const memoryDebug = semanticRuntimeMemoryDebug(input);
   const actionTypesDiffer =
     (legacyActionType !== undefined && legacyActionType !== selected.action.type) ||
     (legacyDebugSelectedActionType !== undefined && legacyDebugSelectedActionType !== selected.action.type);
@@ -3375,7 +3398,7 @@ function semanticRuntimeDecisionDebug(
     ...(selected.confidence !== undefined ? { confidence: selected.confidence } : {}),
     visibleReasons: scrubEvidence(selected.evidence).slice(0, 8),
     rankedAlternatives: semanticRuntimeRankedAlternatives(input, rankedChoices, selected.action.actionId),
-    actionAlternatives: semanticRuntimeActionAlternatives(rankedChoices, selected.action.actionId),
+    actionAlternatives: semanticRuntimeActionAlternatives(input, rankedChoices, selected.action.actionId),
     scoreBreakdown: semanticRuntimeScoreBreakdown(input, selected.action, selected.scopeId),
     whyNot: legacyActionType && legacyActionType !== selected.action.type
       ? [`legacy_reference_action_type:${legacyActionType}`]
@@ -3384,13 +3407,26 @@ function semanticRuntimeDecisionDebug(
       `semantic_runtime_scope:${selected.scopeId}`,
       ...(legacyPlanKind ? [`legacy_reference_plan:${legacyPlanKind}`] : [])
     ],
+    ...(memoryDebug.memoryVersion ? { memoryVersion: memoryDebug.memoryVersion } : {}),
+    ...(memoryDebug.facts.length > 0 ? { facts: memoryDebug.facts } : {}),
+    ...(memoryDebug.hypotheses.length > 0 ? { hypotheses: memoryDebug.hypotheses } : {}),
+    ...(memoryDebug.invalidations.length > 0 ? { invalidations: memoryDebug.invalidations } : {}),
+    ...(memoryDebug.beliefUncertainty.length > 0 ? { beliefUncertainty: memoryDebug.beliefUncertainty } : {}),
+    ...(memoryDebug.opponentModel ? { opponentModel: memoryDebug.opponentModel } : {}),
     ...(warnings.length > 0 ? { warnings } : {}),
     detailSections: [
       {
         id: "semantic_runtime",
         title: "Semantic Runtime",
         items: detailItems
-      }
+      },
+      ...(memoryDebug.items.length > 0
+        ? [{
+            id: "semantic_memory",
+            title: "KI-Speicher",
+            items: memoryDebug.items
+          }]
+        : [])
     ],
     evidence: scrubEvidence([
       ...selected.evidence,
@@ -3402,12 +3438,215 @@ function semanticRuntimeDecisionDebug(
   };
 }
 
+function semanticRuntimeMemoryDebug(input: AiDecisionInput): {
+  memoryVersion: string;
+  facts: string[];
+  hypotheses: string[];
+  invalidations: string[];
+  beliefUncertainty: string[];
+  opponentModel?: Record<string, unknown>;
+  items: string[];
+} {
+  const belief = reconstructBeliefState(input);
+  const facts = belief.entries
+    .filter((entry) => entry.kind === "public_fact" || entry.kind === "revealed_opponent_fact")
+    .slice(0, 6)
+    .map((entry) => semanticRuntimeBeliefEntrySummary(entry.subject));
+  const hypotheses = belief.entries
+    .filter((entry) => entry.kind === "hypothesis" || entry.kind === "unknown")
+    .slice(0, 6)
+    .map((entry) => `${semanticRuntimeBeliefEntrySummary(entry.subject)}:${round(entry.confidence)}`);
+  const opponentModel = input.side === "runner"
+    ? semanticRuntimeRunnerOpponentMemorySummary(belief.runnerOpponentModel)
+    : semanticRuntimeCorpOpponentMemorySummary(belief.corpOpponentModel);
+  const items = [
+    `memory_version:${belief.version}`,
+    ...(input.side === "runner"
+      ? semanticRuntimeRunnerMemoryItems(belief.runnerOpponentModel)
+      : semanticRuntimeCorpMemoryItems(belief.corpOpponentModel)),
+    ...belief.uncertainty.slice(0, 4).map((entry) => `uncertainty:${entry}`)
+  ];
+  return {
+    memoryVersion: belief.version,
+    facts,
+    hypotheses,
+    invalidations: belief.invalidationLog.slice(0, 6),
+    beliefUncertainty: belief.uncertainty.slice(0, 6),
+    ...(opponentModel ? { opponentModel } : {}),
+    items
+  };
+}
+
+function semanticRuntimeBeliefEntrySummary(subject: string): string {
+  if (subject.startsWith("own_private_card:")) return "own_private_card";
+  if (subject.startsWith("public_card:")) {
+    const parts = subject.split(":");
+    return `public_card:${parts[1] ?? "server"}`;
+  }
+  if (subject.startsWith("revealed_opponent_card:")) {
+    const definitionId = subject.slice("revealed_opponent_card:".length);
+    return `revealed_opponent_card:${semanticRuntimeCardLabel(definitionId)}`;
+  }
+  if (subject.startsWith("server_shape:")) return subject;
+  if (subject.startsWith("remote_card_hypothesis:")) {
+    const parts = subject.split(":");
+    return `remote_card_hypothesis:${parts[1] ?? "remote"}:${parts[2] ?? "unknown"}`;
+  }
+  if (subject.startsWith("unrezzed_ice_risk:")) return subject;
+  if (subject.startsWith("opponent_hidden_hand_cards:")) return subject;
+  if (subject.startsWith("unknown_remote_root_cards:")) return subject;
+  return subject.replace(/:[a-z0-9_./-]+$/i, "");
+}
+
+function semanticRuntimeCardLabel(definitionId: string): string {
+  return (
+    RUNTIME_CARDS[definitionId]?.title ??
+    DEMO_CARDS_BY_ID[definitionId]?.title ??
+    definitionId
+  );
+}
+
+function semanticRuntimeKnownCardSummary(definitionId: string): {
+  definitionId: string;
+  title: string;
+  type?: string;
+} {
+  const runtimeDefinition = RUNTIME_CARDS[definitionId];
+  const demoDefinition = DEMO_CARDS_BY_ID[definitionId];
+  const type = runtimeDefinition?.type ?? demoDefinition?.type;
+  const summary = {
+    definitionId,
+    title: runtimeDefinition?.title ?? demoDefinition?.title ?? definitionId,
+  };
+  return type ? { ...summary, type } : summary;
+}
+
+function semanticRuntimeKnownDefinitionCounts(
+  definitionIds: string[],
+): Array<{ definitionId: string; title: string; type?: string; count: number }> {
+  const counts = new Map<string, number>();
+  for (const definitionId of definitionIds) {
+    counts.set(definitionId, (counts.get(definitionId) ?? 0) + 1);
+  }
+  return [...counts.entries()]
+    .sort(([left], [right]) => semanticRuntimeCardLabel(left).localeCompare(semanticRuntimeCardLabel(right)))
+    .map(([definitionId, count]) => ({
+      ...semanticRuntimeKnownCardSummary(definitionId),
+      count,
+    }));
+}
+
+function semanticRuntimeRunnerOpponentMemorySummary(
+  model: RunnerOpponentModel | undefined,
+): Record<string, unknown> | undefined {
+  if (!model) return undefined;
+  return {
+    corpPlanEstimate: model.corpPlanEstimate,
+    hqAgendaDensityEstimate: round(model.hqAgendaDensityEstimate),
+    rndValueEstimate: round(model.rndValueEstimate),
+    corpCreditReserveInterpretation: model.corpCreditReserveInterpretation,
+    rndTopFreshness: {
+      knownToRunner: model.rndTopFreshness.knownToRunner,
+      freshness: model.rndTopFreshness.freshness,
+      freshenedByRunnerAccess: model.rndTopFreshness.freshenedByRunnerAccess === true,
+      ...(model.rndTopFreshness.knownTopDefinitionId
+        ? { knownTopCard: semanticRuntimeKnownCardSummary(model.rndTopFreshness.knownTopDefinitionId) }
+        : {}),
+      ...(model.rndTopFreshness.knownSequenceDefinitionIds && model.rndTopFreshness.knownSequenceDefinitionIds.length > 0
+        ? {
+            knownSequence: model.rndTopFreshness.knownSequenceDefinitionIds
+              .slice(0, 6)
+              .map((definitionId, index) => ({
+                position: index === 0 ? "top" : `top+${index}`,
+                ...semanticRuntimeKnownCardSummary(definitionId)
+              }))
+          }
+        : {}),
+      invalidationReasons: model.rndTopFreshness.invalidationReasons.slice(0, 4)
+    },
+    hqHandMemory: {
+      handCount: model.hqHandMemory.handCount,
+      knownCount: model.hqHandMemory.knownCount,
+      allCardsKnown: model.hqHandMemory.allCardsKnown,
+      knownCards: semanticRuntimeKnownDefinitionCounts(model.hqHandMemory.knownDefinitions),
+      invalidationReasons: model.hqHandMemory.invalidationReasons.slice(0, 4)
+    },
+    remoteCardBelief: model.remoteCardBelief.slice(0, 6).map((entry) => ({
+      serverId: entry.serverId,
+      hypothesis: entry.hypothesis,
+      confidence: round(entry.confidence)
+    })),
+    hiddenRemoteCandidateMemory: model.hiddenRemoteCandidateMemory.slice(0, 6).map((entry) => ({
+      serverId: entry.serverId,
+      candidateCount: entry.candidateCount,
+      agendaCandidateCount: entry.agendaCandidateCount,
+      relevantTrashCandidateCount: entry.relevantTrashCandidateCount,
+      candidateCards: entry.candidateDefinitions.slice(0, 8).map((candidate) => ({
+        ...semanticRuntimeKnownCardSummary(candidate.definitionId),
+        count: candidate.count
+      })),
+      exhaustive: entry.exhaustive
+    })),
+    knownPositionMemoryCount: model.knownPositionMemory.length,
+    knownPositionMemory: model.knownPositionMemory.slice(0, 8).map((entry) => ({
+      zone: entry.zone,
+      positionKey: entry.positionKey,
+      sourceKind: entry.sourceKind,
+      ...semanticRuntimeKnownCardSummary(entry.definitionId)
+    })),
+    unrezzedIceRiskModel: model.unrezzedIceRiskModel.slice(0, 6).map((entry) => ({
+      serverId: entry.serverId,
+      risk: round(entry.risk),
+      basis: entry.basis.slice(0, 3)
+    }))
+  };
+}
+
+function semanticRuntimeCorpOpponentMemorySummary(
+  model: CorpOpponentModel | undefined,
+): Record<string, unknown> | undefined {
+  if (!model) return undefined;
+  return {
+    runnerThreatModel: model.runnerThreatModel,
+    runnerAggressionMemory: model.runnerAggressionMemory,
+    breakerAvailabilityEstimate: model.breakerAvailabilityEstimate,
+    remoteContestProbability: round(model.remoteContestProbability),
+    hqPressureEstimate: round(model.hqPressureEstimate),
+    rndPressureEstimate: round(model.rndPressureEstimate)
+  };
+}
+
+function semanticRuntimeRunnerMemoryItems(model: RunnerOpponentModel | undefined): string[] {
+  if (!model) return [];
+  return [
+    `rnd_top:${model.rndTopFreshness.freshness}`,
+    `hq_known:${model.hqHandMemory.knownCount}/${model.hqHandMemory.handCount}`,
+    `hq_all_known:${model.hqHandMemory.allCardsKnown}`,
+    `remote_beliefs:${model.remoteCardBelief.length}`,
+    `remote_candidate_sets:${model.hiddenRemoteCandidateMemory.length}`,
+    `known_positions:${model.knownPositionMemory.length}`,
+    `corp_credit_reserve:${model.corpCreditReserveInterpretation}`
+  ];
+}
+
+function semanticRuntimeCorpMemoryItems(model: CorpOpponentModel | undefined): string[] {
+  if (!model) return [];
+  return [
+    `runner_runs:${model.runnerAggressionMemory.runEvents}`,
+    `runner_remote_runs:${model.runnerAggressionMemory.remoteRuns}`,
+    `runner_central_runs:${model.runnerAggressionMemory.centralRuns}`,
+    `runner_remote_pressure:${round(model.runnerThreatModel.remotePressure)}`,
+    `runner_hq_pressure:${round(model.hqPressureEstimate)}`,
+    `runner_rnd_pressure:${round(model.rndPressureEstimate)}`
+  ];
+}
+
 function semanticRuntimeRankedAlternatives(
   input: AiDecisionInput,
   rankedChoices: SemanticRuntimeChoice[],
   selectedActionId: string,
 ): NonNullable<AiDecisionDebug["rankedAlternatives"]> {
-  return rankedChoices.slice(0, 24).map((choice, index) => ({
+  return rankedChoices.filter((choice) => !choice.exclusion).slice(0, 24).map((choice, index) => ({
     rank: index + 1,
     planId: `semantic_runtime:${choice.scopeId}:${choice.action.type}`,
     planKind: choice.scopeId,
@@ -3416,12 +3655,13 @@ function semanticRuntimeRankedAlternatives(
     score: choice.score,
     ...(choice.confidence !== undefined ? { confidence: choice.confidence } : {}),
     visibleReasons: scrubEvidence(choice.evidence).slice(0, 4),
-    scoreBreakdown: semanticRuntimeScoreBreakdown(input, choice.action, choice.scopeId),
+    scoreBreakdown: semanticRuntimeScoreBreakdown(input, choice.action, choice.scopeId, choice.exclusion),
     whyNot: choice.action.actionId === selectedActionId ? ["selected_action"] : ["semantic_score_below_selected"]
   }));
 }
 
 function semanticRuntimeActionAlternatives(
+  input: AiDecisionInput,
   rankedChoices: SemanticRuntimeChoice[],
   selectedActionId: string,
 ): NonNullable<AiDecisionDebug["actionAlternatives"]> {
@@ -3434,10 +3674,15 @@ function semanticRuntimeActionAlternatives(
       label: choice.action.label,
       source: String(choice.action.source),
       selected,
-      priority: choice.score,
+      ...(choice.exclusion ? { excluded: true } : { priority: choice.score }),
+      scoreBreakdown: semanticRuntimeScoreBreakdown(input, choice.action, choice.scopeId, choice.exclusion),
       ...(selected
         ? { whyChosen: ["semantic_runtime_actual"] }
-        : { whyNot: ["semantic_score_below_selected"] })
+        : {
+            whyNot: choice.exclusion
+              ? [`semantic_excluded:${choice.exclusion.key}`, choice.exclusion.reason]
+              : ["semantic_score_below_selected"]
+          })
     };
   });
 }
@@ -3446,26 +3691,30 @@ function semanticRuntimeScoreBreakdown(
   input: AiDecisionInput,
   action: LegalAction,
   scopeId: string,
+  exclusion?: SemanticRuntimeExclusion,
 ): NonNullable<AiDecisionDebug["scoreBreakdown"]> {
   const typePriority = semanticRuntimeTypePriority(action.type);
-  const sideScore = input.side === "runner"
-    ? semanticRuntimeRunnerScore(input, action, scopeId)
-    : semanticRuntimeCorpScore(input, action, scopeId);
+  const contextComponents = input.side === "runner"
+    ? semanticRuntimeRunnerScoreComponents(input, action, scopeId)
+    : semanticRuntimeCorpScoreComponents(input, action, scopeId);
   const privateBonus = action.visibility === "private_to_actor" ? 25 : 0;
   const costPenalty = -(actionCreditCost(action) * 35);
   return [
     {
-      key: "semantic_type_priority",
-      label: "Action-Typ-Priorität",
-      value: typePriority,
-      reason: action.type
+        key: "semantic_type_priority",
+        label: "Action-Typ-Priorität",
+        value: typePriority,
+        reason: action.type
     },
-    {
-      key: "semantic_context_score",
-      label: "Board-Kontext",
-      value: sideScore,
-      reason: scopeId
-    },
+    ...(exclusion
+      ? [{
+          key: "semantic_action_excluded",
+          label: `Ausgeschlossen: ${exclusion.label}`,
+          value: 0,
+          reason: exclusion.reason
+        }]
+      : []),
+    ...contextComponents,
     ...(privateBonus !== 0
       ? [{
           key: "semantic_private_actor_bonus",
@@ -3481,6 +3730,66 @@ function semanticRuntimeScoreBreakdown(
       reason: String(actionCreditCost(action))
     }
   ];
+}
+
+function semanticRuntimeActionExclusion(
+  input: AiDecisionInput,
+  action: LegalAction,
+): SemanticRuntimeExclusion | undefined {
+  if (input.side !== "runner" || action.type !== "start_run") return undefined;
+  const serverId = semanticRuntimeServerId(action);
+  const server = input.playerView.servers.find((entry) => entry.id === serverId);
+  if (serverId === "archives") {
+    const archivesExclusion = semanticRuntimeRunnerArchivesExclusion(input, server);
+    if (archivesExclusion) return archivesExclusion;
+  }
+  if (!server) return undefined;
+  const assessment = assessKnownRezzedIcePath(
+    server.ice,
+    input.playerView.own.rig ?? [],
+    input.playerView.own.credits,
+    server.root,
+  );
+  if (assessment.assessedKnownIceCount <= 0 || assessment.canReachAccess) return undefined;
+  return {
+    key: "known_ice_path_no_access",
+    label: assessment.knownPathBlockedByUnbreakableIce
+      ? "Run-Ziel nicht erreichbar"
+      : "Run-Ziel nicht bezahlbar",
+    reason: semanticRuntimeKnownIcePathReason(assessment, server.id)
+  };
+}
+
+function semanticRuntimeRunnerArchivesExclusion(
+  input: AiDecisionInput,
+  server: AiDecisionInput["playerView"]["servers"][number] | undefined,
+): SemanticRuntimeExclusion | undefined {
+  const root = server?.root ?? [];
+  const knownRoot = root.filter((card) => card.known && typeof card.definitionId === "string");
+  const knownAgenda = knownRoot.some((card) => {
+    const definitionId = card.definitionId;
+    return card.type === "agenda" || (definitionId !== undefined && definitionTypeForMetrics(definitionId) === "agenda");
+  });
+  const hiddenArchivesCount = Math.max(0, input.playerView.opponent.discardCount - knownRoot.length);
+  if (knownAgenda || hiddenArchivesCount > 0) return undefined;
+  if (knownRoot.length === 0) {
+    return {
+      key: "archives_empty",
+      label: "Archives leer",
+      reason: "no_archives_cards"
+    };
+  }
+  return {
+    key: "archives_known_no_agenda",
+    label: "Archives bekannt ohne Agenda",
+    reason: `known_non_agenda:${knownRoot.length}`
+  };
+}
+
+function semanticRuntimeScoreFromComponents(
+  components: NonNullable<AiDecisionDebug["scoreBreakdown"]>,
+): number {
+  return components.reduce((sum, component) => sum + component.value, 0);
 }
 
 function semanticRuntimeScopeForAction(
@@ -3543,14 +3852,9 @@ function semanticRuntimeBaseScore(
   action: LegalAction,
   scopeId: string,
 ): number {
-  let score = semanticRuntimeTypePriority(action.type);
-  if (input.side === "runner") {
-    score += semanticRuntimeRunnerScore(input, action, scopeId);
-  } else {
-    score += semanticRuntimeCorpScore(input, action, scopeId);
-  }
-  if (action.visibility === "private_to_actor") score += 25;
-  return score;
+  return semanticRuntimeScoreFromComponents(
+    semanticRuntimeScoreBreakdown(input, action, scopeId),
+  );
 }
 
 function semanticRuntimeTypePriority(type: LegalAction["type"]): number {
@@ -3614,39 +3918,429 @@ function semanticRuntimeRunnerScore(
   action: LegalAction,
   scopeId: string,
 ): number {
-  let score = 0;
+  return semanticRuntimeScoreFromComponents(
+    semanticRuntimeRunnerScoreComponents(input, action, scopeId),
+  );
+}
+
+function semanticRuntimeRunnerScoreComponents(
+  input: AiDecisionInput,
+  action: LegalAction,
+  scopeId: string,
+): AiDecisionScoreComponent[] {
+  const components: AiDecisionScoreComponent[] = [];
   const credits = input.playerView.own.credits;
-  if (action.type === "remove_tag" && input.playerView.own.tags > 0) score += 900;
-  if (action.type === "gain_credit" && credits < 5) score += 700;
+  if (action.type === "remove_tag" && input.playerView.own.tags > 0) {
+    components.push({
+      key: "runner_tags_present",
+      label: "Tags entfernen",
+      value: 900,
+      reason: `tags:${input.playerView.own.tags}`
+    });
+  }
+  if (action.type === "gain_credit" && credits < 5) {
+    components.push({
+      key: "runner_low_credits",
+      label: "Credit-Bedarf",
+      value: 700,
+      reason: `credits:${credits}`
+    });
+  }
   if (action.type === "draw_card" && input.playerView.own.gripOrHq.length < 5) {
-    score += 550;
+    components.push({
+      key: "runner_low_hand",
+      label: "Handkarten-Bedarf",
+      value: 550,
+      reason: `hand:${input.playerView.own.gripOrHq.length}`
+    });
   }
   if (action.type === "install_card") {
     const roles = rolesForAction(input, action);
-    if (roles.some((role) => role.startsWith("breaker_"))) score += 750;
-    if (roles.some((role) => isRunnerEconomyRole(role))) score += 500;
-    if (roles.some((role) => isRunnerPressureRole(role))) score += 650;
+    if (roles.some((role) => role.startsWith("breaker_"))) {
+      components.push({
+        key: "runner_install_breaker",
+        label: "Breaker-Aufbau",
+        value: 750,
+        reason: "breaker_role"
+      });
+    }
+    if (roles.some((role) => isRunnerEconomyRole(role))) {
+      components.push({
+        key: "runner_install_economy",
+        label: "Economy-Aufbau",
+        value: 500,
+        reason: "economy_role"
+      });
+    }
+    if (roles.some((role) => isRunnerPressureRole(role))) {
+      components.push({
+        key: "runner_install_pressure",
+        label: "Druck-Aufbau",
+        value: 650,
+        reason: "pressure_role"
+      });
+    }
   }
   if (action.type === "start_run") {
     const serverId = semanticRuntimeServerId(action);
     const server = input.playerView.servers.find((entry) => entry.id === serverId);
-    if (serverId === "hq" || serverId === "rd") score += 550;
-    if (isRemoteServerTarget(serverId)) {
-      score += server?.root.some((card) => (card.advancementCounters ?? 0) > 0)
-        ? 950
-        : 250;
-      if ((server?.root.length ?? 0) === 0 && (server?.ice.length ?? 0) > 0) {
-        score -= 800;
-      }
+    if (serverId === "hq") {
+      components.push({
+        key: "runner_hq_pressure",
+        label: "HQ-Druck",
+        value: 480,
+        reason: "central:hq"
+      });
+      components.push(...semanticRuntimeRunnerHqMemoryComponents(input, action));
+    } else if (serverId === "rd") {
+      components.push({
+        key: "runner_rnd_pressure",
+        label: "R&D-Druck",
+        value: 640,
+        reason: "central:rd"
+      });
+      components.push(...semanticRuntimeRunnerRndMemoryComponents(input, action));
+    } else if (serverId === "archives") {
+      components.push({
+        key: "runner_archives_pressure",
+        label: "Archive-Druck",
+        value: 250,
+        reason: "central:archives"
+      });
+      components.push(...semanticRuntimeRunnerArchivesComponents(input, action, server));
     }
-    if ((server?.ice.length ?? 0) === 0) score += 350;
+    if (isRemoteServerTarget(serverId)) {
+      components.push(...semanticRuntimeRunnerRemoteComponents(input, action, server));
+    }
+    components.push(...semanticRuntimeRunnerKnownIcePathComponents(input, action, server));
+    if ((server?.ice.length ?? 0) === 0) {
+      components.push({
+        key: "runner_free_server_path",
+        label: "Freier Server",
+        value: 350,
+        reason: serverId ?? "unknown"
+      });
+    }
+    components.push(...semanticRuntimeRepeatedRunTargetComponents(input, serverId));
   }
   if (action.type === "trash_accessed_card") {
-    score += credits >= actionCreditCost(action) ? 600 : -1200;
+    components.push({
+      key: "runner_trash_affordability",
+      label: "Trash-Kosten zahlbar",
+      value: credits >= actionCreditCost(action) ? 600 : -1200,
+      reason: `credits:${credits};cost:${actionCreditCost(action)}`
+    });
   }
-  if (action.type === "jack_out" && scopeId === "simple_run_choice") score -= 450;
-  if (action.type === "end_turn" && input.playerView.own.clicks > 0) score -= 1500;
-  return score;
+  if (action.type === "jack_out" && scopeId === "simple_run_choice") {
+    components.push({
+      key: "runner_jack_out_pressure_loss",
+      label: "Run abbrechen",
+      value: -450,
+      reason: scopeId
+    });
+  }
+  if (action.type === "end_turn" && input.playerView.own.clicks > 0) {
+    components.push({
+      key: "runner_unused_actions",
+      label: "Ungenutzte Aktionen",
+      value: -1500,
+      reason: `actions:${input.playerView.own.clicks}`
+    });
+  }
+  return components;
+}
+
+function semanticRuntimeRunnerRndMemoryComponents(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent[] {
+  const components: AiDecisionScoreComponent[] = [];
+  const freshness =
+    reconstructBeliefState(input).runnerOpponentModel?.rndTopFreshness;
+  const stalePenalty = staleKnownRndRepeatRunPenalty(input, action);
+  const freshBoost = rndFreshRepeatRunBoost(input, action);
+  if (freshBoost !== 0) {
+    components.push({
+      key: "runner_rnd_fresh_memory",
+      label: "R&D-Frische",
+      value: freshBoost,
+      reason: freshness?.freshness ?? "unknown"
+    });
+  } else if (stalePenalty !== 0) {
+    components.push({
+      key: "runner_rnd_stale_known_top",
+      label: "R&D bekannte Topkarte",
+      value: -stalePenalty,
+      reason: freshness?.freshness ?? "stale_known_same_top"
+    });
+  } else if (!freshness || freshness.freshness === "invalidated") {
+    components.push({
+      key: "runner_rnd_unknown_top",
+      label: "R&D unbekannte Topkarte",
+      value: 180,
+      reason: "unknown_or_invalidated"
+    });
+  }
+  return components;
+}
+
+function semanticRuntimeRunnerHqMemoryComponents(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent[] {
+  const components: AiDecisionScoreComponent[] = [];
+  const memory = reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory;
+  const knownDefinitions = memory?.knownDefinitions ?? [];
+  const knownAgenda = knownDefinitions.some(
+    (definitionId) => definitionTypeForMetrics(definitionId) === "agenda",
+  );
+  if (knownAgenda) {
+    components.push({
+      key: "runner_hq_known_agenda",
+      label: "HQ bekannte Agenda",
+      value: memory?.allCardsKnown ? 520 : 260,
+      reason: memory?.allCardsKnown ? "all_hq_known" : "partial_hq_known"
+    });
+  }
+  const stalePenalty = staleKnownHqRepeatRunPenalty(input, action);
+  if (stalePenalty !== 0) {
+    components.push({
+      key: "runner_hq_all_known_low_value",
+      label: "HQ bekannte Low-Value-Hand",
+      value: -stalePenalty,
+      reason: "all_known_low_value"
+    });
+  } else if (knownDefinitions.length > 0 && !knownAgenda) {
+    components.push({
+      key: "runner_hq_partial_known_cards",
+      label: "HQ bekannte Karten",
+      value: -Math.min(180, knownDefinitions.length * 45),
+      reason: `${knownDefinitions.length}/${memory?.handCount ?? "?"}`
+    });
+  }
+  return components;
+}
+
+function semanticRuntimeRunnerArchivesComponents(
+  input: AiDecisionInput,
+  action: LegalAction,
+  server: AiDecisionInput["playerView"]["servers"][number] | undefined,
+): AiDecisionScoreComponent[] {
+  if (action.type !== "start_run" || action.payload?.serverId !== "archives") return [];
+  const root = server?.root ?? [];
+  const knownRoot = root.filter((card) => card.known && typeof card.definitionId === "string");
+  const knownAgenda = knownRoot.some((card) => {
+    const definitionId = card.definitionId;
+    return card.type === "agenda" || (definitionId !== undefined && definitionTypeForMetrics(definitionId) === "agenda");
+  });
+  const hiddenArchivesCount = Math.max(0, input.playerView.opponent.discardCount - knownRoot.length);
+  if (knownAgenda) {
+    return [{
+      key: "runner_archives_visible_agenda",
+      label: "Archives offene Agenda",
+      value: 1250,
+      reason: "known_archives_agenda"
+    }];
+  }
+  if (hiddenArchivesCount > 0) {
+    return [{
+      key: "runner_archives_hidden_cards",
+      label: "Archives verdeckte Karten",
+      value: 700,
+      reason: `hidden_archives:${hiddenArchivesCount}`
+    }];
+  }
+  return [];
+}
+
+function semanticRuntimeRunnerKnownIcePathComponents(
+  input: AiDecisionInput,
+  action: LegalAction,
+  server: AiDecisionInput["playerView"]["servers"][number] | undefined,
+): AiDecisionScoreComponent[] {
+  if (action.type !== "start_run" || !server) return [];
+  const assessment = assessKnownRezzedIcePath(
+    server.ice,
+    input.playerView.own.rig ?? [],
+    input.playerView.own.credits,
+    server.root,
+  );
+  if (assessment.assessedKnownIceCount <= 0) return [];
+  if (!assessment.canReachAccess) return [];
+  if ((assessment.visibleBreakCost ?? 0) <= 0) return [];
+  return [
+    {
+      key: "runner_visible_ice_path_cost",
+      label: "Sichtbare ICE-Kosten",
+      value: -Math.min(
+        1800,
+        (assessment.visibleBreakCost ?? 0) * 220 +
+          Math.max(0, 2 - assessment.creditsAfterPath) * 350,
+      ),
+      reason: semanticRuntimeKnownIcePathReason(assessment, server.id)
+    }
+  ];
+}
+
+function semanticRuntimeKnownIcePathReason(
+  assessment: KnownRezzedIcePathAssessment,
+  serverId: string,
+): string {
+  return [
+    `server:${serverId}`,
+    `known_ice:${assessment.assessedKnownIceCount}`,
+    `can_reach_access:${assessment.canReachAccess}`,
+    `reason:${assessment.noAccessReason ?? "reachable"}`,
+    `unpayable:${assessment.unpayableReason ?? "none"}`,
+    `break_cost:${assessment.visibleBreakCost ?? 0}`,
+    `credits_after:${assessment.creditsAfterPath}`,
+    ...(assessment.missingCoverage?.length
+      ? [`missing:${assessment.missingCoverage.join("|")}`]
+      : []),
+    ...(assessment.unbreakableIceTitle
+      ? [`ice:${assessment.unbreakableIceTitle}`]
+      : [])
+  ].join(";");
+}
+
+function semanticRuntimeRunnerRemoteComponents(
+  input: AiDecisionInput,
+  action: LegalAction,
+  server: AiDecisionInput["playerView"]["servers"][number] | undefined,
+): AiDecisionScoreComponent[] {
+  const components: AiDecisionScoreComponent[] = [];
+  const root = server?.root ?? [];
+  const knownAgenda = root.some((card) => card.known && card.type === "agenda");
+  const advancedRoot = root.some((card) => (card.advancementCounters ?? 0) > 0);
+  const unknownRootCount = root.filter((card) => !card.known).length;
+  const relevantTrash = root.some((card) => {
+    if (!card.known) return false;
+    const type = card.definitionId ? definitionTypeForMetrics(card.definitionId) : card.type;
+    const trashCost = remoteRootTrashCostForMetrics(card);
+    return (
+      (type === "asset" || type === "upgrade") &&
+      trashCost !== undefined &&
+      input.playerView.own.credits >= trashCost + 1
+    );
+  });
+  const knownLowValueRoot = root.length > 0 && unknownRootCount === 0 && !knownAgenda && !relevantTrash && !advancedRoot;
+  let value = 0;
+  let reason = "remote_empty";
+  if (knownAgenda) {
+    value = 1500;
+    reason = "known_remote_agenda";
+  } else if (advancedRoot) {
+    value = 1250;
+    reason = "advanced_remote_root";
+  } else if (relevantTrash) {
+    value = 900;
+    reason = "known_trashable_remote";
+  } else if (unknownRootCount > 0) {
+    value = 1050;
+    reason = `unknown_remote_root:${unknownRootCount}`;
+  } else if (root.length > 0) {
+    value = 450;
+    reason = knownLowValueRoot ? "known_low_value_remote_root" : "known_remote_root";
+  }
+  if (value !== 0) {
+    components.push({
+      key: "runner_remote_root_threat",
+      label: "Remote-Root-Threat",
+      value,
+      reason
+    });
+  }
+  const candidateMemory = server
+    ? reconstructBeliefState(input).runnerOpponentModel?.hiddenRemoteCandidateMemory
+      .slice()
+      .reverse()
+      .find((entry) => entry.serverId === server.id)
+    : undefined;
+  if (candidateMemory) {
+    if (candidateMemory.exhaustive && candidateMemory.agendaCandidateCount === 0 && candidateMemory.relevantTrashCandidateCount === 0) {
+      components.push({
+        key: "runner_remote_known_candidates_low_value",
+        label: "Remote-Kandidaten niedrig",
+        value: -650,
+        reason: `candidates:${candidateMemory.candidateCount}`
+      });
+    } else if (candidateMemory.agendaCandidateCount > 0) {
+      components.push({
+        key: "runner_remote_agenda_candidate",
+        label: "Remote-Agenda-Kandidat",
+        value: 350,
+        reason: `agenda_candidates:${candidateMemory.agendaCandidateCount}`
+      });
+    } else if (candidateMemory.relevantTrashCandidateCount > 0) {
+      components.push({
+        key: "runner_remote_trash_candidate",
+        label: "Remote-Trash-Kandidat",
+        value: 220,
+        reason: `trash_candidates:${candidateMemory.relevantTrashCandidateCount}`
+      });
+    }
+  }
+  if (root.length === 0 && (server?.ice.length ?? 0) > 0) {
+    components.push({
+      key: "runner_remote_empty_with_ice",
+      label: "Leere Remote mit ICE",
+      value: -800,
+      reason: server?.id ?? "remote"
+    });
+  }
+  return components;
+}
+
+function semanticRuntimeRepeatedRunTargetComponents(
+  input: AiDecisionInput,
+  serverId: string | undefined,
+): AiDecisionScoreComponent[] {
+  if (!serverId) return [];
+  const recentRuns = semanticRuntimeRecentRunnerStartRunsOnServer(input, serverId);
+  if (recentRuns <= 0) return [];
+  const penalty =
+    serverId === "hq"
+      ? Math.min(720, recentRuns * 220)
+      : serverId === "rd"
+        ? Math.min(360, recentRuns * 120)
+        : isRemoteServerTarget(serverId)
+          ? Math.min(240, recentRuns * 120)
+          : 0;
+  if (penalty === 0) return [];
+  return [
+    {
+      key: "runner_recent_same_server_runs",
+      label: "Wiederholtes Run-Ziel",
+      value: -penalty,
+      reason: `${serverId}:${recentRuns}`
+    }
+  ];
+}
+
+function semanticRuntimeRecentRunnerStartRunsOnServer(
+  input: AiDecisionInput,
+  serverId: string,
+): number {
+  let count = 0;
+  const history = mergedAiPublicHistory(input);
+  for (let index = history.length - 1; index >= 0; index -= 1) {
+    const event = history[index]!;
+    const actionType =
+      typeof event.publicPayload.actionType === "string"
+        ? event.publicPayload.actionType
+        : event.type;
+    const actor = typeof event.publicPayload.actor === "string" ? event.publicPayload.actor : undefined;
+    if (actionType === "end_turn") break;
+    if (actor === "corp") break;
+    if (actor !== "runner" || actionType !== "start_run") continue;
+    const target = aiServerIdFromEvent(event);
+    if (target === serverId) {
+      count += 1;
+      continue;
+    }
+    if (target) break;
+  }
+  return count;
 }
 
 function semanticRuntimeCorpScore(
@@ -3654,41 +4348,139 @@ function semanticRuntimeCorpScore(
   action: LegalAction,
   scopeId: string,
 ): number {
-  let score = 0;
+  return semanticRuntimeScoreFromComponents(
+    semanticRuntimeCorpScoreComponents(input, action, scopeId),
+  );
+}
+
+function semanticRuntimeCorpScoreComponents(
+  input: AiDecisionInput,
+  action: LegalAction,
+  scopeId: string,
+): AiDecisionScoreComponent[] {
+  const components: AiDecisionScoreComponent[] = [];
   const credits = input.playerView.own.credits;
-  if (action.type === "score_agenda") score += 1200;
+  if (action.type === "score_agenda") {
+    components.push({
+      key: "corp_score_available_agenda",
+      label: "Agenda punkten",
+      value: 1200,
+      reason: "score_agenda"
+    });
+  }
   if (action.type === "advance_card") {
-    score += 600;
-    score += semanticRuntimeCorpAdvanceRemoteScore(input, action);
+    components.push({
+      key: "corp_advance_score_line",
+      label: "Advance-Linie",
+      value: 600,
+      reason: "advance_card"
+    });
+    const remoteScore = semanticRuntimeCorpAdvanceRemoteScore(input, action);
+    if (remoteScore !== 0) {
+      components.push({
+        key: "corp_advance_remote_context",
+        label: "Remote-Kontext",
+        value: remoteScore,
+        reason: scopeId
+      });
+    }
   }
   if (action.type === "rez_ice") {
-    score += credits >= actionCreditCost(action) ? 750 : -1200;
+    components.push({
+      key: "corp_rez_affordability",
+      label: "Rez-Kosten zahlbar",
+      value: credits >= actionCreditCost(action) ? 750 : -1200,
+      reason: `credits:${credits};cost:${actionCreditCost(action)}`
+    });
   }
   if (action.type === "install_card") {
     const roles = rolesForAction(input, action);
     if (semanticRuntimeCorpActionIsScoreLine(input, action, roles)) {
-      score += 550;
+      components.push({
+        key: "corp_install_score_line",
+        label: "Scoring-Aufbau",
+        value: 550,
+        reason: "score_line"
+      });
     }
     if (
       action.payload?.placement === "ice" ||
       roles.some((role) => role.includes("ice") || role.includes("protect"))
     ) {
-      score += 650;
+      components.push({
+        key: "corp_install_protection",
+        label: "Schutz-Aufbau",
+        value: 650,
+        reason: "protect_role"
+      });
     }
-    if (roles.some((role) => role.includes("economy"))) score += 500;
-    score += semanticRuntimeCorpInstallRemoteScore(input, action, roles);
+    if (roles.some((role) => role.includes("economy"))) {
+      components.push({
+        key: "corp_install_economy",
+        label: "Economy-Aufbau",
+        value: 500,
+        reason: "economy_role"
+      });
+    }
+    const remoteScore = semanticRuntimeCorpInstallRemoteScore(input, action, roles);
+    if (remoteScore !== 0) {
+      components.push({
+        key: "corp_install_remote_context",
+        label: "Installations-Kontext",
+        value: remoteScore,
+        reason: scopeId
+      });
+    }
   }
   if (action.type === "gain_credit" && credits < 6) {
-    score += 700;
-    if (semanticRuntimeCorpHasRemoteInstability(input)) score += 250;
+    components.push({
+      key: "corp_low_credits",
+      label: "Credit-Bedarf",
+      value: 700,
+      reason: `credits:${credits}`
+    });
+    if (semanticRuntimeCorpHasRemoteInstability(input)) {
+      components.push({
+        key: "corp_remote_instability_credit_reserve",
+        label: "Remote-Reserve",
+        value: 250,
+        reason: "remote_instability"
+      });
+    }
   }
   if (action.type === "draw_card" && input.playerView.own.gripOrHq.length < 4) {
-    score += 450;
-    if (semanticRuntimeCorpHasRemoteInstability(input)) score += 200;
+    components.push({
+      key: "corp_low_hand",
+      label: "Handkarten-Bedarf",
+      value: 450,
+      reason: `hand:${input.playerView.own.gripOrHq.length}`
+    });
+    if (semanticRuntimeCorpHasRemoteInstability(input)) {
+      components.push({
+        key: "corp_remote_instability_draw",
+        label: "Remote-Nachschub",
+        value: 200,
+        reason: "remote_instability"
+      });
+    }
   }
-  if (action.type === "decline_rez" && scopeId === "simple_rez") score -= 700;
-  if (action.type === "end_turn" && input.playerView.own.clicks > 0) score -= 1400;
-  return score;
+  if (action.type === "decline_rez" && scopeId === "simple_rez") {
+    components.push({
+      key: "corp_decline_rez_pressure",
+      label: "Rez ablehnen",
+      value: -700,
+      reason: scopeId
+    });
+  }
+  if (action.type === "end_turn" && input.playerView.own.clicks > 0) {
+    components.push({
+      key: "corp_unused_actions",
+      label: "Ungenutzte Aktionen",
+      value: -1400,
+      reason: `actions:${input.playerView.own.clicks}`
+    });
+  }
+  return components;
 }
 
 function semanticRuntimeCorpInstallRemoteScore(
@@ -11773,6 +12565,8 @@ function aiServerIdFromEvent(event: PublicGameEvent): string | undefined {
   const payload = event.publicPayload;
   if (typeof payload.serverId === "string") return payload.serverId;
   if (typeof payload.server === "string") return payload.server;
+  if (typeof payload.targetServerId === "string") return payload.targetServerId;
+  if (typeof payload.attackedServerId === "string") return payload.attackedServerId;
   const label =
     typeof payload.serverLabel === "string"
       ? payload.serverLabel

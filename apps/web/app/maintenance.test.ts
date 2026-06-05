@@ -228,6 +228,10 @@ describe("Backend 0.5 maintenance UI helpers", () => {
             source: "basic_action",
             selected: false,
             priority: 130,
+            scoreBreakdown: [
+              { key: "runner_rnd_pressure", label: "R&D-Druck", value: 640 },
+              { key: "runner_recent_same_server_runs", label: "Wiederholtes Run-Ziel", value: -220 }
+            ],
             whyNot: ["lower_action_priority"]
           }
         ]
@@ -250,7 +254,11 @@ describe("Backend 0.5 maintenance UI helpers", () => {
     expect(rows[1]).toMatchObject({
       label: "Run auf HQ",
       selected: true,
-      debugSelected: false
+      debugSelected: false,
+      scoreRows: [
+        ["R&D-Druck", "640.00"],
+        ["Wiederholtes Run-Ziel", "-220.00"]
+      ]
     });
     expect(aiTraceDebugGapNotes(trace.detail)).toContain(
       "Debug-Auswahl weicht von der ausgeführten Action ab; Semantic- und Legacy-/Plan-Diagnose getrennt prüfen."

@@ -10592,6 +10592,11 @@ select,
   background: color-mix(in srgb, var(--runner), var(--field-bg) 86%);
 }
 
+.aiDecisionDebugAction.excluded {
+  opacity: 0.76;
+  border-style: dashed;
+}
+
 .aiDecisionDebugAction > div:first-child {
   min-width: 0;
   display: grid;

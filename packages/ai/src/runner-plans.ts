@@ -5808,11 +5808,15 @@ function selectPlanAction(
   input: AiDecisionInput,
   candidate: RunnerPlanCandidate,
 ): LegalAction | undefined {
-  return candidate.legalActionIds
+  const actions = candidate.legalActionIds
     .map((actionId) =>
       input.legalActions.find((action) => action.actionId === actionId),
     )
-    .filter((action): action is LegalAction => Boolean(action))
+    .filter((action): action is LegalAction => Boolean(action));
+  const selectableActions = actions.filter(
+    (action) => !runnerPlanActionExclusion(input, candidate.kind, action),
+  );
+  return (selectableActions.length > 0 ? selectableActions : actions)
     .sort(
       (left, right) =>
         actionPriority(candidate.kind, right, input) -
@@ -5833,10 +5837,12 @@ function runnerActionAlternativesForPlan(
     .filter((action): action is LegalAction => Boolean(action))
     .map((action) => ({
       action,
+      exclusion: runnerPlanActionExclusion(input, candidate.kind, action),
       priority: actionPriority(candidate.kind, action, input),
     }))
     .sort(
       (left, right) =>
+        Number(Boolean(left.exclusion)) - Number(Boolean(right.exclusion)) ||
         right.priority - left.priority ||
         compareAction(left.action, right.action),
     )
@@ -5847,6 +5853,7 @@ function runnerActionAlternativesForPlan(
         candidate.kind,
         entry.action,
         entry.priority,
+        entry.exclusion,
         entry.action.actionId === selectedActionId,
         index + 1,
       ),
@@ -5858,6 +5865,7 @@ function runnerActionAlternativeForAction(
   kind: RunnerPlanKind,
   action: LegalAction,
   priority: number,
+  exclusion: string | undefined,
   selected: boolean,
   rank: number,
 ): AiDecisionActionAlternative {
@@ -5909,10 +5917,14 @@ function runnerActionAlternativeForAction(
       : action.source,
     ...(sourceTitle ? { sourceTitle } : {}),
     selected,
-    priority: roundScore(priority),
+    ...(exclusion ? { excluded: true } : { priority: roundScore(priority) }),
     ...(selected
       ? { whyChosen: runnerActionWhy(input, action, installedEconomy, true) }
-      : { whyNot: runnerActionWhy(input, action, installedEconomy, false) }),
+      : {
+          whyNot: exclusion
+            ? [`semantic_excluded:${exclusion}`]
+            : runnerActionWhy(input, action, installedEconomy, false)
+        }),
     ...(economy ? { economy } : {}),
   };
 }
@@ -5960,6 +5972,24 @@ function runnerActionWhy(
   return ["side_economy_lower_action_priority"];
 }
 
+function runnerPlanActionExclusion(
+  input: AiDecisionInput,
+  kind: RunnerPlanKind,
+  action: LegalAction,
+  features?: RunnerFeatures,
+): string | undefined {
+  const runPlan =
+    kind === "contest_remote" ||
+    kind === "pressure_rnd" ||
+    kind === "pressure_hq" ||
+    kind === "safe_probe_run";
+  if (!runPlan || action.type !== "start_run") return undefined;
+  const runnerFeatures = features ?? extractRunnerFeatures(input);
+  return runnerRunActionIsKnownNoAccess(input, action, runnerFeatures)
+    ? "known_ice_path_no_access"
+    : undefined;
+}
+
 function actionPriority(
   kind: RunnerPlanKind,
   action: LegalAction,
@@ -5971,7 +6001,7 @@ function actionPriority(
     return 100;
   if (kind === "contest_remote" && action.type === "start_run") {
     const features = extractRunnerFeatures(input);
-    if (runnerRunActionIsKnownNoAccess(input, action, features)) return -9000;
+    if (runnerPlanActionExclusion(input, kind, action, features)) return 0;
     const serverId =
       typeof action.payload?.serverId === "string"
         ? action.payload.serverId
@@ -5998,7 +6028,7 @@ function actionPriority(
     action.type === "start_run"
   ) {
     const features = extractRunnerFeatures(input);
-    if (runnerRunActionIsKnownNoAccess(input, action, features)) return -9000;
+    if (runnerPlanActionExclusion(input, kind, action, features)) return 0;
     const target =
       typeof action.payload?.serverId === "string"
         ? action.payload.serverId

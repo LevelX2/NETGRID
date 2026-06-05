@@ -1782,7 +1782,9 @@ export type AiDecisionActionAlternative = {
   source?: string;
   sourceTitle?: string;
   selected: boolean;
+  excluded?: boolean;
   priority?: number;
+  scoreBreakdown?: AiDecisionScoreComponent[];
   whyChosen?: string[];
   whyNot?: string[];
   economy?: AiDecisionActionEconomyDetail;
@@ -1925,12 +1927,15 @@ function sanitizeAiDecisionActionAlternatives(value: unknown): AiDecisionActionA
       const selected = source.selected;
       if (rank === undefined || !actionId || !actionType || typeof selected !== "boolean") return undefined;
       const result: AiDecisionActionAlternative = { rank, actionId, actionType, selected };
+      if (typeof source.excluded === "boolean") result.excluded = source.excluded;
       for (const field of ["label", "source", "sourceTitle"] as const) {
         const sanitized = sanitizeAiDecisionDebugString(source[field]);
         if (sanitized !== undefined) result[field] = sanitized;
       }
       const priority = source.priority;
       if (typeof priority === "number" && Number.isFinite(priority)) result.priority = priority;
+      const scoreBreakdown = sanitizeAiDecisionScoreComponents(source.scoreBreakdown);
+      if (scoreBreakdown) result.scoreBreakdown = scoreBreakdown;
       const whyChosen = sanitizeAiDecisionDebugStringArray(source.whyChosen);
       if (whyChosen) result.whyChosen = whyChosen;
       const whyNot = sanitizeAiDecisionDebugStringArray(source.whyNot);
