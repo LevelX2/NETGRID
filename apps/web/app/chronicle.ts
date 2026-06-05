@@ -1127,6 +1127,14 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       }
       const playEffect = mergedCardResolverEffect ?? effect;
       category = playEffect.category ?? category;
+      if (actionType === "play_event" && payload.runnerEventRun === true) {
+        const target = serverLabel ?? selectedServerLabel ?? runTargetFromLabel(label);
+        category = "run";
+        importance = "important";
+        title = phrase(subject, `${cardTitle ?? playEffect.sourceTitle ?? "eine Karte"} gespielt und einen Run auf ${target} gestartet`);
+        chips.push("Event", "Run", target, ...playEffect.chips);
+        break;
+      }
       title = phrase(subject, `${cardTitle ?? playEffect.sourceTitle ?? "eine Karte"} gespielt${playEffect.suffix ? ` und ${playEffect.suffix}` : ""}`);
       chips.push(actionType === "play_event" ? "Event" : "Operation", ...playEffect.chips);
       break;
@@ -1696,6 +1704,7 @@ function traceHardwareWreckerChronicleItem(event: PublicGameEvent, side: Side): 
 export function shouldSuppressChronicleEventItem(event: PublicGameEvent): boolean {
   const payload = event.publicPayload ?? {};
   const actionType = stringValue(payload.actionType) ?? event.type;
+  if (actionType === "decline_rez") return true;
   if (actionType !== "continue_run" || payload.encounterContinue !== true) return false;
   return resolvedEffectsFromPayload(payload.resolvedEffects).some((effect) => stringValue(effect.kind) === "resolve_subroutine");
 }
@@ -2824,6 +2833,12 @@ function advanceTitlePart(cardTitle: string | undefined, cardType: string | null
 
 function displayServerLabel(label: string | undefined): string | undefined {
   if (!label) return undefined;
+  if (label === "hq" || label === "HQ") return "HQ";
+  if (label === "rd" || label === "R&D") return "R&D";
+  if (label === "archives" || label === "Archives") return "Archive";
+  if (label === "new_remote") return "neuem Remote";
+  const remote = /^remote_(\d+)$/.exec(label);
+  if (remote?.[1]) return `Remote ${remote[1]}`;
   return label;
 }
 
@@ -2954,6 +2969,18 @@ function groupLabelFor(category: ChronicleCategory, actor: Side | undefined, lab
 
 export function chronicleTurnGroupLabel(side: Side, turnNumber: number | undefined | null): string {
   return turnNumber ? `Zug ${turnNumber} - ${side === "corp" ? "Korp" : "Runner"}` : `Zug - ${side === "corp" ? "Korp" : "Runner"}`;
+}
+
+export function chronicleRunGroupLabelFromEvent(event: PublicGameEvent): string | null {
+  const actionType = stringValue(event.publicPayload.actionType) ?? event.type;
+  const startsRun =
+    actionType === "start_run" ||
+    (actionType === "play_event" && event.publicPayload.runnerEventRun === true);
+  if (!startsRun) return null;
+  const serverLabel = stringValue(event.publicPayload.serverLabel);
+  const label = stringValue(event.publicPayload.label);
+  const target = (serverLabel ? displayServerLabel(serverLabel) : runTargetFromLabel(label)) ?? "einen Server";
+  return `Run auf ${target}`;
 }
 
 function turnLabel(side: Side | undefined, turnNumber: number | undefined): string | undefined {

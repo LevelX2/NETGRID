@@ -154,6 +154,8 @@ export function publicContextForAction(
   if (typeof legalAction.payload?.installedAccessBonusSourceDefinitionIds === "string")
     context.installedAccessBonusSourceDefinitionIds =
       legalAction.payload.installedAccessBonusSourceDefinitionIds;
+  if (legalAction.payload?.runnerEventRun === true)
+    context.runnerEventRun = true;
   if (legalAction.type === "install_card") {
     const definition = cardId ? deps.definitionFor(state, cardId) : undefined;
     context.zoneLabel =

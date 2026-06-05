@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { PublicGameEvent, Side } from "@netgrid/shared";
-import { chronicleActionUseByEventId, chronicleTurnNumberByEventId, chronicleTurnSideByEventId, formatChronicleEffectItems, formatChronicleEvent, shouldSuppressChronicleEventItem } from "./chronicle";
+import { chronicleActionUseByEventId, chronicleRunGroupLabelFromEvent, chronicleTurnNumberByEventId, chronicleTurnSideByEventId, formatChronicleEffectItems, formatChronicleEvent, shouldSuppressChronicleEventItem } from "./chronicle";
 
 const ACTION_TYPES = [
   "mandatory_draw",
@@ -138,6 +138,29 @@ describe("formatChronicleEvent", () => {
     expect(item.title).toBe("Du hast einen Run auf R&D gestartet.");
     expect(item.chips).toContain("Run");
     expect(item.chips).toContain("R&D");
+  });
+
+  it("formats runner event runs as run starts for the chronicle group", () => {
+    const event = makeEvent("play_event", {
+      actor: "runner",
+      aiReasonCode: "runner.plan.remote_contest",
+      cardDefinitionId: "onr_proteus_106_disgruntled-ice-technician",
+      title: "Disgruntled Ice Technician",
+      label: "Disgruntled Ice Technician auf Remote 1",
+      runnerEventRun: true,
+      serverLabel: "Remote 1"
+    });
+    const item = formatChronicleEvent(event, "corp", {
+      cardTitle: "Disgruntled Ice Technician",
+      cardType: "event"
+    });
+
+    expect(item.title).toBe("Die Runner-KI hat Disgruntled Ice Technician gespielt und einen Run auf Remote 1 gestartet.");
+    expect(item.category).toBe("run");
+    expect(item.importance).toBe("important");
+    expect(item.chips).toEqual(expect.arrayContaining(["Event", "Run", "Remote 1"]));
+    expect(item.groupLabel).toBe("Run auf Remote 1");
+    expect(chronicleRunGroupLabelFromEvent(event)).toBe("Run auf Remote 1");
   });
 
   it("describes Runner jack-out as a run abort without access", () => {
@@ -1133,6 +1156,17 @@ describe("formatChronicleEvent", () => {
     ]);
     expect(JSON.stringify(visibleItems)).not.toContain("ungebrochene Subroutinen ausgelöst");
     expect(visibleItems[0]?.chips).toEqual(expect.arrayContaining(["Banpei", "Self-Modifying Code", "Subroutine 1"]));
+  });
+
+  it("suppresses declined rez windows as non-events in the visible chronicle", () => {
+    const event = makeEvent("decline_rez", {
+      actor: "corp",
+      label: "Nicht rezzen",
+      serverLabel: "Remote 1"
+    });
+
+    expect(formatChronicleEvent(event, "corp").title).toBe("Du hast nicht gerezzt. Der Run geht weiter.");
+    expect(shouldSuppressChronicleEventItem(event)).toBe(true);
   });
 
   it("names Core Command Jettison Ice targets and paid rez costs in the chronicle", () => {

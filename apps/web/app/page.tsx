@@ -91,6 +91,7 @@ import {
   chronicleTurnSideByEventId,
   chronicleTurnNumberByEventId,
   chronicleTurnGroupLabel,
+  chronicleRunGroupLabelFromEvent,
   formatChronicleEvent,
   formatChronicleEffectItems,
   isISpySuccessfulRunFollowupPayload,
@@ -11360,20 +11361,6 @@ function chronicleGroupKindFromItem(item: ChronicleItem): ChronicleGroupKind {
   return "neutral";
 }
 
-function chronicleRunGroupLabelFromEvent(event: PublicGameEvent): string | null {
-  const actionType = payloadString(event.publicPayload, "actionType") ?? event.type;
-  if (actionType !== "start_run") return null;
-  const serverLabel = payloadString(event.publicPayload, "serverLabel");
-  const label = payloadString(event.publicPayload, "label");
-  const target = serverLabel ? serverDisplayLabel(serverLabel) : chronicleRunTargetFromLabel(label);
-  return `Run auf ${target}`;
-}
-
-function chronicleRunTargetFromLabel(label: string | null): string {
-  const match = label?.match(/Run auf (.+)$/i);
-  return match?.[1]?.trim() ? serverDisplayLabel(match[1].trim()) : "einen Server";
-}
-
 function chronicleEventBelongsToActiveRun(
   event: PublicGameEvent,
   actionType: string,
@@ -11381,6 +11368,7 @@ function chronicleEventBelongsToActiveRun(
   cardDetailsById: Record<string, CatalogCardDetail>
 ): boolean {
   if (actionType === "end_turn" || actionType === "mandatory_draw") return false;
+  if (actionType === "play_event" && event.publicPayload.runnerEventRun === true) return true;
   if (actionType === "resolve_choice" && chronicleResolveChoiceBelongsToRun(event)) return true;
   if (actionType === "trigger_ability" || actionType === "activated_card_ability") {
     const card = eventCardDetail(event, cardDetailsById);

@@ -146,6 +146,31 @@ describe("PublicContext golden payload gate", () => {
     });
   });
 
+  it("exposes runner event runs as public chronicle context", () => {
+    const state = goldenState("public-context-runner-event-run");
+    addCorpRootCard(state, "corp_root_remote_1", "simple_agenda", "remote_1");
+    const context = goldenContext(
+      state,
+      goldenAction({
+        actionId: "golden:play-event:run",
+        side: "runner",
+        type: "play_event",
+        label: "Disgruntled Ice Technician auf Remote 1",
+        source: "runner_event",
+        payload: {
+          cardId: "runner_event",
+          runnerEventRun: true,
+          serverId: "remote_1",
+        },
+      }),
+    );
+
+    expectGoldenPayload(context, {
+      runnerEventRun: true,
+      serverLabel: "Remote 1",
+    });
+  });
+
   it("pins trace context and trace-success follow-up fields", () => {
     const context = goldenContext(
       goldenState("public-context-trace"),
