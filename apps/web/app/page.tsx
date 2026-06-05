@@ -289,6 +289,21 @@ import {
   type RecentSessionInfo,
   type SessionInfo
 } from "./session-recovery";
+import {
+  aiTraceActionRows,
+  aiTraceDebugGapNotes,
+  aiTraceDoctrineRows,
+  aiTraceMetaRows,
+  aiTraceScoreRows,
+  aiTraceTitle,
+  buildMaintenanceAiTraceEnablePath,
+  buildMaintenanceAiTraceIndexPath,
+  findForbiddenMaintenanceMarkers,
+  latestMaintenanceAiTraceId,
+  safeStringList,
+  type MaintenanceAiTraceDetail,
+  type MaintenanceAiTraceIndexEntry
+} from "./maintenance";
 
 const SERVER_HTTP = process.env.NEXT_PUBLIC_NETGRID_SERVER_URL ?? "http://127.0.0.1:8787";
 const SERVER_UNREACHABLE_NOTICE = `Multiplayer-Server nicht erreichbar (${SERVER_HTTP}). Bitte starte den lokalen Multiplayer-Server und versuche es erneut.`;
@@ -321,6 +336,8 @@ const RUN_OVERLAY_POSITION_STORAGE_KEY = "netgrid.runOverlayPosition.v1";
 const LEGACY_RUN_OVERLAY_POSITION_STORAGE_KEY = "netgrid.runOverlayPosition.v1";
 const ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY = "netgrid.actionPanelOverlayPosition.v1";
 const LEGACY_ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY = "netgrid.actionPanelOverlayPosition.v1";
+const AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY = "netgrid.aiDecisionDebugOverlayPosition.v1";
+const LEGACY_AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY = "netgrid.aiDecisionDebugOverlayPosition.v1";
 const COLOR_SCHEME_STORAGE_KEY = "netgrid-color-scheme";
 const DISPLAY_NAME_STORAGE_KEY = "netgrid.displayName";
 const LEGACY_DISPLAY_NAME_STORAGE_KEY = "netgrid.displayName";
@@ -373,6 +390,7 @@ type ChronicleDetailMode = "simple" | "medium" | "full";
 type ColorScheme = "black" | "white";
 type ResourceStripMode = "auto" | "on" | "off";
 type ActionPanelMode = "docked" | "floating";
+type AiDecisionDebugOverlayStatus = "off" | "activating" | "waiting" | "live" | "error";
 type EntryTab = "play" | "catalog" | "decks" | "recent" | "options";
 type ActiveMatchWorkspace = "game" | "catalog" | "decks" | "recent" | "options";
 type DeckSideFilter = Side | "all";
@@ -2300,11 +2318,21 @@ export default function Page() {
   const [topbarStickyEnabled, setTopbarStickyEnabled] = useState(true);
   const [resourceStripMode, setResourceStripMode] = useState<ResourceStripMode>("auto");
   const [actionPanelMode, setActionPanelMode] = useState<ActionPanelMode>("docked");
+  const [aiDecisionDebugOverlayEnabled, setAiDecisionDebugOverlayEnabled] = useState(false);
   const [actionPanelOverlayPosition, setActionPanelOverlayPosition] = useState<RunOverlayPositionPreference>(() =>
     typeof window === "undefined"
       ? { kind: "default" }
       : parseRunOverlayPositionPreference(readLocalStorageWithLegacy(ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY, LEGACY_ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY))
   );
+  const [aiDecisionDebugOverlayPosition, setAiDecisionDebugOverlayPosition] = useState<RunOverlayPositionPreference>(() =>
+    typeof window === "undefined"
+      ? { kind: "default" }
+      : parseRunOverlayPositionPreference(readLocalStorageWithLegacy(AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY, LEGACY_AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY))
+  );
+  const [aiDecisionDebugStatus, setAiDecisionDebugStatus] = useState<AiDecisionDebugOverlayStatus>("off");
+  const [aiDecisionDebugError, setAiDecisionDebugError] = useState("");
+  const [aiDecisionDebugTraceIndex, setAiDecisionDebugTraceIndex] = useState<MaintenanceAiTraceIndexEntry[]>([]);
+  const [aiDecisionDebugTrace, setAiDecisionDebugTrace] = useState<MaintenanceAiTraceDetail | null>(null);
   const [topbarHeightPx, setTopbarHeightPx] = useState(0);
   const [statusPanelsVisible, setStatusPanelsVisible] = useState(true);
   const [gameplaySettingsLoaded, setGameplaySettingsLoaded] = useState(false);
@@ -2348,6 +2376,8 @@ export default function Page() {
   const autoCorpMandatoryDrawSubmittedKeyRef = useRef<string | null>(null);
   const autoDiscardSubmittedKeyRef = useRef<string | null>(null);
   const pendingAiAdvanceKeyRef = useRef<string | null>(null);
+  const aiDecisionDebugEnabledMatchRef = useRef<string | null>(null);
+  const aiDecisionDebugTraceIdRef = useRef<string | null>(null);
   const localAiPacingModeRef = useRef<AiPacingMode>("paced");
   const hasStoredMatchStartSettingsRef = useRef(false);
   const topbarRef = useRef<HTMLElement | null>(null);
@@ -2671,12 +2701,13 @@ export default function Page() {
     const stored = readLocalStorageWithLegacy(GAMEPLAY_SETTINGS_STORAGE_KEY, LEGACY_GAMEPLAY_SETTINGS_STORAGE_KEY);
     if (stored) {
       try {
-        const parsed = JSON.parse(stored) as { autoCorpMandatoryDrawEnabled?: unknown; autoDiscardEnabled?: unknown; autoEndTurnEnabled?: unknown; priorityWindowHoldEnabled?: unknown; topbarStickyEnabled?: unknown; resourceStripMode?: unknown; actionPanelMode?: unknown };
+        const parsed = JSON.parse(stored) as { autoCorpMandatoryDrawEnabled?: unknown; autoDiscardEnabled?: unknown; autoEndTurnEnabled?: unknown; priorityWindowHoldEnabled?: unknown; topbarStickyEnabled?: unknown; resourceStripMode?: unknown; actionPanelMode?: unknown; aiDecisionDebugOverlayEnabled?: unknown };
         if (typeof parsed.autoCorpMandatoryDrawEnabled === "boolean") setAutoCorpMandatoryDrawEnabled(parsed.autoCorpMandatoryDrawEnabled);
         if (typeof parsed.autoEndTurnEnabled === "boolean") setAutoEndTurnEnabled(parsed.autoEndTurnEnabled);
         if (typeof parsed.autoDiscardEnabled === "boolean") setAutoDiscardEnabled(parsed.autoDiscardEnabled);
         if (typeof parsed.priorityWindowHoldEnabled === "boolean") setPriorityWindowHoldEnabled(parsed.priorityWindowHoldEnabled);
         if (typeof parsed.topbarStickyEnabled === "boolean") setTopbarStickyEnabled(parsed.topbarStickyEnabled);
+        if (typeof parsed.aiDecisionDebugOverlayEnabled === "boolean") setAiDecisionDebugOverlayEnabled(parsed.aiDecisionDebugOverlayEnabled);
         setResourceStripMode(normalizeResourceStripMode(parsed.resourceStripMode));
         setActionPanelMode(normalizeActionPanelMode(parsed.actionPanelMode));
       } catch {
@@ -2688,12 +2719,16 @@ export default function Page() {
 
   useEffect(() => {
     if (!gameplaySettingsLoaded) return;
-    window.localStorage.setItem(GAMEPLAY_SETTINGS_STORAGE_KEY, JSON.stringify({ autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, priorityWindowHoldEnabled, topbarStickyEnabled, resourceStripMode, actionPanelMode }));
-  }, [gameplaySettingsLoaded, autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, priorityWindowHoldEnabled, topbarStickyEnabled, resourceStripMode, actionPanelMode]);
+    window.localStorage.setItem(GAMEPLAY_SETTINGS_STORAGE_KEY, JSON.stringify({ autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, priorityWindowHoldEnabled, topbarStickyEnabled, resourceStripMode, actionPanelMode, aiDecisionDebugOverlayEnabled }));
+  }, [gameplaySettingsLoaded, autoCorpMandatoryDrawEnabled, autoDiscardEnabled, autoEndTurnEnabled, priorityWindowHoldEnabled, topbarStickyEnabled, resourceStripMode, actionPanelMode, aiDecisionDebugOverlayEnabled]);
 
   useEffect(() => {
     window.localStorage.setItem(ACTION_PANEL_OVERLAY_POSITION_STORAGE_KEY, serializeRunOverlayPositionPreference(actionPanelOverlayPosition));
   }, [actionPanelOverlayPosition]);
+
+  useEffect(() => {
+    window.localStorage.setItem(AI_DECISION_DEBUG_OVERLAY_POSITION_STORAGE_KEY, serializeRunOverlayPositionPreference(aiDecisionDebugOverlayPosition));
+  }, [aiDecisionDebugOverlayPosition]);
 
   useEffect(() => {
     const stored = readLocalStorageWithLegacy(CARD_TOOLTIP_SETTINGS_STORAGE_KEY, LEGACY_CARD_TOOLTIP_SETTINGS_STORAGE_KEY);
@@ -3244,6 +3279,8 @@ export default function Page() {
   const floatingPanelContextualActions = activeView?.run ? selectedPanelContextActions.filter((action) => !runActionIds.has(action.actionId)) : selectedPanelContextActions;
   const floatingPanelNeededDuringRun = Boolean(activeView?.run && (activeView.pendingChoice || floatingPanelPrimaryActions.length > 0 || floatingPanelContextualActions.length > 0));
   const showFloatingActionPanel = Boolean(activeMatchIsGame && activeView && actionPanelMode === "floating" && (!activeView.run || floatingPanelNeededDuringRun));
+  const aiDecisionDebugMatchId = activeMatchIsGame && session && payload ? session.matchId : "";
+  const showAiDecisionDebugOverlay = Boolean(activeMatchIsGame && aiDecisionDebugOverlayEnabled && session);
   const floatingPanelHasHiddenContextActions = Boolean(!activeView?.run && legalActionSplit.contextualActions.length > 0 && selectedActionContext?.kind !== "card");
   const cardActionsFor = (card: VisibleCard): LegalAction[] => {
     if (!card.known) return [];
@@ -3281,6 +3318,79 @@ export default function Page() {
     `resourceStrip-${resourceStripMode}`,
     resourceStripVisible ? "resourceStripVisible" : ""
   ].filter(Boolean).join(" ");
+
+  useEffect(() => {
+    if (!aiDecisionDebugOverlayEnabled || !aiDecisionDebugMatchId) {
+      setAiDecisionDebugStatus("off");
+      setAiDecisionDebugError("");
+      setAiDecisionDebugTraceIndex([]);
+      setAiDecisionDebugTrace(null);
+      aiDecisionDebugEnabledMatchRef.current = null;
+      aiDecisionDebugTraceIdRef.current = null;
+      return;
+    }
+    let closed = false;
+    const enableTracing = async () => {
+      if (aiDecisionDebugEnabledMatchRef.current === aiDecisionDebugMatchId) {
+        setAiDecisionDebugStatus((current) => current === "off" ? "waiting" : current);
+        return;
+      }
+      setAiDecisionDebugStatus("activating");
+      setAiDecisionDebugError("");
+      setAiDecisionDebugTraceIndex([]);
+      setAiDecisionDebugTrace(null);
+      aiDecisionDebugTraceIdRef.current = null;
+      try {
+        await enableAiDecisionDebugTracing(aiDecisionDebugMatchId);
+        if (closed) return;
+        aiDecisionDebugEnabledMatchRef.current = aiDecisionDebugMatchId;
+        setAiDecisionDebugStatus("waiting");
+      } catch (error) {
+        if (closed) return;
+        setAiDecisionDebugStatus("error");
+        setAiDecisionDebugError(error instanceof Error ? error.message : "KI-Trace konnte nicht aktiviert werden.");
+      }
+    };
+    void enableTracing();
+    return () => {
+      closed = true;
+    };
+  }, [aiDecisionDebugOverlayEnabled, aiDecisionDebugMatchId]);
+
+  useEffect(() => {
+    if (!aiDecisionDebugOverlayEnabled || !aiDecisionDebugMatchId || aiDecisionDebugStatus === "off" || aiDecisionDebugStatus === "error") return;
+    let closed = false;
+    const loadLatestTrace = async () => {
+      try {
+        const traces = await fetchAiDecisionDebugTraceIndex(aiDecisionDebugMatchId);
+        if (closed) return;
+        setAiDecisionDebugTraceIndex(traces);
+        const latestTraceId = latestMaintenanceAiTraceId(traces);
+        if (!latestTraceId) {
+          setAiDecisionDebugStatus("waiting");
+          return;
+        }
+        if (latestTraceId !== aiDecisionDebugTraceIdRef.current) {
+          const detail = await fetchAiDecisionDebugTraceDetail(latestTraceId);
+          if (closed) return;
+          aiDecisionDebugTraceIdRef.current = latestTraceId;
+          setAiDecisionDebugTrace(detail);
+        }
+        setAiDecisionDebugStatus("live");
+        setAiDecisionDebugError("");
+      } catch (error) {
+        if (closed) return;
+        setAiDecisionDebugStatus("error");
+        setAiDecisionDebugError(error instanceof Error ? error.message : "KI-Trace konnte nicht geladen werden.");
+      }
+    };
+    void loadLatestTrace();
+    const timer = window.setInterval(() => void loadLatestTrace(), 1500);
+    return () => {
+      closed = true;
+      window.clearInterval(timer);
+    };
+  }, [aiDecisionDebugOverlayEnabled, aiDecisionDebugMatchId, aiDecisionDebugStatus]);
 
   useEffect(() => {
     if (runnerSnapshots.length === 0) return;
@@ -5470,6 +5580,7 @@ export default function Page() {
               topbarStickyEnabled={topbarStickyEnabled}
               resourceStripMode={resourceStripMode}
               actionPanelMode={actionPanelMode}
+              aiDecisionDebugOverlayEnabled={aiDecisionDebugOverlayEnabled}
               audioEnabled={audioEnabled}
               audioVolume={audioVolume}
               cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
@@ -5496,6 +5607,7 @@ export default function Page() {
               onTopbarStickyEnabled={setTopbarStickyEnabled}
               onResourceStripMode={setResourceStripMode}
               onActionPanelMode={setActionPanelMode}
+              onAiDecisionDebugOverlayEnabled={setAiDecisionDebugOverlayEnabled}
               onAudioEnabled={updateAudioEnabled}
               onAudioVolume={setAudioVolume}
               onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
@@ -5700,6 +5812,17 @@ export default function Page() {
             onClearContext={() => setSelectedActionContext(null)}
           />
         </FloatingActionPanelOverlay>
+      ) : null}
+      {showAiDecisionDebugOverlay ? (
+        <FloatingAiDecisionDebugOverlay
+          position={aiDecisionDebugOverlayPosition}
+          status={aiDecisionDebugStatus}
+          error={aiDecisionDebugError}
+          trace={aiDecisionDebugTrace}
+          traceCount={aiDecisionDebugTraceIndex.length}
+          onPosition={setAiDecisionDebugOverlayPosition}
+          onClose={() => setAiDecisionDebugOverlayEnabled(false)}
+        />
       ) : null}
       {activeMatchIsGame ? (
       <ScoredAgendaOverlay
@@ -6401,6 +6524,7 @@ export default function Page() {
               topbarStickyEnabled={topbarStickyEnabled}
               resourceStripMode={resourceStripMode}
               actionPanelMode={actionPanelMode}
+              aiDecisionDebugOverlayEnabled={aiDecisionDebugOverlayEnabled}
               audioEnabled={audioEnabled}
               audioVolume={audioVolume}
               cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
@@ -6428,6 +6552,7 @@ export default function Page() {
               onTopbarStickyEnabled={setTopbarStickyEnabled}
               onResourceStripMode={setResourceStripMode}
               onActionPanelMode={setActionPanelMode}
+              onAiDecisionDebugOverlayEnabled={setAiDecisionDebugOverlayEnabled}
               onAudioEnabled={updateAudioEnabled}
               onAudioVolume={setAudioVolume}
               onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
@@ -6495,6 +6620,7 @@ export default function Page() {
             topbarStickyEnabled={topbarStickyEnabled}
             resourceStripMode={resourceStripMode}
             actionPanelMode={actionPanelMode}
+            aiDecisionDebugOverlayEnabled={aiDecisionDebugOverlayEnabled}
             audioEnabled={audioEnabled}
             audioVolume={audioVolume}
             cardTooltipHoverDelayMs={cardTooltipHoverDelayMs}
@@ -6523,6 +6649,7 @@ export default function Page() {
             onTopbarStickyEnabled={setTopbarStickyEnabled}
             onResourceStripMode={setResourceStripMode}
             onActionPanelMode={setActionPanelMode}
+            onAiDecisionDebugOverlayEnabled={setAiDecisionDebugOverlayEnabled}
             onAudioEnabled={updateAudioEnabled}
             onAudioVolume={setAudioVolume}
             onCardTooltipHoverDelayMs={setCardTooltipHoverDelayMs}
@@ -7344,6 +7471,7 @@ function OptionsPanel({
   topbarStickyEnabled,
   resourceStripMode,
   actionPanelMode,
+  aiDecisionDebugOverlayEnabled,
   audioEnabled,
   audioVolume,
   cardTooltipHoverDelayMs,
@@ -7372,6 +7500,7 @@ function OptionsPanel({
   onTopbarStickyEnabled,
   onResourceStripMode,
   onActionPanelMode,
+  onAiDecisionDebugOverlayEnabled,
   onAudioEnabled,
   onAudioVolume,
   onCardTooltipHoverDelayMs,
@@ -7401,6 +7530,7 @@ function OptionsPanel({
   topbarStickyEnabled: boolean;
   resourceStripMode: ResourceStripMode;
   actionPanelMode: ActionPanelMode;
+  aiDecisionDebugOverlayEnabled: boolean;
   audioEnabled: boolean;
   audioVolume: number;
   cardTooltipHoverDelayMs: CardTooltipHoverDelayMs;
@@ -7429,6 +7559,7 @@ function OptionsPanel({
   onTopbarStickyEnabled(value: boolean): void;
   onResourceStripMode(value: ResourceStripMode): void;
   onActionPanelMode(value: ActionPanelMode): void;
+  onAiDecisionDebugOverlayEnabled(value: boolean): void;
   onAudioEnabled(value: boolean): void;
   onAudioVolume(value: number): void;
   onCardTooltipHoverDelayMs(value: CardTooltipHoverDelayMs): void;
@@ -7488,12 +7619,14 @@ function OptionsPanel({
           topbarStickyEnabled={topbarStickyEnabled}
           resourceStripMode={resourceStripMode}
           actionPanelMode={actionPanelMode}
+          aiDecisionDebugOverlayEnabled={aiDecisionDebugOverlayEnabled}
           onAutoCorpMandatoryDrawEnabled={onAutoCorpMandatoryDrawEnabled}
           onAutoDiscardEnabled={onAutoDiscardEnabled}
           onAutoEndTurnEnabled={onAutoEndTurnEnabled}
           onTopbarStickyEnabled={onTopbarStickyEnabled}
           onResourceStripMode={onResourceStripMode}
           onActionPanelMode={onActionPanelMode}
+          onAiDecisionDebugOverlayEnabled={onAiDecisionDebugOverlayEnabled}
         />
         <AiPacingSettings mode={aiPacingMode} onMode={onAiPacingMode} />
         <ActionCueSettings
@@ -7810,12 +7943,14 @@ function GameplaySettings({
   topbarStickyEnabled,
   resourceStripMode,
   actionPanelMode,
+  aiDecisionDebugOverlayEnabled,
   onAutoCorpMandatoryDrawEnabled,
   onAutoDiscardEnabled,
   onAutoEndTurnEnabled,
   onTopbarStickyEnabled,
   onResourceStripMode,
-  onActionPanelMode
+  onActionPanelMode,
+  onAiDecisionDebugOverlayEnabled
 }: {
   autoCorpMandatoryDrawEnabled: boolean;
   autoDiscardEnabled: boolean;
@@ -7823,12 +7958,14 @@ function GameplaySettings({
   topbarStickyEnabled: boolean;
   resourceStripMode: ResourceStripMode;
   actionPanelMode: ActionPanelMode;
+  aiDecisionDebugOverlayEnabled: boolean;
   onAutoCorpMandatoryDrawEnabled(value: boolean): void;
   onAutoDiscardEnabled(value: boolean): void;
   onAutoEndTurnEnabled(value: boolean): void;
   onTopbarStickyEnabled(value: boolean): void;
   onResourceStripMode(value: ResourceStripMode): void;
   onActionPanelMode(value: ActionPanelMode): void;
+  onAiDecisionDebugOverlayEnabled(value: boolean): void;
 }) {
   return (
     <div className="gameplaySettings">
@@ -7858,6 +7995,10 @@ function GameplaySettings({
             <input data-testid="floating-action-panel-toggle" type="checkbox" checked={actionPanelMode === "floating"} onChange={(event) => onActionPanelMode(event.target.checked ? "floating" : "docked")} />
             Aktionsfenster schwebend
           </label>
+          <label className={`settingsToggle ${aiDecisionDebugOverlayEnabled ? "checked" : ""}`}>
+            <input data-testid="ai-decision-debug-overlay-toggle" type="checkbox" checked={aiDecisionDebugOverlayEnabled} onChange={(event) => onAiDecisionDebugOverlayEnabled(event.target.checked)} />
+            KI-Bewertungsfenster anzeigen
+          </label>
         </div>
       </div>
       <div className="resourceStripSettings">
@@ -7870,7 +8011,7 @@ function GameplaySettings({
           ))}
         </div>
       </div>
-      <p className="settingsHelp">Korp-Startziehen bestätigt die Pflichtkarte am Zuganfang automatisch, wenn sonst keine Korp-Aktion offen ist. Auto-Zugende beendet Deinen Zug, wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten gewählt ist. Kopfzeile fixieren hält die aktive Spielkopfzeile beim Scrollen sichtbar. Das schwebende Aktionsfenster zeigt mögliche Nicht-Run-Aktionen lokal verschiebbar an. Der Spielstandsstreifen zeigt Credits, Agenda-Punkte und aktuelle Aktionen platzsparend über dem Spielfeld.</p>
+      <p className="settingsHelp">Korp-Startziehen bestätigt die Pflichtkarte am Zuganfang automatisch, wenn sonst keine Korp-Aktion offen ist. Auto-Zugende beendet Deinen Zug, wenn nur noch Zug beenden offen ist. Auto-Abwerfen bestätigt eine Discard-Auswahl sofort, sobald genau die nötige Anzahl Handkarten gewählt ist. Kopfzeile fixieren hält die aktive Spielkopfzeile beim Scrollen sichtbar. Das schwebende Aktionsfenster zeigt mögliche Nicht-Run-Aktionen lokal verschiebbar an. Das KI-Bewertungsfenster zeigt lokale, redigierte KI-Trace-Daten für laufende KI-Matches. Der Spielstandsstreifen zeigt Credits, Agenda-Punkte und aktuelle Aktionen platzsparend über dem Spielfeld.</p>
     </div>
   );
 }
@@ -9220,6 +9361,243 @@ function FloatingActionPanelOverlay({
 
   if (typeof document === "undefined") return null;
   return createPortal(overlay, document.body);
+}
+
+function FloatingAiDecisionDebugOverlay({
+  position,
+  status,
+  error,
+  trace,
+  traceCount,
+  onPosition,
+  onClose
+}: {
+  position: RunOverlayPositionPreference;
+  status: AiDecisionDebugOverlayStatus;
+  error: string;
+  trace: MaintenanceAiTraceDetail | null;
+  traceCount: number;
+  onPosition(position: RunOverlayPositionPreference): void;
+  onClose(): void;
+}) {
+  const overlayRef = useRef<HTMLDivElement | null>(null);
+  const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
+
+  useEffect(() => {
+    if (position.kind !== "custom") return;
+    const clampToViewport = () => {
+      const overlay = overlayRef.current;
+      if (!overlay) return;
+      const rect = overlay.getBoundingClientRect();
+      const next = clampRunOverlayPosition(position.xPercent, position.yPercent, window.innerWidth, window.innerHeight, rect.width, rect.height);
+      if (next.kind !== "custom" || next.xPercent !== position.xPercent || next.yPercent !== position.yPercent) onPosition(next);
+    };
+    clampToViewport();
+    window.addEventListener("resize", clampToViewport);
+    return () => window.removeEventListener("resize", clampToViewport);
+  }, [position, onPosition]);
+
+  const startDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const overlay = overlayRef.current;
+    if (!overlay) return;
+    const rect = overlay.getBoundingClientRect();
+    dragOffsetRef.current = { x: event.clientX - rect.left, y: event.clientY - rect.top };
+    event.currentTarget.setPointerCapture(event.pointerId);
+  };
+  const dragOverlay = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const overlay = overlayRef.current;
+    const offset = dragOffsetRef.current;
+    if (!overlay || !offset) return;
+    const rect = overlay.getBoundingClientRect();
+    onPosition(
+      clampRunOverlayPosition(
+        ((event.clientX - offset.x) / window.innerWidth) * 100,
+        ((event.clientY - offset.y) / window.innerHeight) * 100,
+        window.innerWidth,
+        window.innerHeight,
+        rect.width,
+        rect.height
+      )
+    );
+  };
+  const stopDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
+    dragOffsetRef.current = null;
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+  };
+  const positionStyle: CSSProperties = position.kind === "custom" ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, transform: "none" } : {};
+  const statusText = aiDecisionDebugStatusLabel(status, traceCount);
+
+  const overlay = (
+    <div ref={overlayRef} className={`aiDecisionDebugOverlay ${position.kind === "custom" ? "custom" : ""}`} style={positionStyle} data-testid="ai-decision-debug-overlay">
+      <section className="aiDecisionDebugWindow" aria-label="KI-Bewertung">
+        <div
+          className="aiDecisionDebugHead actionPanelFloatingDragHandle"
+          onPointerDown={startDrag}
+          onPointerMove={dragOverlay}
+          onPointerUp={stopDrag}
+          onPointerCancel={stopDrag}
+          title="KI-Bewertungsfenster verschieben"
+          aria-label="KI-Bewertungsfenster verschieben"
+        >
+          <div className="aiDecisionDebugTitle">
+            <Brain size={16} aria-hidden="true" />
+            <strong>KI-Bewertung</strong>
+            <span>{statusText}</span>
+          </div>
+          <div className="actionPanelFloatingControls">
+            <Move size={14} aria-hidden="true" />
+            <button
+              className="button iconOnly"
+              type="button"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={onClose}
+              aria-label="KI-Bewertungsfenster ausblenden"
+              title="Ausblenden"
+            >
+              <PanelTopClose size={14} />
+            </button>
+          </div>
+        </div>
+        <div className="aiDecisionDebugBody">
+          <AiDecisionDebugOverlayBody status={status} error={error} trace={trace} />
+        </div>
+      </section>
+    </div>
+  );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(overlay, document.body);
+}
+
+function AiDecisionDebugOverlayBody({
+  status,
+  error,
+  trace
+}: {
+  status: AiDecisionDebugOverlayStatus;
+  error: string;
+  trace: MaintenanceAiTraceDetail | null;
+}) {
+  if (status === "error") {
+    return <p className="aiDecisionDebugNotice error" role="alert">{error || "KI-Trace konnte nicht geladen werden."}</p>;
+  }
+  if (!trace) {
+    return <p className="aiDecisionDebugNotice" role="status">{status === "activating" ? "KI-Trace wird aktiviert." : "Warte auf die nächste KI-Entscheidung."}</p>;
+  }
+  return <AiDecisionDebugTraceView trace={trace} />;
+}
+
+function AiDecisionDebugTraceView({ trace }: { trace: MaintenanceAiTraceDetail }) {
+  const detail = trace.detail;
+  const metaRows = aiTraceMetaRows(trace).filter(([label]) => ["Entscheidung", "Seite", "State", "Aktion", "Plan", "Score", "Vertrauen"].includes(label));
+  const actionRows = aiTraceActionRows(detail).slice(0, 6);
+  const rankedAlternatives = aiDecisionDebugRecordList(detail.rankedAlternatives).slice(0, 4);
+  const scoreRows = aiTraceScoreRows(detail, 8);
+  const doctrineRows = aiTraceDoctrineRows(detail);
+  const notes = aiTraceDebugGapNotes(detail).slice(0, 3);
+  const warningItems = [
+    ...safeStringList(detail.warnings, 4),
+    ...(detail.fallbackUsed === true ? ["Fallback genutzt"] : []),
+    ...(detail.timeoutUsed === true ? ["Timeout genutzt"] : [])
+  ];
+  const visibleReasons = safeStringList(detail.visibleReasons, 5);
+  const whyNot = safeStringList(detail.whyNot, 5);
+  const longTermPlan = safeStringList(detail.longTermPlan, 5);
+  return (
+    <div className="aiDecisionDebugContent">
+      <div className="aiDecisionDebugTraceHead">
+        <strong>{aiTraceTitle(trace)}</strong>
+        <span>{new Date(trace.createdAt).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
+      </div>
+      <AiDecisionDebugRows rows={metaRows} />
+      <AiDecisionDebugChips title="Warnmarker" items={warningItems} tone="warning" />
+      <AiDecisionDebugChips title="Gründe" items={visibleReasons} />
+      <AiDecisionDebugChips title="Why-not" items={whyNot} />
+      <AiDecisionDebugChips title="Plan" items={longTermPlan} />
+      {actionRows.length > 0 ? (
+        <div className="aiDecisionDebugSection">
+          <strong>Aktionsranking</strong>
+          <div className="aiDecisionDebugActions">
+            {actionRows.map((action) => (
+              <div className={`aiDecisionDebugAction ${action.selected ? "selected" : ""}`} key={action.key}>
+                <div>
+                  <strong>#{action.rank} {action.label}</strong>
+                  <span>{action.selected ? "gewählt" : "Alternative"} · Priorität {action.priority}</span>
+                </div>
+                <p>{action.reason}</p>
+                {action.metrics.length > 0 ? <div className="aiDecisionDebugChipRow">{action.metrics.map((metric) => <span key={metric}>{metric}</span>)}</div> : null}
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+      {rankedAlternatives.length > 0 ? (
+        <div className="aiDecisionDebugSection">
+          <strong>Planranking</strong>
+          <div className="aiDecisionDebugCompactList">
+            {rankedAlternatives.map((alternative, index) => (
+              <div key={`${String(alternative.planId ?? alternative.planKind ?? "plan")}-${index}`}>
+                <span>#{String(alternative.rank ?? index + 1)} {String(alternative.planKind ?? alternative.selectedActionType ?? "Plan")}</span>
+                <strong>{typeof alternative.score === "number" ? alternative.score.toFixed(2) : "-"}</strong>
+              </div>
+            ))}
+          </div>
+        </div>
+      ) : null}
+      {scoreRows.length > 0 ? (
+        <div className="aiDecisionDebugSection">
+          <strong>Score-Komponenten</strong>
+          <AiDecisionDebugRows rows={scoreRows} />
+        </div>
+      ) : null}
+      {doctrineRows.length > 0 ? (
+        <div className="aiDecisionDebugSection">
+          <strong>Plan / Doctrine</strong>
+          <AiDecisionDebugRows rows={doctrineRows} />
+        </div>
+      ) : null}
+      <AiDecisionDebugChips title="Folgepunkte" items={notes} tone="muted" />
+    </div>
+  );
+}
+
+function AiDecisionDebugRows({ rows }: { rows: Array<[string, string]> }) {
+  if (rows.length === 0) return null;
+  return (
+    <div className="aiDecisionDebugRows">
+      {rows.map(([label, value]) => (
+        <div key={`${label}:${value}`}>
+          <span>{label}</span>
+          <strong>{value}</strong>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function AiDecisionDebugChips({ title, items, tone = "default" }: { title: string; items: string[]; tone?: "default" | "warning" | "muted" }) {
+  if (items.length === 0) return null;
+  return (
+    <div className={`aiDecisionDebugSection ${tone}`}>
+      <strong>{title}</strong>
+      <div className="aiDecisionDebugChipRow">
+        {items.map((item) => <span key={item}>{item}</span>)}
+      </div>
+    </div>
+  );
+}
+
+function aiDecisionDebugRecordList(value: unknown): Array<Record<string, unknown>> {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is Record<string, unknown> => Boolean(entry && typeof entry === "object" && !Array.isArray(entry)));
+}
+
+function aiDecisionDebugStatusLabel(status: AiDecisionDebugOverlayStatus, traceCount: number): string {
+  if (status === "activating") return "Aktivierung";
+  if (status === "waiting") return traceCount > 0 ? `${traceCount} geladen` : "Wartet";
+  if (status === "live") return traceCount > 0 ? `${traceCount} Traces` : "Live";
+  if (status === "error") return "Fehler";
+  return "Aus";
 }
 
 function ActionPanelDockPlaceholder({
@@ -15672,6 +16050,51 @@ async function fetchRecentGameResults(): Promise<RecentGameResultsResponse> {
     return { error: { message: "Letzte Spiele konnten nicht geladen werden." } };
   }
   return (await response.json()) as RecentGameResultsResponse;
+}
+
+async function enableAiDecisionDebugTracing(matchId: string): Promise<void> {
+  let response: Response;
+  try {
+    response = await fetch(`${SERVER_HTTP}${buildMaintenanceAiTraceEnablePath(matchId)}`, {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ mode: "detailed" })
+    });
+  } catch {
+    throw new ServerConnectionError();
+  }
+  const payload = (await response.json()) as { match?: unknown; error?: { message?: string } };
+  if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace konnte nicht aktiviert werden.");
+  const markers = findForbiddenMaintenanceMarkers(payload);
+  if (markers.length > 0) throw new Error("KI-Trace-Aktivierung wurde wegen Redaktionsprüfung blockiert.");
+}
+
+async function fetchAiDecisionDebugTraceIndex(matchId: string): Promise<MaintenanceAiTraceIndexEntry[]> {
+  let response: Response;
+  try {
+    response = await fetch(`${SERVER_HTTP}${buildMaintenanceAiTraceIndexPath(matchId)}`, { cache: "no-store" });
+  } catch {
+    throw new ServerConnectionError();
+  }
+  const payload = (await response.json()) as { traces?: MaintenanceAiTraceIndexEntry[]; error?: { message?: string } };
+  if (!response.ok) throw new Error(payload.error?.message ?? "KI-Trace-Timeline konnte nicht geladen werden.");
+  const markers = findForbiddenMaintenanceMarkers(payload);
+  if (markers.length > 0) throw new Error("KI-Trace-Timeline wurde wegen Redaktionsprüfung blockiert.");
+  return payload.traces ?? [];
+}
+
+async function fetchAiDecisionDebugTraceDetail(traceId: string): Promise<MaintenanceAiTraceDetail> {
+  let response: Response;
+  try {
+    response = await fetch(`${SERVER_HTTP}/api/storage/maintenance/ai-decision-traces/${encodeURIComponent(traceId)}`, { cache: "no-store" });
+  } catch {
+    throw new ServerConnectionError();
+  }
+  const payload = (await response.json()) as MaintenanceAiTraceDetail | { error?: { message?: string } };
+  if (!response.ok) throw new Error("error" in payload ? payload.error?.message ?? "KI-Trace-Detail konnte nicht geladen werden." : "KI-Trace-Detail konnte nicht geladen werden.");
+  const markers = findForbiddenMaintenanceMarkers(payload);
+  if (markers.length > 0) throw new Error("KI-Trace-Detail wurde wegen Redaktionsprüfung blockiert.");
+  return payload as MaintenanceAiTraceDetail;
 }
 
 function playerSlotForSide(lobby: MatchStartLobby, side: Side): "player_a" | "player_b" {

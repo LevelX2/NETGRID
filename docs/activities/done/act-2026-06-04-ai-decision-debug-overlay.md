@@ -1,19 +1,30 @@
 ---
 activityId: act-2026-06-04-ai-decision-debug-overlay
-status: inbox
+status: done
 kind: concept
 area: ai
 priority: normal
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-06-04
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-06-05
+completedAt: 2026-06-05
+branch: main
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - apps/web/app/page.tsx
+  - apps/web/app/globals.css
+  - apps/web/app/maintenance.ts
+  - apps/web/app/maintenance.test.ts
+  - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Aktueller Projektstatus.md
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-06.md
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/maintenance.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
+  - git diff --check
+  - Browser-Smoke 1280x720: Option schaltbar, aktives Spiel zeigt Overlay, Status Aktivierung/Wartet sichtbar
+  - Browser-Smoke 390x844: aktives Spiel zeigt Overlay innerhalb des Viewports
 ---
 
 # Schwebendes KI-Entscheidungsfenster für Action-Scores
@@ -61,13 +72,13 @@ Für lokale Debug- und Playtest-Zwecke soll im aktiven Spiel optional ein schweb
 
 ## Akzeptanzkriterien
 
-- [ ] Die Option ist default aus, lokal persistiert und in den bestehenden Optionen auffindbar.
-- [ ] Bei aktivierter Option erscheint im aktiven Spiel ein schwebendes KI-Bewertungsfenster mit der letzten KI-Entscheidung und einer Top-N-Liste bewerteter Alternativen.
-- [ ] Gewählte Aktion, Score/Priorität, Gründe, `whyNot` und Plan-/Doctrine-Beiträge werden nur aus side-sicheren, sanitisierten Debugdaten angezeigt.
-- [ ] Wenn Score- oder Plananteile fehlen, zeigt die UI keine erfundenen Werte; der fehlende Debugvertrag wird als Folgepunkt benannt.
-- [ ] Das Fenster bleibt auf Desktop und schmalem Viewport bedienbar, ohne das normale Aktionsfenster dauerhaft zu überdecken.
-- [ ] Redaction-Tests oder bestehende Forbidden-Marker-Checks beweisen, dass keine FullState-/Hidden-Info-/Token-/Decklisten-/`AIInput`-/unredigierten `DecisionDebug`-Marker im In-Game-Fenster landen.
-- [ ] Passende Web-/Server-/AI-Checks sind ausgeführt oder begründet ausgelassen, mindestens Web-Typecheck und ein fokussierter UI-/Projection-Test, sobald Code geändert wird.
+- [x] Die Option ist default aus, lokal persistiert und in den bestehenden Optionen auffindbar.
+- [x] Bei aktivierter Option erscheint im aktiven Spiel ein schwebendes KI-Bewertungsfenster mit der letzten KI-Entscheidung und einer Top-N-Liste bewerteter Alternativen.
+- [x] Gewählte Aktion, Score/Priorität, Gründe, `whyNot` und Plan-/Doctrine-Beiträge werden nur aus side-sicheren, sanitisierten Debugdaten angezeigt.
+- [x] Wenn Score- oder Plananteile fehlen, zeigt die UI keine erfundenen Werte; der fehlende Debugvertrag wird als Folgepunkt benannt.
+- [x] Das Fenster bleibt auf Desktop und schmalem Viewport bedienbar, ohne das normale Aktionsfenster dauerhaft zu überdecken.
+- [x] Redaction-Tests oder bestehende Forbidden-Marker-Checks beweisen, dass keine FullState-/Hidden-Info-/Token-/Decklisten-/`AIInput`-/unredigierten `DecisionDebug`-Marker im In-Game-Fenster landen.
+- [x] Passende Web-/Server-/AI-Checks sind ausgeführt oder begründet ausgelassen, mindestens Web-Typecheck und ein fokussierter UI-/Projection-Test, sobald Code geändert wird.
 
 ## Umsetzungshinweise
 
@@ -85,4 +96,8 @@ Für lokale Debug- und Playtest-Zwecke soll im aktiven Spiel optional ein schweb
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt als lokale, optionale In-Game-Debugansicht. Die Option `KI-Bewertungsfenster anzeigen` ist default aus, wird mit den bestehenden Gameplay-Einstellungen persistiert und aktiviert bei laufenden Matches die vorhandene redigierte Maintenance-KI-Trace-Erfassung. Das schwebende Fenster zeigt Status, letzte KI-Entscheidung, Aktionsranking, Score-Komponenten sowie Plan-/Doctrine-Zeilen nur aus sanitisierten Trace-Daten; jede Trace-Antwort wird vor der Anzeige mit `findForbiddenMaintenanceMarkers` geprüft.
+
+Fehlende Score- oder Plananteile werden als konkrete Folgepunkte angezeigt statt als Werte geschätzt. Das Fenster ist auf Desktop und schmalem Viewport bedienbar und bleibt Anzeige-only: keine Änderung an Engine, `LegalActions`, `applyAction`, Replay, StateHash, Randomness oder KI-Scoring.
+
+Hinweis zur Verifikation: `corepack pnpm --filter @netgrid/web test -- maintenance.test.ts` wurde zusätzlich versucht, lief wegen Skriptargument-Weitergabe breiter als beabsichtigt und scheiterte in bestehenden, nicht paketbezogenen Catalog-Data-Erwartungen in `app/api/cards/catalog-data.test.ts`. Der fokussierte Projection-Test wurde anschließend mit `corepack pnpm --filter @netgrid/web exec vitest run app/maintenance.test.ts` grün ausgeführt.

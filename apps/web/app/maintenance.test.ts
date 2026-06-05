@@ -7,7 +7,10 @@ import {
   buildMaintenanceMatchQuery,
   buildMaintenanceRecoveryLink,
   aiTraceActionRows,
+  aiTraceDebugGapNotes,
+  aiTraceDoctrineRows,
   aiTraceMetaRows,
+  aiTraceScoreRows,
   aiTraceTitle,
   DEFAULT_MAINTENANCE_CLEANUP_FILTERS,
   EMPTY_MAINTENANCE_FILTERS,
@@ -177,6 +180,46 @@ describe("Backend 0.5 maintenance UI helpers", () => {
     expect(rows[1]?.metrics).toEqual(["jetzt 0", "Pool nachher 3", "Bedarf acute"]);
     expect(aiTraceActionRows({ rankedAlternatives: [] })).toEqual([]);
     expect(findForbiddenMaintenanceMarkers({ detail: { actionAlternatives: [{ meta: { decisionDebug: true } }] } }).length).toBeGreaterThan(0);
+  });
+
+  it("formats in-game AI trace score and doctrine rows without inventing missing values", () => {
+    const detail = {
+      planKind: "score_next_turn",
+      doctrinePlanWeight: 0.35,
+      scoreBreakdown: [
+        { key: "plan", label: "Plan", value: 12.5 },
+        { key: "cost", label: "Kosten", value: -2 }
+      ],
+      ownDeckDoctrine: {
+        side: "corp",
+        confidence: 0.8,
+        archetypeTags: ["remote", "economy"],
+        riskFlags: ["agenda_density"]
+      }
+    };
+
+    expect(aiTraceScoreRows(detail)).toEqual([
+      ["Plan", "12.50"],
+      ["Kosten", "-2.00"]
+    ]);
+    expect(aiTraceDoctrineRows(detail)).toEqual([
+      ["Doctrine-Gewicht", "0.35"],
+      ["Doctrine-Seite", "Korp"],
+      ["Doctrine-Vertrauen", "80%"],
+      ["Archetypen", "remote, economy"],
+      ["Risiken", "agenda_density"]
+    ]);
+    expect(aiTraceDebugGapNotes(detail)).toEqual(["Keine Top-Alternativen im aktuellen Trace."]);
+
+    const sparseDetail = { selectedActionType: "gain_credit" };
+    expect(aiTraceScoreRows(sparseDetail)).toEqual([]);
+    expect(aiTraceDoctrineRows(sparseDetail)).toEqual([]);
+    expect(aiTraceDebugGapNotes(sparseDetail)).toEqual([
+      "Keine Top-Alternativen im aktuellen Trace.",
+      "Keine Score-Komponenten im aktuellen Trace.",
+      "Keine Plan-/Doctrine-Beiträge im aktuellen Trace."
+    ]);
+    expect(JSON.stringify({ detail })).not.toMatch(/AIInput|DecisionDebug|cardInstances|privatePayload|decklist|C:\\Users/i);
   });
 
   it("builds cursor paths and merges AI decision trace live-follow updates", () => {

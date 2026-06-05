@@ -10401,6 +10401,210 @@ select,
   transform: translateY(0);
 }
 
+.aiDecisionDebugOverlay {
+  position: fixed;
+  top: 76px;
+  right: 18px;
+  z-index: 209;
+  width: clamp(280px, 34vw, 460px);
+  max-width: calc(100vw - 24px);
+  pointer-events: none;
+}
+
+.aiDecisionDebugOverlay.custom {
+  right: auto;
+}
+
+.aiDecisionDebugWindow {
+  width: 100%;
+  max-height: calc(100dvh - 96px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line) 46%);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--panel), transparent 4%);
+  box-shadow:
+    0 14px 36px rgb(0 0 0 / 0.34),
+    0 0 0 1px color-mix(in srgb, var(--runner), transparent 58%);
+  backdrop-filter: blur(9px);
+  overflow: hidden;
+  pointer-events: auto;
+  animation: runOverlaySlideIn 180ms ease-out;
+}
+
+.aiDecisionDebugHead {
+  min-width: 0;
+  min-height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 9px 8px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--runner), var(--line) 54%);
+  background:
+    linear-gradient(color-mix(in srgb, var(--runner), transparent 88%), color-mix(in srgb, var(--runner), transparent 88%)),
+    var(--panel);
+}
+
+.aiDecisionDebugTitle {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.aiDecisionDebugTitle strong {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+}
+
+.aiDecisionDebugTitle span {
+  flex: 0 0 auto;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.aiDecisionDebugBody {
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.aiDecisionDebugNotice {
+  margin: 0;
+  padding: 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.aiDecisionDebugNotice.error {
+  color: var(--danger);
+}
+
+.aiDecisionDebugContent {
+  display: grid;
+  gap: 10px;
+  padding: 10px;
+  font-size: 12px;
+}
+
+.aiDecisionDebugTraceHead {
+  min-width: 0;
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.aiDecisionDebugTraceHead strong,
+.aiDecisionDebugAction strong,
+.aiDecisionDebugSection > strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.aiDecisionDebugTraceHead span {
+  flex: 0 0 auto;
+  color: var(--muted);
+}
+
+.aiDecisionDebugRows,
+.aiDecisionDebugCompactList {
+  display: grid;
+  gap: 4px;
+}
+
+.aiDecisionDebugRows > div,
+.aiDecisionDebugCompactList > div {
+  min-width: 0;
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 4px 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--line), transparent 55%);
+}
+
+.aiDecisionDebugRows span,
+.aiDecisionDebugCompactList span {
+  min-width: 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
+.aiDecisionDebugRows strong,
+.aiDecisionDebugCompactList strong {
+  min-width: 0;
+  text-align: right;
+  overflow-wrap: anywhere;
+}
+
+.aiDecisionDebugSection {
+  min-width: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.aiDecisionDebugSection.warning .aiDecisionDebugChipRow span {
+  border-color: color-mix(in srgb, var(--cue), var(--line) 35%);
+  color: var(--cue);
+}
+
+.aiDecisionDebugSection.muted .aiDecisionDebugChipRow span {
+  color: var(--muted);
+}
+
+.aiDecisionDebugChipRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+}
+
+.aiDecisionDebugChipRow span {
+  min-width: 0;
+  max-width: 100%;
+  padding: 2px 7px;
+  border: 1px solid color-mix(in srgb, var(--runner), var(--line) 55%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--field-bg), transparent 12%);
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.aiDecisionDebugActions {
+  display: grid;
+  gap: 6px;
+}
+
+.aiDecisionDebugAction {
+  display: grid;
+  gap: 5px;
+  min-width: 0;
+  padding: 7px;
+  border: 1px solid color-mix(in srgb, var(--line), transparent 10%);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--field-bg), transparent 18%);
+}
+
+.aiDecisionDebugAction.selected {
+  border-color: color-mix(in srgb, var(--runner), var(--line) 25%);
+  background: color-mix(in srgb, var(--runner), var(--field-bg) 86%);
+}
+
+.aiDecisionDebugAction > div:first-child {
+  min-width: 0;
+  display: grid;
+  gap: 2px;
+}
+
+.aiDecisionDebugAction > div:first-child span,
+.aiDecisionDebugAction p {
+  margin: 0;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+}
+
 @keyframes runOverlaySlideIn {
   from {
     opacity: 0;
@@ -12387,6 +12591,18 @@ select,
   }
 
   .actionPanelFloatingWindow {
+    max-height: calc(100dvh - 72px);
+  }
+
+  .aiDecisionDebugOverlay {
+    top: 58px;
+    left: 8px;
+    right: auto;
+    width: calc(100vw - 16px);
+    max-width: calc(100vw - 16px);
+  }
+
+  .aiDecisionDebugWindow {
     max-height: calc(100dvh - 72px);
   }
 

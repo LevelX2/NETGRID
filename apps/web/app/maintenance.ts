@@ -404,6 +404,48 @@ export function aiTraceActionRows(detail: Record<string, unknown>): MaintenanceA
     .filter((entry): entry is MaintenanceAiTraceActionRow => Boolean(entry));
 }
 
+export function aiTraceScoreRows(detail: Record<string, unknown>, limit = 8): Array<[string, string]> {
+  return recordList(detail.scoreBreakdown)
+    .slice(0, Math.max(0, limit))
+    .map((component): [string, string] => {
+      const label = String(component.label ?? component.key ?? "Komponente");
+      const value = typeof component.value === "number" && Number.isFinite(component.value) ? component.value.toFixed(2) : "-";
+      return [label, value];
+    });
+}
+
+export function aiTraceDoctrineRows(detail: Record<string, unknown>): Array<[string, string]> {
+  const rows: Array<[string, string]> = [];
+  if (typeof detail.doctrinePlanWeight === "number" && Number.isFinite(detail.doctrinePlanWeight)) {
+    rows.push(["Doctrine-Gewicht", detail.doctrinePlanWeight.toFixed(2)]);
+  }
+  const doctrine = detail.ownDeckDoctrine && typeof detail.ownDeckDoctrine === "object" && !Array.isArray(detail.ownDeckDoctrine)
+    ? detail.ownDeckDoctrine as Record<string, unknown>
+    : undefined;
+  if (!doctrine) return rows;
+  if (doctrine.side === "runner" || doctrine.side === "corp") rows.push(["Doctrine-Seite", doctrine.side === "runner" ? "Runner" : "Korp"]);
+  if (typeof doctrine.confidence === "number" && Number.isFinite(doctrine.confidence)) rows.push(["Doctrine-Vertrauen", `${Math.round(doctrine.confidence * 100)}%`]);
+  const archetypeTags = safeStringList(doctrine.archetypeTags, 4);
+  if (archetypeTags.length > 0) rows.push(["Archetypen", archetypeTags.join(", ")]);
+  const riskFlags = safeStringList(doctrine.riskFlags, 4);
+  if (riskFlags.length > 0) rows.push(["Risiken", riskFlags.join(", ")]);
+  return rows;
+}
+
+export function aiTraceDebugGapNotes(detail: Record<string, unknown>): string[] {
+  const notes: string[] = [];
+  if (aiTraceActionRows(detail).length === 0 && recordList(detail.rankedAlternatives).length === 0) {
+    notes.push("Keine Top-Alternativen im aktuellen Trace.");
+  }
+  if (aiTraceScoreRows(detail).length === 0) {
+    notes.push("Keine Score-Komponenten im aktuellen Trace.");
+  }
+  if (safeStringList(detail.longTermPlan, 1).length === 0 && aiTraceDoctrineRows(detail).length === 0 && typeof detail.planKind !== "string") {
+    notes.push("Keine Plan-/Doctrine-Beiträge im aktuellen Trace.");
+  }
+  return notes;
+}
+
 function aiTraceActionLabel(rawLabel: string, actionType: string, sourceTitle: string, economy: Record<string, unknown> | undefined): string {
   const economyKind = typeof economy?.economyKind === "string" ? economy.economyKind : "";
   if (economyKind === "basic_credit") return "Credit nehmen";
@@ -435,6 +477,11 @@ function aiTraceActionReason(value: unknown): string {
 function numberField(record: Record<string, unknown>, key: string): number | undefined {
   const value = record[key];
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function recordList(value: unknown): Array<Record<string, unknown>> {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is Record<string, unknown> => Boolean(entry && typeof entry === "object" && !Array.isArray(entry)));
 }
 
 function formatSignedCredits(value: number): string {
