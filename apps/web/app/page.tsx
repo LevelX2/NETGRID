@@ -9631,6 +9631,7 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
   const visibleReasons = safeStringList(detail.visibleReasons, 5);
   const whyNot = safeStringList(detail.whyNot, 5);
   const longTermPlan = safeStringList(detail.longTermPlan, 5);
+  const tacticalPlanItems = aiDecisionDebugDetailSectionItems(detail, "tactical_plan", 12);
   const title = mode === "preview" ? aiDecisionPreviewTitle(trace) : aiTraceTitle(trace);
   return (
     <div className="aiDecisionDebugContent">
@@ -9643,6 +9644,7 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
       <AiDecisionDebugChips title="Gründe" items={visibleReasons} />
       <AiDecisionDebugChips title="Why-not" items={whyNot} />
       <AiDecisionDebugChips title="Plan" items={longTermPlan} />
+      <AiDecisionDebugChips title="Taktische Ebene" items={tacticalPlanItems} />
       {actionRows.length > 0 ? (
         <div className="aiDecisionDebugSection">
           <strong>{mode === "preview" ? "Legale Aktionen nach KI-Score" : "Action-Level-Ranking"}</strong>
@@ -9672,7 +9674,7 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
       ) : null}
       {rankedAlternatives.length > 0 ? (
         <div className="aiDecisionDebugSection">
-          <strong>Planranking</strong>
+          <strong>Semantic-Ranking</strong>
           <div className="aiDecisionDebugCompactList">
             {rankedAlternatives.map((alternative, index) => (
               <div key={`${String(alternative.planId ?? alternative.planKind ?? "plan")}-${index}`}>
@@ -9861,6 +9863,11 @@ function AiDecisionDebugChips({ title, items, tone = "default" }: { title: strin
       </div>
     </div>
   );
+}
+
+function aiDecisionDebugDetailSectionItems(detail: Record<string, unknown>, sectionId: string, limit: number): string[] {
+  const section = aiDecisionDebugRecordList(detail.detailSections).find((entry) => entry.id === sectionId);
+  return safeStringList(section?.items, limit);
 }
 
 function aiDecisionDebugRecordList(value: unknown): Array<Record<string, unknown>> {
