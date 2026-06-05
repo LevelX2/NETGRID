@@ -3318,6 +3318,15 @@ function chooseSemanticRuntimeAction(
       ...choice.evidence,
       `semantic_runtime_default:true`,
       `semantic_runtime_scope:${choice.scopeId}`,
+      ...(planRuntime.selectedPlan
+        ? [
+            `tactical_plan:${planRuntime.selectedPlan.planId}`,
+            `tactical_plan_type:${planRuntime.selectedPlan.type}`,
+          ]
+        : []),
+      ...(planRuntime.selectedStep
+        ? [`tactical_step:${planRuntime.selectedStep.kind}`]
+        : []),
       `legacy_reference_reason:${legacyDecision.reasonCode}`,
       ...(legacyActionType
         ? [`legacy_reference_action_type:${legacyActionType}`]
@@ -3377,8 +3386,7 @@ function semanticRuntimeActionTypeIsReactive(type: LegalAction["type"]): boolean
     type === "pump_breaker" ||
     type === "continue_run" ||
     type === "jack_out" ||
-    type === "rez_ice" ||
-    type === "decline_rez"
+    false
   );
 }
 

@@ -223,6 +223,168 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
+  it("uses a breaker coverage plan step before a blocked remote contest", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.rig = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-wall", "corp", "ice", { rezzed: true }),
+      ]),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("draw");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "tactical_plan_type:runner.obtain_breaker_coverage",
+        "tactical_step:draw_for_answer",
+      ]),
+    );
+    expect(decision.decisionDebug?.planKind).toBe(
+      "runner.obtain_breaker_coverage",
+    );
+    expect(decision.decisionDebug?.detailSections).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          id: "tactical_plan",
+          items: expect.arrayContaining([
+            "blocked_plan_count:1",
+            "selected_step_kind:draw_for_answer",
+            "selected_step_mapping:matched",
+          ]),
+        }),
+      ]),
+    );
+  });
+
+  it("keeps an opportunistic central run available while a remote plan is blocked", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction(
+        "run-hq",
+        "runner",
+        "start_run",
+        "Run HQ",
+        { credits: 0 },
+        { payload: { serverId: "hq" } },
+      ),
+    ]);
+    input.playerView.own.rig = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-wall", "corp", "ice", { rezzed: true }),
+      ]),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("run-hq");
+    expect(decision.decisionDebug?.planKind).toBe(
+      "runner.opportunistic_central_run",
+    );
+  });
+
+  it("uses Broker build and payout as explicit credit-bank plans", () => {
+    const stableInput = aiInput("runner", [
+      legalAction(
+        "broker-load",
+        "runner",
+        "trigger_ability",
+        "Credits auf Broker legen",
+        { credits: 0 },
+        { source: "broker" },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    stableInput.playerView.own.credits = 6;
+
+    const stableDecision = chooseRunnerAction(stableInput);
+
+    expect(stableDecision.actionId).toBe("broker-load");
+    expect(stableDecision.decisionDebug?.planKind).toBe(
+      "runner.build_credit_bank",
+    );
+
+    const lowCreditInput = aiInput("runner", [
+      legalAction(
+        "broker-take",
+        "runner",
+        "trigger_ability",
+        "Credits von Broker nehmen",
+        { credits: 0 },
+        { source: "broker" },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    lowCreditInput.playerView.own.credits = 2;
+
+    const lowCreditDecision = chooseRunnerAction(lowCreditInput);
+
+    expect(lowCreditDecision.actionId).toBe("broker-take");
+    expect(lowCreditDecision.decisionDebug?.planKind).toBe(
+      "runner.cash_out_credit_bank",
+    );
+  });
+
+  it("represents a corp rez window as a rez defense plan", () => {
+    const input = aiInput("corp", [
+      legalAction(
+        "rez-outer",
+        "corp",
+        "rez_ice",
+        "Rez outer ICE",
+        { credits: 3 },
+        { source: "outer-ice", payload: { serverId: "remote_1" } },
+      ),
+      legalAction("decline-rez", "corp", "decline_rez", "Decline rez", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [visibleCard("outer-ice", "corp", "ice")]),
+    ];
+
+    const decision = chooseCorpAction(input);
+
+    expect(decision.actionId).toBe("rez-outer");
+    expect(decision.decisionDebug?.planKind).toBe("corp.rez_defense");
+    expect(decision.evidence).toContain("tactical_step:rez_outer_ice");
+  });
+
   it("keeps legacy available only through the explicit runtime kill switch", () => {
     process.env.NETGRID_SEMANTIC_AI_RUNTIME = "legacy";
     const input = aiInput("runner", [
