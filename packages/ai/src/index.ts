@@ -193,6 +193,11 @@ export {
   evaluateCorpOpeningHand,
   evaluateRunnerOpeningHand,
 } from "./deck-doctrine";
+export {
+  buildDeckCapabilityProfile,
+  buildDeckCapabilityProfileFromInput,
+  redactedDeckCapabilityFacts,
+} from "./deck-capabilities";
 export { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 export type {
   AiDeckDoctrineDeckSnapshot,
@@ -200,6 +205,19 @@ export type {
   OpeningHandEvaluation,
   RunnerOpeningHandEvaluation,
 } from "./deck-doctrine";
+export type {
+  BreakerCapability,
+  BreakerCoverageKind,
+  BreakerCoverageMatrix,
+  BuildDeckCapabilityProfileParams,
+  CoverageState,
+  DeckCapabilityConfidence,
+  DeckCapabilityProfile,
+  EconomyBankTool,
+  MemoryCapabilityProfile,
+  MissingCapability,
+  SearchAccessProfile,
+} from "./deck-capabilities";
 export type {
   AiDeckStrategyProfile,
   CorpDeckStrategyProfiles,
