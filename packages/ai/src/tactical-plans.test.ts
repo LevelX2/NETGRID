@@ -498,6 +498,128 @@ describe("tactical plan model", () => {
       key: "empty_remote_no_root_value",
     });
   });
+
+  it("uses bank capability evidence for runner cashout plans", () => {
+    const input = aiInput("runner", [
+      legalAction("broker-cash", "runner", "trigger_ability", {}, {
+        source: "onr_v1_154_broker",
+        label: "Von Broker nehmen",
+      }),
+    ]);
+    input.playerView.own.credits = 2;
+    input.playerView.own.rig = [
+      visibleCard("onr_v1_154_broker", "runner", "resource", {
+        counterDisplays: [
+          {
+            id: "broker-bank",
+            amount: 3,
+            displayKind: "stored_credits",
+            label: "3",
+            ariaLabel: "3 gespeicherte Credits",
+            usageHint: "spendable",
+          },
+        ],
+      }),
+    ];
+    const deckCapabilities = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: input.playerView,
+      legalActions: input.legalActions,
+      deckSnapshot: {
+        deckSnapshotId: "tactical-plan-runner-bank-test",
+        side: "runner",
+        cards: [{ cardId: "onr_v1_154_broker", quantity: 1 }],
+      },
+    });
+
+    const plans = buildTacticalPlans({ input, deckCapabilities });
+    const cashoutPlan = plans.find(
+      (plan) => plan.type === "runner.cash_out_credit_bank",
+    );
+
+    expect(cashoutPlan?.currentStep.requiredCapabilities[0]?.kind).toBe("bank_payout");
+    expect(cashoutPlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "bank_tool_count:1",
+        "bank_estimated_payout:3",
+      ]),
+    );
+  });
+
+  it("blocks corp score windows that are not protected yet", () => {
+    const input = aiInput("corp", [
+      legalAction("advance-agenda", "corp", "advance_card", {}, {
+        source: "agenda-1",
+      }),
+    ]);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [
+        visibleCard("agenda-1", "corp", "agenda", {
+          advancementCounters: 0,
+          advancementRequirement: 3,
+        }),
+      ]),
+    ];
+
+    const plans = buildTacticalPlans({ input });
+    const scorePlan = plans.find(
+      (plan) => plan.type === "corp.create_score_window",
+    );
+
+    expect(scorePlan?.status).toBe("blocked");
+    expect(scorePlan?.currentStep.kind).toBe("protect_remote");
+    expect(scorePlan?.blockers.map((blocker) => blocker.kind)).toEqual(
+      expect.arrayContaining(["score_window_unprotected"]),
+    );
+    expect(scorePlan?.nextSteps.map((step) => step.kind)).toEqual(
+      expect.arrayContaining([
+        "build_remote",
+        "protect_remote",
+        "build_rez_reserve",
+        "advance_score_card",
+        "score_agenda",
+      ]),
+    );
+  });
+
+  it("builds a rez reserve before advancing in a protected low-credit remote", () => {
+    const input = aiInput("corp", [
+      legalAction("advance-agenda", "corp", "advance_card", {}, {
+        source: "agenda-1",
+      }),
+      legalAction("gain", "corp", "gain_credit"),
+    ]);
+    input.playerView.own.credits = 2;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("remote-ice", "corp", "ice", {
+          rezzed: false,
+        }),
+      ], [
+        visibleCard("agenda-1", "corp", "agenda", {
+          advancementCounters: 0,
+          advancementRequirement: 3,
+        }),
+      ]),
+    ];
+
+    const plans = buildTacticalPlans({ input });
+    const scorePlan = plans.find(
+      (plan) => plan.type === "corp.create_score_window",
+    );
+
+    expect(scorePlan?.status).toBe("blocked");
+    expect(scorePlan?.currentStep.kind).toBe("build_rez_reserve");
+    expect(scorePlan?.blockers.map((blocker) => blocker.kind)).toEqual(
+      expect.arrayContaining(["missing_rez_reserve"]),
+    );
+  });
 });
 
 function aiInput(side: Side, legalActions: LegalAction[]): AiDecisionInput {

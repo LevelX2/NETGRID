@@ -41,6 +41,10 @@ export type PlanStepKind =
   | "draw_for_answer"
   | "search_for_answer"
   | "gain_credits"
+  | "build_remote"
+  | "protect_remote"
+  | "build_rez_reserve"
+  | "install_or_prepare_agenda"
   | "build_bank_counter"
   | "cash_out_bank"
   | "run_target"
@@ -75,6 +79,7 @@ export type RequiredCapabilityKind =
   | "bank_payout"
   | "remote_protection"
   | "agenda_score_window"
+  | "rez_reserve"
   | "rez_window";
 
 export type RequiredCapability = {
@@ -520,6 +525,16 @@ function actionTypeMatchesStep(step: PlanStep, actionType: string): boolean {
       );
     case "gain_credits":
       return actionType === "gain_credit";
+    case "build_remote":
+    case "protect_remote":
+    case "install_or_prepare_agenda":
+      return actionType === "install_card";
+    case "build_rez_reserve":
+      return (
+        actionType === "gain_credit" ||
+        actionType === "trigger_ability" ||
+        actionType === "activated_card_ability"
+      );
     case "build_bank_counter":
     case "cash_out_bank":
       return actionType === "trigger_ability" || actionType === "activated_card_ability";
@@ -886,6 +901,8 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
     );
   }
   const bankBuildActions = input.legalActions.filter(isBankBuildAction);
+  const runnerBankToolEvidence = bankToolEvidence(context, "runner");
+  const runnerBankPayout = largestBankPayout(context, "runner");
   const runnerFundingNeed = runnerHasConcreteFundingNeed(input, [
     ...blockedRemoteRuns,
     ...blockedCentralRuns,
@@ -908,9 +925,21 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
           stepId: "build_bank_counter:runner",
           kind: "build_bank_counter",
           desiredActionSemantics: ["card_ability.trigger", "card_ability.unknown"],
+          requiredCapabilities: [
+            {
+              capabilityId: "runner.bank_capacity",
+              kind: "bank_capacity",
+              side: "runner",
+              target: { kind: "bank", id: "runner_credit_bank" },
+              evidence: runnerBankToolEvidence,
+            },
+          ],
           rationale: ["credits are stable enough to bank for later plan execution"],
         }),
-        evidence: bankBuildActions.map((action) => `bank_build_action:${action.actionId}`),
+        evidence: [
+          ...bankBuildActions.map((action) => `bank_build_action:${action.actionId}`),
+          ...runnerBankToolEvidence,
+        ],
         stateVersion,
       }),
     );
@@ -938,13 +967,33 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
           stepId: "cash_out_bank:runner",
           kind: "cash_out_bank",
           desiredActionSemantics: ["card_ability.trigger", "card_ability.unknown"],
+          requiredCapabilities: [
+            {
+              capabilityId: "runner.bank_payout",
+              kind: "bank_payout",
+              side: "runner",
+              target: { kind: "bank", id: "runner_credit_bank" },
+              evidence: [
+                ...runnerBankToolEvidence,
+                ...(runnerBankPayout !== undefined
+                  ? [`bank_estimated_payout:${runnerBankPayout}`]
+                  : []),
+              ],
+            },
+          ],
           rationale: [
             runnerFundingNeed
               ? "stored credits can fund an active plan"
               : "low credits make stored bank credits immediately useful",
+            ...(runnerBankPayout !== undefined
+              ? [`bank_estimated_payout:${runnerBankPayout}`]
+              : []),
           ],
         }),
-        evidence: bankPayoutActions.map((action) => `bank_payout_action:${action.actionId}`),
+        evidence: [
+          ...bankPayoutActions.map((action) => `bank_payout_action:${action.actionId}`),
+          ...runnerBankToolEvidence,
+        ],
         stateVersion,
       }),
     );
@@ -971,13 +1020,19 @@ function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan
           desiredActionSemantics: ["score.agenda"],
           rationale: ["agenda score action is already legal"],
         }),
-        evidence: [`score_action:${action.actionId}`],
+        nextSteps: corpScoreWindowSequence(action.actionId),
+        evidence: [
+          `score_action:${action.actionId}`,
+          "corp_score_sequence:score_now",
+        ],
         stateVersion,
       }),
     );
   }
   for (const action of input.legalActions.filter((candidate) => candidate.type === "advance_card")) {
     const serverId = actionServerId(action) ?? visibleSourceServerId(input.playerView, action);
+    const blockers = corpScoreWindowBlockers(input, serverId, action);
+    const currentStep = corpScoreWindowCurrentStep(action, blockers);
     if (
       serverId &&
       !remoteIsProtected(input.playerView, serverId) &&
@@ -991,17 +1046,18 @@ function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan
         planId: `corp.create_score_window:${action.actionId}`,
         side: "corp",
         type: "corp.create_score_window",
-        status: "active",
+        status: blockers.length > 0 ? "blocked" : "active",
         priority: serverId && remoteIsProtected(input.playerView, serverId) ? 900 : 760,
         horizonTurns: 1,
         ...(serverId ? { target: { kind: "server", id: serverId } } : {}),
-        currentStep: createPlanStep({
-          stepId: `advance_score_card:${action.actionId}`,
-          kind: "advance_score_card",
-          desiredActionSemantics: ["score.advance_card"],
-          rationale: ["advance action progresses a visible score window"],
-        }),
-        evidence: [`advance_action:${action.actionId}`],
+        blockers,
+        currentStep,
+        nextSteps: corpScoreWindowSequence(action.actionId),
+        evidence: [
+          `advance_action:${action.actionId}`,
+          "corp_score_sequence:advance_score_card",
+          ...blockers.flatMap((blocker) => blocker.evidence),
+        ],
         stateVersion,
       }),
     );
@@ -1029,6 +1085,7 @@ function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan
     );
   }
   const bankBuildActions = input.legalActions.filter(isBankBuildAction);
+  const corpBankToolEvidence = bankToolEvidence(context, "corp");
   if (
     bankBuildActions.length > 0 &&
     input.playerView.own.credits >= 4 &&
@@ -1047,14 +1104,212 @@ function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan
           stepId: "build_bank_counter:corp",
           kind: "build_bank_counter",
           desiredActionSemantics: ["card_ability.trigger", "card_ability.unknown"],
+          requiredCapabilities: [
+            {
+              capabilityId: "corp.bank_capacity",
+              kind: "bank_capacity",
+              side: "corp",
+              target: { kind: "bank", id: "corp_credit_bank" },
+              evidence: corpBankToolEvidence,
+            },
+          ],
           rationale: ["corp can bank spare credits for future score or rez windows"],
         }),
-        evidence: bankBuildActions.map((action) => `bank_build_action:${action.actionId}`),
+        evidence: [
+          ...bankBuildActions.map((action) => `bank_build_action:${action.actionId}`),
+          ...corpBankToolEvidence,
+        ],
         stateVersion,
       }),
     );
   }
   return plans;
+}
+
+function corpScoreWindowBlockers(
+  input: AiDecisionInput,
+  serverId: string | undefined,
+  action: LegalAction,
+): PlanBlocker[] {
+  const blockers: PlanBlocker[] = [];
+  const target = serverId ? { kind: "server" as const, id: serverId } : undefined;
+  if (
+    serverId &&
+    isRemoteServer(serverId) &&
+    !remoteIsProtected(input.playerView, serverId) &&
+    !advanceCompletesScore(input.playerView, action)
+  ) {
+    blockers.push({
+      blockerId: `score_window_unprotected:${serverId}`,
+      kind: "score_window_unprotected",
+      severity: "hard",
+      ...(target ? { target } : {}),
+      removalStepKind: "protect_remote",
+      evidence: [`server:${serverId}`, "remote_protection:false"],
+    });
+  }
+  if (
+    serverId &&
+    remoteIsProtected(input.playerView, serverId) &&
+    serverHasUnrezzedIce(input.playerView, serverId) &&
+    input.playerView.own.credits < 4
+  ) {
+    blockers.push({
+      blockerId: `missing_rez_reserve:${serverId}`,
+      kind: "missing_rez_reserve",
+      severity: "soft",
+      ...(target ? { target } : {}),
+      removalStepKind: "build_rez_reserve",
+      evidence: [
+        `server:${serverId}`,
+        `corp_credits:${input.playerView.own.credits}`,
+        "rez_reserve_below_pragmatic_floor:4",
+      ],
+    });
+  }
+  return blockers;
+}
+
+function corpScoreWindowCurrentStep(
+  action: LegalAction,
+  blockers: readonly PlanBlocker[],
+): PlanStep {
+  if (blockers.some((blocker) => blocker.kind === "score_window_unprotected")) {
+    return createPlanStep({
+      stepId: `protect_remote:${action.actionId}`,
+      kind: "protect_remote",
+      desiredActionSemantics: ["install.card", "corp_window.rez"],
+      requiredCapabilities: [
+        {
+          capabilityId: `remote_protection:${action.actionId}`,
+          kind: "remote_protection",
+          side: "corp",
+          evidence: ["score_window_unprotected"],
+        },
+      ],
+      rationale: ["score window must be protected before advancing safely"],
+    });
+  }
+  if (blockers.some((blocker) => blocker.kind === "missing_rez_reserve")) {
+    return createPlanStep({
+      stepId: `build_rez_reserve:${action.actionId}`,
+      kind: "build_rez_reserve",
+      desiredActionSemantics: ["economy.gain_credit", "card_ability.trigger"],
+      requiredCapabilities: [
+        {
+          capabilityId: `rez_reserve:${action.actionId}`,
+          kind: "rez_reserve",
+          side: "corp",
+          evidence: ["missing_rez_reserve"],
+        },
+      ],
+      rationale: ["score window needs a small rez reserve before advancing"],
+    });
+  }
+  return createPlanStep({
+    stepId: `advance_score_card:${action.actionId}`,
+    kind: "advance_score_card",
+    desiredActionSemantics: ["score.advance_card"],
+    rationale: ["advance action progresses a visible score window"],
+  });
+}
+
+function corpScoreWindowSequence(actionId: string): PlanStep[] {
+  return [
+    createPlanStep({
+      stepId: `build_remote:${actionId}`,
+      kind: "build_remote",
+      desiredActionSemantics: ["install.card"],
+      rationale: ["build or reuse a scoring remote"],
+    }),
+    createPlanStep({
+      stepId: `protect_remote:${actionId}`,
+      kind: "protect_remote",
+      desiredActionSemantics: ["install.card", "corp_window.rez"],
+      requiredCapabilities: [
+        {
+          capabilityId: `remote_protection:${actionId}`,
+          kind: "remote_protection",
+          side: "corp",
+          evidence: ["score_window_sequence"],
+        },
+      ],
+      rationale: ["protect the scoring remote"],
+    }),
+    createPlanStep({
+      stepId: `build_rez_reserve:${actionId}`,
+      kind: "build_rez_reserve",
+      desiredActionSemantics: ["economy.gain_credit", "card_ability.trigger"],
+      requiredCapabilities: [
+        {
+          capabilityId: `rez_reserve:${actionId}`,
+          kind: "rez_reserve",
+          side: "corp",
+          evidence: ["score_window_sequence"],
+        },
+      ],
+      rationale: ["hold credits for a relevant rez window"],
+    }),
+    createPlanStep({
+      stepId: `install_or_prepare_agenda:${actionId}`,
+      kind: "install_or_prepare_agenda",
+      desiredActionSemantics: ["install.card"],
+      rationale: ["prepare an agenda or scoreable card"],
+    }),
+    createPlanStep({
+      stepId: `advance_score_card:${actionId}`,
+      kind: "advance_score_card",
+      desiredActionSemantics: ["score.advance_card"],
+      rationale: ["advance the score card"],
+    }),
+    createPlanStep({
+      stepId: `score_agenda:${actionId}`,
+      kind: "score_agenda",
+      desiredActionSemantics: ["score.agenda"],
+      rationale: ["score when the agenda is ready"],
+    }),
+  ];
+}
+
+function serverHasUnrezzedIce(playerView: PlayerView, serverId: string): boolean {
+  const server = playerView.servers.find((candidate) => candidate.id === serverId);
+  return server?.ice.some((ice) => ice.rezzed !== true) === true;
+}
+
+function bankToolEvidence(
+  context: TacticalPlanBuildContext,
+  side: Side,
+): string[] {
+  const tools = side === "runner"
+    ? context.deckCapabilities?.runner?.economyBankTools ?? []
+    : context.deckCapabilities?.corp?.economyBankTools ?? [];
+  if (tools.length === 0) return [];
+  const statuses = [...new Set(tools.map((tool) => tool.status))].sort();
+  const legalBuild = tools.some((tool) => tool.buildActionLegal);
+  const legalCashOut = tools.some((tool) => tool.cashOutActionLegal);
+  return [
+    `bank_tool_count:${tools.length}`,
+    `bank_tool_status:${statuses.join(",")}`,
+    `bank_build_legal:${legalBuild}`,
+    `bank_cashout_legal:${legalCashOut}`,
+    ...(largestBankPayout(context, side) !== undefined
+      ? [`bank_estimated_payout:${largestBankPayout(context, side)}`]
+      : []),
+  ];
+}
+
+function largestBankPayout(
+  context: TacticalPlanBuildContext,
+  side: Side,
+): number | undefined {
+  const tools = side === "runner"
+    ? context.deckCapabilities?.runner?.economyBankTools ?? []
+    : context.deckCapabilities?.corp?.economyBankTools ?? [];
+  const payouts = tools
+    .map((tool) => tool.estimatedPayout ?? tool.currentBankAmount)
+    .filter((value): value is number => typeof value === "number");
+  if (payouts.length === 0) return undefined;
+  return Math.max(...payouts);
 }
 
 function runnerBreakerCoverageStep(
