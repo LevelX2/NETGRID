@@ -572,6 +572,7 @@ describe("Backend 0.5 private storage maintenance", () => {
       expect(privateHand.cards?.[0]).toMatchObject({
         title: expect.any(String),
         definitionId: expect.any(String),
+        rulesText: expect.any(String),
         availability: expect.any(String),
         legalActions: expect.any(Array)
       });

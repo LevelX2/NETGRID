@@ -7,6 +7,7 @@ import { applyAction, createGame, getLegalActions, getPlayerView, hashState, isH
 import {
   AI_DECISION_DEBUG_SCHEMA_VERSION,
   CURRENT_RULES_BASELINE,
+  DEMO_CARDS_BY_ID,
   sanitizeAiDecisionDebug,
   type ApiAiPacingMode,
   type ApiAiTurnPresentationState,
@@ -3256,12 +3257,14 @@ function aiPrivateHandPreview(input: AiDecisionInput): Record<string, unknown> {
 function aiPrivateHandCardPreview(card: VisibleCard, index: number, credits: number, legalActions: LegalAction[]): Record<string, unknown> {
   const playCost = aiPrivateHandCardCost(card);
   const missingCredits = playCost === undefined ? undefined : Math.max(0, playCost - credits);
+  const rulesText = aiPrivateHandCardRulesText(card);
   return {
     index,
     instanceId: card.instanceId,
     definitionId: card.definitionId ?? "",
     title: card.title ?? card.definitionId ?? "Unbekannte Karte",
     type: card.type ?? "unknown",
+    ...(rulesText ? { rulesText } : {}),
     ...(card.subtypes && card.subtypes.length > 0 ? { subtypes: card.subtypes.slice(0, 4) } : {}),
     ...(playCost !== undefined ? { playCost } : {}),
     ...(missingCredits !== undefined ? { missingCredits } : {}),
@@ -3278,6 +3281,15 @@ function aiPrivateHandCardPreview(card: VisibleCard, index: number, credits: num
       creditCost: actionCreditCost(action)
     }))
   };
+}
+
+function aiPrivateHandCardRulesText(card: VisibleCard): string | undefined {
+  const rulesText =
+    card.rulesText ??
+    (card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId]?.rulesText : undefined);
+  if (typeof rulesText !== "string") return undefined;
+  const normalized = rulesText.trim();
+  return normalized.length > 0 ? normalized.slice(0, 1200) : undefined;
 }
 
 function aiPrivateHandCardCost(card: VisibleCard): number | undefined {

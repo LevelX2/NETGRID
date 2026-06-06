@@ -9754,7 +9754,15 @@ function aiDecisionDebugActionTypeLabel(actionType: string | undefined): string 
 
 function AiDecisionDebugPrivateHand({ detail }: { detail: Record<string, unknown> }) {
   const preview = aiDecisionDebugRecord(detail.aiPrivateHandPreview);
-  if (!preview) return null;
+  if (!preview) {
+    const rows = aiDecisionDebugPrivateHandMissingRows(detail);
+    if (rows.length === 0) return null;
+    return (
+      <AiDecisionDebugCollapsibleSection title="KI-Privathand" defaultOpen={false}>
+        <AiDecisionDebugRows rows={rows} />
+      </AiDecisionDebugCollapsibleSection>
+    );
+  }
   const cards = aiDecisionDebugRecordList(preview.cards);
   const rows: Array<[string, string]> = [
     ["Seite", preview.side === "runner" ? "Runner" : preview.side === "corp" ? "Korp" : String(preview.side ?? "-")],
@@ -9772,12 +9780,14 @@ function AiDecisionDebugPrivateHand({ detail }: { detail: Record<string, unknown
           const cost = typeof card.playCost === "number" ? `${card.playCost} Kosten` : "Kosten ?";
           const availability = aiDecisionDebugPrivateHandAvailabilityLabel(card.availability, card.missingCredits);
           const legalActions = aiDecisionDebugRecordList(card.legalActions);
+          const rulesText = typeof card.rulesText === "string" ? card.rulesText : "";
           return (
             <div className="aiDecisionDebugAction" key={`${String(card.instanceId ?? title)}:${index}`}>
               <div>
                 <strong>#{index + 1} {title}</strong>
                 <span>{[type, cost, availability].join(" · ")}</span>
               </div>
+              {rulesText ? <p><strong>Regeltext:</strong> {rulesText}</p> : null}
               {legalActions.length > 0 ? (
                 <p>{legalActions.map((action) => {
                   const label = typeof action.label === "string" ? action.label : aiDecisionDebugActionTypeLabel(typeof action.actionType === "string" ? action.actionType : undefined);
@@ -9793,6 +9803,19 @@ function AiDecisionDebugPrivateHand({ detail }: { detail: Record<string, unknown
       </div>
     </AiDecisionDebugCollapsibleSection>
   );
+}
+
+function aiDecisionDebugPrivateHandMissingRows(detail: Record<string, unknown>): Array<[string, string]> {
+  const memoryItems = aiDecisionDebugDetailSectionItems(detail, "semantic_memory", 64);
+  const ownHandVisibility = aiDecisionDebugTagValue(memoryItems, "own_hand_content_visibility");
+  if (ownHandVisibility !== "preview_private_section") return [];
+  const ownHandCount = aiDecisionDebugTagValue(memoryItems, "own_hand_count");
+  const rows: Array<[string, string]> = [
+    ["Status", "in diesem gespeicherten Trace nicht enthalten"],
+    ["Sichtbarkeit", "nur in der aktuellen Nächster-Schritt-Vorschau, nicht in Logs oder Replays"]
+  ];
+  if (ownHandCount) rows.unshift(["Handkarten", `${ownHandCount} Karten`]);
+  return rows;
 }
 
 function aiDecisionDebugPrivateHandAvailabilityLabel(availability: unknown, missingCredits: unknown): string {
