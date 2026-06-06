@@ -418,6 +418,9 @@ export function mapPlanStepToLegalActions(
     .map((actionId) => legalActionsById.get(actionId))
     .filter((action): action is LegalAction => Boolean(action));
   const status = mappingStatusForStep(step, legalActions);
+  const matchedCandidates = candidates.filter((candidate) =>
+    matchedCandidateIds.includes(candidate.actionId),
+  );
   return {
     plan,
     step: {
@@ -432,6 +435,7 @@ export function mapPlanStepToLegalActions(
       ...step.rationale,
       `mapped_candidate_count:${matchedCandidateIds.length}`,
       `mapped_legal_action_count:${legalActions.length}`,
+      ...matchedCandidates.slice(0, 4).map(candidateMappingRationale),
     ],
   };
 }
@@ -482,6 +486,10 @@ function candidateMatchesStep(
       return false;
     }
   }
+  if (candidateSemanticsMatchStep(step, candidate)) {
+    return candidateTargetMatchesPlan(plan, candidate, action) &&
+      bankStepMatchesCandidate(step, candidate, action);
+  }
   if (step.desiredActionSemantics.includes(candidate.semanticActionType)) {
     return candidateTargetMatchesPlan(plan, candidate, action);
   }
@@ -494,6 +502,68 @@ function candidateMatchesStep(
   return actionTypeMatchesStep(step, candidate.actionType) &&
     candidateTargetMatchesPlan(plan, candidate, action) &&
     bankStepMatchesCandidate(step, candidate, action);
+}
+
+function candidateMappingRationale(candidate: ActionSemanticCandidate): string {
+  return [
+    `candidate_match:${candidate.actionId}`,
+    `semantic:${candidate.semanticActionType}`,
+    ...(candidate.sourceCardId ? [`source:${candidate.sourceCardId}`] : []),
+    ...(candidate.abilityId ? [`ability:${candidate.abilityId}`] : []),
+    ...(candidate.actionTacticSignals.length > 0
+      ? [`tactics:${candidate.actionTacticSignals.slice(0, 4).join(",")}`]
+      : []),
+  ].join("|");
+}
+
+function candidateSemanticsMatchStep(
+  step: PlanStep,
+  candidate: ActionSemanticCandidate,
+): boolean {
+  const signalText = candidateSemanticText(candidate);
+  switch (step.kind) {
+    case "install_breaker":
+      return /install\.card/.test(signalText) &&
+        /breaker|icebreaker|program/.test(signalText);
+    case "search_for_answer":
+      return /program_search|breaker_search|search\.stack|search_for_answer|setup\.program_search/.test(signalText);
+    case "build_bank_counter":
+      return /temporary_resource_bank|counter_bank|charge_bank|build_credit_bank|finite_economy_pool/.test(signalText);
+    case "cash_out_bank":
+      return /temporary_resource_bank|counter_bank|cash_out|payout|take_bank|finite_economy_pool/.test(signalText);
+    case "build_rez_reserve":
+      return /economy\.gain_credit|rez_reserve|corp_economy|operation_economy/.test(signalText);
+    case "protect_remote":
+      return /corp_window\.rez|install\.card|remote_protection|corp_rez_ice/.test(signalText);
+    case "advance_score_card":
+      return /score\.advance_card|advance\.corp_counter_bank/.test(signalText);
+    case "score_agenda":
+      return /score\.agenda|score\.action_counter_bank/.test(signalText);
+    case "rez_outer_ice":
+      return /corp_window\.rez|corp_rez_ice/.test(signalText);
+    default:
+      return false;
+  }
+}
+
+function candidateSemanticText(candidate: ActionSemanticCandidate): string {
+  return [
+    candidate.semanticActionType,
+    candidate.sourceCardId,
+    candidate.abilityId,
+    ...candidate.cardContextSignals,
+    ...candidate.actionTacticSignals,
+    ...candidate.strategySupport.map((entry) => `${entry.strategyId}:${entry.role}`),
+    ...candidate.conditions.map((entry) => entry.kind),
+    ...candidate.risks.map((entry) => entry.kind),
+    ...candidate.constraints.map((entry) => entry.kind),
+    ...candidate.costProfile.additionalCosts,
+    ...(candidate.targetContext?.targetProfileMatches.flatMap((entry) => entry.evidence) ?? []),
+    ...candidate.evidence,
+  ]
+    .filter((entry): entry is string => typeof entry === "string")
+    .join(" ")
+    .toLowerCase();
 }
 
 function planRequiredBreakerCoverage(

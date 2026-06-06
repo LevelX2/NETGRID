@@ -166,6 +166,92 @@ describe("tactical plan model", () => {
     expect(mapping.step.mappingStatus).toBe("matched");
   });
 
+  it("maps search steps from candidate program-search semantics without label hints", () => {
+    const action = legalAction("use-smc", "runner", "trigger_ability", {}, {
+      source: "smc-1",
+      label: "Use ability",
+    });
+    const plan = createTacticalPlan({
+      planId: "runner.obtain_breaker_coverage:remote_1",
+      side: "runner",
+      type: "runner.obtain_breaker_coverage",
+      status: "active",
+      priority: 900,
+      horizonTurns: 1,
+      currentStep: createPlanStep({
+        stepId: "search_for_answer:remote_1",
+        kind: "search_for_answer",
+        desiredActionSemantics: ["breaker_search"],
+        rationale: ["need wall coverage"],
+      }),
+      stateVersion: 1,
+    });
+    const candidate: ActionSemanticCandidate = {
+      ...candidateForAction(action),
+      sourceKind: "card",
+      sourceCardId: "onr_v1_059_self-modifying-code",
+      abilityId: "smc.search_program",
+      semanticActionType: "card_ability.trigger",
+      actionTacticSignals: ["setup.program_search", "breaker_search"],
+      evidence: ["candidate carries program_search semantics"],
+    };
+
+    const mapping = mapPlanStepToLegalActions(
+      plan,
+      plan.currentStep,
+      [candidate],
+      aiInput("runner", [action]),
+    );
+
+    expect(mapping.status).toBe("matched");
+    expect(mapping.rationale).toEqual(
+      expect.arrayContaining([
+        expect.stringContaining("source:onr_v1_059_self-modifying-code"),
+        expect.stringContaining("tactics:setup.program_search"),
+      ]),
+    );
+  });
+
+  it("maps bank steps from candidate bank semantics without label hints", () => {
+    const action = legalAction("use-bank", "runner", "trigger_ability", {}, {
+      source: "broker-1",
+      label: "Use ability",
+    });
+    const plan = createTacticalPlan({
+      planId: "runner.cash_out_credit_bank",
+      side: "runner",
+      type: "runner.cash_out_credit_bank",
+      status: "active",
+      priority: 800,
+      horizonTurns: 1,
+      currentStep: createPlanStep({
+        stepId: "cash_out_bank:runner",
+        kind: "cash_out_bank",
+        desiredActionSemantics: [],
+        rationale: ["fund active plan"],
+      }),
+      stateVersion: 1,
+    });
+    const candidate: ActionSemanticCandidate = {
+      ...candidateForAction(action),
+      sourceKind: "card",
+      sourceCardId: "onr_v1_154_broker",
+      semanticActionType: "economy.temporary_resource_bank",
+      actionTacticSignals: ["cash_out_credit_bank", "payout"],
+      evidence: ["candidate carries temporary_resource_bank semantics"],
+    };
+
+    const mapping = mapPlanStepToLegalActions(
+      plan,
+      plan.currentStep,
+      [candidate],
+      aiInput("runner", [action]),
+    );
+
+    expect(mapping.status).toBe("matched");
+    expect(mapping.actionCandidateIds).toEqual(["use-bank"]);
+  });
+
   it("derives missing wall breaker coverage from visible rezzed ICE", () => {
     const input = aiInput("runner", [
       legalAction("run-remote", "runner", "start_run", {
