@@ -10,6 +10,7 @@ import type {
   BreakerCoverageKind,
   DeckCapabilityProfile,
 } from "./deck-capabilities";
+import { redactedDeckCapabilityFacts } from "./deck-capabilities";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 
 export const TACTICAL_PLAN_SCHEMA_VERSION = "tactical-plan-v1" as const;
@@ -210,6 +211,7 @@ export type PlanStepMappingResult = {
 
 export type TacticalPlanRuntimeResult = {
   previousPlan?: TacticalPlanMemorySnapshot;
+  deckCapabilitiesUsed?: string[];
   planAlternatives: TacticalPlan[];
   blockedPlans: TacticalPlan[];
   selectedPlan?: TacticalPlan;
@@ -233,6 +235,9 @@ export function evaluateTacticalPlans(
   context: TacticalPlanBuildContext,
 ): TacticalPlanRuntimeResult {
   const previousPlan = context.previousPlan ?? getTacticalPlanMemorySnapshot(context.input);
+  const deckCapabilitiesUsed = context.deckCapabilities
+    ? redactedDeckCapabilityFacts(context.deckCapabilities)
+    : [];
   const rawPlans = buildTacticalPlans({
     ...context,
     ...(previousPlan ? { previousPlan } : {}),
@@ -252,6 +257,7 @@ export function evaluateTacticalPlans(
     if (mapping.status === "matched" && mapping.legalActions.length > 0) {
       return {
         ...(previousPlan ? { previousPlan } : {}),
+        ...(deckCapabilitiesUsed.length > 0 ? { deckCapabilitiesUsed } : {}),
         planAlternatives,
         blockedPlans,
         selectedPlan: plan,
@@ -268,6 +274,7 @@ export function evaluateTacticalPlans(
   }
   return {
     ...(previousPlan ? { previousPlan } : {}),
+    ...(deckCapabilitiesUsed.length > 0 ? { deckCapabilitiesUsed } : {}),
     planAlternatives,
     blockedPlans,
     ...(progression.planProgressionReason
@@ -291,6 +298,10 @@ function planCanMapToCurrentAction(plan: TacticalPlan): boolean {
 export function getTacticalPlanMemorySnapshot(
   input: AiDecisionInput,
 ): TacticalPlanMemorySnapshot | undefined {
+  if (input.playerView.winner !== null) {
+    tacticalPlanMemoryByKey.delete(tacticalPlanMemoryKey(input));
+    return undefined;
+  }
   return tacticalPlanMemoryByKey.get(tacticalPlanMemoryKey(input));
 }
 
@@ -299,6 +310,10 @@ export function rememberTacticalPlanRuntime(
   result: TacticalPlanRuntimeResult,
   selectedAction: LegalAction,
 ): TacticalPlanMemorySnapshot | undefined {
+  if (input.playerView.winner !== null) {
+    tacticalPlanMemoryByKey.delete(tacticalPlanMemoryKey(input));
+    return undefined;
+  }
   const selectedPlan = result.selectedPlan;
   const selectedStep = result.selectedStep;
   if (!selectedPlan || !selectedStep) return undefined;
@@ -324,7 +339,13 @@ export function resetTacticalPlanMemory(): void {
 }
 
 function tacticalPlanMemoryKey(input: AiDecisionInput): string {
-  return `${input.profileId}:${input.side}`;
+  return `${tacticalPlanMemoryContextId(input)}:${input.side}:${input.profileId}`;
+}
+
+function tacticalPlanMemoryContextId(input: AiDecisionInput): string {
+  const [decisionScope] = input.decisionId.split(":");
+  if (decisionScope && decisionScope.length > 0) return decisionScope;
+  return input.seed;
 }
 
 function progressTacticalPlans(

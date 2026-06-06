@@ -3634,6 +3634,9 @@ function tacticalPlanDebugItems(planRuntime: TacticalPlanRuntimeResult): string[
     ...(planRuntime.whyPlanAbandoned
       ? [`why_plan_abandoned:${planRuntime.whyPlanAbandoned}`]
       : []),
+    ...(planRuntime.deckCapabilitiesUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `deck_capability_used:${fact}`),
     `plan_alternative_count:${planRuntime.planAlternatives.length}`,
     `blocked_plan_count:${planRuntime.blockedPlans.length}`,
     ...(selectedPlan
@@ -3655,8 +3658,16 @@ function tacticalPlanDebugItems(planRuntime: TacticalPlanRuntimeResult): string[
           `mapped_legal_actions:${selectedMapping.legalActions
             .map((action) => action.actionId)
             .join("|")}`,
+          ...selectedMapping.rationale
+            .slice(-4)
+            .map((entry) => `why_this_action:${entry}`),
         ]
       : []),
+    ...planRuntime.blockedPlans.slice(0, 3).map((plan) =>
+      `why_not_other_plan:${plan.planId}:${plan.blockers
+        .map((blocker) => blocker.kind)
+        .join(",")}`,
+    ),
     ...planRuntime.planAlternatives.slice(0, 8).map((plan, index) =>
       tacticalPlanRankDebugItem(plan, index + 1, selectedPlan?.planId === plan.planId),
     ),

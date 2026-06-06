@@ -4,8 +4,12 @@ import {
   buildTacticalPlans,
   createPlanStep,
   createTacticalPlan,
+  evaluateTacticalPlans,
+  getTacticalPlanMemorySnapshot,
   mapPlanStepToLegalActions,
   rankTacticalPlans,
+  rememberTacticalPlanRuntime,
+  resetTacticalPlanMemory,
 } from "./tactical-plans";
 import { buildDeckCapabilityProfile } from "./deck-capabilities";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
@@ -705,6 +709,87 @@ describe("tactical plan model", () => {
     expect(scorePlan?.blockers.map((blocker) => blocker.kind)).toEqual(
       expect.arrayContaining(["missing_rez_reserve"]),
     );
+  });
+
+  it("isolates tactical plan memory by decision context", () => {
+    resetTacticalPlanMemory();
+    const draw = legalAction("draw", "runner", "draw_card");
+    const inputA = aiInput("runner", [draw]);
+    inputA.decisionId = "match-a:1:runner";
+    const inputB = aiInput("runner", [draw]);
+    inputB.decisionId = "match-b:1:runner";
+    inputB.profileId = inputA.profileId;
+    const plan = createTacticalPlan({
+      planId: "runner.obtain_breaker_coverage:rd",
+      side: "runner",
+      type: "runner.obtain_breaker_coverage",
+      status: "active",
+      priority: 900,
+      horizonTurns: 1,
+      currentStep: createPlanStep({
+        stepId: "draw_for_answer:rd",
+        kind: "draw_for_answer",
+        desiredActionSemantics: ["draw.card"],
+      }),
+      stateVersion: 1,
+    });
+
+    rememberTacticalPlanRuntime(
+      inputA,
+      {
+        planAlternatives: [plan],
+        blockedPlans: [],
+        selectedPlan: plan,
+        selectedStep: plan.currentStep,
+      },
+      draw,
+    );
+
+    expect(getTacticalPlanMemorySnapshot(inputA)?.memoryId).toBe(
+      "match-a:runner:runner-tactical-plan-test",
+    );
+    expect(getTacticalPlanMemorySnapshot(inputB)).toBeUndefined();
+  });
+
+  it("returns redacted deck capability facts in runtime results", () => {
+    const input = aiInput("runner", [
+      legalAction("run-remote", "runner", "start_run", {
+        serverId: "remote_1",
+      }),
+      legalAction("draw", "runner", "draw_card"),
+    ]);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("simple_barrier_ice", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["Wall"],
+        }),
+      ], [visibleCard("simple_agenda", "corp", "agenda")]),
+    ];
+    const deckCapabilities = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: input.playerView,
+      legalActions: input.legalActions,
+      deckSnapshot: {
+        deckSnapshotId: "tactical-plan-redacted-debug-test",
+        side: "runner",
+        cards: [
+          { cardId: "onr_v1_021_dwarf", quantity: 1 },
+          { cardId: "onr_v1_154_broker", quantity: 1 },
+        ],
+      },
+    });
+
+    const result = evaluateTacticalPlans({ input, deckCapabilities });
+    const facts = result.deckCapabilitiesUsed?.join("\n") ?? "";
+
+    expect(result.deckCapabilitiesUsed).toEqual(
+      expect.arrayContaining(["breaker.wall=in_deck/draw_only"]),
+    );
+    expect(facts).not.toMatch(/onr_v1_|Dwarf|Broker/);
   });
 });
 
