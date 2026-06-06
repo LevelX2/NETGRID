@@ -448,7 +448,34 @@ function deriveKnownPositionMemory(history: PublicGameEvent[], classifications: 
     }
   }
 
-  return [...memory.values()].sort((left, right) => `${left.zone}:${left.positionKey}`.localeCompare(`${right.zone}:${right.positionKey}`));
+  return normalizeKnownPositionMemory([...memory.values()]).sort((left, right) => `${left.zone}:${left.positionKey}`.localeCompare(`${right.zone}:${right.positionKey}`));
+}
+
+function normalizeKnownPositionMemory(entries: KnownPositionMemory[]): KnownPositionMemory[] {
+  const preciseRemoteDefinitions = new Set(
+    entries
+      .filter(
+        (entry) =>
+          entry.zone.startsWith("remote_") &&
+          entry.positionKey !== "installed",
+      )
+      .map((entry) => `${entry.zone}:${entry.definitionId}`),
+  );
+  const byExactPosition = new Map<string, KnownPositionMemory>();
+  for (const entry of entries) {
+    if (
+      entry.zone.startsWith("remote_") &&
+      entry.positionKey === "installed" &&
+      preciseRemoteDefinitions.has(`${entry.zone}:${entry.definitionId}`)
+    ) {
+      continue;
+    }
+    byExactPosition.set(
+      `${entry.zone}:${entry.positionKey}:${entry.definitionId}`,
+      entry,
+    );
+  }
+  return [...byExactPosition.values()];
 }
 
 function knownPositionSourceKind(

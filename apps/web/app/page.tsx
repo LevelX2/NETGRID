@@ -10158,7 +10158,7 @@ function AiDecisionDebugRows({ rows }: { rows: Array<[string, string]> }) {
 function AiDecisionDebugMemory({ detail }: { detail: Record<string, unknown> }) {
   const rows = aiDecisionDebugMemoryRows(detail);
   const facts = aiDecisionDebugMemoryChipList(detail.facts, 6);
-  const hypotheses = aiDecisionDebugMemoryChipList(detail.hypotheses, 6);
+  const hypotheses = aiDecisionDebugMemoryHypothesisChipList(detail, 6);
   const uncertainty = aiDecisionDebugMemoryChipList(detail.beliefUncertainty, 4);
   const invalidations = aiDecisionDebugMemoryChipList(detail.invalidations, 5);
   if (rows.length === 0 && facts.length === 0 && hypotheses.length === 0 && uncertainty.length === 0 && invalidations.length === 0) return null;
@@ -10274,6 +10274,15 @@ function aiDecisionDebugMemoryChipList(value: unknown, limit: number): string[] 
   return uniqueDisplayStrings(safeStringList(value, 32).map(aiDecisionDebugMemoryChipLabel)).slice(0, limit);
 }
 
+function aiDecisionDebugMemoryHypothesisChipList(detail: Record<string, unknown>, limit: number): string[] {
+  const hasStructuredHqHandMemory = Boolean(aiDecisionDebugRecord(aiDecisionDebugRecord(detail.opponentModel)?.hqHandMemory));
+  return uniqueDisplayStrings(
+    safeStringList(detail.hypotheses, 32)
+      .filter((value) => !(hasStructuredHqHandMemory && value.startsWith("opponent_hidden_hand_cards:")))
+      .map(aiDecisionDebugMemoryChipLabel)
+  ).slice(0, limit);
+}
+
 function aiDecisionDebugMemoryChipLabel(value: string): string {
   if (value.startsWith("revealed_opponent_card:")) return `Gesehene Karte: ${value.slice("revealed_opponent_card:".length)}`;
   if (value.startsWith("public_card:")) {
@@ -10296,7 +10305,10 @@ function aiDecisionDebugMemoryChipLabel(value: string): string {
     const score = parts[3] ? ` (${Math.round(Number(parts[3]) * 100)}%)` : "";
     return `Unrezzed-ICE-Risiko ${aiDecisionDebugServerLabel(parts[1] ?? "Server")}${score}`;
   }
-  if (value.startsWith("opponent_hidden_hand_cards:")) return `${value.slice("opponent_hidden_hand_cards:".length)} unbekannte gegnerische Handkarten`;
+  if (value.startsWith("opponent_hidden_hand_cards:")) {
+    const rawCount = value.slice("opponent_hidden_hand_cards:".length).split(":")[0] ?? "";
+    return `${rawCount} unbekannte gegnerische Handkarten`;
+  }
   const labels: Record<string, string> = {
     corp_draw_event: "Korp hat gezogen",
     known_projection_only: "nur bekannte Projektion",
@@ -10353,7 +10365,7 @@ function aiDecisionDebugCardList(value: unknown, limit: number): string {
 }
 
 function aiDecisionDebugPositionCardList(value: unknown, limit: number): string {
-  const entries = aiDecisionDebugRecordList(value).slice(0, limit);
+  const entries = aiDecisionDebugNormalizePositionCardList(aiDecisionDebugRecordList(value)).slice(0, limit);
   if (entries.length === 0) return "";
   const labels = entries.map((entry) => {
     const position =
@@ -10363,8 +10375,32 @@ function aiDecisionDebugPositionCardList(value: unknown, limit: number): string 
     const label = aiDecisionDebugCardLabel(entry) || "?";
     return position ? `${position}: ${label}` : label;
   });
-  const remainder = aiDecisionDebugRecordList(value).length - entries.length;
+  const remainder = aiDecisionDebugNormalizePositionCardList(aiDecisionDebugRecordList(value)).length - entries.length;
   return remainder > 0 ? `${labels.join(" · ")} · +${remainder}` : labels.join(" · ");
+}
+
+function aiDecisionDebugNormalizePositionCardList(entries: Array<Record<string, unknown>>): Array<Record<string, unknown>> {
+  const preciseRemoteCards = new Set(
+    entries
+      .filter((entry) => {
+        const zone = typeof entry.zone === "string" ? entry.zone : "";
+        const positionKey = typeof entry.positionKey === "string" ? entry.positionKey : "";
+        return zone.startsWith("remote_") && positionKey !== "installed";
+      })
+      .map((entry) => `${String(entry.zone)}:${aiDecisionDebugCardLabel(entry)}`)
+  );
+  const result = new Map<string, Record<string, unknown>>();
+  for (const entry of entries) {
+    const zone = typeof entry.zone === "string" ? entry.zone : "";
+    const positionKey = typeof entry.positionKey === "string" ? entry.positionKey : "";
+    const label = aiDecisionDebugCardLabel(entry);
+    if (zone.startsWith("remote_") && positionKey === "installed" && preciseRemoteCards.has(`${zone}:${label}`)) {
+      continue;
+    }
+    const displayPosition = typeof entry.position === "string" ? entry.position : [zone, positionKey].filter(Boolean).join("/");
+    result.set(`${displayPosition}:${label}`, entry);
+  }
+  return [...result.values()];
 }
 
 function aiDecisionDebugRecord(value: unknown): Record<string, unknown> | undefined {

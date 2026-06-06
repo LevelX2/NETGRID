@@ -15636,6 +15636,9 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(
       belief.runnerOpponentModel?.hqHandMemory.invalidationReasons.join("|"),
     ).toContain("known_rnd_top_moved_to_hq");
+    expect(
+      JSON.stringify(chooseRunnerAction(input).decisionDebug?.hypotheses ?? []),
+    ).not.toContain("opponent_hidden_hand_cards");
     expect(score.reasons).toContain("known_hq_agenda_pressure");
     expect(score.evidence).toContain(
       "hq_run_boosted_because_known_agenda:true",
@@ -16918,6 +16921,9 @@ describe("V1.4.2 belief state and opponent model", () => {
       type: "agenda",
     });
     expect(knownDebug?.facts).toContain("revealed_opponent_card:Simple Agenda");
+    expect(JSON.stringify(knownDebug?.hypotheses ?? [])).not.toContain(
+      "opponent_hidden_hand_cards",
+    );
 
     const remoteDebug = chooseRunnerAction({
       ...baseInput,
@@ -16960,6 +16966,54 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(JSON.stringify(remoteDebug)).not.toMatch(
       /privatePayload|cardInstances|fullGameState|sessionToken|reconnectToken|joinToken|decklist|hidden-card/i,
     );
+  });
+
+  it("deduplicates generic and precise remote position memory in Runner DecisionDebug", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "ai-decision-debug-known-position-dedupe" }),
+    );
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const debug = chooseRunnerAction({
+      ...baseInput,
+      eventTail: [
+        ...baseInput.eventTail,
+        syntheticPlanActionEvent(
+          "ai-debug-remote-generic-position",
+          100,
+          "corp",
+          "rez_ice",
+          "remote_1",
+          { cardDefinitionId: "simple_economy_asset" },
+        ),
+        syntheticRemoteAccessEvent(
+          "ai-debug-remote-precise-position",
+          101,
+          "remote_1",
+          "simple_economy_asset",
+          "root:0",
+        ),
+      ],
+    }).decisionDebug;
+    const knownPositions =
+      ((debug?.opponentModel as Record<string, any> | undefined)
+        ?.knownPositionMemory as Array<Record<string, unknown>> | undefined) ??
+      [];
+    const simpleAssetRemotePositions = knownPositions.filter(
+      (entry) =>
+        entry.zone === "remote_1" &&
+        entry.definitionId === "simple_economy_asset",
+    );
+
+    expect(simpleAssetRemotePositions).toEqual([
+      expect.objectContaining({
+        zone: "remote_1",
+        positionKey: "root:0",
+        definitionId: "simple_economy_asset",
+      }),
+    ]);
   });
 
   it("uses Semantic Runtime actual actions in DecisionDebug instead of legacy plan winners", () => {

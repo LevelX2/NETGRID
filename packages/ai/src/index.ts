@@ -3740,7 +3740,7 @@ function semanticRuntimeMemoryDebug(input: AiDecisionInput): {
     .filter((entry) => entry.kind === "public_fact" || entry.kind === "revealed_opponent_fact")
     .map((entry) => semanticRuntimeBeliefEntrySummary(entry.subject));
   const hypotheses = belief.entries
-    .filter((entry) => entry.kind === "hypothesis" || entry.kind === "unknown")
+    .filter((entry) => entry.kind === "hypothesis")
     .map((entry) => `${semanticRuntimeBeliefEntrySummary(entry.subject)}:${round(entry.confidence)}`);
   const opponentModel = input.side === "runner"
     ? semanticRuntimeRunnerOpponentMemorySummary(belief.runnerOpponentModel)
