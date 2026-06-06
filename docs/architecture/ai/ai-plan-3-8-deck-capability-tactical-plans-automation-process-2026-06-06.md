@@ -1,6 +1,6 @@
 # AI-PLAN-3 bis AI-PLAN-8 DeckCapabilityProfile und capability-aware TacticalPlans
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 ## Quelle/Vorgabe
 
