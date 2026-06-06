@@ -10823,6 +10823,76 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(assertAiInputIsSideSafe(input)).toBe(true);
   });
 
+  it("penalizes a memory-known remote asset when the Runner cannot afford trash", () => {
+    const input = knownRemoteRootMemoryInput(
+      "ai-known-remote-braindance-unaffordable",
+      "onr_v1_311_braindance-campaign",
+      5,
+    );
+    const contestCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    expect(contestCandidate).toBeDefined();
+    if (!contestCandidate)
+      throw new Error("Missing memory-known Braindance contest candidate");
+
+    const access = evaluateServerAccessValue(input, contestCandidate);
+    expect(access.reasons).toContain(
+      "known_remote_root_trash_unaffordable_after_ice",
+    );
+    expect(access.reasons).toContain("remote_known_no_current_payoff");
+    expect(access.evidence).toContain(
+      "remote_memory_payoff:trash_unaffordable",
+    );
+    expect(access.evidence).toContain("known_remote_root_trash_cost:7");
+    expect(access.evidence).toContain("known_remote_root_credits_after_ice:5");
+    expect(access.score).toBeLessThan(0);
+  });
+
+  it("keeps a memory-known remote asset valuable when the Runner can afford trash", () => {
+    const input = knownRemoteRootMemoryInput(
+      "ai-known-remote-braindance-affordable",
+      "onr_v1_311_braindance-campaign",
+      7,
+    );
+    const contestCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    expect(contestCandidate).toBeDefined();
+    if (!contestCandidate)
+      throw new Error("Missing affordable memory-known Braindance candidate");
+
+    const access = evaluateServerAccessValue(input, contestCandidate);
+
+    expect(access.reasons).toContain("known_remote_trash_target");
+    expect(access.reasons).toContain(
+      "known_remote_root_trash_affordable_after_ice",
+    );
+    expect(access.reasons).not.toContain("remote_known_no_current_payoff");
+    expect(access.evidence).toContain("remote_memory_payoff:trash_affordable");
+    expect(access.score).toBeGreaterThan(0);
+  });
+
+  it("keeps a memory-known remote agenda valuable", () => {
+    const input = knownRemoteRootMemoryInput(
+      "ai-known-remote-agenda-memory",
+      "simple_agenda",
+      1,
+    );
+    const contestCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    expect(contestCandidate).toBeDefined();
+    if (!contestCandidate)
+      throw new Error("Missing memory-known remote agenda candidate");
+
+    const access = evaluateServerAccessValue(input, contestCandidate);
+
+    expect(access.reasons).toContain("known_remote_agenda_pressure");
+    expect(access.evidence).toContain("remote_memory_payoff:agenda");
+    expect(access.score).toBeGreaterThan(0);
+  });
+
   it("runs the Bartmoss remote path after a declined rez and suppresses same-turn no-access repeats", () => {
     const runnerDeck: DeckDefinition = {
       id: "ai_bartmoss_remote_runner",
@@ -23459,6 +23529,65 @@ function knownRemoteDataWallBbsInput(
     difficulty: "normal",
     profileId: "runner-ai-v1.4.1-normal",
   });
+}
+
+function knownRemoteRootMemoryInput(
+  seed: string,
+  remoteRootDefinitionId: string,
+  runnerCredits: number,
+): ReturnType<typeof buildAiDecisionInput> {
+  const state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeck: ONR_V1_2_3_RUNNER_DECK,
+      corpDeck: {
+        ...ONR_V1_2_3_CORP_DECK,
+        cards: [
+          ...ONR_V1_2_3_CORP_DECK.cards,
+          { id: remoteRootDefinitionId, quantity: 1 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  state.runner.credits = runnerCredits;
+  state.corp.credits = 10;
+  ensureRemoteServer(state, "remote_1");
+  const rootId = putCorpRootInRemote(state, remoteRootDefinitionId, 0);
+  state.cardInstances[rootId] = {
+    ...state.cardInstances[rootId]!,
+    faceup: false,
+    rezzed: false,
+  };
+  const input = buildAiDecisionInput(state, "runner", {
+    difficulty: "normal",
+    profileId: "runner-ai-v1.4.1-normal",
+  });
+  const memoryEventStart = input.playerView.stateVersion + 1;
+  return {
+    ...input,
+    eventTail: [
+      ...input.eventTail,
+      syntheticPlanActionEvent(
+        `${seed}-known-remote-start`,
+        memoryEventStart,
+        "runner",
+        "start_run",
+        "remote_1",
+      ),
+      syntheticPlanActionEvent(
+        `${seed}-known-remote-access`,
+        memoryEventStart + 1,
+        "runner",
+        "access_card",
+        "remote_1",
+        {
+          cardDefinitionId: remoteRootDefinitionId,
+          accessedCardPositionKey: "root:0",
+        },
+      ),
+    ],
+  };
 }
 
 function weakFracterBarrierEncounterState(seed: string): GameState {

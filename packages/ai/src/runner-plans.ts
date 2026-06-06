@@ -27,6 +27,7 @@ import {
   type KnownHqHandMemory,
   type RndTopFreshnessMemory,
 } from "./belief-state";
+import { evaluateKnownRemoteAccessPayoff } from "./known-remote-access-payoff";
 import {
   assessKnownRezzedIcePath,
   canBreakerDefinitionBreakIce,
@@ -3761,13 +3762,6 @@ export function evaluateServerAccessValue(
     candidate,
     target,
   );
-  const remoteRootAffordabilityPenalty =
-    knownRemoteRootTrashAffordabilityPenalty(
-      input,
-      candidate,
-      target,
-      features,
-    );
   const knownRemoteValue = evaluateKnownRemoteMemoryValue(
     input,
     candidate,
@@ -3793,8 +3787,7 @@ export function evaluateServerAccessValue(
         : candidate.kind === "contest_remote"
           ? 90 +
             (server?.rootCount ?? 0) * 55 +
-            (server?.advancedRootCount ?? 0) * 35 -
-            remoteRootAffordabilityPenalty.penalty +
+            (server?.advancedRootCount ?? 0) * 35 +
             knownRemoteValue.score
           : candidate.kind === "trash_asset"
             ? 150
@@ -3818,7 +3811,6 @@ export function evaluateServerAccessValue(
     ...(recentCentralPenalty > 0 ? ["recent_central_pressure_repeated"] : []),
     ...(staleArchivesPenalty > 0 ? ["known_archives_access_not_fresh"] : []),
     ...knownRemoteValue.reasons,
-    ...remoteRootAffordabilityPenalty.reasons,
   ];
   return {
     score,
@@ -3828,7 +3820,6 @@ export function evaluateServerAccessValue(
       ...rndMemoryValue.evidence,
       ...hqMemoryValue.evidence,
       ...knownRemoteValue.evidence,
-      ...remoteRootAffordabilityPenalty.evidence,
     ],
   };
 }
@@ -3841,57 +3832,12 @@ function knownRemoteRootTrashAffordabilityPenalty(
 ): { penalty: number; reasons: string[]; evidence: string[] } {
   if (candidate.kind !== "contest_remote" || !target?.startsWith("remote_"))
     return { penalty: 0, reasons: [], evidence: [] };
-  const server = input.playerView.servers.find(
-    (candidateServer) => candidateServer.id === target,
-  );
-  if (!server || server.root.length === 0)
-    return { penalty: 0, reasons: [], evidence: [] };
-  const unknownRootCount = server.root.filter((card) => !card.known).length;
-  if (unknownRootCount > 0) {
-    return {
-      penalty: 0,
-      reasons: ["known_remote_root_affordability_deferred_for_unknown_root"],
-      evidence: [`known_remote_root_unknown_count:${unknownRootCount}`],
-    };
-  }
-  const trashableRoots = server.root.filter((card) =>
-    isTrashableKnownRemoteRoot(card),
-  );
-  if (trashableRoots.length === 0)
-    return { penalty: 0, reasons: [], evidence: [] };
-  if (
-    server.root.some(
-      (card) => card.type === "agenda" || (card.advancementCounters ?? 0) > 0,
-    )
-  ) {
-    return {
-      penalty: 0,
-      reasons: ["known_remote_root_other_access_value"],
-      evidence: [`known_remote_root_trashable_count:${trashableRoots.length}`],
-    };
-  }
-  const trashCosts = trashableRoots
-    .map((card) => remoteRootTrashCost(card))
-    .filter((cost): cost is number => cost !== undefined);
-  if (trashCosts.length === 0) return { penalty: 0, reasons: [], evidence: [] };
-  const cheapestTrashCost = Math.min(...trashCosts);
-  const visibleBreakCost = features.visibleRunBreakCosts.get(target) ?? 0;
-  const creditsAfterVisibleIce =
-    input.playerView.own.credits - visibleBreakCost;
-  const affordable = creditsAfterVisibleIce >= cheapestTrashCost;
+  void features;
+  const payoff = evaluateKnownRemoteAccessPayoff(input, target);
   return {
-    penalty: affordable ? 0 : 780,
-    reasons: [
-      affordable
-        ? "known_remote_root_trash_affordable_after_ice"
-        : "known_remote_root_trash_unaffordable_after_ice",
-    ],
-    evidence: [
-      `known_remote_root_trash_cost:${cheapestTrashCost}`,
-      `known_remote_root_visible_break_cost:${visibleBreakCost}`,
-      `known_remote_root_credits_after_ice:${creditsAfterVisibleIce}`,
-      `known_remote_root_trash_affordable:${affordable}`,
-    ],
+    penalty: payoff.penalty,
+    reasons: payoff.reasons,
+    evidence: payoff.evidence,
   };
 }
 
@@ -4614,6 +4560,8 @@ function runnerRemoteTargetStillContestable(
   if (!server || server.rootCount <= 0) return false;
   const estimate = runnerKnownPathEstimate(input, target, features);
   if (!estimate || estimate.blocked) return false;
+  const payoff = evaluateKnownRemoteAccessPayoff(input, target);
+  if (payoff.knownNoCurrentPayoff) return false;
   return runnerRemoteContestProfile(input, target, features).contestable;
 }
 
@@ -4779,46 +4727,13 @@ function evaluateKnownRemoteMemoryValue(
   if (candidate.kind !== "contest_remote" || !target?.startsWith("remote_")) {
     return { score: 0, reasons: [], evidence: [] };
   }
-  const entries =
-    beliefState.runnerOpponentModel?.knownPositionMemory.filter(
-      (entry) =>
-        entry.zone === target &&
-        entry.positionKey.startsWith("root:") &&
-        entry.definitionId,
-    ) ?? [];
-  if (entries.length === 0) return { score: 0, reasons: [], evidence: [] };
-  let score = 0;
-  const reasons: string[] = [];
-  const evidence: string[] = [`known_remote_cards:${entries.length}`];
-  const runnerCredits = input.playerView.own.credits;
-  for (const entry of entries) {
-    const type = cardDefinitionType(entry.definitionId);
-    const trashCost = cardDefinitionTrashCost(entry.definitionId);
-    if (type === "agenda") {
-      score += 420;
-      reasons.push("known_remote_agenda_pressure");
-      evidence.push("remote_run_boosted_by_known_remote_agenda:true");
-      continue;
-    }
-    if (
-      (type === "asset" || type === "upgrade") &&
-      trashCost !== undefined &&
-      runnerCredits >= trashCost
-    ) {
-      score += 150;
-      reasons.push("known_remote_trash_target");
-      evidence.push("remote_trash_boosted_by_known_remote_trashable:true");
-      evidence.push(`known_remote_trash_cost:${trashCost}`);
-      continue;
-    }
-    if (isLowValueKnownHqAccessCard(entry.definitionId, runnerCredits)) {
-      score -= 190;
-      reasons.push("known_remote_low_value");
-      evidence.push("remote_run_suppressed_by_known_low_value_remote:true");
-    }
-  }
-  evidence.push(`known_remote_memory_score:${score}`);
-  return { score, reasons: sortedUnique(reasons), evidence };
+  const payoff = evaluateKnownRemoteAccessPayoff(input, target, beliefState);
+  const score = payoff.score - payoff.penalty;
+  return {
+    score,
+    reasons: sortedUnique(payoff.reasons),
+    evidence: [...payoff.evidence, `known_remote_memory_score:${score}`],
+  };
 }
 
 function beliefStateForCost(input: AiDecisionInput): BeliefState {
