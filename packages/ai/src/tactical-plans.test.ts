@@ -278,6 +278,9 @@ describe("tactical plan model", () => {
     const contestPlan = plans.find(
       (plan) => plan.planId === "runner.contest_remote:remote_1",
     );
+    const coveragePlan = plans.find(
+      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
+    );
 
     expect(contestPlan?.blockers.map((blocker) => blocker.kind)).toEqual(
       expect.arrayContaining([
@@ -285,6 +288,103 @@ describe("tactical plan model", () => {
         "missing_wall_coverage",
         "coverage_not_in_deck",
       ]),
+    );
+    expect(coveragePlan?.currentStep.kind).toBe("pivot_to_alternative");
+    expect(coveragePlan?.status).toBe("blocked");
+    expect(coveragePlan?.currentStep.rationale).toEqual(
+      expect.arrayContaining(["deck_capability:coverage_not_in_deck"]),
+    );
+  });
+
+  it("draws for known deck coverage when no search access is legal", () => {
+    const input = aiInput("runner", [
+      legalAction("run-remote", "runner", "start_run", {
+        serverId: "remote_1",
+      }),
+      legalAction("draw", "runner", "draw_card"),
+    ]);
+    input.playerView.own.rig = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("simple_barrier_ice", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["Wall"],
+        }),
+      ], [visibleCard("simple_agenda", "corp", "agenda")]),
+    ];
+    const deckCapabilities = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: input.playerView,
+      legalActions: input.legalActions,
+      deckSnapshot: {
+        deckSnapshotId: "tactical-plan-draw-only-wall-test",
+        side: "runner",
+        cards: [{ cardId: "onr_v1_021_dwarf", quantity: 1 }],
+      },
+    });
+
+    const plans = buildTacticalPlans({ input, deckCapabilities });
+    const coveragePlan = plans.find(
+      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
+    );
+
+    expect(coveragePlan?.currentStep.kind).toBe("draw_for_answer");
+    expect(coveragePlan?.currentStep.rationale).toEqual(
+      expect.arrayContaining(["deck_capability:draw_only"]),
+    );
+  });
+
+  it("resolves missing MU before trying to install a breaker in hand", () => {
+    const input = aiInput("runner", [
+      legalAction("run-remote", "runner", "start_run", {
+        serverId: "remote_1",
+      }),
+      legalAction("gain", "runner", "gain_credit"),
+    ]);
+    input.playerView.own.memoryUsed = 4;
+    input.playerView.own.memoryLimit = 4;
+    input.playerView.own.rig = [];
+    input.playerView.own.gripOrHq = [
+      visibleCard("onr_v1_021_dwarf", "runner", "program", {
+        subtypes: ["icebreaker", "worm"],
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("simple_barrier_ice", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["Wall"],
+        }),
+      ], [visibleCard("simple_agenda", "corp", "agenda")]),
+    ];
+    const deckCapabilities = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: input.playerView,
+      legalActions: input.legalActions,
+      deckSnapshot: {
+        deckSnapshotId: "tactical-plan-missing-mu-test",
+        side: "runner",
+        cards: [{ cardId: "onr_v1_021_dwarf", quantity: 1 }],
+      },
+    });
+
+    const plans = buildTacticalPlans({ input, deckCapabilities });
+    const coveragePlan = plans.find(
+      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
+    );
+    const contestPlan = plans.find(
+      (plan) => plan.planId === "runner.contest_remote:remote_1",
+    );
+
+    expect(coveragePlan?.currentStep.kind).toBe("resolve_missing_mu");
+    expect(contestPlan?.blockers.map((blocker) => blocker.kind)).toEqual(
+      expect.arrayContaining(["breaker_present_but_mu_blocked", "missing_mu"]),
     );
   });
 

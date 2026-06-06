@@ -36,6 +36,8 @@ export type TacticalPlanType =
 
 export type PlanStepKind =
   | "install_breaker"
+  | "resolve_missing_mu"
+  | "pivot_to_alternative"
   | "draw_for_answer"
   | "search_for_answer"
   | "gain_credits"
@@ -64,6 +66,7 @@ export type RequiredCapabilityKind =
   | "breaker_ap"
   | "breaker_trace"
   | "breaker_universal"
+  | "mu"
   | "credits"
   | "card_draw"
   | "card_search"
@@ -502,6 +505,10 @@ function actionTypeMatchesStep(step: PlanStep, actionType: string): boolean {
   switch (step.kind) {
     case "install_breaker":
       return actionType === "install_card";
+    case "resolve_missing_mu":
+      return actionType === "install_card" || actionType === "trigger_ability";
+    case "pivot_to_alternative":
+      return false;
     case "draw_for_answer":
       return actionType === "draw_card";
     case "search_for_answer":
@@ -609,7 +616,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
       context,
       missingCoverage,
     );
-    const coverageStep = runnerBreakerCoverageStep(input, serverId);
+    const coverageStep = runnerBreakerCoverageStep(context, serverId);
     plans.push(
       createTacticalPlan({
         planId: `runner.contest_remote:${serverId}`,
@@ -658,7 +665,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
         planId: `runner.obtain_breaker_coverage:${serverId}`,
         side: "runner",
         type: "runner.obtain_breaker_coverage",
-        status: "active",
+        status: coveragePlanStatusForRequiredCoverage(context, missingCoverage),
         priority: 940,
         horizonTurns: 1,
         target: { kind: "server", id: serverId },
@@ -766,7 +773,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
         context,
         missingCoverage,
       );
-      const coverageStep = runnerBreakerCoverageStep(input, serverId);
+      const coverageStep = runnerBreakerCoverageStep(context, serverId);
       const basePriority = serverId === "rd" ? 760 : 740;
       plans.push(
         createTacticalPlan({
@@ -816,7 +823,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
           planId: `runner.obtain_breaker_coverage:${serverId}`,
           side: "runner",
           type: "runner.obtain_breaker_coverage",
-          status: "active",
+          status: coveragePlanStatusForRequiredCoverage(context, missingCoverage),
           priority: serverId === "rd" ? 900 : 880,
           horizonTurns: 1,
           target: { kind: "server", id: serverId },
@@ -1051,14 +1058,37 @@ function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan
 }
 
 function runnerBreakerCoverageStep(
-  input: AiDecisionInput,
+  context: TacticalPlanBuildContext,
   serverId: string,
 ): PlanStep {
+  const input = context.input;
   const missingCoverage = missingBreakerCoverageKind(input.playerView, serverId);
+  const deckState = deckCoverageStateForRequiredCoverage(context, missingCoverage);
+  const deckInventoryEntry = bestDeckBreakerForRequiredCoverage(
+    context,
+    missingCoverage,
+  );
+  const memoryAvailable =
+    context.deckCapabilities?.runner?.memoryProfile.memoryAvailable ??
+    (input.playerView.own.memoryUsed !== undefined &&
+    input.playerView.own.memoryLimit !== undefined
+      ? Math.max(0, input.playerView.own.memoryLimit - input.playerView.own.memoryUsed)
+      : undefined);
   const matchingHandBreaker = runnerHandBreakerForCoverage(
     input.playerView,
     missingCoverage,
   );
+  if (deckState?.installed) {
+    return createPlanStep({
+      stepId: `run_target:${serverId}`,
+      kind: "run_target",
+      desiredActionSemantics: ["run.start"],
+      requiredCapabilities: [breakerCoverageCapability(missingCoverage, serverId)],
+      rationale: [
+        `deck capability reports installed ${missingCoverage} coverage; retry the target plan`,
+      ],
+    });
+  }
   if (input.legalActions.some(isBreakerInstallAction(input.playerView, missingCoverage))) {
     return createPlanStep({
       stepId: `install_breaker:${serverId}`,
@@ -1071,17 +1101,88 @@ function runnerBreakerCoverageStep(
     });
   }
   if (
-    matchingHandBreaker &&
+    deckState?.inHand &&
+    memoryAvailable !== undefined &&
+    memoryAvailable <= 0
+  ) {
+    return createPlanStep({
+      stepId: `resolve_missing_mu:${serverId}`,
+      kind: "resolve_missing_mu",
+      desiredActionSemantics: ["install.card", "memory"],
+      requiredCapabilities: [
+        breakerCoverageCapability(missingCoverage, serverId),
+        {
+          capabilityId: `mu:${serverId}`,
+          kind: "mu",
+          side: "runner",
+          target: { kind: "capability", id: "memory" },
+          evidence: [`memory_available:${memoryAvailable}`],
+        },
+      ],
+      rationale: [
+        `matching ${missingCoverage} breaker is in hand but MU is blocked`,
+        "deck_capability:breaker_present_but_mu_blocked",
+      ],
+    });
+  }
+  if (
+    (matchingHandBreaker || deckState?.inHand) &&
     input.legalActions.some((action) => action.type === "gain_credit")
   ) {
+    const installCost = deckInventoryEntry?.installCost ?? matchingHandBreaker?.installCost;
     return createPlanStep({
       stepId: `gain_credits:${serverId}`,
       kind: "gain_credits",
       desiredActionSemantics: ["economy.gain_credit"],
       requiredCapabilities: [breakerCoverageCapability(missingCoverage, serverId)],
       rationale: [
-        `matching ${missingCoverage} breaker is already in hand; credits are needed before install`,
-        `hand_breaker:${matchingHandBreaker.definitionId ?? matchingHandBreaker.title ?? "unknown"}`,
+        installCost !== undefined && installCost > input.playerView.own.credits
+          ? `matching ${missingCoverage} breaker is already in hand; needs ${installCost} credits before install`
+          : `matching ${missingCoverage} breaker is already in hand; credits are needed before install`,
+        matchingHandBreaker
+          ? `hand_breaker:${matchingHandBreaker.definitionId ?? matchingHandBreaker.title ?? "unknown"}`
+          : "deck_capability:breaker_in_hand",
+      ],
+    });
+  }
+  if (deckState?.searchableNow) {
+    return createPlanStep({
+      stepId: `search_for_answer:${serverId}`,
+      kind: "search_for_answer",
+      desiredActionSemantics: [
+        "setup.program_search",
+        "breaker_search",
+        "card_ability.trigger",
+        "card_ability.unknown",
+        "play.runner_event",
+      ],
+      requiredCapabilities: [breakerCoverageCapability(missingCoverage, serverId)],
+      rationale: [
+        `deck capability has ${missingCoverage} coverage and legal search access`,
+      ],
+    });
+  }
+  if (deckState?.inDeckKnown) {
+    return createPlanStep({
+      stepId: `draw_for_answer:${serverId}`,
+      kind: "draw_for_answer",
+      desiredActionSemantics: ["draw.card"],
+      requiredCapabilities: [breakerCoverageCapability(missingCoverage, serverId)],
+      rationale: [
+        `deck capability has ${missingCoverage} coverage but no legal search access`,
+        "deck_capability:draw_only",
+      ],
+    });
+  }
+  if (deckState?.missing && deckCapabilityHasDeckSnapshot(context)) {
+    return createPlanStep({
+      stepId: `pivot_to_alternative:${serverId}`,
+      kind: "pivot_to_alternative",
+      desiredActionSemantics: [],
+      requiredCapabilities: [breakerCoverageCapability(missingCoverage, serverId)],
+      rationale: [
+        `deck capability has no ${missingCoverage} coverage; do not blind-search`,
+        "deck_capability:coverage_not_in_deck",
       ],
     });
   }
@@ -1143,6 +1244,43 @@ function breakerCoverageCapability(
   };
 }
 
+function deckCoverageStateForRequiredCoverage(
+  context: TacticalPlanBuildContext,
+  requiredCoverage: RequiredCapabilityKind,
+) {
+  const coverage = deckCoverageKindForRequiredCapability(requiredCoverage);
+  return coverage
+    ? context.deckCapabilities?.runner?.breakerCoverageMatrix[coverage]
+    : undefined;
+}
+
+function bestDeckBreakerForRequiredCoverage(
+  context: TacticalPlanBuildContext,
+  requiredCoverage: RequiredCapabilityKind,
+) {
+  const coverage = deckCoverageKindForRequiredCapability(requiredCoverage);
+  if (!coverage) return undefined;
+  const inventory = context.deckCapabilities?.runner?.breakerInventory ?? [];
+  return inventory.find((breaker) =>
+    breaker.coverage.includes(coverage) ||
+    breaker.coverage.includes("universal"),
+  );
+}
+
+function coveragePlanStatusForRequiredCoverage(
+  context: TacticalPlanBuildContext,
+  requiredCoverage: RequiredCapabilityKind,
+): PlanLifecycle {
+  return deckCoverageStateForRequiredCoverage(context, requiredCoverage)?.missing &&
+    deckCapabilityHasDeckSnapshot(context)
+    ? "blocked"
+    : "active";
+}
+
+function deckCapabilityHasDeckSnapshot(context: TacticalPlanBuildContext): boolean {
+  return context.deckCapabilities?.evidence.includes("deck_snapshot:present") === true;
+}
+
 function deckCapabilityEvidenceForRequiredCoverage(
   context: TacticalPlanBuildContext,
   requiredCoverage: RequiredCapabilityKind,
@@ -1152,6 +1290,7 @@ function deckCapabilityEvidenceForRequiredCoverage(
     ? context.deckCapabilities?.runner?.breakerCoverageMatrix[coverage]
     : undefined;
   if (!coverage || !state) return [];
+  if (state.missing && !deckCapabilityHasDeckSnapshot(context)) return [];
   const status = state.installed
     ? "installed"
     : state.inHand
@@ -1174,7 +1313,7 @@ function deckCapabilityBlockersForRequiredCoverage(
     ? context.deckCapabilities?.runner?.breakerCoverageMatrix[coverage]
     : undefined;
   if (!coverage || !state) return [];
-  if (state.missing) {
+  if (state.missing && deckCapabilityHasDeckSnapshot(context)) {
     return [
       {
         blockerId: `deck_missing_${coverage}_coverage:${serverId}`,
@@ -1194,6 +1333,30 @@ function deckCapabilityBlockersForRequiredCoverage(
         target: { kind: "server", id: serverId },
         removalStepKind: "draw_for_answer",
         evidence: [`missing_coverage:${coverage}`],
+      },
+    ];
+  }
+  const memoryAvailable = context.deckCapabilities?.runner?.memoryProfile.memoryAvailable;
+  if (state.inHand && memoryAvailable !== undefined && memoryAvailable <= 0) {
+    return [
+      {
+        blockerId: `breaker_present_but_mu_blocked:${serverId}:${coverage}`,
+        kind: "breaker_present_but_mu_blocked",
+        severity: "soft",
+        target: { kind: "server", id: serverId },
+        removalStepKind: "resolve_missing_mu",
+        evidence: [
+          `deck_capability:breaker_${coverage}=in_hand`,
+          `memory_available:${memoryAvailable}`,
+        ],
+      },
+      {
+        blockerId: `missing_mu:${serverId}:${coverage}`,
+        kind: "missing_mu",
+        severity: "soft",
+        target: { kind: "capability", id: "memory" },
+        removalStepKind: "resolve_missing_mu",
+        evidence: [`memory_available:${memoryAvailable}`],
       },
     ];
   }
