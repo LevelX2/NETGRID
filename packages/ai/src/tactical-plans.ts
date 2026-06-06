@@ -11,6 +11,7 @@ import type {
   DeckCapabilityProfile,
 } from "./deck-capabilities";
 import { redactedDeckCapabilityFacts } from "./deck-capabilities";
+import { evaluateKnownRemoteAccessPayoff } from "./known-remote-access-payoff";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 
 export const TACTICAL_PLAN_SCHEMA_VERSION = "tactical-plan-v1" as const;
@@ -700,10 +701,24 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
   const remoteRunActions = input.legalActions.filter(
     (action) => action.type === "start_run" && isRemoteServer(actionServerId(action)),
   );
+  const noPayoffRemoteRunActions: LegalAction[] = [];
+  const noPayoffByActionId = new Map<
+    string,
+    ReturnType<typeof evaluateKnownRemoteAccessPayoff>
+  >();
+  for (const action of remoteRunActions) {
+    const serverId = actionServerId(action);
+    const payoff = evaluateKnownRemoteAccessPayoff(input, serverId);
+    if (!payoff.knownNoCurrentPayoff) continue;
+    noPayoffRemoteRunActions.push(action);
+    noPayoffByActionId.set(action.actionId, payoff);
+  }
   const emptyRemoteRunActions = remoteRunActions.filter((action) =>
+    !noPayoffRemoteRunActions.includes(action) &&
     remoteRunHasNoRootValue(input.playerView, actionServerId(action)),
   );
   const blockedRemoteRuns = remoteRunActions.filter((action) =>
+    !noPayoffRemoteRunActions.includes(action) &&
     !emptyRemoteRunActions.includes(action) &&
     runNeedsBreakerCoverage(input.playerView, actionServerId(action)),
   );
@@ -812,6 +827,62 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
       }),
     );
   }
+  for (const action of noPayoffRemoteRunActions) {
+    const serverId = actionServerId(action);
+    if (!serverId) continue;
+    const payoff = noPayoffByActionId.get(action.actionId);
+    plans.push(
+      createTacticalPlan({
+        planId: `runner.contest_remote:${serverId}`,
+        side: "runner",
+        type: "runner.contest_remote",
+        status: "abandoned",
+        priority: -680,
+        horizonTurns: 1,
+        target: { kind: "server", id: serverId },
+        blockers: [
+          {
+            blockerId: `known_remote_no_current_payoff:${serverId}`,
+            kind:
+              payoff?.payoff === "trash_unaffordable"
+                ? "too_expensive"
+                : "target_unreachable",
+            severity: "hard",
+            target: { kind: "server", id: serverId },
+            ...(payoff?.payoff === "trash_unaffordable"
+              ? { removalStepKind: "gain_credits" as const }
+              : {}),
+            evidence: [
+              "known remote root has no current access payoff",
+              ...(payoff?.evidence ?? []),
+            ],
+          },
+        ],
+        currentStep: createPlanStep({
+          stepId: `run_target:${serverId}`,
+          kind: "run_target",
+          desiredActionSemantics: ["run.start"],
+          rationale: [
+            "remote is known from Runner memory and currently has no payoff",
+          ],
+        }),
+        evidence: [
+          `known_no_payoff_remote_run_action:${action.actionId}`,
+          ...(payoff?.reasons ?? []),
+          ...(payoff?.evidence ?? []),
+        ],
+        scoreBreakdown: [
+          {
+            key: "remote_known_no_current_payoff",
+            label: "Known remote has no current payoff",
+            value: -680,
+            reason: serverId,
+          },
+        ],
+        stateVersion,
+      }),
+    );
+  }
   for (const action of emptyRemoteRunActions) {
     const serverId = actionServerId(action);
     if (!serverId) continue;
@@ -848,7 +919,8 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
     if (
       !serverId ||
       blockedRemoteRuns.includes(action) ||
-      emptyRemoteRunActions.includes(action)
+      emptyRemoteRunActions.includes(action) ||
+      noPayoffRemoteRunActions.includes(action)
     ) continue;
     plans.push(
       createTacticalPlan({

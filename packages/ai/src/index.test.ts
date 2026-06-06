@@ -10893,6 +10893,60 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(access.score).toBeGreaterThan(0);
   });
 
+  it("does not map a memory-known unaffordable remote asset to another remote run in semantic runtime", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = knownRemoteRootMemoryInput(
+      "ai-known-remote-braindance-semantic-no-repeat",
+      "onr_v1_311_braindance-campaign",
+      5,
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const rdRun = input.legalActions.find(
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const hqRun = input.legalActions.find(
+      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(rdRun).toBeDefined();
+    expect(hqRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!remoteRun || !rdRun || !hqRun || !gainCredit)
+      throw new Error("Missing semantic no-repeat fixture actions");
+
+    const scopedInput = {
+      ...input,
+      legalActions: [remoteRun, rdRun, hqRun, gainCredit],
+    };
+    const decision = chooseRunnerAction(scopedInput, {
+      persistTacticalPlanMemory: false,
+    });
+    const selected = scopedInput.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+    const tacticalDebug = decision.decisionDebug?.detailSections
+      ?.find((section) => section.id === "tactical_plan")
+      ?.items.join("\n") ?? "";
+
+    expect(selected).toBeDefined();
+    expect(
+      selected?.type === "start_run" &&
+        selected.payload?.serverId === "remote_1",
+    ).toBe(false);
+    expect(decision.evidence).toContain("semantic_runtime_default:true");
+    expect(tacticalDebug).toContain("runner.contest_remote:remote_1");
+    expect(tacticalDebug).toContain("status=abandoned");
+    expect(tacticalDebug).toContain("blockers=too_expensive");
+    expect(tacticalDebug).toContain("Known remote has no current payoff:-680");
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+  });
+
   it("runs the Bartmoss remote path after a declined rez and suppresses same-turn no-access repeats", () => {
     const runnerDeck: DeckDefinition = {
       id: "ai_bartmoss_remote_runner",

@@ -1,6 +1,6 @@
 # AI-FIX-REMOTE-1 Known Remote Access Payoff
 
-Status: in Umsetzung
+Status: abgeschlossen
 
 ## Quelle/Vorgabe
 
@@ -150,3 +150,11 @@ Nach Abschluss: final verifizieren, lokal nach main mergen, main prüfen, Worktr
 - Bezahlbarer Remote-Trash und bekannte Remote-Agenda bleiben positive Remote-Fälle.
 - Finale AI-Checks und `git diff --check` sind grün oder eng begründet.
 - Branch ist lokal nach `main` gemerged und der Arbeits-Worktree entfernt.
+
+## Umsetzungsergebnis
+
+- Paket 1A hat diesen Prozess, Worktree und Branch versioniert.
+- Paket 1B hat `evaluateKnownRemoteAccessPayoff` eingeführt und `runner-plans` auf die zentrale Payoff-Auswertung umgestellt.
+- Paket 1C markiert bekannte Remote-Ziele ohne aktuellen Payoff im TacticalPlan-Build als `abandoned`, sodass der PlanStep nicht mehr auf einen weiteren `start_run` für dasselbe Remote gemappt wird.
+- Der konkrete Playtest-Fall `Braindance Campaign` mit 5 Credits wird entwertet; `Braindance Campaign` mit ausreichenden Credits und bekannte Agendas bleiben Remote-positive Fälle.
+- Es gab keine Änderung an Engine, `LegalActions`, `applyAction`, Replay, StateHash, Randomness oder Kartenfreigaben.
