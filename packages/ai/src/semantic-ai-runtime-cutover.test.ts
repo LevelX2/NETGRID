@@ -7,6 +7,7 @@ import type {
   AiDifficulty,
   LegalAction,
   PlayerView,
+  PublicGameEvent,
   Side,
   VisibleCard,
 } from "@netgrid/shared";
@@ -604,6 +605,87 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
+  it("does not continue a satisfied R&D probe into the same known low-value top card", () => {
+    const initialInput = aiInput("runner", [
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        { payload: { serverId: "rd" } },
+      ),
+      legalAction(
+        "run-hq",
+        "runner",
+        "start_run",
+        "Run HQ",
+        { credits: 0 },
+        { payload: { serverId: "hq" } },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    initialInput.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+
+    const initialDecision = chooseRunnerAction(initialInput);
+    expect(initialDecision.actionId).toBe("run-rd");
+
+    const followupInput = aiInput("runner", [
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        { payload: { serverId: "rd" } },
+      ),
+      legalAction(
+        "run-hq",
+        "runner",
+        "start_run",
+        "Run HQ",
+        { credits: 0 },
+        { payload: { serverId: "hq" } },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    followupInput.playerView.stateVersion = 3;
+    followupInput.playerView.servers = initialInput.playerView.servers;
+    followupInput.eventTail = [
+      rdAccessEvent(
+        "semantic-rd-rock-access",
+        1,
+        "onr_v1_265_rock-is-strong",
+      ),
+    ];
+
+    const followupDecision = chooseRunnerAction(followupInput);
+    const selected = followupInput.legalActions.find(
+      (action) => action.actionId === followupDecision.actionId,
+    );
+    const tacticalDebug = followupDecision.decisionDebug?.detailSections
+      ?.find((section) => section.id === "tactical_plan")
+      ?.items.join("\n") ?? "";
+
+    expect(
+      selected?.type === "start_run" && selected.payload?.serverId === "rd",
+    ).toBe(false);
+    expect(tacticalDebug).toContain("runner.opportunistic_central_run:rd");
+    expect(tacticalDebug).toContain("status=abandoned");
+    expect(tacticalDebug).toContain("blockers=target_unreachable");
+    expect(tacticalDebug).toContain(
+      "plan_progression_reason:previous_central_probe_satisfied",
+    );
+  });
+
   it("represents a corp rez window as a rez defense plan", () => {
     const input = aiInput("corp", [
       legalAction(
@@ -784,4 +866,25 @@ function legalAction(
   };
   if (options.payload) action.payload = options.payload;
   return action;
+}
+
+function rdAccessEvent(
+  eventId: string,
+  stateVersionBefore: number,
+  cardDefinitionId: string,
+): PublicGameEvent {
+  return {
+    eventId,
+    type: "access_card",
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "public",
+    publicPayload: {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "rd",
+      cardDefinitionId,
+    },
+  };
 }

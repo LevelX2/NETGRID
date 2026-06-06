@@ -17,6 +17,7 @@ import type {
   AiDecisionInput,
   LegalAction,
   PlayerView,
+  PublicGameEvent,
   Side,
   VisibleCard,
 } from "@netgrid/shared";
@@ -515,6 +516,49 @@ describe("tactical plan model", () => {
     expect(coveragePlan?.requiredCapabilities[0]?.kind).toBe("breaker_wall");
   });
 
+  it("abandons an R&D probe when the known top card is stale and low-value", () => {
+    const input = aiInput("runner", [
+      legalAction("run-rd", "runner", "start_run", {
+        serverId: "rd",
+      }),
+      legalAction("run-hq", "runner", "start_run", {
+        serverId: "hq",
+      }),
+      legalAction("gain", "runner", "gain_credit"),
+    ]);
+    input.playerView.stateVersion = 3;
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    input.eventTail = [
+      rdAccessEvent("tactical-rd-rock-access", 1, "onr_v1_265_rock-is-strong"),
+    ];
+
+    const plans = buildTacticalPlans({ input });
+    const rdPlan = plans.find(
+      (plan) => plan.planId === "runner.opportunistic_central_run:rd",
+    );
+    const hqPlan = plans.find(
+      (plan) => plan.planId === "runner.opportunistic_central_run:hq",
+    );
+
+    expect(rdPlan?.status).toBe("abandoned");
+    expect(rdPlan?.blockers.map((blocker) => blocker.kind)).toEqual([
+      "target_unreachable",
+    ]);
+    expect(rdPlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "known_rnd_top_low_value_stale",
+        "central_known_no_current_payoff",
+        "rd_run_suppressed_by_known_low_value_top:true",
+        "central_memory_payoff:known_low_value",
+      ]),
+    );
+    expect(rdPlan?.scoreBreakdown[0]).toMatchObject({
+      key: "central_known_no_current_payoff",
+      value: -640,
+    });
+    expect(hqPlan?.status).toBe("active");
+  });
+
   it("funds an unaffordable matching breaker in hand instead of drawing", () => {
     const input = aiInput("runner", [
       legalAction("run-rd", "runner", "start_run", {
@@ -918,6 +962,27 @@ function legalAction(
     visibility: "public",
     expiresAtStateVersion: 2,
     ...(Object.keys(payload).length > 0 ? { payload } : {}),
+  };
+}
+
+function rdAccessEvent(
+  eventId: string,
+  stateVersionBefore: number,
+  cardDefinitionId: string,
+): PublicGameEvent {
+  return {
+    eventId,
+    type: "access_card",
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "public",
+    publicPayload: {
+      actor: "runner",
+      actionType: "access_card",
+      serverId: "rd",
+      cardDefinitionId,
+    },
   };
 }
 

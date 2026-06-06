@@ -11,6 +11,7 @@ import type {
   DeckCapabilityProfile,
 } from "./deck-capabilities";
 import { redactedDeckCapabilityFacts } from "./deck-capabilities";
+import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
 import { evaluateKnownRemoteAccessPayoff } from "./known-remote-access-payoff";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 
@@ -358,8 +359,31 @@ function progressTacticalPlans(
   whyPlanAbandoned?: string;
 } {
   if (!previousPlan) return { plans: [...plans] };
+  const previousCentralProbeSatisfied =
+    previousPlan.type === "runner.opportunistic_central_run" &&
+    previousPlan.status === "satisfied" &&
+    previousPlan.ttlDecisionsRemaining <= 0;
   const continued = plans.map((plan) => {
     if (!samePlanLine(plan, previousPlan)) return plan;
+    if (previousCentralProbeSatisfied) {
+      return {
+        ...plan,
+        evidence: [
+          ...plan.evidence,
+          `previous_plan:${previousPlan.planId}`,
+          `plan_progression:${previousPlan.status}->new_plan_required`,
+        ],
+        scoreBreakdown: [
+          ...plan.scoreBreakdown,
+          {
+            key: "previous_probe_satisfied",
+            label: "Previous probe satisfied",
+            value: 0,
+            reason: previousPlan.planId,
+          },
+        ],
+      } satisfies TacticalPlan;
+    }
     return {
       ...plan,
       status: plan.status === "active" ? "progressing" : plan.status,
@@ -398,6 +422,12 @@ function progressTacticalPlans(
       ),
       planProgressionReason: "previous_central_probe_ttl_expired",
       whyPlanAbandoned: "opportunistic central run was a one-decision probe; returning to blocker plan",
+    };
+  }
+  if (previousCentralProbeSatisfied) {
+    return {
+      plans: continued,
+      planProgressionReason: "previous_central_probe_satisfied",
     };
   }
   return {
@@ -726,7 +756,20 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
     (action) =>
       action.type === "start_run" && isCentralServer(actionServerId(action)),
   );
+  const noPayoffCentralRunActions: LegalAction[] = [];
+  const noPayoffCentralByActionId = new Map<
+    string,
+    ReturnType<typeof evaluateKnownCentralAccessPayoff>
+  >();
+  for (const action of centralRunActions) {
+    const serverId = actionServerId(action);
+    const payoff = evaluateKnownCentralAccessPayoff(input, serverId);
+    if (!payoff.knownNoCurrentPayoff) continue;
+    noPayoffCentralRunActions.push(action);
+    noPayoffCentralByActionId.set(action.actionId, payoff);
+  }
   const blockedCentralRuns = centralRunActions.filter((action) =>
+    !noPayoffCentralRunActions.includes(action) &&
     runNeedsBreakerCoverage(input.playerView, actionServerId(action)),
   );
   for (const action of blockedRemoteRuns) {
@@ -914,6 +957,62 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
       }),
     );
   }
+  for (const action of noPayoffCentralRunActions) {
+    const serverId = actionServerId(action);
+    if (!serverId) continue;
+    const payoff = noPayoffCentralByActionId.get(action.actionId);
+    plans.push(
+      createTacticalPlan({
+        planId: `runner.opportunistic_central_run:${serverId}`,
+        side: "runner",
+        type: "runner.opportunistic_central_run",
+        status: "abandoned",
+        priority: -640,
+        horizonTurns: 1,
+        target: { kind: "server", id: serverId },
+        blockers: [
+          {
+            blockerId: `known_central_no_current_payoff:${serverId}`,
+            kind:
+              payoff?.payoff === "trash_unaffordable"
+                ? "too_expensive"
+                : "target_unreachable",
+            severity: "hard",
+            target: { kind: "server", id: serverId },
+            ...(payoff?.payoff === "trash_unaffordable"
+              ? { removalStepKind: "gain_credits" as const }
+              : {}),
+            evidence: [
+              "known central access has no current payoff",
+              ...(payoff?.evidence ?? []),
+            ],
+          },
+        ],
+        currentStep: createPlanStep({
+          stepId: `probe_central:${serverId}`,
+          kind: "probe_central",
+          desiredActionSemantics: ["run.start"],
+          rationale: [
+            "central top card is known from Runner memory and currently has no payoff",
+          ],
+        }),
+        evidence: [
+          `known_no_payoff_central_run_action:${action.actionId}`,
+          ...(payoff?.reasons ?? []),
+          ...(payoff?.evidence ?? []),
+        ],
+        scoreBreakdown: [
+          {
+            key: "central_known_no_current_payoff",
+            label: "Known central access has no current payoff",
+            value: -640,
+            reason: serverId,
+          },
+        ],
+        stateVersion,
+      }),
+    );
+  }
   for (const action of remoteRunActions) {
     const serverId = actionServerId(action);
     if (
@@ -945,6 +1044,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
   for (const action of centralRunActions) {
     const serverId = actionServerId(action);
     if (!serverId) continue;
+    if (noPayoffCentralRunActions.includes(action)) continue;
     if (blockedCentralRuns.includes(action)) {
       const missingCoverage = missingBreakerCoverageKind(input.playerView, serverId);
       const deckCapabilityEvidence = deckCapabilityEvidenceForRequiredCoverage(
