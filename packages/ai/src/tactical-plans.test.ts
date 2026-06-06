@@ -7,6 +7,7 @@ import {
   mapPlanStepToLegalActions,
   rankTacticalPlans,
 } from "./tactical-plans";
+import { buildDeckCapabilityProfile } from "./deck-capabilities";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
 import type {
   AiDecisionInput,
@@ -192,6 +193,99 @@ describe("tactical plan model", () => {
 
     expect(coveragePlan?.requiredCapabilities[0]?.kind).toBe("breaker_wall");
     expect(coveragePlan?.currentStep.rationale[0]).toContain("breaker_wall");
+  });
+
+  it("adds deck capability evidence when a missing breaker can be searched", () => {
+    const input = aiInput("runner", [
+      legalAction("run-remote", "runner", "start_run", {
+        serverId: "remote_1",
+      }),
+      legalAction("smc-search", "runner", "trigger_ability", {}, {
+        source: "onr_v1_059_self-modifying-code",
+        label: "Self-Modifying Code: search your stack for a program",
+      }),
+    ]);
+    input.playerView.own.rig = [
+      visibleCard("onr_v1_059_self-modifying-code", "runner", "program"),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("simple_barrier_ice", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["Wall"],
+        }),
+      ], [visibleCard("simple_agenda", "corp", "agenda")]),
+    ];
+    const deckCapabilities = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: input.playerView,
+      legalActions: input.legalActions,
+      deckSnapshot: {
+        deckSnapshotId: "tactical-plan-deck-capability-test",
+        side: "runner",
+        cards: [
+          { cardId: "onr_v1_021_dwarf", quantity: 1 },
+          { cardId: "onr_v1_059_self-modifying-code", quantity: 1 },
+        ],
+      },
+    });
+
+    const plans = buildTacticalPlans({ input, deckCapabilities });
+    const coveragePlan = plans.find(
+      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
+    );
+
+    expect(coveragePlan?.evidence).toEqual(
+      expect.arrayContaining(["deck_capability:breaker_wall=in_deck/searchable"]),
+    );
+    expect(coveragePlan?.blockers.some((blocker) => blocker.kind === "coverage_not_in_deck")).toBe(false);
+  });
+
+  it("adds granular blockers when deck capabilities have no matching coverage", () => {
+    const input = aiInput("runner", [
+      legalAction("run-remote", "runner", "start_run", {
+        serverId: "remote_1",
+      }),
+      legalAction("draw", "runner", "draw_card"),
+    ]);
+    input.playerView.own.rig = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("simple_barrier_ice", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["Wall"],
+        }),
+      ], [visibleCard("simple_agenda", "corp", "agenda")]),
+    ];
+    const deckCapabilities = buildDeckCapabilityProfile({
+      side: "runner",
+      playerView: input.playerView,
+      legalActions: input.legalActions,
+      deckSnapshot: {
+        deckSnapshotId: "tactical-plan-missing-wall-test",
+        side: "runner",
+        cards: [{ cardId: "onr_v1_014_codecracker", quantity: 1 }],
+      },
+    });
+
+    const plans = buildTacticalPlans({ input, deckCapabilities });
+    const contestPlan = plans.find(
+      (plan) => plan.planId === "runner.contest_remote:remote_1",
+    );
+
+    expect(contestPlan?.blockers.map((blocker) => blocker.kind)).toEqual(
+      expect.arrayContaining([
+        "missing_breaker_coverage",
+        "missing_wall_coverage",
+        "coverage_not_in_deck",
+      ]),
+    );
   });
 
   it("marks blocked central pressure as needing breaker coverage", () => {
@@ -417,13 +511,14 @@ function legalAction(
   side: Side,
   type: LegalAction["type"],
   payload: LegalAction["payload"] = {},
+  options: { source?: LegalAction["source"]; label?: string } = {},
 ): LegalAction {
   return {
     actionId,
     side,
     type,
-    label: actionId,
-    source: "basic_action",
+    label: options.label ?? actionId,
+    source: options.source ?? "basic_action",
     timingPoint: side === "runner" ? "runner_action.main" : "corp_action.main",
     costs: [{ credits: 0 }],
     targetRequirements: [],

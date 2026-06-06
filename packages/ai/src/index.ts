@@ -52,6 +52,11 @@ import {
   type AiDeckDoctrineDeckSnapshot,
 } from "./deck-doctrine";
 import {
+  buildDeckCapabilityProfile,
+  buildDeckCapabilityProfileFromInput,
+  type DeckCapabilityProfile,
+} from "./deck-capabilities";
+import {
   CARD_ROLES_BY_CARD,
   RUNTIME_CARDS,
   createAiHintsByCard,
@@ -3159,16 +3164,17 @@ export function buildAiDecisionInput(
   } = {},
 ): AiDecisionInput {
   const playerView = getPlayerView(state, side);
+  const legalActions = getLegalActions(state, side);
   const ownDeckDoctrine =
     options.ownDeckDoctrine ??
     (options.ownDeckSnapshot
       ? buildDeckDoctrineProfile(options.ownDeckSnapshot)
       : undefined);
-  return buildAiDecisionInputDto({
+  const input = buildAiDecisionInputDto({
     side,
     playerView,
     eventTail: options.eventTail ?? playerView.publicEvents,
-    legalActions: getLegalActions(state, side),
+    legalActions,
     difficulty: options.difficulty ?? "normal",
     seed: state.seed,
     decisionId:
@@ -3178,6 +3184,17 @@ export function buildAiDecisionInput(
       options.profileId ?? `${side}-ai-v0.9-${options.difficulty ?? "normal"}`,
     ...(ownDeckDoctrine ? { ownDeckDoctrine } : {}),
   });
+  if (!options.ownDeckSnapshot) return input;
+  const enriched: AiDecisionInputWithDeckCapabilities = {
+    ...input,
+    ownDeckCapabilities: buildDeckCapabilityProfile({
+      side,
+      playerView,
+      legalActions,
+      deckSnapshot: options.ownDeckSnapshot,
+    }),
+  };
+  return enriched;
 }
 
 export function selectAiDecisionSideForState(
@@ -3226,6 +3243,10 @@ function oppositeSide(side: Side): Side {
 
 type AiDecisionRuntimeOptions = {
   persistTacticalPlanMemory?: boolean;
+};
+
+type AiDecisionInputWithDeckCapabilities = AiDecisionInput & {
+  ownDeckCapabilities?: DeckCapabilityProfile;
 };
 
 export function chooseAiAction(
@@ -3313,11 +3334,13 @@ function chooseSemanticRuntimeAction(
       (candidate) => !candidate.exclusion && semanticRuntimeChoiceIsReactive(candidate),
     );
   const previousPlan = getTacticalPlanMemorySnapshot(input);
+  const deckCapabilities = deckCapabilitiesForInput(input);
   const planRuntime = reactiveChoice
     ? emptyTacticalPlanRuntimeResult()
     : evaluateTacticalPlans({
         input,
         ...(previousPlan ? { previousPlan } : {}),
+        deckCapabilities,
         candidates: buildActionSemanticCandidates({
           legalActions: input.legalActions,
           observerSide: input.side,
@@ -3453,6 +3476,11 @@ function semanticRuntimeChoices(input: AiDecisionInput): SemanticRuntimeChoice[]
         right.score - left.score ||
         compareAction(left.action, right.action),
     );
+}
+
+function deckCapabilitiesForInput(input: AiDecisionInput): DeckCapabilityProfile {
+  return (input as AiDecisionInputWithDeckCapabilities).ownDeckCapabilities ??
+    buildDeckCapabilityProfileFromInput(input);
 }
 
 function chooseSemanticRuntimeChoice(

@@ -6,6 +6,10 @@ import type {
   VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
+import type {
+  BreakerCoverageKind,
+  DeckCapabilityProfile,
+} from "./deck-capabilities";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 
 export const TACTICAL_PLAN_SCHEMA_VERSION = "tactical-plan-v1" as const;
@@ -81,6 +85,22 @@ export type RequiredCapability = {
 
 export type PlanBlockerKind =
   | "missing_breaker_coverage"
+  | "missing_wall_coverage"
+  | "missing_code_gate_coverage"
+  | "missing_sentry_coverage"
+  | "missing_ap_coverage"
+  | "missing_trace_coverage"
+  | "coverage_not_in_deck"
+  | "search_target_not_available"
+  | "breaker_present_but_unaffordable"
+  | "breaker_present_but_mu_blocked"
+  | "missing_mu"
+  | "too_expensive"
+  | "target_unreachable"
+  | "bank_tool_not_installed"
+  | "bank_empty"
+  | "score_window_unprotected"
+  | "missing_rez_reserve"
   | "missing_credits"
   | "missing_legal_action"
   | "missing_remote_protection"
@@ -142,6 +162,7 @@ export type TacticalPlanBuildContext = {
   input: AiDecisionInput;
   candidates?: readonly ActionSemanticCandidate[];
   previousPlan?: TacticalPlanSnapshot;
+  deckCapabilities?: DeckCapabilityProfile;
 };
 
 export type PlanProgressionStatus =
@@ -584,6 +605,10 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
     const serverId = actionServerId(action);
     if (!serverId) continue;
     const missingCoverage = missingBreakerCoverageKind(input.playerView, serverId);
+    const deckCapabilityEvidence = deckCapabilityEvidenceForRequiredCoverage(
+      context,
+      missingCoverage,
+    );
     const coverageStep = runnerBreakerCoverageStep(input, serverId);
     plans.push(
       createTacticalPlan({
@@ -603,11 +628,20 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
             evidence: [
               "visible rezzed ICE path and no visible breaker coverage",
               `missing_coverage:${missingCoverage}`,
+              ...deckCapabilityEvidence,
             ],
           },
+          ...deckCapabilityBlockersForRequiredCoverage(
+            context,
+            missingCoverage,
+            serverId,
+          ),
         ],
         currentStep: coverageStep,
-        evidence: [`blocked_remote_run_action:${action.actionId}`],
+        evidence: [
+          `blocked_remote_run_action:${action.actionId}`,
+          ...deckCapabilityEvidence,
+        ],
         scoreBreakdown: [
           {
             key: "remote_contest_blocked",
@@ -649,7 +683,10 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
             rationale: ["return to the blocked remote after coverage improves"],
           }),
         ],
-        evidence: [`unblocks_plan:runner.contest_remote:${serverId}`],
+        evidence: [
+          `unblocks_plan:runner.contest_remote:${serverId}`,
+          ...deckCapabilityEvidence,
+        ],
         scoreBreakdown: [
           {
             key: "unblocks_remote_contest",
@@ -725,6 +762,10 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
     if (!serverId) continue;
     if (blockedCentralRuns.includes(action)) {
       const missingCoverage = missingBreakerCoverageKind(input.playerView, serverId);
+      const deckCapabilityEvidence = deckCapabilityEvidenceForRequiredCoverage(
+        context,
+        missingCoverage,
+      );
       const coverageStep = runnerBreakerCoverageStep(input, serverId);
       const basePriority = serverId === "rd" ? 760 : 740;
       plans.push(
@@ -745,11 +786,20 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
               evidence: [
                 "visible rezzed ICE path and no visible breaker coverage",
                 `missing_coverage:${missingCoverage}`,
+                ...deckCapabilityEvidence,
               ],
             },
+            ...deckCapabilityBlockersForRequiredCoverage(
+              context,
+              missingCoverage,
+              serverId,
+            ),
           ],
           currentStep: coverageStep,
-          evidence: [`blocked_central_run_action:${action.actionId}`],
+          evidence: [
+            `blocked_central_run_action:${action.actionId}`,
+            ...deckCapabilityEvidence,
+          ],
           scoreBreakdown: [
             {
               key: "central_run_blocked",
@@ -791,7 +841,10 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
               rationale: ["return to the blocked central after coverage improves"],
             }),
           ],
-          evidence: [`unblocks_plan:runner.opportunistic_central_run:${serverId}`],
+          evidence: [
+            `unblocks_plan:runner.opportunistic_central_run:${serverId}`,
+            ...deckCapabilityEvidence,
+          ],
           scoreBreakdown: [
             {
               key: "unblocks_central_pressure",
@@ -1088,6 +1141,122 @@ function breakerCoverageCapability(
     target: { kind: "server", id: serverId },
     evidence: [`server:${serverId}`, `missing_coverage:${kind}`],
   };
+}
+
+function deckCapabilityEvidenceForRequiredCoverage(
+  context: TacticalPlanBuildContext,
+  requiredCoverage: RequiredCapabilityKind,
+): string[] {
+  const coverage = deckCoverageKindForRequiredCapability(requiredCoverage);
+  const state = coverage
+    ? context.deckCapabilities?.runner?.breakerCoverageMatrix[coverage]
+    : undefined;
+  if (!coverage || !state) return [];
+  const status = state.installed
+    ? "installed"
+    : state.inHand
+      ? "in_hand"
+      : state.searchableNow
+        ? "in_deck/searchable"
+        : state.inDeckKnown
+          ? "in_deck/draw_only"
+          : "missing";
+  return [`deck_capability:breaker_${coverage}=${status}`];
+}
+
+function deckCapabilityBlockersForRequiredCoverage(
+  context: TacticalPlanBuildContext,
+  requiredCoverage: RequiredCapabilityKind,
+  serverId: string,
+): PlanBlocker[] {
+  const coverage = deckCoverageKindForRequiredCapability(requiredCoverage);
+  const state = coverage
+    ? context.deckCapabilities?.runner?.breakerCoverageMatrix[coverage]
+    : undefined;
+  if (!coverage || !state) return [];
+  if (state.missing) {
+    return [
+      {
+        blockerId: `deck_missing_${coverage}_coverage:${serverId}`,
+        kind: missingCoverageBlockerKind(coverage),
+        severity: coverage === "special" || coverage === "subtype_limited" ? "soft" : "hard",
+        target: { kind: "server", id: serverId },
+        removalStepKind: "draw_for_answer",
+        evidence: [
+          `deck_capability:breaker_${coverage}=missing`,
+          "coverage_not_in_deck",
+        ],
+      },
+      {
+        blockerId: `coverage_not_in_deck:${serverId}:${coverage}`,
+        kind: "coverage_not_in_deck",
+        severity: "hard",
+        target: { kind: "server", id: serverId },
+        removalStepKind: "draw_for_answer",
+        evidence: [`missing_coverage:${coverage}`],
+      },
+    ];
+  }
+  if (state.inDeckKnown && !state.searchableNow && !state.inHand && !state.installed) {
+    return [
+      {
+        blockerId: `search_target_not_available:${serverId}:${coverage}`,
+        kind: "search_target_not_available",
+        severity: "soft",
+        target: { kind: "server", id: serverId },
+        removalStepKind: "draw_for_answer",
+        evidence: [
+          `deck_capability:breaker_${coverage}=in_deck/draw_only`,
+          "searchable_now:false",
+        ],
+      },
+    ];
+  }
+  return [];
+}
+
+function deckCoverageKindForRequiredCapability(
+  requiredCoverage: RequiredCapabilityKind,
+): BreakerCoverageKind | undefined {
+  switch (requiredCoverage) {
+    case "breaker_wall":
+      return "wall";
+    case "breaker_code_gate":
+      return "code_gate";
+    case "breaker_sentry":
+      return "sentry";
+    case "breaker_ap":
+      return "ap";
+    case "breaker_trace":
+      return "trace";
+    case "breaker_universal":
+      return "universal";
+    case "breaker_coverage":
+      return "special";
+    default:
+      return undefined;
+  }
+}
+
+function missingCoverageBlockerKind(
+  coverage: BreakerCoverageKind,
+): PlanBlockerKind {
+  switch (coverage) {
+    case "wall":
+      return "missing_wall_coverage";
+    case "code_gate":
+      return "missing_code_gate_coverage";
+    case "sentry":
+      return "missing_sentry_coverage";
+    case "ap":
+      return "missing_ap_coverage";
+    case "trace":
+      return "missing_trace_coverage";
+    case "universal":
+    case "subtype_limited":
+    case "special":
+      return "missing_breaker_coverage";
+  }
 }
 
 function actionServerId(action: LegalAction): string | undefined {
