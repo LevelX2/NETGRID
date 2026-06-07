@@ -1,19 +1,22 @@
 ---
 activityId: act-2026-06-07-ai-clean-1-legacy-inventory
-status: inbox
+status: done
 kind: architecture
 area: ai
 priority: high
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
+startedAt: 2026-06-07
+completedAt: 2026-06-07
 branch:
 releaseTarget: ai-clean-legacy-runtime-cleanup
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/reviews/ai/ai-clean-1-legacy-ai-code-inventory-2026-06-07.md
+checks:
+  - corepack pnpm exec prettier --check docs/reviews/ai/ai-clean-1-legacy-ai-code-inventory-2026-06-07.md docs/activities/done/act-2026-06-07-ai-clean-1-legacy-inventory.md
+  - git diff --check -- docs/reviews/ai/ai-clean-1-legacy-ai-code-inventory-2026-06-07.md docs/activities/done/act-2026-06-07-ai-clean-1-legacy-inventory.md
 ---
 
 # AI-CLEAN-1: Legacy-KI-Inventar und Nutzungsstatus
@@ -72,4 +75,4 @@ Nach AI-PLAN-3 bis AI-PLAN-8 und AI-STRAT-1 bis AI-STRAT-4 soll klar dokumentier
 
 ## Ergebnisnotiz
 
-Noch offen.
+Review-Artefakt erstellt. Ergebnis: Kein eindeutig toter KI-Entscheidungspfad wurde bestätigt; AI-CLEAN-2 sollte daher als kleines No-op-/Review-Paket oder nur bei später belegtem Einzelkandidaten bearbeitet werden. Wichtigster Folgeschnitt ist AI-CLEAN-3: Legacy-Baseline-, Planer-, ActionScore- und PlanWeight-Pfade sollen als Fallback/Diagnose/Legacy-Übergang klarer markiert oder benannt werden.
