@@ -225,6 +225,11 @@ export {
   evaluateRunnerRunTargets,
 } from "./runner-run-target-evaluation";
 export {
+  RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
+  evaluateRunnerHandDevelopment,
+  redactedRunnerHandDevelopmentFacts,
+} from "./runner-hand-development";
+export {
   RUNNER_TACTICAL_GOAL_SCHEMA_VERSION,
   buildRunnerTacticalGoals,
   redactedRunnerTacticalGoalFacts,
@@ -270,6 +275,16 @@ export type {
   RunnerRunTargetKind,
   RunnerRunTargetRecommendation,
 } from "./runner-run-target-evaluation";
+export type {
+  EvaluateRunnerHandDevelopmentParams,
+  RunnerHandDevelopmentAvailability,
+  RunnerHandDevelopmentCurrentNeed,
+  RunnerHandDevelopmentDeferReason,
+  RunnerHandDevelopmentEvaluation,
+  RunnerHandDevelopmentFundingNeed,
+  RunnerHandDevelopmentRole,
+  RunnerHandDevelopmentStrategicFit,
+} from "./runner-hand-development";
 export type {
   BuildRunnerTacticalGoalsParams,
   RunnerTacticalGoal,
