@@ -104,7 +104,7 @@ describe("tactical plan model", () => {
     ]);
   });
 
-  it("keeps a progressing plan above a fresh active alternative", () => {
+  it("lets active plans outrank progressing plans when the continuity bonus is not enough", () => {
     const progressing = createTacticalPlan({
       planId: "runner.obtain_breaker_coverage:rd",
       side: "runner",
@@ -119,6 +119,10 @@ describe("tactical plan model", () => {
       }),
       stateVersion: 2,
     });
+    const strongerProgressing = {
+      ...progressing,
+      priority: 900,
+    };
     const freshActive = createTacticalPlan({
       planId: "runner.contest_remote:remote_2",
       side: "runner",
@@ -135,6 +139,10 @@ describe("tactical plan model", () => {
     });
 
     expect(rankTacticalPlans([freshActive, progressing]).map((plan) => plan.planId)).toEqual([
+      "runner.contest_remote:remote_2",
+      "runner.obtain_breaker_coverage:rd",
+    ]);
+    expect(rankTacticalPlans([freshActive, strongerProgressing]).map((plan) => plan.planId)).toEqual([
       "runner.obtain_breaker_coverage:rd",
       "runner.contest_remote:remote_2",
     ]);

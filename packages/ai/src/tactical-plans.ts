@@ -280,6 +280,7 @@ export type TacticalPlanRuntimeResult = {
 };
 
 const tacticalPlanMemoryByKey = new Map<string, TacticalPlanMemorySnapshot>();
+const PLAN_CONTINUITY_PRIORITY_BONUS = 120;
 
 export function buildTacticalPlans(
   context: TacticalPlanBuildContext,
@@ -529,7 +530,7 @@ function progressTacticalPlans(
     return {
       ...plan,
       status: plan.status === "active" ? "progressing" : plan.status,
-      priority: plan.priority + 80,
+      priority: plan.priority + PLAN_CONTINUITY_PRIORITY_BONUS,
       evidence: [
         ...plan.evidence,
         `previous_plan:${previousPlan.planId}`,
@@ -540,7 +541,7 @@ function progressTacticalPlans(
         {
           key: "previous_plan_continuity",
           label: "Planfortschreibung",
-          value: 80,
+          value: PLAN_CONTINUITY_PRIORITY_BONUS,
           reason: previousPlan.planId,
         },
       ],
@@ -3330,7 +3331,7 @@ export function rankTacticalPlans(plans: readonly TacticalPlan[]): TacticalPlan[
 function planStatusRank(status: PlanLifecycle): number {
   switch (status) {
     case "progressing":
-      return 7;
+      return 6;
     case "active":
       return 6;
     case "proposed":
