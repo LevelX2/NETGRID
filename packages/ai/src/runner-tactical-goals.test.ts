@@ -225,6 +225,155 @@ describe("Runner TacticalGoalIntegration", () => {
       "credit_base_recommendation:fund_useful_hand_card",
     );
   });
+
+  it("maps a high access-payoff hand development goal to its legal install action over a weak run", () => {
+    const input = aiInput({
+      credits: 5,
+      servers: [server("hq")],
+      grip: [
+        visibleCard("access-card", {
+          definitionId: "access_payoff_card",
+          type: "hardware",
+        }),
+      ],
+      legalActions: [
+        runAction("run-hq", "hq"),
+        installAction("install-access-card", "access-card"),
+      ],
+    });
+    const handDevelopmentEvaluations = [
+      handDevelopmentEvaluation({
+        cardInstanceId: "access-card",
+        legalActionId: "install-access-card",
+        developmentRole: "access_payoff",
+        availability: "legal_now",
+        currentNeed: "useful_now",
+        priority: 650,
+        deferReason: "none",
+      }),
+    ];
+
+    const result = tacticalResultFor(input, handDevelopmentEvaluations);
+
+    expect(result.selectedPlan?.type).toBe("runner.develop_hand_card");
+    expect(result.selectedStep?.kind).toBe("install_development_card");
+    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
+      "install-access-card",
+    ]);
+    expect(input.legalActions.map((action) => action.actionId)).toContain(
+      result.selectedMapping?.legalActions[0]?.actionId,
+    );
+  });
+
+  it("maps acute memory-support hand development to legal memory hardware", () => {
+    const input = aiInput({
+      credits: 5,
+      servers: [server("hq")],
+      grip: [
+        visibleCard("memory-hardware", {
+          definitionId: "memory_hardware",
+          type: "hardware",
+          memoryLimitBonus: 2,
+        }),
+      ],
+      legalActions: [
+        runAction("run-hq", "hq"),
+        installAction("install-memory", "memory-hardware"),
+      ],
+    });
+
+    const result = tacticalResultFor(input, [
+      handDevelopmentEvaluation({
+        cardInstanceId: "memory-hardware",
+        legalActionId: "install-memory",
+        developmentRole: "memory_support",
+        availability: "legal_now",
+        currentNeed: "acute",
+        priority: 760,
+        deferReason: "none",
+      }),
+    ]);
+
+    expect(result.selectedPlan?.type).toBe("runner.develop_hand_card");
+    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
+      "install-memory",
+    ]);
+  });
+
+  it("does not map defense support without a visible current need", () => {
+    const input = aiInput({
+      credits: 5,
+      servers: [server("hq")],
+      grip: [
+        visibleCard("defense-card", {
+          definitionId: "defense_card",
+          type: "resource",
+        }),
+      ],
+      legalActions: [
+        runAction("run-hq", "hq"),
+        installAction("install-defense", "defense-card"),
+      ],
+    });
+
+    const result = tacticalResultFor(input, [
+      handDevelopmentEvaluation({
+        cardInstanceId: "defense-card",
+        legalActionId: "install-defense",
+        developmentRole: "defense_support",
+        availability: "legal_now",
+        currentNeed: "none",
+        strategicFit: "weak",
+        priority: 700,
+        deferReason: "no_current_need",
+      }),
+    ]);
+
+    expect(result.planAlternatives.map((plan) => plan.type)).not.toContain(
+      "runner.develop_hand_card",
+    );
+    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).not.toContain(
+      "install-defense",
+    );
+  });
+
+  it("keeps remote score-threat pressure ahead of hand development installs", () => {
+    const input = aiInput({
+      credits: 5,
+      servers: [
+        server("remote_2", {
+          root: [visibleCard("remote-root", { known: false, advancementCounters: 2 })],
+        }),
+      ],
+      grip: [
+        visibleCard("access-card", {
+          definitionId: "access_payoff_card",
+          type: "hardware",
+        }),
+      ],
+      legalActions: [
+        runAction("run-remote-2", "remote_2"),
+        installAction("install-access-card", "access-card"),
+      ],
+    });
+
+    const result = tacticalResultFor(input, [
+      handDevelopmentEvaluation({
+        cardInstanceId: "access-card",
+        legalActionId: "install-access-card",
+        developmentRole: "access_payoff",
+        availability: "legal_now",
+        currentNeed: "useful_now",
+        priority: 800,
+        deferReason: "none",
+      }),
+    ]);
+
+    expect(result.selectedPlan?.type).toBe("runner.contest_remote");
+    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
+      "run-remote-2",
+    ]);
+  });
 });
 
 function benchmarkSnapshotById(snapshotId: string): AiDeckDoctrineDeckSnapshot {
@@ -247,6 +396,7 @@ function aiInput(params: {
   servers: PlayerView["servers"];
   legalActions: LegalAction[];
   rig?: VisibleCard[];
+  grip?: VisibleCard[];
 }): AiDecisionInput {
   const playerView: PlayerView = {
     stateVersion: 1,
@@ -259,7 +409,7 @@ function aiInput(params: {
       credits: params.credits,
       clicks: 3,
       agendaPoints: 0,
-      gripOrHq: [],
+      gripOrHq: params.grip ?? [],
       stackOrRdCount: 20,
       heapOrArchives: [],
       scoreArea: [],
@@ -342,6 +492,22 @@ function gainCreditAction(actionId: string): LegalAction {
   };
 }
 
+function installAction(actionId: string, source: string): LegalAction {
+  return {
+    actionId,
+    side: "runner",
+    type: "install_card",
+    label: `Install ${source}`,
+    source,
+    timingPoint: "runner_action.main",
+    costs: [{ clicks: 1 }],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 2,
+    payload: { cardId: source },
+  };
+}
+
 function visibleIdentity(side: Side): VisibleCard {
   return {
     instanceId: `${side}-identity`,
@@ -380,4 +546,35 @@ function handDevelopmentEvaluation(
     evidence: ["source:own_runner_hand"],
     ...overrides,
   };
+}
+
+function tacticalResultFor(
+  input: AiDecisionInput,
+  handDevelopmentEvaluations: RunnerHandDevelopmentEvaluation[],
+) {
+  const runTargetEvaluations = evaluateRunnerRunTargets({
+    input,
+    handDevelopmentEvaluations,
+  });
+  const economyPosture = buildRunnerEconomyPosture({
+    input,
+    handDevelopmentEvaluations,
+  });
+  const runnerTacticalGoals = buildRunnerTacticalGoals({
+    input,
+    runTargetEvaluations,
+    economyPosture,
+  });
+  return evaluateTacticalPlans({
+    input,
+    runnerRunTargetEvaluations: runTargetEvaluations,
+    runnerEconomyPosture: economyPosture,
+    runnerHandDevelopmentEvaluations: handDevelopmentEvaluations,
+    runnerTacticalGoals,
+    candidates: buildActionSemanticCandidates({
+      legalActions: input.legalActions,
+      observerSide: "runner",
+      stateVersion: input.playerView.stateVersion,
+    }),
+  });
 }

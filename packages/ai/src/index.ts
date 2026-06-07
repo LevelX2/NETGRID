@@ -3475,6 +3475,9 @@ function chooseSemanticRuntimeAction(
         ...(runnerStrategicIntent ? { runnerStrategicIntent } : {}),
         ...(runnerRunTargetEvaluations ? { runnerRunTargetEvaluations } : {}),
         ...(runnerEconomyPosture ? { runnerEconomyPosture } : {}),
+        ...(runnerHandDevelopmentEvaluations
+          ? { runnerHandDevelopmentEvaluations }
+          : {}),
         ...(runnerTacticalGoals ? { runnerTacticalGoals } : {}),
         candidates: actionSemanticCandidates,
       });

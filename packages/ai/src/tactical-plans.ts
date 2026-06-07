@@ -17,6 +17,7 @@ import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
 } from "./runner-run-target-evaluation";
+import type { RunnerHandDevelopmentEvaluation } from "./runner-hand-development";
 import {
   redactedRunnerTacticalGoalFacts,
   type RunnerTacticalGoal,
@@ -40,6 +41,8 @@ export type TacticalPlanType =
   | "runner.obtain_breaker_coverage"
   | "runner.contest_remote"
   | "runner.opportunistic_central_run"
+  | "runner.develop_hand_card"
+  | "runner.build_credit_base"
   | "runner.build_credit_bank"
   | "runner.cash_out_credit_bank"
   | "corp.create_score_window"
@@ -53,6 +56,7 @@ export type PlanStepKind =
   | "draw_for_answer"
   | "search_for_answer"
   | "gain_credits"
+  | "install_development_card"
   | "build_remote"
   | "protect_remote"
   | "build_rez_reserve"
@@ -186,6 +190,7 @@ export type TacticalPlanBuildContext = {
   runnerStrategicIntent?: RunnerStrategicIntentProfile;
   runnerRunTargetEvaluations?: readonly RunnerRunTargetEvaluation[];
   runnerEconomyPosture?: RunnerEconomyPosture;
+  runnerHandDevelopmentEvaluations?: readonly RunnerHandDevelopmentEvaluation[];
   runnerTacticalGoals?: readonly RunnerTacticalGoal[];
 };
 
@@ -619,6 +624,9 @@ function candidateMatchesStep(
   ) {
     return false;
   }
+  if (step.kind === "install_development_card") {
+    return developmentCardStepMatchesAction(plan, action);
+  }
   if (step.kind === "install_breaker" && action.type === "install_card") {
     const requiredCoverage = planRequiredBreakerCoverage(plan, step);
     const sourceCard = visibleCardByInstanceId(input.playerView, String(action.source));
@@ -648,6 +656,33 @@ function candidateMatchesStep(
   return actionTypeMatchesStep(step, candidate.actionType) &&
     candidateTargetMatchesPlan(plan, candidate, action) &&
     bankStepMatchesCandidate(step, candidate, action);
+}
+
+function developmentCardStepMatchesAction(
+  plan: TacticalPlan,
+  action: LegalAction,
+): boolean {
+  if (
+    action.type !== "install_card" &&
+    action.type !== "play_event" &&
+    action.type !== "trigger_ability" &&
+    action.type !== "activated_card_ability"
+  ) {
+    return false;
+  }
+  if (plan.target?.kind !== "card") return true;
+  return legalActionReferencesCard(action, plan.target.id);
+}
+
+function legalActionReferencesCard(action: LegalAction, cardId: string): boolean {
+  const payload = action.payload ?? {};
+  return (
+    action.source === cardId ||
+    payload.cardId === cardId ||
+    payload.sourceCardId === cardId ||
+    payload.targetCardId === cardId ||
+    payload.selectedCardId === cardId
+  );
 }
 
 function candidateMappingRationale(candidate: ActionSemanticCandidate): string {
@@ -741,6 +776,13 @@ function actionTypeMatchesStep(step: PlanStep, actionType: string): boolean {
       );
     case "gain_credits":
       return actionType === "gain_credit";
+    case "install_development_card":
+      return (
+        actionType === "install_card" ||
+        actionType === "play_event" ||
+        actionType === "trigger_ability" ||
+        actionType === "activated_card_ability"
+      );
     case "build_remote":
     case "protect_remote":
     case "install_or_prepare_agenda":
@@ -1276,6 +1318,12 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
       }),
     );
   }
+  plans.push(
+    ...runnerHandDevelopmentPlans(context, stateVersion, runnerGoalEvidence),
+  );
+  plans.push(
+    ...runnerCreditBasePlans(context, stateVersion, runnerGoalEvidence),
+  );
   const bankBuildActions = input.legalActions.filter(isBankBuildAction);
   const runnerBankToolEvidence = bankToolEvidence(context, "runner");
   const runnerBankPayout = largestBankPayout(context, "runner");
@@ -1377,6 +1425,208 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
     );
   }
   return plans;
+}
+
+function runnerHandDevelopmentPlans(
+  context: TacticalPlanBuildContext,
+  stateVersion: number,
+  runnerGoalEvidence: readonly string[],
+): TacticalPlan[] {
+  return (context.runnerHandDevelopmentEvaluations ?? [])
+    .filter(usefulLegalRunnerHandDevelopment)
+    .slice(0, 6)
+    .map((evaluation) =>
+      createTacticalPlan({
+        planId: `runner.develop_hand_card:${evaluation.cardInstanceId}`,
+        side: "runner",
+        type: "runner.develop_hand_card",
+        status: "active",
+        priority: runnerHandDevelopmentPlanPriority(context, evaluation),
+        horizonTurns: 1,
+        target: {
+          kind: "card",
+          id: evaluation.cardInstanceId,
+          label: evaluation.developmentRole,
+        },
+        currentStep: createPlanStep({
+          stepId: `install_development_card:${evaluation.cardInstanceId}`,
+          kind: "install_development_card",
+          desiredActionSemantics: [
+            "install.card",
+            "play.runner_event",
+            `runner_hand_development.${evaluation.developmentRole}`,
+          ],
+          rationale: [
+            `hand development role ${evaluation.developmentRole} is ${evaluation.currentNeed}`,
+            `hand development priority ${evaluation.priority}`,
+          ],
+        }),
+        evidence: [
+          `hand_development_role:${evaluation.developmentRole}`,
+          `hand_development_need:${evaluation.currentNeed}`,
+          `hand_development_fit:${evaluation.strategicFit}`,
+          `hand_development_priority:${evaluation.priority}`,
+          ...evaluation.evidence.slice(0, 6),
+          ...runnerGoalEvidence,
+        ],
+        scoreBreakdown: [
+          {
+            key: "runner_hand_development",
+            label: "Runner hand development",
+            value: runnerHandDevelopmentPlanPriority(context, evaluation),
+            reason: evaluation.developmentRole,
+          },
+        ],
+        stateVersion,
+      }),
+    );
+}
+
+function runnerCreditBasePlans(
+  context: TacticalPlanBuildContext,
+  stateVersion: number,
+  runnerGoalEvidence: readonly string[],
+): TacticalPlan[] {
+  const creditBase = context.runnerEconomyPosture?.creditBasePlan;
+  if (!creditBase || creditBase.economyPriority === "low") return [];
+  if (!context.input.legalActions.some((action) => action.type === "gain_credit")) {
+    return [];
+  }
+  return [
+    createTacticalPlan({
+      planId: "runner.build_credit_base",
+      side: "runner",
+      type: "runner.build_credit_base",
+      status: "active",
+      priority: creditBase.economyPriority === "high" ? 930 : 820,
+      horizonTurns: 1,
+      target: { kind: "capability", id: "runner_credit_base" },
+      currentStep: createPlanStep({
+        stepId: "gain_credits:runner_credit_base",
+        kind: "gain_credits",
+        desiredActionSemantics: ["economy.gain_credit"],
+        rationale: [
+          `creditbase recommends ${creditBase.recommendation}`,
+          `desired reserve ${creditBase.desiredCreditReserve}`,
+        ],
+      }),
+      evidence: [
+        `credit_base_recommendation:${creditBase.recommendation}`,
+        `credit_base_priority:${creditBase.economyPriority}`,
+        `credit_base_funding_need:${creditBase.fundingNeed}`,
+        `credit_base_desired_reserve:${creditBase.desiredCreditReserve}`,
+        `credit_base_blocked_hand_cards:${creditBase.usefulHandCardsBlockedByCredits}`,
+        ...runnerGoalEvidence,
+      ],
+      scoreBreakdown: [
+        {
+          key: "runner_credit_base",
+          label: "Runner creditbase",
+          value: creditBase.economyPriority === "high" ? 930 : 820,
+          reason: creditBase.recommendation,
+        },
+      ],
+      stateVersion,
+    }),
+  ];
+}
+
+function usefulLegalRunnerHandDevelopment(
+  evaluation: RunnerHandDevelopmentEvaluation,
+): boolean {
+  if (evaluation.availability !== "legal_now") return false;
+  if (!evaluation.legalActionId) return false;
+  if (
+    evaluation.developmentRole === "duplicate_or_low_value" ||
+    evaluation.developmentRole === "unknown"
+  ) {
+    return false;
+  }
+  if (evaluation.currentNeed === "none" || evaluation.currentNeed === "later") {
+    return false;
+  }
+  if (
+    evaluation.developmentRole === "defense_support" &&
+    evaluation.currentNeed !== "acute"
+  ) {
+    return false;
+  }
+  return evaluation.priority >= 500;
+}
+
+function runnerHandDevelopmentPlanPriority(
+  context: TacticalPlanBuildContext,
+  evaluation: RunnerHandDevelopmentEvaluation,
+): number {
+  const creditBase = context.runnerEconomyPosture?.creditBasePlan;
+  const roleScore = runnerHandDevelopmentRolePriority(evaluation);
+  const needScore = runnerHandDevelopmentNeedPriority(evaluation);
+  const fitScore = runnerHandDevelopmentFitPriority(evaluation);
+  const creditBaseScore =
+    creditBase?.recommendation === "allow_setup_spend" ? 40 :
+    creditBase?.recommendation === "preserve_reserve" ? -40 :
+    0;
+  return Math.max(
+    0,
+    Math.min(930, roleScore + needScore + fitScore + creditBaseScore),
+  );
+}
+
+function runnerHandDevelopmentRolePriority(
+  evaluation: RunnerHandDevelopmentEvaluation,
+): number {
+  switch (evaluation.developmentRole) {
+    case "breaker_or_rig_piece":
+      return 780;
+    case "memory_support":
+      return 760;
+    case "access_payoff":
+      return 750;
+    case "economy_engine":
+    case "bank_tool":
+      return 730;
+    case "draw_or_search_engine":
+      return 700;
+    case "run_event":
+      return 680;
+    case "defense_support":
+      return evaluation.currentNeed === "acute" ? 780 : 420;
+    case "duplicate_or_low_value":
+    case "unknown":
+      return 0;
+  }
+}
+
+function runnerHandDevelopmentNeedPriority(
+  evaluation: RunnerHandDevelopmentEvaluation,
+): number {
+  switch (evaluation.currentNeed) {
+    case "acute":
+      return 110;
+    case "useful_now":
+      return 80;
+    case "setup":
+      return 40;
+    case "later":
+      return -180;
+    case "none":
+      return -420;
+  }
+}
+
+function runnerHandDevelopmentFitPriority(
+  evaluation: RunnerHandDevelopmentEvaluation,
+): number {
+  switch (evaluation.strategicFit) {
+    case "strong":
+      return 60;
+    case "medium":
+      return 20;
+    case "blocked":
+      return -80;
+    case "weak":
+      return -220;
+  }
 }
 
 function runnerAdjustedPlanPriority(
