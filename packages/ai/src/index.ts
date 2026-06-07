@@ -4034,6 +4034,22 @@ function semanticRuntimeRunnerOpponentMemorySummary(
       knownCount: model.hqHandMemory.knownCount,
       allCardsKnown: model.hqHandMemory.allCardsKnown,
       knownCards: semanticRuntimeKnownDefinitionCounts(model.hqHandMemory.knownDefinitions),
+      summary: semanticRuntimeHqHandMemorySummary(model.hqHandMemory),
+      safeKnownCards: model.hqHandMemory.ledger.safeDefinitions.map((definition) => ({
+        ...semanticRuntimeKnownCardSummary(definition.definitionId),
+        count: definition.count
+      })),
+      candidateGroups: model.hqHandMemory.ledger.candidateGroups.slice(0, 6).map((group) => ({
+        category: semanticRuntimeHqCandidateGroupCategory(group.reason, group.installPlacement),
+        reason: group.reason,
+        candidateCount: group.candidateCount,
+        ambiguousCount: Math.max(0, group.candidateCount - group.departureCount),
+        unknownCandidateCount: group.unknownCandidateCount,
+        departureCount: group.departureCount,
+        ...(group.serverId ? { serverId: group.serverId } : {}),
+        ...(group.installPlacement ? { installPlacement: group.installPlacement } : {}),
+        basis: group.basis.slice(0, 4)
+      })),
       invalidationReasons: model.hqHandMemory.invalidationReasons.slice(0, 4)
     },
     remoteCardBelief: model.remoteCardBelief.slice(0, 6).map((entry) => ({
@@ -4079,6 +4095,36 @@ function semanticRuntimeCorpOpponentMemorySummary(
     hqPressureEstimate: round(model.hqPressureEstimate),
     rndPressureEstimate: round(model.rndPressureEstimate)
   };
+}
+
+function semanticRuntimeHqHandMemorySummary(
+  memory: RunnerOpponentModel["hqHandMemory"],
+): {
+  safeKnownCount: number;
+  ambiguousCount: number;
+  unknownCount: number;
+  candidateGroupCount: number;
+} {
+  const ambiguousCount = memory.ledger.candidateGroups.reduce(
+    (sum, group) => sum + Math.max(0, group.candidateCount - group.departureCount),
+    0,
+  );
+  return {
+    safeKnownCount: memory.ledger.safeDefinitions.reduce((sum, definition) => sum + definition.count, 0),
+    ambiguousCount,
+    unknownCount: memory.ledger.unknownRestCount,
+    candidateGroupCount: memory.ledger.candidateGroups.length
+  };
+}
+
+function semanticRuntimeHqCandidateGroupCategory(
+  reason: string,
+  placement: string | undefined,
+): string {
+  if (reason === "hidden_install_no_matching_known_candidates") return "hidden_install_uncertain";
+  if (placement === "ice") return "hidden_ice_install";
+  if (placement === "root") return "hidden_root_install";
+  return "hidden_install";
 }
 
 function semanticRuntimeRunnerMemoryItems(model: RunnerOpponentModel | undefined): string[] {

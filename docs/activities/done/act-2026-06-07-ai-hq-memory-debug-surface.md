@@ -1,20 +1,30 @@
 ---
 activityId: act-2026-06-07-ai-hq-memory-debug-surface
-status: inbox
+status: done
 kind: fix
 area: web
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
+startedAt: 2026-06-07
+completedAt: 2026-06-07
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-06-07-ai-hq-hidden-install-candidates
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+  - packages/ai/src/index.test.ts
+  - apps/web/app/ai-decision-debug-ui.ts
+  - apps/web/app/ai-decision-debug-ui.test.ts
+  - apps/web/app/page.tsx
+checks:
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "names fair known cards and remote candidates in Runner DecisionDebug memory"
+  - corepack pnpm --filter @netgrid/web exec vitest run app/ai-decision-debug-ui.test.ts
+  - corepack pnpm --filter @netgrid/ai exec tsc --noEmit
+  - corepack pnpm --filter @netgrid/web exec tsc --noEmit
+  - git diff --check
 ---
 
 # HQ-Hand-Wissen im DecisionDebug differenziert anzeigen
@@ -52,11 +62,11 @@ Die KI-Debuganzeige soll nicht mehr nur `x/y Karten namentlich bekannt` zeigen, 
 
 ## Akzeptanzkriterien
 
-- [ ] DecisionDebug kann sichere, unbekannte und mehrdeutige HQ-Hand-Anteile getrennt darstellen.
-- [ ] Die Anzeige bleibt bei altem/fehlendem Ledger-Feld rückwärtskompatibel.
-- [ ] Redaction-Tests verhindern `cardInstances`, `privatePayload`, FullState, Session-/Reconnect-Tokens und echte nicht gesehene Kartenidentitäten.
-- [ ] Web-Tests für die relevante Debug-Zeile sind ergänzt oder bestehende Tests angepasst.
-- [ ] `@netgrid/ai` und `@netgrid/web` fokussierte Tests/Typechecks sowie `git diff --check` sind grün.
+- [x] DecisionDebug kann sichere, unbekannte und mehrdeutige HQ-Hand-Anteile getrennt darstellen.
+- [x] Die Anzeige bleibt bei altem/fehlendem Ledger-Feld rückwärtskompatibel.
+- [x] Redaction-Tests verhindern `cardInstances`, `privatePayload`, FullState, Session-/Reconnect-Tokens und echte nicht gesehene Kartenidentitäten.
+- [x] Web-Tests für die relevante Debug-Zeile sind ergänzt oder bestehende Tests angepasst.
+- [x] `@netgrid/ai` und `@netgrid/web` fokussierte Tests/Typechecks sowie `git diff --check` sind grün.
 
 ## Umsetzungshinweise
 
@@ -66,4 +76,4 @@ Die KI-Debuganzeige soll nicht mehr nur `x/y Karten namentlich bekannt` zeigen, 
 
 ## Ergebnisnotiz
 
-Noch offen.
+DecisionDebug gibt für HQ-Hand-Memory nun eine side-sichere Zusammenfassung mit sicheren bekannten Karten, unklaren Kandidaten und unbekannten Restkarten aus. Die Web-Debuganzeige nutzt diese Zusammenfassung kompakt und bleibt beim alten DTO-Format rückwärtskompatibel. Fokussierte AI-/Web-Tests, beide Typechecks und `git diff --check` sind grün.

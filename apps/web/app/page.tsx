@@ -261,6 +261,7 @@ import {
   type CatalogTypeFilterState
 } from "./catalog-ui";
 import { aiInspectorEntryKey, aiInspectorSections, defaultCollapsedAiInspectorSections, type AiInspectorEntry, type CatalogAiInspector } from "./ai-hint-inspector-ui";
+import { aiDecisionDebugHqHandRows } from "./ai-decision-debug-ui";
 import {
   deckStrategyEvidenceKey,
   deckStrategyProfileEntryKey,
@@ -10226,23 +10227,7 @@ function aiDecisionDebugMemoryRows(detail: Record<string, unknown>): Array<[stri
   }
   const hq = aiDecisionDebugRecord(model.hqHandMemory);
   if (hq) {
-    const knownCount = typeof hq.knownCount === "number" ? hq.knownCount : 0;
-    const handCountValue = typeof hq.handCount === "number" ? hq.handCount : undefined;
-    const handCount = handCountValue ?? "?";
-    const knowledgeStatus = hq.allCardsKnown === true
-      ? "vollständig"
-      : knownCount <= 0
-        ? "keine bekannt"
-        : "teilweise";
-    rows.push(["HQ-Hand-Wissen", `${knownCount}/${handCount} Karten namentlich bekannt · ${knowledgeStatus}`]);
-    const knownCards = aiDecisionDebugCardList(hq.knownCards, 8);
-    const unknownCount = handCountValue !== undefined ? Math.max(0, handCountValue - knownCount) : 0;
-    if (knownCards || unknownCount > 0) {
-      rows.push([
-        "HQ-Hand-Inhalt",
-        [knownCards, unknownCount > 0 ? `${unknownCount} unbekannt` : ""].filter(Boolean).join(" · ")
-      ]);
-    }
+    rows.push(...aiDecisionDebugHqHandRows(hq));
   }
   const knownPositions = aiDecisionDebugPositionCardList(model.knownPositionMemory, 6);
   if (knownPositions) {

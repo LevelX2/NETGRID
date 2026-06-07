@@ -17523,9 +17523,25 @@ describe("V1.4.2 belief state and opponent model", () => {
         }),
       ]),
     );
+    expect(knownModel?.hqHandMemory?.summary).toMatchObject({
+      safeKnownCount: 2,
+      ambiguousCount: 0,
+      unknownCount: expect.any(Number),
+      candidateGroupCount: 0,
+    });
+    expect(knownModel?.hqHandMemory?.safeKnownCards).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          definitionId: "simple_agenda",
+          title: "Simple Agenda",
+          type: "agenda",
+          count: 1,
+        }),
+      ]),
+    );
     expect(knownModel?.hqHandMemory?.ledger).toBeUndefined();
     expect(JSON.stringify(knownModel?.hqHandMemory)).not.toMatch(
-      /safeDefinitions|candidateGroups|unknownRestCount/,
+      /safeDefinitions|unknownRestCount/,
     );
     expect(knownModel?.rndTopFreshness?.knownTopCard).toMatchObject({
       definitionId: "simple_agenda",
@@ -17557,6 +17573,24 @@ describe("V1.4.2 belief state and opponent model", () => {
     }).decisionDebug;
     const remoteModel = remoteDebug?.opponentModel as Record<string, any> | undefined;
 
+    expect(remoteModel?.hqHandMemory?.summary).toMatchObject({
+      safeKnownCount: 0,
+      ambiguousCount: 1,
+      unknownCount: 0,
+      candidateGroupCount: 1,
+    });
+    expect(remoteModel?.hqHandMemory?.candidateGroups?.[0]).toMatchObject({
+      category: "hidden_install",
+      reason: "hidden_unknown_install_candidates",
+      serverId: "remote_1",
+      candidateCount: 2,
+      ambiguousCount: 1,
+      unknownCandidateCount: 0,
+      departureCount: 1,
+    });
+    expect(JSON.stringify(remoteModel?.hqHandMemory?.candidateGroups)).not.toMatch(
+      /simple_agenda|simple_economy_operation|cardInstances|privatePayload|decklist|hidden-card/i,
+    );
     expect(remoteModel?.hiddenRemoteCandidateMemory?.[0]).toMatchObject({
       serverId: "remote_1",
       candidateCount: 2,
