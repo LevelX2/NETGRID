@@ -118,6 +118,9 @@ describe("Backend 0.5 maintenance UI helpers", () => {
     expect(aiTraceMetaRows(trace)).toContainEqual(["Ausgeführt", "install_card"]);
     expect(aiTraceMetaRows(trace)).toContainEqual(["Vertrauen", "73%"]);
     expect(aiTracePlanLabel("access_trash_steal")).toBe("Zugriff / Trash / Steal");
+    expect(aiTracePlanLabel("runner.obtain_breaker_coverage")).toBe("Breaker-Abdeckung vorbereiten");
+    expect(aiTracePlanLabel("runner.contest_remote")).toBe("Remote-Run prüfen");
+    expect(aiTracePlanLabel("runner.build_credit_base")).toBe("Credit-Basis aufbauen");
   });
 
   it("formats AI trace action-level rows for Broker versus basic credit", () => {

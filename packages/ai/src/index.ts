@@ -4038,6 +4038,7 @@ function tacticalPlanRankDebugItem(
     ["selected", selected],
     ["blockers", plan.blockers.map((blocker) => blocker.kind).join(",")],
     ["capabilities", plan.requiredCapabilities.map((capability) => capability.kind).join(",")],
+    ["unblocks", tacticalPlanUnblocksDebugValue(plan)],
     ["scores", tacticalPlanScoreDebugValue(plan)],
   ];
   return `plan_rank|${fields
@@ -4049,6 +4050,13 @@ function tacticalPlanRankDebugItem(
 function tacticalPlanTargetDebugValue(target: TacticalPlan["target"]): string {
   if (!target) return "";
   return [target.kind, target.id].filter(Boolean).join(":");
+}
+
+function tacticalPlanUnblocksDebugValue(plan: TacticalPlan): string {
+  return plan.evidence
+    .filter((entry) => entry.startsWith("unblocks_plan:"))
+    .map((entry) => entry.slice("unblocks_plan:".length))
+    .join(",");
 }
 
 function tacticalPlanScoreDebugValue(plan: TacticalPlan): string {
