@@ -1,19 +1,21 @@
 ---
 activityId: act-2026-06-07-ai-mu-install-action-surface-audit
-status: inbox
+status: done
 kind: concept
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: false
 createdAt: 2026-06-07
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-06-07
+completedAt: 2026-06-07
+branch: codex/activities-inbox-ai-run-mu
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/reviews/ai/ai-mu-install-action-surface-audit-2026-06-07.md
+checks:
+  - review_complete
 ---
 
 # AI-MU-Install-Action-Surface-Audit
@@ -68,4 +70,4 @@ Klären, ob die Runner-KI bereits vor der Wahl einer Programminstallation erkenn
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Die KI sieht `runner_program_trash_before_install` in der Folge-Choice bereits side-sicher genug, um MU-Bedarf und Trash-Kandidaten zu bewerten. Die Luecke liegt vor der initialen `install_card`-Entscheidung: Der Sonderpfad ist legal und dadurch in `RunnerHandDevelopmentEvaluation`/TacticalPlans nicht mehr als MU-blockiert sichtbar, traegt aber noch keine explizite Displacement-/Opfer-Evidence. Folgepakete sollen `ProgramSacrificeEvaluation`, `RunnerMuPressureAssessment` und schmale `ActionSemanticCandidate`-/TacticalPlan-Evidence aus PlayerView und LegalAction ableiten, ohne Engine- oder Hidden-Info-Aenderung.
