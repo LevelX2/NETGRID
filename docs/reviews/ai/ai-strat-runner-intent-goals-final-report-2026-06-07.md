@@ -1,6 +1,6 @@
 # AI-STRAT Runner Intent, Run Targets und Golden Deck - Final Report
 
-Status: Paketumsetzung abgeschlossen, finaler Verify/Merge folgt im Paketprozess.
+Status: Abgeschlossen, final verifiziert und lokal per Fast-Forward nach `main` gemerged. Der Paket-Worktree wurde entfernt; ein Remote-Push oder PR erfolgte bewusst nicht.
 
 ## Scope
 
@@ -44,7 +44,8 @@ Grün ausgeführt:
 - `corepack pnpm --filter @netgrid/ai typecheck`
 - `git diff --check`
 
-## Restpunkte
+## Abschlussstand
 
-- Finale kombinierte Regression, lokaler Merge nach `main` und Worktree-Aufräumen erfolgen im abschließenden Paketprozess-Schritt.
+- Finale kombinierte Regression, lokaler Merge nach `main` und Worktree-Aufräumen sind abgeschlossen.
+- `main` enthält den lokalen AI-STRAT-Abschlussstand; Remote-Push und PR-Erstellung bleiben außerhalb dieses lokalen Paketabschlusses.
 - Weitere Kalibrierung für konkrete Kartenfähigkeiten bleibt ein eigener Gate-/Taxonomie-Prozess und wurde hier nicht erweitert.

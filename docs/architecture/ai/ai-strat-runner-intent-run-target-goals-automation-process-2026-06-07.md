@@ -1,6 +1,6 @@
 # AI-STRAT-1 bis AI-STRAT-4 Runner Intent, Run Targets und Golden Deck
 
-Status: AI-STRAT-1 bis AI-STRAT-4 umgesetzt; finaler Verify/Merge offen
+Status: AI-STRAT-1 bis AI-STRAT-4 abgeschlossen, final verifiziert und lokal nach `main` gemerged. Der Paket-Worktree wurde entfernt; ein Remote-Push oder PR erfolgte bewusst nicht.
 
 ## Quelle/Vorgabe
 
@@ -94,6 +94,8 @@ Für `Blink Pressure Rig` bedeutet das: Agenda-Steal bleibt der Primärplan; Run
 ## State Machine
 
 `preflight` -> `ai_strat_1_runner_strategic_intent_projection` -> `ai_strat_2_runner_run_target_economy_posture` -> `ai_strat_3_runner_tactical_goal_integration` -> `ai_strat_4_golden_deck_debug` -> `final_verify` -> `merge_main` -> `complete`
+
+Abschlussstand 2026-06-07: `complete` ist erreicht. Die finale Verifikation ist gelaufen, der Arbeitsbranch wurde lokal nach `main` integriert, der Hauptworkspace wurde geprüft und der Paket-Worktree entfernt. Remote-Integration bleibt ohne ausdrücklichen Nutzerwunsch bewusst offen.
 
 ## Paketfolge
 

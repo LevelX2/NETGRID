@@ -1,19 +1,22 @@
 ---
 activityId: act-2026-06-07-ai-strat-final-report-status-cleanup
-status: inbox
+status: done
 kind: cleanup
 area: docs
 priority: low
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
+startedAt: 2026-06-07
+completedAt: 2026-06-07
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/reviews/ai/ai-strat-runner-intent-goals-final-report-2026-06-07.md
+  - docs/architecture/ai/ai-strat-runner-intent-run-target-goals-automation-process-2026-06-07.md
+checks:
+  - git diff --check
 ---
 
 # AI-STRAT-Final-Report-Status bereinigen
@@ -44,10 +47,10 @@ Das AI-STRAT-Final-Report-Artefakt soll den tatsächlich erreichten Abschlusssta
 
 ## Akzeptanzkriterien
 
-- [ ] Final Report nennt sinngemäß: abgeschlossen, final verifiziert und lokal nach `main` gemerged.
-- [ ] Prozessartefakt enthält keinen offenen finalen Merge-/Verify-Status mehr, sofern dieser bereits abgeschlossen ist.
-- [ ] Der fehlende Remote-Push wird, falls erwähnt, klar als bewusster lokaler Stand und nicht als fachlicher Blocker beschrieben.
-- [ ] `git diff --check` ist grün.
+- [x] Final Report nennt sinngemäß: abgeschlossen, final verifiziert und lokal nach `main` gemerged.
+- [x] Prozessartefakt enthält keinen offenen finalen Merge-/Verify-Status mehr, sofern dieser bereits abgeschlossen ist.
+- [x] Der fehlende Remote-Push wird, falls erwähnt, klar als bewusster lokaler Stand und nicht als fachlicher Blocker beschrieben.
+- [x] `git diff --check` ist grün.
 
 ## Umsetzungshinweise
 
@@ -56,4 +59,4 @@ Das AI-STRAT-Final-Report-Artefakt soll den tatsächlich erreichten Abschlusssta
 
 ## Ergebnisnotiz
 
-Noch offen.
+Final Report und Prozessartefakt weisen den AI-STRAT-Abschluss jetzt widerspruchsfrei als abgeschlossen, final verifiziert, lokal nach `main` gemerged und Worktree-bereinigt aus. Der nicht erfolgte Remote-Push ist als bewusster lokaler Stand beschrieben, nicht als fachlicher Blocker.
