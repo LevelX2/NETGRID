@@ -11385,8 +11385,14 @@ function runnerProgramInstallTrashAssessmentEvidence(params: {
     `protected_icebreakers:${params.candidates.filter((candidate) => candidate.protectedRole).length}`,
     `program_sacrifice_candidates:${params.candidates.length}`,
     `program_sacrifice_acceptable_candidates:${params.candidates.filter((candidate) => candidate.acceptable).length}`,
+    `program_sacrifice_counter_value_candidates:${params.candidates.filter(
+      (candidate) =>
+        candidate.reasonCategories.includes("counters_or_stored_value"),
+    ).length}`,
     `program_sacrifice_can_free_required:${params.selection.canFreeRequiredMemory}`,
     `program_sacrifice_memory_freed:${params.selection.memoryFreed}`,
+    `program_sacrifice_selected_candidates:${params.selection.selectedCandidates.length}`,
+    `program_sacrifice_selected_category:${params.selection.selectedCandidates[0]?.category ?? "none"}`,
     ...(bestCandidate
       ? [
           `program_sacrifice_best_category:${bestCandidate.category}`,

@@ -1,21 +1,28 @@
 ---
 activityId: act-2026-06-07-ai-mu-sacrifice-regression-debug
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: test-quality-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-06-07
+completedAt: 2026-06-07
+branch: codex/activities-inbox-ai-run-mu
 releaseTarget:
 blockedBy:
   - act-2026-06-07-ai-program-sacrifice-evaluation
   - act-2026-06-07-ai-mu-pressure-memory-support
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "program install MU trash|countered|memory support|memory hardware dominate" --reporter=verbose
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - git diff --check
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-hand-development.test.ts src/runner-tactical-goals.test.ts src/tactical-plans.test.ts
 ---
 
 # AI-MU-Sacrifice-Regression und Debug
@@ -75,4 +82,4 @@ Die MU-/Program-Sacrifice-Logik mit fokussierten Tests und redigierter Debug-Evi
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt: Die MU-Sacrifice-Regressionen decken jetzt Counter-/Stored-Value-Programme, Low-Value-Opferauswahl und Memory-Support unter mittlerem MU-Druck ab. Die Debug-Evidence bleibt side-safe und benennt Kandidatenanzahl, ausgewählte Kategorie und MU-Druckgründe ohne private Zustandsdaten.

@@ -152,6 +152,7 @@ describe("MVP 0.3 AI controller contract", () => {
     delete DEMO_CARDS_BY_ID.test_zeta_planless_runner_resource;
     delete DEMO_CARDS_BY_ID.test_zeta_planless_corp_operation;
     delete DEMO_CARDS_BY_ID.test_expensive_fracter;
+    delete DEMO_CARDS_BY_ID.test_low_value_program;
   });
 
   it("builds side-neutral AI inputs without FullState or forbidden transport fields", () => {
@@ -2143,6 +2144,66 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(decision.evidence).toContain("program_sacrifice_best_category:low");
     expect(decision.evidence).toContain(
       "program_sacrifice_can_free_required:true",
+    );
+    expect(decision.evidence).toContain(
+      "program_sacrifice_selected_category:low",
+    );
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
+  it("keeps countered or stored-value programs behind a low-value duplicate sacrifice", () => {
+    DEMO_CARDS_BY_ID.test_low_value_program = {
+      id: "test_low_value_program",
+      title: "Test Low Value Program",
+      side: "runner",
+      type: "program",
+      subtypes: [],
+      implementationStatus: "playable_mvp",
+      installCost: 0,
+      memoryCost: 1,
+      rulesText: "Test-only low-value program.",
+      mechanics: [],
+    } satisfies CardDefinition;
+    const fixture = runnerProgramTrashChoiceInput(
+      "ai-program-install-trash-countered-duplicate",
+      {
+        sourceDefinitionId: "simple_decoder",
+        installedDefinitionIds: [
+          "v099_virus_program",
+          "test_low_value_program",
+        ],
+        memoryUsed: 2,
+        memoryLimit: 2,
+        mutateInstalledCard: (state, cardId, _definitionId, index) => {
+          if (index !== 0) return;
+          state.cardInstances[cardId] = {
+            ...state.cardInstances[cardId]!,
+            counters: {
+              ...(state.cardInstances[cardId]?.counters ?? {}),
+              virus: 4,
+            },
+          };
+        },
+      },
+    );
+    const lowValueProgramId = fixture.installedCardIds[1]!;
+
+    const decision = chooseRunnerAction(fixture.input);
+
+    expect(decision.selectedChoices).toEqual({
+      choiceId: fixture.input.playerView.pendingChoice?.choiceId,
+      selectedOptionIds: [fixture.optionIdsByCardId[lowValueProgramId]!],
+    });
+    expect(decision.evidence).toContain(
+      "program_sacrifice_counter_value_candidates:1",
+    );
+    expect(decision.evidence).toContain(
+      "program_sacrifice_selected_candidates:1",
+    );
+    expect(decision.evidence).toContain(
+      "program_sacrifice_selected_category:low",
     );
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
@@ -15342,6 +15403,49 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("boosts memory support when MU is nearly full and good programs are waiting in hand", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const state = batchARunnerTurn("ai-batch-a-near-memory-pressure-semantic");
+    state.runner.credits = 20;
+    state.runner.memoryUsed = Math.max(0, state.runner.memoryLimit - 1);
+    state.runner.clicks = 4;
+    moveRunnerCardToGrip(state, "onr_v1_015_codeslinger");
+    moveRunnerCardToGrip(state, "onr_v1_146_zetatech-mem-chip");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const memoryAction = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_146_zetatech-mem-chip",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(memoryAction).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!memoryAction || !gain)
+      throw new Error("Missing near-MU-pressure fixture actions");
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [memoryAction, gain],
+      playerView: {
+        ...input.playerView,
+        legalActions: [memoryAction, gain],
+      },
+    });
+
+    expect(decision.actionId).toBe(memoryAction.actionId);
+    expect(decision.evidence).toContain("runner_mu_pressure_severity:medium");
+    expect(decision.evidence).toContain(
+      "runner_mu_pressure_reason:low_mu_with_useful_programs",
+    );
+    expect(decision.evidence).toContain("runner_memory_available:1");
+  });
+
   it("prefers affordable memory support over a program install that needs a critical sacrifice", () => {
     process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
     const state = toRunnerTurn(
@@ -23798,11 +23902,39 @@ function runnerProgramTrashChoiceInput(
     installedDefinitionIds: string[];
     memoryUsed: number;
     memoryLimit: number;
+    mutateInstalledCard?: (
+      state: GameState,
+      cardId: CardInstanceId,
+      definitionId: string,
+      index: number,
+    ) => void;
   },
 ): {
   input: AiDecisionInput;
+  installedCardIds: CardInstanceId[];
   optionIdsByDefinition: Record<string, string>;
+  optionIdsByCardId: Record<string, string>;
 } {
+  const runnerCardCounts = new Map<string, number>([
+    ["simple_decoder", 3],
+    ["simple_fracter", 3],
+    ["simple_killer", 2],
+    ["v099_virus_program", 3],
+    ["simple_economy_event", 4],
+  ]);
+  const requiredCards = [
+    options.sourceDefinitionId,
+    ...options.installedDefinitionIds,
+  ];
+  for (const definitionId of requiredCards) {
+    const requiredCount = requiredCards.filter(
+      (id) => id === definitionId,
+    ).length;
+    runnerCardCounts.set(
+      definitionId,
+      Math.max(runnerCardCounts.get(definitionId) ?? 0, requiredCount),
+    );
+  }
   const state = toRunnerTurn(
     createGameAfterSetup({
       seed,
@@ -23811,13 +23943,10 @@ function runnerProgramTrashChoiceInput(
         name: "Runner Program Trash Choice Fixture",
         side: "runner",
         identity: "runner_identity_001",
-        cards: [
-          { id: "simple_decoder", quantity: 3 },
-          { id: "simple_fracter", quantity: 3 },
-          { id: "simple_killer", quantity: 2 },
-          { id: "v099_virus_program", quantity: 3 },
-          { id: "simple_economy_event", quantity: 4 },
-        ],
+        cards: [...runnerCardCounts.entries()].map(([id, quantity]) => ({
+          id,
+          quantity,
+        })),
       },
       corpDeck: {
         id: `runner_program_trash_choice_corp_${seed}`,
@@ -23837,6 +23966,14 @@ function runnerProgramTrashChoiceInput(
   const installedCardIds = options.installedDefinitionIds.map((definitionId) =>
     moveRunnerProgramToRig(state, definitionId),
   );
+  installedCardIds.forEach((cardId, index) => {
+    options.mutateInstalledCard?.(
+      state,
+      cardId,
+      state.cardInstances[cardId]!.definitionId,
+      index,
+    );
+  });
   state.runner.memoryUsed = options.memoryUsed;
   state.runner.memoryLimit = options.memoryLimit;
   state.pendingChoice = {
@@ -23864,11 +24001,15 @@ function runnerProgramTrashChoiceInput(
       difficulty: "normal",
       profileId: "runner-ai-v1.4.2-normal",
     }),
+    installedCardIds,
     optionIdsByDefinition: Object.fromEntries(
       installedCardIds.map((cardId) => [
         state.cardInstances[cardId]!.definitionId,
         `card_${cardId}`,
       ]),
+    ),
+    optionIdsByCardId: Object.fromEntries(
+      installedCardIds.map((cardId) => [cardId, `card_${cardId}`]),
     ),
   };
 }
