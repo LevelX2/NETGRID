@@ -206,6 +206,12 @@ export {
 } from "./deck-capabilities";
 export { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 export {
+  RUNNER_ECONOMY_POSTURE_SCHEMA_VERSION,
+  RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION,
+  buildRunnerEconomyPosture,
+  evaluateRunnerRunTargets,
+} from "./runner-run-target-evaluation";
+export {
   RUNNER_STRATEGIC_INTENT_SCHEMA_VERSION,
   buildRunnerStrategicIntentProfile,
 } from "./runner-strategic-intent";
@@ -236,6 +242,16 @@ export type {
   DeckStrategyScore,
   RunnerDeckStrategyProfiles,
 } from "./deck-doctrine-strategy";
+export type {
+  EvaluateRunnerRunTargetsParams,
+  RunnerAccessPayoff,
+  RunnerEconomyPosture,
+  RunnerKnownAccessState,
+  RunnerPathPassability,
+  RunnerRunTargetEvaluation,
+  RunnerRunTargetKind,
+  RunnerRunTargetRecommendation,
+} from "./runner-run-target-evaluation";
 export type {
   BuildRunnerStrategicIntentProfileParams,
   RunnerExecutionStyle,
