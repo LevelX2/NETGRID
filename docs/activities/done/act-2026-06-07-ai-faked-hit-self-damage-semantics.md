@@ -1,19 +1,21 @@
 ---
 activityId: act-2026-06-07-ai-faked-hit-self-damage-semantics
-status: inbox
+status: done
 kind: concept
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: false
 createdAt: 2026-06-07
-startedAt:
-completedAt:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/reviews/ai/faked-hit-self-damage-semantics-review-2026-06-08.md
+checks:
+  - git diff --check
 ---
 
 # Faked Hit und Self-Damage-Risikosemantik prüfen
@@ -76,4 +78,4 @@ Die KI-Semantik für `Faked Hit` und vergleichbare eigene Drawback-Karten soll p
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. `docs/reviews/ai/faked-hit-self-damage-semantics-review-2026-06-08.md` dokumentiert die tatsächlich verfügbare Evidence: Engine und Supportmanifest kennen 1 Bad Publicity plus 2 nicht verhinderbaren Core-Damage am Runner; aktive Hints liefern aber nur `damage_window` plus positives Bad-Publicity-Signal, und der kompilierte Hint bleibt bei Schadenstyp, Self-Damage-Ziel und Preventable-Status zu grob. Der Folgeguard darf deshalb nicht nur aus `damage_window` entscheiden und soll für `Faked Hit` enge side-sichere Self-Damage-Evidence mit Closeout-Regel verwenden. Engine, LegalActions, Replay, StateHash und Hidden-Info-Grenzen bleiben unverändert.
