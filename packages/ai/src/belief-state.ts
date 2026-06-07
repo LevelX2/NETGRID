@@ -123,6 +123,7 @@ export type HqHandLedgerMemory = {
 export type HiddenRemoteCandidateMemory = {
   serverId: string;
   candidateCount: number;
+  unknownCandidateCount: number;
   agendaCandidateCount: number;
   relevantTrashCandidateCount: number;
   candidateDefinitions: KnownDefinitionCountMemory[];
@@ -593,6 +594,13 @@ function deriveKnownHqHandMemory(input: AiDecisionInput, history: PublicGameEven
       rememberObservedHqAccessDefinition(knownCards, classification.eventId, definitionId);
       continue;
     }
+    reconcileHqCandidateGroups(
+      classification,
+      definitionId,
+      knownCards,
+      candidateGroups,
+      invalidationReasons,
+    );
 
     const adjustment = hqHandMemoryAdjustment(classification, definitionId);
     if (!adjustment) continue;
@@ -751,6 +759,94 @@ function hqHiddenInstallDepartureMemory(
   };
 }
 
+function reconcileHqCandidateGroups(
+  event: BeliefEventClassification,
+  definitionId: string | undefined,
+  knownCards: KnownHqHandEntry[],
+  candidateGroups: HqHandCandidateGroupMemory[],
+  invalidationReasons: string[],
+): void {
+  if (!definitionId || !event.serverId || candidateGroups.length === 0) return;
+  if (!hqCandidateReconciliationEvent(event)) return;
+
+  const groupIndex = candidateGroups.findIndex(
+    (group) => group.serverId === event.serverId,
+  );
+  if (groupIndex < 0) return;
+  const group = candidateGroups[groupIndex]!;
+  const matchedCandidate = group.candidateDefinitions.find(
+    (candidate) => candidate.definitionId === definitionId,
+  );
+  if (!matchedCandidate && group.unknownCandidateCount <= 0) {
+    invalidationReasons.push(
+      `hq_candidate_reveal_mismatch:${group.sourceEventId}->${event.eventId}:${definitionId}`,
+    );
+    return;
+  }
+
+  const remainingCandidateDefinitions = matchedCandidate
+    ? subtractOneKnownDefinitionCount(group.candidateDefinitions, definitionId)
+    : group.candidateDefinitions;
+  rememberCandidateDefinitionsAsSafeHqEntries(
+    knownCards,
+    event.eventId,
+    group.sourceEventId,
+    remainingCandidateDefinitions,
+  );
+  candidateGroups.splice(groupIndex, 1);
+  invalidationReasons.push(
+    matchedCandidate
+      ? `hq_candidate_reconciled:${group.sourceEventId}->${event.eventId}:${definitionId}`
+      : `hq_candidate_reconciled_unknown_install:${group.sourceEventId}->${event.eventId}:${definitionId}`,
+  );
+}
+
+function hqCandidateReconciliationEvent(event: BeliefEventClassification): boolean {
+  if (
+    event.family === "rez" ||
+    event.family === "reveal" ||
+    event.family === "expose"
+  ) {
+    return true;
+  }
+  return (
+    event.family === "access" ||
+    event.family === "trash" ||
+    event.family === "steal" ||
+    event.family === "score"
+  );
+}
+
+function subtractOneKnownDefinitionCount(
+  definitions: KnownDefinitionCountMemory[],
+  definitionId: string,
+): KnownDefinitionCountMemory[] {
+  return definitions.flatMap((definition) => {
+    if (definition.definitionId !== definitionId) return [definition];
+    const count = definition.count - 1;
+    return count > 0 ? [{ ...definition, count }] : [];
+  });
+}
+
+function rememberCandidateDefinitionsAsSafeHqEntries(
+  knownCards: KnownHqHandEntry[],
+  eventId: string,
+  candidateSourceEventId: string,
+  definitions: KnownDefinitionCountMemory[],
+): void {
+  let index = 0;
+  for (const definition of definitions) {
+    for (let copy = 0; copy < definition.count; copy += 1) {
+      knownCards.push({
+        key: `${eventId}:candidate_reconciled:${candidateSourceEventId}:${definition.definitionId}:${index}`,
+        definitionId: definition.definitionId,
+        eventId,
+      });
+      index += 1;
+    }
+  }
+}
+
 function deriveHiddenRemoteCandidateMemory(
   input: AiDecisionInput,
   history: PublicGameEvent[],
@@ -790,6 +886,7 @@ function deriveHiddenRemoteCandidateMemory(
       rememberObservedHqAccessDefinition(knownCards, classification.eventId, definitionId);
       continue;
     }
+    reconcileHiddenRemoteCandidateMemories(classification, definitionId, memories);
 
     const adjustment = hqHandMemoryAdjustment(classification, definitionId);
     if (!adjustment) continue;
@@ -840,6 +937,7 @@ function deriveHiddenRemoteCandidateMemory(
         memories.push({
           serverId: classification.serverId,
           candidateCount: totalCandidateCount,
+          unknownCandidateCount: candidateGroup.unknownCandidateCount,
           agendaCandidateCount,
           relevantTrashCandidateCount,
           candidateDefinitions,
@@ -866,6 +964,25 @@ function deriveHiddenRemoteCandidateMemory(
   }
 
   return memories.slice(-6);
+}
+
+function reconcileHiddenRemoteCandidateMemories(
+  event: BeliefEventClassification,
+  definitionId: string | undefined,
+  memories: HiddenRemoteCandidateMemory[],
+): void {
+  if (!definitionId || !event.serverId || memories.length === 0) return;
+  if (!hqCandidateReconciliationEvent(event)) return;
+
+  const memoryIndex = memories.findIndex(
+    (memory) =>
+      memory.serverId === event.serverId &&
+      (memory.unknownCandidateCount > 0 ||
+        memory.candidateDefinitions.some(
+          (candidate) => candidate.definitionId === definitionId,
+        )),
+  );
+  if (memoryIndex >= 0) memories.splice(memoryIndex, 1);
 }
 
 function positionInvalidatesKey(key: string, event: BeliefEventClassification): boolean {

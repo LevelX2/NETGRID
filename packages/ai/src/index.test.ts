@@ -16591,6 +16591,244 @@ describe("V1.4.2 belief state and opponent model", () => {
     );
   });
 
+  it("reconciles hidden ICE install candidates after the installed card is rezzed", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "ai-hq-candidate-rez-reconcile" }),
+    );
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const hqLook = syntheticHqPrivateLookEvent("ai-hq-reconcile-look", 100, [
+      "simple_barrier_ice",
+      "simple_code_gate_ice",
+      "simple_economy_operation",
+    ]);
+    const hiddenIceInstall = syntheticPlanActionEvent(
+      "ai-hq-reconcile-hidden-ice",
+      101,
+      "corp",
+      "install_card",
+      "remote_1",
+      { installPlacement: "ice" },
+    );
+    const rezInstalledIce = syntheticPlanActionEvent(
+      "ai-hq-reconcile-rez",
+      102,
+      "corp",
+      "rez_ice",
+      "remote_1",
+      { cardDefinitionId: "simple_barrier_ice" },
+    );
+    const belief = reconstructBeliefState({
+      ...baseInput,
+      playerView: {
+        ...baseInput.playerView,
+        opponent: { ...baseInput.playerView.opponent, handCount: 2 },
+      },
+      eventTail: [
+        ...baseInput.eventTail,
+        hqLook,
+        hiddenIceInstall,
+        rezInstalledIce,
+      ],
+    });
+    const hqMemory = belief.runnerOpponentModel?.hqHandMemory;
+
+    expect(hqMemory?.knownDefinitions).toEqual(
+      expect.arrayContaining([
+        "simple_code_gate_ice",
+        "simple_economy_operation",
+      ]),
+    );
+    expect(hqMemory).toMatchObject({
+      handCount: 2,
+      knownCount: 2,
+      allCardsKnown: true,
+    });
+    expect(hqMemory?.ledger.candidateGroups).toEqual([]);
+    expect(hqMemory?.invalidationReasons.join("|")).toContain(
+      "hq_candidate_reconciled:ai-hq-reconcile-hidden-ice->ai-hq-reconcile-rez:simple_barrier_ice",
+    );
+    expect(belief.runnerOpponentModel?.hiddenRemoteCandidateMemory).toEqual([]);
+  });
+
+  it("reconciles duplicate hidden ICE candidates count-safely", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "ai-hq-candidate-duplicate-reconcile" }),
+    );
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const hqLook = syntheticHqPrivateLookEvent("ai-hq-duplicate-look", 100, [
+      "simple_barrier_ice",
+      "simple_barrier_ice",
+      "simple_code_gate_ice",
+    ]);
+    const hiddenIceInstall = syntheticPlanActionEvent(
+      "ai-hq-duplicate-hidden-ice",
+      101,
+      "corp",
+      "install_card",
+      "remote_1",
+      { installPlacement: "ice" },
+    );
+    const rezInstalledIce = syntheticPlanActionEvent(
+      "ai-hq-duplicate-rez",
+      102,
+      "corp",
+      "rez_ice",
+      "remote_1",
+      { cardDefinitionId: "simple_barrier_ice" },
+    );
+    const belief = reconstructBeliefState({
+      ...baseInput,
+      playerView: {
+        ...baseInput.playerView,
+        opponent: { ...baseInput.playerView.opponent, handCount: 2 },
+      },
+      eventTail: [
+        ...baseInput.eventTail,
+        hqLook,
+        hiddenIceInstall,
+        rezInstalledIce,
+      ],
+    });
+    const knownDefinitions =
+      belief.runnerOpponentModel?.hqHandMemory.knownDefinitions ?? [];
+
+    expect(
+      knownDefinitions.filter((definitionId) => definitionId === "simple_barrier_ice"),
+    ).toHaveLength(1);
+    expect(knownDefinitions).toContain("simple_code_gate_ice");
+    expect(belief.runnerOpponentModel?.hqHandMemory.ledger).toMatchObject({
+      unknownRestCount: 0,
+      candidateGroups: [],
+      safeDefinitions: expect.arrayContaining([
+        expect.objectContaining({ definitionId: "simple_barrier_ice", count: 1 }),
+        expect.objectContaining({ definitionId: "simple_code_gate_ice", count: 1 }),
+      ]),
+    });
+  });
+
+  it("keeps candidate groups conservative on reveal mismatch", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "ai-hq-candidate-mismatch" }),
+    );
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const hqLook = syntheticHqPrivateLookEvent("ai-hq-mismatch-look", 100, [
+      "simple_barrier_ice",
+      "simple_code_gate_ice",
+      "simple_economy_operation",
+    ]);
+    const hiddenIceInstall = syntheticPlanActionEvent(
+      "ai-hq-mismatch-hidden-ice",
+      101,
+      "corp",
+      "install_card",
+      "remote_1",
+      { installPlacement: "ice" },
+    );
+    const revealMismatch = syntheticPlanActionEvent(
+      "ai-hq-mismatch-reveal",
+      102,
+      "corp",
+      "rez_ice",
+      "remote_1",
+      { cardDefinitionId: "simple_agenda" },
+    );
+    const belief = reconstructBeliefState({
+      ...baseInput,
+      playerView: {
+        ...baseInput.playerView,
+        opponent: { ...baseInput.playerView.opponent, handCount: 2 },
+      },
+      eventTail: [
+        ...baseInput.eventTail,
+        hqLook,
+        hiddenIceInstall,
+        revealMismatch,
+      ],
+    });
+    const hqMemory = belief.runnerOpponentModel?.hqHandMemory;
+
+    expect(hqMemory?.knownDefinitions).toEqual(["simple_economy_operation"]);
+    expect(hqMemory?.ledger.candidateGroups).toHaveLength(1);
+    expect(hqMemory?.invalidationReasons.join("|")).toContain(
+      "hq_candidate_reveal_mismatch:ai-hq-mismatch-hidden-ice->ai-hq-mismatch-reveal:simple_agenda",
+    );
+  });
+
+  it("uses reconciled root candidate agenda memory for HQ pressure", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "ai-hq-candidate-agenda-pressure" }),
+    );
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const hqLook = syntheticHqPrivateLookEvent("ai-hq-agenda-pressure-look", 100, [
+      "simple_agenda",
+      "simple_economy_asset",
+      "simple_economy_operation",
+    ]);
+    const hiddenRootInstall = syntheticPlanActionEvent(
+      "ai-hq-agenda-pressure-hidden-root",
+      101,
+      "corp",
+      "install_card",
+      "remote_1",
+      { installPlacement: "root" },
+    );
+    const revealAsset = syntheticPlanActionEvent(
+      "ai-hq-agenda-pressure-reveal",
+      102,
+      "runner",
+      "access_card",
+      "remote_1",
+      { cardDefinitionId: "simple_economy_asset" },
+    );
+    const input = {
+      ...baseInput,
+      playerView: {
+        ...baseInput.playerView,
+        opponent: { ...baseInput.playerView.opponent, handCount: 2 },
+      },
+      eventTail: [
+        ...baseInput.eventTail,
+        hqLook,
+        hiddenRootInstall,
+        revealAsset,
+      ],
+    };
+    const belief = reconstructBeliefState(input);
+    const pressureCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "pressure_hq",
+    );
+    if (!pressureCandidate) throw new Error("Missing pressure_hq candidate");
+    const accessValue = evaluateServerAccessValue(
+      input,
+      pressureCandidate,
+      belief,
+    );
+
+    expect(belief.runnerOpponentModel?.hqHandMemory.knownDefinitions).toContain(
+      "simple_agenda",
+    );
+    expect(belief.runnerOpponentModel?.hqHandMemory.ledger.candidateGroups).toEqual([]);
+    expect(accessValue.reasons).toContain("known_hq_agenda_pressure");
+    expect(accessValue.evidence).toContain(
+      "hq_run_boosted_because_known_agenda:true",
+    );
+    expect(JSON.stringify(belief)).not.toMatch(
+      /privatePayload|cardInstances|decklist|hidden-card/i,
+    );
+  });
+
   it("uses full known HQ agenda memory to prefer a payable HQ run", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({
