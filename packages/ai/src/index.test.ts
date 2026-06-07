@@ -15293,6 +15293,232 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(decision.debug.evidence).toContain("memory_remaining:0");
   });
 
+  it("boosts affordable memory support when full MU blocks useful programs in hand", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const state = batchARunnerTurn("ai-batch-a-memory-pressure-semantic");
+    state.runner.credits = 20;
+    state.runner.memoryUsed = state.runner.memoryLimit;
+    state.runner.clicks = 4;
+    moveRunnerCardToGrip(state, "onr_v1_015_codeslinger");
+    moveRunnerCardToGrip(state, "onr_v1_146_zetatech-mem-chip");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const memoryAction = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_146_zetatech-mem-chip",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(memoryAction).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!memoryAction || !gain)
+      throw new Error("Missing MU-pressure memory fixture actions");
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [memoryAction, gain],
+      playerView: {
+        ...input.playerView,
+        legalActions: [memoryAction, gain],
+      },
+    });
+
+    expect(decision.actionId).toBe(memoryAction.actionId);
+    expect(decision.evidence).toContain("runner_mu_pressure_severity:high");
+    expect(decision.evidence).toContain("runner_memory_support_action:true");
+    const usefulProgramEvidence = (decision.evidence ?? []).find((entry) =>
+      entry.startsWith("runner_useful_programs_in_hand:"),
+    );
+    expect(Number(usefulProgramEvidence?.split(":")[1] ?? 0)).toBeGreaterThan(
+      0,
+    );
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
+  it("prefers affordable memory support over a program install that needs a critical sacrifice", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const state = toRunnerTurn(
+      v105kCardReleaseGame("ai-memory-support-over-critical-sacrifice"),
+    );
+    moveRunnerProgramToRig(state, "onr_v1_015_codeslinger");
+    moveRunnerCardToGrip(state, "onr_v1_052_raffles");
+    moveRunnerCardToGrip(state, "onr_v1_144_tycho-mem-chip");
+    state.runner.credits = 40;
+    state.runner.clicks = 4;
+    state.runner.memoryUsed = 1;
+    state.runner.memoryLimit = 1;
+
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const sourceCard = baseInput.playerView.own.gripOrHq.find(
+      (card) => card.definitionId === "onr_v1_052_raffles",
+    );
+    expect(sourceCard).toBeDefined();
+    if (!sourceCard) throw new Error("Missing Raffles source card");
+    const criticalProgramInstall: LegalAction = {
+      actionId: "test.runner.install_raffles_with_critical_sacrifice",
+      side: "runner",
+      type: "install_card",
+      label: "Raffles mit kritischem Programmtrash installieren",
+      source: sourceCard.instanceId,
+      timingPoint: baseInput.playerView.timingPoint,
+      costs: [{ clicks: 1, credits: sourceCard.installCost ?? 0 }],
+      targetRequirements: [],
+      visibility: "private_to_actor",
+      expiresAtStateVersion: baseInput.playerView.stateVersion,
+      payload: {
+        cardId: sourceCard.instanceId,
+        runnerProgramTrashBeforeInstall: true,
+      },
+    };
+    const memoryAction = baseInput.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(baseInput, action) ===
+          "onr_v1_144_tycho-mem-chip",
+    );
+    expect(memoryAction).toBeDefined();
+    if (!memoryAction) throw new Error("Missing Tycho memory action");
+    const legalActions = [criticalProgramInstall, memoryAction];
+    const input: AiDecisionInput = {
+      ...baseInput,
+      legalActions,
+      playerView: {
+        ...baseInput.playerView,
+        legalActions,
+      },
+    };
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe(memoryAction.actionId);
+    expect(decision.evidence).toContain("runner_mu_pressure_severity:critical");
+    expect(decision.evidence).toContain(
+      "runner_mu_pressure_reason:critical_sacrifice_alternative",
+    );
+    expect(decision.evidence).toContain("runner_memory_support_action:true");
+    const sacrificedAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (entry) => entry.actionId === criticalProgramInstall.actionId,
+      );
+    expect(sacrificedAlternative?.excluded).toBe(true);
+    expect(JSON.stringify(sacrificedAlternative)).toContain(
+      "program_sacrifice_no_acceptable_candidate",
+    );
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
+  it("builds credits when memory support is visible but not yet affordable under MU pressure", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const state = batchARunnerTurn("ai-memory-pressure-fund-support");
+    state.runner.credits = 4;
+    state.runner.memoryUsed = state.runner.memoryLimit;
+    state.runner.clicks = 4;
+    moveRunnerCardToGrip(state, "onr_v1_015_codeslinger");
+    moveRunnerCardToGrip(state, "onr_v1_144_tycho-mem-chip");
+    const cheapMemoryId = findCard(state, "onr_v1_146_zetatech-mem-chip");
+    removeEverywhere(state, cheapMemoryId);
+    state.runner.stack.push(cheapMemoryId);
+    state.cardInstances[cheapMemoryId] = {
+      ...state.cardInstances[cheapMemoryId]!,
+      zone: { side: "runner", zone: "stack" },
+      faceup: false,
+      rezzed: false,
+    };
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    const draw = input.legalActions.find((action) => action.type === "draw_card");
+    const tychoInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_144_tycho-mem-chip",
+    );
+
+    expect(gain).toBeDefined();
+    expect(draw).toBeDefined();
+    expect(tychoInstall).toBeUndefined();
+    if (!gain || !draw)
+      throw new Error("Missing MU-pressure funding fixture actions");
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [gain, draw],
+      playerView: {
+        ...input.playerView,
+        legalActions: [gain, draw],
+      },
+    });
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(decision.evidence).toContain("runner_mu_pressure_severity:high");
+    expect(decision.evidence).toContain(
+      "runner_memory_support_missing_credits:1",
+    );
+    expect(decision.evidence).toContain(
+      "runner_memory_support_funding_action:true",
+    );
+  });
+
+  it("does not let memory hardware dominate when MU is not pressured", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const state = batchARunnerTurn("ai-memory-no-pressure");
+    state.runner.credits = 20;
+    state.runner.memoryUsed = 0;
+    state.runner.memoryLimit = 4;
+    state.runner.clicks = 4;
+    moveRunnerCardToGrip(state, "onr_v1_015_codeslinger");
+    moveRunnerCardToGrip(state, "onr_v1_146_zetatech-mem-chip");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const breakerAction = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_015_codeslinger",
+    );
+    const memoryAction = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_146_zetatech-mem-chip",
+    );
+
+    expect(breakerAction).toBeDefined();
+    expect(memoryAction).toBeDefined();
+    if (!breakerAction || !memoryAction)
+      throw new Error("Missing no-pressure memory fixture actions");
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [memoryAction, breakerAction],
+      playerView: {
+        ...input.playerView,
+        legalActions: [memoryAction, breakerAction],
+      },
+    });
+
+    expect(decision.actionId).toBe(breakerAction.actionId);
+    expect(JSON.stringify(decision.evidence)).not.toContain(
+      "runner_mu_pressure_severity",
+    );
+  });
+
   it("keeps breaker installation credit- and MU-safe", () => {
     const state = batchARunnerTurn("ai-batch-a-credit-safe");
     moveRunnerCardToGrip(state, "onr_v1_015_codeslinger");

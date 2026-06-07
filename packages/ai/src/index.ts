@@ -5084,6 +5084,9 @@ function semanticRuntimeRunnerScoreComponents(
         reason: fundingTarget.reason,
       });
     }
+    const muPressureFunding =
+      runnerMuPressureFundingScoreComponent(input, action);
+    if (muPressureFunding) components.push(muPressureFunding);
   }
   if (action.type === "draw_card" && input.playerView.own.gripOrHq.length < 5) {
     components.push({
@@ -5100,6 +5103,9 @@ function semanticRuntimeRunnerScoreComponents(
       input,
       action,
     );
+    const muPressureMemorySupport =
+      runnerMuPressureInstallScoreComponent(input, action);
+    if (muPressureMemorySupport) components.push(muPressureMemorySupport);
     if (roles.some((role) => role.startsWith("breaker_"))) {
       components.push({
         key: "runner_install_breaker",
@@ -6144,12 +6150,18 @@ function semanticRuntimeRunnerEvidence(
     input,
     action,
   );
+  const actionMuPressureEvidence = runnerMuPressureActionEvidence(
+    input,
+    action,
+  );
   if (sacrificeAssessment?.memoryRequired) {
     return [
       `program_sacrifice_penalty:${runnerProgramInstallDisplacementPenalty(sacrificeAssessment)}`,
       ...sacrificeAssessment.evidence,
+      ...actionMuPressureEvidence,
     ];
   }
+  if (actionMuPressureEvidence.length > 0) return actionMuPressureEvidence;
   if (action.type !== "trash_accessed_card" && action.type !== "decline_trash") {
     return [];
   }
@@ -10550,6 +10562,509 @@ type RunnerProgramInstallTrashAssessment = {
   evidence: string[];
 };
 
+type RunnerMuPressureSeverity = "none" | "low" | "medium" | "high" | "critical";
+
+type RunnerMuPressureAssessment = {
+  memoryUsed: number;
+  memoryLimit: number;
+  memoryAvailable: number;
+  pendingProgramInstallMemory: number;
+  muAfterInstall: number;
+  requiresProgramTrash: boolean;
+  criticalProgramSacrificeRisk: boolean;
+  usefulProgramsInHand: number;
+  memorySupportLegalActions: number;
+  affordableMemorySupportActions: number;
+  memorySupportInHand: number;
+  memorySupportSearchable: boolean;
+  missingCreditsForCheapestMemorySupport?: number;
+  severity: RunnerMuPressureSeverity;
+  evidence: string[];
+};
+
+function runnerMuPressureAssessment(
+  input: AiDecisionInput,
+): RunnerMuPressureAssessment {
+  const memoryUsed = safeNonNegativeInteger(input.playerView.own.memoryUsed);
+  const memoryLimit = safeNonNegativeInteger(input.playerView.own.memoryLimit);
+  const memoryAvailable = Math.max(0, memoryLimit - memoryUsed);
+  const installActions = input.legalActions.filter(
+    (action) => action.side === "runner" && action.type === "install_card",
+  );
+  const programInstallActions = installActions.filter((action) =>
+    isRunnerProgramInstallActionForMuPressure(input, action),
+  );
+  const pendingProgramInstallMemory = Math.max(
+    0,
+    ...programInstallActions.map((action) =>
+      visibleMemoryCostForAi(findVisibleCard(input, action.source)),
+    ),
+  );
+  const muAfterInstall = Math.max(
+    0,
+    memoryUsed + pendingProgramInstallMemory - memoryLimit,
+  );
+  const sacrificeAssessments = programInstallActions
+    .map((action) => runnerProgramInstallTrashAssessmentForAction(input, action))
+    .filter(
+      (
+        assessment,
+      ): assessment is RunnerProgramInstallTrashAssessment =>
+        assessment !== undefined,
+    );
+  const requiresProgramTrash =
+    sacrificeAssessments.some((assessment) => assessment.memoryRequired) ||
+    programInstallActions.some(
+      (action) =>
+        visibleMemoryCostForAi(findVisibleCard(input, action.source)) >
+        memoryAvailable,
+    );
+  const criticalProgramSacrificeRisk = sacrificeAssessments.some((assessment) => {
+    const bestCandidate =
+      assessment.selectedCandidates[0] ?? assessment.candidates[0];
+    return (
+      assessment.memoryRequired &&
+      (!assessment.canFreeRequiredMemory ||
+        bestCandidate?.category === "critical" ||
+        bestCandidate?.category === "high")
+    );
+  });
+  const usefulProgramsInHand = input.playerView.own.gripOrHq.filter((card) =>
+    isUsefulRunnerProgramInHandForMuPressure(input, card),
+  ).length;
+  const memorySupportLegalActions = installActions.filter((action) =>
+    isRunnerMemorySupportAction(input, action),
+  );
+  const affordableMemorySupportActions = memorySupportLegalActions.filter(
+    (action) => actionCreditCost(action) <= input.playerView.own.credits,
+  );
+  const memorySupportCardsInHand = input.playerView.own.gripOrHq.filter((card) =>
+    isRunnerMemorySupportCardForAi(card),
+  );
+  const missingCreditsForCheapestMemorySupport =
+    affordableMemorySupportActions.length > 0
+      ? undefined
+      : runnerMissingCreditsForCheapestMemorySupport(
+          input,
+          memorySupportCardsInHand,
+        );
+  const memorySupportSearchable = input.legalActions.some((action) =>
+    runnerMemorySupportSearchAction(input, action),
+  );
+  const severity = runnerMuPressureSeverity({
+    memoryAvailable,
+    pendingProgramInstallMemory,
+    requiresProgramTrash,
+    criticalProgramSacrificeRisk,
+    usefulProgramsInHand,
+    memorySupportInHand: memorySupportCardsInHand.length,
+    memorySupportLegalActions: memorySupportLegalActions.length,
+  });
+  const evidence = runnerMuPressureEvidence({
+    memoryUsed,
+    memoryLimit,
+    memoryAvailable,
+    pendingProgramInstallMemory,
+    muAfterInstall,
+    requiresProgramTrash,
+    criticalProgramSacrificeRisk,
+    usefulProgramsInHand,
+    memorySupportLegalActions: memorySupportLegalActions.length,
+    affordableMemorySupportActions: affordableMemorySupportActions.length,
+    memorySupportInHand: memorySupportCardsInHand.length,
+    memorySupportSearchable,
+    ...(missingCreditsForCheapestMemorySupport !== undefined
+      ? { missingCreditsForCheapestMemorySupport }
+      : {}),
+    severity,
+  });
+  return {
+    memoryUsed,
+    memoryLimit,
+    memoryAvailable,
+    pendingProgramInstallMemory,
+    muAfterInstall,
+    requiresProgramTrash,
+    criticalProgramSacrificeRisk,
+    usefulProgramsInHand,
+    memorySupportLegalActions: memorySupportLegalActions.length,
+    affordableMemorySupportActions: affordableMemorySupportActions.length,
+    memorySupportInHand: memorySupportCardsInHand.length,
+    memorySupportSearchable,
+    ...(missingCreditsForCheapestMemorySupport !== undefined
+      ? { missingCreditsForCheapestMemorySupport }
+      : {}),
+    severity,
+    evidence,
+  };
+}
+
+function runnerMuPressureInstallScoreComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  const bonus = runnerMuPressureInstallPriorityBonus(input, action);
+  if (bonus.value <= 0) return undefined;
+  return {
+    key: "runner_mu_pressure_memory_support",
+    label: "MU-Druck",
+    value: bonus.value,
+    reason: runnerMuPressureReason(bonus.assessment),
+  };
+}
+
+function runnerMuPressureFundingScoreComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  const bonus = runnerMuPressureFundingPriorityBonus(input, action);
+  if (bonus.value <= 0) return undefined;
+  return {
+    key: "runner_mu_pressure_funding",
+    label: "Memory-Support finanzieren",
+    value: bonus.value,
+    reason: runnerMuPressureReason(bonus.assessment),
+  };
+}
+
+function runnerMuPressureInstallPriorityBonus(
+  input: AiDecisionInput,
+  action: LegalAction,
+): {
+  value: number;
+  evidence: string[];
+  assessment: RunnerMuPressureAssessment;
+} {
+  const assessment = runnerMuPressureAssessment(input);
+  if (
+    assessment.severity === "none" ||
+    !isRunnerMemorySupportAction(input, action)
+  ) {
+    return { value: 0, evidence: [], assessment };
+  }
+  const severityBonus = runnerMuPressureSeverityBonus(assessment.severity);
+  const value = Math.min(
+    1500,
+    severityBonus +
+      Math.min(260, assessment.usefulProgramsInHand * 90) +
+      (assessment.requiresProgramTrash ? 240 : 0) +
+      (assessment.affordableMemorySupportActions > 0 ? 120 : 0),
+  );
+  return {
+    value,
+    evidence: [
+      `runner_mu_pressure_bonus:${value}`,
+      "runner_memory_support_action:true",
+      ...runnerMuPressureActionEvidence(input, action, assessment),
+    ],
+    assessment,
+  };
+}
+
+function runnerMuPressureFundingPriorityBonus(
+  input: AiDecisionInput,
+  action: LegalAction,
+): {
+  value: number;
+  evidence: string[];
+  assessment: RunnerMuPressureAssessment;
+} {
+  const assessment = runnerMuPressureAssessment(input);
+  if (
+    action.side !== "runner" ||
+    action.type !== "gain_credit" ||
+    assessment.severity === "none" ||
+    assessment.missingCreditsForCheapestMemorySupport === undefined
+  ) {
+    return { value: 0, evidence: [], assessment };
+  }
+  const severityBonus = runnerMuPressureSeverityFundingBonus(
+    assessment.severity,
+  );
+  const value = Math.min(
+    1100,
+    severityBonus + Math.min(180, assessment.usefulProgramsInHand * 60),
+  );
+  return {
+    value,
+    evidence: [
+      `runner_mu_pressure_funding_bonus:${value}`,
+      "runner_memory_support_funding_action:true",
+      ...runnerMuPressureActionEvidence(input, action, assessment),
+    ],
+    assessment,
+  };
+}
+
+function runnerMuPressureActionEvidence(
+  input: AiDecisionInput,
+  action: LegalAction,
+  providedAssessment?: RunnerMuPressureAssessment,
+): string[] {
+  const assessment = providedAssessment ?? runnerMuPressureAssessment(input);
+  if (assessment.severity === "none") return [];
+  const memorySupportAction = isRunnerMemorySupportAction(input, action);
+  const programInstallAction = isRunnerProgramInstallActionForMuPressure(
+    input,
+    action,
+  );
+  if (
+    action.type !== "gain_credit" &&
+    !memorySupportAction &&
+    !programInstallAction
+  ) {
+    return [];
+  }
+  return sortedUnique([
+    ...assessment.evidence,
+    ...(memorySupportAction ? ["runner_memory_support_action:true"] : []),
+    ...(action.type === "gain_credit"
+      ? ["runner_memory_support_funding_action:true"]
+      : []),
+    ...(programInstallAction && !memorySupportAction
+      ? ["runner_program_install_under_mu_pressure:true"]
+      : []),
+  ]);
+}
+
+function runnerMuPressureSeverity(context: {
+  memoryAvailable: number;
+  pendingProgramInstallMemory: number;
+  requiresProgramTrash: boolean;
+  criticalProgramSacrificeRisk: boolean;
+  usefulProgramsInHand: number;
+  memorySupportInHand: number;
+  memorySupportLegalActions: number;
+}): RunnerMuPressureSeverity {
+  const hasUsefulProgramPressure =
+    context.usefulProgramsInHand > 0 ||
+    context.pendingProgramInstallMemory > context.memoryAvailable ||
+    context.requiresProgramTrash;
+  if (!hasUsefulProgramPressure) return "none";
+  if (context.criticalProgramSacrificeRisk) return "critical";
+  if (context.requiresProgramTrash) return "high";
+  if (context.memoryAvailable <= 0 && context.usefulProgramsInHand > 0)
+    return "high";
+  if (context.memoryAvailable <= 1 && context.usefulProgramsInHand > 0)
+    return "medium";
+  if (context.pendingProgramInstallMemory > context.memoryAvailable)
+    return "medium";
+  return "none";
+}
+
+function runnerMuPressureSeverityBonus(
+  severity: RunnerMuPressureSeverity,
+): number {
+  switch (severity) {
+    case "critical":
+      return 1040;
+    case "high":
+      return 820;
+    case "medium":
+      return 460;
+    case "low":
+      return 140;
+    case "none":
+      return 0;
+  }
+}
+
+function runnerMuPressureSeverityFundingBonus(
+  severity: RunnerMuPressureSeverity,
+): number {
+  switch (severity) {
+    case "critical":
+      return 860;
+    case "high":
+      return 700;
+    case "medium":
+      return 360;
+    case "low":
+      return 120;
+    case "none":
+      return 0;
+  }
+}
+
+function runnerMuPressureEvidence(
+  assessment: Omit<RunnerMuPressureAssessment, "evidence">,
+): string[] {
+  if (assessment.severity === "none") return [];
+  return sortedUnique([
+    `runner_mu_pressure_severity:${assessment.severity}`,
+    `runner_memory_used:${assessment.memoryUsed}`,
+    `runner_memory_limit:${assessment.memoryLimit}`,
+    `runner_memory_available:${assessment.memoryAvailable}`,
+    `runner_pending_program_install_memory:${assessment.pendingProgramInstallMemory}`,
+    `runner_mu_after_install:${assessment.muAfterInstall}`,
+    `runner_program_install_requires_trash:${assessment.requiresProgramTrash}`,
+    `runner_critical_program_sacrifice_risk:${assessment.criticalProgramSacrificeRisk}`,
+    `runner_useful_programs_in_hand:${assessment.usefulProgramsInHand}`,
+    `runner_memory_support_legal_actions:${assessment.memorySupportLegalActions}`,
+    `runner_memory_support_affordable_actions:${assessment.affordableMemorySupportActions}`,
+    `runner_memory_support_in_hand:${assessment.memorySupportInHand}`,
+    `runner_memory_support_searchable:${assessment.memorySupportSearchable}`,
+    ...(assessment.missingCreditsForCheapestMemorySupport !== undefined
+      ? [
+          `runner_memory_support_missing_credits:${assessment.missingCreditsForCheapestMemorySupport}`,
+        ]
+      : []),
+    ...runnerMuPressureReasonTags(assessment),
+  ]);
+}
+
+function runnerMuPressureReason(
+  assessment: RunnerMuPressureAssessment,
+): string {
+  return [
+    assessment.severity,
+    `memory_available:${assessment.memoryAvailable}`,
+    `useful_programs:${assessment.usefulProgramsInHand}`,
+    `memory_support:${assessment.affordableMemorySupportActions}`,
+  ].join("|");
+}
+
+function runnerMuPressureReasonTags(
+  assessment: Omit<RunnerMuPressureAssessment, "evidence">,
+): string[] {
+  return [
+    ...(assessment.memoryAvailable <= 0 && assessment.usefulProgramsInHand > 0
+      ? ["runner_mu_pressure_reason:full_mu_with_useful_programs"]
+      : []),
+    ...(assessment.memoryAvailable === 1 && assessment.usefulProgramsInHand > 0
+      ? ["runner_mu_pressure_reason:low_mu_with_useful_programs"]
+      : []),
+    ...(assessment.requiresProgramTrash
+      ? ["runner_mu_pressure_reason:program_install_requires_trash"]
+      : []),
+    ...(assessment.criticalProgramSacrificeRisk
+      ? ["runner_mu_pressure_reason:critical_sacrifice_alternative"]
+      : []),
+    ...(assessment.affordableMemorySupportActions > 0
+      ? ["runner_mu_pressure_reason:memory_support_affordable"]
+      : []),
+    ...(assessment.missingCreditsForCheapestMemorySupport !== undefined
+      ? ["runner_mu_pressure_reason:memory_support_missing_credits"]
+      : []),
+  ];
+}
+
+function isRunnerProgramInstallActionForMuPressure(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (action.side !== "runner" || action.type !== "install_card") return false;
+  const source = findVisibleCard(input, action.source);
+  return source?.type === "program" || visibleMemoryCostForAi(source) > 0;
+}
+
+function isRunnerMemorySupportAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (action.side !== "runner" || action.type !== "install_card") return false;
+  return isRunnerMemorySupportCardForAi(findVisibleCard(input, action.source));
+}
+
+function isRunnerMemorySupportCardForAi(card: VisibleCard | undefined): boolean {
+  if (!card || card.known === false) return false;
+  const roles = rolesForCardId(card.definitionId);
+  const text = [
+    card.title,
+    card.definitionId,
+    card.type,
+    ...(card.subtypes ?? []),
+    card.rulesText,
+    ...roles,
+  ]
+    .filter((entry): entry is string => typeof entry === "string")
+    .join(" ")
+    .toLowerCase();
+  return (
+    safeNonNegativeInteger(card.memoryLimitBonus) > 0 ||
+    roles.some((role) => role === "memory" || role === "memory_support") ||
+    /\b(memory|mu)\b|mem chip/.test(text)
+  );
+}
+
+function isUsefulRunnerProgramInHandForMuPressure(
+  input: AiDecisionInput,
+  card: VisibleCard,
+): boolean {
+  if (card.known === false || card.type !== "program") return false;
+  if (visibleMemoryCostForAi(card) <= 0) return false;
+  if (
+    card.definitionId &&
+    (input.playerView.own.rig ?? []).some(
+      (installed) => installed.definitionId === card.definitionId,
+    )
+  ) {
+    return false;
+  }
+  const roles = rolesForCardId(card.definitionId);
+  const subtypes = (card.subtypes ?? []).map((subtype) =>
+    subtype.toLowerCase(),
+  );
+  return (
+    roles.length === 0 ||
+    roles.some(
+      (role) =>
+        role.startsWith("breaker_") ||
+        isRunnerPressureRole(role) ||
+        isRunnerEconomyRole(role) ||
+        [
+          "setup",
+          "build_rig",
+          "memory",
+          "memory_support",
+          "draw",
+          "search",
+          "defense",
+          "protection",
+          "hosting",
+          "recovery",
+        ].some((needle) => role === needle || role.includes(needle)),
+    ) ||
+    subtypes.some((subtype) =>
+      ["icebreaker", "breaker", "decoder", "fracter", "killer"].includes(
+        subtype,
+      ),
+    )
+  );
+}
+
+function runnerMissingCreditsForCheapestMemorySupport(
+  input: AiDecisionInput,
+  memorySupportCards: readonly VisibleCard[],
+): number | undefined {
+  const credits = input.playerView.own.credits;
+  const missingCredits = memorySupportCards
+    .map((card) => Math.max(0, visibleInstallCostForAi(card) - credits))
+    .filter((missing) => missing > 0)
+    .sort((left, right) => left - right);
+  return missingCredits[0];
+}
+
+function runnerMemorySupportSearchAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (action.side !== "runner") return false;
+  if (
+    action.type !== "trigger_ability" &&
+    action.type !== "activated_card_ability" &&
+    action.type !== "play_event"
+  ) {
+    return false;
+  }
+  const roles = rolesForAction(input, action);
+  const label = action.label.toLowerCase();
+  return (
+    roles.some((role) => role.includes("search") || role.includes("memory")) ||
+    /search|memory|mu|mem chip/.test(label)
+  );
+}
+
 function selectedRunnerProgramInstallTrashOptionIds(
   input: AiDecisionInput,
   choice: NonNullable<AiDecisionInput["playerView"]["pendingChoice"]>,
@@ -11881,7 +12396,14 @@ function scoreRunnerAction(
         );
         const sacrificePenalty =
           runnerProgramInstallDisplacementPenalty(sacrificeAssessment);
-        score = scoreRunnerInstall(roles, features, profile) - sacrificePenalty;
+        const muPressureBonus = runnerMuPressureInstallPriorityBonus(
+          input,
+          action,
+        );
+        score =
+          scoreRunnerInstall(roles, features, profile) +
+          muPressureBonus.value -
+          sacrificePenalty;
         if (
           sacrificeAssessment?.memoryRequired &&
           !sacrificeAssessment.canFreeRequiredMemory
@@ -11891,15 +12413,19 @@ function scoreRunnerAction(
           explanation =
             "Die Installation wuerde ein wichtiges installiertes Programm opfern; die KI bricht den Pflicht-Trash-Pfad ab.";
         } else {
-          reasonCode = roles.some((role) => role.startsWith("breaker_"))
+          reasonCode = muPressureBonus.value > 0
+            ? "runner.setup.install_memory_support"
+            : roles.some((role) => role.startsWith("breaker_"))
             ? "runner.setup.install_missing_breaker"
             : "runner.setup.install_support";
-          explanation =
-            "Die Runner-KI verbessert sichtbare Rig- oder Setup-Rollen.";
+          explanation = muPressureBonus.value > 0
+            ? "Die Runner-KI baut bei sichtbarem MU-Druck Memory-Support auf."
+            : "Die Runner-KI verbessert sichtbare Rig- oder Setup-Rollen.";
         }
         evidence.push(
           "own_card_role_known",
           ...publicRoleEvidence(roles),
+          ...muPressureBonus.evidence,
           ...(sacrificeAssessment?.memoryRequired
             ? [
                 `program_sacrifice_penalty:${sacrificePenalty}`,
@@ -12022,11 +12548,22 @@ function scoreRunnerAction(
       );
       break;
     case "gain_credit":
-      score =
-        input.difficulty === "easy" ? 560 : features.credits < 4 ? 540 : 380;
-      reasonCode = "runner.economy.basic_credit";
-      explanation = "Credits verbessern die sichtbare Handlungsfähigkeit.";
-      evidence.push("basic_economy");
+      {
+        const muPressureFunding = runnerMuPressureFundingPriorityBonus(
+          input,
+          action,
+        );
+        score =
+          (input.difficulty === "easy" ? 560 : features.credits < 4 ? 540 : 380) +
+          muPressureFunding.value;
+        reasonCode = muPressureFunding.value > 0
+          ? "runner.setup.fund_memory_support"
+          : "runner.economy.basic_credit";
+        explanation = muPressureFunding.value > 0
+          ? "Credits finanzieren sichtbaren Memory-Support gegen aktuellen MU-Druck."
+          : "Credits verbessern die sichtbare Handlungsfähigkeit.";
+        evidence.push("basic_economy", ...muPressureFunding.evidence);
+      }
       break;
     case "draw_card":
       score = features.handCount < 3 ? 430 : 320;

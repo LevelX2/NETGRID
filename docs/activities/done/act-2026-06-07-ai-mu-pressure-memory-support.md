@@ -1,20 +1,26 @@
 ---
 activityId: act-2026-06-07-ai-mu-pressure-memory-support
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-06-07
+completedAt: 2026-06-07
+branch: codex/activities-inbox-ai-run-mu
 releaseTarget:
 blockedBy:
   - act-2026-06-07-ai-mu-install-action-surface-audit
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-tactical-goals.test.ts src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-hand-development.test.ts src/runner-run-target-evaluation.test.ts
 ---
 
 # AI-MU-Pressure und Memory-Support
@@ -75,4 +81,4 @@ Volle oder fast volle MU soll die Runner-KI stärker in Richtung Memory-Ausbau, 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Die Runner-KI hat jetzt eine enge side-sichere `RunnerMuPressureAssessment`, die sichtbare MU, installierbare Programme, Pflicht-Trash-Pfade, Memory-Support in Hand, bezahlbaren Memory-Support und fehlende Credits bewertet. Semantic Runtime und Legacy-Scoring werten bezahlbaren Memory-Support bei echter MU-Pressure auf, finanzieren sichtbaren aber noch zu teuren Memory-Support per `gain_credit`, und lassen Memory-Hardware ohne aktuellen MU-Druck normal gegen wichtigere Rig-Installationen konkurrieren. DecisionDebug/Evidence nennt Schweregrad, MU-Zahlen, Memory-Alternative, Funding-Bedarf und Grundkategorien ohne verdeckte Kartendaten.
