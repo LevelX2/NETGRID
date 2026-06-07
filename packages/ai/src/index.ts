@@ -3788,6 +3788,9 @@ function tacticalPlanDebugItems(planRuntime: TacticalPlanRuntimeResult): string[
     ...(planRuntime.runnerEconomyPostureUsed ?? [])
       .slice(0, 12)
       .map((fact) => `runner_economy_posture_used:${fact}`),
+    ...(planRuntime.runnerHandDevelopmentEvaluationsUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `runner_hand_development_used:${fact}`),
     ...(planRuntime.runnerTacticalGoalsUsed ?? [])
       .slice(0, 12)
       .map((fact) => `runner_tactical_goal_used:${fact}`),
@@ -3800,6 +3803,12 @@ function tacticalPlanDebugItems(planRuntime: TacticalPlanRuntimeResult): string[
           `selected_plan_status:${selectedPlan.status}`,
         ]
       : ["selected_plan:none"]),
+    ...(selectedPlan?.type === "runner.develop_hand_card"
+      ? selectedPlan.evidence
+          .filter((entry) => entry.startsWith("hand_development_"))
+          .slice(0, 6)
+          .map((entry) => `selected_development_goal:${entry}`)
+      : []),
     ...(selectedStep
       ? [
           `selected_step:${selectedStep.stepId}`,

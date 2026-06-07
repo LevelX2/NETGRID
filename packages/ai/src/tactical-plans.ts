@@ -17,7 +17,10 @@ import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
 } from "./runner-run-target-evaluation";
-import type { RunnerHandDevelopmentEvaluation } from "./runner-hand-development";
+import {
+  redactedRunnerHandDevelopmentFacts,
+  type RunnerHandDevelopmentEvaluation,
+} from "./runner-hand-development";
 import {
   redactedRunnerTacticalGoalFacts,
   type RunnerTacticalGoal,
@@ -235,6 +238,7 @@ export type TacticalPlanRuntimeResult = {
   runnerStrategicIntentUsed?: string[];
   runnerRunTargetEvaluationsUsed?: string[];
   runnerEconomyPostureUsed?: string[];
+  runnerHandDevelopmentEvaluationsUsed?: string[];
   runnerTacticalGoalsUsed?: string[];
   planAlternatives: TacticalPlan[];
   blockedPlans: TacticalPlan[];
@@ -271,6 +275,9 @@ export function evaluateTacticalPlans(
   const runnerEconomyPostureUsed = context.runnerEconomyPosture
     ? redactedRunnerEconomyPostureFacts(context.runnerEconomyPosture)
     : [];
+  const runnerHandDevelopmentEvaluationsUsed = context.runnerHandDevelopmentEvaluations
+    ? redactedRunnerHandDevelopmentFacts(context.runnerHandDevelopmentEvaluations)
+    : [];
   const runnerTacticalGoalsUsed = context.runnerTacticalGoals
     ? redactedRunnerTacticalGoalFacts(context.runnerTacticalGoals)
     : [];
@@ -297,6 +304,9 @@ export function evaluateTacticalPlans(
         ...(runnerStrategicIntentUsed.length > 0 ? { runnerStrategicIntentUsed } : {}),
         ...(runnerRunTargetEvaluationsUsed.length > 0 ? { runnerRunTargetEvaluationsUsed } : {}),
         ...(runnerEconomyPostureUsed.length > 0 ? { runnerEconomyPostureUsed } : {}),
+        ...(runnerHandDevelopmentEvaluationsUsed.length > 0
+          ? { runnerHandDevelopmentEvaluationsUsed }
+          : {}),
         ...(runnerTacticalGoalsUsed.length > 0 ? { runnerTacticalGoalsUsed } : {}),
         planAlternatives,
         blockedPlans,
@@ -318,6 +328,9 @@ export function evaluateTacticalPlans(
     ...(runnerStrategicIntentUsed.length > 0 ? { runnerStrategicIntentUsed } : {}),
     ...(runnerRunTargetEvaluationsUsed.length > 0 ? { runnerRunTargetEvaluationsUsed } : {}),
     ...(runnerEconomyPostureUsed.length > 0 ? { runnerEconomyPostureUsed } : {}),
+    ...(runnerHandDevelopmentEvaluationsUsed.length > 0
+      ? { runnerHandDevelopmentEvaluationsUsed }
+      : {}),
     ...(runnerTacticalGoalsUsed.length > 0 ? { runnerTacticalGoalsUsed } : {}),
     planAlternatives,
     blockedPlans,

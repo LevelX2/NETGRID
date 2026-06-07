@@ -190,6 +190,47 @@ describe("Runner Golden Deck strategy and debug", () => {
     );
   });
 
+  it("exposes redacted Runner hand-development and creditbase debugfacts", () => {
+    const input = goldenInput({
+      credits: 5,
+      servers: [server("hq")],
+      grip: [
+        visibleCard("access-card", {
+          definitionId: "runner_access_payoff_card",
+          title: "Access Payoff",
+          type: "hardware",
+          rulesText: "access payoff support",
+        }),
+      ],
+      legalActions: [
+        runAction("run-hq", "hq"),
+        legalAction("install-access-card", "install_card", "Install Access Payoff", {
+          source: "access-card",
+          payload: { cardId: "access-card" },
+        }),
+      ],
+    });
+
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+    const debugText = JSON.stringify(decision.decisionDebug);
+    const tacticalDebug = tacticalPlanDebugText(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("install-access-card");
+    expect(tacticalDebug).toContain("runner_hand_development_used:");
+    expect(tacticalDebug).toContain("runner_hand_development:access_payoff");
+    expect(tacticalDebug).toContain(
+      "runner_credit_base_recommendation:allow_setup_spend",
+    );
+    expect(tacticalDebug).toContain(
+      "selected_development_goal:hand_development_role:access_payoff",
+    );
+    expect(debugText).not.toMatch(
+      /deckSnapshotId|decklist|cardInstances|privatePayload|fullGameState|FullState|C:\\|\/Users\//i,
+    );
+  });
+
   it("avoids stale known-low R&D and keeps the reason visible in debug", () => {
     const input = goldenInput({
       credits: 6,
@@ -374,6 +415,7 @@ function goldenInput(params: {
   servers: PlayerView["servers"];
   legalActions: LegalAction[];
   rig?: VisibleCard[];
+  grip?: VisibleCard[];
   stateVersion?: number;
   eventTail?: PublicGameEvent[];
   snapshot?: AiDeckDoctrineDeckSnapshot;
@@ -384,6 +426,7 @@ function goldenInput(params: {
     servers: params.servers,
     legalActions: params.legalActions,
     ...(params.rig ? { rig: params.rig } : {}),
+    ...(params.grip ? { grip: params.grip } : {}),
     ...(params.stateVersion ? { stateVersion: params.stateVersion } : {}),
     ...(params.eventTail ? { eventTail: params.eventTail } : {}),
   });
@@ -437,6 +480,7 @@ function playerView(params: {
   servers: PlayerView["servers"];
   legalActions: LegalAction[];
   rig?: VisibleCard[];
+  grip?: VisibleCard[];
   stateVersion?: number;
   eventTail?: PublicGameEvent[];
 }): PlayerView {
@@ -451,7 +495,7 @@ function playerView(params: {
       credits: params.credits,
       clicks: 3,
       agendaPoints: 0,
-      gripOrHq: [],
+      gripOrHq: params.grip ?? [],
       stackOrRdCount: 20,
       heapOrArchives: [],
       scoreArea: [],
