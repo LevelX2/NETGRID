@@ -219,7 +219,7 @@ describe("V1.0.5K Card Release", () => {
       strength: 1,
     });
     expect(DEMO_CARDS_BY_ID["onr_v1_239_endless-corridor"]).toMatchObject({
-      rezCost: 5,
+      rezCost: 4,
       strength: 2,
     });
     expect(DEMO_CARDS_BY_ID["onr_v1_144_tycho-mem-chip"]).toMatchObject({
@@ -1254,7 +1254,7 @@ describe("V1.1.2K Card Release", () => {
       strength: 2,
     });
     expect(DEMO_CARDS_BY_ID["onr_v1_257_nerve-labyrinth"]).toMatchObject({
-      rezCost: 7,
+      rezCost: 6,
       strength: 4,
     });
     expect(DEMO_CARDS_BY_ID["onr_v1_278_wall-of-ice"]).toMatchObject({

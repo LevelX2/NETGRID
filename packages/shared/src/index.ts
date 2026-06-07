@@ -7751,8 +7751,8 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     id: "onr_v1_234_data-darts",
     title: "Data Darts",
     subtypes: ["sentry", "ap", "hellbolt"],
-    rezCost: 6,
-    strength: 2,
+    rezCost: 5,
+    strength: 3,
     rulesText:
       "[Subroutine] Do 3 net damage.\n[Subroutine] The Runner cannot break any subroutines of the next piece of ice encountered during this run.",
     subroutines: [
@@ -7839,7 +7839,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     id: "onr_v1_239_endless-corridor",
     title: "Endless Corridor",
     subtypes: ["code_gate"],
-    rezCost: 5,
+    rezCost: 4,
     strength: 2,
     rulesText: "End the run.\nEnd the run.",
     subroutines: [
@@ -8013,7 +8013,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     id: "onr_v1_257_nerve-labyrinth",
     title: "Nerve Labyrinth",
     subtypes: ["code_gate"],
-    rezCost: 7,
+    rezCost: 6,
     strength: 4,
     rulesText: "Do 2 net damage. End the run.",
     subroutines: [

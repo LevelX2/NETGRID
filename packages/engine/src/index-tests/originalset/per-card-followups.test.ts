@@ -2163,6 +2163,91 @@ describe("Originalset spotcheck 2026-05-15 contacts/datapool follow-up", () => {
     expect(replay.ok).toBe(true);
     expect(hashState(replay.state)).toBe(hashState(state));
   });
+
+  it("keeps Endless Corridor rez affordable after rezzing Antiquated Interface Routines", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-antiquated-endless-rez-affordability",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: ONR_V1_RUNNER_DECK,
+        corpDeck: {
+          id: "spotcheck_antiquated_endless_rez_affordability_corp",
+          name: "Spotcheck Antiquated Endless Rez Affordability Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_237_data-wall", quantity: 1 },
+            { id: "onr_v1_239_endless-corridor", quantity: 1 },
+            { id: "onr_v1_350_antiquated-interface-routines", quantity: 1 },
+            { id: "simple_agenda", quantity: 2 },
+            { id: "simple_economy_operation", quantity: 2 },
+          ],
+        },
+      }),
+    );
+    state.corp.credits = 6;
+    const upgradeId = putCorpRootInRemote(
+      state,
+      "onr_v1_350_antiquated-interface-routines",
+    );
+    const dataWallId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_237_data-wall",
+    );
+    const endlessCorridorId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_239_endless-corridor",
+    );
+    state.cardInstances[dataWallId] = {
+      ...state.cardInstances[dataWallId]!,
+      rezzed: true,
+      faceup: true,
+    };
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    expect(
+      mustAction(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          action.payload?.cardId === endlessCorridorId,
+      ).costs,
+    ).toEqual([{ credits: 4 }]);
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" && action.payload?.cardId === upgradeId,
+    );
+    expect(state.corp.credits).toBe(4);
+    expect(
+      mustAction(
+        state,
+        "corp",
+        (action) =>
+          action.type === "rez_ice" &&
+          action.payload?.cardId === endlessCorridorId,
+      ).costs,
+    ).toEqual([{ credits: 4 }]);
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" && action.payload?.cardId === endlessCorridorId,
+    );
+    expect(state.corp.credits).toBe(0);
+    expect(state.cardInstances[endlessCorridorId]?.rezzed).toBe(true);
+  });
 });
 
 describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () => {

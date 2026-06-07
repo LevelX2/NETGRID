@@ -553,6 +553,10 @@ describe("V1.9.13 Damage/Prevention/Replacement Longtail", () => {
       DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_234_data-darts"]).toMatchObject({
+      rezCost: 5,
+      strength: 3,
+    });
   });
 
   it("installs V1.9.13 Runner prevention cards through legal install actions", () => {
