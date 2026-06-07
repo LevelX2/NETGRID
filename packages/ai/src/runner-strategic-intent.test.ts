@@ -66,6 +66,158 @@ describe("Runner StrategicIntentProjection", () => {
     );
   });
 
+  it.each([
+    {
+      name: "real R&D Interface Dig holdout",
+      snapshot: benchmarkSnapshotById(
+        "local_realistic_runner_rnd_interface_dig_snapshot_v1",
+      ),
+      executionStyle: "runner.run_event_tempo",
+      setupEngine: [
+        "runner.search_breaker_setup",
+        "runner.rig_first",
+        "runner.economy_setup_before_pressure",
+        "runner.draw_or_search_setup",
+      ],
+      pressureVectors: [
+        "runner.central_probe_pressure",
+        "runner.conditional_remote_contest",
+      ],
+      riskProfile: ["runner.risky_universal_breaker_pressure"],
+      rejectedIntents: [
+        "runner.bad_publicity_pressure",
+        "runner.dedicated_hq_multiaccess",
+        "runner.hq_depletion",
+      ],
+      notRejected: ["runner.dedicated_rnd_multiaccess"],
+      evidenceNeedles: [
+        "strategy_score:runner.rnd_pressure",
+        "setup_engine:",
+        "pressure_vectors:",
+      ],
+    },
+    {
+      name: "synthetic HQ pressure deck",
+      snapshot: syntheticSnapshot(
+        "synthetic_runner_hq_pressure_fixture",
+        [
+          ["onr_v1_024_expert-schedule-analyzer", 2],
+          ["onr_v1_085_executive-wiretaps", 2],
+          ["onr_v1_129_hq-interface", 2],
+          ["onr_v1_016_cyfermaster", 1],
+          ["onr_v1_021_dwarf", 1],
+          ["onr_v1_066_snowball", 1],
+          ["onr_v1_079_bodyweight-synthetic-blood", 3],
+          ["onr_v1_097_livewires-contacts", 3],
+          ["onr_v1_154_broker", 2],
+        ],
+      ),
+      executionStyle: "runner.run_event_tempo",
+      setupEngine: [
+        "runner.rig_first",
+        "runner.economy_setup_before_pressure",
+      ],
+      pressureVectors: ["runner.central_probe_pressure"],
+      riskProfile: [],
+      rejectedIntents: [
+        "runner.bad_publicity_pressure",
+        "runner.dedicated_rnd_multiaccess",
+      ],
+      notRejected: [
+        "runner.dedicated_hq_multiaccess",
+        "runner.hq_depletion",
+      ],
+      evidenceNeedles: [
+        "strategy_score:runner.hq_pressure",
+        "setup_engine:",
+        "pressure_vectors:",
+      ],
+    },
+    {
+      name: "synthetic economy remote-contest deck",
+      snapshot: syntheticSnapshot(
+        "synthetic_runner_economy_remote_contest_fixture",
+        [
+          ["onr_v1_156_corporate-ally", 2],
+          ["onr_v1_173_restrictive-net-zoning", 2],
+          ["onr_v1_016_cyfermaster", 1],
+          ["onr_v1_021_dwarf", 1],
+          ["onr_v1_066_snowball", 1],
+          ["onr_v1_079_bodyweight-synthetic-blood", 3],
+          ["onr_v1_097_livewires-contacts", 3],
+          ["onr_v1_154_broker", 3],
+          ["onr_v1_168_loan-from-chiba", 3],
+          ["onr_v1_184_top-runners-conference", 2],
+        ],
+      ),
+      executionStyle: "runner.run_event_tempo",
+      setupEngine: [
+        "runner.rig_first",
+        "runner.economy_setup_before_pressure",
+      ],
+      pressureVectors: [
+        "runner.central_probe_pressure",
+        "runner.conditional_remote_contest",
+      ],
+      riskProfile: [],
+      rejectedIntents: [
+        "runner.bad_publicity_pressure",
+        "runner.dedicated_hq_multiaccess",
+        "runner.dedicated_rnd_multiaccess",
+        "runner.hq_depletion",
+      ],
+      notRejected: [],
+      evidenceNeedles: [
+        "strategy_score:runner.rnd_pressure",
+        "setup_engine:",
+        "pressure_vectors:",
+      ],
+    },
+  ])(
+    "projects $name with redacted strategy evidence",
+    ({
+      snapshot,
+      executionStyle,
+      setupEngine,
+      pressureVectors,
+      riskProfile,
+      rejectedIntents,
+      notRejected,
+      evidenceNeedles,
+    }) => {
+      const intent = runnerStrategicIntentForSnapshot(snapshot);
+
+      expect(intent.primaryWinIntent).toBe("runner.steal_agendas_default");
+      expect(intent.executionStyle).toBe(executionStyle);
+      expect(intent.setupEngine).toEqual(expect.arrayContaining(setupEngine));
+      expect(intent.pressureVectors).toEqual(
+        expect.arrayContaining(pressureVectors),
+      );
+      for (const vector of [
+        "runner.central_probe_pressure",
+        "runner.conditional_remote_contest",
+      ] as const) {
+        if (!pressureVectors.includes(vector)) {
+          expect(intent.pressureVectors).not.toContain(vector);
+        }
+      }
+      expect(intent.riskProfile).toEqual(expect.arrayContaining(riskProfile));
+      expect(intent.rejectedIntents).toEqual(
+        expect.arrayContaining(rejectedIntents),
+      );
+      for (const rejectedIntent of notRejected) {
+        expect(intent.rejectedIntents).not.toContain(rejectedIntent);
+      }
+      const evidence = JSON.stringify(intent.evidence);
+      for (const needle of evidenceNeedles) {
+        expect(evidence).toContain(needle);
+      }
+      expect(evidence).not.toMatch(
+        /onr_v1_|R&D Interface|HQ Interface|Corporate Ally|deckHash|privatePayload|cardInstances|fullGameState|snapshot_id/i,
+      );
+    },
+  );
+
   it("does not turn generic support into dedicated central pressure", () => {
     const strategyProfile = buildDeckStrategyProfile({
       deckSnapshotId: "runner-support-only-strategy-fixture",
@@ -124,6 +276,30 @@ describe("Runner StrategicIntentProjection", () => {
     );
   });
 });
+
+function runnerStrategicIntentForSnapshot(
+  snapshot: AiDeckDoctrineDeckSnapshot,
+) {
+  return buildRunnerStrategicIntentProfile({
+    strategyProfile: buildDeckStrategyProfile(snapshot),
+    deckCapabilities: buildDeckCapabilityProfile({
+      side: "runner",
+      deckSnapshot: snapshot,
+      legalActions: [],
+    }),
+  });
+}
+
+function syntheticSnapshot(
+  deckSnapshotId: string,
+  cards: Array<[cardId: string, quantity: number]>,
+): AiDeckDoctrineDeckSnapshot {
+  return {
+    deckSnapshotId,
+    side: "runner",
+    cards: cards.map(([cardId, quantity]) => ({ cardId, quantity })),
+  };
+}
 
 function benchmarkSnapshotById(snapshotId: string): AiDeckDoctrineDeckSnapshot {
   const snapshot = benchmarkSnapshots.find(

@@ -1,19 +1,24 @@
 ---
 activityId: act-2026-06-07-runner-strategic-intent-golden-decks
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: normal
 primaryAgent: test-quality-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
+startedAt: 2026-06-07
+completedAt: 2026-06-07
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/runner-strategic-intent.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-strategic-intent.test.ts
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-golden-deck-debug.test.ts
+  - corepack pnpm --filter @netgrid/ai exec tsc --noEmit
+  - git diff --check
 ---
 
 # Runner StrategicIntent mit weiteren Golden Decks absichern
@@ -52,11 +57,11 @@ Die neue Runner-Strategieprojektion soll nicht nur am Golden Deck `Blink Pressur
 
 ## Akzeptanzkriterien
 
-- [ ] Mindestens zwei zusätzliche Runner-Golden-Deck-Muster sind durch fokussierte Tests abgesichert oder begründet zurückgestellt.
-- [ ] Die Tests verhindern, dass generischer Support fälschlich zu dediziertem HQ-/R&D-Pressure wird.
-- [ ] Blink Pressure Rig bleibt weiterhin grün.
-- [ ] Evidence und Debug-Snapshots enthalten keine vollständige Deckliste, Deckreihenfolge, private Snapshot-ID, `cardInstances`, `privatePayload` oder gegnerische Hidden-Info.
-- [ ] `@netgrid/ai` Typecheck, fokussierte AI-Tests und `git diff --check` sind grün.
+- [x] Mindestens zwei zusätzliche Runner-Golden-Deck-Muster sind durch fokussierte Tests abgesichert oder begründet zurückgestellt.
+- [x] Die Tests verhindern, dass generischer Support fälschlich zu dediziertem HQ-/R&D-Pressure wird.
+- [x] Blink Pressure Rig bleibt weiterhin grün.
+- [x] Evidence und Debug-Snapshots enthalten keine vollständige Deckliste, Deckreihenfolge, private Snapshot-ID, `cardInstances`, `privatePayload` oder gegnerische Hidden-Info.
+- [x] `@netgrid/ai` Typecheck, fokussierte AI-Tests und `git diff --check` sind grün.
 
 ## Umsetzungshinweise
 
@@ -65,4 +70,4 @@ Die neue Runner-Strategieprojektion soll nicht nur am Golden Deck `Blink Pressur
 
 ## Ergebnisnotiz
 
-Noch offen.
+Der reale Benchmark-Snapshot `local_realistic_runner_rnd_interface_dig_snapshot_v1` ist jetzt als zusätzlicher Golden-Deck-Anker abgedeckt. Zwei kleine synthetische Fixtures sichern zusätzlich HQ-Pressure und Economy/Remote-Contest ab, ohne neue Strategy-IDs, Taktiksignale oder Hint-Migration. Die Tests prüfen `primaryWinIntent`, `executionStyle`, `setupEngine`, `pressureVectors`, `riskProfile`, `rejectedIntents` und redigierte Evidence; Blink Pressure Rig bleibt im bestehenden Golden-Deck-Debug-Test grün.
