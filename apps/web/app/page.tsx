@@ -264,9 +264,11 @@ import { aiInspectorEntryKey, aiInspectorSections, defaultCollapsedAiInspectorSe
 import {
   deckStrategyEvidenceKey,
   deckStrategyProfileEntryKey,
+  deckStrategyProfileJsonExportFileName,
   formatDeckStrategyValue,
   formatStrategyScore,
   scoreWidthPercent,
+  serializeDeckStrategyProfileJsonExport,
   strategyStatusLabel,
   strategyStatusTone,
   type DeckStrategyProfileEntry,
@@ -12118,6 +12120,26 @@ async function copyTextToClipboard(text: string): Promise<boolean> {
   }
 }
 
+function downloadTextFile(fileName: string, text: string, mimeType: string): boolean {
+  if (!text.trim() || typeof document === "undefined" || !document.body || typeof Blob === "undefined" || typeof URL === "undefined") return false;
+  const blob = new Blob([text], { type: mimeType });
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement("a");
+  anchor.href = url;
+  anchor.download = fileName;
+  anchor.style.display = "none";
+  document.body.appendChild(anchor);
+  try {
+    anchor.click();
+    return true;
+  } catch {
+    return false;
+  } finally {
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+  }
+}
+
 function CatalogPanel({
   cards,
   detail,
@@ -13596,10 +13618,29 @@ function DeckStrategyProfilePanel({ response, loading }: { response: DeckStrateg
   );
 }
 
+type DeckStrategyProfileExportStatus = "idle" | "copied" | "copy_failed" | "downloaded" | "download_failed";
+
 function DeckStrategyProfileViewerPanel({ viewer, loading }: { viewer: DeckStrategyProfileViewer; loading: boolean }) {
   const primaryRows = viewer.strategies.filter((strategy) => strategy.status === "primary" || strategy.status === "secondary");
   const fallbackRows = primaryRows.length > 0 ? primaryRows : viewer.strategies.slice(0, 3);
   const lowRows = viewer.strategies.filter((strategy) => !fallbackRows.includes(strategy));
+  const exportJson = useMemo(() => serializeDeckStrategyProfileJsonExport(viewer), [viewer]);
+  const exportFileName = useMemo(() => deckStrategyProfileJsonExportFileName(viewer), [viewer]);
+  const [exportStatus, setExportStatus] = useState<DeckStrategyProfileExportStatus>("idle");
+  useEffect(() => {
+    if (exportStatus === "idle") return;
+    const timeout = window.setTimeout(() => setExportStatus("idle"), 2400);
+    return () => window.clearTimeout(timeout);
+  }, [exportStatus]);
+  const copyProfileJson = async () => {
+    const copied = await copyTextToClipboard(exportJson);
+    setExportStatus(copied ? "copied" : "copy_failed");
+  };
+  const downloadProfileJson = () => {
+    const downloaded = downloadTextFile(exportFileName, exportJson, "application/json;charset=utf-8");
+    setExportStatus(downloaded ? "downloaded" : "download_failed");
+  };
+  const exportStatusLabel = deckStrategyProfileExportStatusLabel(exportStatus);
   return (
     <div className="deckStrategyContent" aria-busy={loading}>
       <div className="deckStrategyStatusGrid">
@@ -13608,6 +13649,28 @@ function DeckStrategyProfileViewerPanel({ viewer, loading }: { viewer: DeckStrat
         ))}
       </div>
       <p className="deckStrategyDiagnosticNotice">{viewer.diagnosticNotice}</p>
+      <div className="deckStrategyExportBar">
+        <div className="deckStrategyExportTitle">
+          <Download size={15} />
+          <strong>JSON-Export</strong>
+          <small>{exportFileName}</small>
+        </div>
+        <div className="deckStrategyExportActions">
+          <button className="button" type="button" onClick={copyProfileJson} disabled={loading}>
+            {exportStatus === "copied" ? <Check size={14} /> : <Clipboard size={14} />}
+            JSON kopieren
+          </button>
+          <button className="button" type="button" onClick={downloadProfileJson} disabled={loading}>
+            <Download size={14} />
+            JSON speichern
+          </button>
+        </div>
+        {exportStatusLabel ? (
+          <small className={`deckStrategyExportStatus ${exportStatus.includes("failed") ? "bad" : "ok"}`} role="status" aria-live="polite">
+            {exportStatusLabel}
+          </small>
+        ) : null}
+      </div>
       <DeckStrategyRows title="Strategien (diagnostisch)" strategies={fallbackRows} prominent />
       {lowRows.length > 0 ? (
         <details className="deckStrategyDetails">
@@ -13628,6 +13691,21 @@ function DeckStrategyProfileViewerPanel({ viewer, loading }: { viewer: DeckStrat
       <DeckStrategyWarnings warnings={viewer.warnings} />
     </div>
   );
+}
+
+function deckStrategyProfileExportStatusLabel(status: DeckStrategyProfileExportStatus): string | null {
+  switch (status) {
+    case "idle":
+      return null;
+    case "copied":
+      return "JSON kopiert";
+    case "copy_failed":
+      return "Kopieren fehlgeschlagen";
+    case "downloaded":
+      return "JSON-Datei erstellt";
+    case "download_failed":
+      return "Download nicht möglich";
+  }
 }
 
 function DeckStrategyRows({ title, strategies, prominent = false }: { title: string; strategies: DeckStrategyProfileViewer["strategies"]; prominent?: boolean }) {

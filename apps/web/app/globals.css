@@ -2126,6 +2126,64 @@ select {
   background: color-mix(in srgb, var(--ice), transparent 91%);
 }
 
+.deckStrategyExportBar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  min-width: 0;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.deckStrategyExportTitle {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+  color: var(--muted);
+}
+
+.deckStrategyExportTitle svg {
+  flex: 0 0 auto;
+  color: var(--ice);
+}
+
+.deckStrategyExportTitle strong {
+  color: var(--text);
+  font-size: 12px;
+}
+
+.deckStrategyExportTitle small {
+  min-width: 0;
+  color: var(--muted);
+  font-size: 11px;
+  overflow-wrap: anywhere;
+}
+
+.deckStrategyExportActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-left: auto;
+}
+
+.deckStrategyExportStatus {
+  flex-basis: 100%;
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.deckStrategyExportStatus.ok {
+  color: var(--ok);
+}
+
+.deckStrategyExportStatus.bad {
+  color: var(--danger);
+}
+
 .deckStrategyStatusGrid,
 .deckStrategyEntryList {
   display: flex;

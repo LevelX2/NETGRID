@@ -127,6 +127,29 @@ export type DeckStrategyProfileViewerResponse =
       deck?: DeckStrategyProfileUnavailableDeckInfo;
     };
 
+export const DECK_STRATEGY_PROFILE_JSON_EXPORT_SCHEMA_VERSION =
+  "ai007-deck-strategy-json-export-v1" as const;
+
+export type DeckStrategyProfileJsonExport = {
+  schemaVersion: typeof DECK_STRATEGY_PROFILE_JSON_EXPORT_SCHEMA_VERSION;
+  taskId: "AI007";
+  exportKind: "diagnostic_ai_deck_profile";
+  exportedAt: string;
+  plannerEffect: "none";
+  deck: {
+    deckId: string;
+    deckName: string;
+    side: DeckStrategyViewerSide;
+    cardCount: number;
+    deckHash?: string;
+  };
+  safety: {
+    payload: "deck_strategy_profile_viewer_only";
+    forbiddenFields: [];
+  };
+  viewer: DeckStrategyProfileViewer;
+};
+
 export const FORBIDDEN_DECK_STRATEGY_VIEWER_FIELDS = [
   "GameState",
   "cardInstances",
@@ -149,6 +172,50 @@ export const FORBIDDEN_DECK_STRATEGY_VIEWER_FIELDS = [
   "planWeights",
   "PlanWeights",
 ];
+
+export function deckStrategyProfileJsonExport(
+  viewer: DeckStrategyProfileViewer,
+  exportedAt = new Date().toISOString(),
+): DeckStrategyProfileJsonExport {
+  const payload: DeckStrategyProfileJsonExport = {
+    schemaVersion: DECK_STRATEGY_PROFILE_JSON_EXPORT_SCHEMA_VERSION,
+    taskId: "AI007",
+    exportKind: "diagnostic_ai_deck_profile",
+    exportedAt,
+    plannerEffect: "none",
+    deck: {
+      deckId: viewer.deckId,
+      deckName: viewer.deckName,
+      side: viewer.side,
+      cardCount: viewer.cardCount,
+      ...(viewer.source.deckHash ? { deckHash: viewer.source.deckHash } : {}),
+    },
+    safety: {
+      payload: "deck_strategy_profile_viewer_only",
+      forbiddenFields: [],
+    },
+    viewer,
+  };
+  const forbiddenFields = forbiddenDeckStrategyFields(payload);
+  if (forbiddenFields.length > 0) {
+    throw new Error(`Deck strategy profile export contains forbidden fields: ${forbiddenFields.join(", ")}`);
+  }
+  return payload;
+}
+
+export function serializeDeckStrategyProfileJsonExport(
+  viewer: DeckStrategyProfileViewer,
+  exportedAt?: string,
+): string {
+  return `${JSON.stringify(deckStrategyProfileJsonExport(viewer, exportedAt), null, 2)}\n`;
+}
+
+export function deckStrategyProfileJsonExportFileName(
+  viewer: Pick<DeckStrategyProfileViewer, "deckName" | "deckId" | "side">,
+): string {
+  const deckName = safeDeckStrategyProfileFileNamePart(viewer.deckName || viewer.deckId);
+  return `netgrid-ki-deckprofil-${viewer.side}-${deckName}.json`;
+}
 
 export function deckStrategyProfileEntryKey(
   sectionKey: string,
@@ -233,4 +300,16 @@ export function forbiddenDeckStrategyFields(value: unknown, found = new Set<stri
     forbiddenDeckStrategyFields(child, found);
   }
   return [...found].sort();
+}
+
+function safeDeckStrategyProfileFileNamePart(value: string): string {
+  const normalized = value
+    .normalize("NFKD")
+    .replace(/ß/g, "ss")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, "-")
+    .replace(/^-+|-+$/g, "")
+    .slice(0, 72);
+  return normalized || "deck";
 }
