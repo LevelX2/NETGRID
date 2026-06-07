@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { AiDeckStrategyProfile } from "@netgrid/ai";
 import type { DeckSnapshot, EditableDeck } from "@netgrid/decks";
+import benchmarkSnapshotsData from "../../../../../../data/ai/ai-local-realistic-benchmark-deck-snapshots-2026-05-23.json";
 import snapshotsData08 from "../../../../../../data/decks/deck-snapshots-0.8.json";
 import {
   buildDeckStrategyProfileViewer,
@@ -8,6 +9,7 @@ import {
 } from "./strategy-profile-data";
 
 const snapshots = snapshotsData08.snapshots as DeckSnapshot[];
+const benchmarkSnapshots = benchmarkSnapshotsData.snapshots as unknown as DeckSnapshot[];
 
 describe("AI007 DeckDoctrine strategy profile view model", () => {
   it("builds a dynamic Runner viewer with strategy scores and side profiles", () => {
@@ -21,6 +23,7 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
       aggregation: "AI006 strategy aggregation",
       plannerEffect: "none",
     });
+    expect(viewer.runnerStrategicIntent?.title).toBe("Abgeleitete KI-Spielabsicht");
     expect(viewer.statusEntries.map((entry) => entry.value)).toContain(
       "AI006 strategy aggregation aus neuer KI-Semantik",
     );
@@ -57,6 +60,7 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
     );
     const viewer = expectAvailable(response);
 
+    expect(viewer.runnerStrategicIntent).toBeUndefined();
     expect(viewer.strategies.some((strategy) => strategy.strategyId.startsWith("corp."))).toBe(true);
     expect(viewer.sideProfileGroups.map((section) => section.title)).toEqual([
       "ICE",
@@ -71,6 +75,39 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
       [...viewer.strategies.map((strategy) => strategy.finalScore)].sort(
         (left, right) => right - left,
       ),
+    );
+  });
+
+  it("adds a redacted Runner strategic intent view for Blink Pressure Rig", () => {
+    const response = deckStrategyProfileViewerResponse(
+      editableDeckFromBenchmarkSnapshot("local_realistic_runner_blink_pressure_rig_snapshot_v1"),
+    );
+    const viewer = expectAvailable(response);
+    const intent = viewer.runnerStrategicIntent;
+    if (!intent) throw new Error("Missing Runner strategic intent view");
+    const sectionText = flattenEntries(intent.sections);
+    const statusText = flattenEntries(intent.statusEntries);
+    const evidenceText = flattenEntries(intent.evidence);
+    const serializedIntent = JSON.stringify(intent);
+
+    expect(statusText).toContain("Abgeleitete KI-Spielabsicht");
+    expect(statusText).toContain("Runtime-nahe Projektion");
+    expect(sectionText).toContain("Agenda-Steal");
+    expect(sectionText).toContain("Run-Event-Tempo");
+    expect(sectionText).toContain("Breaker-Suche");
+    expect(sectionText).toContain("Rig-Aufbau");
+    expect(sectionText).toContain("Economy-Aufbau vor Druck");
+    expect(sectionText).toContain("Zentraler Probe-/Access-Druck");
+    expect(sectionText).toContain("Situativer Remote Contest");
+    expect(sectionText).toContain("Riskante Universalbreaker-Coverage");
+    expect(sectionText).toContain("HQ-Depletion-Muster");
+    expect(sectionText).toContain("Bad-Publicity-Druckmuster");
+    expect(sectionText).toContain("Dediziertes R&D-Multiaccess-Muster");
+    expect(sectionText).toContain("Dediziertes HQ-Multiaccess-Muster");
+    expect(evidenceText).toContain("Diagnostisches Deckprofil vorhanden");
+    expect(evidenceText).toContain("DeckCapabilities vorhanden");
+    expect(serializedIntent).not.toMatch(
+      /local_realistic_runner_blink_pressure_rig_snapshot_v1|Blink Pressure Rig|onr_v1_|cardInstances|privatePayload|fullGameState/i,
     );
   });
 
@@ -192,6 +229,16 @@ describe("AI007 DeckDoctrine strategy profile view model", () => {
 function editableDeckFromSnapshot(snapshotId: string): EditableDeck {
   const snapshot = snapshots.find((candidate) => candidate.deckSnapshotId === snapshotId);
   if (!snapshot) throw new Error(`Missing snapshot ${snapshotId}`);
+  return editableDeckFromDeckSnapshot(snapshot);
+}
+
+function editableDeckFromBenchmarkSnapshot(snapshotId: string): EditableDeck {
+  const snapshot = benchmarkSnapshots.find((candidate) => candidate.deckSnapshotId === snapshotId);
+  if (!snapshot) throw new Error(`Missing benchmark snapshot ${snapshotId}`);
+  return editableDeckFromDeckSnapshot(snapshot);
+}
+
+function editableDeckFromDeckSnapshot(snapshot: DeckSnapshot): EditableDeck {
   return {
     deckId: snapshot.sourceDeckId,
     deckVersion: snapshot.deckVersion,

@@ -273,6 +273,7 @@ import {
   strategyStatusTone,
   type DeckStrategyProfileEntry,
   type DeckStrategyProfileEvidenceGroup,
+  type DeckStrategyProfileRunnerStrategicIntentViewer,
   type DeckStrategyProfileSection,
   type DeckStrategyProfileViewer,
   type DeckStrategyProfileViewerResponse,
@@ -13649,6 +13650,7 @@ function DeckStrategyProfileViewerPanel({ viewer, loading }: { viewer: DeckStrat
         ))}
       </div>
       <p className="deckStrategyDiagnosticNotice">{viewer.diagnosticNotice}</p>
+      <DeckRunnerStrategicIntentSection intent={viewer.runnerStrategicIntent} />
       <div className="deckStrategyExportBar">
         <div className="deckStrategyExportTitle">
           <Download size={15} />
@@ -13706,6 +13708,23 @@ function deckStrategyProfileExportStatusLabel(status: DeckStrategyProfileExportS
     case "download_failed":
       return "Download nicht möglich";
   }
+}
+
+function DeckRunnerStrategicIntentSection({ intent }: { intent: DeckStrategyProfileRunnerStrategicIntentViewer | undefined }) {
+  if (!intent) return null;
+  return (
+    <section className="deckStrategySection deckRunnerStrategicIntent">
+      <h4>{intent.title}</h4>
+      <p className="deckStrategyDiagnosticNotice">{intent.notice}</p>
+      <div className="deckStrategyStatusGrid">
+        {intent.statusEntries.map((entry, index) => (
+          <DeckStrategyEntryBadge entry={entry} key={deckStrategyProfileEntryKey("runner-intent-status", entry, index)} />
+        ))}
+      </div>
+      <DeckStrategySections title="Runtime-nahe Interpretation" sections={intent.sections} />
+      <DeckStrategyFlatEntries title="Redigierte Quellenhinweise" entries={intent.evidence} emptyText="Keine redigierte Evidence." />
+    </section>
+  );
 }
 
 function DeckStrategyRows({ title, strategies, prominent = false }: { title: string; strategies: DeckStrategyProfileViewer["strategies"]; prominent?: boolean }) {

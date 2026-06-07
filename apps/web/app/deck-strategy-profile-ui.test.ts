@@ -7,6 +7,7 @@ import {
   deckStrategyProfileEntryKey,
   forbiddenDeckStrategyFields,
   formatDeckStrategyValue,
+  formatRunnerStrategicIntentValue,
   formatStrategyLabel,
   formatStrategyScore,
   scoreWidthPercent,
@@ -21,6 +22,12 @@ describe("AI007 deck strategy profile UI helpers", () => {
     expect(formatStrategyLabel("runner.interface_closeout")).toBe("Interface Closeout");
     expect(formatStrategyLabel("corp.tag_trace_punish")).toBe("Tag Trace Punish");
     expect(formatDeckStrategyValue("legacy_lineSupport")).toBe("legacy line support");
+    expect(formatRunnerStrategicIntentValue("runner.steal_agendas_default")).toBe("Agenda-Steal");
+    expect(formatRunnerStrategicIntentValue("runner.run_event_tempo")).toBe("Run-Event-Tempo");
+    expect(formatRunnerStrategicIntentValue("runner.search.breaker")).toBe("Breaker-Suche");
+    expect(formatRunnerStrategicIntentValue("runner.search_breaker_setup")).toBe("Breaker-Suche");
+    expect(formatRunnerStrategicIntentValue("runner.hq_pressure")).toBe("HQ-Druck");
+    expect(formatRunnerStrategicIntentValue("runner.risky_universal_breaker_pressure")).toBe("Riskante Universalbreaker-Coverage");
     expect(formatStrategyScore(74.4)).toBe("74");
     expect(scoreWidthPercent(124)).toBe("100%");
     expect(strategyStatusLabel("primary")).toBe("Primär");

@@ -1,5 +1,13 @@
-import type { AiDeckStrategyProfile, DeckStrategyEvidence } from "@netgrid/ai";
-import { buildDeckStrategyProfile } from "@netgrid/ai";
+import type {
+  AiDeckStrategyProfile,
+  DeckStrategyEvidence,
+  RunnerStrategicIntentProfile,
+} from "@netgrid/ai";
+import {
+  buildDeckCapabilityProfile,
+  buildDeckStrategyProfile,
+  buildRunnerStrategicIntentProfile,
+} from "@netgrid/ai";
 import type { DeckSnapshot, DeckValidationResult, EditableDeck } from "@netgrid/decks";
 import { assertDeckPayloadSafe } from "@netgrid/decks";
 import type { Side } from "@netgrid/shared";
@@ -8,11 +16,13 @@ import { createRuntimeCardsById } from "../../card-pool-runtime";
 import { deckValidationResponse } from "../deck-data";
 import {
   formatDeckStrategyValue,
+  formatRunnerStrategicIntentValue,
   formatStrategyLabel,
   type DeckStrategyProfileAnchorEvidence,
   type DeckStrategyProfileEntry,
   type DeckStrategyProfileEvidenceGroup,
   type DeckStrategyProfileGap,
+  type DeckStrategyProfileRunnerStrategicIntentViewer,
   type DeckStrategyProfileSection,
   type DeckStrategyProfileStrategyRow,
   type DeckStrategyProfileStrategyStatus,
@@ -82,7 +92,32 @@ export function deckStrategyProfileViewerResponse(
         quantity: entry.quantity,
       })),
     });
-    const viewer = buildDeckStrategyProfileViewer(profile, body.snapshot, deckPayload);
+    const runnerStrategicIntent = profile.side === "runner"
+      ? buildRunnerStrategicIntentViewer(
+          buildRunnerStrategicIntentProfile({
+            strategyProfile: profile,
+            deckCapabilities: buildDeckCapabilityProfile({
+              side: body.snapshot.side,
+              deckSnapshot: {
+                deckSnapshotId: body.snapshot.deckSnapshotId,
+                side: body.snapshot.side,
+                formatProfileId: body.snapshot.formatProfileId,
+                publicMetadata: body.snapshot.publicMetadata,
+                cards: body.snapshot.cards.map((entry) => ({
+                  cardId: entry.cardId,
+                  quantity: entry.quantity,
+                })),
+              },
+            }),
+          }),
+        )
+      : undefined;
+    const viewer = buildDeckStrategyProfileViewer(
+      profile,
+      body.snapshot,
+      deckPayload,
+      runnerStrategicIntent,
+    );
     const response: DeckStrategyProfileViewerResponse = {
       schemaVersion: RESPONSE_SCHEMA_VERSION,
       taskId: "AI007",
@@ -101,6 +136,7 @@ export function buildDeckStrategyProfileViewer(
   profile: AiDeckStrategyProfile,
   snapshot: Pick<DeckSnapshot, "deckHash" | "name">,
   deck: Pick<EditableDeck, "deckId" | "name" | "side">,
+  runnerStrategicIntent?: DeckStrategyProfileRunnerStrategicIntentViewer,
 ): DeckStrategyProfileViewer {
   const strategies = strategyRows(profile);
   const evidenceStrategies = strategies
@@ -136,6 +172,7 @@ export function buildDeckStrategyProfileViewer(
     evidenceGroups: fallbackEvidenceStrategies.map((strategy) =>
       evidenceGroupForStrategy(strategy, profile),
     ),
+    ...(runnerStrategicIntent ? { runnerStrategicIntent } : {}),
     functionSignalCounts: countEntries(profile.functionSignalCounts, "function-signals"),
     legacySignalGroups: legacySignalGroups(profile.legacySignalCounts),
     warnings: warningEntries(profile.warnings),
@@ -160,6 +197,166 @@ function statusEntries(
     { label: "Profil-Schema", value: profile.schemaVersion, tone: "legacy" },
     { label: "Deck-Hash", value: snapshot.deckHash, tone: "legacy" },
   ];
+}
+
+function buildRunnerStrategicIntentViewer(
+  intent: RunnerStrategicIntentProfile,
+): DeckStrategyProfileRunnerStrategicIntentViewer {
+  const executionStyleEntries = intent.executionStyle
+    ? [intentEntry("Ausführungsstil", intent.executionStyle, "valid")]
+    : [intentEntry("Ausführungsstil", "runner.unknown", "legacy", "kein eindeutiger Run-Tempo-Anker")];
+  return {
+    schemaVersion: intent.schemaVersion,
+    title: "Abgeleitete KI-Spielabsicht",
+    notice:
+      "Runtime-nahe Runner-Interpretation aus diagnostischem KI-Deckprofil und AI-internen DeckCapabilities. Diese Anzeige bleibt read-only und ändert keine KI-Gewichtung.",
+    source: {
+      label: "Abgeleitete KI-Spielabsicht",
+      interpretation: "Runtime-nahe Projektion",
+      deckStrategyProfile: intent.source.deckStrategyProfile,
+      deckCapabilities: intent.source.deckCapabilities,
+      plannerEffect: intent.source.plannerEffect,
+    },
+    statusEntries: [
+      { label: "Analyseabschnitt", value: "Abgeleitete KI-Spielabsicht", tone: "valid" },
+      { label: "Interpretation", value: "Runtime-nahe Projektion", tone: "valid" },
+      { label: "Profilquelle", value: "Diagnoseprofil + DeckCapabilities", tone: "info" },
+      { label: "Plannerwirkung", value: "Read-only im Deckeditor", tone: "warning" },
+      { label: "Confidence", value: formatDeckStrategyValue(intent.confidence), tone: confidenceTone(intent.confidence) },
+    ],
+    sections: [
+      {
+        key: "runner-intent-win-plan",
+        title: "Gewinnplan",
+        entries: [
+          intentEntry("Primärer Gewinnplan", intent.primaryWinIntent, "valid"),
+          ...executionStyleEntries,
+        ],
+      },
+      {
+        key: "runner-intent-setup-engine",
+        title: "Setup-Engine",
+        entries: intent.setupEngine.map((value) =>
+          intentEntry("Setup", value, "info"),
+        ),
+        emptyText: "Keine Setup-Engine abgeleitet.",
+      },
+      {
+        key: "runner-intent-pressure-vectors",
+        title: "Druckvektoren",
+        entries: intent.pressureVectors.map((value) =>
+          intentEntry("Druck", value, "valid"),
+        ),
+        emptyText: "Keine Druckvektoren abgeleitet.",
+      },
+      {
+        key: "runner-intent-risk-profile",
+        title: "Risikoprofil",
+        entries: intent.riskProfile.map((value) =>
+          intentEntry("Risiko", value, "warning"),
+        ),
+        emptyText: "Kein besonderes Risikoprofil.",
+      },
+      {
+        key: "runner-intent-rejected-intents",
+        title: "Abgelehnte Muster",
+        entries: intent.rejectedIntents.map((value) =>
+          intentEntry("Abgelehnt", value, "legacy"),
+        ),
+        emptyText: "Keine abgelehnten Muster.",
+      },
+    ],
+    evidence: intent.evidence.map((fact, index) => ({
+      label: index === 0 ? "Quelle" : "Evidence",
+      value: formatRunnerStrategicIntentEvidence(fact),
+      tone: "legacy",
+    })),
+  };
+}
+
+function intentEntry(
+  label: string,
+  value: string,
+  tone: DeckStrategyProfileTone,
+  detail?: string,
+): DeckStrategyProfileEntry {
+  return {
+    label,
+    value: formatRunnerStrategicIntentValue(value),
+    ...(detail ? { detail } : {}),
+    tone,
+  };
+}
+
+function confidenceTone(
+  confidence: RunnerStrategicIntentProfile["confidence"],
+): DeckStrategyProfileTone {
+  switch (confidence) {
+    case "high":
+      return "valid";
+    case "medium":
+      return "info";
+    case "low":
+      return "warning";
+  }
+}
+
+function formatRunnerStrategicIntentEvidence(fact: string): string {
+  if (fact === "deck_strategy_profile:present") return "Diagnostisches Deckprofil vorhanden";
+  if (fact === "deck_strategy_profile:missing") return "Diagnostisches Deckprofil fehlt";
+  if (fact === "deck_capabilities:present") return "DeckCapabilities vorhanden";
+  if (fact === "deck_capabilities:missing") return "DeckCapabilities fehlen";
+
+  const [kind, ...parts] = fact.split(":");
+  if (kind === "deck_strategy_planner_effect") {
+    return `Deckprofil-Plannerwirkung: ${formatDeckStrategyValue(parts.join(":"))}`;
+  }
+  if (kind === "deck_strategy_primary_count") {
+    return `${parts[0] ?? "0"} primäre Diagnose-Strategien`;
+  }
+  if (kind === "deck_capability_confidence") {
+    return `DeckCapability Confidence: ${formatDeckStrategyValue(parts.join(":"))}`;
+  }
+  if (kind === "deck_capability_runner_breakers") {
+    return `${parts[0] ?? "0"} bekannte Runner-Breaker`;
+  }
+  if (kind === "deck_capability_runner_search_tools") {
+    return `${parts[0] ?? "0"} bekannte Search-Tools`;
+  }
+  if (kind === "deck_capability_runner_bank_tools") {
+    return `${parts[0] ?? "0"} bekannte Economy-/Bank-Tools`;
+  }
+  if (kind === "execution_style") {
+    return `Ausführungsstil: ${formatRunnerStrategicIntentValue(parts.join(":"))}`;
+  }
+  if (kind === "setup_engine") {
+    return `Setup-Engine: ${formatRunnerStrategicIntentList(parts.join(":"))}`;
+  }
+  if (kind === "pressure_vectors") {
+    return `Druckvektoren: ${formatRunnerStrategicIntentList(parts.join(":"))}`;
+  }
+  if (kind === "risk_profile") {
+    return `Risikoprofil: ${formatRunnerStrategicIntentList(parts.join(":"))}`;
+  }
+  if (kind === "rejected_intents") {
+    return `Abgelehnte Muster: ${formatRunnerStrategicIntentList(parts.join(":"))}`;
+  }
+  if (kind === "strategy_score" && parts.length >= 2) {
+    return `${formatRunnerStrategicIntentValue(parts[0] ?? "")}: ${parts
+      .slice(1)
+      .map(formatDeckStrategyValue)
+      .join(", ")}`;
+  }
+  return formatDeckStrategyValue(fact);
+}
+
+function formatRunnerStrategicIntentList(value: string): string {
+  if (!value || value === "none") return "keine";
+  return value
+    .split("|")
+    .filter(Boolean)
+    .map(formatRunnerStrategicIntentValue)
+    .join(", ");
 }
 
 function strategyRows(profile: AiDeckStrategyProfile): DeckStrategyProfileStrategyRow[] {

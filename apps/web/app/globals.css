@@ -2198,6 +2198,13 @@ select {
   min-width: 0;
 }
 
+.deckRunnerStrategicIntent {
+  padding: 9px;
+  border: 1px solid color-mix(in srgb, var(--ice), var(--line) 48%);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--ice), var(--section-bg) 94%);
+}
+
 .deckStrategySection h4,
 .deckStrategyMetricGroup h5,
 .deckStrategyEvidenceColumns h5 {

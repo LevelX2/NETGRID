@@ -71,6 +71,22 @@ export type DeckStrategyProfileEvidenceGroup = {
   supportGaps: DeckStrategyProfileGap[];
 };
 
+export type DeckStrategyProfileRunnerStrategicIntentViewer = {
+  schemaVersion: "runner-strategic-intent-profile-v1";
+  title: "Abgeleitete KI-Spielabsicht";
+  notice: string;
+  source: {
+    label: "Abgeleitete KI-Spielabsicht";
+    interpretation: "Runtime-nahe Projektion";
+    deckStrategyProfile: "diagnostic_only";
+    deckCapabilities: "ai_internal";
+    plannerEffect: "runtime_projection";
+  };
+  statusEntries: DeckStrategyProfileEntry[];
+  sections: DeckStrategyProfileSection[];
+  evidence: DeckStrategyProfileEntry[];
+};
+
 export type DeckStrategyProfileNotice = {
   label: string;
   value: string;
@@ -100,6 +116,7 @@ export type DeckStrategyProfileViewer = {
   sideProfileTitle: string;
   sideProfileGroups: DeckStrategyProfileSection[];
   evidenceGroups: DeckStrategyProfileEvidenceGroup[];
+  runnerStrategicIntent?: DeckStrategyProfileRunnerStrategicIntentViewer;
   functionSignalCounts: DeckStrategyProfileEntry[];
   legacySignalGroups: DeckStrategyProfileSection[];
   warnings: DeckStrategyProfileNotice[];
@@ -276,6 +293,57 @@ export function formatStrategyLabel(value: string): string {
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+export function formatRunnerStrategicIntentValue(value: string): string {
+  switch (value) {
+    case "runner.steal_agendas_default":
+      return "Agenda-Steal";
+    case "runner.unknown":
+      return "Unklare Runner-Spielabsicht";
+    case "runner.run_event_tempo":
+      return "Run-Event-Tempo";
+    case "runner.opportunistic_pressure":
+      return "Opportunistischer Druck";
+    case "runner.setup_first":
+      return "Setup zuerst";
+    case "runner.search.breaker":
+    case "runner.search_breaker_setup":
+      return "Breaker-Suche";
+    case "runner.rig_first":
+      return "Rig-Aufbau";
+    case "runner.economy_first":
+    case "runner.economy_setup_before_pressure":
+      return "Economy-Aufbau vor Druck";
+    case "runner.draw_or_search_setup":
+      return "Draw-/Search-Setup";
+    case "runner.central_probe_pressure":
+      return "Zentraler Probe-/Access-Druck";
+    case "runner.hq_pressure":
+      return "HQ-Druck";
+    case "runner.rnd_pressure":
+      return "R&D-Druck";
+    case "runner.remote_contest":
+      return "Remote Contest";
+    case "runner.remote_trash":
+      return "Remote Trash-Druck";
+    case "runner.conditional_remote_contest":
+      return "Situativer Remote Contest";
+    case "runner.risky_universal_breaker_pressure":
+      return "Riskante Universalbreaker-Coverage";
+    case "runner.low_confidence_strategy_projection":
+      return "Niedrige Projektionssicherheit";
+    case "runner.hq_depletion":
+      return "HQ-Depletion-Muster";
+    case "runner.bad_publicity_pressure":
+      return "Bad-Publicity-Druckmuster";
+    case "runner.dedicated_rnd_multiaccess":
+      return "Dediziertes R&D-Multiaccess-Muster";
+    case "runner.dedicated_hq_multiaccess":
+      return "Dediziertes HQ-Multiaccess-Muster";
+    default:
+      return formatStrategyLabel(value);
+  }
 }
 
 export function formatDeckStrategyValue(value: string): string {
