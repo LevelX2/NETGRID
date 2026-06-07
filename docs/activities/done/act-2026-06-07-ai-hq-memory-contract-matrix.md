@@ -1,6 +1,6 @@
 ---
 activityId: act-2026-06-07-ai-hq-memory-contract-matrix
-status: in_progress
+status: done
 kind: architecture
 area: ai
 priority: high
@@ -8,12 +8,16 @@ primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: false
 createdAt: 2026-06-07
 startedAt: 2026-06-07
-completedAt:
+completedAt: 2026-06-07
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/architecture/ai/hq-hand-memory-contract-matrix-2026-06-07.md
+  - docs/architecture/ai/README.md
+  - KI-Wissen-NETGRID/02 Wissen/00 Uebersichten/Index.md
+checks:
+  - git diff --check
 ---
 
 # HQ-Hand-Wissensvertrag und Ereignismatrix
@@ -60,11 +64,11 @@ Für die Runner-KI soll ein präziser Vertrag entstehen, wie rechtmäßig gewonn
 
 ## Akzeptanzkriterien
 
-- [ ] Es gibt ein kurzes Vertragsartefakt oder eine Activity-Ergebnisnotiz mit klarer Ereignismatrix für HQ-Hand-Wissen.
-- [ ] Der Vertrag benennt explizit, wann vollständige Invalidierung erlaubt ist und wann nur Kandidaten reduziert werden dürfen.
-- [ ] Der Vertrag definiert side-sichere Eventfelder, die keine Kartenidentität leaken, aber Typ-/Placement-Schlussfolgerungen erlauben.
-- [ ] Offene Regelfragen sind sichtbar als Folgepakete oder Blocker benannt.
-- [ ] Keine Code-, Engine-, Replay-, StateHash- oder Hidden-Info-Vertragsänderung wurde in diesem Paket vorgenommen.
+- [x] Es gibt ein kurzes Vertragsartefakt oder eine Activity-Ergebnisnotiz mit klarer Ereignismatrix für HQ-Hand-Wissen.
+- [x] Der Vertrag benennt explizit, wann vollständige Invalidierung erlaubt ist und wann nur Kandidaten reduziert werden dürfen.
+- [x] Der Vertrag definiert side-sichere Eventfelder, die keine Kartenidentität leaken, aber Typ-/Placement-Schlussfolgerungen erlauben.
+- [x] Offene Regelfragen sind sichtbar als Folgepakete oder Blocker benannt.
+- [x] Keine Code-, Engine-, Replay-, StateHash- oder Hidden-Info-Vertragsänderung wurde in diesem Paket vorgenommen.
 
 ## Umsetzungshinweise
 
@@ -74,4 +78,6 @@ Für die Runner-KI soll ein präziser Vertrag entstehen, wie rechtmäßig gewonn
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt: `docs/architecture/ai/hq-hand-memory-contract-matrix-2026-06-07.md` definiert den Zielvertrag für Runner-KI-HQ-Hand-Wissen mit Ledger-Zielmodell, side-sicheren Eventfeldern, Ereignismatrix, Beispiel und Handoff an die Folgepakete. Die Matrix hält fest, dass sichere Restkarten bei verdeckten ICE-/Root-Installationen erhalten bleiben sollen, während plausible Abgänge als Kandidatengruppen geführt werden. Vollinvalidierung ist nur bei echter Hidden-Zone-Mischung, Widersprüchen oder fehlender side-sicherer Placement-/Positionsinformation erlaubt.
+
+Keine Codeänderung vorgenommen. Verlinkt in `docs/architecture/ai/README.md` und im Wissensindex.
