@@ -56,6 +56,19 @@ import {
   buildDeckCapabilityProfileFromInput,
   type DeckCapabilityProfile,
 } from "./deck-capabilities";
+import { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
+import {
+  buildRunnerStrategicIntentProfile,
+  type RunnerStrategicIntentProfile,
+} from "./runner-strategic-intent";
+import {
+  buildRunnerEconomyPosture,
+  evaluateRunnerRunTargets,
+} from "./runner-run-target-evaluation";
+import {
+  buildRunnerTacticalGoals,
+  type RunnerTacticalGoal,
+} from "./runner-tactical-goals";
 import {
   CARD_ROLES_BY_CARD,
   RUNTIME_CARDS,
@@ -212,6 +225,11 @@ export {
   evaluateRunnerRunTargets,
 } from "./runner-run-target-evaluation";
 export {
+  RUNNER_TACTICAL_GOAL_SCHEMA_VERSION,
+  buildRunnerTacticalGoals,
+  redactedRunnerTacticalGoalFacts,
+} from "./runner-tactical-goals";
+export {
   RUNNER_STRATEGIC_INTENT_SCHEMA_VERSION,
   buildRunnerStrategicIntentProfile,
 } from "./runner-strategic-intent";
@@ -252,6 +270,12 @@ export type {
   RunnerRunTargetKind,
   RunnerRunTargetRecommendation,
 } from "./runner-run-target-evaluation";
+export type {
+  BuildRunnerTacticalGoalsParams,
+  RunnerTacticalGoal,
+  RunnerTacticalGoalFamily,
+  RunnerTacticalGoalId,
+} from "./runner-tactical-goals";
 export type {
   BuildRunnerStrategicIntentProfileParams,
   RunnerExecutionStyle,
@@ -3217,14 +3241,22 @@ export function buildAiDecisionInput(
     ...(ownDeckDoctrine ? { ownDeckDoctrine } : {}),
   });
   if (!options.ownDeckSnapshot) return input;
+  const ownDeckCapabilities = buildDeckCapabilityProfile({
+    side,
+    playerView,
+    legalActions,
+    deckSnapshot: options.ownDeckSnapshot,
+  });
+  const ownRunnerStrategicIntent = side === "runner"
+    ? buildRunnerStrategicIntentProfile({
+        strategyProfile: buildDeckStrategyProfile(options.ownDeckSnapshot),
+        deckCapabilities: ownDeckCapabilities,
+      })
+    : undefined;
   const enriched: AiDecisionInputWithDeckCapabilities = {
     ...input,
-    ownDeckCapabilities: buildDeckCapabilityProfile({
-      side,
-      playerView,
-      legalActions,
-      deckSnapshot: options.ownDeckSnapshot,
-    }),
+    ownDeckCapabilities,
+    ...(ownRunnerStrategicIntent ? { ownRunnerStrategicIntent } : {}),
   };
   return enriched;
 }
@@ -3279,6 +3311,8 @@ type AiDecisionRuntimeOptions = {
 
 type AiDecisionInputWithDeckCapabilities = AiDecisionInput & {
   ownDeckCapabilities?: DeckCapabilityProfile;
+  ownRunnerStrategicIntent?: RunnerStrategicIntentProfile;
+  ownRunnerTacticalGoals?: RunnerTacticalGoal[];
 };
 
 export function chooseAiAction(
@@ -3367,12 +3401,42 @@ function chooseSemanticRuntimeAction(
     );
   const previousPlan = getTacticalPlanMemorySnapshot(input);
   const deckCapabilities = deckCapabilitiesForInput(input);
+  const runnerStrategicIntent = input.side === "runner"
+    ? runnerStrategicIntentForInput(input, deckCapabilities)
+    : undefined;
+  const runnerEconomyPosture = runnerStrategicIntent
+    ? buildRunnerEconomyPosture({
+        input,
+        strategicIntent: runnerStrategicIntent,
+        deckCapabilities,
+      })
+    : undefined;
+  const runnerRunTargetEvaluations = runnerStrategicIntent
+    ? evaluateRunnerRunTargets({
+        input,
+        strategicIntent: runnerStrategicIntent,
+        deckCapabilities,
+      })
+    : undefined;
+  const runnerTacticalGoals = runnerStrategicIntent
+    ? buildRunnerTacticalGoals({
+        input,
+        strategicIntent: runnerStrategicIntent,
+        ...(runnerRunTargetEvaluations ? { runTargetEvaluations: runnerRunTargetEvaluations } : {}),
+        ...(runnerEconomyPosture ? { economyPosture: runnerEconomyPosture } : {}),
+        deckCapabilities,
+      })
+    : undefined;
   const planRuntime = reactiveChoice
     ? emptyTacticalPlanRuntimeResult()
     : evaluateTacticalPlans({
         input,
         ...(previousPlan ? { previousPlan } : {}),
         deckCapabilities,
+        ...(runnerStrategicIntent ? { runnerStrategicIntent } : {}),
+        ...(runnerRunTargetEvaluations ? { runnerRunTargetEvaluations } : {}),
+        ...(runnerEconomyPosture ? { runnerEconomyPosture } : {}),
+        ...(runnerTacticalGoals ? { runnerTacticalGoals } : {}),
         candidates: buildActionSemanticCandidates({
           legalActions: input.legalActions,
           observerSide: input.side,
@@ -3513,6 +3577,14 @@ function semanticRuntimeChoices(input: AiDecisionInput): SemanticRuntimeChoice[]
 function deckCapabilitiesForInput(input: AiDecisionInput): DeckCapabilityProfile {
   return (input as AiDecisionInputWithDeckCapabilities).ownDeckCapabilities ??
     buildDeckCapabilityProfileFromInput(input);
+}
+
+function runnerStrategicIntentForInput(
+  input: AiDecisionInput,
+  deckCapabilities: DeckCapabilityProfile,
+): RunnerStrategicIntentProfile {
+  return (input as AiDecisionInputWithDeckCapabilities).ownRunnerStrategicIntent ??
+    buildRunnerStrategicIntentProfile({ deckCapabilities });
 }
 
 function chooseSemanticRuntimeChoice(

@@ -13,6 +13,15 @@ import type {
 import { redactedDeckCapabilityFacts } from "./deck-capabilities";
 import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
 import { evaluateKnownRemoteAccessPayoff } from "./known-remote-access-payoff";
+import type {
+  RunnerEconomyPosture,
+  RunnerRunTargetEvaluation,
+} from "./runner-run-target-evaluation";
+import {
+  redactedRunnerTacticalGoalFacts,
+  type RunnerTacticalGoal,
+} from "./runner-tactical-goals";
+import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 
 export const TACTICAL_PLAN_SCHEMA_VERSION = "tactical-plan-v1" as const;
@@ -174,6 +183,10 @@ export type TacticalPlanBuildContext = {
   candidates?: readonly ActionSemanticCandidate[];
   previousPlan?: TacticalPlanSnapshot;
   deckCapabilities?: DeckCapabilityProfile;
+  runnerStrategicIntent?: RunnerStrategicIntentProfile;
+  runnerRunTargetEvaluations?: readonly RunnerRunTargetEvaluation[];
+  runnerEconomyPosture?: RunnerEconomyPosture;
+  runnerTacticalGoals?: readonly RunnerTacticalGoal[];
 };
 
 export type PlanProgressionStatus =
@@ -214,6 +227,10 @@ export type PlanStepMappingResult = {
 export type TacticalPlanRuntimeResult = {
   previousPlan?: TacticalPlanMemorySnapshot;
   deckCapabilitiesUsed?: string[];
+  runnerStrategicIntentUsed?: string[];
+  runnerRunTargetEvaluationsUsed?: string[];
+  runnerEconomyPostureUsed?: string[];
+  runnerTacticalGoalsUsed?: string[];
   planAlternatives: TacticalPlan[];
   blockedPlans: TacticalPlan[];
   selectedPlan?: TacticalPlan;
@@ -240,6 +257,18 @@ export function evaluateTacticalPlans(
   const deckCapabilitiesUsed = context.deckCapabilities
     ? redactedDeckCapabilityFacts(context.deckCapabilities)
     : [];
+  const runnerStrategicIntentUsed = context.runnerStrategicIntent
+    ? redactedRunnerStrategicIntentFacts(context.runnerStrategicIntent)
+    : [];
+  const runnerRunTargetEvaluationsUsed = context.runnerRunTargetEvaluations
+    ? redactedRunnerRunTargetEvaluationFacts(context.runnerRunTargetEvaluations)
+    : [];
+  const runnerEconomyPostureUsed = context.runnerEconomyPosture
+    ? redactedRunnerEconomyPostureFacts(context.runnerEconomyPosture)
+    : [];
+  const runnerTacticalGoalsUsed = context.runnerTacticalGoals
+    ? redactedRunnerTacticalGoalFacts(context.runnerTacticalGoals)
+    : [];
   const rawPlans = buildTacticalPlans({
     ...context,
     ...(previousPlan ? { previousPlan } : {}),
@@ -260,6 +289,10 @@ export function evaluateTacticalPlans(
       return {
         ...(previousPlan ? { previousPlan } : {}),
         ...(deckCapabilitiesUsed.length > 0 ? { deckCapabilitiesUsed } : {}),
+        ...(runnerStrategicIntentUsed.length > 0 ? { runnerStrategicIntentUsed } : {}),
+        ...(runnerRunTargetEvaluationsUsed.length > 0 ? { runnerRunTargetEvaluationsUsed } : {}),
+        ...(runnerEconomyPostureUsed.length > 0 ? { runnerEconomyPostureUsed } : {}),
+        ...(runnerTacticalGoalsUsed.length > 0 ? { runnerTacticalGoalsUsed } : {}),
         planAlternatives,
         blockedPlans,
         selectedPlan: plan,
@@ -277,6 +310,10 @@ export function evaluateTacticalPlans(
   return {
     ...(previousPlan ? { previousPlan } : {}),
     ...(deckCapabilitiesUsed.length > 0 ? { deckCapabilitiesUsed } : {}),
+    ...(runnerStrategicIntentUsed.length > 0 ? { runnerStrategicIntentUsed } : {}),
+    ...(runnerRunTargetEvaluationsUsed.length > 0 ? { runnerRunTargetEvaluationsUsed } : {}),
+    ...(runnerEconomyPostureUsed.length > 0 ? { runnerEconomyPostureUsed } : {}),
+    ...(runnerTacticalGoalsUsed.length > 0 ? { runnerTacticalGoalsUsed } : {}),
     planAlternatives,
     blockedPlans,
     ...(progression.planProgressionReason
@@ -286,6 +323,51 @@ export function evaluateTacticalPlans(
       ? { whyPlanAbandoned: progression.whyPlanAbandoned }
       : {}),
   };
+}
+
+function redactedRunnerStrategicIntentFacts(
+  intent: RunnerStrategicIntentProfile,
+): string[] {
+  return [
+    `runner_strategic_intent:${intent.primaryWinIntent}`,
+    ...(intent.executionStyle
+      ? [`runner_execution_style:${intent.executionStyle}`]
+      : []),
+    `runner_setup_engine:${intent.setupEngine.join("|") || "none"}`,
+    `runner_pressure_vectors:${intent.pressureVectors.join("|") || "none"}`,
+    `runner_risk_profile:${intent.riskProfile.join("|") || "none"}`,
+    `runner_rejected_intents:${intent.rejectedIntents.join("|") || "none"}`,
+    `runner_intent_confidence:${intent.confidence}`,
+  ];
+}
+
+function redactedRunnerRunTargetEvaluationFacts(
+  evaluations: readonly RunnerRunTargetEvaluation[],
+): string[] {
+  return evaluations.slice(0, 8).map((evaluation) =>
+    [
+      `runner_run_target:${evaluation.targetServerId}`,
+      `kind:${evaluation.targetKind}`,
+      `payoff:${evaluation.accessPayoff}`,
+      `known:${evaluation.knownAccessState}`,
+      `path:${evaluation.pathPassability}`,
+      `credits_after:${evaluation.creditsAfterRun}`,
+      `recommendation:${evaluation.recommendation}`,
+      `score:${evaluation.score}`,
+    ].join("|"),
+  );
+}
+
+function redactedRunnerEconomyPostureFacts(posture: RunnerEconomyPosture): string[] {
+  return [
+    `runner_economy_min_floor:${posture.minimumCreditFloor}`,
+    `runner_economy_desired_reserve:${posture.desiredCreditReserve}`,
+    `runner_economy_risk_adjusted:${posture.riskAdjustedRunReserve}`,
+    `runner_economy_build_before_pressure:${posture.buildEconomyBeforePressure}`,
+    `runner_economy_bank_relevant:${posture.bankToolsRelevant}`,
+    `runner_economy_funding_need:${posture.fundingNeed}`,
+    `runner_economy_recommendation:${posture.recommendation}`,
+  ];
 }
 
 function planCanMapToCurrentAction(plan: TacticalPlan): boolean {
@@ -728,6 +810,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
   const previousPlan = context.previousPlan;
   const stateVersion = input.playerView.stateVersion;
   const plans: TacticalPlan[] = [];
+  const runnerGoalEvidence = runnerTacticalGoalEvidence(context);
   const remoteRunActions = input.legalActions.filter(
     (action) => action.type === "start_run" && isRemoteServer(actionServerId(action)),
   );
@@ -1027,16 +1110,23 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
         side: "runner",
         type: "runner.contest_remote",
         status: "active",
-        priority: 820,
+        priority: runnerAdjustedPlanPriority(context, action, 820),
         horizonTurns: 1,
         target: { kind: "server", id: serverId },
         currentStep: createPlanStep({
           stepId: `run_target:${serverId}`,
           kind: "run_target",
           desiredActionSemantics: ["run.start"],
-          rationale: ["remote run is legal and no visible coverage blocker was detected"],
+          rationale: [
+            "remote run is legal and no visible coverage blocker was detected",
+            ...runnerRunTargetStepRationale(context, action),
+          ],
         }),
-        evidence: [`remote_run_action:${action.actionId}`],
+        evidence: [
+          `remote_run_action:${action.actionId}`,
+          ...runnerRunTargetPlanEvidence(context, action),
+          ...runnerGoalEvidence,
+        ],
         stateVersion,
       }),
     );
@@ -1149,16 +1239,27 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
         side: "runner",
         type: "runner.opportunistic_central_run",
         status: "active",
-        priority: serverId === "rd" ? 760 : 740,
+        priority: runnerAdjustedPlanPriority(
+          context,
+          action,
+          serverId === "rd" ? 760 : 740,
+        ),
         horizonTurns: 1,
         target: { kind: "server", id: serverId },
         currentStep: createPlanStep({
           stepId: `probe_central:${serverId}`,
           kind: "probe_central",
           desiredActionSemantics: ["run.start"],
-          rationale: ["central pressure remains available while blocked plans wait"],
+          rationale: [
+            "central pressure remains available while blocked plans wait",
+            ...runnerRunTargetStepRationale(context, action),
+          ],
         }),
-        evidence: [`central_run_action:${action.actionId}`],
+        evidence: [
+          `central_run_action:${action.actionId}`,
+          ...runnerRunTargetPlanEvidence(context, action),
+          ...runnerGoalEvidence,
+        ],
         stateVersion,
       }),
     );
@@ -1181,7 +1282,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
         side: "runner",
         type: "runner.build_credit_bank",
         status: "active",
-        priority: 700,
+        priority: runnerEconomyGoalPriority(context, 700),
         horizonTurns: 2,
         target: { kind: "bank", id: "runner_credit_bank" },
         currentStep: createPlanStep({
@@ -1202,6 +1303,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
         evidence: [
           ...bankBuildActions.map((action) => `bank_build_action:${action.actionId}`),
           ...runnerBankToolEvidence,
+          ...runnerGoalEvidence,
         ],
         stateVersion,
       }),
@@ -1223,7 +1325,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
         side: "runner",
         type: "runner.cash_out_credit_bank",
         status: "active",
-        priority: 880,
+        priority: runnerEconomyGoalPriority(context, 880),
         horizonTurns: 1,
         target: { kind: "bank", id: "runner_credit_bank" },
         currentStep: createPlanStep({
@@ -1256,12 +1358,99 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
         evidence: [
           ...bankPayoutActions.map((action) => `bank_payout_action:${action.actionId}`),
           ...runnerBankToolEvidence,
+          ...runnerGoalEvidence,
         ],
         stateVersion,
       }),
     );
   }
   return plans;
+}
+
+function runnerAdjustedPlanPriority(
+  context: TacticalPlanBuildContext,
+  action: LegalAction,
+  basePriority: number,
+): number {
+  const evaluation = runnerRunTargetEvaluationForAction(context, action);
+  if (!evaluation) return basePriority;
+  return basePriority + runnerRunTargetPriorityDelta(evaluation);
+}
+
+function runnerRunTargetPriorityDelta(
+  evaluation: RunnerRunTargetEvaluation,
+): number {
+  switch (evaluation.recommendation) {
+    case "run_now":
+      return 180;
+    case "run_if_free":
+      return 40;
+    case "setup_first":
+      return -80;
+    case "gain_credits_first":
+      return -180;
+    case "find_breaker_first":
+      return -220;
+    case "do_not_run_now":
+      return -720;
+  }
+}
+
+function runnerEconomyGoalPriority(
+  context: TacticalPlanBuildContext,
+  basePriority: number,
+): number {
+  const posture = context.runnerEconomyPosture;
+  if (!posture) return basePriority;
+  if (posture.recommendation === "cash_out_bank") return basePriority + 160;
+  if (posture.recommendation === "build_economy") return basePriority + 90;
+  return basePriority;
+}
+
+function runnerRunTargetEvaluationForAction(
+  context: TacticalPlanBuildContext,
+  action: LegalAction,
+): RunnerRunTargetEvaluation | undefined {
+  return context.runnerRunTargetEvaluations?.find(
+    (evaluation) => evaluation.actionId === action.actionId,
+  );
+}
+
+function runnerRunTargetPlanEvidence(
+  context: TacticalPlanBuildContext,
+  action: LegalAction,
+): string[] {
+  const evaluation = runnerRunTargetEvaluationForAction(context, action);
+  if (!evaluation) return [];
+  return [
+    `runner_run_target_recommendation:${evaluation.recommendation}`,
+    `runner_run_target_payoff:${evaluation.accessPayoff}`,
+    `runner_run_target_path:${evaluation.pathPassability}`,
+    `runner_run_target_score:${evaluation.score}`,
+  ];
+}
+
+function runnerRunTargetStepRationale(
+  context: TacticalPlanBuildContext,
+  action: LegalAction,
+): string[] {
+  const evaluation = runnerRunTargetEvaluationForAction(context, action);
+  if (!evaluation) return [];
+  return [
+    `RunTargetEvaluation recommends ${evaluation.recommendation}.`,
+    `Access payoff is ${evaluation.accessPayoff}; path is ${evaluation.pathPassability}.`,
+  ];
+}
+
+function runnerTacticalGoalEvidence(context: TacticalPlanBuildContext): string[] {
+  return (context.runnerTacticalGoals ?? []).slice(0, 6).map((goal) =>
+    [
+      `runner_tactical_goal:${goal.goalId}`,
+      `priority:${goal.priority}`,
+      `urgency:${goal.urgency}`,
+      ...(goal.targetServerId ? [`target:${goal.targetServerId}`] : []),
+    ].join("|"),
+  );
 }
 
 function buildCorpTacticalPlans(context: TacticalPlanBuildContext): TacticalPlan[] {
