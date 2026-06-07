@@ -613,7 +613,7 @@ describe("Proteus Phase 2d Installed-Connection Bad Publicity Cost", () => {
       (action) => action.actionId === playAction.actionId,
     );
 
-    expect(state.runner.credits).toBe(beforePlay.runner.credits - 3);
+    expect(state.runner.credits).toBe(beforePlay.runner.credits - 4);
     expect(state.corp.badPublicity).toBe(0);
     expect(state.pendingChoice?.source).toContain(
       "card_implementation.runner_installed_connection_trash_bad_publicity",

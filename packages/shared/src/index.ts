@@ -9958,7 +9958,7 @@ const PROTEUS_VISIBLE_BASELINE_CARDS: CardDefinition[] = [
     type: "event",
     subtypes: ["bad_publicity"],
     implementationStatus: "playable_mvp",
-    cost: 3,
+    cost: 4,
     rulesText:
       "Play only if you have at least two connections in play. Trash two connections. Give the Corp 1 Bad Publicity point. If the Corp has 7 or more Bad Publicity points, it loses the game, even if it fulfills victory conditions at the same time.",
     mechanics: [
