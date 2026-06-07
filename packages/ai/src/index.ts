@@ -3382,7 +3382,11 @@ export function chooseRunnerAction(
   const legacyDecision = shouldUsePlanAction
     ? chooseRunnerPlanAction(input, baselineDecision)
     : baselineDecision;
-  return chooseSemanticRuntimeAction(input, legacyDecision, options);
+  const guardedLegacyDecision = runnerSelfDamageGuardedDecision(
+    input,
+    legacyDecision,
+  );
+  return chooseSemanticRuntimeAction(input, guardedLegacyDecision, options);
 }
 
 export function chooseRunnerBaselineAction(input: AiDecisionInput): AiDecision {
@@ -3401,6 +3405,29 @@ type SemanticRuntimeExclusion = {
   reason: string;
 };
 
+type SelfDamageSurvivalAssessment = {
+  sourceDefinitionId: string;
+  handBeforeAction: number;
+  handAfterActionCost: number;
+  selfDamageAmount: number;
+  selfDamageType: "net" | "meat" | "brain" | "core" | "unknown";
+  preventable: boolean | "unknown";
+  effectiveSelfDamage: number;
+  survivesSelfDamage: boolean;
+  immediateWinByAction: boolean;
+  badPublicityBefore?: number;
+  badPublicityAdded?: number;
+  evidence: string[];
+};
+
+type SelfDamageActionEvidence = {
+  amount: number;
+  type: SelfDamageSurvivalAssessment["selfDamageType"];
+  preventable: SelfDamageSurvivalAssessment["preventable"];
+  badPublicityAdded?: number;
+  evidence: string[];
+};
+
 type TacticalPlanMappedChoiceResult = {
   choice?: SemanticRuntimeChoice;
   overrideChoice?: SemanticRuntimeChoice;
@@ -3410,6 +3437,8 @@ type TacticalPlanMappedChoiceResult = {
 
 // Tactical plans may break close ties, but a clear semantic gap belongs to the current board.
 const PLAN_MAPPED_CHOICE_MAX_SCORE_GAP = 600;
+const BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI = 7;
+const FAKED_HIT_CARD_ID = "onr_proteus_108_faked-hit";
 
 function chooseSemanticRuntimeAction(
   input: AiDecisionInput,
@@ -3517,8 +3546,11 @@ function chooseSemanticRuntimeAction(
     mappedChoice.overriddenMappedChoice &&
     mappedChoice.overrideChoice,
   );
+  const selfDamageImmediateWinChoice =
+    runnerSelfDamageImmediateWinSemanticChoice(input, choices);
   const initialChoice =
     reactiveChoice ??
+    selfDamageImmediateWinChoice ??
     mappedChoice.choice ??
     (planMappingOverridden && mappedChoice.overrideChoice
       ? semanticRuntimeChoiceWithEvidence(mappedChoice.overrideChoice, {
@@ -3636,6 +3668,29 @@ function bestSemanticRuntimeChoiceForTacticalPlanOverride(
     (choice) => !tacticalPlanBlocksSemanticChoice(planRuntime, choice),
   );
   return bestSemanticRuntimeChoice(viableChoices);
+}
+
+function runnerSelfDamageImmediateWinSemanticChoice(
+  input: AiDecisionInput,
+  choices: readonly SemanticRuntimeChoice[],
+): SemanticRuntimeChoice | undefined {
+  if (input.side !== "runner") return undefined;
+  const choice = bestSemanticRuntimeChoice(
+    choices.filter((candidate) => {
+      if (candidate.exclusion) return false;
+      return runnerSelfDamageSurvivalAssessment(
+        input,
+        candidate.action,
+      )?.immediateWinByAction;
+    }),
+  );
+  if (!choice) return undefined;
+  return semanticRuntimeChoiceWithEvidence(choice, {
+    reasonCode: "runner.self_damage.immediate_win",
+    explanation:
+      "Der Runner darf eine Self-Damage-Aktion waehlen, wenn dieselbe Aktion sofort gewinnt.",
+    evidence: ["self_damage_immediate_win_selected:true"],
+  });
 }
 
 function tacticalPlanBlocksSemanticChoice(
@@ -4850,6 +4905,9 @@ function semanticRuntimeActionExclusion(
     action,
   );
   if (planMemoryExclusion) return planMemoryExclusion;
+  const selfDamageSurvivalExclusion =
+    semanticRuntimeRunnerSelfDamageSurvivalExclusion(input, action);
+  if (selfDamageSurvivalExclusion) return selfDamageSurvivalExclusion;
   const encounterExclusion = semanticRuntimeRunnerEncounterActionExclusion(
     input,
     action,
@@ -4893,6 +4951,21 @@ function semanticRuntimeActionExclusion(
       ? "Run-Ziel nicht erreichbar"
       : "Run-Ziel nicht bezahlbar",
     reason: semanticRuntimeKnownIcePathReason(assessment, server.id),
+  };
+}
+
+function semanticRuntimeRunnerSelfDamageSurvivalExclusion(
+  input: AiDecisionInput,
+  action: LegalAction,
+): SemanticRuntimeExclusion | undefined {
+  const assessment = runnerSelfDamageSurvivalAssessment(input, action);
+  if (!assessment) return undefined;
+  if (assessment.survivesSelfDamage || assessment.immediateWinByAction)
+    return undefined;
+  return {
+    key: "self_damage_flatline_risk",
+    label: "Self-Damage-Flatline-Risiko",
+    reason: sortedUnique(assessment.evidence).join("|"),
   };
 }
 
@@ -6605,14 +6678,21 @@ function semanticRuntimeRunnerEvidence(
     input,
     action,
   );
+  const selfDamageSurvivalEvidence =
+    runnerSelfDamageSurvivalAssessment(input, action)?.evidence ?? [];
   if (sacrificeAssessment?.memoryRequired) {
     return [
       `program_sacrifice_penalty:${runnerProgramInstallDisplacementPenalty(sacrificeAssessment)}`,
       ...sacrificeAssessment.evidence,
       ...actionMuPressureEvidence,
+      ...selfDamageSurvivalEvidence,
     ];
   }
-  if (actionMuPressureEvidence.length > 0) return actionMuPressureEvidence;
+  if (
+    actionMuPressureEvidence.length > 0 ||
+    selfDamageSurvivalEvidence.length > 0
+  )
+    return [...actionMuPressureEvidence, ...selfDamageSurvivalEvidence];
   if (
     action.type !== "trash_accessed_card" &&
     action.type !== "decline_trash"
@@ -6620,6 +6700,274 @@ function semanticRuntimeRunnerEvidence(
     return [];
   }
   return runnerRemoteTrashAccessContext(input, action).evidence;
+}
+
+function runnerSelfDamageGuardedDecision(
+  input: AiDecisionInput,
+  decision: AiDecision,
+): AiDecision {
+  if (input.side !== "runner") return decision;
+  const selectedAction = input.legalActions.find(
+    (action) => action.actionId === decision.actionId,
+  );
+  if (!selectedAction) return decision;
+  const assessment = runnerSelfDamageSurvivalAssessment(input, selectedAction);
+  if (!assessment) return decision;
+  if (assessment.survivesSelfDamage) {
+    return decisionWithSelfDamageEvidence(decision, assessment);
+  }
+  if (assessment.immediateWinByAction)
+    return decisionWithSelfDamageEvidence(decision, assessment);
+
+  const fallbackChoice = scoreActions(input, "runner")
+    .filter((choice): choice is RankedChoice & { action: LegalAction } => {
+      if (!choice.action) return false;
+      const candidateAssessment = runnerSelfDamageSurvivalAssessment(
+        input,
+        choice.action,
+      );
+      return (
+        !candidateAssessment ||
+        candidateAssessment.survivesSelfDamage ||
+        candidateAssessment.immediateWinByAction
+      );
+    })
+    .sort(
+      (left, right) =>
+        right.score - left.score || compareAction(left.action, right.action),
+    )[0];
+
+  if (!fallbackChoice?.action) {
+    return {
+      ...decision,
+      evidence: scrubEvidence([
+        ...(decision.evidence ?? []),
+        ...assessment.evidence,
+        "self_damage_guard_no_safe_legal_alternative",
+      ]),
+    };
+  }
+
+  const selectedChoices = selectedChoicesForDecision(
+    input,
+    fallbackChoice.action,
+  );
+  return {
+    actionId: fallbackChoice.action.actionId,
+    ...(selectedChoices ? { selectedChoices } : {}),
+    reasonCode: "runner.self_damage.safe_alternative",
+    explanation:
+      "Der Runner vermeidet eine legale Self-Damage-Aktion, die ohne unmittelbaren Sieg zur Flatline fuehren wuerde.",
+    consideredActionIds: input.legalActions
+      .map((action) => action.actionId)
+      .sort(),
+    fallbackUsed: false,
+    evidence: scrubEvidence([
+      ...(decision.evidence ?? []),
+      ...assessment.evidence,
+      "self_damage_guarded_legacy_decision:true",
+      `self_damage_guard_fallback_action:${fallbackChoice.action.actionId}`,
+      ...fallbackChoice.evidence,
+    ]),
+    ...(decision.decisionDebug
+      ? { decisionDebug: decision.decisionDebug }
+      : {}),
+    ...(decision.timeoutUsed !== undefined
+      ? { timeoutUsed: decision.timeoutUsed }
+      : {}),
+    profileId: input.profileId,
+    difficulty: input.difficulty,
+    ...(fallbackChoice.confidence !== undefined
+      ? { confidence: fallbackChoice.confidence }
+      : decision.confidence !== undefined
+        ? { confidence: decision.confidence }
+        : {}),
+    reason: "runner.self_damage.safe_alternative",
+  };
+}
+
+function decisionWithSelfDamageEvidence(
+  decision: AiDecision,
+  assessment: SelfDamageSurvivalAssessment,
+): AiDecision {
+  return {
+    ...decision,
+    evidence: scrubEvidence([
+      ...(decision.evidence ?? []),
+      ...assessment.evidence,
+    ]),
+  };
+}
+
+function runnerSelfDamageSurvivalAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+): SelfDamageSurvivalAssessment | undefined {
+  if (input.side !== "runner" || action.side !== "runner") return undefined;
+  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
+  if (!sourceDefinitionId) return undefined;
+  const selfDamage = selfDamageEvidenceForAction(
+    input,
+    action,
+    sourceDefinitionId,
+  );
+  if (!selfDamage) return undefined;
+
+  const handBeforeAction = input.playerView.own.gripOrHq.length;
+  const handAfterActionCost =
+    handBeforeAction - (actionConsumesOwnRunnerHandCard(input, action) ? 1 : 0);
+  const badPublicityBefore = visibleCorpBadPublicity(input);
+  const badPublicityAdded = selfDamage.badPublicityAdded ?? 0;
+  const immediateWinByAction =
+    badPublicityAdded > 0 &&
+    badPublicityBefore + badPublicityAdded >=
+      BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI;
+  const effectiveSelfDamage = selfDamage.amount;
+  const survivesSelfDamage = handAfterActionCost >= effectiveSelfDamage;
+  const evidence = [
+    "self_damage_survival_assessed:true",
+    `self_damage_source:${sourceDefinitionId}`,
+    `self_damage_hand_before:${handBeforeAction}`,
+    `self_damage_hand_after_action_cost:${handAfterActionCost}`,
+    `self_damage_amount:${selfDamage.amount}`,
+    `self_damage_type:${selfDamage.type}`,
+    `self_damage_preventable:${selfDamage.preventable}`,
+    `self_damage_effective:${effectiveSelfDamage}`,
+    `self_damage_survives:${survivesSelfDamage}`,
+    `self_damage_immediate_win:${immediateWinByAction}`,
+    ...(badPublicityAdded > 0
+      ? [
+          `self_damage_bad_publicity_before:${badPublicityBefore}`,
+          `self_damage_bad_publicity_added:${badPublicityAdded}`,
+        ]
+      : []),
+    ...(immediateWinByAction ? ["lethal_but_winning_closeout"] : []),
+    ...selfDamage.evidence,
+  ];
+
+  return {
+    sourceDefinitionId,
+    handBeforeAction,
+    handAfterActionCost,
+    selfDamageAmount: selfDamage.amount,
+    selfDamageType: selfDamage.type,
+    preventable: selfDamage.preventable,
+    effectiveSelfDamage,
+    survivesSelfDamage,
+    immediateWinByAction,
+    ...(badPublicityAdded > 0 ? { badPublicityBefore, badPublicityAdded } : {}),
+    evidence,
+  };
+}
+
+function selfDamageEvidenceForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  sourceDefinitionId: string,
+): SelfDamageActionEvidence | undefined {
+  if (
+    sourceDefinitionId === FAKED_HIT_CARD_ID &&
+    action.type === "play_event"
+  ) {
+    return {
+      amount: 2,
+      type: "core",
+      preventable: false,
+      badPublicityAdded: 1,
+      evidence: [
+        "self_damage_contract:faked_hit",
+        "self_damage_evidence:docs/reviews/ai/faked-hit-self-damage-semantics-review-2026-06-08.md",
+      ],
+    };
+  }
+
+  const hint = AI_HINTS.get(sourceDefinitionId);
+  const effect = hint?.effects?.find((candidate) => {
+    const target = stringRecordValue(candidate, "target");
+    return (
+      candidate.kind === "damage" &&
+      candidate.scope === "runner" &&
+      candidate.timing === "action" &&
+      typeof candidate.amount === "number" &&
+      (target?.includes("self") === true ||
+        target?.includes("self_inflicted") === true)
+    );
+  });
+  if (!effect || typeof effect.amount !== "number") return undefined;
+
+  return {
+    amount: Math.max(0, Math.floor(effect.amount)),
+    type: damageTypeFromHintResource(effect.resource),
+    preventable: booleanRecordValue(effect, "preventable") ?? "unknown",
+    evidence: [
+      "self_damage_contract:structured_ai_hint",
+      `self_damage_hint_card:${sourceDefinitionId}`,
+    ],
+  };
+}
+
+function actionConsumesOwnRunnerHandCard(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (
+    action.type !== "play_event" &&
+    action.type !== "install_card" &&
+    action.type !== "activated_card_ability" &&
+    action.type !== "trigger_ability"
+  ) {
+    return false;
+  }
+  return input.playerView.own.gripOrHq.some(
+    (card) => card.known && card.instanceId === action.source,
+  );
+}
+
+function visibleCorpBadPublicity(input: AiDecisionInput): number {
+  const identity =
+    input.side === "runner"
+      ? input.playerView.opponent.identity
+      : input.playerView.own.identity;
+  const amount = identity.counterDisplays?.find(
+    (counter) =>
+      counter.id === "bad_publicity" ||
+      counter.counterType === "bad_publicity" ||
+      counter.displayKind === "bad_publicity",
+  )?.amount;
+  return typeof amount === "number" && Number.isFinite(amount)
+    ? Math.max(0, Math.floor(amount))
+    : 0;
+}
+
+function damageTypeFromHintResource(
+  resource: string | undefined,
+): SelfDamageSurvivalAssessment["selfDamageType"] {
+  switch (resource) {
+    case "net_damage":
+      return "net";
+    case "meat_damage":
+      return "meat";
+    case "brain_damage":
+      return "brain";
+    default:
+      return "unknown";
+  }
+}
+
+function stringRecordValue(
+  value: unknown,
+  key: string,
+): string | undefined {
+  const record = value as Record<string, unknown>;
+  return typeof record[key] === "string" ? record[key] : undefined;
+}
+
+function booleanRecordValue(
+  value: unknown,
+  key: string,
+): boolean | undefined {
+  const record = value as Record<string, unknown>;
+  return typeof record[key] === "boolean" ? record[key] : undefined;
 }
 
 function semanticRuntimeCorpEvidence(

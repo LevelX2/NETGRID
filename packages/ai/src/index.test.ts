@@ -21,6 +21,7 @@ import {
   replayEvents,
 } from "@netgrid/engine";
 import {
+  emptyRunnerGripForTest,
   MECHANIC_SMOKE_DECKS,
   v105kCardReleaseGame,
 } from "../../engine/src/test-fixtures/mechanic-smoke-fixtures";
@@ -11351,6 +11352,106 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(tacticalDebug).toContain("blockers=too_expensive");
     expect(tacticalDebug).toContain("Known remote has no current payoff:-680");
     expect(assertAiInputIsSideSafe(input)).toBe(true);
+  });
+
+  it.each([
+    { seed: "ai-faked-hit-self-damage-empty-hand", extraHandCards: 0 as const },
+    {
+      seed: "ai-faked-hit-self-damage-one-extra-card",
+      extraHandCards: 1 as const,
+    },
+  ])(
+    "blocks Faked Hit when self-damage would flatline without closeout: $seed",
+    ({ seed, extraHandCards }) => {
+      process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+      const input = fakedHitSelfDamageInput(seed, {
+        badPublicityBefore: 0,
+        extraHandCards,
+      });
+      const fakedHit = fakedHitAction(input);
+      const gainCredit = input.legalActions.find(
+        (action) => action.type === "gain_credit",
+      );
+      expect(fakedHit).toBeDefined();
+      expect(gainCredit).toBeDefined();
+      if (!fakedHit || !gainCredit)
+        throw new Error("Missing Faked Hit guard fixture actions");
+
+      const scopedInput = scopedLegalActions(input, [fakedHit, gainCredit]);
+      const decision = chooseRunnerAction(scopedInput, {
+        persistTacticalPlanMemory: false,
+      });
+
+      expect(decision.actionId).toBe(gainCredit.actionId);
+      expect(
+        scopedInput.legalActions.some(
+          (action) => action.actionId === decision.actionId,
+        ),
+      ).toBe(true);
+      const debug = JSON.stringify(decision.decisionDebug);
+      expect(debug).toContain("self_damage_flatline_risk");
+      expect(debug).toContain(
+        `self_damage_hand_after_action_cost:${extraHandCards}`,
+      );
+      expect(debug).toContain("self_damage_survives:false");
+      expect(JSON.stringify(decision)).not.toMatch(
+        /cardInstances|privatePayload|corp\.hq|corp\.rd/i,
+      );
+    },
+  );
+
+  it("keeps Faked Hit available when enough hand cards survive the self-damage", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = fakedHitSelfDamageInput(
+      "ai-faked-hit-self-damage-survives",
+      {
+        badPublicityBefore: 0,
+        extraHandCards: 2,
+      },
+    );
+    const fakedHit = fakedHitAction(input);
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(fakedHit).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!fakedHit || !gainCredit)
+      throw new Error("Missing Faked Hit survival fixture actions");
+
+    const scopedInput = scopedLegalActions(input, [fakedHit, gainCredit]);
+    const decision = chooseRunnerAction(scopedInput, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe(fakedHit.actionId);
+    expect(decision.evidence).toContain("self_damage_survives:true");
+    expect(decision.evidence).not.toContain("semantic_excluded:true");
+  });
+
+  it("allows lethal Faked Hit when the same action reaches Bad Publicity 7", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = fakedHitSelfDamageInput("ai-faked-hit-bp-closeout", {
+      badPublicityBefore: 6,
+      extraHandCards: 0,
+    });
+    const fakedHit = fakedHitAction(input);
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(fakedHit).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!fakedHit || !gainCredit)
+      throw new Error("Missing Faked Hit closeout fixture actions");
+
+    const scopedInput = scopedLegalActions(input, [fakedHit, gainCredit]);
+    const decision = chooseRunnerAction(scopedInput, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe(fakedHit.actionId);
+    expect(decision.evidence).toContain("self_damage_survives:false");
+    expect(decision.evidence).toContain("self_damage_immediate_win:true");
+    expect(decision.evidence).toContain("lethal_but_winning_closeout");
   });
 
   it("lets a clearly stronger semantic action override a mapped tactical plan action", () => {
@@ -25686,6 +25787,86 @@ function knownRemoteRootMemoryInput(
         },
       ),
     ],
+  };
+}
+
+function fakedHitSelfDamageInput(
+  seed: string,
+  options: {
+    badPublicityBefore: number;
+    extraHandCards: 0 | 1 | 2;
+  },
+): ReturnType<typeof buildAiDecisionInput> {
+  const state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeck: {
+        id: `${seed}_runner`,
+        name: "AI Faked Hit Guard Runner",
+        side: "runner",
+        identity: "runner_identity_001",
+        cards: [
+          { id: "onr_proteus_108_faked-hit", quantity: 1 },
+          { id: "simple_economy_event", quantity: 4 },
+          { id: "simple_run_event", quantity: 4 },
+          { id: "simple_fracter", quantity: 2 },
+        ],
+      },
+      corpDeck: {
+        id: `${seed}_corp`,
+        name: "AI Faked Hit Guard Corp",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "simple_agenda", quantity: 6 },
+          { id: "simple_barrier_ice", quantity: 4 },
+          { id: "simple_economy_operation", quantity: 8 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  emptyRunnerGripForTest(state);
+  moveRunnerCardToGrip(state, "onr_proteus_108_faked-hit");
+  if (options.extraHandCards >= 1) {
+    moveRunnerCardToGrip(state, "simple_economy_event");
+  }
+  if (options.extraHandCards >= 2) {
+    moveRunnerCardToGrip(state, "simple_run_event");
+  }
+  state.runner.credits = 10;
+  state.runner.clicks = 4;
+  state.corp.badPublicity = options.badPublicityBefore;
+
+  return buildAiDecisionInput(state, "runner", {
+    difficulty: "normal",
+    profileId: "runner-ai-v1.4.2-normal",
+    decisionId: `${seed}:faked-hit-guard`,
+    actionNumber: 1,
+  });
+}
+
+function fakedHitAction(
+  input: ReturnType<typeof buildAiDecisionInput>,
+): LegalAction | undefined {
+  return input.legalActions.find(
+    (action) =>
+      action.type === "play_event" &&
+      sourceDefinitionFromInput(input, action) === "onr_proteus_108_faked-hit",
+  );
+}
+
+function scopedLegalActions(
+  input: ReturnType<typeof buildAiDecisionInput>,
+  legalActions: LegalAction[],
+): ReturnType<typeof buildAiDecisionInput> {
+  return {
+    ...input,
+    legalActions,
+    playerView: {
+      ...input.playerView,
+      legalActions,
+    },
   };
 }
 

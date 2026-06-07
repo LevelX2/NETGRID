@@ -1,20 +1,28 @@
 ---
 activityId: act-2026-06-07-ai-self-damage-survival-guard
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: critical
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-06-07-ai-faked-hit-self-damage-semantics
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+  - packages/ai/src/index.test.ts
+  - packages/ai/src/input-dto.ts
+  - docs/reviews/ai/faked-hit-self-damage-semantics-review-2026-06-08.md
+checks:
+  - corepack pnpm --filter @netgrid/ai exec tsc --noEmit
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "Faked Hit"
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts
+  - git diff --check
 ---
 
 # Self-Damage-Survival-Guard für Runner-Actions
@@ -66,12 +74,12 @@ Die Runner-KI darf keine eigene Aktion wählen, die durch Self-Damage unmittelba
 
 ## Akzeptanzkriterien
 
-- [ ] `Faked Hit` mit nur `Faked Hit` auf der Hand und Korp Bad Publicity < 6 wird nicht gewählt.
-- [ ] `Faked Hit` mit genau 1 zusätzlicher Handkarte und Korp Bad Publicity < 6 wird nicht gewählt, weil 2 Damage nicht überlebt werden.
-- [ ] `Faked Hit` mit 2+ verfügbaren Handkarten und Korp Bad Publicity < 6 bleibt legal, wird aber nicht durch den Survival-Guard blockiert; weitere Bad-Publicity-Relevanzbewertung entscheidet den Nutzen.
-- [ ] `Faked Hit` von Korp Bad Publicity 6 auf 7 darf als Immediate-Win-/Closeout-Aktion gewählt werden, sofern der Game-End-Vertrag bestätigt wird.
-- [ ] Andere Self-Damage-Actions, soweit side-sicher erkennbar, werden mit derselben Survival-Bewertung behandelt oder als Folgepakete dokumentiert.
-- [ ] Finale Runner-Action stammt aus `input.legalActions`.
+- [x] `Faked Hit` mit nur `Faked Hit` auf der Hand und Korp Bad Publicity < 6 wird nicht gewählt.
+- [x] `Faked Hit` mit genau 1 zusätzlicher Handkarte und Korp Bad Publicity < 6 wird nicht gewählt, weil 2 Damage nicht überlebt werden.
+- [x] `Faked Hit` mit 2+ verfügbaren Handkarten und Korp Bad Publicity < 6 bleibt legal, wird aber nicht durch den Survival-Guard blockiert; weitere Bad-Publicity-Relevanzbewertung entscheidet den Nutzen.
+- [x] `Faked Hit` von Korp Bad Publicity 6 auf 7 darf als Immediate-Win-/Closeout-Aktion gewählt werden, sofern der Game-End-Vertrag bestätigt wird.
+- [x] Andere Self-Damage-Actions, soweit side-sicher erkennbar, werden mit derselben Survival-Bewertung behandelt oder als Folgepakete dokumentiert.
+- [x] Finale Runner-Action stammt aus `input.legalActions`.
 
 ## Umsetzungshinweise
 
@@ -84,4 +92,6 @@ Die Runner-KI darf keine eigene Aktion wählen, die durch Self-Damage unmittelba
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt. Die Runner-KI bewertet eigene Self-Damage-Aktionen jetzt vor der finalen Auswahl side-sicher auf Handbestand nach Aktionskosten, Damage-Menge, Damage-Typ, Preventable-Status und unmittelbaren Bad-Publicity-Closeout. Nicht überlebte Self-Damage-Aktionen werden in Legacy- und Semantic-Runtime-Pfaden gegen sichere legale Alternativen geschützt; ein sofortiger Gewinn bleibt mit Evidence `lethal_but_winning_closeout` erlaubt.
+
+Für `Faked Hit` ist der belegte Spezialfall als enger Kartenadapter hinterlegt. Zusätzlich lässt die AI-Input-Sanitisierung öffentliche `counterDisplays` durch, damit sichtbare Bad Publicity ohne private State-Daten verfügbar ist.

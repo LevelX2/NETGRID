@@ -3,6 +3,7 @@ import {
   type AiDecisionInput,
   type AiDifficulty,
   type AiDeckDoctrineProfile,
+  type CounterDisplay,
   type ChoiceRequirement,
   type Cost,
   type LegalAction,
@@ -364,6 +365,13 @@ function sanitizePlayerView(view: PlayerView): PlayerView {
       label: server.label,
       ice: server.ice.map(sanitizeVisibleCard),
       root: server.root.map(sanitizeVisibleCard),
+      ...(server.counterDisplays
+        ? {
+            counterDisplays: server.counterDisplays.map(
+              sanitizeCounterDisplay,
+            ),
+          }
+        : {}),
     })),
     ...(view.specialZones
       ? {
@@ -439,11 +447,30 @@ function sanitizeVisibleCard(card: VisibleCard): VisibleCard {
     ...(card.agendaPoints !== undefined ? { agendaPoints: card.agendaPoints } : {}),
     ...(card.trashCost !== undefined ? { trashCost: card.trashCost } : {}),
     ...(card.counters !== undefined ? { counters: { ...card.counters } } : {}),
+    ...(card.counterDisplays !== undefined
+      ? { counterDisplays: card.counterDisplays.map(sanitizeCounterDisplay) }
+      : {}),
     ...(card.hostedOn !== undefined ? { hostedOn: card.hostedOn } : {}),
     ...(card.owner !== undefined ? { owner: card.owner } : {}),
     ...(card.controller !== undefined ? { controller: card.controller } : {}),
     ...(card.effectiveRunQuote
       ? { effectiveRunQuote: sanitizeVisibleEffectiveIceRunQuote(card.effectiveRunQuote) }
+      : {}),
+  };
+}
+
+function sanitizeCounterDisplay(display: CounterDisplay): CounterDisplay {
+  return {
+    id: display.id,
+    amount: display.amount,
+    displayKind: display.displayKind,
+    label: display.label,
+    ariaLabel: display.ariaLabel,
+    ...(display.counterType !== undefined
+      ? { counterType: display.counterType }
+      : {}),
+    ...(display.usageHint !== undefined
+      ? { usageHint: display.usageHint }
       : {}),
   };
 }
