@@ -192,6 +192,186 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(evaluation.evidence).toContain("installed_run_payoff:rd:multiaccess");
   });
 
+  it("ranks HQ payoff above neutral R&D when only HQ Interface is installed", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [server("hq"), server("rd")],
+      legalActions: [runAction("run-hq", "hq"), runAction("run-rd", "rd")],
+      rig: [
+        visibleCard("hq-interface", {
+          definitionId: "onr_v1_129_hq-interface",
+          title: "HQ Interface",
+          type: "hardware",
+        }),
+      ],
+    });
+
+    const evaluations = evaluateRunnerRunTargets({ input });
+
+    expect(evaluations[0]?.targetServerId).toBe("hq");
+    expect(evaluations[0]?.evidence).toContain(
+      "installed_run_payoff:hq:multiaccess",
+    );
+    expect(evaluations[1]?.targetServerId).toBe("rd");
+  });
+
+  it("ranks R&D payoff above neutral HQ when only R&D Interface is installed", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [server("hq"), server("rd")],
+      legalActions: [runAction("run-hq", "hq"), runAction("run-rd", "rd")],
+      rig: [
+        visibleCard("rd-interface", {
+          definitionId: "onr_v1_139_r-and-d-interface",
+          title: "R&D Interface",
+          type: "hardware",
+        }),
+      ],
+    });
+
+    const evaluations = evaluateRunnerRunTargets({ input });
+
+    expect(evaluations[0]?.targetServerId).toBe("rd");
+    expect(evaluations[0]?.evidence).toContain(
+      "installed_run_payoff:rd:multiaccess",
+    );
+    expect(evaluations[1]?.targetServerId).toBe("hq");
+  });
+
+  it("keeps HQ and R&D installed payoffs visible when both are present", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [server("hq"), server("rd")],
+      legalActions: [runAction("run-hq", "hq"), runAction("run-rd", "rd")],
+      rig: [
+        visibleCard("hq-interface", {
+          definitionId: "onr_v1_129_hq-interface",
+          title: "HQ Interface",
+          type: "hardware",
+        }),
+        visibleCard("rd-interface", {
+          definitionId: "onr_v1_139_r-and-d-interface",
+          title: "R&D Interface",
+          type: "hardware",
+        }),
+      ],
+    });
+
+    const evaluations = evaluateRunnerRunTargets({ input });
+    const hq = evaluations.find((evaluation) => evaluation.targetServerId === "hq");
+    const rd = evaluations.find((evaluation) => evaluation.targetServerId === "rd");
+
+    expect(hq?.accessPayoff).toBe("access_bonus");
+    expect(rd?.accessPayoff).toBe("access_bonus");
+    expect(hq?.evidence).toContain("installed_run_payoff:hq:multiaccess");
+    expect(rd?.evidence).toContain("installed_run_payoff:rd:multiaccess");
+  });
+
+  it("lets a known R&D agenda beat installed HQ multiaccess pressure", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [server("hq"), server("rd")],
+      legalActions: [runAction("run-hq", "hq"), runAction("run-rd", "rd")],
+      rig: [
+        visibleCard("hq-interface", {
+          definitionId: "onr_v1_129_hq-interface",
+          title: "HQ Interface",
+          type: "hardware",
+        }),
+      ],
+    });
+
+    const evaluations = evaluateRunnerRunTargets({
+      input,
+      beliefState: beliefWithRndTop({
+        freshness: "stale_known_same_top",
+        knownTopDefinitionId: "onr_v1_203_hostile-takeover",
+        knownTopIsAgenda: true,
+      }),
+    });
+
+    expect(evaluations[0]?.targetServerId).toBe("rd");
+    expect(evaluations[0]?.accessPayoff).toBe("agenda");
+    expect(evaluations[1]?.targetServerId).toBe("hq");
+  });
+
+  it("lets a remote score threat oversteer central future payoff", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [
+        server("hq"),
+        server("remote_1", {
+          root: [
+            visibleCard("remote-root-1", {
+              known: false,
+              advancementCounters: 2,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [
+        runAction("run-hq", "hq"),
+        runAction("run-remote-1", "remote_1"),
+      ],
+      rig: [
+        visibleCard("boardwalk", {
+          definitionId: "onr_v1_008_boardwalk",
+          title: "Boardwalk",
+          type: "program",
+          subtypes: ["virus"],
+        }),
+      ],
+    });
+
+    const evaluations = evaluateRunnerRunTargets({ input });
+
+    expect(evaluations[0]?.targetServerId).toBe("remote_1");
+    expect(evaluations[0]?.accessPayoff).toBe("score_threat");
+    expect(evaluations[1]?.targetServerId).toBe("hq");
+    expect(evaluations[1]?.evidence).toContain(
+      "installed_run_payoff:hq:future_hq_info",
+    );
+  });
+
+  it("does not turn an unreachable payoff target into a legal run choice", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [
+        server("hq", {
+          ice: [
+            visibleCard("hq-wall", {
+              definitionId: "onr_v1_279_wall-of-static",
+              title: "Wall of Static",
+              type: "ice",
+              subtypes: ["wall"],
+              known: true,
+              rezzed: true,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-hq", "hq")],
+      rig: [
+        visibleCard("hq-interface", {
+          definitionId: "onr_v1_129_hq-interface",
+          title: "HQ Interface",
+          type: "hardware",
+        }),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+    if (!evaluation) throw new Error("Expected HQ evaluation");
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "hq",
+      accessPayoff: "access_bonus",
+      pathPassability: "blocked_missing_coverage",
+      recommendation: "find_breaker_first",
+    });
+    expect(evaluation.evidence).toContain("installed_run_payoff:hq:multiaccess");
+  });
+
   it("suppresses a known remote root with no current access payoff", () => {
     const input = aiInput({
       credits: 6,
@@ -558,6 +738,7 @@ function handDevelopmentEvaluation(
 function beliefWithRndTop(params: {
   freshness: RunnerOpponentModel["rndTopFreshness"]["freshness"];
   knownTopDefinitionId?: string;
+  knownTopIsAgenda?: boolean;
 }): BeliefState {
   const rndTopFreshness: RunnerOpponentModel["rndTopFreshness"] = {
     lastKnownAccessEventId: "test-access-rd",
@@ -565,6 +746,9 @@ function beliefWithRndTop(params: {
     freshness: params.freshness,
     ...(params.knownTopDefinitionId
       ? { knownTopDefinitionId: params.knownTopDefinitionId }
+      : {}),
+    ...(params.knownTopIsAgenda !== undefined
+      ? { knownTopIsAgenda: params.knownTopIsAgenda }
       : {}),
     invalidationReasons: [],
   };

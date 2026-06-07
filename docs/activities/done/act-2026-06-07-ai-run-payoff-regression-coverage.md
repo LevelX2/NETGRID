@@ -1,20 +1,26 @@
 ---
 activityId: act-2026-06-07-ai-run-payoff-regression-coverage
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: test-quality-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-06-07
+completedAt: 2026-06-07
+branch: codex/activities-inbox-ai-run-mu
 releaseTarget:
 blockedBy:
   - act-2026-06-07-ai-run-payoff-hints-consumer
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/runner-run-target-evaluation.ts
+  - packages/ai/src/runner-run-target-evaluation.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-evaluation.test.ts
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-tactical-goals.test.ts src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts
+  - git diff --check
 ---
 
 # AI-Run-Payoff-Regression-Coverage
@@ -68,4 +74,8 @@ Die neue serverbezogene Run-Payoff-Auswertung durch fokussierte AI-Regressionen 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. Die Run-Payoff-Regressionen decken jetzt HQ- und F&E-/R&D-Payoff-Vergleiche, gleichzeitige Central-Payoffs, known-low-Dämpfung, Known-Agenda-Übersteuerung, Remote-Score-Threat-Übersteuerung, unreachbare Pfade und redigierte Evidence ab.
+
+Zusätzlich wurde der Consumer minimal ergänzt, damit künftige HQ-Info-Payoffs wie Boardwalk als `future_hq_info` bewertet werden. Die Änderung bleibt read-only und erzeugt keine Legalität.
+
+Checks: AI-Typecheck, `runner-run-target-evaluation.test.ts`, angrenzende `runner-tactical-goals.test.ts`, `tactical-plans.test.ts`, `semantic-ai-runtime-cutover.test.ts` und `git diff --check` erfolgreich.

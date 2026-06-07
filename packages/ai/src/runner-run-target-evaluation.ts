@@ -856,6 +856,15 @@ function installedRunPayoffContributionForHint(
       continue;
     }
     if (
+      effect.kind === "hq_info" &&
+      targetKind === "hq" &&
+      effect.timing === "start_of_turn"
+    ) {
+      contribution.futureSetupValue += 35;
+      contribution.evidence.push("installed_run_payoff:hq:future_hq_info");
+      continue;
+    }
+    if (
       effect.kind === "remote_tax" &&
       effectScopeMatchesTarget(effect.scope, targetKind)
     ) {
