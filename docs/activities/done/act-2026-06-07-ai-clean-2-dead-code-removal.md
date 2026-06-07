@@ -1,20 +1,24 @@
 ---
 activityId: act-2026-06-07-ai-clean-2-dead-code-removal
-status: inbox
+status: done
 kind: cleanup
 area: ai
 priority: high
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
+startedAt: 2026-06-07
+completedAt: 2026-06-07
 branch:
 releaseTarget: ai-clean-legacy-runtime-cleanup
 blockedBy:
   - act-2026-06-07-ai-clean-1-legacy-inventory
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/reviews/ai/ai-clean-1-legacy-ai-code-inventory-2026-06-07.md
+checks:
+  - rg -n "Bestätigte `dead_code`|Bestätigte `remove_candidate`|AI-CLEAN-2" docs/reviews/ai/ai-clean-1-legacy-ai-code-inventory-2026-06-07.md
+  - corepack pnpm exec prettier --check docs/activities/done/act-2026-06-07-ai-clean-2-dead-code-removal.md
+  - git diff --check -- docs/activities/done/act-2026-06-07-ai-clean-2-dead-code-removal.md docs/activities/inbox/act-2026-06-07-ai-clean-2-dead-code-removal.md
 ---
 
 # AI-CLEAN-2: Eindeutig tote Legacy-KI-Pfade entfernen
@@ -62,4 +66,4 @@ Nach dem AI-CLEAN-1-Inventar sollen nur die KI-Pfade entfernt werden, die eindeu
 
 ## Ergebnisnotiz
 
-Noch offen.
+AI-CLEAN-1 bestätigt keine eindeutig toten `dead_code`-Pfade und keine sicheren `remove_candidate`-Kandidaten auf Codeebene. Deshalb wurde in diesem Paket bewusst kein Code gelöscht. Legacy-Notaus, No-Candidate-Fallback, diagnostische Profile, Tests und erklärende Artefakte bleiben unverändert. `@netgrid/ai`-Checks wurden begründet ausgelassen, weil keine AI-Code-Entfernung oder Codeänderung vorgenommen wurde; geprüft wurden die Review-Evidence, Markdown-Format und `git diff --check`.
