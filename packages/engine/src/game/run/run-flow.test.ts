@@ -170,6 +170,40 @@ describe("MVP 0.97 Run, Jack-out, Breach and Multiaccess", () => {
     expect(state.run).toBeUndefined();
   });
 
+  it("keeps the R&D origin on accessed-card trash public events", () => {
+    let state = toRunnerTurn(v097RunGame("v097-rd-trash-origin"));
+    state.runner.credits = 5;
+    const assetId = putCorpCardOnTopOfRd(state, "simple_economy_asset");
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      cardDefinitionId: "simple_economy_asset",
+      serverLabel: "R&D",
+    });
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "trash_accessed_card",
+    );
+
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trash_accessed_card",
+      cardDefinitionId: "simple_economy_asset",
+      serverLabel: "R&D",
+    });
+    expect(state.corp.archives).toContain(assetId);
+    expect(state.run).toBeUndefined();
+  });
+
   it("uses seeded HQ multiaccess without replacement and keeps the queue hidden before access", () => {
     let state = toRunnerTurn(v097RunGame("v097-hq-multiaccess"));
     state.runner.credits = 5;

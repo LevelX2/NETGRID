@@ -523,7 +523,7 @@ function payoffForTarget(
       ),
     );
   }
-  if (targetServerId === "rd") {
+  if (targetServerId === "hq" || targetServerId === "rd") {
     return centralPayoffToRunTarget(
       evaluateKnownCentralAccessPayoff(
         params.input,

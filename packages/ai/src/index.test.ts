@@ -876,10 +876,7 @@ describe("MVP 0.3 AI controller contract", () => {
     const dropp = runtimeVisibleBreaker(cardsById["onr_v1_019_dropp"]);
 
     expect(
-      canBreakerDefinitionBreakIce(
-        "onr_v1_019_dropp",
-        "onr_v1_237_data-wall",
-      ),
+      canBreakerDefinitionBreakIce("onr_v1_019_dropp", "onr_v1_237_data-wall"),
     ).toBe(false);
     expect(
       minimumCreditsToBreakEndTheRunSubroutines(
@@ -1489,8 +1486,7 @@ describe("MVP 0.3 AI controller contract", () => {
     state = apply(
       state,
       "corp",
-      (action) =>
-        action.type === "rez_ice" && action.source === washedUpId,
+      (action) => action.type === "rez_ice" && action.source === washedUpId,
     );
     expect(state.run?.encounteredIceId).toBe(washedUpId);
     expect(state.runner.rig.programs).toContain(decoderId);
@@ -1514,13 +1510,19 @@ describe("MVP 0.3 AI controller contract", () => {
     );
     expect(selectedDecision).toBeDefined();
     if (!selectedDecision) throw new Error("Missing selected action");
-    expect(selectedDecision.costs.some((cost) => cost.credits === 1)).toBe(false);
+    expect(selectedDecision.costs.some((cost) => cost.credits === 1)).toBe(
+      false,
+    );
     expect(decision.reasonCode).toMatch(/^runner\./);
 
-    state = apply(state, "runner", (action) =>
-      action.actionId === selectedDecision.actionId,
+    state = apply(
+      state,
+      "runner",
+      (action) => action.actionId === selectedDecision.actionId,
     );
-    expect(selectedDecision.costs.some((cost) => cost.credits === 1)).toBe(false);
+    expect(selectedDecision.costs.some((cost) => cost.credits === 1)).toBe(
+      false,
+    );
     if (state.run?.phase === "encounter_ice") {
       expect(state.run.encounteredIceId === washedUpId).toBe(true);
       expect(
@@ -1581,8 +1583,7 @@ describe("MVP 0.3 AI controller contract", () => {
     state = apply(
       state,
       "corp",
-      (action) =>
-        action.type === "rez_ice" && action.source === washedUpId,
+      (action) => action.type === "rez_ice" && action.source === washedUpId,
     );
     expect(state.run?.encounteredIceId).toBe(washedUpId);
     expect(state.runner.rig.programs).toHaveLength(0);
@@ -1601,7 +1602,8 @@ describe("MVP 0.3 AI controller contract", () => {
         ?.payOrTrashProgramSubroutinePayment,
     ).toBe("number");
     expect(
-      payForWashedUpActionFromEngine?.payload?.payOrTrashProgramSubroutineIndexes,
+      payForWashedUpActionFromEngine?.payload
+        ?.payOrTrashProgramSubroutineIndexes,
     ).toBe("0");
 
     const encounterInput = buildAiDecisionInput(state, "runner", {
@@ -1628,10 +1630,7 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(state.runner.credits).toBe(creditsBefore);
     expect(state.runner.rig.programs).toHaveLength(0);
     expect(state.runner.heap).toHaveLength(heapBefore);
-    if (
-      state.run?.phase === "encounter_ice" &&
-      state.run.encounteredIceId
-    ) {
+    if (state.run?.phase === "encounter_ice" && state.run.encounteredIceId) {
       expect(
         state.run.encounteredIceId === secondIceId ||
           state.run.encounteredIceId === washedUpId,
@@ -1696,8 +1695,7 @@ describe("MVP 0.3 AI controller contract", () => {
     state = apply(
       state,
       "corp",
-      (action) =>
-        action.type === "rez_ice" && action.source === washedUpId,
+      (action) => action.type === "rez_ice" && action.source === washedUpId,
     );
     expect(state.run?.encounteredIceId).toBe(washedUpId);
     expect(state.runner.rig.programs).toContain(decoderId);
@@ -1746,9 +1744,9 @@ describe("MVP 0.3 AI controller contract", () => {
         )}`,
       );
 
-    expect(typeof payForWashedUpAction.payload?.payOrTrashProgramSubroutineIndexes).toBe(
-      "string",
-    );
+    expect(
+      typeof payForWashedUpAction.payload?.payOrTrashProgramSubroutineIndexes,
+    ).toBe("string");
     expect(
       payForWashedUpAction.payload?.payOrTrashProgramSubroutinePayment,
     ).toBe(1);
@@ -1792,7 +1790,9 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(state.runner.heap).toHaveLength(heapBefore);
     expect(state.runner.heap).not.toContain(decoderId);
 
-    expect(decision.evidence).not.toContain("run_remainder_effect_must_break:true");
+    expect(decision.evidence).not.toContain(
+      "run_remainder_effect_must_break:true",
+    );
 
     for (let index = 0; index < 4; index += 1) {
       if (
@@ -1801,12 +1801,16 @@ describe("MVP 0.3 AI controller contract", () => {
         state.run.encounteredIceId !== washedUpId
       )
         break;
-      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
     }
     expect(state.run?.approachedIceId === secondIceId).toBe(true);
     expect(
       state.run?.encounteredIceId === secondIceId ||
-      state.run?.approachedIceId === secondIceId,
+        state.run?.approachedIceId === secondIceId,
     ).toBe(true);
   });
 
@@ -1877,8 +1881,7 @@ describe("MVP 0.3 AI controller contract", () => {
     state = apply(
       state,
       "corp",
-      (action) =>
-        action.type === "rez_ice" && action.source === washedUpId,
+      (action) => action.type === "rez_ice" && action.source === washedUpId,
     );
 
     const encounterInput = buildAiDecisionInput(state, "runner", {
@@ -1911,7 +1914,11 @@ describe("MVP 0.3 AI controller contract", () => {
         state.run.encounteredIceId !== washedUpId
       )
         break;
-      state = apply(state, "runner", (action) => action.type === "continue_run");
+      state = apply(
+        state,
+        "runner",
+        (action) => action.type === "continue_run",
+      );
     }
     expect(state.timingPoint).toBe("run.jack_out_window");
     expect(state.run?.approachedIceId).toBe(secondIceId);
@@ -11301,10 +11308,12 @@ describe("V1.4.1 plan-based Runner AI", () => {
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
     const rdRun = input.legalActions.find(
-      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
     );
     const hqRun = input.legalActions.find(
-      (action) => action.type === "start_run" && action.payload?.serverId === "hq",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
     );
     const gainCredit = input.legalActions.find(
       (action) => action.type === "gain_credit",
@@ -11326,9 +11335,10 @@ describe("V1.4.1 plan-based Runner AI", () => {
     const selected = scopedInput.legalActions.find(
       (action) => action.actionId === decision.actionId,
     );
-    const tacticalDebug = decision.decisionDebug?.detailSections
-      ?.find((section) => section.id === "tactical_plan")
-      ?.items.join("\n") ?? "";
+    const tacticalDebug =
+      decision.decisionDebug?.detailSections
+        ?.find((section) => section.id === "tactical_plan")
+        ?.items.join("\n") ?? "";
 
     expect(selected).toBeDefined();
     expect(
@@ -11340,6 +11350,122 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(tacticalDebug).toContain("status=abandoned");
     expect(tacticalDebug).toContain("blockers=too_expensive");
     expect(tacticalDebug).toContain("Known remote has no current payoff:-680");
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+  });
+
+  it("lets a clearly stronger semantic action override a mapped tactical plan action", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = runnerActionPhaseInput(
+      "ai-semantic-plan-map-clear-score-gap",
+      (state) => {
+        state.runner.credits = 6;
+        ensureRemoteServer(state, "remote_2");
+        ensureRemoteServer(state, "remote_3");
+        putCorpRootInServer(state, "remote_2", "onr_v1_317_data-masons", 0, {
+          faceup: true,
+          rezzed: true,
+        });
+        putCorpRootInServer(state, "remote_3", "simple_agenda", 0, {
+          faceup: true,
+        });
+      },
+      {
+        runnerDeck: {
+          id: "ai_semantic_plan_map_gap_runner",
+          name: "AI Semantic Plan Map Gap Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "simple_economy_event", quantity: 8 },
+            { id: "simple_fracter", quantity: 2 },
+          ],
+        },
+        corpDeck: {
+          id: "ai_semantic_plan_map_gap_corp",
+          name: "AI Semantic Plan Map Gap Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_317_data-masons", quantity: 1 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 6 },
+          ],
+        },
+      },
+    );
+    const remote2Run = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_2",
+    );
+    const remote3Run = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_3",
+    );
+    expect(remote2Run).toBeDefined();
+    expect(remote3Run).toBeDefined();
+    if (!remote2Run || !remote3Run)
+      throw new Error("Missing remote run fixture actions");
+
+    const remote2CostlyRun: LegalAction = {
+      ...remote2Run,
+      costs: [{ credits: 10 }],
+    };
+    const remote3PrivateRun: LegalAction = {
+      ...remote3Run,
+      visibility: "private_to_actor",
+    };
+    const scopedActions = [remote2CostlyRun, remote3PrivateRun];
+    const decision = chooseRunnerAction(
+      {
+        ...input,
+        legalActions: scopedActions,
+        playerView: {
+          ...input.playerView,
+          legalActions: scopedActions,
+        },
+      },
+      { persistTacticalPlanMemory: false },
+    );
+    const remote2Alternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) => entry.actionId === remote2Run.actionId,
+    );
+    const remote3Alternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) => entry.actionId === remote3Run.actionId,
+    );
+    const tacticalDebug =
+      decision.decisionDebug?.detailSections
+        ?.find((section) => section.id === "tactical_plan")
+        ?.items.join("\n") ?? "";
+
+    expect(decision.actionId).toBe(remote3Run.actionId);
+    expect(decision.evidence).toContain(
+      "tactical_plan_mapping_overridden:true",
+    );
+    expect(decision.evidence).toContain(
+      "tactical_plan_override_reason:semantic_score_gap",
+    );
+    expect(decision.evidence).toContain(
+      "tactical_plan:runner.contest_remote:remote_3",
+    );
+    expect(decision.evidence).not.toContain(
+      "tactical_plan:runner.contest_remote:remote_2",
+    );
+    expect(JSON.stringify(decision.evidence)).not.toContain(
+      remote2Run.actionId,
+    );
+    expect(remote3Alternative?.priority).toBeGreaterThan(
+      remote2Alternative?.priority ?? 0,
+    );
+    expect(tacticalDebug).toContain(
+      "selected_plan:runner.contest_remote:remote_3",
+    );
+    expect(tacticalDebug).toContain(
+      `mapped_legal_actions:${remote3Run.actionId}`,
+    );
+    expect(tacticalDebug).toContain("id=runner.contest_remote:remote_2");
+    expect(tacticalDebug).toContain(
+      "id=runner.contest_remote:remote_3|type=runner.contest_remote|target=server:remote_3",
+    );
     expect(assertAiInputIsSideSafe(input)).toBe(true);
   });
 
@@ -12023,7 +12149,9 @@ describe("V1.4.1 plan-based Runner AI", () => {
       "onr_v1_324_fortress-architects",
     );
     expect(
-      input.legalActions.some((action) => action.type === "trash_accessed_card"),
+      input.legalActions.some(
+        (action) => action.type === "trash_accessed_card",
+      ),
     ).toBe(true);
     expect(
       input.legalActions.some((action) => action.type === "decline_trash"),
@@ -13465,7 +13593,8 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(
       repeatInput.legalActions.some(
         (action) =>
-          action.type === "start_run" && action.payload?.serverId === "remote_1",
+          action.type === "start_run" &&
+          action.payload?.serverId === "remote_1",
       ),
     ).toBe(true);
     expect(
@@ -17027,7 +17156,11 @@ describe("V1.4.2 belief state and opponent model", () => {
       playerView: {
         ...baseInput.playerView,
         opponent: { ...baseInput.playerView.opponent, handCount: 3 },
-        publicEvents: [...baseInput.playerView.publicEvents, hqLook, hiddenIceInstall],
+        publicEvents: [
+          ...baseInput.playerView.publicEvents,
+          hqLook,
+          hiddenIceInstall,
+        ],
       },
       eventTail: [...baseInput.eventTail, hqLook, hiddenIceInstall],
       legalActions: baseInput.legalActions,
@@ -17054,8 +17187,14 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(hqMemory?.ledger).toMatchObject({
       unknownRestCount: 0,
       safeDefinitions: expect.arrayContaining([
-        expect.objectContaining({ definitionId: "simple_economy_operation", count: 1 }),
-        expect.objectContaining({ definitionId: "simple_economy_asset", count: 1 }),
+        expect.objectContaining({
+          definitionId: "simple_economy_operation",
+          count: 1,
+        }),
+        expect.objectContaining({
+          definitionId: "simple_economy_asset",
+          count: 1,
+        }),
       ]),
     });
     expect(candidateGroup).toMatchObject({
@@ -17069,7 +17208,9 @@ describe("V1.4.2 belief state and opponent model", () => {
         { definitionId: "simple_code_gate_ice", count: 1 },
       ]),
     });
-    expect(belief.runnerOpponentModel?.hiddenRemoteCandidateMemory[0]).toMatchObject({
+    expect(
+      belief.runnerOpponentModel?.hiddenRemoteCandidateMemory[0],
+    ).toMatchObject({
       serverId: "remote_1",
       installPlacement: "ice",
       candidateCount: 2,
@@ -17133,7 +17274,9 @@ describe("V1.4.2 belief state and opponent model", () => {
         }),
       ],
     });
-    expect(belief.runnerOpponentModel?.hiddenRemoteCandidateMemory[0]).toMatchObject({
+    expect(
+      belief.runnerOpponentModel?.hiddenRemoteCandidateMemory[0],
+    ).toMatchObject({
       agendaCandidateCount: 1,
       candidateDefinitions: expect.arrayContaining([
         { definitionId: "simple_agenda", count: 1 },
@@ -17247,7 +17390,9 @@ describe("V1.4.2 belief state and opponent model", () => {
         expect.objectContaining({
           installPlacement: "ice",
           unknownCandidateCount: expect.any(Number),
-          candidateDefinitions: [{ definitionId: "simple_barrier_ice", count: 1 }],
+          candidateDefinitions: [
+            { definitionId: "simple_barrier_ice", count: 1 },
+          ],
         }),
       ],
     });
@@ -17364,15 +17509,23 @@ describe("V1.4.2 belief state and opponent model", () => {
       belief.runnerOpponentModel?.hqHandMemory.knownDefinitions ?? [];
 
     expect(
-      knownDefinitions.filter((definitionId) => definitionId === "simple_barrier_ice"),
+      knownDefinitions.filter(
+        (definitionId) => definitionId === "simple_barrier_ice",
+      ),
     ).toHaveLength(1);
     expect(knownDefinitions).toContain("simple_code_gate_ice");
     expect(belief.runnerOpponentModel?.hqHandMemory.ledger).toMatchObject({
       unknownRestCount: 0,
       candidateGroups: [],
       safeDefinitions: expect.arrayContaining([
-        expect.objectContaining({ definitionId: "simple_barrier_ice", count: 1 }),
-        expect.objectContaining({ definitionId: "simple_code_gate_ice", count: 1 }),
+        expect.objectContaining({
+          definitionId: "simple_barrier_ice",
+          count: 1,
+        }),
+        expect.objectContaining({
+          definitionId: "simple_code_gate_ice",
+          count: 1,
+        }),
       ]),
     });
   });
@@ -17436,11 +17589,11 @@ describe("V1.4.2 belief state and opponent model", () => {
       difficulty: "normal",
       profileId: "runner-ai-v1.4.2-normal",
     });
-    const hqLook = syntheticHqPrivateLookEvent("ai-hq-agenda-pressure-look", 100, [
-      "simple_agenda",
-      "simple_economy_asset",
-      "simple_economy_operation",
-    ]);
+    const hqLook = syntheticHqPrivateLookEvent(
+      "ai-hq-agenda-pressure-look",
+      100,
+      ["simple_agenda", "simple_economy_asset", "simple_economy_operation"],
+    );
     const hiddenRootInstall = syntheticPlanActionEvent(
       "ai-hq-agenda-pressure-hidden-root",
       101,
@@ -17484,7 +17637,9 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(belief.runnerOpponentModel?.hqHandMemory.knownDefinitions).toContain(
       "simple_agenda",
     );
-    expect(belief.runnerOpponentModel?.hqHandMemory.ledger.candidateGroups).toEqual([]);
+    expect(
+      belief.runnerOpponentModel?.hqHandMemory.ledger.candidateGroups,
+    ).toEqual([]);
     expect(accessValue.reasons).toContain("known_hq_agenda_pressure");
     expect(accessValue.evidence).toContain(
       "hq_run_boosted_because_known_agenda:true",
@@ -17758,11 +17913,13 @@ describe("V1.4.2 belief state and opponent model", () => {
       knownCount: 0,
       allCardsKnown: false,
     });
-    expect(afterReorder.runnerOpponentModel?.hqHandMemory.ledger).toMatchObject({
-      safeDefinitions: [],
-      unknownRestCount: 2,
-      candidateGroups: [],
-    });
+    expect(afterReorder.runnerOpponentModel?.hqHandMemory.ledger).toMatchObject(
+      {
+        safeDefinitions: [],
+        unknownRestCount: 2,
+        candidateGroups: [],
+      },
+    );
   });
 
   it("projects Expert Schedule Analyzer HQ look only to Runner AIInput", () => {
@@ -18167,10 +18324,17 @@ describe("V1.4.2 belief state and opponent model", () => {
           "simple_agenda",
           "simple_economy_operation",
         ]),
-        syntheticCentralAccessEvent("ai-debug-known-rd", 101, "rd", "simple_agenda"),
+        syntheticCentralAccessEvent(
+          "ai-debug-known-rd",
+          101,
+          "rd",
+          "simple_agenda",
+        ),
       ],
     }).decisionDebug;
-    const knownModel = knownDebug?.opponentModel as Record<string, any> | undefined;
+    const knownModel = knownDebug?.opponentModel as
+      | Record<string, any>
+      | undefined;
 
     expect(knownModel?.hqHandMemory?.knownCards).toEqual(
       expect.arrayContaining([
@@ -18233,10 +18397,18 @@ describe("V1.4.2 belief state and opponent model", () => {
           "simple_agenda",
           "simple_economy_operation",
         ]),
-        syntheticPlanActionEvent("ai-debug-remote-install", 101, "corp", "install_card", "remote_1"),
+        syntheticPlanActionEvent(
+          "ai-debug-remote-install",
+          101,
+          "corp",
+          "install_card",
+          "remote_1",
+        ),
       ],
     }).decisionDebug;
-    const remoteModel = remoteDebug?.opponentModel as Record<string, any> | undefined;
+    const remoteModel = remoteDebug?.opponentModel as
+      | Record<string, any>
+      | undefined;
 
     expect(remoteModel?.hqHandMemory?.summary).toMatchObject({
       safeKnownCount: 0,
@@ -18253,7 +18425,9 @@ describe("V1.4.2 belief state and opponent model", () => {
       unknownCandidateCount: 0,
       departureCount: 1,
     });
-    expect(JSON.stringify(remoteModel?.hqHandMemory?.candidateGroups)).not.toMatch(
+    expect(
+      JSON.stringify(remoteModel?.hqHandMemory?.candidateGroups),
+    ).not.toMatch(
       /simple_agenda|simple_economy_operation|cardInstances|privatePayload|decklist|hidden-card/i,
     );
     expect(remoteModel?.hiddenRemoteCandidateMemory?.[0]).toMatchObject({
@@ -18365,22 +18539,44 @@ describe("V1.4.2 belief state and opponent model", () => {
       Math.min(input.legalActions.length, 32),
     );
     expect(
-      new Set(decision.decisionDebug?.actionAlternatives?.map((entry) => entry.actionId)),
-    ).toEqual(new Set(input.legalActions.slice(0, 32).map((action) => action.actionId)));
-    const actionAlternativeById = new Map(
-      decision.decisionDebug?.actionAlternatives?.map((entry) => [entry.actionId, entry]) ?? [],
+      new Set(
+        decision.decisionDebug?.actionAlternatives?.map(
+          (entry) => entry.actionId,
+        ),
+      ),
+    ).toEqual(
+      new Set(input.legalActions.slice(0, 32).map((action) => action.actionId)),
     );
-    const hqRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "hq");
-    const rdRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    const actionAlternativeById = new Map(
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [
+        entry.actionId,
+        entry,
+      ]) ?? [],
+    );
+    const hqRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
     if (hqRun && rdRun) {
       const hqAlternative = actionAlternativeById.get(hqRun.actionId);
       const rdAlternative = actionAlternativeById.get(rdRun.actionId);
-      expect(rdAlternative?.priority).toBeGreaterThan(hqAlternative?.priority ?? 0);
-      expect(rdAlternative?.scoreBreakdown?.some((component) => component.key === "runner_rnd_unknown_top")).toBe(true);
+      expect(rdAlternative?.priority).toBeGreaterThan(
+        hqAlternative?.priority ?? 0,
+      );
+      expect(
+        rdAlternative?.scoreBreakdown?.some(
+          (component) => component.key === "runner_rnd_unknown_top",
+        ),
+      ).toBe(true);
     }
-    const selectedRankedAlternative = decision.decisionDebug?.rankedAlternatives?.find(
-      (entry) => entry.whyNot?.includes("selected_action"),
-    );
+    const selectedRankedAlternative =
+      decision.decisionDebug?.rankedAlternatives?.find((entry) =>
+        entry.whyNot?.includes("selected_action"),
+      );
     expect(selectedRankedAlternative).toMatchObject({
       selectedActionType: actualAction?.type,
       whyNot: ["selected_action"],
@@ -18392,6 +18588,86 @@ describe("V1.4.2 belief state and opponent model", () => {
     }
     expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
       /privatePayload|cardInstances|fullGameState|sessionToken|reconnectToken|joinToken|decklist|Hidden Priority Agenda|hidden-card/i,
+    );
+  });
+
+  it("excludes semantic HQ runs when the full known HQ hand has no current payoff", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "semantic-runtime-known-hq-no-payoff" }),
+    );
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const hqRun = baseInput.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    const rdRun = baseInput.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const gainCredit = baseInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(hqRun).toBeDefined();
+    expect(rdRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!hqRun || !rdRun || !gainCredit)
+      throw new Error("Missing known HQ no-payoff fixture actions");
+
+    const scopedActions = [hqRun, rdRun, gainCredit];
+    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+    const decision = chooseRunnerAction(
+      {
+        ...baseInput,
+        playerView: {
+          ...baseInput.playerView,
+          opponent: {
+            ...baseInput.playerView.opponent,
+            handCount: 2,
+          },
+          legalActions: scopedActions,
+        },
+        eventTail: [
+          ...baseInput.eventTail,
+          syntheticHqPrivateLookEvent("semantic-known-hq-ice-only", 100, [
+            "onr_v1_230_cortical-scanner",
+            "onr_v1_237_data-wall",
+          ]),
+        ],
+        legalActions: scopedActions,
+      },
+      { persistTacticalPlanMemory: false },
+    );
+    const alternatives = new Map(
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [
+        entry.actionId,
+        entry,
+      ]) ?? [],
+    );
+    const hqAlternative = alternatives.get(hqRun.actionId);
+    const rdAlternative = alternatives.get(rdRun.actionId);
+
+    expect(decision.actionId).toBe(rdRun.actionId);
+    expect(hqAlternative?.excluded).toBe(true);
+    expect(hqAlternative?.priority).toBeUndefined();
+    expect(hqAlternative?.whyNot).toContain(
+      "semantic_excluded:known_central_no_current_payoff",
+    );
+    expect(
+      hqAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "semantic_action_excluded" &&
+          component.reason?.includes("server:hq") &&
+          component.reason?.includes(
+            "hq_run_suppressed_by_fully_known_low_value_hand:true",
+          ),
+      ),
+    ).toBe(true);
+    expect(rdAlternative?.excluded).toBeUndefined();
+    expect(decision.evidence).not.toContain(
+      "tactical_plan:runner.opportunistic_central_run:hq",
     );
   });
 
@@ -18408,49 +18684,80 @@ describe("V1.4.2 belief state and opponent model", () => {
       publicPayload: {
         actor: "runner",
         actionType: "start_run",
-        targetServerId: "hq"
-      }
+        targetServerId: "hq",
+      },
     }));
     const input = buildAiDecisionInput(state, "runner", {
       difficulty: "normal",
       profileId: "runner-ai-v1.4.2-normal",
-      eventTail
+      eventTail,
     });
 
     delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
     const decision = chooseRunnerAction(input);
     const alternatives = new Map(
-      decision.decisionDebug?.actionAlternatives?.map((entry) => [entry.actionId, entry]) ?? [],
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [
+        entry.actionId,
+        entry,
+      ]) ?? [],
     );
-    const hqRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "hq");
-    const rdRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
+    const hqRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
     expect(hqRun).toBeDefined();
     expect(rdRun).toBeDefined();
     if (!hqRun || !rdRun) throw new Error("Expected HQ and R&D run actions");
     const hqAlternative = alternatives.get(hqRun.actionId);
     const rdAlternative = alternatives.get(rdRun.actionId);
-    expect(hqAlternative?.scoreBreakdown?.some((component) => component.key === "runner_recent_same_server_runs" && component.value < 0)).toBe(true);
-    expect(rdAlternative?.priority).toBeGreaterThan(hqAlternative?.priority ?? 0);
+    expect(
+      hqAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "runner_recent_same_server_runs" &&
+          component.value < 0,
+      ),
+    ).toBe(true);
+    expect(rdAlternative?.priority).toBeGreaterThan(
+      hqAlternative?.priority ?? 0,
+    );
   });
 
   it("drops empty Archives far below meaningful semantic run targets", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "semantic-runtime-empty-archives-low-value" }),
+      createGameAfterSetup({
+        seed: "semantic-runtime-empty-archives-low-value",
+      }),
     );
     state.corp.archives = [];
     const input = buildAiDecisionInput(state, "runner", {
       difficulty: "normal",
       profileId: "runner-ai-v1.4.2-normal",
     });
-    const archivesRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "archives");
-    const hqRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "hq");
-    const rdRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "rd");
-    const gainCredit = input.legalActions.find((action) => action.type === "gain_credit");
+    const archivesRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "archives",
+    );
+    const hqRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
     expect(archivesRun).toBeDefined();
     expect(hqRun).toBeDefined();
     expect(rdRun).toBeDefined();
     expect(gainCredit).toBeDefined();
-    if (!archivesRun || !hqRun || !rdRun || !gainCredit) throw new Error("Missing empty Archives fixture actions");
+    if (!archivesRun || !hqRun || !rdRun || !gainCredit)
+      throw new Error("Missing empty Archives fixture actions");
 
     delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
     const decision = chooseRunnerAction({
@@ -18458,7 +18765,10 @@ describe("V1.4.2 belief state and opponent model", () => {
       legalActions: [archivesRun, hqRun, rdRun, gainCredit],
     });
     const alternatives = new Map(
-      decision.decisionDebug?.actionAlternatives?.map((entry) => [entry.actionId, entry]) ?? [],
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [
+        entry.actionId,
+        entry,
+      ]) ?? [],
     );
     const archivesAlternative = alternatives.get(archivesRun.actionId);
     const hqAlternative = alternatives.get(hqRun.actionId);
@@ -18467,16 +18777,32 @@ describe("V1.4.2 belief state and opponent model", () => {
 
     expect(archivesAlternative?.excluded).toBe(true);
     expect(archivesAlternative?.priority).toBeUndefined();
-    expect(archivesAlternative?.whyNot).toContain("semantic_excluded:archives_empty");
-    expect(archivesAlternative?.scoreBreakdown?.some((component) => component.key === "semantic_action_excluded" && component.reason === "no_archives_cards")).toBe(true);
-    expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(gainAlternative?.rank ?? 0);
-    expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(hqAlternative?.rank ?? 0);
-    expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(rdAlternative?.rank ?? 0);
+    expect(archivesAlternative?.whyNot).toContain(
+      "semantic_excluded:archives_empty",
+    );
+    expect(
+      archivesAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "semantic_action_excluded" &&
+          component.reason === "no_archives_cards",
+      ),
+    ).toBe(true);
+    expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(
+      gainAlternative?.rank ?? 0,
+    );
+    expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(
+      hqAlternative?.rank ?? 0,
+    );
+    expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(
+      rdAlternative?.rank ?? 0,
+    );
   });
 
   it("drops fully known non-agenda Archives below basic semantic actions", () => {
     const state = toRunnerTurn(
-      createGameAfterSetup({ seed: "semantic-runtime-known-archives-low-value" }),
+      createGameAfterSetup({
+        seed: "semantic-runtime-known-archives-low-value",
+      }),
     );
     const assetId = moveCorpCardToArchives(state, "simple_economy_asset", true);
     keepOnlyCorpArchivesCards(state, [assetId]);
@@ -18484,13 +18810,21 @@ describe("V1.4.2 belief state and opponent model", () => {
       difficulty: "normal",
       profileId: "runner-ai-v1.4.2-normal",
     });
-    const archivesRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "archives");
-    const gainCredit = input.legalActions.find((action) => action.type === "gain_credit");
-    const drawCard = input.legalActions.find((action) => action.type === "draw_card");
+    const archivesRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "archives",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    const drawCard = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
     expect(archivesRun).toBeDefined();
     expect(gainCredit).toBeDefined();
     expect(drawCard).toBeDefined();
-    if (!archivesRun || !gainCredit || !drawCard) throw new Error("Missing known Archives fixture actions");
+    if (!archivesRun || !gainCredit || !drawCard)
+      throw new Error("Missing known Archives fixture actions");
 
     delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
     const decision = chooseRunnerAction({
@@ -18498,7 +18832,10 @@ describe("V1.4.2 belief state and opponent model", () => {
       legalActions: [archivesRun, gainCredit, drawCard],
     });
     const alternatives = new Map(
-      decision.decisionDebug?.actionAlternatives?.map((entry) => [entry.actionId, entry]) ?? [],
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [
+        entry.actionId,
+        entry,
+      ]) ?? [],
     );
     const archivesAlternative = alternatives.get(archivesRun.actionId);
     const gainAlternative = alternatives.get(gainCredit.actionId);
@@ -18506,10 +18843,22 @@ describe("V1.4.2 belief state and opponent model", () => {
 
     expect(archivesAlternative?.excluded).toBe(true);
     expect(archivesAlternative?.priority).toBeUndefined();
-    expect(archivesAlternative?.whyNot).toContain("semantic_excluded:archives_known_no_agenda");
-    expect(archivesAlternative?.scoreBreakdown?.some((component) => component.key === "semantic_action_excluded" && component.reason === "known_non_agenda:1")).toBe(true);
-    expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(gainAlternative?.rank ?? 0);
-    expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(drawAlternative?.rank ?? 0);
+    expect(archivesAlternative?.whyNot).toContain(
+      "semantic_excluded:archives_known_no_agenda",
+    );
+    expect(
+      archivesAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "semantic_action_excluded" &&
+          component.reason === "known_non_agenda:1",
+      ),
+    ).toBe(true);
+    expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(
+      gainAlternative?.rank ?? 0,
+    );
+    expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(
+      drawAlternative?.rank ?? 0,
+    );
     expect(decision.actionId).not.toBe(archivesRun.actionId);
   });
 
@@ -18524,9 +18873,16 @@ describe("V1.4.2 belief state and opponent model", () => {
       difficulty: "normal",
       profileId: "runner-ai-v1.4.2-normal",
     });
-    const emptyRemoteRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "remote_2");
-    const gainCredit = input.legalActions.find((action) => action.type === "gain_credit");
-    const drawCard = input.legalActions.find((action) => action.type === "draw_card");
+    const emptyRemoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_2",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    const drawCard = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
     expect(emptyRemoteRun).toBeDefined();
     expect(gainCredit).toBeDefined();
     expect(drawCard).toBeDefined();
@@ -18535,12 +18891,18 @@ describe("V1.4.2 belief state and opponent model", () => {
     }
 
     delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
-    const decision = chooseRunnerAction({
-      ...input,
-      legalActions: [emptyRemoteRun, gainCredit, drawCard],
-    }, { persistTacticalPlanMemory: false });
+    const decision = chooseRunnerAction(
+      {
+        ...input,
+        legalActions: [emptyRemoteRun, gainCredit, drawCard],
+      },
+      { persistTacticalPlanMemory: false },
+    );
     const alternatives = new Map(
-      decision.decisionDebug?.actionAlternatives?.map((entry) => [entry.actionId, entry]) ?? [],
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [
+        entry.actionId,
+        entry,
+      ]) ?? [],
     );
     const emptyRemoteAlternative = alternatives.get(emptyRemoteRun.actionId);
     const gainAlternative = alternatives.get(gainCredit.actionId);
@@ -18549,10 +18911,22 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(decision.actionId).not.toBe(emptyRemoteRun.actionId);
     expect(emptyRemoteAlternative?.excluded).toBe(true);
     expect(emptyRemoteAlternative?.priority).toBeUndefined();
-    expect(emptyRemoteAlternative?.whyNot).toContain("semantic_excluded:remote_empty_no_root");
-    expect(emptyRemoteAlternative?.scoreBreakdown?.some((component) => component.key === "semantic_action_excluded" && component.reason === "empty_remote_root:remote_2")).toBe(true);
-    expect(emptyRemoteAlternative?.rank ?? 0).toBeGreaterThan(gainAlternative?.rank ?? 0);
-    expect(emptyRemoteAlternative?.rank ?? 0).toBeGreaterThan(drawAlternative?.rank ?? 0);
+    expect(emptyRemoteAlternative?.whyNot).toContain(
+      "semantic_excluded:remote_empty_no_root",
+    );
+    expect(
+      emptyRemoteAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "semantic_action_excluded" &&
+          component.reason === "empty_remote_root:remote_2",
+      ),
+    ).toBe(true);
+    expect(emptyRemoteAlternative?.rank ?? 0).toBeGreaterThan(
+      gainAlternative?.rank ?? 0,
+    );
+    expect(emptyRemoteAlternative?.rank ?? 0).toBeGreaterThan(
+      drawAlternative?.rank ?? 0,
+    );
   });
 
   it("drops remote runs behind known rezzed end-the-run ICE when no installed breaker can reach access", () => {
@@ -18587,7 +18961,11 @@ describe("V1.4.2 belief state and opponent model", () => {
     state.corp.credits = 5;
     moveRunnerCardToGrip(state, "simple_fracter");
     ensureRemoteServer(state, "remote_1");
-    const wallId = putCorpIceOnServer(state, "remote_1", "onr_v1_279_wall-of-static");
+    const wallId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_279_wall-of-static",
+    );
     state.cardInstances[wallId] = {
       ...state.cardInstances[wallId]!,
       faceup: true,
@@ -18598,12 +18976,21 @@ describe("V1.4.2 belief state and opponent model", () => {
       difficulty: "normal",
       profileId: "runner-ai-v1.4.2-normal",
     });
-    const remoteRun = input.legalActions.find((action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
-    const breakerInstall = input.legalActions.find(
-      (action) => action.type === "install_card" && sourceDefinition(state, action) === "simple_fracter",
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
-    const gainCredit = input.legalActions.find((action) => action.type === "gain_credit");
-    const drawCard = input.legalActions.find((action) => action.type === "draw_card");
+    const breakerInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinition(state, action) === "simple_fracter",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    const drawCard = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
     expect(remoteRun).toBeDefined();
     expect(breakerInstall).toBeDefined();
     expect(gainCredit).toBeDefined();
@@ -18618,7 +19005,10 @@ describe("V1.4.2 belief state and opponent model", () => {
       legalActions: [remoteRun, breakerInstall, gainCredit, drawCard],
     });
     const alternatives = new Map(
-      decision.decisionDebug?.actionAlternatives?.map((entry) => [entry.actionId, entry]) ?? [],
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [
+        entry.actionId,
+        entry,
+      ]) ?? [],
     );
     const remoteAlternative = alternatives.get(remoteRun.actionId);
     const installAlternative = alternatives.get(breakerInstall.actionId);
@@ -18627,11 +19017,25 @@ describe("V1.4.2 belief state and opponent model", () => {
 
     expect(remoteAlternative?.excluded).toBe(true);
     expect(remoteAlternative?.priority).toBeUndefined();
-    expect(remoteAlternative?.whyNot).toContain("semantic_excluded:known_ice_path_no_access");
-    expect(remoteAlternative?.scoreBreakdown?.some((component) => component.key === "semantic_action_excluded" && component.reason?.includes("can_reach_access:false"))).toBe(true);
-    expect(remoteAlternative?.rank ?? 0).toBeGreaterThan(installAlternative?.rank ?? 0);
-    expect(remoteAlternative?.rank ?? 0).toBeGreaterThan(gainAlternative?.rank ?? 0);
-    expect(remoteAlternative?.rank ?? 0).toBeGreaterThan(drawAlternative?.rank ?? 0);
+    expect(remoteAlternative?.whyNot).toContain(
+      "semantic_excluded:known_ice_path_no_access",
+    );
+    expect(
+      remoteAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "semantic_action_excluded" &&
+          component.reason?.includes("can_reach_access:false"),
+      ),
+    ).toBe(true);
+    expect(remoteAlternative?.rank ?? 0).toBeGreaterThan(
+      installAlternative?.rank ?? 0,
+    );
+    expect(remoteAlternative?.rank ?? 0).toBeGreaterThan(
+      gainAlternative?.rank ?? 0,
+    );
+    expect(remoteAlternative?.rank ?? 0).toBeGreaterThan(
+      drawAlternative?.rank ?? 0,
+    );
     expect(decision.actionId).toBe(breakerInstall.actionId);
   });
 
@@ -18671,11 +19075,7 @@ describe("V1.4.2 belief state and opponent model", () => {
       "remote_1",
       "onr_v1_276_viral-15",
     );
-    const tutorId = putCorpIceOnServer(
-      state,
-      "remote_1",
-      "onr_v1_274_tutor",
-    );
+    const tutorId = putCorpIceOnServer(state, "remote_1", "onr_v1_274_tutor");
     for (const iceId of [viral15Id, tutorId]) {
       state.cardInstances[iceId] = {
         ...state.cardInstances[iceId]!,
@@ -18903,17 +19303,20 @@ describe("V1.4.2 belief state and opponent model", () => {
   });
 
   it("keeps extended DecisionDebug detail section items for plan diagnostics", () => {
-    const items = Array.from({ length: 30 }, (_, index) => `plan_rank|rank=${index + 1}|id=plan_${index + 1}`);
+    const items = Array.from(
+      { length: 30 },
+      (_, index) => `plan_rank|rank=${index + 1}|id=plan_${index + 1}`,
+    );
     const sanitized = sanitizeAiDecisionDebug({
       schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
       aiLevel: 2,
-      detailSections: [
-        { id: "tactical_plan", title: "Tactical Plan", items },
-      ],
+      detailSections: [{ id: "tactical_plan", title: "Tactical Plan", items }],
     });
 
     expect(sanitized?.detailSections?.[0]?.items).toHaveLength(30);
-    expect(sanitized?.detailSections?.[0]?.items.at(-1)).toBe("plan_rank|rank=30|id=plan_30");
+    expect(sanitized?.detailSections?.[0]?.items.at(-1)).toBe(
+      "plan_rank|rank=30|id=plan_30",
+    );
   });
 
   it("does not mutate real game state hash while building belief state and choosing actions", () => {

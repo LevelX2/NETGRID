@@ -451,7 +451,9 @@ function stealAgenda(
   legalAction?: LegalAction,
 ): AccessExecutionResult {
   if (!cardId) throw new Error("Keine Agenda wird accessed.");
-  if (host.state.run?.bizarreEncryptionSchemeActive) {
+  const run = mustRun(host);
+  attachAccessOriginPayload(legalAction, run);
+  if (run.bizarreEncryptionSchemeActive) {
     return delayBizarreEncryptionSchemeAgendaScore(
       host,
       cardId as CardInstanceId,
@@ -630,6 +632,7 @@ function trashAccessedCard(
   const targetCardId = cardId as CardInstanceId;
   if (!cardId || run.accessedCardId !== targetCardId)
     throw new Error("Diese Karte wird aktuell nicht accessed.");
+  attachAccessOriginPayload(legalAction, run);
   const definition = host.cards.definitionFor(cardId as CardInstanceId);
   const rawOverride = legalAction?.payload?.accessTrashCostOverride;
   const overrideCost =
@@ -778,6 +781,17 @@ function trashAccessedCard(
     runFinished: true,
     ...resolvedPayloadFor(legalAction),
     stateChanged: true,
+  };
+}
+
+function attachAccessOriginPayload(
+  legalAction: LegalAction | undefined,
+  run: ActiveRun,
+): void {
+  if (!legalAction) return;
+  legalAction.payload = {
+    ...(legalAction.payload ?? {}),
+    serverId: run.breach?.serverId ?? run.accessServerOverride ?? run.attackedServerId,
   };
 }
 
