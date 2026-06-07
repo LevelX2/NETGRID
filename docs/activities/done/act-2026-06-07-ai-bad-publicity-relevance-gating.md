@@ -1,20 +1,26 @@
 ---
 activityId: act-2026-06-07-ai-bad-publicity-relevance-gating
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-06-07-ai-faked-hit-self-damage-semantics
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai exec tsc --noEmit
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "Faked Hit"
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts
+  - git diff --check
 ---
 
 # Bad-Publicity-Relevanz für Runner-KI gewichten
@@ -62,11 +68,11 @@ Die Runner-KI soll Bad-Publicity-Aktionen nicht schon deshalb hoch bewerten, wei
 
 ## Akzeptanzkriterien
 
-- [ ] `Faked Hit` bei Korp Bad Publicity 0 bis 5 und ohne erkennbare Bad-Publicity-Decklinie wird niedrig bewertet, selbst wenn Self-Damage überlebt würde.
-- [ ] `Faked Hit` oder gleichwertige Aktion bei Korp Bad Publicity 6 wird als unmittelbarer Closeout erkannt.
-- [ ] Eine überlebbare Bad-Publicity-Aktion mit starker Drawback-Schwere verliert gegen sichere Economy-/Setup-/Pressure-Alternativen, wenn kein Closeout oder Deckplan erkennbar ist.
-- [ ] Eine erkennbare Bad-Publicity-Linie darf Support-Aktionen aufwerten, aber nicht den Self-Damage-Survival-Guard umgehen.
-- [ ] Keine neue Strategy-ID wird eingeführt; Evidence bleibt redigiert und side-sicher.
+- [x] `Faked Hit` bei Korp Bad Publicity 0 bis 5 und ohne erkennbare Bad-Publicity-Decklinie wird niedrig bewertet, selbst wenn Self-Damage überlebt würde.
+- [x] `Faked Hit` oder gleichwertige Aktion bei Korp Bad Publicity 6 wird als unmittelbarer Closeout erkannt.
+- [x] Eine überlebbare Bad-Publicity-Aktion mit starker Drawback-Schwere verliert gegen sichere Economy-/Setup-/Pressure-Alternativen, wenn kein Closeout oder Deckplan erkennbar ist.
+- [x] Eine erkennbare Bad-Publicity-Linie darf Support-Aktionen aufwerten, aber nicht den Self-Damage-Survival-Guard umgehen.
+- [x] Keine neue Strategy-ID wird eingeführt; Evidence bleibt redigiert und side-sicher.
 
 ## Umsetzungshinweise
 
@@ -80,4 +86,6 @@ Die Runner-KI soll Bad-Publicity-Aktionen nicht schon deshalb hoch bewerten, wei
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt. Die Runner-Semantic-Runtime bewertet Bad-Publicity-Aktionen jetzt mit einer `runner_bad_publicity_relevance`-Score-Komponente. Sie berücksichtigt den sichtbaren aktuellen Bad-Publicity-Stand, den erwarteten Gewinn aus der Aktion, BP-7-Closeout, sichtbare eigene Bad-Publicity-Supportkarten, Payoff-Horizont und Drawback-Schwere.
+
+Ohne Closeout und ohne sichtbare BP-Linie wird `Faked Hit` trotz überlebtem Self-Damage als `bad_publicity_support_only` mit `drawback_outweighs_bp_gain` abgewertet und verliert gegen sichere Economy. Bei Bad Publicity 6 bleibt der Immediate-Closeout stark und darf den Drawback übersteuern. Der Self-Damage-Survival-Guard bleibt vorgeschaltet und wird nicht umgangen.

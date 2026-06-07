@@ -11400,7 +11400,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
     },
   );
 
-  it("keeps Faked Hit available when enough hand cards survive the self-damage", () => {
+  it("keeps Faked Hit survival-safe but de-prioritizes support-only Bad Publicity", () => {
     process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
     const input = fakedHitSelfDamageInput(
       "ai-faked-hit-self-damage-survives",
@@ -11423,9 +11423,12 @@ describe("V1.4.1 plan-based Runner AI", () => {
       persistTacticalPlanMemory: false,
     });
 
-    expect(decision.actionId).toBe(fakedHit.actionId);
-    expect(decision.evidence).toContain("self_damage_survives:true");
-    expect(decision.evidence).not.toContain("semantic_excluded:true");
+    expect(decision.actionId).toBe(gainCredit.actionId);
+    const debug = JSON.stringify(decision.decisionDebug);
+    expect(debug).toContain("self_damage_survives:true");
+    expect(debug).toContain("bad_publicity_support_only");
+    expect(debug).toContain("drawback_outweighs_bp_gain");
+    expect(debug).not.toContain("semantic_exclusion:self_damage_flatline_risk");
   });
 
   it("allows lethal Faked Hit when the same action reaches Bad Publicity 7", () => {
