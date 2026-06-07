@@ -157,7 +157,16 @@ export function publicContextForAction(
   if (legalAction.payload?.runnerEventRun === true)
     context.runnerEventRun = true;
   if (legalAction.type === "install_card") {
-    const definition = cardId ? deps.definitionFor(state, cardId) : undefined;
+    const definition =
+      legalAction.side === "runner" && cardId
+        ? deps.definitionFor(state, cardId)
+        : undefined;
+    if (
+      legalAction.payload?.placement === "ice" ||
+      legalAction.payload?.placement === "root"
+    ) {
+      context.installPlacement = legalAction.payload.placement;
+    }
     context.zoneLabel =
       legalAction.side === "runner"
         ? definition?.type === "resource"

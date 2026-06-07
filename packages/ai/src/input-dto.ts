@@ -122,6 +122,7 @@ const PUBLIC_PAYLOAD_PRIMITIVE_KEYS = new Set<string>([
   "server",
   "serverLabel",
   "targetServerLabel",
+  "installPlacement",
   "targetVisibility",
   "choiceVisibility",
   "redactedKind",
