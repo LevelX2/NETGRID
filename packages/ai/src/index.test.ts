@@ -798,6 +798,56 @@ describe("MVP 0.3 AI controller contract", () => {
     });
   });
 
+  it("projects Tutor's unbroken run-duration ETR onto later ICE before choosing access reachability", () => {
+    const cardsById = createRuntimeCardsById();
+    const innerViral15 = runtimeVisibleIce(cardsById["onr_v1_276_viral-15"]);
+    const outerTutor = {
+      ...runtimeVisibleIce(cardsById["onr_v1_274_tutor"]),
+      effectiveRunQuote: {
+        iceInstanceId: "ai_visible_outer_tutor",
+        iceDefinitionId: "onr_v1_274_tutor",
+        effectiveStrength: 5,
+        subroutines: [
+          {
+            id: "onr_v1_274_tutor_future_end_the_run",
+            type: "set_run_future_end_the_run_subroutine",
+            unbrokenRunEffect: { addsFutureEndTheRunSubroutines: 1 },
+          },
+        ],
+      } satisfies VisibleEffectiveIceRunQuote,
+    };
+    const codecracker = runtimeVisibleBreaker(
+      cardsById["onr_v1_014_codecracker"],
+    );
+    const evilTwin = runtimeVisibleBreaker(cardsById["onr_v1_023_evil-twin"]);
+
+    expect(
+      assessKnownRezzedIcePath([innerViral15, outerTutor], [], 9),
+    ).toMatchObject({
+      blocked: true,
+      canReachAccess: false,
+      knownPathBlockedByMissingCoverage: true,
+      missingCoverage: ["sentry"],
+      unbreakableIceTitle: "Viral 15",
+    });
+    expect(
+      assessKnownRezzedIcePath([innerViral15, outerTutor], [codecracker], 5),
+    ).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleBreakCost: 5,
+      creditsAfterPath: 0,
+    });
+    expect(
+      assessKnownRezzedIcePath([innerViral15, outerTutor], [evilTwin], 3),
+    ).toMatchObject({
+      blocked: false,
+      canReachAccess: true,
+      visibleBreakCost: 3,
+      creditsAfterPath: 0,
+    });
+  });
+
   it("classifies known rezzed ETR ICE without breaker coverage as unbreakable no-access", () => {
     const cardsById = createRuntimeCardsById();
     const dataWall = runtimeVisibleIce(cardsById["onr_v1_237_data-wall"]);
@@ -17968,6 +18018,109 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(remoteAlternative?.rank ?? 0).toBeGreaterThan(gainAlternative?.rank ?? 0);
     expect(remoteAlternative?.rank ?? 0).toBeGreaterThan(drawAlternative?.rank ?? 0);
     expect(decision.actionId).toBe(breakerInstall.actionId);
+  });
+
+  it("drops a Tutor plus Viral 15 remote run when the unbroken Tutor subroutine makes access unreachable", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "semantic-runtime-tutor-viral15-remote-no-breaker",
+        runnerDeck: {
+          id: "semantic_tutor_viral15_runner",
+          name: "Semantic Tutor Viral 15 Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "simple_economy_event", quantity: 8 },
+            { id: "simple_run_event", quantity: 4 },
+          ],
+        },
+        corpDeck: {
+          id: "semantic_tutor_viral15_corp",
+          name: "Semantic Tutor Viral 15 Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_274_tutor", quantity: 1 },
+            { id: "onr_v1_276_viral-15", quantity: 1 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 9;
+    state.corp.credits = 9;
+    ensureRemoteServer(state, "remote_1");
+    const viral15Id = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_276_viral-15",
+    );
+    const tutorId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_274_tutor",
+    );
+    for (const iceId of [viral15Id, tutorId]) {
+      state.cardInstances[iceId] = {
+        ...state.cardInstances[iceId]!,
+        faceup: true,
+        rezzed: true,
+      };
+    }
+    putCorpRootInRemote(state, "simple_agenda", 0);
+
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    const drawCard = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    expect(drawCard).toBeDefined();
+    if (!remoteRun || !gainCredit || !drawCard) {
+      throw new Error("Missing Tutor/Viral 15 semantic fixture actions");
+    }
+
+    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+    const decision = chooseRunnerAction({
+      ...input,
+      legalActions: [remoteRun, gainCredit, drawCard],
+    });
+    const alternatives = new Map(
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [
+        entry.actionId,
+        entry,
+      ]) ?? [],
+    );
+    const remoteAlternative = alternatives.get(remoteRun.actionId);
+
+    expect(decision.actionId).not.toBe(remoteRun.actionId);
+    expect(remoteAlternative?.excluded).toBe(true);
+    expect(remoteAlternative?.whyNot).toContain(
+      "semantic_excluded:known_ice_path_no_access",
+    );
+    expect(
+      remoteAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "semantic_action_excluded" &&
+          component.reason?.includes("ice:Viral 15") &&
+          component.reason.includes("missing:sentry") &&
+          component.reason.includes("can_reach_access:false"),
+      ),
+    ).toBe(true);
+    expect(JSON.stringify(remoteAlternative)).not.toMatch(
+      /cardInstances|privatePayload|decklist|simple_agenda_1/,
+    );
   });
 
   it("redacts forbidden DecisionDebug key and value patterns deterministically", () => {

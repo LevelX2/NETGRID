@@ -4,6 +4,7 @@ import {
   type PublicGameEvent,
   type VisibleCard,
   type VisibleEffectiveIceRunQuote,
+  type VisibleEffectiveSubroutine,
 } from "@netgrid/shared";
 import { RUNTIME_CARDS } from "./ai-hints";
 import { breakerCardBlocksAccessReachability } from "./breaker-ontology-consumer";
@@ -17,6 +18,9 @@ type IceCardLike = {
   effectiveRunQuote?: VisibleEffectiveIceRunQuote;
 };
 type RootCardLike = { definitionId?: string; rezzed?: boolean; known: boolean };
+type RunPathProjectionEffect = NonNullable<
+  VisibleEffectiveSubroutine["unbrokenRunEffect"]
+>;
 type BreakAssessment = {
   cost: number;
   breakerInstanceId: string;
@@ -84,43 +88,101 @@ export function assessKnownRezzedIcePath(
   runnerCredits: number,
   rootCards: RootCardLike[] = [],
 ): KnownRezzedIcePathAssessment {
+  return assessKnownRezzedIcePathInternal(
+    iceCards,
+    rigCards,
+    runnerCredits,
+    rootCards,
+    [],
+    { allowBreakingRunPathEffects: true },
+  );
+}
+
+function assessKnownRezzedIcePathInternal(
+  iceCards: IceCardLike[],
+  rigCards: VisibleCard[],
+  runnerCredits: number,
+  rootCards: RootCardLike[],
+  initialRunPathEffects: RunPathProjectionEffect[],
+  options: { allowBreakingRunPathEffects: boolean },
+  initialBreakerStrengths?: Map<string, number>,
+): KnownRezzedIcePathAssessment {
   let visibleBreakCost = 0;
   let remainingCredits = runnerCredits;
   let assessedKnownIceCount = 0;
   let firstKnownIceBreakable = false;
+  let activeRunPathEffects = initialRunPathEffects.slice();
   const breakerStrengths = new Map(
     rigCards.map((card) => [card.instanceId, card.strength ?? 0]),
   );
-  void rootCards;
+  if (initialBreakerStrengths) {
+    for (const [instanceId, strength] of initialBreakerStrengths) {
+      breakerStrengths.set(instanceId, strength);
+    }
+  }
   for (const { ice, iceIndex } of iceCards
     .map((ice, iceIndex) => ({ ice, iceIndex }))
     .reverse()) {
-    if (!ice.definitionId || !ice.known || ice.rezzed !== true) continue;
+    const iceDefinitionId = ice.definitionId;
+    if (!iceDefinitionId || !ice.known || ice.rezzed !== true) continue;
+    const effectiveIce = projectIceForRunPathEffects(
+      ice,
+      activeRunPathEffects,
+      iceIndex,
+    );
     const pathCostBeforeIce = visibleBreakCost;
     assessedKnownIceCount += 1;
-    const quote = effectiveRunQuoteForIce(ice);
+    const quote = effectiveRunQuoteForIce(effectiveIce);
     const endTheRunCount = quote
       ? quote.subroutines.filter(
           (subroutine) => subroutine.type === "end_the_run",
         ).length
-      : endTheRunSubroutineCount(ice.definitionId);
+      : endTheRunSubroutineCount(iceDefinitionId);
     const additionalBreakCostPerSubroutine =
       quote?.breakSubroutineAdditionalCostPerSubroutine ?? 0;
+    const encounterTax = activeRunPathEffects.reduce(
+      (sum, effect) =>
+        sum + Math.max(0, Math.floor(effect.addsFutureEncounterCost ?? 0)),
+      0,
+    );
+    if (encounterTax > 0) {
+      if (encounterTax > remainingCredits) {
+        return blockedPathAssessment(
+          visibleBreakCost + encounterTax,
+          remainingCredits - encounterTax,
+          iceIndex,
+          effectiveIce.definitionId,
+          effectiveIce.subtypes,
+          pathCostBeforeIce,
+          firstKnownIceBreakable,
+          assessedKnownIceCount,
+          pathCostBeforeIce > 0
+            ? "later_ice_unaffordable_after_prior_ice_cost"
+            : "ice_unaffordable",
+        );
+      }
+      visibleBreakCost += encounterTax;
+      remainingCredits -= encounterTax;
+    }
     if (endTheRunCount > 0) {
-      const breakAssessment = minimumCreditsToBreakEndTheRunSubroutines(
-        effectiveIceForQuote(ice, quote),
-        rigCards,
-        endTheRunCount,
-        breakerStrengths,
-        additionalBreakCostPerSubroutine,
-      );
+      const breakAssessment = runPathEffectsPreventFutureBreaking(
+        activeRunPathEffects,
+      )
+        ? undefined
+        : minimumCreditsToBreakEndTheRunSubroutines(
+            effectiveIceForQuote(effectiveIce, quote),
+            rigCards,
+            endTheRunCount,
+            breakerStrengths,
+            additionalBreakCostPerSubroutine,
+          );
       if (!breakAssessment) {
         return blockedPathAssessment(
           visibleBreakCost,
           remainingCredits,
           iceIndex,
-          ice.definitionId,
-          ice.subtypes,
+          effectiveIce.definitionId,
+          effectiveIce.subtypes,
           visibleBreakCost,
           firstKnownIceBreakable,
           assessedKnownIceCount,
@@ -132,8 +194,8 @@ export function assessKnownRezzedIcePath(
           visibleBreakCost + breakAssessment.cost,
           remainingCredits - breakAssessment.cost,
           iceIndex,
-          ice.definitionId,
-          ice.subtypes,
+          effectiveIce.definitionId,
+          effectiveIce.subtypes,
           visibleBreakCost,
           firstKnownIceBreakable,
           assessedKnownIceCount,
@@ -158,21 +220,25 @@ export function assessKnownRezzedIcePath(
       ) ?? [];
     for (const subroutine of payOrEndSubroutines) {
       const payCost = Math.max(0, Math.floor(subroutine.amount ?? 0));
-      const breakAssessment = minimumCreditsToBreakEndTheRunSubroutines(
-        effectiveIceForQuote(ice, quote),
-        rigCards,
-        1,
-        breakerStrengths,
-        additionalBreakCostPerSubroutine,
-      );
+      const breakAssessment = runPathEffectsPreventFutureBreaking(
+        activeRunPathEffects,
+      )
+        ? undefined
+        : minimumCreditsToBreakEndTheRunSubroutines(
+            effectiveIceForQuote(effectiveIce, quote),
+            rigCards,
+            1,
+            breakerStrengths,
+            additionalBreakCostPerSubroutine,
+          );
       const handlingCost = Math.min(payCost, breakAssessment?.cost ?? payCost);
       if (handlingCost > remainingCredits) {
         return blockedPathAssessment(
           visibleBreakCost + handlingCost,
           remainingCredits - handlingCost,
           iceIndex,
-          ice.definitionId,
-          ice.subtypes,
+          effectiveIce.definitionId,
+          effectiveIce.subtypes,
           pathCostBeforeIce,
           firstKnownIceBreakable,
           assessedKnownIceCount,
@@ -195,6 +261,41 @@ export function assessKnownRezzedIcePath(
         );
       }
     }
+    const futureIce = iceCards.slice(0, Math.max(0, iceIndex));
+    const runPathEffects = pathProjectionEffectsForQuote(quote).filter(
+      (effect) => !runPathEffectAlreadyVisibleOnFutureIce(effect, futureIce),
+    );
+    for (const effect of runPathEffects) {
+      const breakAssessment =
+        options.allowBreakingRunPathEffects
+          ? runPathEffectBreakAssessment({
+              iceCards,
+              iceIndex,
+              ice: effectiveIce,
+              quote,
+              effect,
+              activeRunPathEffects,
+              rigCards,
+              rootCards,
+              remainingCredits,
+              breakerStrengths,
+              additionalBreakCostPerSubroutine,
+            })
+          : undefined;
+      if (breakAssessment) {
+        visibleBreakCost += breakAssessment.cost;
+        remainingCredits -= breakAssessment.cost;
+        firstKnownIceBreakable = true;
+        if (breakAssessment.carriesStrengthAcrossIce) {
+          breakerStrengths.set(
+            breakAssessment.breakerInstanceId,
+            breakAssessment.endingStrength,
+          );
+        }
+      } else {
+        activeRunPathEffects = [...activeRunPathEffects, effect];
+      }
+    }
   }
   return {
     blocked: false,
@@ -210,6 +311,212 @@ export function assessKnownRezzedIcePath(
     creditsSpentBeforeUnpayableIce: 0,
     assessedKnownIceCount,
   };
+}
+
+function runPathEffectBreakAssessment(params: {
+  iceCards: IceCardLike[];
+  iceIndex: number;
+  ice: IceCardLike;
+  quote: VisibleEffectiveIceRunQuote | undefined;
+  effect: RunPathProjectionEffect;
+  activeRunPathEffects: RunPathProjectionEffect[];
+  rigCards: VisibleCard[];
+  rootCards: RootCardLike[];
+  remainingCredits: number;
+  breakerStrengths: Map<string, number>;
+  additionalBreakCostPerSubroutine: number;
+}): BreakAssessment | undefined {
+  if (!runPathProjectionEffectCanMatter(params.effect)) return undefined;
+  const futureIce = params.iceCards.slice(0, Math.max(0, params.iceIndex));
+  if (futureIce.length <= 0) return undefined;
+  const breakAssessment = minimumCreditsToBreakEndTheRunSubroutines(
+    effectiveIceForQuote(params.ice, params.quote),
+    params.rigCards,
+    1,
+    params.breakerStrengths,
+    params.additionalBreakCostPerSubroutine,
+  );
+  if (!breakAssessment || breakAssessment.cost > params.remainingCredits)
+    return undefined;
+
+  const futureWithoutEffect = assessKnownRezzedIcePathInternal(
+    futureIce,
+    params.rigCards,
+    params.remainingCredits,
+    params.rootCards,
+    params.activeRunPathEffects,
+    { allowBreakingRunPathEffects: false },
+    new Map(params.breakerStrengths),
+  );
+  const futureWithEffect = assessKnownRezzedIcePathInternal(
+    futureIce,
+    params.rigCards,
+    params.remainingCredits,
+    params.rootCards,
+    [...params.activeRunPathEffects, params.effect],
+    { allowBreakingRunPathEffects: false },
+    new Map(params.breakerStrengths),
+  );
+  const breakerStrengthsAfterBreak = new Map(params.breakerStrengths);
+  if (breakAssessment.carriesStrengthAcrossIce) {
+    breakerStrengthsAfterBreak.set(
+      breakAssessment.breakerInstanceId,
+      breakAssessment.endingStrength,
+    );
+  }
+  const futureAfterBreak = assessKnownRezzedIcePathInternal(
+    futureIce,
+    params.rigCards,
+    params.remainingCredits - breakAssessment.cost,
+    params.rootCards,
+    params.activeRunPathEffects,
+    { allowBreakingRunPathEffects: false },
+    breakerStrengthsAfterBreak,
+  );
+  if (!futureAfterBreak.canReachAccess) return undefined;
+  const effectCreatesNoAccess =
+    futureWithoutEffect.canReachAccess &&
+    !futureWithEffect.canReachAccess &&
+    futureWithEffect.assessedKnownIceCount > 0;
+  if (effectCreatesNoAccess) return breakAssessment;
+  const futureCostDelta = Math.max(
+    0,
+    (futureWithEffect.visibleBreakCost ?? 0) -
+      (futureWithoutEffect.visibleBreakCost ?? 0),
+  );
+  return futureCostDelta > breakAssessment.cost ? breakAssessment : undefined;
+}
+
+function pathProjectionEffectsForQuote(
+  quote: VisibleEffectiveIceRunQuote | undefined,
+): RunPathProjectionEffect[] {
+  const effects: RunPathProjectionEffect[] = [];
+  for (const subroutine of quote?.subroutines ?? []) {
+    const effect = subroutine.unbrokenRunEffect;
+    if (effect && runPathProjectionEffectCanMatter(effect)) effects.push(effect);
+  }
+  return effects;
+}
+
+function runPathEffectAlreadyVisibleOnFutureIce(
+  effect: RunPathProjectionEffect,
+  futureIce: IceCardLike[],
+): boolean {
+  if ((effect.addsFutureEndTheRunSubroutines ?? 0) > 0) {
+    return futureIce.some((ice) =>
+      effectiveRunQuoteForIce(ice)?.subroutines.some(
+        (subroutine) =>
+          subroutine.type === "end_the_run" &&
+          subroutine.dynamicSourceKind ===
+            "run_duration_additional_subroutine",
+      ),
+    );
+  }
+  if ((effect.increasesFutureBreakCostPerSubroutine ?? 0) > 0) {
+    return futureIce.some((ice) => {
+      const quote = effectiveRunQuoteForIce(ice);
+      if (!quote) return false;
+      const cost = quote.breakSubroutineAdditionalCostPerSubroutine ?? 0;
+      const attributedCostSources =
+        quote.breakSubroutineCostSourceDefinitionIds?.length ?? 0;
+      return cost > attributedCostSources;
+    });
+  }
+  if ((effect.increasesFutureIceStrength ?? 0) > 0) {
+    return futureIce.some((ice) => {
+      const quote = effectiveRunQuoteForIce(ice);
+      if (!quote || !ice.definitionId) return false;
+      return quote.effectiveStrength > cardDefinitionStrength(ice.definitionId);
+    });
+  }
+  return false;
+}
+
+function runPathProjectionEffectCanMatter(
+  effect: RunPathProjectionEffect,
+): boolean {
+  return (
+    (effect.addsFutureEndTheRunSubroutines ?? 0) > 0 ||
+    (effect.increasesFutureBreakCostPerSubroutine ?? 0) > 0 ||
+    (effect.increasesFutureIceStrength ?? 0) > 0 ||
+    (effect.addsFutureEncounterCost ?? 0) > 0 ||
+    effect.preventsFutureBreaking === true
+  );
+}
+
+function projectIceForRunPathEffects(
+  ice: IceCardLike,
+  effects: RunPathProjectionEffect[],
+  iceIndex: number,
+): IceCardLike {
+  if (
+    effects.length === 0 ||
+    !ice.definitionId ||
+    !ice.known ||
+    ice.rezzed !== true
+  )
+    return ice;
+  const quote = effectiveRunQuoteForIce(ice);
+  const baseQuote: VisibleEffectiveIceRunQuote = quote ?? {
+    iceInstanceId: `visible_path.${ice.definitionId}.${iceIndex}`,
+    iceDefinitionId: ice.definitionId,
+    effectiveStrength: ice.strength ?? cardDefinitionStrength(ice.definitionId),
+    subroutines:
+      DEMO_CARDS_BY_ID[ice.definitionId]?.subroutines?.map((subroutine) => ({
+        id: subroutine.id,
+        type: subroutine.type,
+        ...(subroutine.amount !== undefined
+          ? { amount: subroutine.amount }
+          : {}),
+        ...(subroutine.breakTags
+          ? { breakTags: subroutine.breakTags.slice() }
+          : {}),
+      })) ?? [],
+  };
+  let effectiveStrength = baseQuote.effectiveStrength;
+  let breakSubroutineAdditionalCostPerSubroutine =
+    baseQuote.breakSubroutineAdditionalCostPerSubroutine ?? 0;
+  const subroutines = baseQuote.subroutines.map((subroutine) => ({
+    ...subroutine,
+  }));
+  for (const effect of effects) {
+    const addedEndTheRun = Math.max(
+      0,
+      Math.floor(effect.addsFutureEndTheRunSubroutines ?? 0),
+    );
+    for (let index = 0; index < addedEndTheRun; index += 1) {
+      subroutines.push({
+        id: `visible_projection.future_end_the_run.${iceIndex}.${index + 1}`,
+        type: "end_the_run",
+      });
+    }
+    effectiveStrength += Math.max(
+      0,
+      Math.floor(effect.increasesFutureIceStrength ?? 0),
+    );
+    breakSubroutineAdditionalCostPerSubroutine += Math.max(
+      0,
+      Math.floor(effect.increasesFutureBreakCostPerSubroutine ?? 0),
+    );
+  }
+  return {
+    ...ice,
+    strength: effectiveStrength,
+    effectiveRunQuote: {
+      ...baseQuote,
+      effectiveStrength,
+      subroutines,
+      ...(breakSubroutineAdditionalCostPerSubroutine > 0
+        ? { breakSubroutineAdditionalCostPerSubroutine }
+        : {}),
+    },
+  };
+}
+
+function runPathEffectsPreventFutureBreaking(
+  effects: RunPathProjectionEffect[],
+): boolean {
+  return effects.some((effect) => effect.preventsFutureBreaking === true);
 }
 
 function blockedPathAssessment(
