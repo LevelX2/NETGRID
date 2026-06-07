@@ -15034,11 +15034,34 @@ function pumpViabilityAssessment(
       : undefined;
   if (server) {
     const currentQuote = currentEncounteredIceCard(input)?.effectiveRunQuote;
+    const hasImmediateSafetyThreat =
+      currentQuote?.subroutines.some(isImmediateSafetyThreatSubroutine) ??
+      false;
+    const futurePath = hasImmediateSafetyThreat
+      ? {
+          blocksPump: false,
+          creditsAfterPath: creditsAfterPumpAndBreak,
+          evidence: [] as string[],
+        }
+      : encounterFuturePathAfterPumpBreakAssessment(
+          input,
+          server,
+          creditsAfterPumpAndBreak,
+        );
+    if (futurePath.blocksPump)
+      return {
+        canLeadToBreak: false,
+        evidence: [
+          ...futurePath.evidence,
+          `pump_credits_after_break:${creditsAfterPumpAndBreak}`,
+          `pump_required_count:${requiredPumps}`,
+        ],
+      };
     const remotePayoff = encounterRemotePayoffAfterBreakAssessment(
       input,
       server,
       currentQuote?.subroutines ?? [],
-      creditsAfterPumpAndBreak,
+      futurePath.creditsAfterPath,
       0,
     );
     if (remotePayoff.blocksBreak)
@@ -15074,6 +15097,51 @@ function pumpViabilityAssessment(
       `pump_required_count:${requiredPumps}`,
       ...runEffect.evidence,
     ],
+  };
+}
+
+function encounterFuturePathAfterPumpBreakAssessment(
+  input: AiDecisionInput,
+  server: AiDecisionInput["playerView"]["servers"][number],
+  creditsAfterPumpAndBreak: number,
+): { blocksPump: boolean; creditsAfterPath: number; evidence: string[] } {
+  const run = input.playerView.run;
+  if (run?.position?.kind !== "ice")
+    return {
+      blocksPump: false,
+      creditsAfterPath: creditsAfterPumpAndBreak,
+      evidence: [],
+    };
+  const futureIce = server.ice.slice(0, Math.max(0, run.position.iceIndex));
+  if (futureIce.length <= 0)
+    return {
+      blocksPump: false,
+      creditsAfterPath: creditsAfterPumpAndBreak,
+      evidence: [],
+    };
+  const pathAssessment = assessKnownRezzedIcePath(
+    futureIce,
+    input.playerView.own.rig ?? [],
+    creditsAfterPumpAndBreak,
+    server.root,
+  );
+  const pathEvidence = semanticRuntimeKnownIcePathReason(
+    pathAssessment,
+    server.id,
+  );
+  if (
+    pathAssessment.assessedKnownIceCount > 0 &&
+    !pathAssessment.canReachAccess
+  )
+    return {
+      blocksPump: true,
+      creditsAfterPath: pathAssessment.creditsAfterPath,
+      evidence: ["pump_future_path_blocked_after_cost:true", pathEvidence],
+    };
+  return {
+    blocksPump: false,
+    creditsAfterPath: pathAssessment.creditsAfterPath,
+    evidence: [pathEvidence],
   };
 }
 
