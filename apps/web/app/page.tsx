@@ -9455,6 +9455,7 @@ function FloatingAiDecisionDebugOverlay({
 }) {
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     if (position.kind !== "custom") return;
@@ -9499,10 +9500,11 @@ function FloatingAiDecisionDebugOverlay({
   };
   const positionStyle: CSSProperties = position.kind === "custom" ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, transform: "none" } : {};
   const statusText = preview ? "Nächster Schritt" : aiDecisionDebugStatusLabel(status, traceCount);
+  const windowClassName = `aiDecisionDebugWindow ${collapsed ? "is-collapsed" : ""}`;
 
   const overlay = (
     <div ref={overlayRef} className={`aiDecisionDebugOverlay ${position.kind === "custom" ? "custom" : ""}`} style={positionStyle} data-testid="ai-decision-debug-overlay">
-      <section className="aiDecisionDebugWindow" aria-label="KI-Bewertung">
+      <section className={windowClassName} aria-label="KI-Bewertung">
         <div
           className="aiDecisionDebugHead actionPanelFloatingDragHandle"
           onPointerDown={startDrag}
@@ -9523,6 +9525,17 @@ function FloatingAiDecisionDebugOverlay({
               className="button iconOnly"
               type="button"
               onPointerDown={(event) => event.stopPropagation()}
+              onClick={() => setCollapsed((current) => !current)}
+              aria-expanded={!collapsed}
+              aria-label={collapsed ? "KI-Bewertungsfenster ausklappen" : "KI-Bewertungsfenster einklappen"}
+              title={collapsed ? "Ausklappen" : "Einklappen"}
+            >
+              {collapsed ? <ChevronDown size={14} /> : <ChevronUp size={14} />}
+            </button>
+            <button
+              className="button iconOnly"
+              type="button"
+              onPointerDown={(event) => event.stopPropagation()}
               onClick={onClose}
               aria-label="KI-Bewertungsfenster ausblenden"
               title="Ausblenden"
@@ -9531,7 +9544,7 @@ function FloatingAiDecisionDebugOverlay({
             </button>
           </div>
         </div>
-        <div className="aiDecisionDebugBody">
+        <div className="aiDecisionDebugBody" hidden={collapsed}>
           <AiDecisionDebugOverlayBody status={status} error={error} preview={preview} previewError={previewError} trace={trace} />
         </div>
       </section>

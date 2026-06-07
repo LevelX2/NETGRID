@@ -10497,6 +10497,11 @@ select,
   animation: runOverlaySlideIn 180ms ease-out;
 }
 
+.aiDecisionDebugWindow.is-collapsed {
+  max-height: none;
+  grid-template-rows: auto;
+}
+
 .aiDecisionDebugHead {
   min-width: 0;
   min-height: 40px;
@@ -10509,6 +10514,10 @@ select,
   background:
     linear-gradient(color-mix(in srgb, var(--runner), transparent 88%), color-mix(in srgb, var(--runner), transparent 88%)),
     var(--panel);
+}
+
+.aiDecisionDebugWindow.is-collapsed .aiDecisionDebugHead {
+  border-bottom: 0;
 }
 
 .aiDecisionDebugTitle {
@@ -10535,6 +10544,10 @@ select,
 .aiDecisionDebugBody {
   min-height: 0;
   overflow-y: auto;
+}
+
+.aiDecisionDebugBody[hidden] {
+  display: none;
 }
 
 .aiDecisionDebugNotice {
