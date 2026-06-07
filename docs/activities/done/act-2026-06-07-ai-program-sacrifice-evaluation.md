@@ -1,20 +1,27 @@
 ---
 activityId: act-2026-06-07-ai-program-sacrifice-evaluation
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-06-07
+completedAt: 2026-06-07
+branch: codex/activities-inbox-ai-run-mu
 releaseTarget:
 blockedBy:
   - act-2026-06-07-ai-mu-install-action-surface-audit
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-tactical-goals.test.ts src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-evaluation.test.ts src/runner-hand-development.test.ts
+  - git diff --check
 ---
 
 # AI-Program-Sacrifice-Evaluation
@@ -72,4 +79,4 @@ Die Runner-KI soll Programme, die wegen voller MU vor einer Installation getrash
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Die Runner-KI bewertet Pflicht-Trash-Installationen jetzt mit einer side-sicheren `ProgramSacrificeEvaluation` aus PlayerView, LegalAction und sichtbarer Rig. Die Bewertung klassifiziert Opfer als `critical`, `high`, `medium` oder `low`, beruecksichtigt eindeutige Breaker-Coverage, Rollenwert, Counter/gespeicherten Wert, Sunk-Cost und Redundanz, und liefert redigierte Evidence wie `program_sacrifice_best_category`, `program_sacrifice_best_penalty` und `program_sacrifice_reason:*`. Die Folge-Choice nutzt dieselbe Auswahlbewertung; initiale `install_card`-Actions mit `runnerProgramTrashBeforeInstall` erhalten einen Displacement-Malus oder eine Semantic-Runtime-Exclusion, wenn kein akzeptables Opfer genug MU freimachen kann.

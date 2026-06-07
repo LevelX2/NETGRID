@@ -20,7 +20,10 @@ import {
   hashState,
   replayEvents,
 } from "@netgrid/engine";
-import { MECHANIC_SMOKE_DECKS } from "../../engine/src/test-fixtures/mechanic-smoke-fixtures";
+import {
+  MECHANIC_SMOKE_DECKS,
+  v105kCardReleaseGame,
+} from "../../engine/src/test-fixtures/mechanic-smoke-fixtures";
 import {
   AI_DECISION_INPUT_TOP_LEVEL_FIELDS,
   assertAiInputIsSideSafe,
@@ -2137,6 +2140,10 @@ describe("MVP 0.3 AI controller contract", () => {
     expect(decision.evidence).toContain(
       "choice_source:runner_program_trash_before_install",
     );
+    expect(decision.evidence).toContain("program_sacrifice_best_category:low");
+    expect(decision.evidence).toContain(
+      "program_sacrifice_can_free_required:true",
+    );
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );
@@ -2160,6 +2167,80 @@ describe("MVP 0.3 AI controller contract", () => {
       selectedOptionIds: [],
     });
     expect(decision.evidence).toContain("protected_icebreakers:1");
+    expect(decision.evidence).toContain(
+      "program_sacrifice_best_category:critical",
+    );
+    expect(decision.evidence).toContain(
+      "program_sacrifice_can_free_required:false",
+    );
+  });
+
+  it("does not choose an initial program install when only a critical sacrifice can free MU", () => {
+    const state = toRunnerTurn(
+      v105kCardReleaseGame("ai-program-install-critical-sacrifice-initial"),
+    );
+    moveRunnerProgramToRig(state, "onr_v1_015_codeslinger");
+    moveRunnerCardToGrip(state, "onr_v1_052_raffles");
+    state.runner.credits = 40;
+    state.runner.clicks = 4;
+    state.runner.memoryUsed = 1;
+    state.runner.memoryLimit = 1;
+
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const sourceCard = baseInput.playerView.own.gripOrHq.find(
+      (card) => card.definitionId === "onr_v1_052_raffles",
+    );
+    expect(sourceCard).toBeDefined();
+    if (!sourceCard) throw new Error("Missing source card");
+    const installAction: LegalAction = {
+      actionId: "test.runner.install_raffles_with_program_trash",
+      side: "runner",
+      type: "install_card",
+      label: "Raffles mit Programmtrash installieren",
+      source: sourceCard.instanceId,
+      timingPoint: baseInput.playerView.timingPoint,
+      costs: [{ clicks: 1, credits: sourceCard.installCost ?? 0 }],
+      targetRequirements: [],
+      visibility: "private_to_actor",
+      expiresAtStateVersion: baseInput.playerView.stateVersion,
+      payload: {
+        cardId: sourceCard.instanceId,
+        runnerProgramTrashBeforeInstall: true,
+      },
+    };
+    const legalActions = [
+      installAction,
+      ...baseInput.legalActions.filter(
+        (action) => action.actionId !== installAction.actionId,
+      ),
+    ];
+    const input: AiDecisionInput = {
+      ...baseInput,
+      legalActions,
+      playerView: {
+        ...baseInput.playerView,
+        legalActions,
+      },
+    };
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).not.toBe(installAction.actionId);
+    const alternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) => entry.actionId === installAction.actionId,
+    );
+    expect(alternative?.excluded).toBe(true);
+    expect(JSON.stringify(alternative)).toContain(
+      "program_sacrifice_no_acceptable_candidate",
+    );
+    expect(JSON.stringify(alternative)).toContain(
+      "program_sacrifice_best_category:critical",
+    );
+    expect(JSON.stringify(decision)).not.toMatch(/cardInstances|privatePayload/);
   });
 
   it("does not voluntarily trash installed programs when runner program install has enough MU", () => {
