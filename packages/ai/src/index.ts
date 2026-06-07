@@ -4032,6 +4032,13 @@ function tacticalPlanRankDebugItem(
     ["type", plan.type],
     ["target", tacticalPlanTargetDebugValue(plan.target)],
     ["target_label", plan.target?.label],
+    ["handLimitPressure", tacticalPlanEvidenceValue(plan, "hand_limit_pressure:")],
+    ["projectedOverflow", tacticalPlanEvidenceValue(plan, "projected_overflow:")],
+    ["drawOverflowPenalty", tacticalPlanEvidenceValue(plan, "draw_overflow_penalty:")],
+    ["discardFodderCount", tacticalPlanEvidenceValue(plan, "discard_fodder_count:")],
+    ["usefulPlayableCardsInHand", tacticalPlanEvidenceValue(plan, "useful_playable_cards_in_hand:")],
+    ["urgencyOverride", tacticalPlanEvidenceValue(plan, "urgency_override:")],
+    ["why_draw_over_install_or_credit", tacticalPlanEvidenceValue(plan, "why_draw_over_install_or_credit:")],
     ["priority", plan.priority],
     ["status", plan.status],
     ["step", plan.currentStep.kind],
@@ -4050,6 +4057,14 @@ function tacticalPlanRankDebugItem(
 function tacticalPlanTargetDebugValue(target: TacticalPlan["target"]): string {
   if (!target) return "";
   return [target.kind, target.id].filter(Boolean).join(":");
+}
+
+function tacticalPlanEvidenceValue(
+  plan: TacticalPlan,
+  prefix: string,
+): string | undefined {
+  const entry = plan.evidence.find((candidate) => candidate.startsWith(prefix));
+  return entry ? entry.slice(prefix.length) : undefined;
 }
 
 function tacticalPlanUnblocksDebugValue(plan: TacticalPlan): string {

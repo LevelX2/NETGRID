@@ -136,6 +136,47 @@ Prüfbare Floors:
 - Bei 3 bis 5 Credits darf Setup eine Economy-Aktion schlagen, wenn Rolle und Bedarf stark sind und der Runner nach der Zahlung den Floor hält oder einen akuten Blocker entfernt.
 - Ab 6 Credits kann Druck Vorrang haben, wenn RunTargetEvaluation einen guten Zielwert sieht.
 
+## `RunnerDrawOverflowAssessment`
+
+Kartenziehen bleibt ein legitimer Weg, um fehlende Antworten zu finden, bekommt aber in der TacticalPlan-Schicht einen situativen Malus, wenn der Runner dadurch das Handlimit überschreitet oder eine bereits zu volle Hand weiter belastet. Die Bewertung ist AI-intern und nutzt nur eigene Runner-Handdaten, `maxHandSize`, `LegalActions`, HandDevelopment-/Creditbase-Evaluations und side-sichere Plan-Evidence.
+
+Mindestvertrag:
+
+```ts
+type RunnerDrawOverflowAssessment = {
+  currentHandCount: number;
+  maxHandSize: number;
+  cardsToDraw: number;
+  projectedOverflow: number;
+  severity: "none" | "minor" | "moderate" | "high";
+  discardFodderCount: number;
+  valuableCardsAtRisk: number;
+  usefulPlayableCardsInHand: number;
+  usefulHandCardsBlockedByCredits: number;
+  urgencyOverride:
+    | "none"
+    | "find_breaker_for_score_threat"
+    | "find_survival_answer"
+    | "find_run_access_payoff"
+    | "find_economy";
+  penalty: number;
+  reasons: string[];
+};
+```
+
+Bewertungsregeln:
+
+- Overflow 0 erzeugt keinen Malus.
+- Overflow 1 erzeugt einen kleinen Malus, wenn keine klare Abwurfkarte bekannt ist.
+- Overflow 2 erzeugt einen deutlichen Malus; Draw muss gegen Install-/Creditbase-Alternativen bestehen.
+- Overflow 3+ oder bereits überschrittenes Handlimit erzeugt starken Druck gegen weiteren Draw.
+- `discardFodderCount` reduziert den Malus, wenn Low-Value-/Duplicate-/nicht relevante eigene Karten erkennbar abwerfbar sind.
+- Nützliche spielbare Handkarten und wegen Credits blockierte nützliche Handkarten erhöhen den Druck, erst Handentwicklung oder Creditbase zu wählen.
+- Akute Remote-Score-Gefahr darf den Malus reduzieren, wenn Draw die plausible Antwortsuche für fehlende Breaker bleibt.
+- Es gibt keine harte Draw-Sperre; wenn keine bessere legale Alternative existiert, kann Draw weiterhin gewählt werden.
+
+Redigierte Debugdaten dürfen nur Counts, Severity, Penalty, Urgency und Gründe zeigen, insbesondere `handLimitPressure`, `projectedOverflow`, `drawOverflowPenalty`, `discardFodderCount`, `usefulPlayableCardsInHand`, `urgencyOverride` und `why_draw_over_install_or_credit`.
+
 ## Übersteuerungen
 
 Economy und Handentwicklung werden nur durch klare, side-sichere Gründe übersteuert:
@@ -155,6 +196,7 @@ Folgeimplementierungen sollen die bestehenden Goals so mappen:
 - `runner.find_or_install_primary_breaker`: wenn `RunnerHandDevelopmentEvaluation` `breaker_or_rig_piece` oder `memory_support` mit starkem Bedarf meldet.
 - `runner.draw_or_search_for_setup`: wenn keine nützliche Handkarte legal/finanzierbar ist oder Draw/Search selbst eine starke Setuprolle hat.
 - `runner.avoid_low_value_risk_runs`: wenn RunTargetEvaluation schwach ist und Creditbase oder Handentwicklung einen besseren legalen Zug nahelegen.
+- Draw-for-Answer-Pläne werden über `RunnerDrawOverflowAssessment` gegen Overdraw-Kosten abgewogen; Handentwicklung und Creditbase dürfen dadurch höher ranken, bleiben aber LegalActions-only.
 - Pressure- und Remote-Contest-Goals bleiben die expliziten Übersteuerungsziele.
 
 Zulässige Evidence-Subrollen sind zum Beispiel `hand_role:access_payoff`, `hand_role:memory_support`, `creditbase_reason:useful_hand_blocked`, `creditbase_reason:active_run_funding` und `override:known_agenda`. Sie sind keine neuen Goal-IDs.

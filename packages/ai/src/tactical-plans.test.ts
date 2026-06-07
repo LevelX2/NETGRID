@@ -13,6 +13,8 @@ import {
 } from "./tactical-plans";
 import { buildDeckCapabilityProfile } from "./deck-capabilities";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
+import type { RunnerHandDevelopmentEvaluation } from "./runner-hand-development";
+import type { RunnerEconomyPosture } from "./runner-run-target-evaluation";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -767,6 +769,338 @@ describe("tactical plan model", () => {
     );
   });
 
+  it("keeps urgent score-threat draw plausible when one overflow has discard fodder", () => {
+    const run = legalAction("run-remote", "runner", "start_run", {
+      serverId: "remote_1",
+    });
+    const draw = legalAction("draw", "runner", "draw_card");
+    const input = aiInput("runner", [run, draw]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("low-a", "runner", "event"),
+      visibleCard("low-b", "runner", "event"),
+      visibleCard("setup-a", "runner", "program"),
+      visibleCard("setup-b", "runner", "program"),
+      visibleCard("setup-c", "runner", "hardware"),
+    ];
+    input.playerView.own.maxHandSize = 5;
+    input.playerView.own.rig = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [
+        visibleCard("simple_barrier_ice", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["Wall"],
+          effectiveRunQuote: {
+            iceInstanceId: "simple_barrier_ice",
+            iceDefinitionId: "simple_barrier_ice",
+            effectiveStrength: 1,
+            subroutines: [{ id: "etr", type: "end_the_run" }],
+          },
+        }),
+      ], [
+        visibleCard("simple_agenda", "corp", "agenda", {
+          advancementCounters: 1,
+        }),
+      ]),
+    ];
+    const handDevelopmentEvaluations = [
+      runnerHandDevelopmentEvaluation({
+        cardInstanceId: "low-a",
+        developmentRole: "duplicate_or_low_value",
+        strategicFit: "weak",
+        currentNeed: "none",
+        priority: 120,
+        deferReason: "duplicate",
+      }),
+    ];
+
+    const plans = buildTacticalPlans({
+      input,
+      runnerHandDevelopmentEvaluations: handDevelopmentEvaluations,
+    });
+    const coveragePlan = plans.find(
+      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
+    );
+    if (!coveragePlan) throw new Error("Missing urgent draw coverage plan");
+    expect(coveragePlan.currentStep.kind).toBe("draw_for_answer");
+    const mapping = mapPlanStepToLegalActions(
+      coveragePlan,
+      coveragePlan.currentStep,
+      [
+        candidateForUntargetedAction(draw),
+        candidateForActionWithSelectedTargets(run, [
+          {
+            targetId: "remote_1",
+            targetKind: "server",
+            targetSide: "corp",
+            visibilityScope: "public",
+            evidence: ["test"],
+          },
+        ]),
+      ],
+      input,
+    );
+
+    expect(mapping.status).toBe("matched");
+    expect(mapping.legalActions[0]?.actionId).toBe(draw.actionId);
+    expect(coveragePlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "hand_limit_pressure:minor",
+        "projected_overflow:1",
+        "discard_fodder_count:1",
+        "draw_overflow_penalty:0",
+        "urgency_override:find_breaker_for_score_threat",
+      ]),
+    );
+  });
+
+  it("prefers a useful install over draw two into hand overflow without urgency", () => {
+    const rdRun = legalAction("run-rd", "runner", "start_run", {
+      serverId: "rd",
+    });
+    const drawTwo = legalAction("draw-two", "runner", "draw_card", {
+      amount: 2,
+    });
+    const install = legalAction("install-access-card", "runner", "install_card", {}, {
+      source: "access-card",
+    });
+    const input = aiInput("runner", [rdRun, drawTwo, install]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("access-card", "runner", "hardware"),
+      visibleCard("filler-1", "runner", "event"),
+      visibleCard("filler-2", "runner", "event"),
+      visibleCard("filler-3", "runner", "event"),
+      visibleCard("filler-4", "runner", "event"),
+    ];
+    input.playerView.own.maxHandSize = 5;
+    input.playerView.own.rig = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("simple_barrier_ice", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["Wall"],
+        }),
+      ]),
+      server("archives"),
+    ];
+    const handDevelopmentEvaluations = [
+      runnerHandDevelopmentEvaluation({
+        cardInstanceId: "access-card",
+        developmentRole: "access_payoff",
+        strategicFit: "strong",
+        currentNeed: "useful_now",
+        priority: 650,
+        legalActionId: install.actionId,
+      }),
+    ];
+
+    const result = evaluateTacticalPlans({
+      input,
+      runnerHandDevelopmentEvaluations: handDevelopmentEvaluations,
+      candidates: [
+        candidateForUntargetedAction(rdRun),
+        candidateForUntargetedAction(drawTwo),
+        candidateForUntargetedAction(install),
+      ],
+    });
+    const drawPlan = result.planAlternatives.find(
+      (plan) => plan.planId === "runner.obtain_breaker_coverage:rd",
+    );
+
+    expect(result.selectedPlan?.type).toBe("runner.develop_hand_card");
+    expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(install.actionId);
+    expect(drawPlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "hand_limit_pressure:moderate",
+        "projected_overflow:2",
+        "useful_playable_cards_in_hand:1",
+      ]),
+    );
+  });
+
+  it("prefers credit base when overdraw would risk a useful card blocked by credits", () => {
+    const rdRun = legalAction("run-rd", "runner", "start_run", {
+      serverId: "rd",
+    });
+    const draw = legalAction("draw", "runner", "draw_card");
+    const gain = legalAction("gain", "runner", "gain_credit");
+    const input = aiInput("runner", [rdRun, draw, gain]);
+    input.playerView.own.credits = 1;
+    input.playerView.own.gripOrHq = [
+      visibleCard("expensive-economy", "runner", "resource", { installCost: 4 }),
+      visibleCard("filler-1", "runner", "event"),
+      visibleCard("filler-2", "runner", "event"),
+      visibleCard("filler-3", "runner", "event"),
+      visibleCard("filler-4", "runner", "event"),
+    ];
+    input.playerView.own.maxHandSize = 5;
+    input.playerView.own.rig = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("simple_barrier_ice", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["Wall"],
+        }),
+      ]),
+      server("archives"),
+    ];
+    const handDevelopmentEvaluations = [
+      runnerHandDevelopmentEvaluation({
+        cardInstanceId: "expensive-economy",
+        availability: "missing_credits",
+        developmentRole: "economy_engine",
+        strategicFit: "blocked",
+        currentNeed: "useful_now",
+        priority: 650,
+        fundingNeed: {
+          installOrPlayCost: 4,
+          missingCredits: 3,
+          reason: "cannot_pay",
+        },
+        deferReason: "missing_credits",
+      }),
+    ];
+    const economyPosture = runnerEconomyPosture({
+      currentCredits: 1,
+      usefulHandCardsBlockedByCredits: 1,
+      recommendation: "fund_useful_hand_card",
+      economyPriority: "high",
+    });
+
+    const result = evaluateTacticalPlans({
+      input,
+      runnerHandDevelopmentEvaluations: handDevelopmentEvaluations,
+      runnerEconomyPosture: economyPosture,
+      candidates: [
+        candidateForUntargetedAction(rdRun),
+        candidateForUntargetedAction(draw),
+        candidateForUntargetedAction(gain),
+      ],
+    });
+
+    expect(result.selectedPlan?.type).toBe("runner.build_credit_base");
+    expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(gain.actionId);
+    expect(input.legalActions.map((action) => action.actionId)).toContain(
+      result.selectedMapping?.legalActions[0]?.actionId,
+    );
+  });
+
+  it("reduces draw overflow penalty when clear discard fodder covers the overflow", () => {
+    const rdRun = legalAction("run-rd", "runner", "start_run", {
+      serverId: "rd",
+    });
+    const drawTwo = legalAction("draw-two", "runner", "draw_card", {
+      amount: 2,
+    });
+    const input = aiInput("runner", [rdRun, drawTwo]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("low-a", "runner", "event"),
+      visibleCard("low-b", "runner", "event"),
+      visibleCard("setup-a", "runner", "program"),
+      visibleCard("setup-b", "runner", "program"),
+      visibleCard("setup-c", "runner", "hardware"),
+    ];
+    input.playerView.own.maxHandSize = 5;
+    input.playerView.own.rig = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("simple_barrier_ice", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["Wall"],
+        }),
+      ]),
+      server("archives"),
+    ];
+    const handDevelopmentEvaluations = [
+      runnerHandDevelopmentEvaluation({
+        cardInstanceId: "low-a",
+        developmentRole: "duplicate_or_low_value",
+        strategicFit: "weak",
+        currentNeed: "none",
+        priority: 120,
+        deferReason: "duplicate",
+      }),
+      runnerHandDevelopmentEvaluation({
+        cardInstanceId: "low-b",
+        developmentRole: "duplicate_or_low_value",
+        strategicFit: "weak",
+        currentNeed: "none",
+        priority: 120,
+        deferReason: "duplicate",
+      }),
+    ];
+
+    const plans = buildTacticalPlans({
+      input,
+      runnerHandDevelopmentEvaluations: handDevelopmentEvaluations,
+    });
+    const drawPlan = plans.find(
+      (plan) => plan.planId === "runner.obtain_breaker_coverage:rd",
+    );
+
+    expect(drawPlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "hand_limit_pressure:moderate",
+        "projected_overflow:2",
+        "discard_fodder_count:2",
+        "draw_overflow_penalty:60",
+      ]),
+    );
+  });
+
+  it("prefers credits over further draw when already over hand limit and no urgent need exists", () => {
+    const rdRun = legalAction("run-rd", "runner", "start_run", {
+      serverId: "rd",
+    });
+    const draw = legalAction("draw", "runner", "draw_card");
+    const gain = legalAction("gain", "runner", "gain_credit");
+    const input = aiInput("runner", [rdRun, draw, gain]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.gripOrHq = [
+      visibleCard("filler-1", "runner", "event"),
+      visibleCard("filler-2", "runner", "event"),
+      visibleCard("filler-3", "runner", "event"),
+      visibleCard("filler-4", "runner", "event"),
+      visibleCard("filler-5", "runner", "event"),
+      visibleCard("filler-6", "runner", "event"),
+    ];
+    input.playerView.own.maxHandSize = 5;
+    input.playerView.own.rig = [];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("simple_barrier_ice", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["Wall"],
+        }),
+      ]),
+      server("archives"),
+    ];
+    const economyPosture = runnerEconomyPosture({
+      currentCredits: 5,
+      recommendation: "allow_pressure",
+      economyPriority: "low",
+    });
+
+    const result = evaluateTacticalPlans({
+      input,
+      runnerEconomyPosture: economyPosture,
+      candidates: [
+        candidateForUntargetedAction(rdRun),
+        candidateForUntargetedAction(draw),
+        candidateForUntargetedAction(gain),
+      ],
+    });
+
+    expect(result.selectedPlan?.type).toBe("runner.build_credit_base");
+    expect(result.selectedMapping?.legalActions[0]?.actionId).toBe(gain.actionId);
+  });
+
   it("blocks corp score windows that are not protected yet", () => {
     const input = aiInput("corp", [
       legalAction("advance-agenda", "corp", "advance_card", {}, {
@@ -923,6 +1257,62 @@ describe("tactical plan model", () => {
     expect(facts).not.toMatch(/onr_v1_|Dwarf|Broker/);
   });
 });
+
+function runnerHandDevelopmentEvaluation(
+  overrides: Partial<RunnerHandDevelopmentEvaluation> & {
+    cardInstanceId: string;
+  },
+): RunnerHandDevelopmentEvaluation {
+  const { cardInstanceId, ...rest } = overrides;
+  return {
+    schemaVersion: "runner-hand-development-evaluation-v1",
+    cardInstanceId,
+    availability: "legal_now",
+    developmentRole: "access_payoff",
+    strategicFit: "strong",
+    currentNeed: "useful_now",
+    priority: 650,
+    deferReason: "none",
+    evidence: [],
+    ...rest,
+  };
+}
+
+function runnerEconomyPosture(overrides: {
+  currentCredits: number;
+  usefulHandCardsBlockedByCredits?: number;
+  recommendation?: RunnerEconomyPosture["creditBasePlan"]["recommendation"];
+  economyPriority?: RunnerEconomyPosture["creditBasePlan"]["economyPriority"];
+}): RunnerEconomyPosture {
+  const usefulHandCardsBlockedByCredits =
+    overrides.usefulHandCardsBlockedByCredits ?? 0;
+  const recommendation = overrides.recommendation ?? "allow_pressure";
+  const economyPriority = overrides.economyPriority ?? "low";
+  return {
+    schemaVersion: "runner-economy-posture-v1",
+    minimumCreditFloor: 2,
+    desiredCreditReserve: 4,
+    creditBasePlan: {
+      schemaVersion: "runner-credit-base-plan-v1",
+      currentCredits: overrides.currentCredits,
+      minimumCreditFloor: 2,
+      desiredCreditReserve: 4,
+      runCostReserve: 2,
+      fundingNeed: economyPriority === "high",
+      usefulHandCardsBlockedByCredits,
+      usefulHandCardsAffordableNow: 0,
+      recommendation,
+      economyPriority,
+      evidence: [],
+    },
+    riskAdjustedRunReserve: false,
+    buildEconomyBeforePressure: economyPriority !== "low",
+    bankToolsRelevant: false,
+    fundingNeed: economyPriority === "high",
+    recommendation: economyPriority === "high" ? "build_economy" : "stable",
+    evidence: [],
+  };
+}
 
 function aiInput(side: Side, legalActions: LegalAction[]): AiDecisionInput {
   return {
@@ -1126,6 +1516,21 @@ function candidateForAction(action: LegalAction): ActionSemanticCandidate {
     projectionIssues: [],
     hardGates: [],
     evidence: ["test candidate"],
+  };
+}
+
+function candidateForUntargetedAction(action: LegalAction): ActionSemanticCandidate {
+  const semanticActionType: ActionSemanticCandidate["semanticActionType"] =
+    action.type === "draw_card" ? "draw.card" :
+    action.type === "gain_credit" ? "economy.gain_credit" :
+    action.type === "install_card" ? "install.card" :
+    "run";
+  const candidate = candidateForAction(action);
+  if (!candidate.targetContext) return { ...candidate, semanticActionType };
+  return {
+    ...candidate,
+    semanticActionType,
+    targetContext: { ...candidate.targetContext, selectedTargets: [] },
   };
 }
 
