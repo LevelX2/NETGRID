@@ -769,6 +769,46 @@ describe("tactical plan model", () => {
     );
   });
 
+  it("labels hand-development plans with the concrete own hand card title", () => {
+    const input = aiInput("runner", [
+      legalAction("install-access-card", "runner", "install_card", {}, {
+        source: "access-card",
+      }),
+    ]);
+    const handDevelopmentEvaluations: RunnerHandDevelopmentEvaluation[] = [
+      {
+        schemaVersion: "runner-hand-development-evaluation-v1",
+        cardInstanceId: "access-card",
+        definitionId: "access_card_definition",
+        title: "Concrete Access Tool",
+        cardType: "hardware",
+        availability: "legal_now",
+        developmentRole: "access_payoff",
+        strategicFit: "strong",
+        currentNeed: "useful_now",
+        priority: 650,
+        deferReason: "none",
+        legalActionId: "install-access-card",
+        evidence: [],
+      },
+    ];
+
+    const plans = buildTacticalPlans({
+      input,
+      runnerHandDevelopmentEvaluations: handDevelopmentEvaluations,
+    });
+    const handPlan = plans.find(
+      (plan) => plan.type === "runner.develop_hand_card",
+    );
+
+    expect(handPlan?.target).toMatchObject({
+      kind: "card",
+      id: "access-card",
+      label: "Concrete Access Tool",
+    });
+    expect(handPlan?.evidence).toContain("hand_development_role:access_payoff");
+  });
+
   it("keeps urgent score-threat draw plausible when one overflow has discard fodder", () => {
     const run = legalAction("run-remote", "runner", "start_run", {
       serverId: "remote_1",

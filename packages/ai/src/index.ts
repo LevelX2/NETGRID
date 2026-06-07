@@ -4032,19 +4032,41 @@ function tacticalPlanRankDebugItem(
     ["type", plan.type],
     ["target", tacticalPlanTargetDebugValue(plan.target)],
     ["target_label", plan.target?.label],
-    ["handLimitPressure", tacticalPlanEvidenceValue(plan, "hand_limit_pressure:")],
-    ["projectedOverflow", tacticalPlanEvidenceValue(plan, "projected_overflow:")],
-    ["drawOverflowPenalty", tacticalPlanEvidenceValue(plan, "draw_overflow_penalty:")],
-    ["discardFodderCount", tacticalPlanEvidenceValue(plan, "discard_fodder_count:")],
-    ["usefulPlayableCardsInHand", tacticalPlanEvidenceValue(plan, "useful_playable_cards_in_hand:")],
+    ["target_role", tacticalPlanTargetRoleDebugValue(plan)],
+    [
+      "handLimitPressure",
+      tacticalPlanEvidenceValue(plan, "hand_limit_pressure:"),
+    ],
+    [
+      "projectedOverflow",
+      tacticalPlanEvidenceValue(plan, "projected_overflow:"),
+    ],
+    [
+      "drawOverflowPenalty",
+      tacticalPlanEvidenceValue(plan, "draw_overflow_penalty:"),
+    ],
+    [
+      "discardFodderCount",
+      tacticalPlanEvidenceValue(plan, "discard_fodder_count:"),
+    ],
+    [
+      "usefulPlayableCardsInHand",
+      tacticalPlanEvidenceValue(plan, "useful_playable_cards_in_hand:"),
+    ],
     ["urgencyOverride", tacticalPlanEvidenceValue(plan, "urgency_override:")],
-    ["why_draw_over_install_or_credit", tacticalPlanEvidenceValue(plan, "why_draw_over_install_or_credit:")],
+    [
+      "why_draw_over_install_or_credit",
+      tacticalPlanEvidenceValue(plan, "why_draw_over_install_or_credit:"),
+    ],
     ["priority", plan.priority],
     ["status", plan.status],
     ["step", plan.currentStep.kind],
     ["selected", selected],
     ["blockers", plan.blockers.map((blocker) => blocker.kind).join(",")],
-    ["capabilities", plan.requiredCapabilities.map((capability) => capability.kind).join(",")],
+    [
+      "capabilities",
+      plan.requiredCapabilities.map((capability) => capability.kind).join(","),
+    ],
     ["unblocks", tacticalPlanUnblocksDebugValue(plan)],
     ["scores", tacticalPlanScoreDebugValue(plan)],
   ];
@@ -4057,6 +4079,15 @@ function tacticalPlanRankDebugItem(
 function tacticalPlanTargetDebugValue(target: TacticalPlan["target"]): string {
   if (!target) return "";
   return [target.kind, target.id].filter(Boolean).join(":");
+}
+
+function tacticalPlanTargetRoleDebugValue(
+  plan: TacticalPlan,
+): string | undefined {
+  if (plan.type !== "runner.develop_hand_card") return undefined;
+  const prefix = "hand_development_role:";
+  const role = plan.evidence.find((entry) => entry.startsWith(prefix));
+  return role ? role.slice(prefix.length) : undefined;
 }
 
 function tacticalPlanEvidenceValue(
@@ -4655,6 +4686,7 @@ function breakAccessPathAssessment(
         semanticRuntimeKnownIcePathReason(pathAssessment, server.id),
       ],
     };
+  }
   return {
     canPreserveAccessPath: false,
     evidence: [

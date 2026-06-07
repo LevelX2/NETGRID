@@ -1527,7 +1527,7 @@ function runnerHandDevelopmentPlans(
         target: {
           kind: "card",
           id: evaluation.cardInstanceId,
-          label: evaluation.developmentRole,
+          label: runnerHandDevelopmentTargetLabel(evaluation),
         },
         currentStep: createPlanStep({
           stepId: `install_development_card:${evaluation.cardInstanceId}`,
@@ -1561,6 +1561,12 @@ function runnerHandDevelopmentPlans(
         stateVersion,
       }),
     );
+}
+
+function runnerHandDevelopmentTargetLabel(
+  evaluation: RunnerHandDevelopmentEvaluation,
+): string {
+  return evaluation.title ?? evaluation.definitionId ?? evaluation.developmentRole;
 }
 
 function runnerCreditBasePlans(

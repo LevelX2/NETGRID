@@ -9721,6 +9721,7 @@ type AiDecisionDebugPlanEntry = {
   type: string;
   target?: string;
   targetLabel?: string;
+  targetRole?: string;
   priority?: number;
   status?: string;
   step?: string;
@@ -9861,7 +9862,7 @@ function AiDecisionDebugPlanLayer({ detail, defaultOpen = true }: { detail: Reco
                   <strong>#{plan.rank} {aiDecisionDebugPlanTitle(plan)}</strong>
                   <span>
                     {[
-                      titleUsesTarget ? undefined : aiDecisionDebugPlanTargetLabel(plan),
+                      aiDecisionDebugPlanSecondaryLabel(plan, titleUsesTarget),
                       plan.priority !== undefined ? `Priorität ${plan.priority.toFixed(0)}` : undefined,
                       aiDecisionDebugPlanStatusLabel(plan.status)
                     ].filter(Boolean).join(" · ")}
@@ -9913,7 +9914,6 @@ function aiDecisionDebugPlanLayer(detail: Record<string, unknown>): {
   const selectedType = selectedEntry?.type ?? aiDecisionDebugTagValue(items, "selected_plan_type") ?? aiDecisionDebugTagValue(items, "tactical_plan_type");
   const selectedStatus = selectedEntry?.status ?? aiDecisionDebugTagValue(items, "selected_plan_status");
   const selectedStep = selectedEntry?.step ?? aiDecisionDebugTagValue(items, "selected_step_kind") ?? aiDecisionDebugTagValue(items, "tactical_step");
-  const selectedTarget = selectedEntry ? aiDecisionDebugPlanTargetLabel(selectedEntry) : "";
   const selectedPriority = selectedEntry?.priority !== undefined ? ` · Priorität ${selectedEntry.priority.toFixed(0)}` : "";
   const previousType = aiDecisionDebugTagValue(items, "previous_plan_type");
   const previousStatus = aiDecisionDebugTagValue(items, "previous_plan_status");
@@ -9931,7 +9931,9 @@ function aiDecisionDebugPlanLayer(detail: Record<string, unknown>): {
       "Ausgewählter Plan",
       [
         selectedPlanLabel,
-        selectedEntry && aiDecisionDebugPlanTitleUsesTarget(selectedEntry) ? undefined : selectedTarget || undefined,
+        selectedEntry
+          ? aiDecisionDebugPlanSecondaryLabel(selectedEntry, aiDecisionDebugPlanTitleUsesTarget(selectedEntry))
+          : undefined,
         selectedStatus ? aiDecisionDebugPlanStatusLabel(selectedStatus) : undefined
       ].filter(Boolean).join(" · ") + selectedPriority
     ]);
@@ -9973,6 +9975,7 @@ function aiDecisionDebugParsePlanEntry(item: string): AiDecisionDebugPlanEntry |
   const type = fields.get("type") ?? "Plan";
   const target = fields.get("target") || undefined;
   const targetLabel = fields.get("target_label") || undefined;
+  const targetRole = fields.get("target_role") || undefined;
   const priority = aiDecisionDebugNumber(fields.get("priority"));
   const status = fields.get("status") || undefined;
   const step = fields.get("step") || undefined;
@@ -9982,6 +9985,7 @@ function aiDecisionDebugParsePlanEntry(item: string): AiDecisionDebugPlanEntry |
     type,
     ...(target ? { target } : {}),
     ...(targetLabel ? { targetLabel } : {}),
+    ...(targetRole ? { targetRole } : {}),
     ...(priority !== undefined ? { priority } : {}),
     ...(status ? { status } : {}),
     ...(step ? { step } : {}),
@@ -10038,6 +10042,10 @@ function aiDecisionDebugPlanTitle(plan: AiDecisionDebugPlanEntry): string {
       : "Breaker-Abdeckung";
     return targetRun ? `${targetRun} vorbereiten: ${coverage}` : `Breaker-Abdeckung vorbereiten: ${coverage}`;
   }
+  if (plan.type === "runner.develop_hand_card") {
+    const cardLabel = aiDecisionDebugPlanTargetLabel(plan);
+    return cardLabel ? `Handkarte entwickeln: ${cardLabel}` : aiTracePlanLabel(plan.type);
+  }
   const targetRun = aiDecisionDebugPlanTargetRunAction(plan);
   if (
     targetRun &&
@@ -10055,8 +10063,20 @@ function aiDecisionDebugPlanTitleUsesTarget(plan: AiDecisionDebugPlanEntry): boo
       plan.type === "runner.opportunistic_central_run") &&
       aiDecisionDebugPlanTargetRunAction(plan)) ||
     (plan.type === "runner.obtain_breaker_coverage" &&
-      aiDecisionDebugPlanTargetRunNoun(plan)),
+      aiDecisionDebugPlanTargetRunNoun(plan)) ||
+    (plan.type === "runner.develop_hand_card" &&
+      Boolean(aiDecisionDebugPlanTargetLabel(plan))),
   );
+}
+
+function aiDecisionDebugPlanSecondaryLabel(
+  plan: AiDecisionDebugPlanEntry,
+  titleUsesTarget: boolean,
+): string | undefined {
+  if (plan.type === "runner.develop_hand_card") {
+    return aiDecisionDebugPlanTargetRoleLabel(plan) || undefined;
+  }
+  return titleUsesTarget ? undefined : aiDecisionDebugPlanTargetLabel(plan) || undefined;
 }
 
 function aiDecisionDebugPlanReferenceLabel(planId: string): string {
@@ -10101,13 +10121,21 @@ function aiDecisionDebugPlanServerTargetLabel(plan: AiDecisionDebugPlanEntry | u
 }
 
 function aiDecisionDebugPlanTargetLabel(plan: AiDecisionDebugPlanEntry): string {
-  if (plan.targetLabel) return aiDecisionDebugPlanTargetValueLabel(plan.targetLabel);
+  if (plan.targetLabel) {
+    return plan.target?.startsWith("card:")
+      ? plan.targetLabel
+      : aiDecisionDebugPlanTargetValueLabel(plan.targetLabel);
+  }
   if (!plan.target) return "";
   const [kind, id = plan.target] = plan.target.split(":");
   if (kind === "server") return aiDecisionDebugPlanServerTargetLabel(plan);
   if (kind === "capability" && id === "runner_credit_base") return "Credits";
   if (kind === "bank" && id === "runner_credit_bank") return "Credit-Bank";
   return id;
+}
+
+function aiDecisionDebugPlanTargetRoleLabel(plan: AiDecisionDebugPlanEntry): string {
+  return plan.targetRole ? aiDecisionDebugPlanTargetValueLabel(plan.targetRole) : "";
 }
 
 function aiDecisionDebugPlanTargetValueLabel(value: string): string {
@@ -10141,12 +10169,16 @@ function aiDecisionDebugPlanStepLabel(value: string, plan?: AiDecisionDebugPlanE
   const coverage = plan?.capabilities[0]
     ? aiDecisionDebugPlanCapabilityLabel(plan.capabilities[0])
     : "";
+  const handCard = plan?.type === "runner.develop_hand_card"
+    ? aiDecisionDebugPlanTargetLabel(plan)
+    : "";
   const labels: Record<string, string> = {
     advance_score_card: "Score-Karte advancen",
     build_bank_counter: "Credit-Bank aufbauen",
     cash_out_bank: "Credit-Bank auszahlen",
     draw_for_answer: coverage ? `Karte ziehen / ${coverage} suchen` : "Karte ziehen / Antwort suchen",
     gain_credits: "Credits nehmen",
+    install_development_card: handCard ? `${handCard} installieren` : "Handkarte installieren",
     install_breaker: coverage ? `${coverage} installieren` : "Breaker installieren",
     probe_central: "Zentralserver-Run prüfen",
     rez_outer_ice: "äußeres ICE rezzen",
