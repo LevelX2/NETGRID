@@ -10372,11 +10372,22 @@ function aiDecisionDebugMemoryRows(detail: Record<string, unknown>): Array<[stri
   if (!model) return rows;
   const rnd = aiDecisionDebugRecord(model.rndTopFreshness);
   if (rnd) {
-    const freshness = typeof rnd.freshness === "string" ? aiDecisionDebugRndFreshnessLabel(rnd.freshness) : "-";
-    const known = rnd.knownToRunner === true ? "bekannt" : "nicht bekannt";
+    const rawFreshness = typeof rnd.freshness === "string" ? rnd.freshness : undefined;
     const knownTop = aiDecisionDebugCardLabel(aiDecisionDebugRecord(rnd.knownTopCard));
-    rows.push(["R&D-Top-Wissen", `${knownTop ? `${knownTop} · ` : ""}${freshness} · ${known}`]);
     const sequence = aiDecisionDebugPositionCardList(rnd.knownSequence, 6);
+    const freshness =
+      rawFreshness === "fresh_after_top_removed" && knownTop
+        ? "Sequenz vorgerückt"
+        : rawFreshness
+          ? aiDecisionDebugRndFreshnessLabel(rawFreshness)
+          : "-";
+    const known =
+      rawFreshness === "fresh_after_top_removed" && !knownTop && !sequence
+        ? "neue Topkarte unbekannt"
+        : rnd.knownToRunner === true
+          ? "bekannt"
+          : "nicht bekannt";
+    rows.push(["R&D-Top-Wissen", `${knownTop ? `${knownTop} · ` : ""}${freshness} · ${known}`]);
     if (sequence) rows.push(["R&D-Sequenz", sequence]);
   }
   const hq = aiDecisionDebugRecord(model.hqHandMemory);
@@ -10482,6 +10493,7 @@ function aiDecisionDebugRndFreshnessLabel(value: string): string {
   const labels: Record<string, string> = {
     fresh: "frisch",
     fresh_known_same_top: "frisch bekannte Topkarte",
+    fresh_after_top_removed: "Topkarte entfernt",
     invalidated: "invalidiert",
     stale_known_same_top: "alte bekannte Topkarte",
     unknown: "unbekannt"
