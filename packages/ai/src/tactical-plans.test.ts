@@ -14,7 +14,10 @@ import {
 import { buildDeckCapabilityProfile } from "./deck-capabilities";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
 import type { RunnerHandDevelopmentEvaluation } from "./runner-hand-development";
-import type { RunnerEconomyPosture } from "./runner-run-target-evaluation";
+import type {
+  RunnerEconomyPosture,
+  RunnerRunTargetEvaluation,
+} from "./runner-run-target-evaluation";
 import type {
   AiDecisionInput,
   LegalAction,
@@ -775,6 +778,67 @@ describe("tactical plan model", () => {
     expect(emptyRemotePlan?.scoreBreakdown[0]).toMatchObject({
       key: "empty_remote_no_root_value",
     });
+  });
+
+  it("explains normal remote run priority with run-target score components", () => {
+    const remoteRun = legalAction("run-remote-2", "runner", "start_run", {
+      serverId: "remote_2",
+    });
+    const input = aiInput("runner", [remoteRun]);
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_2", [], [
+        visibleCard("onr_v1_317_data-masons", "corp", "asset", {
+          trashCost: 1,
+        }),
+      ]),
+    ];
+    const runnerRunTargetEvaluations: RunnerRunTargetEvaluation[] = [
+      {
+        schemaVersion: "runner-run-target-evaluation-v1",
+        targetServerId: "remote_2",
+        targetKind: "remote",
+        actionId: remoteRun.actionId,
+        accessPayoff: "trash_affordable",
+        knownAccessState: "known_payoff",
+        multiaccessAvailable: false,
+        pathPassability: "reachable",
+        pathCost: 0,
+        creditsAfterRun: 5,
+        stealOrTrashAffordable: true,
+        riskyUniversalCoverage: false,
+        scoreThreat: false,
+        recommendation: "run_now",
+        score: 480,
+        evidence: ["test_known_trashable_remote"],
+      },
+    ];
+
+    const plans = buildTacticalPlans({
+      input,
+      runnerRunTargetEvaluations,
+    });
+    const remotePlan = plans.find(
+      (plan) => plan.planId === "runner.contest_remote:remote_2",
+    );
+
+    expect(remotePlan?.priority).toBe(1000);
+    expect(remotePlan?.scoreBreakdown).toEqual([
+      {
+        key: "runner_run_target_base",
+        label: "Remote-Run-Basis",
+        value: 820,
+        reason: "remote_2",
+      },
+      {
+        key: "runner_run_target_recommendation",
+        label: "RunTarget-Empfehlung",
+        value: 180,
+        reason: "run_now;payoff:trash_affordable;score:480",
+      },
+    ]);
   });
 
   it("uses bank capability evidence for runner cashout plans", () => {

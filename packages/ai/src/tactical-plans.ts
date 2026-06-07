@@ -1225,6 +1225,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
           ...runnerRunTargetPlanEvidence(context, action),
           ...runnerGoalEvidence,
         ],
+        scoreBreakdown: runnerRunTargetPlanScoreBreakdown(context, action, 820),
         stateVersion,
       }),
     );
@@ -1779,6 +1780,36 @@ function runnerAdjustedPlanPriority(
   const evaluation = runnerRunTargetEvaluationForAction(context, action);
   if (!evaluation) return basePriority;
   return basePriority + runnerRunTargetPriorityDelta(evaluation);
+}
+
+function runnerRunTargetPlanScoreBreakdown(
+  context: TacticalPlanBuildContext,
+  action: LegalAction,
+  basePriority: number,
+): PlanScoreBreakdown[] {
+  const evaluation = runnerRunTargetEvaluationForAction(context, action);
+  return [
+    {
+      key: "runner_run_target_base",
+      label: "Remote-Run-Basis",
+      value: basePriority,
+      reason: actionServerId(action) ?? action.actionId,
+    },
+    ...(evaluation
+      ? [
+          {
+            key: "runner_run_target_recommendation",
+            label: "RunTarget-Empfehlung",
+            value: runnerRunTargetPriorityDelta(evaluation),
+            reason: [
+              evaluation.recommendation,
+              `payoff:${evaluation.accessPayoff}`,
+              `score:${evaluation.score}`,
+            ].join(";"),
+          },
+        ]
+      : []),
+  ];
 }
 
 function runnerRunTargetPriorityDelta(
