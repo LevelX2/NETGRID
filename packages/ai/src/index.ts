@@ -205,6 +205,10 @@ export {
   redactedDeckCapabilityFacts,
 } from "./deck-capabilities";
 export { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
+export {
+  RUNNER_STRATEGIC_INTENT_SCHEMA_VERSION,
+  buildRunnerStrategicIntentProfile,
+} from "./runner-strategic-intent";
 export type {
   AiDeckDoctrineDeckSnapshot,
   CorpOpeningHandEvaluation,
@@ -232,6 +236,17 @@ export type {
   DeckStrategyScore,
   RunnerDeckStrategyProfiles,
 } from "./deck-doctrine-strategy";
+export type {
+  BuildRunnerStrategicIntentProfileParams,
+  RunnerExecutionStyle,
+  RunnerPressureVector,
+  RunnerPrimaryWinIntent,
+  RunnerRejectedIntent,
+  RunnerRiskProfile,
+  RunnerSetupEngine,
+  RunnerStrategicIntentConfidence,
+  RunnerStrategicIntentProfile,
+} from "./runner-strategic-intent";
 export {
   classifyBreakerCoverageFromOntology,
   compareBreakerProfilesForCoverage,
