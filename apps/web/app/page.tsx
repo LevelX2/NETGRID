@@ -9628,26 +9628,18 @@ function aiDecisionTraceSelectedActionLabel(trace: MaintenanceAiTraceDetail): st
 
 function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: MaintenanceAiTraceDetail; mode?: "trace" | "preview" }) {
   const detail = trace.detail;
-  const metaRows = aiTraceMetaRows(trace)
-    .filter(([label]) => ["Entscheidung", "Seite", "State", "Ausgeführt", "Debug-Auswahl", "Debug-Kopplung", "Plan", "Score", "Vertrauen"].includes(label))
-    .map(([label, value]): [string, string] => {
-      if (mode !== "preview") return [label, value];
-      if (label === "Entscheidung") return ["Vorschau", "Nächster KI-Schritt"];
-      if (label === "Ausgeführt") return ["Geplant", aiDecisionTraceSelectedActionLabel(trace)];
-      return [label, value];
-    });
+  const metaRows = aiDecisionDebugOverlayMetaRows(trace, mode);
   const actionRows = aiTraceActionRows(detail, mode === "preview" ? 32 : 8);
   const rankedAlternatives = aiDecisionDebugRecordList(detail.rankedAlternatives).slice(0, mode === "preview" ? 12 : 4);
   const scoreRows = aiTraceScoreRows(detail, 8);
   const doctrineRows = aiTraceDoctrineRows(detail);
   const notes = aiTraceDebugGapNotes(detail).slice(0, 3);
-  const warningItems = [
-    ...safeStringList(detail.warnings, 4),
+  const statusWarnings = [
     ...(detail.fallbackUsed === true ? ["Fallback genutzt"] : []),
     ...(detail.timeoutUsed === true ? ["Timeout genutzt"] : [])
   ];
   const visibleReasons = safeStringList(detail.visibleReasons, 5);
-  const whyNot = safeStringList(detail.whyNot, 5);
+  const relevantExclusions = safeStringList(detail.whyNot, 5).filter(aiDecisionDebugIsCurrentWhyNot);
   const title = mode === "preview" ? aiDecisionPreviewTitle(trace) : aiTraceTitle(trace);
   return (
     <div className="aiDecisionDebugContent">
@@ -9656,9 +9648,9 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
         <span>{new Date(trace.createdAt).toLocaleTimeString("de-DE", { hour: "2-digit", minute: "2-digit", second: "2-digit" })}</span>
       </div>
       <AiDecisionDebugRows rows={metaRows} />
-      <AiDecisionDebugChips title="Warnmarker" items={warningItems} tone="warning" />
+      <AiDecisionDebugChips title="Hinweise" items={statusWarnings} tone="warning" />
       <AiDecisionDebugChips title="Gründe" items={visibleReasons} />
-      <AiDecisionDebugChips title="Why-not" items={whyNot} />
+      <AiDecisionDebugChips title="Ausschlüsse" items={relevantExclusions} />
       <AiDecisionDebugPlanLayer detail={detail} defaultOpen />
       {actionRows.length > 0 ? (
         <AiDecisionDebugCollapsibleSection title={mode === "preview" ? "LegalAction-Ebene" : "Action-Level-Ranking"} defaultOpen>
@@ -9713,6 +9705,29 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
       <AiDecisionDebugChips title="Folgepunkte" items={notes} tone="muted" />
     </div>
   );
+}
+
+const AI_DECISION_DEBUG_OVERLAY_META_LABELS = new Set([
+  "Entscheidung",
+  "Ausgeführt",
+  "Debug-Auswahl",
+  "Debug-Kopplung",
+  "Plan",
+  "Score"
+]);
+
+function aiDecisionDebugOverlayMetaRows(
+  trace: MaintenanceAiTraceDetail,
+  mode: "trace" | "preview",
+): Array<[string, string]> {
+  const hiddenPreviewLabels = new Set(["Entscheidung", "Ausgeführt"]);
+  return aiTraceMetaRows(trace)
+    .filter(([label]) => AI_DECISION_DEBUG_OVERLAY_META_LABELS.has(label))
+    .filter(([label]) => mode !== "preview" || !hiddenPreviewLabels.has(label));
+}
+
+function aiDecisionDebugIsCurrentWhyNot(item: string): boolean {
+  return !item.startsWith("legacy_reference_") && item !== "semantic_runtime_actual_differs_from_legacy_debug";
 }
 
 type AiDecisionDebugPlanEntry = {
