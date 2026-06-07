@@ -9,6 +9,7 @@ import {
   type KnownRemoteAccessPayoff,
 } from "./known-remote-access-payoff";
 import type { DeckCapabilityProfile } from "./deck-capabilities";
+import { createAiHintsByCard, type AiCardHint } from "./ai-hints";
 import type { RunnerHandDevelopmentEvaluation } from "./runner-hand-development";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
@@ -31,6 +32,17 @@ export type RunnerAccessPayoff =
   | "fresh"
   | "access_bonus"
   | "score_threat";
+
+export type RunnerInstalledRunPayoff = {
+  immediateAccessValue: number;
+  futureSetupValue: number;
+  purgeTaxValue: number;
+  economyValue: number;
+  riskPenalty: number;
+  scoreBonus: number;
+  multiaccessAvailable: boolean;
+  evidence: string[];
+};
 
 export type RunnerKnownAccessState =
   | "known_payoff"
@@ -96,6 +108,7 @@ export type RunnerRunTargetEvaluation = {
   pathCost: number;
   creditsAfterRun: number;
   stealOrTrashAffordable: boolean | "unknown";
+  installedRunPayoff: RunnerInstalledRunPayoff;
   riskyUniversalCoverage: boolean;
   scoreThreat: boolean;
   recommendation: RunnerRunTargetRecommendation;
@@ -123,6 +136,9 @@ export type EvaluateRunnerRunTargetsParams = {
   beliefState?: BeliefState;
   handDevelopmentEvaluations?: readonly RunnerHandDevelopmentEvaluation[];
 };
+
+const AI_HINTS_BY_CARD = createAiHintsByCard();
+const INSTALLED_RUN_PAYOFF_SCORE_CAP = 180;
 
 export function buildRunnerEconomyPosture(
   params: EvaluateRunnerRunTargetsParams,
@@ -398,15 +414,21 @@ function evaluateRunnerRunTarget(
     server?.root ?? [],
   );
   const payoff = payoffForTarget(params, targetServerId, targetKind);
+  const installedRunPayoff = installedRunPayoffForTarget(
+    params.input,
+    targetKind,
+  );
   const scoreThreat = targetKind === "remote" && remoteHasScoreThreat(server);
-  const accessPayoff = scoreThreat && payoff.accessPayoff === "unknown"
-    ? "score_threat"
-    : payoff.accessPayoff;
+  const accessPayoff = accessPayoffWithInstalledRunPayoff({
+    basePayoff: payoff.accessPayoff,
+    installedRunPayoff,
+    scoreThreat,
+  });
   const riskyUniversalCoverage = hasRiskyUniversalPressure(params) &&
     (server?.ice.length ?? 0) > 0;
   const pathPassability = pathPassabilityFor(path);
   const creditsAfterRun = path.creditsAfterPath;
-  const multiaccessAvailable = targetHasMultiaccess(params.input, targetKind);
+  const multiaccessAvailable = installedRunPayoff.multiaccessAvailable;
   const stealOrTrashAffordable = stealOrTrashAffordableFor(accessPayoff);
   const recommendation = recommendationForRunTarget({
     targetKind,
@@ -415,6 +437,7 @@ function evaluateRunnerRunTarget(
     pathPassability,
     creditsAfterRun,
     economyPosture,
+    installedRunPayoff,
     scoreThreat,
   });
   const score = scoreRunTargetEvaluation({
@@ -427,6 +450,7 @@ function evaluateRunnerRunTarget(
     scoreThreat,
     recommendation,
     multiaccessAvailable,
+    installedRunPayoffScore: installedRunPayoff.scoreBonus,
   });
   return {
     schemaVersion: RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION,
@@ -440,6 +464,7 @@ function evaluateRunnerRunTarget(
     pathCost: path.visibleBreakCost ?? 0,
     creditsAfterRun,
     stealOrTrashAffordable,
+    installedRunPayoff,
     riskyUniversalCoverage,
     scoreThreat,
     recommendation,
@@ -453,12 +478,31 @@ function evaluateRunnerRunTarget(
       `path_cost:${path.visibleBreakCost ?? 0}`,
       `credits_after_run:${creditsAfterRun}`,
       `multiaccess_available:${multiaccessAvailable}`,
+      `installed_run_payoff_score:${installedRunPayoff.scoreBonus}`,
       `risky_universal_coverage:${riskyUniversalCoverage}`,
       `score_threat:${scoreThreat}`,
       `recommendation:${recommendation}`,
       ...payoff.evidence.slice(0, 8),
+      ...installedRunPayoff.evidence.slice(0, 8),
     ],
   };
+}
+
+function accessPayoffWithInstalledRunPayoff(params: {
+  basePayoff: RunnerAccessPayoff;
+  installedRunPayoff: RunnerInstalledRunPayoff;
+  scoreThreat: boolean;
+}): RunnerAccessPayoff {
+  if (params.scoreThreat && params.basePayoff === "unknown") {
+    return "score_threat";
+  }
+  if (
+    params.basePayoff === "unknown" &&
+    params.installedRunPayoff.immediateAccessValue >= 50
+  ) {
+    return "access_bonus";
+  }
+  return params.basePayoff;
 }
 
 function payoffForTarget(
@@ -538,6 +582,7 @@ function recommendationForRunTarget(params: {
   pathPassability: RunnerPathPassability;
   creditsAfterRun: number;
   economyPosture: RunnerEconomyPosture;
+  installedRunPayoff: RunnerInstalledRunPayoff;
   scoreThreat: boolean;
 }): RunnerRunTargetRecommendation {
   if (params.pathPassability === "blocked_missing_coverage") {
@@ -563,6 +608,12 @@ function recommendationForRunTarget(params: {
   ) {
     return "gain_credits_first";
   }
+  if (
+    params.installedRunPayoff.immediateAccessValue >= 50 &&
+    params.pathPassability === "reachable"
+  ) {
+    return "run_now";
+  }
   if (params.targetKind === "rd" && params.knownAccessState === "unknown") {
     return "run_now";
   }
@@ -581,12 +632,14 @@ function scoreRunTargetEvaluation(params: {
   scoreThreat: boolean;
   recommendation: RunnerRunTargetRecommendation;
   multiaccessAvailable: boolean;
+  installedRunPayoffScore: number;
 }): number {
   const payoffScore = scoreForPayoff(params.accessPayoff);
   const pathPenalty = params.pathPassability === "reachable" ? 0 : -420;
   const reservePenalty =
     params.creditsAfterRun < params.economyPosture.minimumCreditFloor ? -160 : 0;
   const multiaccessBonus = params.multiaccessAvailable ? 80 : 0;
+  const installedRunPayoffBonus = params.installedRunPayoffScore;
   const scoreThreatBonus = params.scoreThreat ? 180 : 0;
   const recommendationScore = recommendationRank(params.recommendation) * 20;
   return (
@@ -594,6 +647,7 @@ function scoreRunTargetEvaluation(params: {
     pathPenalty +
     reservePenalty +
     multiaccessBonus +
+    installedRunPayoffBonus +
     scoreThreatBonus +
     recommendationScore
   );
@@ -661,24 +715,227 @@ function highValuePayoff(payoff: RunnerAccessPayoff): boolean {
   );
 }
 
-function targetHasMultiaccess(
+function installedRunPayoffForTarget(
   input: AiDecisionInput,
   targetKind: RunnerRunTargetKind,
-): boolean {
-  if (targetKind !== "rd" && targetKind !== "hq") return false;
-  return (input.playerView.own.rig ?? []).some((card) => {
-    const definitionId = card.definitionId;
-    if (targetKind === "rd") {
-      return (
-        definitionId === "onr_v1_050_r-and-d-protocol-files" ||
-        definitionId === "onr_v1_139_r-and-d-interface"
+): RunnerInstalledRunPayoff {
+  const values = {
+    immediateAccessValue: 0,
+    futureSetupValue: 0,
+    purgeTaxValue: 0,
+    economyValue: 0,
+    riskPenalty: 0,
+  };
+  let multiaccessAvailable = false;
+  const evidence = new Set<string>();
+  for (const card of input.playerView.own.rig ?? []) {
+    if (card.known === false) continue;
+    if (!card.definitionId) continue;
+    const hint = AI_HINTS_BY_CARD.get(card.definitionId);
+    const contribution = hint
+      ? installedRunPayoffContributionForHint(hint, targetKind)
+      : undefined;
+    if (!contribution) continue;
+    values.immediateAccessValue += contribution.immediateAccessValue;
+    values.futureSetupValue += contribution.futureSetupValue;
+    values.purgeTaxValue += contribution.purgeTaxValue;
+    values.economyValue += contribution.economyValue;
+    values.riskPenalty += contribution.riskPenalty;
+    multiaccessAvailable ||= contribution.multiaccessAvailable;
+    for (const fact of contribution.evidence) evidence.add(fact);
+  }
+  const rawScore =
+    values.immediateAccessValue +
+    values.futureSetupValue +
+    values.purgeTaxValue +
+    values.economyValue -
+    values.riskPenalty;
+  const scoreBonus = Math.max(
+    0,
+    Math.min(INSTALLED_RUN_PAYOFF_SCORE_CAP, rawScore),
+  );
+  return {
+    ...values,
+    scoreBonus,
+    multiaccessAvailable,
+    evidence: [...evidence].sort(),
+  };
+}
+
+function installedRunPayoffContributionForHint(
+  hint: AiCardHint,
+  targetKind: RunnerRunTargetKind,
+): RunnerInstalledRunPayoff {
+  const effects = hint.effects ?? [];
+  const contribution: RunnerInstalledRunPayoff = {
+    immediateAccessValue: 0,
+    futureSetupValue: 0,
+    purgeTaxValue: 0,
+    economyValue: 0,
+    riskPenalty: 0,
+    scoreBonus: 0,
+    multiaccessAvailable: false,
+    evidence: [],
+  };
+  const successfulRunTriggerMatches = effects.some((effect) =>
+    effect.kind === "persistent_counter_effect" &&
+    effect.timing === "successful_run" &&
+    effectScopeMatchesTarget(effect.scope, targetKind)
+  );
+  for (const effect of effects) {
+    const target = effectTarget(effect);
+    if (effect.kind === "multiaccess" && effectScopeMatchesTarget(effect.scope, targetKind)) {
+      contribution.multiaccessAvailable = true;
+      contribution.immediateAccessValue += 90;
+      contribution.evidence.push(
+        `installed_run_payoff:${targetKind}:multiaccess`,
+      );
+      continue;
+    }
+    if (
+      effect.kind === "hq_info" &&
+      targetKind === "hq" &&
+      effect.timing === "on_access"
+    ) {
+      contribution.immediateAccessValue += 60;
+      contribution.evidence.push("installed_run_payoff:hq:hq_info");
+      continue;
+    }
+    if (
+      effect.kind === "topdeck_info" &&
+      targetKind === "rd" &&
+      (effect.timing === "on_access" || effect.timing === "successful_run")
+    ) {
+      contribution.immediateAccessValue += 60;
+      contribution.evidence.push("installed_run_payoff:rd:topdeck_info");
+      continue;
+    }
+    if (
+      effect.kind === "access_replacement" &&
+      effectScopeMatchesTarget(effect.scope, targetKind) &&
+      (effect.timing === "on_access" || effect.timing === "successful_run")
+    ) {
+      contribution.immediateAccessValue += 45;
+      contribution.evidence.push(
+        `installed_run_payoff:${targetKind}:access_replacement`,
+      );
+      continue;
+    }
+    if (
+      effect.kind === "persistent_counter_effect" &&
+      effect.timing === "on_access" &&
+      effectScopeMatchesTarget(effect.scope, targetKind) &&
+      (target === "free_trash" ||
+        target === "trash_untrashable" ||
+        target === "access_trash_pressure")
+    ) {
+      contribution.immediateAccessValue += 70;
+      contribution.evidence.push(
+        `installed_run_payoff:${targetKind}:access_trash`,
+      );
+      continue;
+    }
+    if (
+      effect.kind === "persistent_counter_effect" &&
+      effect.timing === "successful_run" &&
+      effectScopeMatchesTarget(effect.scope, targetKind)
+    ) {
+      contribution.futureSetupValue += 24;
+      contribution.evidence.push(
+        `installed_run_payoff:${targetKind}:successful_run_counter`,
+      );
+      continue;
+    }
+    if (
+      effect.kind === "topdeck_info" &&
+      targetKind === "rd" &&
+      effect.timing === "start_of_turn"
+    ) {
+      contribution.futureSetupValue += 35;
+      contribution.evidence.push("installed_run_payoff:rd:future_topdeck_info");
+      continue;
+    }
+    if (
+      effect.kind === "remote_tax" &&
+      effectScopeMatchesTarget(effect.scope, targetKind)
+    ) {
+      contribution.futureSetupValue += targetKind === "remote" ? 45 : 24;
+      contribution.evidence.push(
+        `installed_run_payoff:${targetKind}:remote_tax`,
+      );
+      continue;
+    }
+    if (
+      effect.kind === "global_modifier" &&
+      effect.timing === "successful_run" &&
+      effect.scope === "ice"
+    ) {
+      contribution.futureSetupValue += 24;
+      contribution.evidence.push(
+        `installed_run_payoff:${targetKind}:break_cost_support`,
+      );
+      continue;
+    }
+    if (
+      effect.kind === "recurring_economy" &&
+      (effectScopeMatchesTarget(effect.scope, targetKind) ||
+        successfulRunTriggerMatches)
+    ) {
+      contribution.economyValue += 28;
+      contribution.evidence.push(
+        `installed_run_payoff:${targetKind}:economy_value`,
+      );
+      continue;
+    }
+    if (
+      effect.kind === "delayed_penalty" &&
+      target === "virus_purge" &&
+      successfulRunTriggerMatches
+    ) {
+      contribution.purgeTaxValue += 10;
+      contribution.evidence.push(
+        `installed_run_payoff:${targetKind}:purge_tax`,
+      );
+      continue;
+    }
+    if (
+      effect.kind === "run_tax" &&
+      effect.scope === "runner" &&
+      (effect.timing === "action" || effect.timing === "successful_run")
+    ) {
+      contribution.riskPenalty += 25;
+      contribution.evidence.push(
+        `installed_run_payoff:${targetKind}:risk_tax`,
       );
     }
-    return (
-      definitionId === "onr_v1_024_expert-schedule-analyzer" ||
-      definitionId === "onr_v1_041_microtech-ai-interface"
-    );
-  });
+  }
+  const rawScore =
+    contribution.immediateAccessValue +
+    contribution.futureSetupValue +
+    contribution.purgeTaxValue +
+    contribution.economyValue -
+    contribution.riskPenalty;
+  return {
+    ...contribution,
+    scoreBonus: Math.max(0, Math.min(INSTALLED_RUN_PAYOFF_SCORE_CAP, rawScore)),
+  };
+}
+
+function effectScopeMatchesTarget(
+  scope: string | undefined,
+  targetKind: RunnerRunTargetKind,
+): boolean {
+  if (!scope) return false;
+  if (targetKind === "rd" && scope === "rnd") return true;
+  if (scope === targetKind) return true;
+  if (scope === "server") return true;
+  if (targetKind === "remote" && scope === "remote") return true;
+  return false;
+}
+
+function effectTarget(effect: NonNullable<AiCardHint["effects"]>[number]): string | undefined {
+  const target = (effect as Record<string, unknown>).target;
+  return typeof target === "string" ? target : undefined;
 }
 
 function hasRiskyUniversalPressure(

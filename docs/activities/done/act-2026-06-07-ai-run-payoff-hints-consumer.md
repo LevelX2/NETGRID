@@ -1,20 +1,27 @@
 ---
 activityId: act-2026-06-07-ai-run-payoff-hints-consumer
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-06-07
+completedAt: 2026-06-07
+branch: codex/activities-inbox-ai-run-mu
 releaseTarget:
 blockedBy:
   - act-2026-06-07-ai-run-payoff-signal-inventory
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/runner-run-target-evaluation.ts
+  - packages/ai/src/runner-run-target-evaluation.test.ts
+checks:
+  - corepack pnpm install
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-evaluation.test.ts
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-tactical-goals.test.ts src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts
+  - git diff --check
 ---
 
 # AI-Run-Payoff-Hints und Consumer
@@ -78,4 +85,13 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. `RunnerRunTargetEvaluation` aggregiert jetzt installierte Runner-Run-Payoffs side-safe aus strukturierten AI-Hints der eigenen PlayerView-Rig-Karten. Der neue `RunnerInstalledRunPayoff` trennt immediate access value, future/counter setup value, purge-tax value, economy value, risk penalty, Score-Bonus, echten Multiaccess und redigierte Evidence.
+
+Umgesetzt:
+
+- HQ-/F&E-Multiaccess wird über `effects.kind=multiaccess` statt über enge CardId-Sonderfälle erkannt.
+- Weitere Payoffs wie `hq_info`, `topdeck_info`, `access_replacement`, on-access free-trash/access-trash-pressure, successful-run Counter, `remote_tax`, ICE-Break-Cost-Support, Purge-Tax und Economy werden moderat und gedeckelt bewertet.
+- Known-low-/known-no-current-payoff, fehlende Coverage, unpayable paths und Economy-FundingNeed bleiben stärkere Dämpfer.
+- Evidence bleibt kategoriebasiert, z. B. `installed_run_payoff:hq:multiaccess`, ohne Hidden-Info- oder FullState-Daten.
+
+Checks: `corepack pnpm install` war nötig, weil der neue Worktree keine `node_modules` hatte. Danach liefen AI-Typecheck, RunTargetEvaluation-Test, angrenzende TacticalGoal-/TacticalPlan-/Runtime-Cutover-Tests und `git diff --check` erfolgreich.

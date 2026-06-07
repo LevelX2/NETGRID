@@ -27,6 +27,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
 
     const [evaluation] = evaluateRunnerRunTargets({ input });
+    if (!evaluation) throw new Error("Expected HQ evaluation");
 
     expect(evaluation).toMatchObject({
       targetServerId: "rd",
@@ -59,6 +60,136 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       multiaccessAvailable: false,
       recommendation: "do_not_run_now",
     });
+  });
+
+  it("uses installed HQ multiaccess hints to upgrade HQ pressure", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [server("hq")],
+      legalActions: [runAction("run-hq", "hq")],
+      rig: [
+        visibleCard("hq-interface", {
+          definitionId: "onr_v1_129_hq-interface",
+          title: "HQ Interface",
+          type: "hardware",
+        }),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+    if (!evaluation) throw new Error("Expected R&D evaluation");
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "hq",
+      accessPayoff: "access_bonus",
+      multiaccessAvailable: true,
+      recommendation: "run_now",
+    });
+    expect(evaluation.installedRunPayoff).toMatchObject({
+      immediateAccessValue: 90,
+      multiaccessAvailable: true,
+    });
+    expect(evaluation.evidence).toContain("installed_run_payoff:hq:multiaccess");
+  });
+
+  it("recognizes R&D multiaccess from structured hints beyond the legacy fallback list", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [server("rd")],
+      legalActions: [runAction("run-rd", "rd")],
+      rig: [
+        visibleCard("highlighter", {
+          definitionId: "onr_proteus_090_highlighter",
+          title: "Highlighter",
+          type: "program",
+          subtypes: ["virus"],
+        }),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+    if (!evaluation) throw new Error("Expected HQ evaluation");
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      accessPayoff: "access_bonus",
+      multiaccessAvailable: true,
+      recommendation: "run_now",
+    });
+    expect(evaluation.evidence).toEqual(
+      expect.arrayContaining([
+        "installed_run_payoff:rd:multiaccess",
+        "installed_run_payoff:rd:successful_run_counter",
+      ]),
+    );
+  });
+
+  it("uses installed HQ access-trash hints without exposing hidden cards", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [server("hq")],
+      legalActions: [runAction("run-hq", "hq")],
+      rig: [
+        visibleCard("crumble", {
+          definitionId: "onr_proteus_084_crumble",
+          title: "Crumble",
+          type: "program",
+          subtypes: ["virus"],
+        }),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+    if (!evaluation) throw new Error("Expected HQ evaluation");
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "hq",
+      accessPayoff: "access_bonus",
+      recommendation: "run_now",
+    });
+    expect(evaluation.installedRunPayoff.immediateAccessValue).toBeGreaterThan(0);
+    expect(evaluation.evidence).toEqual(
+      expect.arrayContaining([
+        "installed_run_payoff:hq:access_trash",
+        "installed_run_payoff:hq:purge_tax",
+      ]),
+    );
+    expect(evaluation.evidence.join("\n")).not.toMatch(
+      /hidden|privatePayload|fullState|cardInstances/i,
+    );
+  });
+
+  it("keeps known-low R&D damped even when installed R&D payoff exists", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [server("rd")],
+      legalActions: [runAction("run-rd", "rd")],
+      rig: [
+        visibleCard("rd-interface", {
+          definitionId: "onr_v1_139_r-and-d-interface",
+          title: "R&D Interface",
+          type: "hardware",
+        }),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      beliefState: beliefWithRndTop({
+        freshness: "stale_known_same_top",
+        knownTopDefinitionId: "onr_v1_281_accounts-receivable",
+      }),
+    });
+    if (!evaluation) throw new Error("Expected R&D evaluation");
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "rd",
+      accessPayoff: "known_low_value",
+      knownAccessState: "known_no_current_payoff",
+      multiaccessAvailable: true,
+      recommendation: "do_not_run_now",
+    });
+    expect(evaluation.evidence).toContain("installed_run_payoff:rd:multiaccess");
   });
 
   it("suppresses a known remote root with no current access payoff", () => {
