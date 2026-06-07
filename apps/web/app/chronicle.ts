@@ -230,6 +230,53 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push("Setup", "Starthand", setupDecision === "keep" ? "Behalten" : setupDecision === "mulligan" ? "Mulligan" : "Entscheidung");
         break;
       }
+      if (payload.runnerProgramTrashBeforeInstall === true || payload.runnerProgramTrashBeforeInstallResolved === true) {
+        const installedDefinitionId = sourceDefinitionId ?? cardDefinitionId;
+        const installedTitle =
+          titleForDefinitionId(installedDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "das Programm";
+        const trashedTitles = titlesForDefinitionIds(stringValue(payload.trashedCardDefinitionIds));
+        const trashedCount = numberValue(payload.trashedCount) ?? trashedTitles.length;
+        const trashedText =
+          trashedTitles.length > 0
+            ? joinChronicleParts(trashedTitles)
+            : trashedCount > 0
+              ? `${trashedCount} Programm${trashedCount === 1 ? "" : "e"}`
+              : undefined;
+        const installed = payload.installed === true;
+        const memoryUsedAfter = numberValue(payload.memoryUsedAfter);
+        const memoryLimitAfter = numberValue(payload.memoryLimitAfter);
+        category = "card";
+        importance = installed ? "important" : "normal";
+        visibility = "public";
+        cardDefinitionId = installedDefinitionId ?? cardDefinitionId;
+        cardTitle = installedTitle;
+        title = installed
+          ? phrase(
+              subject,
+              `${installedTitle} im Rig installiert${
+                trashedText ? `; ${trashedText} ${trashedCount === 1 ? "wurde" : "wurden"} für MU getrasht` : ""
+              }`,
+            )
+          : phrase(subject, `${installedTitle} nicht installiert; MU wurde nicht freigemacht`);
+        description =
+          memoryUsedAfter !== undefined && memoryLimitAfter !== undefined
+            ? `MU nach Installation: ${memoryUsedAfter}/${memoryLimitAfter}.`
+            : installed
+              ? undefined
+              : "Die Installation wurde abgebrochen, weil nicht genug MU freigemacht wurde.";
+        chips.push(
+          installedTitle,
+          "Programmtrash",
+          installed ? "Installiert" : "Nicht installiert",
+          installed ? "MU freigemacht" : "MU blockiert",
+          ...(trashedCount > 0 ? [`${trashedCount} Trash`] : []),
+          ...trashedTitles,
+        );
+        break;
+      }
       {
         const ambushEffect = resolvedEffectsFromPayload(payload.resolvedEffects).find(
           (effect) =>

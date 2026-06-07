@@ -704,6 +704,33 @@ describe("formatChronicleEvent", () => {
     expect(memoryResolved.description).toBe("Für MU getrasht: Simple Fracter.");
   });
 
+  it("shows Runner program trash-before-install choices with installed and trashed programs", () => {
+    const item = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        aiReasonCode: "runner_program_install_memory_cleanup",
+        sourceDefinitionId: "onr_proteus_090_highlighter",
+        runnerProgramTrashBeforeInstall: true,
+        runnerProgramTrashBeforeInstallResolved: true,
+        trashedCount: 1,
+        trashedCardDefinitionIds: "simple_fracter",
+        installed: true,
+        memoryUsedAfter: 4,
+        memoryLimitAfter: 4
+      }),
+      "corp"
+    );
+
+    expect(item.title).toBe("Die Runner-KI hat Highlighter im Rig installiert; Simple Fracter wurde für MU getrasht.");
+    expect(item.description).toBe("MU nach Installation: 4/4.");
+    expect(item.category).toBe("card");
+    expect(item.importance).toBe("important");
+    expect(item.cardDefinitionId).toBe("onr_proteus_090_highlighter");
+    expect(item.cardTitle).toBe("Highlighter");
+    expect(item.chips).toEqual(expect.arrayContaining(["Runner", "KI", "Highlighter", "Programmtrash", "Installiert", "MU freigemacht", "Simple Fracter"]));
+    expect(item.title).not.toContain("Entscheidung beantwortet");
+  });
+
   it("shows access ambush payment choices in the chronicle", () => {
     const paid = formatChronicleEvent(
       makeEvent("resolve_choice", {
