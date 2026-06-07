@@ -2359,7 +2359,7 @@
       "subtypes": [],
       "numeric": {
         "cost": null,
-        "installCost": null,
+        "installCost": 0,
         "memoryCost": 1,
         "strength": null,
         "rezCost": null,

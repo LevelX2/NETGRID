@@ -5738,7 +5738,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: ["deck"],
     implementationStatus: "playable_mvp",
-    installCost: 6,
+    installCost: 3,
     memoryLimitBonus: 2,
     recurringCredits: 3,
     rulesText:
@@ -5760,7 +5760,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "hardware",
     subtypes: ["chip"],
     implementationStatus: "playable_mvp",
-    installCost: 0,
+    installCost: 1,
     recurringCredits: 1,
     rulesText:
       "1 recurring credit. Use this credit only for Killer icebreaker use during runs.",
@@ -9343,7 +9343,7 @@ const ONR_V1_LIMITED_PLAYABLE_CARDS: CardDefinition[] = [
     type: "resource",
     subtypes: ["link"],
     implementationStatus: "playable_mvp",
-    installCost: 1,
+    installCost: 9,
     baseLink: 9,
     rulesText:
       "1 credit: Base link 9. Only one base-link card is used for each trace attempt.",

@@ -229,6 +229,12 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       DEMO_CARDS_BY_ID["onr_v1_276_viral-15"]
         ?.implementationStatus,
     ).toBe("playable_mvp");
+    expect(DEMO_CARDS_BY_ID["onr_v1_123_bodyweight-data-creche"]).toMatchObject({
+      installCost: 3,
+    });
+    expect(DEMO_CARDS_BY_ID["onr_v1_124_corolla-speed-chip"]).toMatchObject({
+      installCost: 1,
+    });
   });
 
   it("installs all V1.9.22 runner hardware through LegalActions with replay, visibility and revalidation", () => {

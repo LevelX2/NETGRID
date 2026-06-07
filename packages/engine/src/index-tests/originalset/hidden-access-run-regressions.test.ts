@@ -1337,6 +1337,10 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       ["onr_v1_153_back-door-to-orbital-air", 2, 1, 2],
     ] as const;
 
+    expect(DEMO_CARDS_BY_ID["onr_v1_148_access-through-alpha"]).toMatchObject({
+      installCost: 9,
+    });
+
     for (const [definitionId, baseLink, baseCost, pumpCost] of specs) {
       let state = toRunnerTurn(
         createGameAfterSetup({
