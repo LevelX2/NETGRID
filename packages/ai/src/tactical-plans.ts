@@ -359,9 +359,21 @@ function redactedRunnerRunTargetEvaluationFacts(
 }
 
 function redactedRunnerEconomyPostureFacts(posture: RunnerEconomyPosture): string[] {
+  const creditBase = posture.creditBasePlan;
   return [
     `runner_economy_min_floor:${posture.minimumCreditFloor}`,
     `runner_economy_desired_reserve:${posture.desiredCreditReserve}`,
+    `runner_credit_base_recommendation:${creditBase.recommendation}`,
+    `runner_credit_base_priority:${creditBase.economyPriority}`,
+    `runner_credit_base_blocked_hand_cards:${creditBase.usefulHandCardsBlockedByCredits}`,
+    `runner_credit_base_affordable_hand_cards:${creditBase.usefulHandCardsAffordableNow}`,
+    ...(creditBase.topBlockedHandCandidate
+      ? [
+          `runner_credit_base_top_role:${creditBase.topBlockedHandCandidate.developmentRole}`,
+          `runner_credit_base_top_need:${creditBase.topBlockedHandCandidate.currentNeed}`,
+          `runner_credit_base_top_missing_credits:${creditBase.topBlockedHandCandidate.missingCredits}`,
+        ]
+      : []),
     `runner_economy_risk_adjusted:${posture.riskAdjustedRunReserve}`,
     `runner_economy_build_before_pressure:${posture.buildEconomyBeforePressure}`,
     `runner_economy_bank_relevant:${posture.bankToolsRelevant}`,
@@ -1403,6 +1415,9 @@ function runnerEconomyGoalPriority(
   const posture = context.runnerEconomyPosture;
   if (!posture) return basePriority;
   if (posture.recommendation === "cash_out_bank") return basePriority + 160;
+  if (posture.creditBasePlan.recommendation === "fund_useful_hand_card")
+    return basePriority + 140;
+  if (posture.creditBasePlan.economyPriority === "high") return basePriority + 120;
   if (posture.recommendation === "build_economy") return basePriority + 90;
   return basePriority;
 }

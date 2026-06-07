@@ -16,6 +16,10 @@ import {
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,
 } from "./runner-run-target-evaluation";
+import {
+  RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
+  type RunnerHandDevelopmentEvaluation,
+} from "./runner-hand-development";
 import { buildRunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import { buildRunnerTacticalGoals } from "./runner-tactical-goals";
 import { evaluateTacticalPlans } from "./tactical-plans";
@@ -157,6 +161,70 @@ describe("Runner TacticalGoalIntegration", () => {
       "runner_tactical_goal:runner.pressure_good_central_target",
     );
   });
+
+  it("maps low-credit creditbase planning to an existing gain-credit LegalAction", () => {
+    const input = aiInput({
+      credits: 0,
+      servers: [server("hq")],
+      legalActions: [
+        runAction("run-hq", "hq"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+    const handDevelopmentEvaluations = [
+      handDevelopmentEvaluation({
+        developmentRole: "access_payoff",
+        availability: "missing_credits",
+        currentNeed: "useful_now",
+        priority: 650,
+        fundingNeed: {
+          installOrPlayCost: 4,
+          missingCredits: 4,
+          reason: "cannot_pay",
+        },
+      }),
+    ];
+    const runTargetEvaluations = evaluateRunnerRunTargets({
+      input,
+      handDevelopmentEvaluations,
+    });
+    const economyPosture = buildRunnerEconomyPosture({
+      input,
+      handDevelopmentEvaluations,
+    });
+    const runnerTacticalGoals = buildRunnerTacticalGoals({
+      input,
+      runTargetEvaluations,
+      economyPosture,
+    });
+
+    const result = evaluateTacticalPlans({
+      input,
+      runnerRunTargetEvaluations: runTargetEvaluations,
+      runnerEconomyPosture: economyPosture,
+      runnerTacticalGoals,
+      candidates: buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "runner",
+        stateVersion: input.playerView.stateVersion,
+      }),
+    });
+
+    expect(economyPosture.creditBasePlan).toMatchObject({
+      recommendation: "fund_useful_hand_card",
+      usefulHandCardsBlockedByCredits: 1,
+    });
+    expect(result.selectedStep?.kind).toBe("gain_credits");
+    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
+      "gain-credit",
+    ]);
+    expect(input.legalActions.map((action) => action.actionId)).toContain(
+      result.selectedMapping?.legalActions[0]?.actionId,
+    );
+    expect(JSON.stringify(runnerTacticalGoals)).toContain(
+      "credit_base_recommendation:fund_useful_hand_card",
+    );
+  });
 });
 
 function benchmarkSnapshotById(snapshotId: string): AiDeckDoctrineDeckSnapshot {
@@ -259,6 +327,21 @@ function runAction(actionId: string, serverId: string): LegalAction {
   };
 }
 
+function gainCreditAction(actionId: string): LegalAction {
+  return {
+    actionId,
+    side: "runner",
+    type: "gain_credit",
+    label: "Gain 1 credit",
+    source: "basic_action",
+    timingPoint: "runner_action.main",
+    costs: [{ clicks: 1 }],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 2,
+  };
+}
+
 function visibleIdentity(side: Side): VisibleCard {
   return {
     instanceId: `${side}-identity`,
@@ -278,6 +361,23 @@ function visibleCard(
   return {
     instanceId,
     known: true,
+    ...overrides,
+  };
+}
+
+function handDevelopmentEvaluation(
+  overrides: Partial<RunnerHandDevelopmentEvaluation>,
+): RunnerHandDevelopmentEvaluation {
+  return {
+    schemaVersion: RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
+    cardInstanceId: "runner-hand-card",
+    availability: "missing_credits",
+    developmentRole: "access_payoff",
+    strategicFit: "strong",
+    currentNeed: "useful_now",
+    priority: 600,
+    deferReason: "missing_credits",
+    evidence: ["source:own_runner_hand"],
     ...overrides,
   };
 }

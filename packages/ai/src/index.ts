@@ -65,6 +65,7 @@ import {
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,
 } from "./runner-run-target-evaluation";
+import { evaluateRunnerHandDevelopment } from "./runner-hand-development";
 import {
   buildRunnerTacticalGoals,
   type RunnerTacticalGoal,
@@ -219,6 +220,7 @@ export {
 } from "./deck-capabilities";
 export { buildDeckStrategyProfile } from "./deck-doctrine-strategy";
 export {
+  RUNNER_CREDIT_BASE_PLAN_SCHEMA_VERSION,
   RUNNER_ECONOMY_POSTURE_SCHEMA_VERSION,
   RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION,
   buildRunnerEconomyPosture,
@@ -268,6 +270,9 @@ export type {
 export type {
   EvaluateRunnerRunTargetsParams,
   RunnerAccessPayoff,
+  RunnerCreditBaseHandCandidate,
+  RunnerCreditBasePlan,
+  RunnerCreditBasePlanRecommendation,
   RunnerEconomyPosture,
   RunnerKnownAccessState,
   RunnerPathPassability,
@@ -3405,6 +3410,11 @@ function chooseSemanticRuntimeAction(
     };
   }
   const choices = semanticRuntimeChoices(input);
+  const actionSemanticCandidates = buildActionSemanticCandidates({
+    legalActions: input.legalActions,
+    observerSide: input.side,
+    stateVersion: input.playerView.stateVersion,
+  });
   const reactiveChoice =
     choices.find(
       (candidate) =>
@@ -3419,11 +3429,22 @@ function chooseSemanticRuntimeAction(
   const runnerStrategicIntent = input.side === "runner"
     ? runnerStrategicIntentForInput(input, deckCapabilities)
     : undefined;
+  const runnerHandDevelopmentEvaluations = runnerStrategicIntent
+    ? evaluateRunnerHandDevelopment({
+        input,
+        strategicIntent: runnerStrategicIntent,
+        deckCapabilities,
+        actionCandidates: actionSemanticCandidates,
+      })
+    : undefined;
   const runnerEconomyPosture = runnerStrategicIntent
     ? buildRunnerEconomyPosture({
         input,
         strategicIntent: runnerStrategicIntent,
         deckCapabilities,
+        ...(runnerHandDevelopmentEvaluations
+          ? { handDevelopmentEvaluations: runnerHandDevelopmentEvaluations }
+          : {}),
       })
     : undefined;
   const runnerRunTargetEvaluations = runnerStrategicIntent
@@ -3431,6 +3452,9 @@ function chooseSemanticRuntimeAction(
         input,
         strategicIntent: runnerStrategicIntent,
         deckCapabilities,
+        ...(runnerHandDevelopmentEvaluations
+          ? { handDevelopmentEvaluations: runnerHandDevelopmentEvaluations }
+          : {}),
       })
     : undefined;
   const runnerTacticalGoals = runnerStrategicIntent
@@ -3452,11 +3476,7 @@ function chooseSemanticRuntimeAction(
         ...(runnerRunTargetEvaluations ? { runnerRunTargetEvaluations } : {}),
         ...(runnerEconomyPosture ? { runnerEconomyPosture } : {}),
         ...(runnerTacticalGoals ? { runnerTacticalGoals } : {}),
-        candidates: buildActionSemanticCandidates({
-          legalActions: input.legalActions,
-          observerSide: input.side,
-          stateVersion: input.playerView.stateVersion,
-        }),
+        candidates: actionSemanticCandidates,
       });
   const mappedChoice = tacticalPlanMappedChoice(choices, planRuntime.selectedMapping);
   const choice =

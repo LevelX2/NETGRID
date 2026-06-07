@@ -13,6 +13,10 @@ import {
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,
 } from "./runner-run-target-evaluation";
+import {
+  RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
+  type RunnerHandDevelopmentEvaluation,
+} from "./runner-hand-development";
 
 describe("Runner RunTargetEvaluation + EconomyPosture", () => {
   it("recommends an unknown reachable R&D run", () => {
@@ -140,6 +144,158 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       recommendation: "gain_credits_first",
     });
   });
+
+  it("builds a creditbase funding need for useful hand cards blocked by credits", () => {
+    const input = aiInput({
+      credits: 0,
+      servers: [server("hq")],
+      legalActions: [runAction("run-hq", "hq")],
+    });
+    const handDevelopmentEvaluations = [
+      handDevelopmentEvaluation({
+        developmentRole: "access_payoff",
+        availability: "missing_credits",
+        currentNeed: "useful_now",
+        priority: 650,
+        fundingNeed: {
+          installOrPlayCost: 4,
+          missingCredits: 4,
+          reason: "cannot_pay",
+        },
+      }),
+    ];
+
+    const posture = buildRunnerEconomyPosture({
+      input,
+      handDevelopmentEvaluations,
+    });
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      handDevelopmentEvaluations,
+    });
+
+    expect(posture.creditBasePlan).toMatchObject({
+      currentCredits: 0,
+      desiredCreditReserve: 4,
+      fundingNeed: true,
+      usefulHandCardsBlockedByCredits: 1,
+      recommendation: "fund_useful_hand_card",
+      economyPriority: "high",
+    });
+    expect(posture.creditBasePlan.topBlockedHandCandidate).toMatchObject({
+      developmentRole: "access_payoff",
+      currentNeed: "useful_now",
+      installOrPlayCost: 4,
+      missingCredits: 4,
+    });
+    expect(evaluation).toMatchObject({
+      targetServerId: "hq",
+      recommendation: "gain_credits_first",
+    });
+  });
+
+  it("allows setup spending at five credits when a useful hand card is legal", () => {
+    const input = aiInput({
+      credits: 5,
+      servers: [server("hq")],
+      legalActions: [runAction("run-hq", "hq")],
+    });
+
+    const posture = buildRunnerEconomyPosture({
+      input,
+      handDevelopmentEvaluations: [
+        handDevelopmentEvaluation({
+          developmentRole: "memory_support",
+          availability: "legal_now",
+          currentNeed: "setup",
+          priority: 620,
+        }),
+      ],
+    });
+
+    expect(posture.creditBasePlan).toMatchObject({
+      currentCredits: 5,
+      fundingNeed: false,
+      usefulHandCardsAffordableNow: 1,
+      recommendation: "allow_setup_spend",
+      economyPriority: "low",
+    });
+    expect(posture.recommendation).toBe("stable");
+  });
+
+  it("keeps creditbase conservative when hand development only finds unknown or low-value cards", () => {
+    const input = aiInput({
+      credits: 4,
+      servers: [server("hq")],
+      legalActions: [runAction("run-hq", "hq")],
+    });
+
+    const posture = buildRunnerEconomyPosture({
+      input,
+      handDevelopmentEvaluations: [
+        handDevelopmentEvaluation({
+          developmentRole: "unknown",
+          availability: "missing_credits",
+          currentNeed: "none",
+          strategicFit: "weak",
+          priority: 800,
+          fundingNeed: {
+            installOrPlayCost: 6,
+            missingCredits: 2,
+            reason: "cannot_pay",
+          },
+        }),
+      ],
+    });
+
+    expect(posture.creditBasePlan).toMatchObject({
+      fundingNeed: false,
+      usefulHandCardsBlockedByCredits: 0,
+      recommendation: "preserve_reserve",
+    });
+    expect(posture.creditBasePlan.topBlockedHandCandidate).toBeUndefined();
+  });
+
+  it("lets score-threat runs oversteer low-credit creditbase planning", () => {
+    const input = aiInput({
+      credits: 2,
+      servers: [
+        server("remote_2", {
+          root: [
+            visibleCard("remote-root-2", {
+              known: false,
+              advancementCounters: 2,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-remote-2", "remote_2")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      handDevelopmentEvaluations: [
+        handDevelopmentEvaluation({
+          developmentRole: "access_payoff",
+          availability: "missing_credits",
+          currentNeed: "useful_now",
+          priority: 650,
+          fundingNeed: {
+            installOrPlayCost: 4,
+            missingCredits: 2,
+            reason: "cannot_pay",
+          },
+        }),
+      ],
+    });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "remote_2",
+      scoreThreat: true,
+      accessPayoff: "score_threat",
+      recommendation: "run_now",
+    });
+  });
 });
 
 function aiInput(params: {
@@ -247,6 +403,23 @@ function visibleCard(
   return {
     instanceId,
     known: true,
+    ...overrides,
+  };
+}
+
+function handDevelopmentEvaluation(
+  overrides: Partial<RunnerHandDevelopmentEvaluation>,
+): RunnerHandDevelopmentEvaluation {
+  return {
+    schemaVersion: RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
+    cardInstanceId: "runner-hand-card",
+    availability: "missing_credits",
+    developmentRole: "access_payoff",
+    strategicFit: "strong",
+    currentNeed: "useful_now",
+    priority: 600,
+    deferReason: "missing_credits",
+    evidence: ["source:own_runner_hand"],
     ...overrides,
   };
 }

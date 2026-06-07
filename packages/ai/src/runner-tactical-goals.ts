@@ -89,6 +89,7 @@ export function buildRunnerTacticalGoals(
       evidence: [
         `economy_recommendation:${economyPosture.recommendation}`,
         `desired_credit_reserve:${economyPosture.desiredCreditReserve}`,
+        ...creditBaseGoalEvidence(economyPosture),
       ],
     }));
   }
@@ -179,6 +180,7 @@ export function buildRunnerTacticalGoals(
       evidence: [
         `risk_adjusted_run_reserve:${economyPosture?.riskAdjustedRunReserve === true}`,
         `credits:${params.input.playerView.own.credits}`,
+        ...creditBaseGoalEvidence(economyPosture),
       ],
     }));
   }
@@ -204,6 +206,26 @@ export function buildRunnerTacticalGoals(
       left.goalId.localeCompare(right.goalId) ||
       (left.targetServerId ?? "").localeCompare(right.targetServerId ?? ""),
   );
+}
+
+function creditBaseGoalEvidence(
+  economyPosture: RunnerEconomyPosture | undefined,
+): string[] {
+  const plan = economyPosture?.creditBasePlan;
+  if (!plan) return [];
+  return [
+    `credit_base_recommendation:${plan.recommendation}`,
+    `credit_base_priority:${plan.economyPriority}`,
+    `useful_hand_cards_blocked_by_credits:${plan.usefulHandCardsBlockedByCredits}`,
+    `useful_hand_cards_affordable_now:${plan.usefulHandCardsAffordableNow}`,
+    ...(plan.topBlockedHandCandidate
+      ? [
+          `top_blocked_hand_role:${plan.topBlockedHandCandidate.developmentRole}`,
+          `top_blocked_hand_need:${plan.topBlockedHandCandidate.currentNeed}`,
+          `top_blocked_hand_missing_credits:${plan.topBlockedHandCandidate.missingCredits}`,
+        ]
+      : []),
+  ];
 }
 
 export function redactedRunnerTacticalGoalFacts(
