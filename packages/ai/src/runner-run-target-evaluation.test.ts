@@ -292,6 +292,13 @@ function beliefWithRndTop(params: {
         allCardsKnown: false,
         sourceEventIds: [],
         invalidationReasons: [],
+        ledger: {
+          safeDefinitions: [],
+          unknownRestCount: 5,
+          candidateGroups: [],
+          sourceEventIds: [],
+          invalidationReasons: [],
+        },
       },
       hiddenRemoteCandidateMemory: [],
     },

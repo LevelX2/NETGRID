@@ -1,20 +1,26 @@
 ---
 activityId: act-2026-06-07-ai-hq-memory-ledger-foundation
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
+startedAt: 2026-06-07
+completedAt: 2026-06-07
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-06-07-ai-hq-memory-contract-matrix
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/belief-state.ts
+  - packages/ai/src/index.test.ts
+  - packages/ai/src/runner-run-target-evaluation.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts src/runner-run-target-evaluation.test.ts
+  - corepack pnpm --filter @netgrid/ai exec tsc -p tsconfig.json --noEmit
+  - git diff --check
 ---
 
 # HQ-Hand-Memory-Ledger als Grundlage einführen
@@ -59,11 +65,11 @@ checks: []
 
 ## Akzeptanzkriterien
 
-- [ ] `hqHandMemory` kann intern sichere und mehrdeutige Informationen ausdrücken, ohne bestehende Consumer zu brechen.
-- [ ] Die bisherigen `knownDefinitions`/`knownCount`-Felder bleiben für bestehende Planner- und Debug-Pfade verfügbar.
-- [ ] Vorhandene HQ-Memory-Tests bleiben grün.
-- [ ] Neue Safety-Regressionen belegen, dass das Ledger nur side-sichere AIInputs verarbeitet.
-- [ ] `@netgrid/ai` Typecheck, fokussierte AI-Tests und `git diff --check` sind grün.
+- [x] `hqHandMemory` kann intern sichere und mehrdeutige Informationen ausdrücken, ohne bestehende Consumer zu brechen.
+- [x] Die bisherigen `knownDefinitions`/`knownCount`-Felder bleiben für bestehende Planner- und Debug-Pfade verfügbar.
+- [x] Vorhandene HQ-Memory-Tests bleiben grün.
+- [x] Neue Safety-Regressionen belegen, dass das Ledger nur side-sichere AIInputs verarbeitet.
+- [x] `@netgrid/ai` Typecheck, fokussierte AI-Tests und `git diff --check` sind grün.
 
 ## Umsetzungshinweise
 
@@ -72,4 +78,4 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+`hqHandMemory` besitzt jetzt ein internes Ledger mit sicheren Definitionseinträgen, unbekanntem Restcount, vorbereiteten Kandidatengruppen sowie Quellen- und Invalidierungsfeldern. Die bestehenden Consumer-Felder werden weiter aus derselben side-sicheren Event-Ableitung befüllt; DecisionDebug zeigt weiterhin nur die bisherige Zusammenfassung.

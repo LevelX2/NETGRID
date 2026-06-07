@@ -15453,6 +15453,68 @@ describe("V1.4.2 belief state and opponent model", () => {
     });
   });
 
+  it("keeps HQ hand ledger derived only from side-safe public AIInput fields", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "ai-v142-hq-ledger-side-safe" }),
+    );
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const hqAccessEvent = syntheticHqMemoryEvent(
+      "ai-v142-hq-ledger-public-access",
+      100,
+      "runner",
+      "access_card",
+      "simple_economy_operation",
+    );
+    const taintedEvent = {
+      ...hqAccessEvent,
+      privatePayload: {
+        cardDefinitionId: "simple_priority_agenda",
+        decklist: ["simple_priority_agenda"],
+        hiddenHq: ["hidden-card"],
+      },
+      cardInstances: {
+        hidden: { definitionId: "simple_priority_agenda" },
+      },
+    } as PublicGameEvent & {
+      privatePayload: Record<string, unknown>;
+      cardInstances: Record<string, unknown>;
+    };
+    const sanitizedInput = buildAiDecisionInputDto({
+      side: "runner",
+      playerView: {
+        ...baseInput.playerView,
+        publicEvents: [...baseInput.playerView.publicEvents, taintedEvent],
+      },
+      eventTail: [...baseInput.eventTail, taintedEvent],
+      legalActions: baseInput.legalActions,
+      difficulty: "normal",
+      seed: baseInput.seed,
+      decisionId: "ai-v142-hq-ledger-side-safe:runner",
+      actionNumber: baseInput.actionNumber,
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const belief = reconstructBeliefState(sanitizedInput);
+    const ledger = belief.runnerOpponentModel?.hqHandMemory.ledger;
+
+    expect(assertAiInputIsSideSafe(sanitizedInput)).toBe(true);
+    expect(ledger).toMatchObject({
+      safeDefinitions: [
+        {
+          definitionId: "simple_economy_operation",
+          count: 1,
+          sourceEventIds: ["ai-v142-hq-ledger-public-access"],
+        },
+      ],
+      candidateGroups: [],
+    });
+    expect(JSON.stringify(ledger)).not.toMatch(
+      /privatePayload|cardInstances|simple_priority_agenda|decklist|hidden-card/i,
+    );
+  });
+
   it("tracks R&D access freshness and invalidates after Corp draw, then reconstructs after undo-like rollback", () => {
     let state = toRunnerTurn(
       createGameAfterSetup({ seed: "ai-v142-rnd-freshness" }),
@@ -16167,6 +16229,24 @@ describe("V1.4.2 belief state and opponent model", () => {
       knownCount: 2,
       allCardsKnown: true,
     });
+    expect(
+      fullyKnownBelief.runnerOpponentModel?.hqHandMemory.ledger,
+    ).toMatchObject({
+      unknownRestCount: 0,
+      candidateGroups: [],
+      safeDefinitions: expect.arrayContaining([
+        {
+          definitionId: "onr_v1_297_overtime-incentives",
+          count: 1,
+          sourceEventIds: ["ai-hq-known-overtime"],
+        },
+        {
+          definitionId: "simple_economy_operation",
+          count: 1,
+          sourceEventIds: ["ai-hq-known-economy"],
+        },
+      ]),
+    });
 
     const afterDraw = structuredClone(state);
     moveCorpCardToHq(afterDraw, "onr_v1_237_data-wall");
@@ -16190,6 +16270,22 @@ describe("V1.4.2 belief state and opponent model", () => {
       handCount: 3,
       knownCount: 2,
       allCardsKnown: false,
+    });
+    expect(
+      afterDrawBelief.runnerOpponentModel?.hqHandMemory.ledger,
+    ).toMatchObject({
+      unknownRestCount: 1,
+      candidateGroups: [],
+      safeDefinitions: expect.arrayContaining([
+        expect.objectContaining({
+          definitionId: "onr_v1_297_overtime-incentives",
+          count: 1,
+        }),
+        expect.objectContaining({
+          definitionId: "simple_economy_operation",
+          count: 1,
+        }),
+      ]),
     });
 
     const afterPlay = structuredClone(state);
@@ -16223,6 +16319,19 @@ describe("V1.4.2 belief state and opponent model", () => {
       knownDefinitions: ["simple_economy_operation"],
       knownCount: 1,
       allCardsKnown: true,
+    });
+    expect(
+      afterPlayBelief.runnerOpponentModel?.hqHandMemory.ledger,
+    ).toMatchObject({
+      unknownRestCount: 0,
+      candidateGroups: [],
+      safeDefinitions: [
+        {
+          definitionId: "simple_economy_operation",
+          count: 1,
+          sourceEventIds: ["ai-hq-known-economy"],
+        },
+      ],
     });
   });
 
@@ -16489,6 +16598,11 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(afterReorder.runnerOpponentModel?.hqHandMemory).toMatchObject({
       knownCount: 0,
       allCardsKnown: false,
+    });
+    expect(afterReorder.runnerOpponentModel?.hqHandMemory.ledger).toMatchObject({
+      safeDefinitions: [],
+      unknownRestCount: 2,
+      candidateGroups: [],
     });
   });
 
@@ -16914,6 +17028,10 @@ describe("V1.4.2 belief state and opponent model", () => {
           count: 1,
         }),
       ]),
+    );
+    expect(knownModel?.hqHandMemory?.ledger).toBeUndefined();
+    expect(JSON.stringify(knownModel?.hqHandMemory)).not.toMatch(
+      /safeDefinitions|candidateGroups|unknownRestCount/,
     );
     expect(knownModel?.rndTopFreshness?.knownTopCard).toMatchObject({
       definitionId: "simple_agenda",

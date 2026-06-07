@@ -82,11 +82,37 @@ export type KnownHqHandMemory = {
   allCardsKnown: boolean;
   sourceEventIds: string[];
   invalidationReasons: string[];
+  ledger: HqHandLedgerMemory;
 };
 
 export type KnownDefinitionCountMemory = {
   definitionId: string;
   count: number;
+};
+
+export type HqHandSafeDefinitionMemory = {
+  definitionId: string;
+  count: number;
+  sourceEventIds: string[];
+};
+
+export type HqHandCandidateGroupMemory = {
+  groupId: string;
+  reason: string;
+  sourceEventId: string;
+  candidateDefinitions: KnownDefinitionCountMemory[];
+  candidateCount: number;
+  unknownCandidateCount: number;
+  departureCount: number;
+  basis: string[];
+};
+
+export type HqHandLedgerMemory = {
+  safeDefinitions: HqHandSafeDefinitionMemory[];
+  unknownRestCount: number;
+  candidateGroups: HqHandCandidateGroupMemory[];
+  sourceEventIds: string[];
+  invalidationReasons: string[];
 };
 
 export type HiddenRemoteCandidateMemory = {
@@ -162,6 +188,12 @@ export type BeliefState = {
 
 const BELIEF_VERSION_PREFIX = "belief-v1.4.2";
 const RD_SWAP_OPERATION_DEFINITION_ID = "v098_hq_rd_swap_operation";
+
+type KnownHqHandEntry = {
+  key: string;
+  definitionId: string;
+  eventId: string;
+};
 
 export function reconstructBeliefState(input: AiDecisionInput): BeliefState {
   const history = beliefHistory(input);
@@ -513,7 +545,7 @@ function advanceRndKnownPositionMemory(
 
 function deriveKnownHqHandMemory(input: AiDecisionInput, history: PublicGameEvent[], classifications: BeliefEventClassification[]): KnownHqHandMemory {
   const eventsById = new Map(history.map((event) => [event.eventId, event]));
-  const knownCards: Array<{ key: string; definitionId: string; eventId: string }> = [];
+  const knownCards: KnownHqHandEntry[] = [];
   const invalidationReasons: string[] = [];
   let knownRndTop: { definitionId: string; eventId: string } | undefined;
 
@@ -579,13 +611,41 @@ function deriveKnownHqHandMemory(input: AiDecisionInput, history: PublicGameEven
     .sort((left, right) => left.key.localeCompare(right.key));
   const knownDefinitionIds = knownEntries.map((entry) => entry.definitionId);
   const handCount = input.playerView.opponent.handCount;
+  const ledger = deriveHqHandLedger(knownEntries, handCount, invalidationReasons);
   return {
     handCount,
     knownDefinitions: knownDefinitionIds,
     knownCount: knownDefinitionIds.length,
     allCardsKnown: handCount > 0 && knownDefinitionIds.length === handCount,
+    sourceEventIds: ledger.sourceEventIds,
+    invalidationReasons,
+    ledger
+  };
+}
+
+function deriveHqHandLedger(
+  knownEntries: KnownHqHandEntry[],
+  handCount: number,
+  invalidationReasons: string[]
+): HqHandLedgerMemory {
+  const sourceEventIdsByDefinition = new Map<string, string[]>();
+  for (const entry of knownEntries) {
+    sourceEventIdsByDefinition.set(entry.definitionId, [
+      ...(sourceEventIdsByDefinition.get(entry.definitionId) ?? []),
+      entry.eventId,
+    ]);
+  }
+  const safeDefinitions = countKnownDefinitionEntries(knownEntries.map((entry) => entry.definitionId)).map((definition) => ({
+    ...definition,
+    sourceEventIds: sortedUnique(sourceEventIdsByDefinition.get(definition.definitionId) ?? []),
+  }));
+
+  return {
+    safeDefinitions,
+    unknownRestCount: Math.max(0, handCount - knownEntries.length),
+    candidateGroups: [],
     sourceEventIds: sortedUnique(knownEntries.map((entry) => entry.eventId)),
-    invalidationReasons
+    invalidationReasons: invalidationReasons.slice(),
   };
 }
 
@@ -962,7 +1022,8 @@ function deriveRunnerOpponentModel(
         knownCount: 0,
         allCardsKnown: false,
         sourceEventIds: [],
-        invalidationReasons: []
+        invalidationReasons: [],
+        ledger: deriveHqHandLedger([], input.playerView.opponent.handCount, [])
       } satisfies KnownHqHandMemory),
     hiddenRemoteCandidateMemory
   };
