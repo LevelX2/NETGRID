@@ -171,6 +171,46 @@ describe("tactical plan model", () => {
     expect(mapping.step.mappingStatus).toBe("matched");
   });
 
+  it("does not map a targeted plan step to a different targetServerId run", () => {
+    const rdAction = legalAction("run-rd", "runner", "start_run", {
+      targetServerId: "rd",
+    });
+    const remoteAction = legalAction("run-remote", "runner", "start_run", {
+      targetServerId: "remote_1",
+    });
+    const plan = createTacticalPlan({
+      planId: "runner.obtain_breaker_coverage:rd",
+      side: "runner",
+      type: "runner.obtain_breaker_coverage",
+      status: "progressing",
+      priority: 980,
+      horizonTurns: 1,
+      target: { kind: "server", id: "rd" },
+      currentStep: createPlanStep({
+        stepId: "run_target:rd",
+        kind: "run_target",
+        desiredActionSemantics: ["run"],
+      }),
+      stateVersion: 1,
+    });
+
+    const mapping = mapPlanStepToLegalActions(
+      plan,
+      plan.currentStep,
+      [
+        candidateForActionWithSelectedTargets(remoteAction, []),
+        candidateForActionWithSelectedTargets(rdAction, []),
+      ],
+      aiInput("runner", [remoteAction, rdAction]),
+    );
+
+    expect(mapping.status).toBe("matched");
+    expect(mapping.actionCandidateIds).toEqual(["run-rd"]);
+    expect(mapping.legalActions.map((action) => action.actionId)).toEqual([
+      "run-rd",
+    ]);
+  });
+
   it("maps search steps from candidate program-search semantics without label hints", () => {
     const action = legalAction("use-smc", "runner", "trigger_ability", {}, {
       source: "smc-1",
@@ -284,6 +324,53 @@ describe("tactical plan model", () => {
 
     expect(coveragePlan?.requiredCapabilities[0]?.kind).toBe("breaker_wall");
     expect(coveragePlan?.currentStep.rationale[0]).toContain("breaker_wall");
+  });
+
+  it("derives missing code-gate coverage from the actual blocked ICE", () => {
+    const input = aiInput("runner", [
+      legalAction("run-rd", "runner", "start_run", {
+        serverId: "rd",
+      }),
+      legalAction("draw", "runner", "draw_card"),
+    ]);
+    input.playerView.own.rig = [
+      visibleCard("efficient_fracter", "runner", "program", {
+        subtypes: ["Fracter"],
+        rulesText: "1 credit: Break 1 barrier subroutine.",
+        strength: 3,
+      }),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [
+        visibleCard("simple_code_gate_ice", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["code_gate"],
+          strength: 2,
+        }),
+        visibleCard("simple_barrier_ice", "corp", "ice", {
+          rezzed: true,
+          subtypes: ["barrier"],
+          strength: 3,
+        }),
+      ]),
+      server("archives"),
+    ];
+
+    const plans = buildTacticalPlans({ input });
+    const coveragePlan = plans.find(
+      (plan) => plan.planId === "runner.obtain_breaker_coverage:rd",
+    );
+
+    expect(coveragePlan?.requiredCapabilities[0]?.kind).toBe(
+      "breaker_code_gate",
+    );
+    expect(coveragePlan?.currentStep.requiredCapabilities[0]?.kind).toBe(
+      "breaker_code_gate",
+    );
+    expect(coveragePlan?.currentStep.rationale.join("\n")).toContain(
+      "breaker_code_gate",
+    );
   });
 
   it("adds deck capability evidence when a missing breaker can be searched", () => {
@@ -1039,5 +1126,21 @@ function candidateForAction(action: LegalAction): ActionSemanticCandidate {
     projectionIssues: [],
     hardGates: [],
     evidence: ["test candidate"],
+  };
+}
+
+function candidateForActionWithSelectedTargets(
+  action: LegalAction,
+  selectedTargets: NonNullable<ActionSemanticCandidate["targetContext"]>["selectedTargets"],
+): ActionSemanticCandidate {
+  const candidate = candidateForAction(action);
+  const targetContext = candidate.targetContext;
+  if (!targetContext) return candidate;
+  return {
+    ...candidate,
+    targetContext: {
+      ...targetContext,
+      selectedTargets,
+    },
   };
 }

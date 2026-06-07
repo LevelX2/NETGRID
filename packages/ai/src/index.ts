@@ -4015,7 +4015,7 @@ function tacticalPlanDebugItems(planRuntime: TacticalPlanRuntimeResult): string[
         .map((blocker) => blocker.kind)
         .join(",")}`,
     ),
-    ...planRuntime.planAlternatives.slice(0, 8).map((plan, index) =>
+    ...planRuntime.planAlternatives.map((plan, index) =>
       tacticalPlanRankDebugItem(plan, index + 1, selectedPlan?.planId === plan.planId),
     ),
   ];

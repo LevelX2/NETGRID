@@ -9730,6 +9730,8 @@ type AiDecisionDebugPlanEntry = {
   scores: Array<[string, string]>;
 };
 
+const AI_DECISION_DEBUG_TACTICAL_PLAN_ITEM_LIMIT = Number.MAX_SAFE_INTEGER;
+
 function aiDecisionDebugSemanticRankingLabel(alternative: Record<string, unknown>): string {
   const actionLabel = aiDecisionDebugActionTypeLabel(
     typeof alternative.selectedActionType === "string" ? alternative.selectedActionType : undefined,
@@ -9894,7 +9896,7 @@ function aiDecisionDebugPlanLayer(detail: Record<string, unknown>): {
   fallbackItems: string[];
 } {
   const longTermPlan = safeStringList(detail.longTermPlan, 12);
-  const tacticalPlanItems = aiDecisionDebugDetailSectionItems(detail, "tactical_plan", 64);
+  const tacticalPlanItems = aiDecisionDebugDetailSectionItems(detail, "tactical_plan", AI_DECISION_DEBUG_TACTICAL_PLAN_ITEM_LIMIT);
   const items = uniqueDisplayStrings([...longTermPlan, ...tacticalPlanItems]);
   const entries = items
     .map(aiDecisionDebugParsePlanEntry)

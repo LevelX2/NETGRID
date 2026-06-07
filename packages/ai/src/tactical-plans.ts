@@ -834,7 +834,7 @@ function candidateTargetMatchesPlan(
     (target) => target.targetKind === "server",
   );
   if (selectedServer) return selectedServer.targetId === plan.target.id;
-  return !candidate.legalActionRef.originalPayloadKeys.includes("serverId");
+  return !candidate.legalActionRef.originalPayloadKeys.some(isServerTargetPayloadKey);
 }
 
 function bankStepMatchesCandidate(
@@ -2428,8 +2428,21 @@ function missingCoverageBlockerKind(
 }
 
 function actionServerId(action: LegalAction): string | undefined {
-  const value = action.payload?.serverId;
+  const value =
+    action.payload?.serverId ??
+    action.payload?.targetServerId ??
+    action.payload?.attackedServerId ??
+    action.payload?.server;
   return typeof value === "string" ? value : undefined;
+}
+
+function isServerTargetPayloadKey(key: string): boolean {
+  return (
+    key === "serverId" ||
+    key === "targetServerId" ||
+    key === "attackedServerId" ||
+    key === "server"
+  );
 }
 
 function isRemoteServer(serverId: string | undefined): boolean {
@@ -2445,7 +2458,22 @@ function missingBreakerCoverageKind(
   serverId: string,
 ): RequiredCapabilityKind {
   const server = playerView.servers.find((candidate) => candidate.id === serverId);
-  const rezzedIce = server?.ice.find((ice) => ice.known && ice.rezzed === true);
+  if (!server) return "breaker_coverage";
+  const assessment = assessKnownRezzedIcePath(
+    server.ice,
+    playerView.own.rig ?? [],
+    playerView.own.credits,
+    server.root,
+  );
+  const preciseMissingCoverage = coverageKindForAssessment(assessment);
+  if (preciseMissingCoverage) return preciseMissingCoverage;
+  const blockedIceIndex =
+    assessment.unbreakableIceIndex ?? assessment.unpayableIceIndex;
+  const blockedIce =
+    blockedIceIndex !== undefined ? server.ice[blockedIceIndex] : undefined;
+  const rezzedIce = blockedIce?.known && blockedIce.rezzed === true
+    ? blockedIce
+    : server.ice.find((ice) => ice.known && ice.rezzed === true);
   if (!rezzedIce) return "breaker_coverage";
   const text = [
     rezzedIce.title,
@@ -2461,6 +2489,28 @@ function missingBreakerCoverageKind(
   if (text.includes("ap")) return "breaker_ap";
   if (text.includes("trace")) return "breaker_trace";
   return "breaker_universal";
+}
+
+function coverageKindForAssessment(
+  assessment: ReturnType<typeof assessKnownRezzedIcePath>,
+): RequiredCapabilityKind | undefined {
+  const [coverage] = assessment.missingCoverage ?? [];
+  switch (coverage) {
+    case "wall":
+      return "breaker_wall";
+    case "code_gate":
+      return "breaker_code_gate";
+    case "sentry":
+      return "breaker_sentry";
+    case "ap":
+      return "breaker_ap";
+    case "trace":
+      return "breaker_trace";
+    case "unknown_special":
+      return "breaker_universal";
+    default:
+      return undefined;
+  }
 }
 
 function runNeedsBreakerCoverage(
