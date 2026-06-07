@@ -1,19 +1,22 @@
 ---
 activityId: act-2026-06-07-ai-run-payoff-signal-inventory
-status: inbox
+status: done
 kind: concept
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: false
 createdAt: 2026-06-07
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-06-07
+completedAt: 2026-06-07
+branch: codex/activities-inbox-ai-run-mu
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/reviews/ai/ai-run-payoff-signal-inventory-2026-06-07.md
+checks:
+  - Quellenreview von runner-run-target-evaluation, AI-Hints, Taktiksignalen und Kartendaten
+  - git diff --check
 ---
 
 # AI-Run-Payoff-Signal-Inventar
@@ -73,4 +76,8 @@ Klären, welche aktiven Runner-Karten erfolgreiche Runs auf HQ, F&E, Archive, Au
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. Das Review `docs/reviews/ai/ai-run-payoff-signal-inventory-2026-06-07.md` dokumentiert die geprüften HQ-, F&E-/R&D-, Remote- und beliebige-Run-Payoff-Karten, die vorhandenen strukturierten AI-Hints/Taktiksignale, die aktuelle enge CardId-Logik in `RunnerRunTargetEvaluation` und das Handoff an den Consumer-Slice.
+
+Ergebnis: Für das nächste Paket sind keine neuen Strategy-IDs und keine blockierenden neuen Taktiksignale nötig. Der Consumer kann side-safe aus installierten Runner-Karten der eigenen PlayerView und aus strukturierten Hint-Effects wie `multiaccess`, `hq_info`, `topdeck_info`, `persistent_counter_effect`, `remote_tax` und on-access free-trash Targets aggregieren. Optional empfohlen bleibt eine spätere Semantikpflege für präzisere Free-Trash-/Successful-Run-Counter-Signale.
+
+Checks: Quellenreview und `git diff --check` erfolgreich.
