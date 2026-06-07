@@ -13266,6 +13266,144 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(decision.evidence).toContain("hand_use_pressure:1");
   });
 
+  it("devalues All-Nighter when the chosen run target lacks coverage", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = runnerActionPhaseInput(
+      "ai-all-nighter-no-coverage-target",
+      (state) => {
+        state.runner.credits = 1;
+        moveRunnerCardToGrip(state, "onr_v1_076_all-nighter");
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInServer(state, "remote_1", "simple_agenda", 2);
+        const ice = putCorpIceOnServer(
+          state,
+          "remote_1",
+          "simple_barrier_ice",
+        );
+        state.cardInstances[ice] = {
+          ...state.cardInstances[ice]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+      allNighterAiDeckConfig("no_coverage"),
+    );
+    const allNighterRemote = allNighterPlayAction(input, "remote_1");
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(allNighterRemote).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!allNighterRemote || !gainCredit)
+      throw new Error("Missing All-Nighter no-coverage fixture actions");
+
+    const scopedInput = scopedLegalActions(input, [allNighterRemote, gainCredit]);
+    const decision = chooseRunnerAction(scopedInput, {
+      persistTacticalPlanMemory: false,
+    });
+    const debug = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(gainCredit.actionId);
+    expect(scopedInput.legalActions.map((action) => action.actionId)).toContain(
+      decision.actionId,
+    );
+    expect(debug).toContain("multiRunEvent:no_plausible_first_run");
+    expect(debug).toContain("multiRunEvent:path:blocked_missing_coverage");
+    expect(debug).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+  });
+
+  it("allows All-Nighter when the chosen run target has urgent payoff", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = runnerActionPhaseInput(
+      "ai-all-nighter-high-payoff-target",
+      (state) => {
+        state.runner.credits = 6;
+        moveRunnerCardToGrip(state, "onr_v1_076_all-nighter");
+        putCorpRootInServer(state, "remote_1", "simple_agenda", 2);
+      },
+      allNighterAiDeckConfig("high_payoff"),
+    );
+    const allNighterRemote = allNighterPlayAction(input, "remote_1");
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(allNighterRemote).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!allNighterRemote || !gainCredit)
+      throw new Error("Missing All-Nighter high-payoff fixture actions");
+
+    const scopedInput = scopedLegalActions(input, [allNighterRemote, gainCredit]);
+    const decision = chooseRunnerAction(scopedInput, {
+      persistTacticalPlanMemory: false,
+    });
+    const debug = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(allNighterRemote.actionId);
+    expect(scopedInput.legalActions.map((action) => action.actionId)).toContain(
+      decision.actionId,
+    );
+    expect(debug).toContain("multiRunEvent:allowed_high_payoff");
+    expect(debug).toContain("multiRunEvent:access_payoff:score_threat");
+    expect(debug).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+  });
+
+  it("declines a bad All-Nighter bonus run target", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = runnerActionPhaseInput(
+      "ai-all-nighter-followup-no-coverage",
+      (state) => {
+        state.runner.credits = 1;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInServer(state, "remote_1", "simple_agenda", 2);
+        const ice = putCorpIceOnServer(
+          state,
+          "remote_1",
+          "simple_barrier_ice",
+        );
+        state.cardInstances[ice] = {
+          ...state.cardInstances[ice]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+      allNighterAiDeckConfig("followup_no_coverage"),
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!remoteRun || !gainCredit)
+      throw new Error("Missing All-Nighter followup fixture actions");
+    const bonusRun: LegalAction = {
+      ...remoteRun,
+      actionId: `${remoteRun.actionId}:all_nighter_bonus`,
+      costs: [],
+      payload: {
+        ...(remoteRun.payload ?? {}),
+        bonusRunNoClick: true,
+      },
+    };
+
+    const scopedInput = scopedLegalActions(input, [bonusRun, gainCredit]);
+    const decision = chooseRunnerAction(scopedInput, {
+      persistTacticalPlanMemory: false,
+    });
+    const debug = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(gainCredit.actionId);
+    expect(scopedInput.legalActions.map((action) => action.actionId)).toContain(
+      decision.actionId,
+    );
+    expect(debug).toContain("multiRunEvent:followup_declined_no_payoff");
+    expect(debug).toContain("multi_run_followup_no_plausible_run");
+    expect(debug).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+  });
+
   it("avoids draw into discard pressure when useful hand actions exist", () => {
     const input = runnerActionPhaseInput(
       "ai-v141-hand-avoid-discard-draw",
@@ -24403,6 +24541,45 @@ function runnerActionPhaseInput(
     difficulty: "normal",
     profileId: "runner-ai-v1.4.1-normal",
   });
+}
+
+function allNighterAiDeckConfig(idSuffix: string): CreateGameConfig {
+  return {
+    runnerDeck: {
+      id: `ai_all_nighter_runner_${idSuffix}`,
+      name: "AI All-Nighter Runner",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "onr_v1_076_all-nighter", quantity: 3 },
+        { id: "simple_fracter", quantity: 2 },
+        { id: "simple_economy_event", quantity: 8 },
+      ],
+    },
+    corpDeck: {
+      id: `ai_all_nighter_corp_${idSuffix}`,
+      name: "AI All-Nighter Corp",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "simple_agenda", quantity: 6 },
+        { id: "simple_barrier_ice", quantity: 4 },
+        { id: "simple_economy_operation", quantity: 8 },
+      ],
+    },
+  };
+}
+
+function allNighterPlayAction(
+  input: ReturnType<typeof buildAiDecisionInput>,
+  serverId: string,
+): LegalAction | undefined {
+  return input.legalActions.find(
+    (action) =>
+      action.type === "play_event" &&
+      action.payload?.serverId === serverId &&
+      sourceDefinitionFromInput(input, action) === "onr_v1_076_all-nighter",
+  );
 }
 
 function runnerCentralPressureDeckConfig(idSuffix: string): CreateGameConfig {

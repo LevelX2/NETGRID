@@ -64,6 +64,7 @@ import {
 import {
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,
+  type RunnerRunTargetEvaluation,
 } from "./runner-run-target-evaluation";
 import { evaluateRunnerHandDevelopment } from "./runner-hand-development";
 import {
@@ -3405,6 +3406,22 @@ type SemanticRuntimeExclusion = {
   reason: string;
 };
 
+type RunnerMultiRunEventAssessment = {
+  sourceDefinitionId: string;
+  targetServerId: string;
+  phase: "first_run" | "followup_run";
+  canTakeRun: boolean;
+  payoffClass:
+    | "high_payoff"
+    | "unknown_probe"
+    | "low_payoff"
+    | "blocked"
+    | "missing_target";
+  value: number;
+  evaluation?: RunnerRunTargetEvaluation;
+  evidence: string[];
+};
+
 type SelfDamageSurvivalAssessment = {
   sourceDefinitionId: string;
   handBeforeAction: number;
@@ -3457,6 +3474,7 @@ type TacticalPlanMappedChoiceResult = {
 // Tactical plans may break close ties, but a clear semantic gap belongs to the current board.
 const PLAN_MAPPED_CHOICE_MAX_SCORE_GAP = 600;
 const BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI = 7;
+const ALL_NIGHTER_CARD_ID = "onr_v1_076_all-nighter";
 const FAKED_HIT_CARD_ID = "onr_proteus_108_faked-hit";
 
 function chooseSemanticRuntimeAction(
@@ -4935,6 +4953,9 @@ function semanticRuntimeActionExclusion(
   const programSacrificeExclusion =
     semanticRuntimeRunnerProgramSacrificeExclusion(input, action);
   if (programSacrificeExclusion) return programSacrificeExclusion;
+  const multiRunEventExclusion =
+    semanticRuntimeRunnerMultiRunEventExclusion(input, action);
+  if (multiRunEventExclusion) return multiRunEventExclusion;
   if (input.side !== "runner" || action.type !== "start_run") return undefined;
   const serverId = semanticRuntimeServerId(action);
   const knownCentralPayoffExclusion =
@@ -5571,6 +5592,8 @@ function semanticRuntimeRunnerScoreComponents(
       reason: `hand:${input.playerView.own.gripOrHq.length}`,
     });
   }
+  const multiRunEventComponent = runnerMultiRunEventScoreComponent(input, action);
+  if (multiRunEventComponent) components.push(multiRunEventComponent);
   if (action.type === "install_card") {
     const roles = rolesForAction(input, action);
     const sourceCard = findVisibleCard(input, action.source);
@@ -5713,6 +5736,195 @@ function semanticRuntimeRunnerScoreComponents(
     });
   }
   return components;
+}
+
+function semanticRuntimeRunnerMultiRunEventExclusion(
+  input: AiDecisionInput,
+  action: LegalAction,
+): SemanticRuntimeExclusion | undefined {
+  const assessment = runnerMultiRunEventAssessment(input, action);
+  if (!assessment || assessment.canTakeRun) return undefined;
+  return {
+    key:
+      assessment.phase === "followup_run"
+        ? "multi_run_followup_no_plausible_run"
+        : "multi_run_event_no_plausible_first_run",
+    label:
+      assessment.phase === "followup_run"
+        ? "All-Nighter-Folgerun ohne plausibles Ziel"
+        : "All-Nighter ohne plausibles erstes Run-Ziel",
+    reason: sortedUnique(assessment.evidence).join("|"),
+  };
+}
+
+function runnerMultiRunEventScoreComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  const assessment = runnerMultiRunEventAssessment(input, action);
+  if (!assessment) return undefined;
+  return {
+    key: "runner_multi_run_event_gate",
+    label:
+      assessment.phase === "followup_run"
+        ? "All-Nighter-Folgerun"
+        : "All-Nighter-Run-Gate",
+    value: assessment.value,
+    reason: sortedUnique(assessment.evidence).join("|"),
+  };
+}
+
+function runnerMultiRunEventAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+): RunnerMultiRunEventAssessment | undefined {
+  if (input.side !== "runner" || action.side !== "runner") return undefined;
+  const sourceDefinitionId = sourceDefinitionIdForAction(input, action);
+  const isAllNighterPlay =
+    action.type === "play_event" && sourceDefinitionId === ALL_NIGHTER_CARD_ID;
+  const isAllNighterFollowup =
+    action.type === "start_run" && action.payload?.bonusRunNoClick === true;
+  if (!isAllNighterPlay && !isAllNighterFollowup) return undefined;
+
+  const phase = isAllNighterFollowup ? "followup_run" : "first_run";
+  const targetServerId = semanticRuntimeServerId(action) ?? "unknown";
+  const evaluation =
+    targetServerId === "unknown"
+      ? undefined
+      : runnerMultiRunTargetEvaluation(input, action, targetServerId);
+  const payoffClass = runnerMultiRunPayoffClass(evaluation);
+  const canTakeRun = runnerMultiRunEvaluationPlausible(evaluation);
+  const evidence = [
+    `multiRunEvent:${phase}`,
+    `multiRunEvent:source:${sourceDefinitionId || "bonus_run"}`,
+    `multiRunEvent:target:${targetServerId}`,
+    `multiRunEvent:payoff:${payoffClass}`,
+    `multiRunEvent:plausible_run:${canTakeRun}`,
+    ...(evaluation
+      ? [
+          `multiRunEvent:recommendation:${evaluation.recommendation}`,
+          `multiRunEvent:path:${evaluation.pathPassability}`,
+          `multiRunEvent:access_payoff:${evaluation.accessPayoff}`,
+          `multiRunEvent:known_access:${evaluation.knownAccessState}`,
+          `multiRunEvent:credits_after:${evaluation.creditsAfterRun}`,
+          ...evaluation.evidence.slice(0, 8),
+        ]
+      : ["multiRunEvent:no_run_target_evaluation"]),
+    ...(canTakeRun
+      ? [
+          payoffClass === "high_payoff"
+            ? "multiRunEvent:allowed_high_payoff"
+            : "multiRunEvent:allowed_unknown_probe",
+        ]
+      : phase === "followup_run"
+        ? ["multiRunEvent:followup_declined_no_payoff"]
+        : ["multiRunEvent:no_plausible_first_run"]),
+  ];
+
+  return {
+    sourceDefinitionId: sourceDefinitionId || "bonus_run",
+    targetServerId,
+    phase,
+    canTakeRun,
+    payoffClass,
+    value: runnerMultiRunEventScoreValue(phase, payoffClass, canTakeRun),
+    ...(evaluation ? { evaluation } : {}),
+    evidence,
+  };
+}
+
+function runnerMultiRunTargetEvaluation(
+  input: AiDecisionInput,
+  action: LegalAction,
+  targetServerId: string,
+): RunnerRunTargetEvaluation | undefined {
+  const runAction: LegalAction =
+    action.type === "start_run"
+      ? action
+      : {
+          ...action,
+          actionId: `${action.actionId}:multi_run_target_gate`,
+          type: "start_run",
+          source: "basic_action",
+          costs: [],
+          payload: {
+            ...(action.payload ?? {}),
+            serverId: targetServerId,
+          },
+        };
+  const scopedInput: AiDecisionInput = {
+    ...input,
+    legalActions: [runAction],
+    playerView: {
+      ...input.playerView,
+      legalActions: [runAction],
+    },
+  };
+  const deckCapabilities = deckCapabilitiesForInput(input);
+  const strategicIntent = runnerStrategicIntentForInput(
+    input,
+    deckCapabilities,
+  );
+  return evaluateRunnerRunTargets({
+    input: scopedInput,
+    deckCapabilities,
+    strategicIntent,
+  })[0];
+}
+
+function runnerMultiRunEvaluationPlausible(
+  evaluation: RunnerRunTargetEvaluation | undefined,
+): boolean {
+  if (!evaluation) return false;
+  if (evaluation.pathPassability !== "reachable") return false;
+  if (evaluation.creditsAfterRun < 0) return false;
+  if (evaluation.knownAccessState === "known_no_current_payoff") return false;
+  if (runnerMultiRunHighPayoff(evaluation)) return true;
+  return (
+    evaluation.recommendation === "run_now" ||
+    evaluation.recommendation === "run_if_free"
+  );
+}
+
+function runnerMultiRunPayoffClass(
+  evaluation: RunnerRunTargetEvaluation | undefined,
+): RunnerMultiRunEventAssessment["payoffClass"] {
+  if (!evaluation) return "missing_target";
+  if (
+    evaluation.pathPassability !== "reachable" ||
+    evaluation.creditsAfterRun < 0
+  ) {
+    return "blocked";
+  }
+  if (evaluation.knownAccessState === "known_no_current_payoff") {
+    return "low_payoff";
+  }
+  if (evaluation.accessPayoff === "unknown") return "unknown_probe";
+  if (runnerMultiRunHighPayoff(evaluation)) return "high_payoff";
+  if (evaluation.recommendation === "run_if_free") return "unknown_probe";
+  return evaluation.recommendation === "run_now" ? "high_payoff" : "low_payoff";
+}
+
+function runnerMultiRunHighPayoff(
+  evaluation: RunnerRunTargetEvaluation,
+): boolean {
+  return (
+    evaluation.accessPayoff === "agenda" ||
+    evaluation.accessPayoff === "score_threat" ||
+    evaluation.accessPayoff === "trash_affordable" ||
+    evaluation.accessPayoff === "fresh" ||
+    evaluation.accessPayoff === "access_bonus"
+  );
+}
+
+function runnerMultiRunEventScoreValue(
+  phase: RunnerMultiRunEventAssessment["phase"],
+  payoffClass: RunnerMultiRunEventAssessment["payoffClass"],
+  canTakeRun: boolean,
+): number {
+  if (!canTakeRun) return -2200;
+  if (phase === "followup_run") return payoffClass === "high_payoff" ? 220 : 80;
+  return payoffClass === "high_payoff" ? 2100 : 1400;
 }
 
 function runnerHandFundingTarget(

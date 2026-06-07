@@ -1,19 +1,27 @@
 ---
 activityId: act-2026-06-08-ai-all-nighter-run-gating
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-06-08
-startedAt:
-completedAt:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai exec tsc --noEmit
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "All-Nighter"
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/releases/mechanic-package-smokes-v16-v199.test.ts -t "All-Nighter"
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-evaluation.test.ts
+  - git diff --check
 ---
 
 # All-Nighter-Run-Gating für Runner-KI
@@ -58,14 +66,14 @@ Die Runner-KI soll `All-Nighter` nur spielen und den optionalen Folge-Run nur w�
 
 ## Akzeptanzkriterien
 
-- [ ] Low-Credit-/No-Coverage-Fall: Runner hat `All-Nighter`, aber keinen plausiblen erreichbaren Run und zu wenig Credits oder keine passende Coverage -> `All-Nighter` verliert gegen Economy, Draw, Search, Install oder gleichwertige Setup-Aktion.
-- [ ] High-Payoff-Fall: Ein side-sicher bekannter oder stark plausibler Payoff, etwa bekannte Agenda, akuter Remote-Contest oder starker HQ/F&E-Payoff, darf `All-Nighter` trotz Kosten-/Reservebelastung erlauben.
-- [ ] Folge-Run-Fall: Nach dem ersten Run wird die optionale All-Nighter-Folgeaktion neu bewertet; ohne sinnvollen zweiten Run wählt die KI keinen schlechten Zusatzlauf.
-- [ ] Normale Run-Regeln bleiben führend: All-Nighter-Runs verwenden dieselbe LegalAction- und Zielbewertungsbasis wie reguläre Runner-Runs.
-- [ ] Known-low, known-no-current-payoff, unbezahlbare Pfade und fehlende Coverage dämpfen sowohl den ersten als auch den optionalen zweiten Run.
-- [ ] Debug-/Evidence-Daten erklären die Abwertung oder Erlaubnis redigiert und ohne verdeckte Korp-Karten, private Payloads oder FullState-Leaks.
-- [ ] Bestehende All-Nighter-Engine-Smokes bleiben unverändert grün.
-- [ ] Fokussierte AI-Regressionen decken mindestens Ausspielen-abwerten, Ausspielen-erlauben und Folge-Run-ablehnen ab.
+- [x] Low-Credit-/No-Coverage-Fall: Runner hat `All-Nighter`, aber keinen plausiblen erreichbaren Run und zu wenig Credits oder keine passende Coverage -> `All-Nighter` verliert gegen Economy, Draw, Search, Install oder gleichwertige Setup-Aktion.
+- [x] High-Payoff-Fall: Ein side-sicher bekannter oder stark plausibler Payoff, etwa bekannte Agenda, akuter Remote-Contest oder starker HQ/F&E-Payoff, darf `All-Nighter` trotz Kosten-/Reservebelastung erlauben.
+- [x] Folge-Run-Fall: Nach dem ersten Run wird die optionale All-Nighter-Folgeaktion neu bewertet; ohne sinnvollen zweiten Run wählt die KI keinen schlechten Zusatzlauf.
+- [x] Normale Run-Regeln bleiben führend: All-Nighter-Runs verwenden dieselbe LegalAction- und Zielbewertungsbasis wie reguläre Runner-Runs.
+- [x] Known-low, known-no-current-payoff, unbezahlbare Pfade und fehlende Coverage dämpfen sowohl den ersten als auch den optionalen zweiten Run.
+- [x] Debug-/Evidence-Daten erklären die Abwertung oder Erlaubnis redigiert und ohne verdeckte Korp-Karten, private Payloads oder FullState-Leaks.
+- [x] Bestehende All-Nighter-Engine-Smokes bleiben unverändert grün.
+- [x] Fokussierte AI-Regressionen decken mindestens Ausspielen-abwerten, Ausspielen-erlauben und Folge-Run-ablehnen ab.
 
 ## Umsetzungshinweise
 
@@ -80,4 +88,6 @@ Die Runner-KI soll `All-Nighter` nur spielen und den optionalen Folge-Run nur w�
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt in `packages/ai/src/index.ts`: All-Nighter-`play_event`-Aktionen und `bonusRunNoClick`-Folgeruns werden über ein `RunnerMultiRunEventAssessment` gegen `evaluateRunnerRunTargets` bewertet. Die Gate-Logik nutzt dieselbe side-sichere Ziel-, Payoff-, Coverage-, Pfad- und Creditreserve-Basis wie reguläre Runner-Runs. No-Coverage/No-Payoff-Ziele werden ausgeschlossen; hohe Payoffs oder plausible Unknown-Probes bleiben erlaubt. Debug/Evidence enthält redigierte `multiRunEvent:*`-Fakten, zum Beispiel `multiRunEvent:no_plausible_first_run`, `multiRunEvent:allowed_high_payoff` und `multiRunEvent:followup_declined_no_payoff`.
+
+Abgesichert in `packages/ai/src/index.test.ts`: All-Nighter verliert bei blockiertem Ziel gegen Economy, All-Nighter ist bei akutem Remote-Payoff erlaubt, und ein schlechter Bonus-Run wird nicht gewählt. Der bestehende Engine-Smoke für All-Nighter bleibt grün.
