@@ -4840,7 +4840,7 @@ describe("MVP 0.3 Corp AI v2", () => {
   });
 });
 
-describe("V1.4.0 plan-based Corp AI", () => {
+describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
   it("generates only current LegalAction-backed Corp plans", () => {
     let state = createGameAfterSetup({ seed: "ai-v140-generator" });
     state = apply(state, "corp", (action) => action.type === "mandatory_draw");
@@ -6136,7 +6136,7 @@ describe("V1.4.0 plan-based Corp AI", () => {
     );
   });
 
-  it("uses deck doctrine as a bounded Corp plan weight", () => {
+  it("uses deck doctrine as a bounded legacy Corp plan weight", () => {
     const input = corpActionPhaseInput("ai-doctrine-plan-weight", (state) => {
       state.corp.credits = 7;
       putCorpRootInRemote(state, "simple_agenda", 2);

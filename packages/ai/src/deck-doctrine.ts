@@ -21,6 +21,8 @@ export type RunnerOpeningHandEvaluation = OpeningHandEvaluation;
 
 const AI_HINTS = createAiHintsByCard();
 
+// Legacy fallback weights for the old baseline/plan scorers. The newer
+// Semantic Runtime/TacticalGoal layer uses DeckCapability-derived facts instead.
 const CORP_DOCTRINE_PLAN_WEIGHTS: Record<string, Record<string, number>> = {
   rush: { score_now: 18, score_next_turn: 22, build_scoring_remote: 10, protect_hq: 4, protect_rnd: 4, recover_economy: 6, bait_runner: -4 },
   glacier: { score_now: 4, score_next_turn: 12, build_scoring_remote: 24, protect_hq: 10, protect_rnd: 10, recover_economy: 12, bait_runner: 2 },

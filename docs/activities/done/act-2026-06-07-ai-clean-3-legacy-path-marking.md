@@ -1,20 +1,25 @@
 ---
 activityId: act-2026-06-07-ai-clean-3-legacy-path-marking
-status: inbox
+status: done
 kind: cleanup
 area: ai
 priority: normal
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
+startedAt: 2026-06-07
+completedAt: 2026-06-07
 branch:
 releaseTarget: ai-clean-legacy-runtime-cleanup
 blockedBy:
   - act-2026-06-07-ai-clean-1-legacy-inventory
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/reviews/ai/ai-clean-3-legacy-path-marking-2026-06-07.md
+checks:
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "Legacy fallback V1.4.0 plan-based Corp AI|bounded legacy Corp plan weight"
+  - corepack pnpm exec prettier --check docs/reviews/ai/ai-clean-3-legacy-path-marking-2026-06-07.md docs/activities/done/act-2026-06-07-ai-clean-3-legacy-path-marking.md
+  - git diff --check -- packages/ai/src/runner-plans.ts packages/ai/src/corp-plans.ts packages/ai/src/deck-doctrine.ts packages/ai/src/index.test.ts docs/reviews/ai/ai-clean-3-legacy-path-marking-2026-06-07.md docs/activities/done/act-2026-06-07-ai-clean-3-legacy-path-marking.md docs/activities/inbox/act-2026-06-07-ai-clean-3-legacy-path-marking.md
 ---
 
 # AI-CLEAN-3: Verbleibende Legacy-/Diagnosepfade eindeutig markieren
@@ -62,4 +67,4 @@ KI-Pfade, die nach AI-CLEAN-1 bewusst bleiben, sollen im Code, in Debug-Ausgaben
 
 ## Ergebnisnotiz
 
-Noch offen.
+Legacy-/Diagnosemarkierung ergänzt: Runner- und Corp-Planerexports sind jetzt als Legacy-Fallback-Planer kommentiert, Doctrine-PlanWeights sind als Legacy-Fallback-Weights markiert, und nahe Tests benennen den V1.4.0-Corp-Planer sowie Doctrine-PlanWeights als Legacy-Fallback-Kontext. Zusätzliches Review-Artefakt erstellt. Keine neue KI-Logik, keine Score-Kalibrierung, keine Debug-Payload-Erweiterung und keine Hidden-Info-/Engine-Grenzänderung. Prettier für die berührten Legacy-Code-Dateien wurde bewusst nicht als Paketcheck verwendet, weil diese Dateien bereits vor diesem Paket whole-file-Formatdrift aufweisen; geprüft wurden Typecheck, gezielte Tests, Markdown-Prettier und `git diff --check`.

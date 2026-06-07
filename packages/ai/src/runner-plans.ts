@@ -509,6 +509,8 @@ export function hasRunnerPlanAction(input: AiDecisionInput): boolean {
   );
 }
 
+// Legacy fallback planner: Semantic Runtime is the default decision layer.
+// Keep this path for force-legacy/no-candidate fallback and regression fixtures.
 export function chooseRunnerPlanAction(
   input: AiDecisionInput,
   fallbackDecision: AiDecision,
