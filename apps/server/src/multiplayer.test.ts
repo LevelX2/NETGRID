@@ -5481,6 +5481,108 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(corpPayload.eventTail.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", serverLabel: "R&D", redactedKind: "accessed_card" });
   });
 
+  it("redacts active R&D trash choices from Corp live and reconnect payloads", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "rd-upgrade-trash-redaction" });
+    const created = await service.createMatch({ hostSide: "corp", seed: "rd-upgrade-trash-redaction" });
+    if (!created.joinUrl) throw new Error("Missing join URL");
+    const joinToken = new URL(created.joinUrl).searchParams.get("joinToken");
+    if (!joinToken) throw new Error("Missing join token");
+    const joined = await service.joinMatch(created.matchId, { token: joinToken, displayName: "Runner" });
+    expect("error" in joined).toBe(false);
+    if ("error" in joined) throw new Error(joined.error.message);
+    const runner = { side: "runner" as const, sessionToken: joined.sessionToken, reconnectToken: joined.reconnectToken };
+
+    const record = await storage.load(created.matchId);
+    if (!record) throw new Error("Missing record");
+    const gameState = toRunnerTurnEngine(createGameAfterSetup({
+      matchId: created.matchId,
+      seed: "rd-upgrade-trash-redaction-engine",
+      runnerDeckId: "demo_runner_004",
+      corpDeckId: "demo_corp_004"
+    }));
+    gameState.runner.credits = 10;
+    const accessedId = putCorpCardOnTopOfRdForTest(gameState, "simple_upgrade");
+    for (const [cardId, card] of Object.entries(gameState.cardInstances)) {
+      if (cardId !== accessedId && card.definitionId === "simple_upgrade") {
+        removeEverywhereForTest(gameState, cardId);
+        gameState.corp.rd.push(cardId as CardInstanceId);
+        gameState.cardInstances[cardId] = {
+          ...card,
+          zone: { side: "corp", zone: "rd" },
+          faceup: false,
+          rezzed: false
+        };
+      }
+    }
+    record.gameState = gameState;
+    record.match.baseline = gameState.baseline;
+    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+    record.match.matchVersion += 1;
+    await storage.save(record);
+
+    await submit(
+      service,
+      created.matchId,
+      runner,
+      (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+      "rd-upgrade-trash-redaction-start"
+    );
+    const accessed = await submit(
+      service,
+      created.matchId,
+      runner,
+      (action) => action.type === "access_card",
+      "rd-upgrade-trash-redaction-access"
+    );
+
+    expect(accessed.actorPayload.playerView.run?.accessedCard).toMatchObject({
+      known: true,
+      definitionId: "simple_upgrade",
+      title: "Simple Upgrade"
+    });
+    expect(accessed.actorPayload.legalActions.map((action) => action.type)).toEqual(
+      expect.arrayContaining(["trash_accessed_card", "decline_trash"])
+    );
+
+    const corpLivePayload = accessed.opponentPayload;
+    expect(corpLivePayload.playerView.run?.accessedCard).toMatchObject({ known: false });
+    expect(corpLivePayload.playerView.run?.accessedCard).not.toHaveProperty("definitionId");
+    expect(corpLivePayload.playerView.run?.accessedCard).not.toHaveProperty("title");
+    expect(corpLivePayload.playerView.run?.accessedCard).not.toHaveProperty("type");
+    expect(corpLivePayload.playerView.run?.accessedCard).not.toHaveProperty("trashCost");
+    expect(corpLivePayload.pendingChoice).toBeUndefined();
+    expect(corpLivePayload.legalActions).toEqual([]);
+    expect(JSON.stringify(corpLivePayload)).not.toMatch(/Simple Upgrade|simple_upgrade|trash_accessed_card|decline_trash/i);
+    expect(corpLivePayload.eventTail.at(-1)?.publicPayload).toMatchObject({ actionType: "access_card", serverLabel: "R&D", redactedKind: "accessed_card" });
+
+    const corpBootstrap = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    expect("error" in corpBootstrap).toBe(false);
+    if ("error" in corpBootstrap) throw new Error(corpBootstrap.error.message);
+    const corpReconnect = await service.reconnectMatch(created.matchId, {
+      side: "corp",
+      reconnectToken: created.hostReconnectToken
+    });
+    expect("error" in corpReconnect).toBe(false);
+    if ("error" in corpReconnect) throw new Error(corpReconnect.error.message);
+    for (const payload of [corpBootstrap, corpReconnect]) {
+      expect(payload.playerView.run?.accessedCard).toMatchObject({ known: false });
+      expect(payload.pendingChoice).toBeUndefined();
+      expect(payload.legalActions).toEqual([]);
+      expect(JSON.stringify(payload)).not.toMatch(/Simple Upgrade|simple_upgrade|trash_accessed_card|decline_trash/i);
+    }
+
+    const declined = await submit(
+      service,
+      created.matchId,
+      runner,
+      (action) => action.type === "decline_trash",
+      "rd-upgrade-trash-redaction-decline"
+    );
+    expect(JSON.stringify(declined.opponentPayload)).not.toMatch(/Simple Upgrade|simple_upgrade/i);
+    expect(JSON.stringify(declined.opponentPayload.eventTail.at(-1)?.publicPayload)).not.toMatch(/Simple Upgrade|simple_upgrade|upgrade|trashCost/i);
+  });
+
   it("keeps HQ access card identities visible in Corp payloads", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, { tokenSalt: "hq-access-visible" });

@@ -813,6 +813,19 @@ export function resolveHiddenRunnerResourceSlot(
       hiddenRunnerResourceSlotId(id) === slotId,
   );
 }
+
+function corpViewerCanSeeCorpCard(
+  state: GameState,
+  id: CardInstanceId,
+  instance: CardInstance,
+): boolean {
+  if (state.corp.hq.includes(id)) return true;
+  if (state.corp.archives.includes(id)) return true;
+  if (state.corp.scoreArea.includes(id)) return true;
+  if (instance.zone.side !== "corp") return false;
+  return instance.zone.zone === "serverIce" || instance.zone.zone === "serverRoot";
+}
+
 export function visibleCorpCard(
   state: GameState,
   id: CardInstanceId,
@@ -833,12 +846,17 @@ export function visibleCorpCard(
     viewer === "runner" && state.run?.approachIceExposeViewingIceId === id;
   const viewedInstalledExposeCard =
     viewer === "runner" && pendingInstalledCorpExposeReviewCardId(state) === id;
+  const privateRunnerRdAccess =
+    viewer === "corp" &&
+    accessed &&
+    state.run?.attackedServerId === "rd" &&
+    instance.zone.side === "corp" &&
+    instance.zone.zone === "rd";
   const visible =
-    viewer === "corp" ||
-    instance.faceup ||
-    instance.rezzed ||
-    exposedBySpyCounter ||
-    accessed ||
+    (viewer === "corp" && corpViewerCanSeeCorpCard(state, id, instance)) ||
+    (!privateRunnerRdAccess &&
+      (instance.faceup || instance.rezzed || exposedBySpyCounter)) ||
+    (viewer === "runner" && accessed) ||
     viewedApproachedIce ||
     viewedInstalledExposeCard ||
     state.corp.scoreArea.includes(id) ||

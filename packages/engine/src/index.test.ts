@@ -2026,8 +2026,84 @@ describe("MVP 0.1 runs, access and scoring", () => {
     expect(state.run).toBeUndefined();
     expect(
       getPlayerView(state, "runner").publicEvents.at(-1)?.publicPayload
-        .actionType,
+      .actionType,
     ).toBe("steal_agenda");
+  });
+
+  it("redacts the private R&D trash choice from Corp view when Runner declines", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "rd-upgrade-trash-redaction",
+        runnerDeckId: "demo_runner_004",
+        corpDeckId: "demo_corp_004",
+      }),
+    );
+    state.runner.credits = 10;
+    const accessedId = putCorpCardOnTopOfRd(state, "simple_upgrade");
+    for (const [cardId, card] of Object.entries(state.cardInstances)) {
+      if (cardId !== accessedId && card.definitionId === "simple_upgrade") {
+        removeEverywhere(state, cardId);
+        state.corp.rd.push(cardId as CardInstanceId);
+        state.cardInstances[cardId] = {
+          ...card,
+          zone: { side: "corp", zone: "rd" },
+          faceup: false,
+          rezzed: false,
+        };
+      }
+    }
+    const replayInitial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    const runnerView = getPlayerView(state, "runner");
+    expect(runnerView.run?.accessedCard).toMatchObject({
+      known: true,
+      definitionId: "simple_upgrade",
+      title: "Simple Upgrade",
+      type: "upgrade",
+      trashCost: 4,
+    });
+    expect(getLegalActions(state, "runner").map((action) => action.type)).toEqual(
+      expect.arrayContaining(["trash_accessed_card", "decline_trash"]),
+    );
+
+    const corpView = getPlayerView(state, "corp");
+    expect(corpView.pendingChoice).toBeUndefined();
+    expect(getLegalActions(state, "corp")).toEqual([]);
+    expect(corpView.run?.accessedCard).toMatchObject({ known: false });
+    expect(corpView.run?.accessedCard).not.toHaveProperty("definitionId");
+    expect(corpView.run?.accessedCard).not.toHaveProperty("title");
+    expect(corpView.run?.accessedCard).not.toHaveProperty("type");
+    expect(corpView.run?.accessedCard).not.toHaveProperty("trashCost");
+    expect(JSON.stringify(corpView)).not.toMatch(
+      /Simple Upgrade|simple_upgrade|trash_accessed_card|decline_trash/i,
+    );
+    expect(
+      getPlayerView(state, "corp").publicEvents.at(-1)?.publicPayload,
+    ).toMatchObject({
+      actionType: "access_card",
+      serverLabel: "R&D",
+      redactedKind: "accessed_card",
+    });
+
+    state = apply(state, "runner", (action) => action.type === "decline_trash");
+    const corpAfterDecline = getPlayerView(state, "corp");
+    expect(corpAfterDecline.run?.accessedCard).toBeUndefined();
+    expect(
+      JSON.stringify(corpAfterDecline.publicEvents.at(-1)?.publicPayload),
+    ).not.toMatch(/Simple Upgrade|simple_upgrade|upgrade|trashCost/i);
+
+    const replay = replayEvents(replayInitial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(hashState(replay.state)).toBe(hashState(state));
   });
 
   it("reveals the randomly accessed HQ card in the access event", () => {
