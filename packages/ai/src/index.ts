@@ -3412,6 +3412,7 @@ type SelfDamageSurvivalAssessment = {
   selfDamageAmount: number;
   selfDamageType: "net" | "meat" | "brain" | "core" | "unknown";
   preventable: boolean | "unknown";
+  unpreventable: boolean;
   effectiveSelfDamage: number;
   survivesSelfDamage: boolean;
   immediateWinByAction: boolean;
@@ -6845,6 +6846,17 @@ function runnerSelfDamageSurvivalAssessment(
       BAD_PUBLICITY_LOSS_THRESHOLD_FOR_AI;
   const effectiveSelfDamage = selfDamage.amount;
   const survivesSelfDamage = handAfterActionCost >= effectiveSelfDamage;
+  const selfDamageUnpreventable = selfDamage.preventable === false;
+  const selfDamageDispositionEvidence =
+    !survivesSelfDamage && !immediateWinByAction
+      ? ["why_self_damage_action_blocked:self_damage_flatline_risk"]
+      : [
+          `why_self_damage_action_allowed:${
+            immediateWinByAction
+              ? "lethal_but_winning_closeout"
+              : "survives_self_damage"
+          }`,
+        ];
   const evidence = [
     "self_damage_survival_assessed:true",
     `self_damage_source:${sourceDefinitionId}`,
@@ -6853,9 +6865,11 @@ function runnerSelfDamageSurvivalAssessment(
     `self_damage_amount:${selfDamage.amount}`,
     `self_damage_type:${selfDamage.type}`,
     `self_damage_preventable:${selfDamage.preventable}`,
+    `self_damage_unpreventable:${selfDamageUnpreventable}`,
     `self_damage_effective:${effectiveSelfDamage}`,
     `self_damage_survives:${survivesSelfDamage}`,
     `self_damage_immediate_win:${immediateWinByAction}`,
+    ...selfDamageDispositionEvidence,
     ...(badPublicityAdded > 0
       ? [
           `self_damage_bad_publicity_before:${badPublicityBefore}`,
@@ -6873,6 +6887,7 @@ function runnerSelfDamageSurvivalAssessment(
     selfDamageAmount: selfDamage.amount,
     selfDamageType: selfDamage.type,
     preventable: selfDamage.preventable,
+    unpreventable: selfDamageUnpreventable,
     effectiveSelfDamage,
     survivesSelfDamage,
     immediateWinByAction,
@@ -6990,7 +7005,11 @@ function runnerBadPublicityRelevanceAssessment(
       ? ["immediate_bad_publicity_closeout"]
       : badPublicityPlanPresent
         ? ["bad_publicity_plan_support"]
-        : ["bad_publicity_support_only", "no_bad_publicity_closeout"]),
+        : [
+            "bad_publicity_support_only",
+            "no_bad_publicity_closeout",
+            "why_bad_publicity_support_only:no_visible_bad_publicity_plan",
+          ]),
     ...(drawbackSeverity > 0 && !immediateBadPublicityCloseout
       ? ["drawback_outweighs_bp_gain"]
       : []),

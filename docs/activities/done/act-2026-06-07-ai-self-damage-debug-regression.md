@@ -1,21 +1,27 @@
 ---
 activityId: act-2026-06-07-ai-self-damage-debug-regression
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: test-quality-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-06-07-ai-self-damage-survival-guard
   - act-2026-06-07-ai-bad-publicity-relevance-gating
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai exec tsc --noEmit
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "Faked Hit"
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts
+  - git diff --check
 ---
 
 # Self-Damage- und Bad-Publicity-Entscheidungen debuggen
@@ -73,12 +79,12 @@ Die neue Self-Damage- und Bad-Publicity-Bewertung soll über redigierte Decision
 
 ## Akzeptanzkriterien
 
-- [ ] DecisionDebug oder gleichwertige AI-Debugfacts erklären den Self-Damage-Block für den beobachteten `Faked Hit`-Fall.
-- [ ] Debugfacts erklären den Sonderfall, dass lethal Self-Damage bei unmittelbarem BP-7-Closeout erlaubt sein kann.
-- [ ] Debugfacts erklären Bad Publicity ohne Deckplan als Support-only beziehungsweise niedrige Relevanz.
-- [ ] Regressionen decken die konkreten Faked-Hit-Handgrößen- und BP-Zählerfälle ab.
-- [ ] Redaction-Tests bestätigen, dass keine Hidden-Info oder privaten Daten ausgegeben werden.
-- [ ] `@netgrid/ai` Typecheck, fokussierte AI-Tests und `git diff --check` sind grün.
+- [x] DecisionDebug oder gleichwertige AI-Debugfacts erklären den Self-Damage-Block für den beobachteten `Faked Hit`-Fall.
+- [x] Debugfacts erklären den Sonderfall, dass lethal Self-Damage bei unmittelbarem BP-7-Closeout erlaubt sein kann.
+- [x] Debugfacts erklären Bad Publicity ohne Deckplan als Support-only beziehungsweise niedrige Relevanz.
+- [x] Regressionen decken die konkreten Faked-Hit-Handgrößen- und BP-Zählerfälle ab.
+- [x] Redaction-Tests bestätigen, dass keine Hidden-Info oder privaten Daten ausgegeben werden.
+- [x] `@netgrid/ai` Typecheck, fokussierte AI-Tests und `git diff --check` sind grün.
 
 ## Umsetzungshinweise
 
@@ -87,4 +93,6 @@ Die neue Self-Damage- und Bad-Publicity-Bewertung soll über redigierte Decision
 
 ## Ergebnisnotiz
 
-Noch offen.
+Nachgehärtet in `packages/ai/src/index.ts`: Self-Damage-Debugfacts enthalten jetzt zusätzlich `self_damage_unpreventable`, `why_self_damage_action_blocked:self_damage_flatline_risk` und `why_self_damage_action_allowed:*`. Bad-Publicity-Support-only-Fälle enthalten `why_bad_publicity_support_only:no_visible_bad_publicity_plan`.
+
+Die bestehenden `Faked Hit`-Regressionen in `packages/ai/src/index.test.ts` prüfen nun explizit Self-Damage-Menge, Typ, Unpreventable-Status, Block-/Allow-Grund, BP-7-Closeout-Grund, Support-only-Begründung sowie Redaction gegen Hidden-Info/private Payloads/lokale Pfade.

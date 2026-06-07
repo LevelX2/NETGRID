@@ -11390,10 +11390,17 @@ describe("V1.4.1 plan-based Runner AI", () => {
       ).toBe(true);
       const debug = JSON.stringify(decision.decisionDebug);
       expect(debug).toContain("self_damage_flatline_risk");
+      expect(debug).toContain(`self_damage_hand_before:${extraHandCards + 1}`);
       expect(debug).toContain(
         `self_damage_hand_after_action_cost:${extraHandCards}`,
       );
+      expect(debug).toContain("self_damage_amount:2");
+      expect(debug).toContain("self_damage_type:core");
+      expect(debug).toContain("self_damage_unpreventable:true");
       expect(debug).toContain("self_damage_survives:false");
+      expect(debug).toContain(
+        "why_self_damage_action_blocked:self_damage_flatline_risk",
+      );
       expect(JSON.stringify(decision)).not.toMatch(
         /cardInstances|privatePayload|corp\.hq|corp\.rd/i,
       );
@@ -11426,9 +11433,20 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(decision.actionId).toBe(gainCredit.actionId);
     const debug = JSON.stringify(decision.decisionDebug);
     expect(debug).toContain("self_damage_survives:true");
+    expect(debug).toContain("self_damage_unpreventable:true");
+    expect(debug).toContain(
+      "why_self_damage_action_allowed:survives_self_damage",
+    );
     expect(debug).toContain("bad_publicity_support_only");
+    expect(debug).toContain(
+      "why_bad_publicity_support_only:no_visible_bad_publicity_plan",
+    );
+    expect(debug).toContain("bad_publicity_relevance_score");
     expect(debug).toContain("drawback_outweighs_bp_gain");
     expect(debug).not.toContain("semantic_exclusion:self_damage_flatline_risk");
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload|corp\.hq|corp\.rd|FullState|C:\\|\/Users\//i,
+    );
   });
 
   it("allows lethal Faked Hit when the same action reaches Bad Publicity 7", () => {
@@ -11452,9 +11470,18 @@ describe("V1.4.1 plan-based Runner AI", () => {
     });
 
     expect(decision.actionId).toBe(fakedHit.actionId);
+    const debug = JSON.stringify(decision.decisionDebug);
     expect(decision.evidence).toContain("self_damage_survives:false");
     expect(decision.evidence).toContain("self_damage_immediate_win:true");
     expect(decision.evidence).toContain("lethal_but_winning_closeout");
+    expect(debug).toContain("self_damage_unpreventable:true");
+    expect(debug).toContain(
+      "why_self_damage_action_allowed:lethal_but_winning_closeout",
+    );
+    expect(debug).toContain("immediate_bad_publicity_closeout");
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload|corp\.hq|corp\.rd|FullState|C:\\|\/Users\//i,
+    );
   });
 
   it("lets a clearly stronger semantic action override a mapped tactical plan action", () => {
