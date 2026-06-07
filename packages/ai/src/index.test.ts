@@ -4578,6 +4578,75 @@ describe("MVP 0.3 Runner AI", () => {
     );
   });
 
+  it("does not pump Dwarf through central Fire Wall when the remaining known HQ path is unaffordable", () => {
+    const state = dwarfDoubleFireWallHqEncounterState(
+      "ai-dwarf-hq-double-firewall-unaffordable",
+      {
+        runnerCredits: 5,
+        scoredSuperiorNetBarriers: 2,
+      },
+    );
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const pump = input.legalActions.find(
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_021_dwarf",
+    );
+    const continueRun = input.legalActions.find(
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.encounterContinue === true,
+    );
+    const hq = input.playerView.servers.find((server) => server.id === "hq");
+    const knownRezzedFireWalls =
+      hq?.ice.filter(
+        (ice) =>
+          ice.definitionId === "onr_v1_245_fire-wall" &&
+          ice.known &&
+          ice.rezzed,
+      ) ?? [];
+    const decision = chooseRunnerAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+
+    expect(pump).toBeDefined();
+    expect(continueRun).toBeDefined();
+    if (!pump || !continueRun)
+      throw new Error("Missing Dwarf/Fire Wall encounter actions");
+    expect(input.playerView.run?.encounteredIce?.strength).toBe(6);
+    expect(knownRezzedFireWalls).toHaveLength(2);
+    expect(continueRun?.payload?.encounterWillEndRun).toBe(true);
+    expect(selected?.type).toBe("continue_run");
+    expect([
+      "runner.encounter.continue",
+      "runner.plan.safe_probe_run",
+    ]).toContain(decision.reasonCode);
+
+    const baselineDecision = chooseRunnerBaselineAction({
+      ...input,
+      legalActions: [pump, continueRun],
+    });
+    const baselineSelected = input.legalActions.find(
+      (action) => action.actionId === baselineDecision.actionId,
+    );
+    expect(baselineSelected?.type).toBe("continue_run");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const semanticDecision = chooseRunnerAction({
+      ...input,
+      legalActions: [pump, continueRun],
+    });
+    const semanticSelected = input.legalActions.find(
+      (action) => action.actionId === semanticDecision.actionId,
+    );
+    expect(semanticSelected?.type).toBe("continue_run");
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "legacy";
+  });
+
   it("still pumps Dwarf through Rock when enough credits remain to trash the known remote", () => {
     const state = dwarfRemoteEncounterState("ai-dwarf-rock-bbs-affordable", {
       runnerCredits: 8,
@@ -24566,6 +24635,75 @@ function dwarfRemoteEncounterState(
       sourceDefinition(state, action) === options.iceDefinitionId,
   );
   return state;
+}
+
+function dwarfDoubleFireWallHqEncounterState(
+  seed: string,
+  options: {
+    runnerCredits: number;
+    scoredSuperiorNetBarriers: number;
+  },
+): GameState {
+  let state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeck: ONR_V1_2_3_RUNNER_DECK,
+      corpDeck: {
+        id: "ai_dwarf_hq_firewall_corp",
+        name: "AI Dwarf HQ Fire Wall Corp",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "onr_v1_219_superior-net-barriers", quantity: 2 },
+          { id: "onr_v1_245_fire-wall", quantity: 2 },
+          { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+          { id: "simple_economy_operation", quantity: 6 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  state.runner.credits = 20;
+  state.runner.clicks = 1;
+  state.corp.credits = 20;
+  moveRunnerProgramToRig(state, "onr_v1_021_dwarf");
+  for (let index = 0; index < options.scoredSuperiorNetBarriers; index += 1) {
+    const agendaId = Object.entries(state.cardInstances)
+      .filter(
+        ([, card]) => card.definitionId === "onr_v1_219_superior-net-barriers",
+      )
+      .map(([id]) => id as CardInstanceId)
+      .filter((id) => !state.corp.scoreArea.includes(id))
+      .sort()[0];
+    expect(agendaId).toBeDefined();
+    if (!agendaId) throw new Error("Missing Superior Net Barriers copy");
+    removeEverywhere(state, agendaId);
+    state.corp.scoreArea.push(agendaId);
+    state.cardInstances[agendaId] = {
+      ...state.cardInstances[agendaId]!,
+      zone: { side: "corp", zone: "scoreArea" },
+      faceup: true,
+      rezzed: true,
+    };
+  }
+  const innerFireWallId = putCorpIceOnServer(
+    state,
+    "hq",
+    "onr_v1_245_fire-wall",
+  );
+  state.cardInstances[innerFireWallId] = {
+    ...state.cardInstances[innerFireWallId]!,
+    faceup: true,
+    rezzed: true,
+  };
+  const outerFireWallId = putUnusedCorpIceOnServer(
+    state,
+    "hq",
+    "onr_v1_245_fire-wall",
+    new Set([innerFireWallId]),
+  );
+  state.runner.credits = options.runnerCredits;
+  return startAndRezOuterIce(state, "hq", outerFireWallId);
 }
 
 function knownRemoteDataWallBbsInput(
