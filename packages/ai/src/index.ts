@@ -82,6 +82,7 @@ import {
 } from "./tag-punish-ontology-consumer";
 import { buildAiDecisionInputDto } from "./input-dto";
 import { buildActionSemanticCandidates } from "./action-semantic-candidate";
+import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
 import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
@@ -4048,6 +4049,11 @@ function semanticRuntimeActionExclusion(
   if (planMemoryExclusion) return planMemoryExclusion;
   if (input.side !== "runner" || action.type !== "start_run") return undefined;
   const serverId = semanticRuntimeServerId(action);
+  const knownCentralPayoffExclusion = semanticRuntimeKnownCentralPayoffExclusion(
+    input,
+    serverId,
+  );
+  if (knownCentralPayoffExclusion) return knownCentralPayoffExclusion;
   const server = input.playerView.servers.find((entry) => entry.id === serverId);
   if (serverId === "archives") {
     const archivesExclusion = semanticRuntimeRunnerArchivesExclusion(input, server);
@@ -4071,6 +4077,31 @@ function semanticRuntimeActionExclusion(
       ? "Run-Ziel nicht erreichbar"
       : "Run-Ziel nicht bezahlbar",
     reason: semanticRuntimeKnownIcePathReason(assessment, server.id)
+  };
+}
+
+function semanticRuntimeKnownCentralPayoffExclusion(
+  input: AiDecisionInput,
+  serverId: string | undefined,
+): SemanticRuntimeExclusion | undefined {
+  if (serverId !== "rd") return undefined;
+  const payoff = evaluateKnownCentralAccessPayoff(input, serverId);
+  if (!payoff.knownNoCurrentPayoff) return undefined;
+  return {
+    key: "known_central_no_current_payoff",
+    label: payoff.payoff === "trash_unaffordable"
+      ? "R&D-Topkarte nicht bezahlbar"
+      : "R&D-Topkarte bekannt ohne aktuellen Nutzen",
+    reason: sortedUnique([
+      `server:${serverId}`,
+      `payoff:${payoff.payoff}`,
+      ...payoff.reasons.slice(0, 3),
+      ...payoff.evidence.filter(
+        (entry) =>
+          entry === "rd_run_suppressed_by_known_low_value_top:true" ||
+          entry.startsWith("central_memory_payoff:"),
+      ).slice(0, 3),
+    ]).join("|"),
   };
 }
 

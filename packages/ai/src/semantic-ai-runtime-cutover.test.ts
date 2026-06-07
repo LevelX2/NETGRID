@@ -684,6 +684,48 @@ describe("Semantic AI runtime cutover", () => {
     expect(tacticalDebug).toContain(
       "plan_progression_reason:previous_central_probe_satisfied",
     );
+    expect(JSON.stringify(followupDecision.decisionDebug)).toContain(
+      "semantic_excluded:known_central_no_current_payoff",
+    );
+  });
+
+  it("excludes a stale known low-value R&D top card from semantic fallback choices", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        { payload: { serverId: "rd" } },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.stateVersion = 3;
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+    ];
+    input.eventTail = [
+      rdAccessEvent(
+        "semantic-rd-rock-fallback-access",
+        1,
+        "onr_v1_265_rock-is-strong",
+      ),
+    ];
+
+    const decision = chooseRunnerAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(debugText).toContain(
+      "semantic_excluded:known_central_no_current_payoff",
+    );
+    expect(debugText).toContain("payoff:known_low_value");
+    expect(debugText).toContain("rd_run_suppressed_by_known_low_value_top:true");
   });
 
   it("represents a corp rez window as a rez defense plan", () => {
