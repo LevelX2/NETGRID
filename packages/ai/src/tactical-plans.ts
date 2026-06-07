@@ -428,6 +428,10 @@ function redactedRunnerEconomyPostureFacts(posture: RunnerEconomyPosture): strin
     `runner_economy_bank_relevant:${posture.bankToolsRelevant}`,
     `runner_economy_funding_need:${posture.fundingNeed}`,
     `runner_economy_recommendation:${posture.recommendation}`,
+    `runner_credit_reserve_phase:${posture.creditReservePolicy.phase}`,
+    `runner_credit_reserve_remote_score_threat:${posture.creditReservePolicy.remoteScoreThreat}`,
+    `runner_credit_reserve_contest:${posture.creditReservePolicy.contestReserve}`,
+    `runner_credit_reserve_below_now:${posture.creditReservePolicy.belowReserveNow}`,
   ];
 }
 
@@ -1630,6 +1634,9 @@ function runnerCreditBasePlans(
               `credit_base_priority:${creditBase.economyPriority}`,
               `credit_base_funding_need:${creditBase.fundingNeed}`,
               `credit_base_desired_reserve:${creditBase.desiredCreditReserve}`,
+              `credit_reserve_remote_score_threat:${creditBase.creditReservePolicy.remoteScoreThreat}`,
+              `credit_reserve_contest:${creditBase.creditReservePolicy.contestReserve}`,
+              `credit_reserve_below_now:${creditBase.creditReservePolicy.belowReserveNow}`,
               `credit_base_blocked_hand_cards:${creditBase.usefulHandCardsBlockedByCredits}`,
             ]
           : ["credit_base_recommendation:avoid_overdraw"]),

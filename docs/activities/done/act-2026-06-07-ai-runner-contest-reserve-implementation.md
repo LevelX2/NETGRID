@@ -1,20 +1,31 @@
 ---
 activityId: act-2026-06-07-ai-runner-contest-reserve-implementation
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-06-07-ai-runner-contest-reserve-contract
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/runner-run-target-evaluation.ts
+  - packages/ai/src/runner-run-target-evaluation.test.ts
+  - packages/ai/src/runner-tactical-goals.ts
+  - packages/ai/src/runner-tactical-goals.test.ts
+  - packages/ai/src/tactical-plans.ts
+  - packages/ai/src/tactical-plans.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai exec tsc --noEmit
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-evaluation.test.ts src/runner-tactical-goals.test.ts src/tactical-plans.test.ts
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-evaluation.test.ts src/runner-tactical-goals.test.ts src/tactical-plans.test.ts src/runner-golden-deck-debug.test.ts src/semantic-ai-runtime-cutover.test.ts
+  - "corepack pnpm --filter @netgrid/ai test -> rot: 2 bekannte runner-golden-deck-debug.test-Fails aus act-2026-06-08-ai-stabilize-golden-deck-tests"
+  - git diff --check
 ---
 
 # Runner-Contest-Reserve in EconomyPosture und TacticalPlans anwenden
@@ -69,14 +80,14 @@ Die Runner-KI soll Aktionen, Runs und Installationen gegen eine dynamische Credi
 
 ## Akzeptanzkriterien
 
-- [ ] Midgame-Fall: Runner hat 6 Credits, Remote-Score-Threat ist sichtbar, bekannter oder konservativ geschätzter Contest-Pfad kostet etwa 5, eine Installation würde auf 2 Credits fallen -> Installation wird abgewertet und Economy/Reserve-Aufbau bevorzugt.
-- [ ] Setup-Fall: Runner hat 8 Credits, nützliche Handkarte kostet 3, Reserve bleibt bei etwa 5 -> Installation bleibt erlaubt.
-- [ ] Low-Credit-Fall: Runner hat 0 bis 2 Credits und kein hoher Run-Payoff liegt vor -> `build_economy_base`/`gain_credit` oder gleichwertige Economy-Aktion wird bevorzugt.
-- [ ] High-Payoff-Fall: Bekannte Agenda auf F&E oder vergleichbarer unmittelbarer Payoff darf die Reserve verletzen.
-- [ ] Soft-Reserve-Fall: Eine Reserve-Unterschreitung wirkt als Malus, erzeugt aber keine harte Sperre für side-sicher gute Runs oder blocker-lösende Aktionen.
-- [ ] Remote-Contest-Fall: Runner kann mit mehr Credits einen sichtbaren Remote-Score-Threat contesten -> `gain_credits_first` oder gleichwertige Creditbase-Entscheidung steigt.
-- [ ] Low-Value-Run-Fall: Ein Run ohne hohen Payoff, der den Runner unter Reserve drücken würde, wird abgewertet.
-- [ ] Jede finale Runner-Action stammt aus `input.legalActions`.
+- [x] Midgame-Fall: Runner hat 6 Credits, Remote-Score-Threat ist sichtbar, bekannter oder konservativ geschätzter Contest-Pfad kostet etwa 5, eine Installation würde auf 2 Credits fallen -> Installation wird abgewertet und Economy/Reserve-Aufbau bevorzugt.
+- [x] Setup-Fall: Runner hat 8 Credits, nützliche Handkarte kostet 3, Reserve bleibt bei etwa 5 -> Installation bleibt erlaubt.
+- [x] Low-Credit-Fall: Runner hat 0 bis 2 Credits und kein hoher Run-Payoff liegt vor -> `build_economy_base`/`gain_credit` oder gleichwertige Economy-Aktion wird bevorzugt.
+- [x] High-Payoff-Fall: Bekannte Agenda auf F&E oder vergleichbarer unmittelbarer Payoff darf die Reserve verletzen.
+- [x] Soft-Reserve-Fall: Eine Reserve-Unterschreitung wirkt als Malus, erzeugt aber keine harte Sperre für side-sicher gute Runs oder blocker-lösende Aktionen.
+- [x] Remote-Contest-Fall: Runner kann mit mehr Credits einen sichtbaren Remote-Score-Threat contesten -> `gain_credits_first` oder gleichwertige Creditbase-Entscheidung steigt.
+- [x] Low-Value-Run-Fall: Ein Run ohne hohen Payoff, der den Runner unter Reserve drücken würde, wird abgewertet.
+- [x] Jede finale Runner-Action stammt aus `input.legalActions`.
 
 ## Umsetzungshinweise
 
@@ -90,4 +101,6 @@ Die Runner-KI soll Aktionen, Runs und Installationen gegen eine dynamische Credi
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt. `RunnerEconomyPosture` und `RunnerCreditBasePlan` enthalten jetzt eine eingebettete `RunnerCreditReservePolicy` mit Phase, Breaker-/Contest-/Development-/Emergency-Reserve, Remote-Score-Threat, `canContestIfFunded`, `belowReserveNow` und redigierter Evidence. Die Contest-Reserve steigt nur, wenn Credits den Remote-Contest tatsächlich ermöglichen können; fehlende Breaker-Coverage erzeugt keine reine Credit-Reserve.
+
+RunTarget-Evaluation, TacticalGoals und TacticalPlan-Debugfacts führen die Reserve-Evidence weiter. Unterfinanzierter unbekannter Remote-Score-Threat empfiehlt `gain_credits_first`; side-sicher hohe Payoffs bleiben erlaubt. Der vollständige `@netgrid/ai`-Lauf bleibt mit den zwei bereits offenen Golden-Deck-Fails rot und wird vom Stabilisierungspaket `act-2026-06-08-ai-stabilize-golden-deck-tests` weiterbearbeitet.

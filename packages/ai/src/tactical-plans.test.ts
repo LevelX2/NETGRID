@@ -1457,16 +1457,36 @@ function runnerEconomyPosture(overrides: {
     overrides.usefulHandCardsBlockedByCredits ?? 0;
   const recommendation = overrides.recommendation ?? "allow_pressure";
   const economyPriority = overrides.economyPriority ?? "low";
+  const creditReservePolicy = {
+    schemaVersion: 1 as const,
+    phase: "opening" as const,
+    currentCredits: overrides.currentCredits,
+    minimumCreditFloor: 2,
+    breakerUseReserve: 2,
+    contestReserve: 0,
+    developmentReserve: 4,
+    emergencyReserve: 0,
+    desiredCreditReserve: 4,
+    remoteScoreThreat: "none" as const,
+    canContestIfFunded: false,
+    belowReserveNow: overrides.currentCredits < 4,
+    spendingWouldDropBelowReserve: false,
+    reserveDrivers: ["phase:opening"],
+    reserveOverrides: [],
+    evidence: [],
+  };
   return {
     schemaVersion: "runner-economy-posture-v1",
     minimumCreditFloor: 2,
     desiredCreditReserve: 4,
+    creditReservePolicy,
     creditBasePlan: {
       schemaVersion: "runner-credit-base-plan-v1",
       currentCredits: overrides.currentCredits,
       minimumCreditFloor: 2,
       desiredCreditReserve: 4,
       runCostReserve: 2,
+      creditReservePolicy,
       fundingNeed: economyPriority === "high",
       usefulHandCardsBlockedByCredits,
       usefulHandCardsAffordableNow: 0,

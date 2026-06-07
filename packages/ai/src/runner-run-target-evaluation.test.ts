@@ -563,6 +563,50 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(posture.recommendation).toBe("stable");
   });
 
+  it("raises contest reserve when a visible remote score threat exists", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [
+        server("remote_2", {
+          root: [
+            visibleCard("remote-root-2", {
+              known: false,
+              advancementCounters: 2,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [
+        runAction("run-remote-2", "remote_2"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+
+    const posture = buildRunnerEconomyPosture({ input });
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(posture.creditReservePolicy).toMatchObject({
+      phase: "late_contest",
+      remoteScoreThreat: "urgent",
+      contestReserve: 8,
+      desiredCreditReserve: 8,
+      belowReserveNow: true,
+      canContestIfFunded: true,
+    });
+    expect(posture.creditBasePlan).toMatchObject({
+      recommendation: "build_credit_base",
+      economyPriority: "high",
+      fundingNeed: true,
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "remote_score_threat:urgent",
+        "contest_reserve:8",
+        "desired_credit_reserve:8",
+      ]),
+    );
+  });
+
   it("keeps creditbase conservative when hand development only finds unknown or low-value cards", () => {
     const input = aiInput({
       credits: 4,
@@ -596,7 +640,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(posture.creditBasePlan.topBlockedHandCandidate).toBeUndefined();
   });
 
-  it("lets score-threat runs oversteer low-credit creditbase planning", () => {
+  it("funds unknown remote score-threat pressure when below contest reserve", () => {
     const input = aiInput({
       credits: 2,
       servers: [
@@ -633,7 +677,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       targetServerId: "remote_2",
       scoreThreat: true,
       accessPayoff: "score_threat",
-      recommendation: "run_now",
+      recommendation: "gain_credits_first",
     });
   });
 });
@@ -721,6 +765,21 @@ function runAction(actionId: string, serverId: string): LegalAction {
     visibility: "public",
     expiresAtStateVersion: 2,
     payload: { serverId },
+  };
+}
+
+function gainCreditAction(actionId: string): LegalAction {
+  return {
+    actionId,
+    side: "runner",
+    type: "gain_credit",
+    label: "Gain credit",
+    source: "basic_action",
+    timingPoint: "runner_action.main",
+    costs: [{ clicks: 1 }],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 2,
   };
 }
 

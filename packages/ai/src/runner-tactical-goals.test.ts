@@ -124,6 +124,61 @@ describe("Runner TacticalGoalIntegration", () => {
     );
   });
 
+  it("maps remote contest reserve pressure to gain credits before pressure", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [
+        server("remote_2", {
+          root: [
+            visibleCard("remote-root-2", {
+              known: false,
+              advancementCounters: 2,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [
+        runAction("run-remote-2", "remote_2"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+    const runTargetEvaluations = evaluateRunnerRunTargets({ input });
+    const economyPosture = buildRunnerEconomyPosture({ input });
+    const runnerTacticalGoals = buildRunnerTacticalGoals({
+      input,
+      runTargetEvaluations,
+      economyPosture,
+    });
+
+    const result = evaluateTacticalPlans({
+      input,
+      runnerRunTargetEvaluations: runTargetEvaluations,
+      runnerEconomyPosture: economyPosture,
+      runnerTacticalGoals,
+      candidates: buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "runner",
+        stateVersion: input.playerView.stateVersion,
+      }),
+    });
+
+    expect(economyPosture.creditReservePolicy).toMatchObject({
+      remoteScoreThreat: "urgent",
+      contestReserve: 8,
+      belowReserveNow: true,
+    });
+    expect(JSON.stringify(runnerTacticalGoals)).toContain(
+      "credit_reserve_remote_score_threat:urgent",
+    );
+    expect(result.selectedStep?.kind).toBe("gain_credits");
+    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
+      "gain-credit",
+    ]);
+    expect(JSON.stringify(result.runnerEconomyPostureUsed)).toContain(
+      "runner_credit_reserve_contest:8",
+    );
+  });
+
   it("feeds run target goals into TacticalPlans without creating LegalActions", () => {
     const input = aiInput({
       credits: 6,
@@ -337,7 +392,7 @@ describe("Runner TacticalGoalIntegration", () => {
     );
   });
 
-  it("keeps remote score-threat pressure ahead of hand development installs", () => {
+  it("lets useful setup beat underfunded unknown remote score-threat pressure", () => {
     const input = aiInput({
       credits: 5,
       servers: [
@@ -369,9 +424,9 @@ describe("Runner TacticalGoalIntegration", () => {
       }),
     ]);
 
-    expect(result.selectedPlan?.type).toBe("runner.contest_remote");
+    expect(result.selectedPlan?.type).toBe("runner.develop_hand_card");
     expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
-      "run-remote-2",
+      "install-access-card",
     ]);
   });
 });

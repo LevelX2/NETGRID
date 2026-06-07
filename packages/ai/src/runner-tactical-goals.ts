@@ -216,6 +216,10 @@ function creditBaseGoalEvidence(
   return [
     `credit_base_recommendation:${plan.recommendation}`,
     `credit_base_priority:${plan.economyPriority}`,
+    `credit_reserve_phase:${plan.creditReservePolicy.phase}`,
+    `credit_reserve_remote_score_threat:${plan.creditReservePolicy.remoteScoreThreat}`,
+    `credit_reserve_contest:${plan.creditReservePolicy.contestReserve}`,
+    `credit_reserve_below_now:${plan.creditReservePolicy.belowReserveNow}`,
     `useful_hand_cards_blocked_by_credits:${plan.usefulHandCardsBlockedByCredits}`,
     `useful_hand_cards_affordable_now:${plan.usefulHandCardsAffordableNow}`,
     ...(plan.topBlockedHandCandidate
