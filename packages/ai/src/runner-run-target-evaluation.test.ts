@@ -61,6 +61,35 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
+  it("suppresses HQ when every HQ card is known and has no current access payoff", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [server("hq"), server("rd")],
+      legalActions: [runAction("run-hq", "hq"), runAction("run-rd", "rd")],
+    });
+    input.playerView.opponent.handCount = 2;
+
+    const evaluations = evaluateRunnerRunTargets({
+      input,
+      beliefState: beliefWithKnownHq([
+        "onr_v1_230_cortical-scanner",
+        "onr_v1_237_data-wall",
+      ]),
+    });
+    const hqEvaluation = evaluations.find(
+      (evaluation) => evaluation.targetServerId === "hq",
+    );
+
+    expect(hqEvaluation).toMatchObject({
+      targetServerId: "hq",
+      accessPayoff: "known_low_value",
+      knownAccessState: "known_no_current_payoff",
+      recommendation: "do_not_run_now",
+    });
+    expect(hqEvaluation?.evidence).toContain("central_memory_payoff:known");
+    expect(hqEvaluation?.evidence).toContain("hq_all_cards_known:true");
+  });
+
   it("suppresses a known remote root with no current access payoff", () => {
     const input = aiInput({
       credits: 6,
@@ -470,6 +499,61 @@ function beliefWithRndTop(params: {
           unknownRestCount: 5,
           candidateGroups: [],
           sourceEventIds: [],
+          invalidationReasons: [],
+        },
+      },
+      hiddenRemoteCandidateMemory: [],
+    },
+    rndTopFreshness,
+    knownPositionMemory: [],
+  };
+}
+
+function beliefWithKnownHq(knownDefinitions: string[]): BeliefState {
+  const rndTopFreshness: RunnerOpponentModel["rndTopFreshness"] = {
+    lastKnownAccessEventId: "test-invalidated-rd",
+    knownToRunner: false,
+    freshness: "invalidated",
+    invalidationReasons: [],
+  };
+  const safeDefinitions = knownDefinitions.map((definitionId) => ({
+    definitionId,
+    count: 1,
+    sourceEventIds: ["test-hq-look"],
+  }));
+  return {
+    side: "runner",
+    version: "belief-test",
+    entries: [],
+    assumptions: [],
+    uncertainty: [],
+    invalidationLog: [],
+    eventClassifications: [],
+    runnerOpponentModel: {
+      corpPlanEstimate: {
+        scoring: 0,
+        economy: 0,
+        protection: 0,
+      },
+      remoteCardBelief: [],
+      unrezzedIceRiskModel: [],
+      hqAgendaDensityEstimate: 0,
+      rndValueEstimate: 0,
+      corpCreditReserveInterpretation: "medium",
+      rndTopFreshness,
+      knownPositionMemory: [],
+      hqHandMemory: {
+        handCount: knownDefinitions.length,
+        knownDefinitions,
+        knownCount: knownDefinitions.length,
+        allCardsKnown: true,
+        sourceEventIds: ["test-hq-look"],
+        invalidationReasons: [],
+        ledger: {
+          safeDefinitions,
+          unknownRestCount: 0,
+          candidateGroups: [],
+          sourceEventIds: ["test-hq-look"],
           invalidationReasons: [],
         },
       },

@@ -4814,23 +4814,33 @@ function semanticRuntimeKnownCentralPayoffExclusion(
   input: AiDecisionInput,
   serverId: string | undefined,
 ): SemanticRuntimeExclusion | undefined {
-  if (serverId !== "rd") return undefined;
+  if (serverId !== "hq" && serverId !== "rd") return undefined;
   const payoff = evaluateKnownCentralAccessPayoff(input, serverId);
   if (!payoff.knownNoCurrentPayoff) return undefined;
+  const serverLabel = serverId === "hq" ? "HQ" : "R&D";
   return {
     key: "known_central_no_current_payoff",
-    label: payoff.payoff === "trash_unaffordable"
-      ? "R&D-Topkarte nicht bezahlbar"
-      : "R&D-Topkarte bekannt ohne aktuellen Nutzen",
+    label:
+      payoff.payoff === "trash_unaffordable"
+        ? `${serverLabel}-Trash nicht bezahlbar`
+        : serverId === "hq"
+          ? "HQ-Hand bekannt ohne aktuellen Nutzen"
+          : "R&D-Topkarte bekannt ohne aktuellen Nutzen",
     reason: sortedUnique([
       `server:${serverId}`,
       `payoff:${payoff.payoff}`,
       ...payoff.reasons.slice(0, 3),
-      ...payoff.evidence.filter(
-        (entry) =>
-          entry === "rd_run_suppressed_by_known_low_value_top:true" ||
-          entry.startsWith("central_memory_payoff:"),
-      ).slice(0, 3),
+      ...payoff.evidence
+        .filter(
+          (entry) =>
+            entry === "rd_run_suppressed_by_known_low_value_top:true" ||
+            entry ===
+              "hq_run_suppressed_by_fully_known_low_value_hand:true" ||
+            entry ===
+              "hq_run_suppressed_by_known_unaffordable_trash:true" ||
+            entry.startsWith("central_memory_payoff:"),
+        )
+        .slice(0, 3),
     ]).join("|"),
   };
 }

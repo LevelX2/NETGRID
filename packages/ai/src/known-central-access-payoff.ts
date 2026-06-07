@@ -32,6 +32,7 @@ export function evaluateKnownCentralAccessPayoff(
   serverId: string | undefined,
   beliefState: BeliefState = reconstructBeliefState(input),
 ): KnownCentralAccessPayoff {
+  if (serverId === "hq") return evaluateKnownHqAccessPayoff(input, beliefState);
   if (serverId !== "rd") return unknownCentralPayoff(serverId ?? "none");
   const freshness = beliefState.runnerOpponentModel?.rndTopFreshness;
   if (!freshness || freshness.freshness === "invalidated")
@@ -151,9 +152,131 @@ export function evaluateKnownCentralAccessPayoff(
   };
 }
 
+function evaluateKnownHqAccessPayoff(
+  input: AiDecisionInput,
+  beliefState: BeliefState,
+): KnownCentralAccessPayoff {
+  const memory = beliefState.runnerOpponentModel?.hqHandMemory;
+  if (!memory || memory.knownDefinitions.length === 0) {
+    return unknownCentralPayoff("hq", ["hq_hand_memory:none"]);
+  }
+
+  const path = knownCentralPathCost(input, "hq");
+  const knownAgendaDefinitions = memory.knownDefinitions.filter(
+    (definitionId) => cardDefinitionType(definitionId) === "agenda",
+  );
+  const knownNonAgendaCount =
+    memory.knownDefinitions.length - knownAgendaDefinitions.length;
+  const unknownCount = Math.max(0, memory.handCount - memory.knownCount);
+  const candidateGroupCount = memory.ledger.candidateGroups.length;
+  const evidenceBase = [
+    "central_target:hq",
+    memory.allCardsKnown
+      ? "central_memory_payoff:known"
+      : "central_memory_payoff:partial_known",
+    `hq_hand_known_count:${memory.knownCount}`,
+    `hq_hand_count:${memory.handCount}`,
+    `hq_all_cards_known:${memory.allCardsKnown}`,
+    `hq_unknown_cards:${unknownCount}`,
+    `hq_candidate_group_count:${candidateGroupCount}`,
+    `hq_known_agenda_count:${knownAgendaDefinitions.length}`,
+    `hq_known_non_agenda_count:${knownNonAgendaCount}`,
+    `hq_visible_break_cost:${path.visibleBreakCost}`,
+    `hq_credits_after_path:${path.creditsAfterPath}`,
+  ];
+
+  if (knownAgendaDefinitions.length > 0) {
+    return {
+      payoff: "agenda",
+      knownNoCurrentPayoff: false,
+      score: 520,
+      penalty: 0,
+      reasons: ["known_hq_agenda_pressure"],
+      evidence: [
+        ...evidenceBase,
+        "central_memory_payoff:agenda",
+        "hq_run_boosted_because_known_agenda:true",
+      ],
+    };
+  }
+
+  if (!memory.allCardsKnown) {
+    return unknownCentralPayoff("hq", [
+      ...evidenceBase,
+      "hq_unknown_or_ambiguous_cards_remain:true",
+    ]);
+  }
+
+  const trashableKnownCards = memory.knownDefinitions
+    .map((definitionId) => {
+      const type = cardDefinitionType(definitionId);
+      if (type !== "asset" && type !== "upgrade") return undefined;
+      const trashCost = cardDefinitionTrashCost(definitionId);
+      return trashCost !== undefined ? { definitionId, trashCost } : undefined;
+    })
+    .filter(
+      (
+        card,
+      ): card is {
+        definitionId: string;
+        trashCost: number;
+      } => card !== undefined,
+    );
+  const affordableTrashCards = trashableKnownCards.filter(
+    (card) => path.creditsAfterPath >= card.trashCost,
+  );
+  if (affordableTrashCards.length > 0) {
+    return {
+      payoff: "trash_affordable",
+      knownNoCurrentPayoff: false,
+      score: 120,
+      penalty: 0,
+      reasons: ["known_hq_trash_affordable_after_ice"],
+      evidence: [
+        ...evidenceBase,
+        `hq_known_trash_affordable_count:${affordableTrashCards.length}`,
+        "central_memory_payoff:trash_affordable",
+        "hq_run_boosted_by_known_trashable:true",
+      ],
+    };
+  }
+
+  if (trashableKnownCards.length > 0) {
+    return {
+      payoff: "trash_unaffordable",
+      knownNoCurrentPayoff: true,
+      score: 0,
+      penalty: 700,
+      reasons: [
+        "known_hq_trash_unaffordable_after_ice",
+        "central_known_no_current_payoff",
+      ],
+      evidence: [
+        ...evidenceBase,
+        `hq_known_trash_unaffordable_count:${trashableKnownCards.length}`,
+        "central_memory_payoff:trash_unaffordable",
+        "hq_run_suppressed_by_known_unaffordable_trash:true",
+      ],
+    };
+  }
+
+  return {
+    payoff: "known_low_value",
+    knownNoCurrentPayoff: true,
+    score: 0,
+    penalty: 640,
+    reasons: ["known_hq_hand_low_value", "central_known_no_current_payoff"],
+    evidence: [
+      ...evidenceBase,
+      "central_memory_payoff:known_low_value",
+      "hq_run_suppressed_by_fully_known_low_value_hand:true",
+    ],
+  };
+}
+
 function knownCentralPathCost(
   input: AiDecisionInput,
-  serverId: "rd",
+  serverId: "hq" | "rd",
 ): { visibleBreakCost: number; creditsAfterPath: number } {
   const server = input.playerView.servers.find(
     (candidate) => candidate.id === serverId,

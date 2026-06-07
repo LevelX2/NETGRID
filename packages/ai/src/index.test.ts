@@ -17984,6 +17984,86 @@ describe("V1.4.2 belief state and opponent model", () => {
     );
   });
 
+  it("excludes semantic HQ runs when the full known HQ hand has no current payoff", () => {
+    const state = toRunnerTurn(
+      createGameAfterSetup({ seed: "semantic-runtime-known-hq-no-payoff" }),
+    );
+    const baseInput = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const hqRun = baseInput.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    const rdRun = baseInput.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const gainCredit = baseInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(hqRun).toBeDefined();
+    expect(rdRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!hqRun || !rdRun || !gainCredit)
+      throw new Error("Missing known HQ no-payoff fixture actions");
+
+    const scopedActions = [hqRun, rdRun, gainCredit];
+    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+    const decision = chooseRunnerAction(
+      {
+        ...baseInput,
+        playerView: {
+          ...baseInput.playerView,
+          opponent: {
+            ...baseInput.playerView.opponent,
+            handCount: 2,
+          },
+          legalActions: scopedActions,
+        },
+        eventTail: [
+          ...baseInput.eventTail,
+          syntheticHqPrivateLookEvent("semantic-known-hq-ice-only", 100, [
+            "onr_v1_230_cortical-scanner",
+            "onr_v1_237_data-wall",
+          ]),
+        ],
+        legalActions: scopedActions,
+      },
+      { persistTacticalPlanMemory: false },
+    );
+    const alternatives = new Map(
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [
+        entry.actionId,
+        entry,
+      ]) ?? [],
+    );
+    const hqAlternative = alternatives.get(hqRun.actionId);
+    const rdAlternative = alternatives.get(rdRun.actionId);
+
+    expect(decision.actionId).toBe(rdRun.actionId);
+    expect(hqAlternative?.excluded).toBe(true);
+    expect(hqAlternative?.priority).toBeUndefined();
+    expect(hqAlternative?.whyNot).toContain(
+      "semantic_excluded:known_central_no_current_payoff",
+    );
+    expect(
+      hqAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "semantic_action_excluded" &&
+          component.reason?.includes("server:hq") &&
+          component.reason?.includes(
+            "hq_run_suppressed_by_fully_known_low_value_hand:true",
+          ),
+      ),
+    ).toBe(true);
+    expect(rdAlternative?.excluded).toBeUndefined();
+    expect(decision.evidence).not.toContain(
+      "tactical_plan:runner.opportunistic_central_run:hq",
+    );
+  });
+
   it("penalizes repeated semantic HQ runs and explains the run target score factors", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({ seed: "semantic-runtime-run-target-memory" }),

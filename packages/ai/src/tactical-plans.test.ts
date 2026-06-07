@@ -656,6 +656,53 @@ describe("tactical plan model", () => {
     expect(hqPlan?.status).toBe("active");
   });
 
+  it("abandons an HQ probe when all HQ cards are known and low-value", () => {
+    const input = aiInput("runner", [
+      legalAction("run-hq", "runner", "start_run", {
+        serverId: "hq",
+      }),
+      legalAction("run-rd", "runner", "start_run", {
+        serverId: "rd",
+      }),
+      legalAction("gain", "runner", "gain_credit"),
+    ]);
+    input.playerView.stateVersion = 3;
+    input.playerView.opponent.handCount = 2;
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    input.eventTail = [
+      hqPrivateLookEvent("tactical-hq-known-ice-look", 1, [
+        "onr_v1_230_cortical-scanner",
+        "onr_v1_237_data-wall",
+      ]),
+    ];
+
+    const plans = buildTacticalPlans({ input });
+    const hqPlan = plans.find(
+      (plan) => plan.planId === "runner.opportunistic_central_run:hq",
+    );
+    const rdPlan = plans.find(
+      (plan) => plan.planId === "runner.opportunistic_central_run:rd",
+    );
+
+    expect(hqPlan?.status).toBe("abandoned");
+    expect(hqPlan?.blockers.map((blocker) => blocker.kind)).toEqual([
+      "target_unreachable",
+    ]);
+    expect(hqPlan?.evidence).toEqual(
+      expect.arrayContaining([
+        "known_hq_hand_low_value",
+        "central_known_no_current_payoff",
+        "hq_run_suppressed_by_fully_known_low_value_hand:true",
+        "central_memory_payoff:known_low_value",
+      ]),
+    );
+    expect(hqPlan?.scoreBreakdown[0]).toMatchObject({
+      key: "central_known_no_current_payoff",
+      value: -640,
+    });
+    expect(rdPlan?.status).toBe("active");
+  });
+
   it("funds an unaffordable matching breaker in hand instead of drawing", () => {
     const input = aiInput("runner", [
       legalAction("run-rd", "runner", "start_run", {
@@ -1507,6 +1554,29 @@ function rdAccessEvent(
       actionType: "access_card",
       serverId: "rd",
       cardDefinitionId,
+    },
+  };
+}
+
+function hqPrivateLookEvent(
+  eventId: string,
+  stateVersionBefore: number,
+  knownHqDefinitionIds: string[],
+): PublicGameEvent {
+  return {
+    eventId,
+    type: "resolve_choice",
+    stateVersionBefore,
+    stateVersionAfter: stateVersionBefore + 1,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "hidden_info_barrier",
+    publicPayload: {
+      actor: "runner",
+      actionType: "resolve_choice",
+      hiddenZoneAction: "p3_33_private_look",
+      privateLookZone: "hq",
+      privateLookCount: knownHqDefinitionIds.length,
+      knownHqDefinitionIds,
     },
   };
 }
