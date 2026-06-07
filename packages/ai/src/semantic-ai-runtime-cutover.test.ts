@@ -331,6 +331,191 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
+  it("does not spend the Runner's last credit on a pump that still cannot break the encountered ICE", () => {
+    const dwarf: VisibleCard = {
+      instanceId: "runner-dwarf",
+      definitionId: "onr_v1_021_dwarf",
+      title: "Dwarf",
+      owner: "runner",
+      controller: "runner",
+      type: "program",
+      subtypes: ["icebreaker", "fracter"],
+      known: true,
+      strength: 3,
+    };
+    const crystalWall: VisibleCard = {
+      instanceId: "corp-crystal-wall",
+      definitionId: "onr_v1_232_crystal-wall",
+      title: "Crystal Wall",
+      owner: "corp",
+      controller: "corp",
+      type: "ice",
+      subtypes: ["wall"],
+      known: true,
+      rezzed: true,
+      strength: 4,
+      strengthModifier: 1,
+    };
+    const pump = legalAction(
+      "pump-dwarf",
+      "runner",
+      "pump_breaker",
+      "Dwarf: Stärke +1",
+      { credits: 1 },
+      { source: dwarf.instanceId, visibility: "private_to_actor" },
+    );
+    const continueIntoEtr = legalAction(
+      "continue-etr",
+      "runner",
+      "continue_run",
+      "Subroutinen auslösen (Run endet)",
+      { credits: 0 },
+      {
+        visibility: "private_to_actor",
+        payload: {
+          encounterContinue: true,
+          unbrokenSubroutineCount: 1,
+          encounterWillEndRun: true,
+          sourceDefinitionId: "onr_v1_232_crystal-wall",
+        },
+      },
+    );
+    pump.timingPoint = "run.encounter_ice";
+    continueIntoEtr.timingPoint = "run.encounter_ice";
+    const input = aiInput("runner", [pump, continueIntoEtr]);
+    input.playerView.timingPoint = "run.encounter_ice";
+    input.playerView.own.credits = 1;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.rig = [dwarf];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [crystalWall]),
+      server("archives"),
+    ];
+    input.playerView.run = {
+      attackedServerId: "rd",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "rd", iceIndex: 0 },
+      encounteredIce: crystalWall,
+      successful: false,
+    };
+
+    const decision = chooseRunnerAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(continueIntoEtr.actionId);
+    expect(decision.reasonCode).toBe("runner.semantic.simple_run_choice");
+    expect(debugText).toContain(
+      "semantic_excluded:pump_cannot_lead_to_useful_break",
+    );
+    expect(debugText).toContain("pump_required_count:1");
+  });
+
+  it("does not spend the Runner's last credit on a break when the remaining ICE path is still unaffordable", () => {
+    const dwarf: VisibleCard = {
+      instanceId: "runner-dwarf",
+      definitionId: "onr_v1_021_dwarf",
+      title: "Dwarf",
+      owner: "runner",
+      controller: "runner",
+      type: "program",
+      subtypes: ["icebreaker", "fracter"],
+      known: true,
+      strength: 4,
+    };
+    const outerCrystalWall: VisibleCard = {
+      instanceId: "corp-outer-crystal-wall",
+      definitionId: "onr_v1_232_crystal-wall",
+      title: "Crystal Wall",
+      owner: "corp",
+      controller: "corp",
+      type: "ice",
+      subtypes: ["wall"],
+      known: true,
+      rezzed: true,
+      strength: 4,
+    };
+    const currentCrystalWall: VisibleCard = {
+      instanceId: "corp-current-crystal-wall",
+      definitionId: "onr_v1_232_crystal-wall",
+      title: "Crystal Wall",
+      owner: "corp",
+      controller: "corp",
+      type: "ice",
+      subtypes: ["wall"],
+      known: true,
+      rezzed: true,
+      strength: 4,
+      effectiveRunQuote: {
+        iceInstanceId: "corp-current-crystal-wall",
+        iceDefinitionId: "onr_v1_232_crystal-wall",
+        effectiveStrength: 4,
+        subroutines: [{ id: "current-etr", type: "end_the_run" }],
+      },
+    };
+    const breakCurrent = legalAction(
+      "break-current-wall",
+      "runner",
+      "break_subroutine",
+      "Dwarf: Subroutine brechen",
+      { credits: 1 },
+      {
+        source: dwarf.instanceId,
+        visibility: "private_to_actor",
+        payload: {
+          breakerId: dwarf.instanceId,
+          iceId: currentCrystalWall.instanceId,
+          subroutineIndex: 0,
+        },
+      },
+    );
+    const continueIntoEtr = legalAction(
+      "continue-etr",
+      "runner",
+      "continue_run",
+      "Subroutinen auslösen (Run endet)",
+      { credits: 0 },
+      {
+        visibility: "private_to_actor",
+        payload: {
+          encounterContinue: true,
+          unbrokenSubroutineCount: 1,
+          encounterWillEndRun: true,
+          sourceDefinitionId: "onr_v1_232_crystal-wall",
+        },
+      },
+    );
+    breakCurrent.timingPoint = "run.encounter_ice";
+    continueIntoEtr.timingPoint = "run.encounter_ice";
+    const input = aiInput("runner", [breakCurrent, continueIntoEtr]);
+    input.playerView.timingPoint = "run.encounter_ice";
+    input.playerView.own.credits = 1;
+    input.playerView.own.clicks = 2;
+    input.playerView.own.rig = [dwarf];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd", [outerCrystalWall, currentCrystalWall]),
+      server("archives"),
+    ];
+    input.playerView.run = {
+      attackedServerId: "rd",
+      phase: "encounter_ice",
+      position: { kind: "ice", serverId: "rd", iceIndex: 1 },
+      encounteredIce: currentCrystalWall,
+      successful: false,
+    };
+
+    const decision = chooseRunnerAction(input);
+    const debugText = JSON.stringify(decision.decisionDebug);
+
+    expect(decision.actionId).toBe(continueIntoEtr.actionId);
+    expect(decision.reasonCode).toBe("runner.semantic.simple_run_choice");
+    expect(debugText).toContain(
+      "semantic_excluded:break_cannot_preserve_access_path",
+    );
+    expect(debugText).toContain("break_future_path_blocked_after_cost:true");
+  });
+
   it("builds toward an unaffordable economy payout card in hand", () => {
     const input = aiInput("runner", [
       legalAction("draw", "runner", "draw_card", "Draw 1", { credits: 0 }),

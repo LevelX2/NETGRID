@@ -4162,6 +4162,11 @@ function semanticRuntimeActionExclusion(
 ): SemanticRuntimeExclusion | undefined {
   const planMemoryExclusion = semanticRuntimePlanMemoryActionExclusion(input, action);
   if (planMemoryExclusion) return planMemoryExclusion;
+  const encounterExclusion = semanticRuntimeRunnerEncounterActionExclusion(
+    input,
+    action,
+  );
+  if (encounterExclusion) return encounterExclusion;
   if (input.side !== "runner" || action.type !== "start_run") return undefined;
   const serverId = semanticRuntimeServerId(action);
   const knownCentralPayoffExclusion = semanticRuntimeKnownCentralPayoffExclusion(
@@ -4193,6 +4198,161 @@ function semanticRuntimeActionExclusion(
       : "Run-Ziel nicht bezahlbar",
     reason: semanticRuntimeKnownIcePathReason(assessment, server.id)
   };
+}
+
+function semanticRuntimeRunnerEncounterActionExclusion(
+  input: AiDecisionInput,
+  action: LegalAction,
+): SemanticRuntimeExclusion | undefined {
+  if (input.side !== "runner") return undefined;
+  if (action.type === "pump_breaker") {
+    const assessment = pumpViabilityAssessment(input, action);
+    if (assessment.canLeadToBreak) return undefined;
+    return {
+      key: "pump_cannot_lead_to_useful_break",
+      label: "Pumpen ohne Zugriffspfad",
+      reason: sortedUnique([
+        "encounter_action:pump_breaker",
+        ...assessment.evidence,
+      ]).join("|"),
+    };
+  }
+  if (action.type === "break_subroutine") {
+    const assessment = breakAccessPathAssessment(input, action);
+    if (assessment.canPreserveAccessPath) return undefined;
+    return {
+      key: "break_cannot_preserve_access_path",
+      label: "Break ohne Zugriffspfad",
+      reason: sortedUnique([
+        "encounter_action:break_subroutine",
+        ...assessment.evidence,
+      ]).join("|"),
+    };
+  }
+  return undefined;
+}
+
+function breakAccessPathAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+): { canPreserveAccessPath: boolean; evidence: string[] } {
+  const run = input.playerView.run;
+  if (run?.position?.kind !== "ice")
+    return { canPreserveAccessPath: true, evidence: [] };
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === run.position?.serverId,
+  );
+  if (!server) return { canPreserveAccessPath: true, evidence: [] };
+
+  const breakIndexes = breakSubroutineIndexesForAction(action);
+  const quote = currentEncounteredIceCard(input)?.effectiveRunQuote;
+  const targetSubroutines = [...breakIndexes]
+    .map((index) => quote?.subroutines[index])
+    .filter((subroutine): subroutine is NonNullable<typeof subroutine> =>
+      Boolean(subroutine),
+    );
+  if (targetSubroutines.some(isImmediateSafetyThreatSubroutine))
+    return {
+      canPreserveAccessPath: true,
+      evidence: ["break_preserves_immediate_safety:true"],
+    };
+
+  const creditsAfterBreak =
+    input.playerView.own.credits - creditCostForAiAction(action);
+  const remainingCurrentEndRunAfterBreak =
+    quote && breakIndexes.size > 0
+      ? quote.subroutines.filter(
+          (subroutine, index) =>
+            isEndRunSubroutine(subroutine) && !breakIndexes.has(index),
+        ).length
+      : 0;
+  const currentEncounterContinue = input.legalActions.find(
+    (candidate) =>
+      candidate.type === "continue_run" &&
+      candidate.payload?.encounterContinue === true,
+  );
+  if (
+    currentEncounterContinue?.payload?.encounterWillEndRun === true &&
+    remainingCurrentEndRunAfterBreak > 0 &&
+    creditsAfterBreak < (estimatedEncounterBreakCost(input, action) ?? 1)
+  )
+    return {
+      canPreserveAccessPath: false,
+      evidence: [
+        "break_cannot_clear_current_ice:true",
+        `break_credits_after:${creditsAfterBreak}`,
+        `break_remaining_current_end_run:${remainingCurrentEndRunAfterBreak}`,
+      ],
+    };
+
+  const futureIce = server.ice.slice(0, Math.max(0, run.position.iceIndex));
+  if (futureIce.length <= 0)
+    return {
+      canPreserveAccessPath: true,
+      evidence: [`break_credits_after:${creditsAfterBreak}`],
+    };
+
+  const pathAssessment = assessKnownRezzedIcePath(
+    futureIce,
+    input.playerView.own.rig ?? [],
+    creditsAfterBreak,
+    server.root,
+  );
+  if (
+    pathAssessment.assessedKnownIceCount <= 0 ||
+    pathAssessment.canReachAccess
+  )
+    return {
+      canPreserveAccessPath: true,
+      evidence: [
+        `break_credits_after:${creditsAfterBreak}`,
+        semanticRuntimeKnownIcePathReason(pathAssessment, server.id),
+      ],
+    };
+  return {
+    canPreserveAccessPath: false,
+    evidence: [
+      "break_future_path_blocked_after_cost:true",
+      `break_credits_after:${creditsAfterBreak}`,
+      semanticRuntimeKnownIcePathReason(pathAssessment, server.id),
+    ],
+  };
+}
+
+function breakSubroutineIndexesForAction(action: LegalAction): Set<number> {
+  const indexes = parseSubroutineIndexes(action.payload?.subroutineIndexes);
+  const singleIndex = Number(action.payload?.subroutineIndex);
+  if (Number.isInteger(singleIndex) && singleIndex >= 0)
+    indexes.add(singleIndex);
+  return indexes;
+}
+
+function isImmediateSafetyThreatSubroutine(
+  subroutine: NonNullable<
+    NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"][number]
+  >,
+): boolean {
+  const type = subroutine.type.toLowerCase();
+  return (
+    type === "do_damage" ||
+    type === "give_runner_tag" ||
+    type === "initiate_trace" ||
+    type === "trash_installed_program" ||
+    type === "trash_program_unless_runner_pays" ||
+    type === "trash_installed_program_unless_runner_pays" ||
+    subroutine.unbrokenRunEffect?.causesDamageOrProgramTrash === true
+  );
+}
+
+function isEndRunSubroutine(
+  subroutine: NonNullable<
+    NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"][number]
+  >,
+): boolean {
+  return (
+    subroutine.type === "end_the_run" ||
+    subroutine.type === "end_the_run_unless_runner_pays"
+  );
 }
 
 function semanticRuntimeKnownCentralPayoffExclusion(
