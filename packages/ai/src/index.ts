@@ -95,11 +95,15 @@ import {
   type StructuredTagPunishPayoffKind,
 } from "./tag-punish-ontology-consumer";
 import { buildAiDecisionInputDto } from "./input-dto";
-import { buildActionSemanticCandidates } from "./action-semantic-candidate";
+import {
+  buildActionSemanticCandidates,
+  type ActionSemanticCandidate,
+} from "./action-semantic-candidate";
 import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
 import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
+  mapPlanStepToLegalActions,
   rememberTacticalPlanRuntime,
   type PlanStepMappingResult,
   type TacticalPlan,
@@ -3267,12 +3271,13 @@ export function buildAiDecisionInput(
     legalActions,
     deckSnapshot: options.ownDeckSnapshot,
   });
-  const ownRunnerStrategicIntent = side === "runner"
-    ? buildRunnerStrategicIntentProfile({
-        strategyProfile: buildDeckStrategyProfile(options.ownDeckSnapshot),
-        deckCapabilities: ownDeckCapabilities,
-      })
-    : undefined;
+  const ownRunnerStrategicIntent =
+    side === "runner"
+      ? buildRunnerStrategicIntentProfile({
+          strategyProfile: buildDeckStrategyProfile(options.ownDeckSnapshot),
+          deckCapabilities: ownDeckCapabilities,
+        })
+      : undefined;
   const enriched: AiDecisionInputWithDeckCapabilities = {
     ...input,
     ownDeckCapabilities,
@@ -3349,10 +3354,11 @@ export function chooseCorpAction(
   options: AiDecisionRuntimeOptions = {},
 ): AiDecision {
   const baselineDecision = chooseCorpBaselineAction(input);
-  const legacyDecision = hasCorpPlanAction(input) &&
+  const legacyDecision =
+    hasCorpPlanAction(input) &&
     !isCorpReactiveBaselineDecision(baselineDecision)
-    ? chooseCorpPlanAction(input, baselineDecision)
-    : baselineDecision;
+      ? chooseCorpPlanAction(input, baselineDecision)
+      : baselineDecision;
   return chooseSemanticRuntimeAction(input, legacyDecision, options);
 }
 
@@ -3395,6 +3401,16 @@ type SemanticRuntimeExclusion = {
   reason: string;
 };
 
+type TacticalPlanMappedChoiceResult = {
+  choice?: SemanticRuntimeChoice;
+  overrideChoice?: SemanticRuntimeChoice;
+  overriddenMappedChoice?: SemanticRuntimeChoice;
+  scoreGap?: number;
+};
+
+// Tactical plans may break close ties, but a clear semantic gap belongs to the current board.
+const PLAN_MAPPED_CHOICE_MAX_SCORE_GAP = 600;
+
 function chooseSemanticRuntimeAction(
   input: AiDecisionInput,
   legacyDecision: AiDecision,
@@ -3421,14 +3437,17 @@ function chooseSemanticRuntimeAction(
         !candidate.exclusion &&
         candidate.score > 0 &&
         semanticRuntimeChoiceIsReactive(candidate),
-    ) ?? choices.find(
-      (candidate) => !candidate.exclusion && semanticRuntimeChoiceIsReactive(candidate),
+    ) ??
+    choices.find(
+      (candidate) =>
+        !candidate.exclusion && semanticRuntimeChoiceIsReactive(candidate),
     );
   const previousPlan = getTacticalPlanMemorySnapshot(input);
   const deckCapabilities = deckCapabilitiesForInput(input);
-  const runnerStrategicIntent = input.side === "runner"
-    ? runnerStrategicIntentForInput(input, deckCapabilities)
-    : undefined;
+  const runnerStrategicIntent =
+    input.side === "runner"
+      ? runnerStrategicIntentForInput(input, deckCapabilities)
+      : undefined;
   const runnerHandDevelopmentEvaluations = runnerStrategicIntent
     ? evaluateRunnerHandDevelopment({
         input,
@@ -3461,8 +3480,12 @@ function chooseSemanticRuntimeAction(
     ? buildRunnerTacticalGoals({
         input,
         strategicIntent: runnerStrategicIntent,
-        ...(runnerRunTargetEvaluations ? { runTargetEvaluations: runnerRunTargetEvaluations } : {}),
-        ...(runnerEconomyPosture ? { economyPosture: runnerEconomyPosture } : {}),
+        ...(runnerRunTargetEvaluations
+          ? { runTargetEvaluations: runnerRunTargetEvaluations }
+          : {}),
+        ...(runnerEconomyPosture
+          ? { economyPosture: runnerEconomyPosture }
+          : {}),
         deckCapabilities,
       })
     : undefined;
@@ -3481,12 +3504,27 @@ function chooseSemanticRuntimeAction(
         ...(runnerTacticalGoals ? { runnerTacticalGoals } : {}),
         candidates: actionSemanticCandidates,
       });
-  const mappedChoice = tacticalPlanMappedChoice(choices, planRuntime.selectedMapping);
+  const bestChoice = bestSemanticRuntimeChoice(choices);
+  const bestPlanOverrideChoice =
+    bestSemanticRuntimeChoiceForTacticalPlanOverride(choices, planRuntime);
+  const mappedChoice = tacticalPlanMappedChoice(
+    choices,
+    planRuntime.selectedMapping,
+    bestPlanOverrideChoice,
+  );
+  const planMappingOverridden = Boolean(
+    !reactiveChoice &&
+    mappedChoice.overriddenMappedChoice &&
+    mappedChoice.overrideChoice,
+  );
   const initialChoice =
     reactiveChoice ??
-    mappedChoice ??
-    choices.find((candidate) => !candidate.exclusion && candidate.score > 0) ??
-    choices.find((candidate) => !candidate.exclusion);
+    mappedChoice.choice ??
+    (planMappingOverridden && mappedChoice.overrideChoice
+      ? semanticRuntimeChoiceWithEvidence(mappedChoice.overrideChoice, {
+          evidence: tacticalPlanMappingOverrideEvidence(mappedChoice),
+        })
+      : bestChoice);
   if (!initialChoice) {
     return {
       ...legacyDecision,
@@ -3496,6 +3534,14 @@ function chooseSemanticRuntimeAction(
       ],
     };
   }
+  const effectivePlanRuntime = planMappingOverridden
+    ? tacticalPlanRuntimeAlignedToChoice(
+        planRuntime,
+        mappedChoice.overrideChoice,
+        actionSemanticCandidates,
+        input,
+      )
+    : planRuntime;
   const wilsonAdjusted = runnerWilsonAdjustedSemanticChoice(
     input,
     choices,
@@ -3508,7 +3554,11 @@ function chooseSemanticRuntimeAction(
   const selectedChoices = selectedChoicesForDecision(input, choice.action);
   const persistTacticalPlanMemory = options.persistTacticalPlanMemory !== false;
   const updatedPlanMemory = persistTacticalPlanMemory
-    ? rememberTacticalPlanRuntime(input, planRuntime, wilsonAdjusted.memoryAction ?? choice.action)
+    ? rememberTacticalPlanRuntime(
+        input,
+        effectivePlanRuntime,
+        wilsonAdjusted.memoryAction ?? choice.action,
+      )
     : undefined;
   return {
     actionId: choice.action.actionId,
@@ -3517,19 +3567,21 @@ function chooseSemanticRuntimeAction(
     explanation: choice.explanation,
     consideredActionIds: [],
     fallbackUsed: false,
-    ...(choice.confidence !== undefined ? { confidence: choice.confidence } : {}),
+    ...(choice.confidence !== undefined
+      ? { confidence: choice.confidence }
+      : {}),
     evidence: scrubEvidence([
       ...choice.evidence,
       `semantic_runtime_default:true`,
       `semantic_runtime_scope:${choice.scopeId}`,
-      ...(planRuntime.selectedPlan
+      ...(effectivePlanRuntime.selectedPlan
         ? [
-            `tactical_plan:${planRuntime.selectedPlan.planId}`,
-            `tactical_plan_type:${planRuntime.selectedPlan.type}`,
+            `tactical_plan:${effectivePlanRuntime.selectedPlan.planId}`,
+            `tactical_plan_type:${effectivePlanRuntime.selectedPlan.type}`,
           ]
         : []),
-      ...(planRuntime.selectedStep
-        ? [`tactical_step:${planRuntime.selectedStep.kind}`]
+      ...(effectivePlanRuntime.selectedStep
+        ? [`tactical_step:${effectivePlanRuntime.selectedStep.kind}`]
         : []),
       ...(updatedPlanMemory
         ? [
@@ -3537,7 +3589,7 @@ function chooseSemanticRuntimeAction(
             `tactical_plan_progression:${updatedPlanMemory.planProgressionReason}`,
           ]
         : []),
-      ...(!persistTacticalPlanMemory && planRuntime.selectedPlan
+      ...(!persistTacticalPlanMemory && effectivePlanRuntime.selectedPlan
         ? ["tactical_plan_memory_preview_only:true"]
         : []),
       `legacy_reference_reason:${legacyDecision.reasonCode}`,
@@ -3551,7 +3603,7 @@ function chooseSemanticRuntimeAction(
       wilsonAdjusted.rankedChoices,
       legacyDecision,
       legacyActionType,
-      planRuntime,
+      effectivePlanRuntime,
     ),
     timeoutUsed: Boolean(legacyDecision.timeoutUsed),
     profileId: input.profileId,
@@ -3567,20 +3619,166 @@ function emptyTacticalPlanRuntimeResult(): TacticalPlanRuntimeResult {
   };
 }
 
+function bestSemanticRuntimeChoice(
+  choices: readonly SemanticRuntimeChoice[],
+): SemanticRuntimeChoice | undefined {
+  return (
+    choices.find((candidate) => !candidate.exclusion && candidate.score > 0) ??
+    choices.find((candidate) => !candidate.exclusion)
+  );
+}
+
+function bestSemanticRuntimeChoiceForTacticalPlanOverride(
+  choices: readonly SemanticRuntimeChoice[],
+  planRuntime: TacticalPlanRuntimeResult,
+): SemanticRuntimeChoice | undefined {
+  const viableChoices = choices.filter(
+    (choice) => !tacticalPlanBlocksSemanticChoice(planRuntime, choice),
+  );
+  return bestSemanticRuntimeChoice(viableChoices);
+}
+
+function tacticalPlanBlocksSemanticChoice(
+  planRuntime: TacticalPlanRuntimeResult,
+  choice: SemanticRuntimeChoice,
+): boolean {
+  if (choice.action.type !== "start_run") return false;
+  const serverId = semanticRuntimeServerId(choice.action);
+  if (!serverId) return false;
+  return planRuntime.planAlternatives.some(
+    (plan) =>
+      (plan.status === "abandoned" ||
+        plan.status === "blocked" ||
+        plan.status === "failed" ||
+        plan.status === "expired") &&
+      plan.target?.kind === "server" &&
+      plan.target.id === serverId,
+  );
+}
+
 function tacticalPlanMappedChoice(
   choices: readonly SemanticRuntimeChoice[],
   mapping: PlanStepMappingResult | undefined,
-): SemanticRuntimeChoice | undefined {
-  if (!mapping) return undefined;
-  const mappedActionIds = new Set(mapping.legalActions.map((action) => action.actionId));
-  return choices.find(
-    (choice) =>
-      !choice.exclusion &&
-      mappedActionIds.has(choice.action.actionId) &&
-      choice.score > 0,
-  ) ?? choices.find(
-    (choice) => !choice.exclusion && mappedActionIds.has(choice.action.actionId),
+  overrideChoice: SemanticRuntimeChoice | undefined,
+): TacticalPlanMappedChoiceResult {
+  if (!mapping) return {};
+  const mappedActionIds = new Set(
+    mapping.legalActions.map((action) => action.actionId),
   );
+  const mappedChoice =
+    choices.find(
+      (choice) =>
+        !choice.exclusion &&
+        mappedActionIds.has(choice.action.actionId) &&
+        choice.score > 0,
+    ) ??
+    choices.find(
+      (choice) =>
+        !choice.exclusion && mappedActionIds.has(choice.action.actionId),
+    );
+  if (!mappedChoice) return {};
+  if (
+    overrideChoice &&
+    overrideChoice.action.actionId !== mappedChoice.action.actionId
+  ) {
+    const scoreGap = roundScore(overrideChoice.score - mappedChoice.score);
+    const mappedNonPositiveAgainstPositive =
+      mappedChoice.score <= 0 && overrideChoice.score > 0;
+    if (
+      mappedNonPositiveAgainstPositive ||
+      scoreGap > PLAN_MAPPED_CHOICE_MAX_SCORE_GAP
+    ) {
+      return {
+        overrideChoice,
+        overriddenMappedChoice: mappedChoice,
+        scoreGap,
+      };
+    }
+  }
+  return { choice: mappedChoice };
+}
+
+function tacticalPlanMappingOverrideEvidence(
+  result: TacticalPlanMappedChoiceResult,
+): string[] {
+  const mappedChoice = result.overriddenMappedChoice;
+  if (!mappedChoice) return [];
+  return [
+    "tactical_plan_mapping_overridden:true",
+    "tactical_plan_override_reason:semantic_score_gap",
+    `tactical_plan_mapping_score_gap:${result.scoreGap ?? 0}`,
+  ];
+}
+
+function tacticalPlanRuntimeAlignedToChoice(
+  result: TacticalPlanRuntimeResult,
+  choice: SemanticRuntimeChoice | undefined,
+  candidates: readonly ActionSemanticCandidate[],
+  input: AiDecisionInput,
+): TacticalPlanRuntimeResult {
+  if (!choice) return tacticalPlanRuntimeWithoutSelectedMapping(result);
+  const mapping = tacticalPlanMappingForChoice(
+    result,
+    choice,
+    candidates,
+    input,
+  );
+  if (!mapping) return tacticalPlanRuntimeWithoutSelectedMapping(result);
+  return {
+    ...result,
+    selectedPlan: mapping.plan,
+    selectedStep: mapping.step,
+    selectedMapping: mapping,
+  };
+}
+
+function tacticalPlanMappingForChoice(
+  result: TacticalPlanRuntimeResult,
+  choice: SemanticRuntimeChoice,
+  candidates: readonly ActionSemanticCandidate[],
+  input: AiDecisionInput,
+): PlanStepMappingResult | undefined {
+  for (const plan of result.planAlternatives) {
+    if (!tacticalPlanCanMapToCurrentAction(plan)) continue;
+    const mapping = mapPlanStepToLegalActions(
+      plan,
+      plan.currentStep,
+      candidates,
+      input,
+    );
+    if (
+      mapping.status === "matched" &&
+      mapping.legalActions.some(
+        (action) => action.actionId === choice.action.actionId,
+      )
+    ) {
+      return mapping;
+    }
+  }
+  return undefined;
+}
+
+function tacticalPlanCanMapToCurrentAction(plan: TacticalPlan): boolean {
+  return (
+    plan.status !== "abandoned" &&
+    plan.status !== "expired" &&
+    plan.status !== "failed" &&
+    plan.status !== "satisfied"
+  );
+}
+
+function tacticalPlanRuntimeWithoutSelectedMapping(
+  result: TacticalPlanRuntimeResult,
+): TacticalPlanRuntimeResult {
+  const {
+    selectedPlan: _selectedPlan,
+    selectedStep: _selectedStep,
+    selectedMapping: _selectedMapping,
+    planProgressionReason: _planProgressionReason,
+    whyPlanAbandoned: _whyPlanAbandoned,
+    ...rest
+  } = result;
+  return rest;
 }
 
 function runnerWilsonAdjustedSemanticChoice(
@@ -3599,7 +3797,10 @@ function runnerWilsonAdjustedSemanticChoice(
   if (!targetServerId) {
     return { choice: selectedChoice, rankedChoices: rankedChoices.slice() };
   }
-  const capAssessment = runnerWilsonRunCapAssessment(input, selectedChoice.action);
+  const capAssessment = runnerWilsonRunCapAssessment(
+    input,
+    selectedChoice.action,
+  );
   const wilsonEvidence = [
     `wilson_target_server:${targetServerId}`,
     `wilson_visible_break_cost:${capAssessment.visibleBreakCost}`,
@@ -3607,11 +3808,12 @@ function runnerWilsonAdjustedSemanticChoice(
   ];
 
   if (!capAssessment.ok) {
-    const hasWilsonOption = rankedChoices.some((choice) =>
-      choice.action.payload?.runnerAbility === "wilson_gain_run_action" ||
-      (choice.action.type === "start_run" &&
-        choice.action.payload?.wilsonRunOnlyAction === true &&
-        semanticRuntimeServerId(choice.action) === targetServerId),
+    const hasWilsonOption = rankedChoices.some(
+      (choice) =>
+        choice.action.payload?.runnerAbility === "wilson_gain_run_action" ||
+        (choice.action.type === "start_run" &&
+          choice.action.payload?.wilsonRunOnlyAction === true &&
+          semanticRuntimeServerId(choice.action) === targetServerId),
     );
     if (!hasWilsonOption) {
       return { choice: selectedChoice, rankedChoices: rankedChoices.slice() };
@@ -3649,7 +3851,8 @@ function runnerWilsonAdjustedSemanticChoice(
     const adjusted = semanticRuntimeChoiceWithEvidence(wilsonRunOnlyChoice, {
       minimumScore: selectedChoice.score + 80,
       reasonCode: "runner.wilson.run_only_action_preferred",
-      explanation: "Wilson stellt für dasselbe Run-Ziel eine legale Zusatz-Run-Aktion bereit.",
+      explanation:
+        "Wilson stellt für dasselbe Run-Ziel eine legale Zusatz-Run-Aktion bereit.",
       evidence: ["wilson_run_only_action_preferred", ...wilsonEvidence],
     });
     return {
@@ -3672,7 +3875,8 @@ function runnerWilsonAdjustedSemanticChoice(
   const adjusted = semanticRuntimeChoiceWithEvidence(wilsonTriggerChoice, {
     minimumScore: selectedChoice.score + 120,
     reasonCode: "runner.wilson.run_action_preferred",
-    explanation: "Wilson wird genutzt, bevor der Runner den ohnehin gewählten Run startet.",
+    explanation:
+      "Wilson wird genutzt, bevor der Runner den ohnehin gewählten Run startet.",
     evidence: ["wilson_run_action_preferred", ...wilsonEvidence],
   });
   return {
@@ -3726,8 +3930,11 @@ function runnerWilsonRunCapAssessment(
   visibleBreakCost: number;
 } {
   const serverId = semanticRuntimeServerId(action);
-  const server = input.playerView.servers.find((entry) => entry.id === serverId);
-  if (!server) return { ok: false, reason: "server_unknown", visibleBreakCost: 0 };
+  const server = input.playerView.servers.find(
+    (entry) => entry.id === serverId,
+  );
+  if (!server)
+    return { ok: false, reason: "server_unknown", visibleBreakCost: 0 };
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     input.playerView.own.rig ?? [],
@@ -3750,11 +3957,15 @@ function runnerWilsonRunCapAssessment(
   return { ok: true, reason: "visible_cost_within_cap", visibleBreakCost };
 }
 
-function semanticRuntimeChoiceIsReactive(choice: SemanticRuntimeChoice): boolean {
+function semanticRuntimeChoiceIsReactive(
+  choice: SemanticRuntimeChoice,
+): boolean {
   return semanticRuntimeActionTypeIsReactive(choice.action.type);
 }
 
-function semanticRuntimeActionTypeIsReactive(type: LegalAction["type"]): boolean {
+function semanticRuntimeActionTypeIsReactive(
+  type: LegalAction["type"],
+): boolean {
   return (
     type === "mandatory_draw" ||
     type === "resolve_choice" ||
@@ -3774,9 +3985,13 @@ function semanticRuntimeForcedLegacy(): boolean {
   return process.env.NETGRID_SEMANTIC_AI_RUNTIME === "legacy";
 }
 
-function semanticRuntimeChoices(input: AiDecisionInput): SemanticRuntimeChoice[] {
+function semanticRuntimeChoices(
+  input: AiDecisionInput,
+): SemanticRuntimeChoice[] {
   return sortSemanticRuntimeChoices(
-    input.legalActions.map((action) => scoreSemanticRuntimeAction(input, action)),
+    input.legalActions.map((action) =>
+      scoreSemanticRuntimeAction(input, action),
+    ),
   );
 }
 
@@ -3793,23 +4008,31 @@ function sortSemanticRuntimeChoices(
     );
 }
 
-function deckCapabilitiesForInput(input: AiDecisionInput): DeckCapabilityProfile {
-  return (input as AiDecisionInputWithDeckCapabilities).ownDeckCapabilities ??
-    buildDeckCapabilityProfileFromInput(input);
+function deckCapabilitiesForInput(
+  input: AiDecisionInput,
+): DeckCapabilityProfile {
+  return (
+    (input as AiDecisionInputWithDeckCapabilities).ownDeckCapabilities ??
+    buildDeckCapabilityProfileFromInput(input)
+  );
 }
 
 function runnerStrategicIntentForInput(
   input: AiDecisionInput,
   deckCapabilities: DeckCapabilityProfile,
 ): RunnerStrategicIntentProfile {
-  return (input as AiDecisionInputWithDeckCapabilities).ownRunnerStrategicIntent ??
-    buildRunnerStrategicIntentProfile({ deckCapabilities });
+  return (
+    (input as AiDecisionInputWithDeckCapabilities).ownRunnerStrategicIntent ??
+    buildRunnerStrategicIntentProfile({ deckCapabilities })
+  );
 }
 
 function chooseSemanticRuntimeChoice(
   input: AiDecisionInput,
 ): SemanticRuntimeChoice | undefined {
-  return semanticRuntimeChoices(input).find((candidate) => !candidate.exclusion && candidate.score > 0);
+  return semanticRuntimeChoices(input).find(
+    (candidate) => !candidate.exclusion && candidate.score > 0,
+  );
 }
 
 function scoreSemanticRuntimeAction(
@@ -3818,7 +4041,12 @@ function scoreSemanticRuntimeAction(
 ): SemanticRuntimeChoice {
   const scopeId = semanticRuntimeScopeForAction(input, action);
   const exclusion = semanticRuntimeActionExclusion(input, action);
-  const scoreBreakdown = semanticRuntimeScoreBreakdown(input, action, scopeId, exclusion);
+  const scoreBreakdown = semanticRuntimeScoreBreakdown(
+    input,
+    action,
+    scopeId,
+    exclusion,
+  );
   const score = semanticRuntimeScoreFromComponents(scoreBreakdown);
   return {
     action,
@@ -3858,20 +4086,26 @@ function semanticRuntimeDecisionDebug(
   const legacyDebugSelectedActionType = legacyDebug?.selectedActionType;
   const memoryDebug = semanticRuntimeMemoryDebug(input);
   const actionTypesDiffer =
-    (legacyActionType !== undefined && legacyActionType !== selected.action.type) ||
-    (legacyDebugSelectedActionType !== undefined && legacyDebugSelectedActionType !== selected.action.type);
+    (legacyActionType !== undefined &&
+      legacyActionType !== selected.action.type) ||
+    (legacyDebugSelectedActionType !== undefined &&
+      legacyDebugSelectedActionType !== selected.action.type);
   const warnings = actionTypesDiffer
     ? ["semantic_runtime_actual_differs_from_legacy_debug"]
     : [];
   const detailItems = [
     `semantic_runtime_scope:${selected.scopeId}`,
     `semantic_actual_action_type:${selected.action.type}`,
-    ...(legacyActionType ? [`legacy_reference_action_type:${legacyActionType}`] : []),
+    ...(legacyActionType
+      ? [`legacy_reference_action_type:${legacyActionType}`]
+      : []),
     ...(legacyPlanKind ? [`legacy_reference_plan:${legacyPlanKind}`] : []),
-    ...(legacyDebugSelectedActionType ? [`legacy_debug_selected_action_type:${legacyDebugSelectedActionType}`] : []),
+    ...(legacyDebugSelectedActionType
+      ? [`legacy_debug_selected_action_type:${legacyDebugSelectedActionType}`]
+      : []),
     ...scrubEvidence(selected.evidence)
       .filter((entry) => entry.startsWith("wilson_"))
-      .slice(0, 8)
+      .slice(0, 8),
   ];
   const selectedPlan = planRuntime.selectedPlan;
   const selectedStep = planRuntime.selectedStep;
@@ -3884,14 +4118,29 @@ function semanticRuntimeDecisionDebug(
     planKind: selectedPlan?.type ?? selected.scopeId,
     selectedActionType: selected.action.type,
     score: selected.score,
-    ...(selected.confidence !== undefined ? { confidence: selected.confidence } : {}),
+    ...(selected.confidence !== undefined
+      ? { confidence: selected.confidence }
+      : {}),
     visibleReasons: scrubEvidence(selected.evidence).slice(0, 8),
-    rankedAlternatives: semanticRuntimeRankedAlternatives(input, rankedChoices, selected.action.actionId),
-    actionAlternatives: semanticRuntimeActionAlternatives(input, rankedChoices, selected.action.actionId),
-    scoreBreakdown: semanticRuntimeScoreBreakdown(input, selected.action, selected.scopeId),
-    whyNot: legacyActionType && legacyActionType !== selected.action.type
-      ? [`legacy_reference_action_type:${legacyActionType}`]
-      : [],
+    rankedAlternatives: semanticRuntimeRankedAlternatives(
+      input,
+      rankedChoices,
+      selected.action.actionId,
+    ),
+    actionAlternatives: semanticRuntimeActionAlternatives(
+      input,
+      rankedChoices,
+      selected.action.actionId,
+    ),
+    scoreBreakdown: semanticRuntimeScoreBreakdown(
+      input,
+      selected.action,
+      selected.scopeId,
+    ),
+    whyNot:
+      legacyActionType && legacyActionType !== selected.action.type
+        ? [`legacy_reference_action_type:${legacyActionType}`]
+        : [],
     longTermPlan: [
       ...(selectedPlan
         ? [
@@ -3900,47 +4149,65 @@ function semanticRuntimeDecisionDebug(
             ...(selectedStep ? [`tactical_step:${selectedStep.kind}`] : []),
           ]
         : [`semantic_runtime_scope:${selected.scopeId}`]),
-      ...(legacyPlanKind ? [`legacy_reference_plan:${legacyPlanKind}`] : [])
+      ...(legacyPlanKind ? [`legacy_reference_plan:${legacyPlanKind}`] : []),
     ],
-    ...(memoryDebug.memoryVersion ? { memoryVersion: memoryDebug.memoryVersion } : {}),
+    ...(memoryDebug.memoryVersion
+      ? { memoryVersion: memoryDebug.memoryVersion }
+      : {}),
     ...(memoryDebug.facts.length > 0 ? { facts: memoryDebug.facts } : {}),
-    ...(memoryDebug.hypotheses.length > 0 ? { hypotheses: memoryDebug.hypotheses } : {}),
-    ...(memoryDebug.invalidations.length > 0 ? { invalidations: memoryDebug.invalidations } : {}),
-    ...(memoryDebug.beliefUncertainty.length > 0 ? { beliefUncertainty: memoryDebug.beliefUncertainty } : {}),
-    ...(memoryDebug.opponentModel ? { opponentModel: memoryDebug.opponentModel } : {}),
+    ...(memoryDebug.hypotheses.length > 0
+      ? { hypotheses: memoryDebug.hypotheses }
+      : {}),
+    ...(memoryDebug.invalidations.length > 0
+      ? { invalidations: memoryDebug.invalidations }
+      : {}),
+    ...(memoryDebug.beliefUncertainty.length > 0
+      ? { beliefUncertainty: memoryDebug.beliefUncertainty }
+      : {}),
+    ...(memoryDebug.opponentModel
+      ? { opponentModel: memoryDebug.opponentModel }
+      : {}),
     ...(warnings.length > 0 ? { warnings } : {}),
     detailSections: [
       {
         id: "semantic_runtime",
         title: "Semantic Runtime",
-        items: detailItems
+        items: detailItems,
       },
       ...(planRuntime.planAlternatives.length > 0 || planRuntime.previousPlan
-        ? [{
-            id: "tactical_plan",
-            title: "Tactical Plan",
-            items: tacticalPlanDebugItems(planRuntime)
-          }]
+        ? [
+            {
+              id: "tactical_plan",
+              title: "Tactical Plan",
+              items: tacticalPlanDebugItems(planRuntime),
+            },
+          ]
         : []),
       ...(memoryDebug.items.length > 0
-        ? [{
-            id: "semantic_memory",
-            title: "KI-Speicher",
-            items: memoryDebug.items
-          }]
-        : [])
+        ? [
+            {
+              id: "semantic_memory",
+              title: "KI-Speicher",
+              items: memoryDebug.items,
+            },
+          ]
+        : []),
     ],
     evidence: scrubEvidence([
       ...selected.evidence,
-      ...(legacyDecision.evidence ?? []).map((entry) => `legacy_reference:${entry}`)
+      ...(legacyDecision.evidence ?? []).map(
+        (entry) => `legacy_reference:${entry}`,
+      ),
     ]).slice(0, 12),
     fallbackUsed: false,
     profileId: input.profileId,
-    timeoutUsed: Boolean(legacyDecision.timeoutUsed)
+    timeoutUsed: Boolean(legacyDecision.timeoutUsed),
   };
 }
 
-function tacticalPlanDebugItems(planRuntime: TacticalPlanRuntimeResult): string[] {
+function tacticalPlanDebugItems(
+  planRuntime: TacticalPlanRuntimeResult,
+): string[] {
   const selectedPlan = planRuntime.selectedPlan;
   const selectedStep = planRuntime.selectedStep;
   const selectedMapping = planRuntime.selectedMapping;
@@ -4010,13 +4277,20 @@ function tacticalPlanDebugItems(planRuntime: TacticalPlanRuntimeResult): string[
             .map((entry) => `why_this_action:${entry}`),
         ]
       : []),
-    ...planRuntime.blockedPlans.slice(0, 3).map((plan) =>
-      `why_not_other_plan:${plan.planId}:${plan.blockers
-        .map((blocker) => blocker.kind)
-        .join(",")}`,
-    ),
+    ...planRuntime.blockedPlans
+      .slice(0, 3)
+      .map(
+        (plan) =>
+          `why_not_other_plan:${plan.planId}:${plan.blockers
+            .map((blocker) => blocker.kind)
+            .join(",")}`,
+      ),
     ...planRuntime.planAlternatives.map((plan, index) =>
-      tacticalPlanRankDebugItem(plan, index + 1, selectedPlan?.planId === plan.planId),
+      tacticalPlanRankDebugItem(
+        plan,
+        index + 1,
+        selectedPlan?.planId === plan.planId,
+      ),
     ),
   ];
 }
@@ -4113,7 +4387,9 @@ function tacticalPlanScoreDebugValue(plan: TacticalPlan): string {
 }
 
 function tacticalPlanDebugFieldValue(value: string | number | boolean): string {
-  return String(value).replace(/[|\r\n]+/g, " ").trim();
+  return String(value)
+    .replace(/[|\r\n]+/g, " ")
+    .trim();
 }
 
 function uniqueDebugStrings(values: string[]): string[] {
@@ -4138,21 +4414,28 @@ function semanticRuntimeMemoryDebug(input: AiDecisionInput): {
 } {
   const belief = reconstructBeliefState(input);
   const facts = belief.entries
-    .filter((entry) => entry.kind === "public_fact" || entry.kind === "revealed_opponent_fact")
+    .filter(
+      (entry) =>
+        entry.kind === "public_fact" || entry.kind === "revealed_opponent_fact",
+    )
     .map((entry) => semanticRuntimeBeliefEntrySummary(entry.subject));
   const hypotheses = belief.entries
     .filter((entry) => entry.kind === "hypothesis")
-    .map((entry) => `${semanticRuntimeBeliefEntrySummary(entry.subject)}:${round(entry.confidence)}`);
-  const opponentModel = input.side === "runner"
-    ? semanticRuntimeRunnerOpponentMemorySummary(belief.runnerOpponentModel)
-    : semanticRuntimeCorpOpponentMemorySummary(belief.corpOpponentModel);
+    .map(
+      (entry) =>
+        `${semanticRuntimeBeliefEntrySummary(entry.subject)}:${round(entry.confidence)}`,
+    );
+  const opponentModel =
+    input.side === "runner"
+      ? semanticRuntimeRunnerOpponentMemorySummary(belief.runnerOpponentModel)
+      : semanticRuntimeCorpOpponentMemorySummary(belief.corpOpponentModel);
   const items = [
     `memory_version:${belief.version}`,
     ...semanticRuntimeOwnHandMemoryItems(input),
     ...(input.side === "runner"
       ? semanticRuntimeRunnerMemoryItems(belief.runnerOpponentModel)
       : semanticRuntimeCorpMemoryItems(belief.corpOpponentModel)),
-    ...belief.uncertainty.slice(0, 4).map((entry) => `uncertainty:${entry}`)
+    ...belief.uncertainty.slice(0, 4).map((entry) => `uncertainty:${entry}`),
   ];
   return {
     memoryVersion: belief.version,
@@ -4161,7 +4444,7 @@ function semanticRuntimeMemoryDebug(input: AiDecisionInput): {
     invalidations: belief.invalidationLog.slice(0, 6),
     beliefUncertainty: belief.uncertainty.slice(0, 6),
     ...(opponentModel ? { opponentModel } : {}),
-    items
+    items,
   };
 }
 
@@ -4224,15 +4507,22 @@ function semanticRuntimeKnownCardSummary(definitionId: string): {
   return type ? { ...summary, type } : summary;
 }
 
-function semanticRuntimeKnownDefinitionCounts(
-  definitionIds: string[],
-): Array<{ definitionId: string; title: string; type?: string; count: number }> {
+function semanticRuntimeKnownDefinitionCounts(definitionIds: string[]): Array<{
+  definitionId: string;
+  title: string;
+  type?: string;
+  count: number;
+}> {
   const counts = new Map<string, number>();
   for (const definitionId of definitionIds) {
     counts.set(definitionId, (counts.get(definitionId) ?? 0) + 1);
   }
   return [...counts.entries()]
-    .sort(([left], [right]) => semanticRuntimeCardLabel(left).localeCompare(semanticRuntimeCardLabel(right)))
+    .sort(([left], [right]) =>
+      semanticRuntimeCardLabel(left).localeCompare(
+        semanticRuntimeCardLabel(right),
+      ),
+    )
     .map(([definitionId, count]) => ({
       ...semanticRuntimeKnownCardSummary(definitionId),
       count,
@@ -4251,73 +4541,102 @@ function semanticRuntimeRunnerOpponentMemorySummary(
     rndTopFreshness: {
       knownToRunner: model.rndTopFreshness.knownToRunner,
       freshness: model.rndTopFreshness.freshness,
-      freshenedByRunnerAccess: model.rndTopFreshness.freshenedByRunnerAccess === true,
+      freshenedByRunnerAccess:
+        model.rndTopFreshness.freshenedByRunnerAccess === true,
       ...(model.rndTopFreshness.knownTopDefinitionId
-        ? { knownTopCard: semanticRuntimeKnownCardSummary(model.rndTopFreshness.knownTopDefinitionId) }
+        ? {
+            knownTopCard: semanticRuntimeKnownCardSummary(
+              model.rndTopFreshness.knownTopDefinitionId,
+            ),
+          }
         : {}),
-      ...(model.rndTopFreshness.knownSequenceDefinitionIds && model.rndTopFreshness.knownSequenceDefinitionIds.length > 0
+      ...(model.rndTopFreshness.knownSequenceDefinitionIds &&
+      model.rndTopFreshness.knownSequenceDefinitionIds.length > 0
         ? {
             knownSequence: model.rndTopFreshness.knownSequenceDefinitionIds
               .slice(0, 6)
               .map((definitionId, index) => ({
                 position: index === 0 ? "top" : `top+${index}`,
-                ...semanticRuntimeKnownCardSummary(definitionId)
-              }))
+                ...semanticRuntimeKnownCardSummary(definitionId),
+              })),
           }
         : {}),
-      invalidationReasons: model.rndTopFreshness.invalidationReasons.slice(0, 4)
+      invalidationReasons: model.rndTopFreshness.invalidationReasons.slice(
+        0,
+        4,
+      ),
     },
     hqHandMemory: {
       handCount: model.hqHandMemory.handCount,
       knownCount: model.hqHandMemory.knownCount,
       allCardsKnown: model.hqHandMemory.allCardsKnown,
-      knownCards: semanticRuntimeKnownDefinitionCounts(model.hqHandMemory.knownDefinitions),
+      knownCards: semanticRuntimeKnownDefinitionCounts(
+        model.hqHandMemory.knownDefinitions,
+      ),
       summary: semanticRuntimeHqHandMemorySummary(model.hqHandMemory),
-      safeKnownCards: model.hqHandMemory.ledger.safeDefinitions.map((definition) => ({
-        ...semanticRuntimeKnownCardSummary(definition.definitionId),
-        count: definition.count
-      })),
-      candidateGroups: model.hqHandMemory.ledger.candidateGroups.slice(0, 6).map((group) => ({
-        category: semanticRuntimeHqCandidateGroupCategory(group.reason, group.installPlacement),
-        reason: group.reason,
-        candidateCount: group.candidateCount,
-        ambiguousCount: Math.max(0, group.candidateCount - group.departureCount),
-        unknownCandidateCount: group.unknownCandidateCount,
-        departureCount: group.departureCount,
-        ...(group.serverId ? { serverId: group.serverId } : {}),
-        ...(group.installPlacement ? { installPlacement: group.installPlacement } : {}),
-        basis: group.basis.slice(0, 4)
-      })),
-      invalidationReasons: model.hqHandMemory.invalidationReasons.slice(0, 4)
+      safeKnownCards: model.hqHandMemory.ledger.safeDefinitions.map(
+        (definition) => ({
+          ...semanticRuntimeKnownCardSummary(definition.definitionId),
+          count: definition.count,
+        }),
+      ),
+      candidateGroups: model.hqHandMemory.ledger.candidateGroups
+        .slice(0, 6)
+        .map((group) => ({
+          category: semanticRuntimeHqCandidateGroupCategory(
+            group.reason,
+            group.installPlacement,
+          ),
+          reason: group.reason,
+          candidateCount: group.candidateCount,
+          ambiguousCount: Math.max(
+            0,
+            group.candidateCount - group.departureCount,
+          ),
+          unknownCandidateCount: group.unknownCandidateCount,
+          departureCount: group.departureCount,
+          ...(group.serverId ? { serverId: group.serverId } : {}),
+          ...(group.installPlacement
+            ? { installPlacement: group.installPlacement }
+            : {}),
+          basis: group.basis.slice(0, 4),
+        })),
+      invalidationReasons: model.hqHandMemory.invalidationReasons.slice(0, 4),
     },
     remoteCardBelief: model.remoteCardBelief.slice(0, 6).map((entry) => ({
       serverId: entry.serverId,
       hypothesis: entry.hypothesis,
-      confidence: round(entry.confidence)
+      confidence: round(entry.confidence),
     })),
-    hiddenRemoteCandidateMemory: model.hiddenRemoteCandidateMemory.slice(0, 6).map((entry) => ({
-      serverId: entry.serverId,
-      candidateCount: entry.candidateCount,
-      agendaCandidateCount: entry.agendaCandidateCount,
-      relevantTrashCandidateCount: entry.relevantTrashCandidateCount,
-      candidateCards: entry.candidateDefinitions.slice(0, 8).map((candidate) => ({
-        ...semanticRuntimeKnownCardSummary(candidate.definitionId),
-        count: candidate.count
+    hiddenRemoteCandidateMemory: model.hiddenRemoteCandidateMemory
+      .slice(0, 6)
+      .map((entry) => ({
+        serverId: entry.serverId,
+        candidateCount: entry.candidateCount,
+        agendaCandidateCount: entry.agendaCandidateCount,
+        relevantTrashCandidateCount: entry.relevantTrashCandidateCount,
+        candidateCards: entry.candidateDefinitions
+          .slice(0, 8)
+          .map((candidate) => ({
+            ...semanticRuntimeKnownCardSummary(candidate.definitionId),
+            count: candidate.count,
+          })),
+        exhaustive: entry.exhaustive,
       })),
-      exhaustive: entry.exhaustive
-    })),
     knownPositionMemoryCount: model.knownPositionMemory.length,
     knownPositionMemory: model.knownPositionMemory.slice(0, 8).map((entry) => ({
       zone: entry.zone,
       positionKey: entry.positionKey,
       sourceKind: entry.sourceKind,
-      ...semanticRuntimeKnownCardSummary(entry.definitionId)
+      ...semanticRuntimeKnownCardSummary(entry.definitionId),
     })),
-    unrezzedIceRiskModel: model.unrezzedIceRiskModel.slice(0, 6).map((entry) => ({
-      serverId: entry.serverId,
-      risk: round(entry.risk),
-      basis: entry.basis.slice(0, 3)
-    }))
+    unrezzedIceRiskModel: model.unrezzedIceRiskModel
+      .slice(0, 6)
+      .map((entry) => ({
+        serverId: entry.serverId,
+        risk: round(entry.risk),
+        basis: entry.basis.slice(0, 3),
+      })),
   };
 }
 
@@ -4331,7 +4650,7 @@ function semanticRuntimeCorpOpponentMemorySummary(
     breakerAvailabilityEstimate: model.breakerAvailabilityEstimate,
     remoteContestProbability: round(model.remoteContestProbability),
     hqPressureEstimate: round(model.hqPressureEstimate),
-    rndPressureEstimate: round(model.rndPressureEstimate)
+    rndPressureEstimate: round(model.rndPressureEstimate),
   };
 }
 
@@ -4344,14 +4663,18 @@ function semanticRuntimeHqHandMemorySummary(
   candidateGroupCount: number;
 } {
   const ambiguousCount = memory.ledger.candidateGroups.reduce(
-    (sum, group) => sum + Math.max(0, group.candidateCount - group.departureCount),
+    (sum, group) =>
+      sum + Math.max(0, group.candidateCount - group.departureCount),
     0,
   );
   return {
-    safeKnownCount: memory.ledger.safeDefinitions.reduce((sum, definition) => sum + definition.count, 0),
+    safeKnownCount: memory.ledger.safeDefinitions.reduce(
+      (sum, definition) => sum + definition.count,
+      0,
+    ),
     ambiguousCount,
     unknownCount: memory.ledger.unknownRestCount,
-    candidateGroupCount: memory.ledger.candidateGroups.length
+    candidateGroupCount: memory.ledger.candidateGroups.length,
   };
 }
 
@@ -4359,13 +4682,16 @@ function semanticRuntimeHqCandidateGroupCategory(
   reason: string,
   placement: string | undefined,
 ): string {
-  if (reason === "hidden_install_no_matching_known_candidates") return "hidden_install_uncertain";
+  if (reason === "hidden_install_no_matching_known_candidates")
+    return "hidden_install_uncertain";
   if (placement === "ice") return "hidden_ice_install";
   if (placement === "root") return "hidden_root_install";
   return "hidden_install";
 }
 
-function semanticRuntimeRunnerMemoryItems(model: RunnerOpponentModel | undefined): string[] {
+function semanticRuntimeRunnerMemoryItems(
+  model: RunnerOpponentModel | undefined,
+): string[] {
   if (!model) return [];
   return [
     `rnd_top:${model.rndTopFreshness.freshness}`,
@@ -4374,11 +4700,13 @@ function semanticRuntimeRunnerMemoryItems(model: RunnerOpponentModel | undefined
     `remote_beliefs:${model.remoteCardBelief.length}`,
     `remote_candidate_sets:${model.hiddenRemoteCandidateMemory.length}`,
     `known_positions:${model.knownPositionMemory.length}`,
-    `corp_credit_reserve:${model.corpCreditReserveInterpretation}`
+    `corp_credit_reserve:${model.corpCreditReserveInterpretation}`,
   ];
 }
 
-function semanticRuntimeCorpMemoryItems(model: CorpOpponentModel | undefined): string[] {
+function semanticRuntimeCorpMemoryItems(
+  model: CorpOpponentModel | undefined,
+): string[] {
   if (!model) return [];
   return [
     `runner_runs:${model.runnerAggressionMemory.runEvents}`,
@@ -4386,7 +4714,7 @@ function semanticRuntimeCorpMemoryItems(model: CorpOpponentModel | undefined): s
     `runner_central_runs:${model.runnerAggressionMemory.centralRuns}`,
     `runner_remote_pressure:${round(model.runnerThreatModel.remotePressure)}`,
     `runner_hq_pressure:${round(model.hqPressureEstimate)}`,
-    `runner_rnd_pressure:${round(model.rndPressureEstimate)}`
+    `runner_rnd_pressure:${round(model.rndPressureEstimate)}`,
   ];
 }
 
@@ -4395,18 +4723,31 @@ function semanticRuntimeRankedAlternatives(
   rankedChoices: SemanticRuntimeChoice[],
   selectedActionId: string,
 ): NonNullable<AiDecisionDebug["rankedAlternatives"]> {
-  return rankedChoices.filter((choice) => !choice.exclusion).slice(0, 24).map((choice, index) => ({
-    rank: index + 1,
-    planId: `semantic_runtime:${choice.scopeId}:${choice.action.type}`,
-    planKind: choice.scopeId,
-    selectedActionType: choice.action.type,
-    summary: choice.explanation,
-    score: choice.score,
-    ...(choice.confidence !== undefined ? { confidence: choice.confidence } : {}),
-    visibleReasons: scrubEvidence(choice.evidence).slice(0, 4),
-    scoreBreakdown: semanticRuntimeScoreBreakdown(input, choice.action, choice.scopeId, choice.exclusion),
-    whyNot: choice.action.actionId === selectedActionId ? ["selected_action"] : ["semantic_score_below_selected"]
-  }));
+  return rankedChoices
+    .filter((choice) => !choice.exclusion)
+    .slice(0, 24)
+    .map((choice, index) => ({
+      rank: index + 1,
+      planId: `semantic_runtime:${choice.scopeId}:${choice.action.type}`,
+      planKind: choice.scopeId,
+      selectedActionType: choice.action.type,
+      summary: choice.explanation,
+      score: choice.score,
+      ...(choice.confidence !== undefined
+        ? { confidence: choice.confidence }
+        : {}),
+      visibleReasons: scrubEvidence(choice.evidence).slice(0, 4),
+      scoreBreakdown: semanticRuntimeScoreBreakdown(
+        input,
+        choice.action,
+        choice.scopeId,
+        choice.exclusion,
+      ),
+      whyNot:
+        choice.action.actionId === selectedActionId
+          ? ["selected_action"]
+          : ["semantic_score_below_selected"],
+    }));
 }
 
 function semanticRuntimeActionAlternatives(
@@ -4430,14 +4771,22 @@ function semanticRuntimeActionAlternatives(
       source: String(choice.action.source),
       selected,
       ...(choice.exclusion ? { excluded: true } : { priority: choice.score }),
-      scoreBreakdown: semanticRuntimeScoreBreakdown(input, choice.action, choice.scopeId, choice.exclusion),
+      scoreBreakdown: semanticRuntimeScoreBreakdown(
+        input,
+        choice.action,
+        choice.scopeId,
+        choice.exclusion,
+      ),
       ...(selected
         ? { whyChosen: ["semantic_runtime_actual"] }
         : {
             whyNot: choice.exclusion
-              ? [`semantic_excluded:${choice.exclusion.key}`, choice.exclusion.reason]
-              : ["semantic_score_below_selected"]
-          })
+              ? [
+                  `semantic_excluded:${choice.exclusion.key}`,
+                  choice.exclusion.reason,
+                ]
+              : ["semantic_score_below_selected"],
+          }),
     };
   });
 }
@@ -4449,41 +4798,46 @@ function semanticRuntimeScoreBreakdown(
   exclusion?: SemanticRuntimeExclusion,
 ): NonNullable<AiDecisionDebug["scoreBreakdown"]> {
   const typePriority = semanticRuntimeTypePriority(action.type);
-  const contextComponents = input.side === "runner"
-    ? semanticRuntimeRunnerScoreComponents(input, action, scopeId)
-    : semanticRuntimeCorpScoreComponents(input, action, scopeId);
+  const contextComponents =
+    input.side === "runner"
+      ? semanticRuntimeRunnerScoreComponents(input, action, scopeId)
+      : semanticRuntimeCorpScoreComponents(input, action, scopeId);
   const privateBonus = action.visibility === "private_to_actor" ? 25 : 0;
   const costPenalty = -(actionCreditCost(action) * 35);
   return [
     {
-        key: "semantic_type_priority",
-        label: "Action-Typ-Priorität",
-        value: typePriority,
-        reason: action.type
+      key: "semantic_type_priority",
+      label: "Action-Typ-Priorität",
+      value: typePriority,
+      reason: action.type,
     },
     ...(exclusion
-      ? [{
-          key: "semantic_action_excluded",
-          label: `Ausgeschlossen: ${exclusion.label}`,
-          value: 0,
-          reason: exclusion.reason
-        }]
+      ? [
+          {
+            key: "semantic_action_excluded",
+            label: `Ausgeschlossen: ${exclusion.label}`,
+            value: 0,
+            reason: exclusion.reason,
+          },
+        ]
       : []),
     ...contextComponents,
     ...(privateBonus !== 0
-      ? [{
-          key: "semantic_private_actor_bonus",
-          label: "Akteur-private Action",
-          value: privateBonus,
-          reason: "private_to_actor"
-        }]
+      ? [
+          {
+            key: "semantic_private_actor_bonus",
+            label: "Akteur-private Action",
+            value: privateBonus,
+            reason: "private_to_actor",
+          },
+        ]
       : []),
     {
       key: "semantic_credit_cost_penalty",
       label: "Credit-Kosten",
       value: costPenalty,
-      reason: String(actionCreditCost(action))
-    }
+      reason: String(actionCreditCost(action)),
+    },
   ];
 }
 
@@ -4491,7 +4845,10 @@ function semanticRuntimeActionExclusion(
   input: AiDecisionInput,
   action: LegalAction,
 ): SemanticRuntimeExclusion | undefined {
-  const planMemoryExclusion = semanticRuntimePlanMemoryActionExclusion(input, action);
+  const planMemoryExclusion = semanticRuntimePlanMemoryActionExclusion(
+    input,
+    action,
+  );
   if (planMemoryExclusion) return planMemoryExclusion;
   const encounterExclusion = semanticRuntimeRunnerEncounterActionExclusion(
     input,
@@ -4500,19 +4857,23 @@ function semanticRuntimeActionExclusion(
   if (encounterExclusion) return encounterExclusion;
   if (input.side !== "runner" || action.type !== "start_run") return undefined;
   const serverId = semanticRuntimeServerId(action);
-  const knownCentralPayoffExclusion = semanticRuntimeKnownCentralPayoffExclusion(
-    input,
-    serverId,
-  );
+  const knownCentralPayoffExclusion =
+    semanticRuntimeKnownCentralPayoffExclusion(input, serverId);
   if (knownCentralPayoffExclusion) return knownCentralPayoffExclusion;
-  const server = input.playerView.servers.find((entry) => entry.id === serverId);
+  const server = input.playerView.servers.find(
+    (entry) => entry.id === serverId,
+  );
   if (serverId === "archives") {
-    const archivesExclusion = semanticRuntimeRunnerArchivesExclusion(input, server);
+    const archivesExclusion = semanticRuntimeRunnerArchivesExclusion(
+      input,
+      server,
+    );
     if (archivesExclusion) return archivesExclusion;
   }
   if (!server) return undefined;
   if (isRemoteServerTarget(serverId)) {
-    const emptyRemoteExclusion = semanticRuntimeRunnerEmptyRemoteExclusion(server);
+    const emptyRemoteExclusion =
+      semanticRuntimeRunnerEmptyRemoteExclusion(server);
     if (emptyRemoteExclusion) return emptyRemoteExclusion;
   }
   const assessment = assessKnownRezzedIcePath(
@@ -4521,13 +4882,14 @@ function semanticRuntimeActionExclusion(
     input.playerView.own.credits,
     server.root,
   );
-  if (assessment.assessedKnownIceCount <= 0 || assessment.canReachAccess) return undefined;
+  if (assessment.assessedKnownIceCount <= 0 || assessment.canReachAccess)
+    return undefined;
   return {
     key: "known_ice_path_no_access",
     label: assessment.knownPathBlockedByUnbreakableIce
       ? "Run-Ziel nicht erreichbar"
       : "Run-Ziel nicht bezahlbar",
-    reason: semanticRuntimeKnownIcePathReason(assessment, server.id)
+    reason: semanticRuntimeKnownIcePathReason(assessment, server.id),
   };
 }
 
@@ -4871,7 +5233,8 @@ function semanticRuntimePlanMemoryActionExclusion(
     return {
       key: "bank_cashout_deferred_after_build",
       label: "Bank-Auszahlung verschoben",
-      reason: "previous build_credit_bank plan is still stable and no concrete funding need is visible",
+      reason:
+        "previous build_credit_bank plan is still stable and no concrete funding need is visible",
     };
   }
   return undefined;
@@ -4882,24 +5245,33 @@ function semanticRuntimeRunnerArchivesExclusion(
   server: AiDecisionInput["playerView"]["servers"][number] | undefined,
 ): SemanticRuntimeExclusion | undefined {
   const root = server?.root ?? [];
-  const knownRoot = root.filter((card) => card.known && typeof card.definitionId === "string");
+  const knownRoot = root.filter(
+    (card) => card.known && typeof card.definitionId === "string",
+  );
   const knownAgenda = knownRoot.some((card) => {
     const definitionId = card.definitionId;
-    return card.type === "agenda" || (definitionId !== undefined && definitionTypeForMetrics(definitionId) === "agenda");
+    return (
+      card.type === "agenda" ||
+      (definitionId !== undefined &&
+        definitionTypeForMetrics(definitionId) === "agenda")
+    );
   });
-  const hiddenArchivesCount = Math.max(0, input.playerView.opponent.discardCount - knownRoot.length);
+  const hiddenArchivesCount = Math.max(
+    0,
+    input.playerView.opponent.discardCount - knownRoot.length,
+  );
   if (knownAgenda || hiddenArchivesCount > 0) return undefined;
   if (knownRoot.length === 0) {
     return {
       key: "archives_empty",
       label: "Archives leer",
-      reason: "no_archives_cards"
+      reason: "no_archives_cards",
     };
   }
   return {
     key: "archives_known_no_agenda",
     label: "Archives bekannt ohne Agenda",
-    reason: `known_non_agenda:${knownRoot.length}`
+    reason: `known_non_agenda:${knownRoot.length}`,
   };
 }
 
@@ -4923,7 +5295,8 @@ function semanticRuntimeScopeForAction(
   }
   if (action.type === "start_run") {
     const serverId = semanticRuntimeServerId(action);
-    if (serverId === "hq" || serverId === "rd") return "simple_hq_or_rnd_pressure";
+    if (serverId === "hq" || serverId === "rd")
+      return "simple_hq_or_rnd_pressure";
     if (isRemoteServerTarget(serverId)) return "remote_contest";
     return "simple_run_choice";
   }
@@ -5052,7 +5425,7 @@ function semanticRuntimeRunnerScoreComponents(
       key: "runner_tags_present",
       label: "Tags entfernen",
       value: 900,
-      reason: `tags:${input.playerView.own.tags}`
+      reason: `tags:${input.playerView.own.tags}`,
     });
   }
   if (action.type === "gain_credit" && credits < 5) {
@@ -5060,7 +5433,7 @@ function semanticRuntimeRunnerScoreComponents(
       key: "runner_low_credits",
       label: "Credit-Bedarf",
       value: 700,
-      reason: `credits:${credits}`
+      reason: `credits:${credits}`,
     });
   }
   if (action.type === "gain_credit") {
@@ -5079,7 +5452,7 @@ function semanticRuntimeRunnerScoreComponents(
       key: "runner_low_hand",
       label: "Handkarten-Bedarf",
       value: 550,
-      reason: `hand:${input.playerView.own.gripOrHq.length}`
+      reason: `hand:${input.playerView.own.gripOrHq.length}`,
     });
   }
   if (action.type === "install_card") {
@@ -5090,7 +5463,7 @@ function semanticRuntimeRunnerScoreComponents(
         key: "runner_install_breaker",
         label: "Breaker-Aufbau",
         value: 750,
-        reason: "breaker_role"
+        reason: "breaker_role",
       });
     }
     if (roles.some((role) => isRunnerEconomyRole(role))) {
@@ -5098,7 +5471,7 @@ function semanticRuntimeRunnerScoreComponents(
         key: "runner_install_economy",
         label: "Economy-Aufbau",
         value: 500,
-        reason: "economy_role"
+        reason: "economy_role",
       });
     }
     if (roles.some((role) => isRunnerPressureRole(role))) {
@@ -5106,7 +5479,7 @@ function semanticRuntimeRunnerScoreComponents(
         key: "runner_install_pressure",
         label: "Druck-Aufbau",
         value: 650,
-        reason: "pressure_role"
+        reason: "pressure_role",
       });
     }
     if (runnerBadPublicityOrTraceTechCard(sourceCard, roles)) {
@@ -5120,58 +5493,76 @@ function semanticRuntimeRunnerScoreComponents(
   }
   if (action.type === "start_run") {
     const serverId = semanticRuntimeServerId(action);
-    const server = input.playerView.servers.find((entry) => entry.id === serverId);
+    const server = input.playerView.servers.find(
+      (entry) => entry.id === serverId,
+    );
     if (serverId === "hq") {
       components.push({
         key: "runner_hq_pressure",
         label: "HQ-Druck",
         value: 480,
-        reason: "central:hq"
+        reason: "central:hq",
       });
-      components.push(...semanticRuntimeRunnerHqMemoryComponents(input, action));
+      components.push(
+        ...semanticRuntimeRunnerHqMemoryComponents(input, action),
+      );
     } else if (serverId === "rd") {
       components.push({
         key: "runner_rnd_pressure",
         label: "R&D-Druck",
         value: 640,
-        reason: "central:rd"
+        reason: "central:rd",
       });
-      components.push(...semanticRuntimeRunnerRndMemoryComponents(input, action));
+      components.push(
+        ...semanticRuntimeRunnerRndMemoryComponents(input, action),
+      );
     } else if (serverId === "archives") {
       components.push({
         key: "runner_archives_pressure",
         label: "Archive-Druck",
         value: 250,
-        reason: "central:archives"
+        reason: "central:archives",
       });
-      components.push(...semanticRuntimeRunnerArchivesComponents(input, action, server));
+      components.push(
+        ...semanticRuntimeRunnerArchivesComponents(input, action, server),
+      );
     }
     if (isRemoteServerTarget(serverId)) {
-      components.push(...semanticRuntimeRunnerRemoteComponents(input, action, server));
+      components.push(
+        ...semanticRuntimeRunnerRemoteComponents(input, action, server),
+      );
     }
-    components.push(...semanticRuntimeRunnerKnownIcePathComponents(input, action, server));
+    components.push(
+      ...semanticRuntimeRunnerKnownIcePathComponents(input, action, server),
+    );
     if ((server?.ice.length ?? 0) === 0) {
       components.push({
         key: "runner_free_server_path",
         label: "Freier Server",
         value: 350,
-        reason: serverId ?? "unknown"
+        reason: serverId ?? "unknown",
       });
     }
-    components.push(...semanticRuntimeRepeatedRunTargetComponents(input, serverId));
+    components.push(
+      ...semanticRuntimeRepeatedRunTargetComponents(input, serverId),
+    );
   }
   if (action.type === "trash_accessed_card") {
-    components.push(...semanticRuntimeRunnerAccessTrashComponents(input, action));
+    components.push(
+      ...semanticRuntimeRunnerAccessTrashComponents(input, action),
+    );
   }
   if (action.type === "decline_trash") {
-    components.push(...semanticRuntimeRunnerAccessTrashComponents(input, action));
+    components.push(
+      ...semanticRuntimeRunnerAccessTrashComponents(input, action),
+    );
   }
   if (action.type === "jack_out" && scopeId === "simple_run_choice") {
     components.push({
       key: "runner_jack_out_pressure_loss",
       label: "Run abbrechen",
       value: -450,
-      reason: scopeId
+      reason: scopeId,
     });
   }
   if (action.type === "end_turn" && input.playerView.own.clicks > 0) {
@@ -5179,7 +5570,7 @@ function semanticRuntimeRunnerScoreComponents(
       key: "runner_unused_actions",
       label: "Ungenutzte Aktionen",
       value: -1500,
-      reason: `actions:${input.playerView.own.clicks}`
+      reason: `actions:${input.playerView.own.clicks}`,
     });
   }
   return components;
@@ -5240,9 +5631,8 @@ function runnerHandFundingTarget(
         ]).join(","),
       };
     })
-    .filter(
-      (candidate): candidate is { value: number; reason: string } =>
-        Boolean(candidate),
+    .filter((candidate): candidate is { value: number; reason: string } =>
+      Boolean(candidate),
     )
     .sort(
       (left, right) =>
@@ -5252,7 +5642,9 @@ function runnerHandFundingTarget(
 }
 
 function visibleCardPlayOrInstallCostForAi(card: VisibleCard): number {
-  const definition = card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId] : undefined;
+  const definition = card.definitionId
+    ? DEMO_CARDS_BY_ID[card.definitionId]
+    : undefined;
   const direct = card.installCost ?? card.cost ?? card.rezCost;
   if (typeof direct === "number" && Number.isFinite(direct)) {
     return Math.max(0, direct);
@@ -5264,7 +5656,9 @@ function visibleCardPlayOrInstallCostForAi(card: VisibleCard): number {
 }
 
 function runnerCardLooksLikeCreditPayout(card: VisibleCard): boolean {
-  const definition = card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId] : undefined;
+  const definition = card.definitionId
+    ? DEMO_CARDS_BY_ID[card.definitionId]
+    : undefined;
   const mechanics = definition?.mechanics ?? [];
   if (mechanics.some((mechanic) => mechanic.includes("gain_credits"))) {
     return true;
@@ -5283,8 +5677,7 @@ function runnerBadPublicityOrTraceTechCard(
         role.includes("bad_publicity") ||
         role.includes("trace") ||
         role.includes("bad-publicity"),
-    ) ||
-    /bad publicity|bad_publicity|trace/i.test(text)
+    ) || /bad publicity|bad_publicity|trace/i.test(text)
   );
 }
 
@@ -5292,7 +5685,8 @@ function runnerCardAddressesVisibleBreakerNeed(
   input: AiDecisionInput,
   card: VisibleCard,
 ): boolean {
-  if (input.side !== "runner" || !isVisibleIcebreakerProgram(card)) return false;
+  if (input.side !== "runner" || !isVisibleIcebreakerProgram(card))
+    return false;
   return input.playerView.servers.some((server) => {
     const assessment = assessKnownRezzedIcePath(
       server.ice,
@@ -5328,10 +5722,15 @@ function visibleBreakerCardCanAddressIce(
   }
   const iceText = visibleCardTextForAi(ice).toLowerCase();
   if (/wall|barrier/.test(iceText)) {
-    return roles.includes("fracter") || /fracter|wall|barrier/.test(breakerText);
+    return (
+      roles.includes("fracter") || /fracter|wall|barrier/.test(breakerText)
+    );
   }
   if (/code gate|codegate/.test(iceText)) {
-    return roles.includes("decoder") || /decoder|code gate|codegate/.test(breakerText);
+    return (
+      roles.includes("decoder") ||
+      /decoder|code gate|codegate/.test(breakerText)
+    );
   }
   if (/sentry/.test(iceText)) {
     return roles.includes("killer") || /killer|sentry/.test(breakerText);
@@ -5340,7 +5739,9 @@ function visibleBreakerCardCanAddressIce(
 }
 
 function visibleCardTextForAi(card: VisibleCard): string {
-  const definition = card.definitionId ? DEMO_CARDS_BY_ID[card.definitionId] : undefined;
+  const definition = card.definitionId
+    ? DEMO_CARDS_BY_ID[card.definitionId]
+    : undefined;
   return [
     card.title,
     card.definitionId,
@@ -5350,7 +5751,9 @@ function visibleCardTextForAi(card: VisibleCard): string {
     ...(definition?.subtypes ?? []),
     definition?.rulesText,
     ...(definition?.mechanics ?? []),
-  ].filter(Boolean).join(" ");
+  ]
+    .filter(Boolean)
+    .join(" ");
 }
 
 function semanticRuntimeRunnerAccessTrashComponents(
@@ -5371,14 +5774,14 @@ function semanticRuntimeRunnerAccessTrashComponents(
             ? 220
             : 600
           : -1200,
-      reason: `credits:${input.playerView.own.credits};cost:${context.trashCost};general_cost:${context.generalCreditCost}`
+      reason: `credits:${input.playerView.own.credits};cost:${context.trashCost};general_cost:${context.generalCreditCost}`,
     });
     if (context.centralAccess) {
       components.push({
         key: "runner_central_access_trash_low_corp_investment",
         label: "Zentralzugriff ohne Korp-Install",
         value: -900,
-        reason: context.accessServerId ?? "central"
+        reason: context.accessServerId ?? "central",
       });
     }
     if (context.deferredByBudget) {
@@ -5386,7 +5789,7 @@ function semanticRuntimeRunnerAccessTrashComponents(
         key: "runner_access_trash_deferred_by_budget",
         label: "Budget nach Trash zu niedrig",
         value: -5600,
-        reason: `credits_after:${context.creditsAfterGeneralTrash};reserve:${context.reserveTarget}`
+        reason: `credits_after:${context.creditsAfterGeneralTrash};reserve:${context.reserveTarget}`,
       });
     }
     if (context.role === "low_value") {
@@ -5394,7 +5797,7 @@ function semanticRuntimeRunnerAccessTrashComponents(
         key: "runner_access_trash_low_value",
         label: "Niedriger Trash-Wert",
         value: -5200,
-        reason: context.targetType ?? "unknown"
+        reason: context.targetType ?? "unknown",
       });
     }
   } else {
@@ -5403,21 +5806,21 @@ function semanticRuntimeRunnerAccessTrashComponents(
         key: "runner_decline_trash_preserve_budget",
         label: "Budget erhalten",
         value: 3600,
-        reason: `credits_after_trash:${context.creditsAfterGeneralTrash};reserve:${context.reserveTarget}`
+        reason: `credits_after_trash:${context.creditsAfterGeneralTrash};reserve:${context.reserveTarget}`,
       });
     } else if (context.role === "low_value") {
       components.push({
         key: "runner_decline_low_value_trash",
         label: "Niedrigen Trash ablehnen",
         value: 2600,
-        reason: context.targetType ?? "unknown"
+        reason: context.targetType ?? "unknown",
       });
     } else if (context.affordableRelevant && context.highImpact) {
       components.push({
         key: "runner_decline_relevant_trash",
         label: "Relevanten Trash liegenlassen",
         value: -1800,
-        reason: context.role ?? "relevant"
+        reason: context.role ?? "relevant",
       });
     }
   }
@@ -5438,21 +5841,21 @@ function semanticRuntimeRunnerRndMemoryComponents(
       key: "runner_rnd_fresh_memory",
       label: "R&D-Frische",
       value: freshBoost,
-      reason: freshness?.freshness ?? "unknown"
+      reason: freshness?.freshness ?? "unknown",
     });
   } else if (stalePenalty !== 0) {
     components.push({
       key: "runner_rnd_stale_known_top",
       label: "R&D bekannte Topkarte",
       value: -stalePenalty,
-      reason: freshness?.freshness ?? "stale_known_same_top"
+      reason: freshness?.freshness ?? "stale_known_same_top",
     });
   } else if (!freshness || freshness.freshness === "invalidated") {
     components.push({
       key: "runner_rnd_unknown_top",
       label: "R&D unbekannte Topkarte",
       value: 180,
-      reason: "unknown_or_invalidated"
+      reason: "unknown_or_invalidated",
     });
   }
   return components;
@@ -5463,7 +5866,8 @@ function semanticRuntimeRunnerHqMemoryComponents(
   action: LegalAction,
 ): AiDecisionScoreComponent[] {
   const components: AiDecisionScoreComponent[] = [];
-  const memory = reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory;
+  const memory =
+    reconstructBeliefState(input).runnerOpponentModel?.hqHandMemory;
   const knownDefinitions = memory?.knownDefinitions ?? [];
   const knownAgenda = knownDefinitions.some(
     (definitionId) => definitionTypeForMetrics(definitionId) === "agenda",
@@ -5473,7 +5877,7 @@ function semanticRuntimeRunnerHqMemoryComponents(
       key: "runner_hq_known_agenda",
       label: "HQ bekannte Agenda",
       value: memory?.allCardsKnown ? 520 : 260,
-      reason: memory?.allCardsKnown ? "all_hq_known" : "partial_hq_known"
+      reason: memory?.allCardsKnown ? "all_hq_known" : "partial_hq_known",
     });
   }
   const stalePenalty = staleKnownHqRepeatRunPenalty(input, action);
@@ -5482,14 +5886,14 @@ function semanticRuntimeRunnerHqMemoryComponents(
       key: "runner_hq_all_known_low_value",
       label: "HQ bekannte Low-Value-Hand",
       value: -stalePenalty,
-      reason: "all_known_low_value"
+      reason: "all_known_low_value",
     });
   } else if (knownDefinitions.length > 0 && !knownAgenda) {
     components.push({
       key: "runner_hq_partial_known_cards",
       label: "HQ bekannte Karten",
       value: -Math.min(180, knownDefinitions.length * 45),
-      reason: `${knownDefinitions.length}/${memory?.handCount ?? "?"}`
+      reason: `${knownDefinitions.length}/${memory?.handCount ?? "?"}`,
     });
   }
   return components;
@@ -5500,29 +5904,43 @@ function semanticRuntimeRunnerArchivesComponents(
   action: LegalAction,
   server: AiDecisionInput["playerView"]["servers"][number] | undefined,
 ): AiDecisionScoreComponent[] {
-  if (action.type !== "start_run" || action.payload?.serverId !== "archives") return [];
+  if (action.type !== "start_run" || action.payload?.serverId !== "archives")
+    return [];
   const root = server?.root ?? [];
-  const knownRoot = root.filter((card) => card.known && typeof card.definitionId === "string");
+  const knownRoot = root.filter(
+    (card) => card.known && typeof card.definitionId === "string",
+  );
   const knownAgenda = knownRoot.some((card) => {
     const definitionId = card.definitionId;
-    return card.type === "agenda" || (definitionId !== undefined && definitionTypeForMetrics(definitionId) === "agenda");
+    return (
+      card.type === "agenda" ||
+      (definitionId !== undefined &&
+        definitionTypeForMetrics(definitionId) === "agenda")
+    );
   });
-  const hiddenArchivesCount = Math.max(0, input.playerView.opponent.discardCount - knownRoot.length);
+  const hiddenArchivesCount = Math.max(
+    0,
+    input.playerView.opponent.discardCount - knownRoot.length,
+  );
   if (knownAgenda) {
-    return [{
-      key: "runner_archives_visible_agenda",
-      label: "Archives offene Agenda",
-      value: 1250,
-      reason: "known_archives_agenda"
-    }];
+    return [
+      {
+        key: "runner_archives_visible_agenda",
+        label: "Archives offene Agenda",
+        value: 1250,
+        reason: "known_archives_agenda",
+      },
+    ];
   }
   if (hiddenArchivesCount > 0) {
-    return [{
-      key: "runner_archives_hidden_cards",
-      label: "Archives verdeckte Karten",
-      value: 700,
-      reason: `hidden_archives:${hiddenArchivesCount}`
-    }];
+    return [
+      {
+        key: "runner_archives_hidden_cards",
+        label: "Archives verdeckte Karten",
+        value: 700,
+        reason: `hidden_archives:${hiddenArchivesCount}`,
+      },
+    ];
   }
   return [];
 }
@@ -5551,8 +5969,8 @@ function semanticRuntimeRunnerKnownIcePathComponents(
         (assessment.visibleBreakCost ?? 0) * 220 +
           Math.max(0, 2 - assessment.creditsAfterPath) * 350,
       ),
-      reason: semanticRuntimeKnownIcePathReason(assessment, server.id)
-    }
+      reason: semanticRuntimeKnownIcePathReason(assessment, server.id),
+    },
   ];
 }
 
@@ -5573,7 +5991,7 @@ function semanticRuntimeKnownIcePathReason(
       : []),
     ...(assessment.unbreakableIceTitle
       ? [`ice:${assessment.unbreakableIceTitle}`]
-      : [])
+      : []),
   ].join(";");
 }
 
@@ -5589,7 +6007,9 @@ function semanticRuntimeRunnerRemoteComponents(
   const unknownRootCount = root.filter((card) => !card.known).length;
   const relevantTrash = root.some((card) => {
     if (!card.known) return false;
-    const type = card.definitionId ? definitionTypeForMetrics(card.definitionId) : card.type;
+    const type = card.definitionId
+      ? definitionTypeForMetrics(card.definitionId)
+      : card.type;
     const trashCost = remoteRootTrashCostForMetrics(card);
     return (
       (type === "asset" || type === "upgrade") &&
@@ -5597,7 +6017,12 @@ function semanticRuntimeRunnerRemoteComponents(
       input.playerView.own.credits >= trashCost + 1
     );
   });
-  const knownLowValueRoot = root.length > 0 && unknownRootCount === 0 && !knownAgenda && !relevantTrash && !advancedRoot;
+  const knownLowValueRoot =
+    root.length > 0 &&
+    unknownRootCount === 0 &&
+    !knownAgenda &&
+    !relevantTrash &&
+    !advancedRoot;
   let value = 0;
   let reason = "remote_empty";
   if (knownAgenda) {
@@ -5614,43 +6039,49 @@ function semanticRuntimeRunnerRemoteComponents(
     reason = `unknown_remote_root:${unknownRootCount}`;
   } else if (root.length > 0) {
     value = 450;
-    reason = knownLowValueRoot ? "known_low_value_remote_root" : "known_remote_root";
+    reason = knownLowValueRoot
+      ? "known_low_value_remote_root"
+      : "known_remote_root";
   }
   if (value !== 0) {
     components.push({
       key: "runner_remote_root_threat",
       label: "Remote-Root-Threat",
       value,
-      reason
+      reason,
     });
   }
   const candidateMemory = server
-    ? reconstructBeliefState(input).runnerOpponentModel?.hiddenRemoteCandidateMemory
-      .slice()
-      .reverse()
-      .find((entry) => entry.serverId === server.id)
+    ? reconstructBeliefState(input)
+        .runnerOpponentModel?.hiddenRemoteCandidateMemory.slice()
+        .reverse()
+        .find((entry) => entry.serverId === server.id)
     : undefined;
   if (candidateMemory) {
-    if (candidateMemory.exhaustive && candidateMemory.agendaCandidateCount === 0 && candidateMemory.relevantTrashCandidateCount === 0) {
+    if (
+      candidateMemory.exhaustive &&
+      candidateMemory.agendaCandidateCount === 0 &&
+      candidateMemory.relevantTrashCandidateCount === 0
+    ) {
       components.push({
         key: "runner_remote_known_candidates_low_value",
         label: "Remote-Kandidaten niedrig",
         value: -650,
-        reason: `candidates:${candidateMemory.candidateCount}`
+        reason: `candidates:${candidateMemory.candidateCount}`,
       });
     } else if (candidateMemory.agendaCandidateCount > 0) {
       components.push({
         key: "runner_remote_agenda_candidate",
         label: "Remote-Agenda-Kandidat",
         value: 350,
-        reason: `agenda_candidates:${candidateMemory.agendaCandidateCount}`
+        reason: `agenda_candidates:${candidateMemory.agendaCandidateCount}`,
       });
     } else if (candidateMemory.relevantTrashCandidateCount > 0) {
       components.push({
         key: "runner_remote_trash_candidate",
         label: "Remote-Trash-Kandidat",
         value: 220,
-        reason: `trash_candidates:${candidateMemory.relevantTrashCandidateCount}`
+        reason: `trash_candidates:${candidateMemory.relevantTrashCandidateCount}`,
       });
     }
   }
@@ -5659,7 +6090,7 @@ function semanticRuntimeRunnerRemoteComponents(
       key: "runner_remote_empty_with_ice",
       label: "Leere Remote mit ICE",
       value: -800,
-      reason: server?.id ?? "remote"
+      reason: server?.id ?? "remote",
     });
   }
   return components;
@@ -5670,7 +6101,10 @@ function semanticRuntimeRepeatedRunTargetComponents(
   serverId: string | undefined,
 ): AiDecisionScoreComponent[] {
   if (!serverId) return [];
-  const recentRuns = semanticRuntimeRecentRunnerStartRunsOnServer(input, serverId);
+  const recentRuns = semanticRuntimeRecentRunnerStartRunsOnServer(
+    input,
+    serverId,
+  );
   if (recentRuns <= 0) return [];
   const penalty =
     serverId === "hq"
@@ -5686,8 +6120,8 @@ function semanticRuntimeRepeatedRunTargetComponents(
       key: "runner_recent_same_server_runs",
       label: "Wiederholtes Run-Ziel",
       value: -penalty,
-      reason: `${serverId}:${recentRuns}`
-    }
+      reason: `${serverId}:${recentRuns}`,
+    },
   ];
 }
 
@@ -5703,7 +6137,10 @@ function semanticRuntimeRecentRunnerStartRunsOnServer(
       typeof event.publicPayload.actionType === "string"
         ? event.publicPayload.actionType
         : event.type;
-    const actor = typeof event.publicPayload.actor === "string" ? event.publicPayload.actor : undefined;
+    const actor =
+      typeof event.publicPayload.actor === "string"
+        ? event.publicPayload.actor
+        : undefined;
     if (actionType === "end_turn") break;
     if (actor === "corp") break;
     if (actor !== "runner" || actionType !== "start_run") continue;
@@ -5739,7 +6176,7 @@ function semanticRuntimeCorpScoreComponents(
       key: "corp_score_available_agenda",
       label: "Agenda punkten",
       value: 1200,
-      reason: "score_agenda"
+      reason: "score_agenda",
     });
   }
   if (action.type === "advance_card") {
@@ -5747,7 +6184,7 @@ function semanticRuntimeCorpScoreComponents(
       key: "corp_advance_score_line",
       label: "Advance-Linie",
       value: 600,
-      reason: "advance_card"
+      reason: "advance_card",
     });
     const remoteScore = semanticRuntimeCorpAdvanceRemoteScore(input, action);
     if (remoteScore !== 0) {
@@ -5755,7 +6192,7 @@ function semanticRuntimeCorpScoreComponents(
         key: "corp_advance_remote_context",
         label: "Remote-Kontext",
         value: remoteScore,
-        reason: scopeId
+        reason: scopeId,
       });
     }
   }
@@ -5764,7 +6201,7 @@ function semanticRuntimeCorpScoreComponents(
       key: "corp_rez_affordability",
       label: "Rez-Kosten zahlbar",
       value: credits >= actionCreditCost(action) ? 750 : -1200,
-      reason: `credits:${credits};cost:${actionCreditCost(action)}`
+      reason: `credits:${credits};cost:${actionCreditCost(action)}`,
     });
   }
   if (action.type === "install_card") {
@@ -5774,7 +6211,7 @@ function semanticRuntimeCorpScoreComponents(
         key: "corp_install_score_line",
         label: "Scoring-Aufbau",
         value: 550,
-        reason: "score_line"
+        reason: "score_line",
       });
     }
     if (
@@ -5785,7 +6222,7 @@ function semanticRuntimeCorpScoreComponents(
         key: "corp_install_protection",
         label: "Schutz-Aufbau",
         value: 650,
-        reason: "protect_role"
+        reason: "protect_role",
       });
     }
     if (roles.some((role) => role.includes("economy"))) {
@@ -5793,16 +6230,20 @@ function semanticRuntimeCorpScoreComponents(
         key: "corp_install_economy",
         label: "Economy-Aufbau",
         value: 500,
-        reason: "economy_role"
+        reason: "economy_role",
       });
     }
-    const remoteScore = semanticRuntimeCorpInstallRemoteScore(input, action, roles);
+    const remoteScore = semanticRuntimeCorpInstallRemoteScore(
+      input,
+      action,
+      roles,
+    );
     if (remoteScore !== 0) {
       components.push({
         key: "corp_install_remote_context",
         label: "Installations-Kontext",
         value: remoteScore,
-        reason: scopeId
+        reason: scopeId,
       });
     }
   }
@@ -5811,14 +6252,14 @@ function semanticRuntimeCorpScoreComponents(
       key: "corp_low_credits",
       label: "Credit-Bedarf",
       value: 700,
-      reason: `credits:${credits}`
+      reason: `credits:${credits}`,
     });
     if (semanticRuntimeCorpHasRemoteInstability(input)) {
       components.push({
         key: "corp_remote_instability_credit_reserve",
         label: "Remote-Reserve",
         value: 250,
-        reason: "remote_instability"
+        reason: "remote_instability",
       });
     }
   }
@@ -5827,14 +6268,14 @@ function semanticRuntimeCorpScoreComponents(
       key: "corp_low_hand",
       label: "Handkarten-Bedarf",
       value: 450,
-      reason: `hand:${input.playerView.own.gripOrHq.length}`
+      reason: `hand:${input.playerView.own.gripOrHq.length}`,
     });
     if (semanticRuntimeCorpHasRemoteInstability(input)) {
       components.push({
         key: "corp_remote_instability_draw",
         label: "Remote-Nachschub",
         value: 200,
-        reason: "remote_instability"
+        reason: "remote_instability",
       });
     }
   }
@@ -5843,7 +6284,7 @@ function semanticRuntimeCorpScoreComponents(
       key: "corp_decline_rez_pressure",
       label: "Rez ablehnen",
       value: -700,
-      reason: scopeId
+      reason: scopeId,
     });
   }
   if (action.type === "end_turn" && input.playerView.own.clicks > 0) {
@@ -5851,7 +6292,7 @@ function semanticRuntimeCorpScoreComponents(
       key: "corp_unused_actions",
       label: "Ungenutzte Aktionen",
       value: -1400,
-      reason: `actions:${input.playerView.own.clicks}`
+      reason: `actions:${input.playerView.own.clicks}`,
     });
   }
   return components;
@@ -6035,7 +6476,9 @@ function semanticRuntimeCorpEmptyRemoteCount(input: AiDecisionInput): number {
   ).length;
 }
 
-function semanticRuntimeCorpHasRemoteInstability(input: AiDecisionInput): boolean {
+function semanticRuntimeCorpHasRemoteInstability(
+  input: AiDecisionInput,
+): boolean {
   return (
     semanticRuntimeCorpEmptyRemoteCount(input) > 0 ||
     input.playerView.servers.some(
@@ -6073,11 +6516,9 @@ function semanticRuntimeCorpHasStabilizingAlternative(
   return input.legalActions.some((action) => {
     if (action.actionId === excludedAction.actionId || action.side !== "corp")
       return false;
-    if (action.type === "gain_credit" || action.type === "draw_card") return true;
-    if (
-      action.type !== "install_card" ||
-      action.payload?.placement !== "ice"
-    )
+    if (action.type === "gain_credit" || action.type === "draw_card")
+      return true;
+    if (action.type !== "install_card" || action.payload?.placement !== "ice")
       return false;
     const serverId = semanticRuntimeCorpActionServerId(input, action);
     return serverId === "hq" || serverId === "rd";
@@ -6112,7 +6553,10 @@ function semanticRuntimeRunnerEvidence(
   action: LegalAction,
 ): string[] {
   if (input.side !== "runner") return [];
-  if (action.type !== "trash_accessed_card" && action.type !== "decline_trash") {
+  if (
+    action.type !== "trash_accessed_card" &&
+    action.type !== "decline_trash"
+  ) {
     return [];
   }
   return runnerRemoteTrashAccessContext(input, action).evidence;
@@ -6170,7 +6614,9 @@ function semanticRuntimeCorpEvidence(
   ) {
     evidence.push("corp_remote_risk:new_empty_remote");
   }
-  if (semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine(input, action)) {
+  if (
+    semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine(input, action)
+  ) {
     evidence.push("corp_remote_risk:naked_score_line");
   }
   if (
@@ -6204,17 +6650,15 @@ function semanticRuntimeCorpHasUnsafeRemoteScoreAction(
 }
 
 function semanticRuntimeConfidence(scopeId: string, score: number): number {
-  if (scopeId === "choice_resolution" || scopeId === "mandatory_draw") return 0.95;
+  if (scopeId === "choice_resolution" || scopeId === "mandatory_draw")
+    return 0.95;
   if (score >= 9000) return 0.86;
   if (score >= 7000) return 0.76;
   if (score >= 5000) return 0.66;
   return 0.51;
 }
 
-function semanticRuntimeExplanation(
-  side: Side,
-  scopeId: string,
-): string {
+function semanticRuntimeExplanation(side: Side, scopeId: string): string {
   return `${side} Semantic Runtime waehlt eine legale Aktion im Scope ${scopeId}.`;
 }
 
@@ -10815,7 +11259,8 @@ function discardKeepScore(
   const type = card.type ?? DEMO_CARDS_BY_ID[card.definitionId]?.type;
   const cost = discardVisibleCardCost(card);
   const runnerPlanRelevantBreaker =
-    input.side === "runner" && runnerCardAddressesVisibleBreakerNeed(input, card);
+    input.side === "runner" &&
+    runnerCardAddressesVisibleBreakerNeed(input, card);
   const runnerBadPublicityTraceTech =
     input.side === "runner" && runnerBadPublicityOrTraceTechCard(card, roles);
   const runnerFundingEconomyCard =
@@ -11538,9 +11983,9 @@ function scoreRunnerAction(
         }
       }
       break;
-      case "continue_run":
-        {
-          const runEffect = encounterRunRemainderEffectAssessment(input, action);
+    case "continue_run":
+      {
+        const runEffect = encounterRunRemainderEffectAssessment(input, action);
         score = runEffect.mustBreak
           ? 180
           : runEffect.hasRunRemainderEffect
@@ -13971,7 +14416,8 @@ function aiServerIdFromEvent(event: PublicGameEvent): string | undefined {
   if (typeof payload.serverId === "string") return payload.serverId;
   if (typeof payload.server === "string") return payload.server;
   if (typeof payload.targetServerId === "string") return payload.targetServerId;
-  if (typeof payload.attackedServerId === "string") return payload.attackedServerId;
+  if (typeof payload.attackedServerId === "string")
+    return payload.attackedServerId;
   const label =
     typeof payload.serverLabel === "string"
       ? payload.serverLabel
@@ -14464,15 +14910,14 @@ function parseSubroutineIndexes(value: unknown): Set<number> {
   for (const rawIndex of value.split(",")) {
     if (!rawIndex) continue;
     const index = Number(rawIndex);
-    if (!Number.isFinite(index) || !Number.isInteger(index) || index < 0) continue;
+    if (!Number.isFinite(index) || !Number.isInteger(index) || index < 0)
+      continue;
     indexes.add(index);
   }
   return indexes;
 }
 
-function isTrashUnlessRunnerPaysSubroutine(
-  type: string | undefined,
-): boolean {
+function isTrashUnlessRunnerPaysSubroutine(type: string | undefined): boolean {
   return (
     type === "trash_program_unless_runner_pays" ||
     type === "trash_installed_program_unless_runner_pays"
@@ -30353,7 +30798,10 @@ function runnerRemoteTrashAccessContext(
       role === "tag_punish" ||
       finitePoolEconomy);
   const acuteThreat = remoteAccess
-    ? remoteTrashAccessProtectsAcuteThreatForMetrics(input, run.attackedServerId)
+    ? remoteTrashAccessProtectsAcuteThreatForMetrics(
+        input,
+        run.attackedServerId,
+      )
     : false;
   const highRemainingFinitePool =
     finitePoolEconomy &&
