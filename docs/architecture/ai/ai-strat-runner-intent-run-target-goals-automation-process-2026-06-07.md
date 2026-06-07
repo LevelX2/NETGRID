@@ -1,6 +1,6 @@
 # AI-STRAT-1 bis AI-STRAT-4 Runner Intent, Run Targets und Golden Deck
 
-Status: in Umsetzung
+Status: AI-STRAT-1 bis AI-STRAT-4 umgesetzt; finaler Verify/Merge offen
 
 ## Quelle/Vorgabe
 
@@ -196,7 +196,7 @@ Kernartefakte:
 
 Done-Gate:
 
-- Blink Opening enthält `find_or_install_blink`, `build_economy_base`, `draw_or_search_for_setup`, `avoid_low_value_risk_runs`.
+- Blink Opening enthält generisch `find_or_install_primary_breaker`, `build_economy_base`, `draw_or_search_for_setup`, `avoid_low_value_risk_runs`.
 - Blink Midgame enthält `pressure_good_central_target`, `contest_remote_if_score_threat`, `maintain_credit_and_hand_buffer`.
 - TacticalPlans konsumieren Goals, erzeugen aber keine LegalActions.
 

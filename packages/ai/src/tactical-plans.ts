@@ -1113,7 +1113,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
         priority: runnerAdjustedPlanPriority(context, action, 820),
         horizonTurns: 1,
         target: { kind: "server", id: serverId },
-        currentStep: createPlanStep({
+        currentStep: runnerRunTargetCurrentStep(context, action, {
           stepId: `run_target:${serverId}`,
           kind: "run_target",
           desiredActionSemantics: ["run.start"],
@@ -1246,7 +1246,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
         ),
         horizonTurns: 1,
         target: { kind: "server", id: serverId },
-        currentStep: createPlanStep({
+        currentStep: runnerRunTargetCurrentStep(context, action, {
           stepId: `probe_central:${serverId}`,
           kind: "probe_central",
           desiredActionSemantics: ["run.start"],
@@ -1414,6 +1414,26 @@ function runnerRunTargetEvaluationForAction(
   return context.runnerRunTargetEvaluations?.find(
     (evaluation) => evaluation.actionId === action.actionId,
   );
+}
+
+function runnerRunTargetCurrentStep(
+  context: TacticalPlanBuildContext,
+  action: LegalAction,
+  defaultStep: Parameters<typeof createPlanStep>[0],
+): PlanStep {
+  const evaluation = runnerRunTargetEvaluationForAction(context, action);
+  if (evaluation?.recommendation === "gain_credits_first") {
+    return createPlanStep({
+      stepId: `gain_credits_before_run:${evaluation.targetServerId}`,
+      kind: "gain_credits",
+      desiredActionSemantics: ["economy.gain_credit"],
+      rationale: [
+        "run target evaluation recommends funding before pressure",
+        ...runnerRunTargetStepRationale(context, action),
+      ],
+    });
+  }
+  return createPlanStep(defaultStep);
 }
 
 function runnerRunTargetPlanEvidence(

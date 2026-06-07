@@ -3741,6 +3741,18 @@ function tacticalPlanDebugItems(planRuntime: TacticalPlanRuntimeResult): string[
     ...(planRuntime.deckCapabilitiesUsed ?? [])
       .slice(0, 12)
       .map((fact) => `deck_capability_used:${fact}`),
+    ...(planRuntime.runnerStrategicIntentUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `runner_strategic_intent_used:${fact}`),
+    ...(planRuntime.runnerRunTargetEvaluationsUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `runner_run_target_used:${fact}`),
+    ...(planRuntime.runnerEconomyPostureUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `runner_economy_posture_used:${fact}`),
+    ...(planRuntime.runnerTacticalGoalsUsed ?? [])
+      .slice(0, 12)
+      .map((fact) => `runner_tactical_goal_used:${fact}`),
     `plan_alternative_count:${planRuntime.planAlternatives.length}`,
     `blocked_plan_count:${planRuntime.blockedPlans.length}`,
     ...(selectedPlan
