@@ -1,20 +1,25 @@
 ---
 activityId: act-2026-06-07-ai-runner-pressure-budget-variation
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: release-implementation-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-06-07-ai-runner-contest-reserve-implementation
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/tactical-plans.ts
+  - packages/ai/src/runner-tactical-goals.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai exec tsc --noEmit
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-evaluation.test.ts src/runner-tactical-goals.test.ts src/tactical-plans.test.ts
+  - git diff --check
 ---
 
 # Runner-Pressure-Budget und kontrollierte Variation
@@ -81,13 +86,13 @@ Die Runner-KI soll durch die neue Creditreserve nicht in ein starres Credit-Stap
 
 ## Akzeptanzkriterien
 
-- [ ] Runner unter Reserve, F&E frei/top unbekannt, kein Remote-Threat -> Credit/Economy bleibt hoch, aber F&E-Probe kann als plausible Action gewinnen oder im oberen Korridor bleiben.
-- [ ] Runner unter Reserve, F&E known-low -> kein Pressure-Probe; Economy, Install oder Draw/Search gewinnt.
-- [ ] Remote-Score-Threat plus ContestFundingNeed -> kein opportunistischer F&E-/HQ-Probe-Run verdrängt den Contest-Funding-Plan.
-- [ ] Zwei nahe gute Runs, zum Beispiel HQ und F&E, dürfen kontrolliert variieren, sofern beide safe und plausibel sind.
-- [ ] Ein deutlich schlechter Run kann durch Variation nicht gewinnen.
-- [ ] Variation ist deterministisch/reproduzierbar und ändert keine Engine-Random-, Replay- oder StateHash-Verträge.
-- [ ] Finale Action stammt aus `input.legalActions`.
+- [x] Runner unter Reserve, F&E frei/top unbekannt, kein Remote-Threat -> Credit/Economy bleibt hoch, aber F&E-Probe kann als plausible Action gewinnen oder im oberen Korridor bleiben.
+- [x] Runner unter Reserve, F&E known-low -> kein Pressure-Probe; Economy, Install oder Draw/Search gewinnt.
+- [x] Remote-Score-Threat plus ContestFundingNeed -> kein opportunistischer F&E-/HQ-Probe-Run verdrängt den Contest-Funding-Plan.
+- [x] Zwei nahe gute Runs, zum Beispiel HQ und F&E, dürfen kontrolliert variieren, sofern beide safe und plausibel sind.
+- [x] Ein deutlich schlechter Run kann durch Variation nicht gewinnen.
+- [x] Variation ist deterministisch/reproduzierbar und ändert keine Engine-Random-, Replay- oder StateHash-Verträge.
+- [x] Finale Action stammt aus `input.legalActions`.
 
 ## Umsetzungshinweise
 
@@ -101,4 +106,6 @@ Die Runner-KI soll durch die neue Creditreserve nicht in ein starres Credit-Stap
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt in `packages/ai/src/tactical-plans.ts`: Runner erhalten bei aktivem Credit-Reserve-Aufbau einen begrenzten `RunnerPressureBudget` für kostenlose HQ-/F&E-Probes. Die Freigabe wird blockiert, wenn Remote-Contest-Funding nötig ist, keine sicheren Probe-Ziele existieren oder eine nützliche Hand-Development-Aktion aktuell legal ist. Near-Tie-Probes erhalten eine kleine deterministische Variation über `stateVersion`; sie nutzt keinen Engine-Random und ändert keine Replay-/StateHash-Verträge.
+
+Abgesichert in `packages/ai/src/runner-tactical-goals.test.ts`: freier F&E-Probe unter Reserve, Remote-Contest-Funding blockiert Central-Probes, deterministische Near-Tie-Variation, keine Variation für nicht nahe liegende Central-Probes. Bestehende known-low-Abdeckung bleibt über RunTarget-/TacticalPlan-Tests erhalten.

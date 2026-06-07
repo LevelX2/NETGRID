@@ -179,6 +179,215 @@ describe("Runner TacticalGoalIntegration", () => {
     );
   });
 
+  it("blocks central probes while remote contest funding is needed", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [
+        server("hq"),
+        server("rd"),
+        server("remote_2", {
+          root: [
+            visibleCard("remote-root-2", {
+              known: false,
+              advancementCounters: 2,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [
+        runAction("run-hq", "hq"),
+        runAction("run-rd", "rd"),
+        runAction("run-remote-2", "remote_2"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+    const runTargetEvaluations = evaluateRunnerRunTargets({ input });
+    const economyPosture = buildRunnerEconomyPosture({ input });
+    const runnerTacticalGoals = buildRunnerTacticalGoals({
+      input,
+      runTargetEvaluations,
+      economyPosture,
+    });
+
+    const result = evaluateTacticalPlans({
+      input,
+      runnerRunTargetEvaluations: runTargetEvaluations,
+      runnerEconomyPosture: economyPosture,
+      runnerTacticalGoals,
+      candidates: buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "runner",
+        stateVersion: input.playerView.stateVersion,
+      }),
+    });
+
+    expect(economyPosture.creditReservePolicy).toMatchObject({
+      remoteScoreThreat: "urgent",
+      belowReserveNow: true,
+      canContestIfFunded: true,
+    });
+    expect(result.selectedStep?.kind).toBe("gain_credits");
+    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
+      "gain-credit",
+    ]);
+    expect(JSON.stringify(result.planAlternatives)).toContain(
+      "remote_contest_funding_need",
+    );
+    expect(JSON.stringify(result.planAlternatives)).not.toContain(
+      "pressure_probe_allowed:true",
+    );
+  });
+
+  it("allows a free unknown R&D probe while economy reserve is active", () => {
+    const input = aiInput({
+      credits: 3,
+      servers: [server("rd")],
+      legalActions: [
+        runAction("run-rd", "rd"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+    const runTargetEvaluations = evaluateRunnerRunTargets({ input });
+    const economyPosture = buildRunnerEconomyPosture({ input });
+    const runnerTacticalGoals = buildRunnerTacticalGoals({
+      input,
+      runTargetEvaluations,
+      economyPosture,
+    });
+
+    const result = evaluateTacticalPlans({
+      input,
+      runnerRunTargetEvaluations: runTargetEvaluations,
+      runnerEconomyPosture: economyPosture,
+      runnerTacticalGoals,
+      candidates: buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "runner",
+        stateVersion: input.playerView.stateVersion,
+      }),
+    });
+
+    expect(economyPosture.creditBasePlan.economyPriority).toBe("medium");
+    expect(result.selectedPlan?.type).toBe("runner.opportunistic_central_run");
+    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
+      "run-rd",
+    ]);
+    expect(JSON.stringify(result.planAlternatives)).toContain(
+      "pressure_probe_allowed:true",
+    );
+    expect(JSON.stringify(result.planAlternatives)).toContain(
+      "variation_reason:deterministic_priority_only",
+    );
+  });
+
+  it("uses deterministic near-tie variation between safe central probes", () => {
+    const input = aiInput({
+      credits: 3,
+      servers: [server("hq"), server("rd")],
+      rig: [
+        visibleCard("hq-interface", {
+          definitionId: "onr_v1_129_hq-interface",
+          title: "HQ Interface",
+          type: "hardware",
+        }),
+      ],
+      legalActions: [
+        runAction("run-hq", "hq"),
+        runAction("run-rd", "rd"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+    input.playerView.stateVersion = 2;
+    const runTargetEvaluations = evaluateRunnerRunTargets({ input });
+    const economyPosture = buildRunnerEconomyPosture({ input });
+    const runnerTacticalGoals = buildRunnerTacticalGoals({
+      input,
+      runTargetEvaluations,
+      economyPosture,
+    });
+
+    const result = evaluateTacticalPlans({
+      input,
+      runnerRunTargetEvaluations: runTargetEvaluations,
+      runnerEconomyPosture: economyPosture,
+      runnerTacticalGoals,
+      candidates: buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "runner",
+        stateVersion: input.playerView.stateVersion,
+      }),
+    });
+    const repeatedResult = evaluateTacticalPlans({
+      input,
+      runnerRunTargetEvaluations: runTargetEvaluations,
+      runnerEconomyPosture: economyPosture,
+      runnerTacticalGoals,
+      candidates: buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "runner",
+        stateVersion: input.playerView.stateVersion,
+      }),
+    });
+
+    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
+      "run-hq",
+    ]);
+    expect(repeatedResult.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
+      "run-hq",
+    ]);
+    expect(JSON.stringify(result.planAlternatives)).toContain(
+      "bounded_variation_applied:true",
+    );
+    expect(JSON.stringify(result.planAlternatives)).toContain(
+      "preferred_probe_target:hq",
+    );
+    expect(JSON.stringify(result.planAlternatives)).toContain(
+      "pressure_probe_variation_bonus:25",
+    );
+  });
+
+  it("does not let variation lift a non-near-tie central probe", () => {
+    const input = aiInput({
+      credits: 3,
+      servers: [server("hq"), server("rd")],
+      legalActions: [
+        runAction("run-hq", "hq"),
+        runAction("run-rd", "rd"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+    input.playerView.stateVersion = 2;
+    const runTargetEvaluations = evaluateRunnerRunTargets({ input });
+    const economyPosture = buildRunnerEconomyPosture({ input });
+    const runnerTacticalGoals = buildRunnerTacticalGoals({
+      input,
+      runTargetEvaluations,
+      economyPosture,
+    });
+
+    const result = evaluateTacticalPlans({
+      input,
+      runnerRunTargetEvaluations: runTargetEvaluations,
+      runnerEconomyPosture: economyPosture,
+      runnerTacticalGoals,
+      candidates: buildActionSemanticCandidates({
+        legalActions: input.legalActions,
+        observerSide: "runner",
+        stateVersion: input.playerView.stateVersion,
+      }),
+    });
+
+    expect(result.selectedMapping?.legalActions.map((action) => action.actionId)).toEqual([
+      "run-rd",
+    ]);
+    expect(JSON.stringify(result.planAlternatives)).toContain(
+      "near_tie_probe_targets:rd",
+    );
+    expect(JSON.stringify(result.planAlternatives)).toContain(
+      "bounded_variation_applied:false",
+    );
+  });
+
   it("feeds run target goals into TacticalPlans without creating LegalActions", () => {
     const input = aiInput({
       credits: 6,

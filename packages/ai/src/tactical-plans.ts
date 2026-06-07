@@ -169,6 +169,19 @@ export type RunnerDrawOverflowUrgencyOverride =
   | "find_run_access_payoff"
   | "find_economy";
 
+export type RunnerPressureBudget = {
+  canSpendActionOnPressure: boolean;
+  pressureActionBudgetThisTurn: number;
+  maxCreditLossForProbe: number;
+  allowedProbeTargets: string[];
+  nearTieProbeTargets: string[];
+  preferredProbeTarget?: string;
+  blockedReasons: string[];
+  boundedVariationApplied: boolean;
+  variationReason: string;
+  evidence: string[];
+};
+
 export type RunnerDrawOverflowAssessment = {
   currentHandCount: number;
   maxHandSize: number;
@@ -941,6 +954,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
     (action) =>
       action.type === "start_run" && isCentralServer(actionServerId(action)),
   );
+  const pressureBudget = assessRunnerPressureBudget(context);
   const noPayoffCentralRunActions: LegalAction[] = [];
   const noPayoffCentralByActionId = new Map<
     string,
@@ -1336,6 +1350,11 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
       );
       continue;
     }
+    const pressureAllowance = runnerPressureProbeAllowance(
+      pressureBudget,
+      serverId,
+    );
+    const basePriority = serverId === "rd" ? 760 : 740;
     plans.push(
       createTacticalPlan({
         planId: `runner.opportunistic_central_run:${serverId}`,
@@ -1345,7 +1364,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
         priority: runnerAdjustedPlanPriority(
           context,
           action,
-          serverId === "rd" ? 760 : 740,
+          basePriority + pressureAllowance.priorityBonus,
         ),
         horizonTurns: 1,
         target: { kind: "server", id: serverId },
@@ -1360,6 +1379,7 @@ function buildRunnerTacticalPlans(context: TacticalPlanBuildContext): TacticalPl
         }),
         evidence: [
           `central_run_action:${action.actionId}`,
+          ...pressureAllowance.evidence,
           ...runnerRunTargetPlanEvidence(context, action),
           ...runnerGoalEvidence,
         ],
@@ -1850,6 +1870,161 @@ function runnerEconomyGoalPriority(
   if (posture.creditBasePlan.economyPriority === "high") return basePriority + 120;
   if (posture.recommendation === "build_economy") return basePriority + 90;
   return basePriority;
+}
+
+const RUNNER_PRESSURE_PROBE_PRIORITY_BONUS = 180;
+const RUNNER_PRESSURE_PROBE_VARIATION_BONUS = 25;
+const RUNNER_PRESSURE_PROBE_NEAR_TIE_WINDOW = 25;
+
+function assessRunnerPressureBudget(
+  context: TacticalPlanBuildContext,
+): RunnerPressureBudget {
+  const reservePolicy = context.runnerEconomyPosture?.creditReservePolicy;
+  const creditBase = context.runnerEconomyPosture?.creditBasePlan;
+  const usefulHandDevelopmentAvailable = (
+    context.runnerHandDevelopmentEvaluations ?? []
+  ).some(usefulLegalRunnerHandDevelopment);
+  const reservePressureActive =
+    creditBase !== undefined &&
+    creditBase.economyPriority !== "low" &&
+    reservePolicy !== undefined &&
+    reservePolicy.belowReserveNow;
+  const remoteFundingNeed =
+    reservePolicy !== undefined &&
+    reservePolicy.remoteScoreThreat !== "none" &&
+    reservePolicy.belowReserveNow &&
+    reservePolicy.canContestIfFunded;
+  const allowedProbeEvaluations = (context.runnerRunTargetEvaluations ?? [])
+    .filter((evaluation) => runnerPressureProbeTargetAllowed(evaluation));
+  const allowedProbeTargets = allowedProbeEvaluations
+    .map((evaluation) => evaluation.targetServerId)
+    .sort();
+  const probeBaselines = allowedProbeEvaluations
+    .map((evaluation) => ({
+      targetServerId: evaluation.targetServerId,
+      priority: runnerPressureProbeBasePriority(evaluation),
+    }))
+    .sort((left, right) => left.targetServerId.localeCompare(right.targetServerId));
+  const bestProbeBaseline = Math.max(
+    0,
+    ...probeBaselines.map((baseline) => baseline.priority),
+  );
+  const nearTieProbeTargets = probeBaselines
+    .filter(
+      (baseline) =>
+        bestProbeBaseline - baseline.priority <=
+        RUNNER_PRESSURE_PROBE_NEAR_TIE_WINDOW,
+    )
+    .map((baseline) => baseline.targetServerId);
+  const blockedReasons = [
+    ...(!reservePressureActive ? ["reserve_pressure_inactive"] : []),
+    ...(usefulHandDevelopmentAvailable ? ["useful_hand_development_available"] : []),
+    ...(remoteFundingNeed ? ["remote_contest_funding_need"] : []),
+    ...(allowedProbeTargets.length === 0 ? ["no_safe_probe_target"] : []),
+  ];
+  const canSpendActionOnPressure =
+    context.input.side === "runner" &&
+    reservePressureActive &&
+    !usefulHandDevelopmentAvailable &&
+    !remoteFundingNeed &&
+    allowedProbeTargets.length > 0;
+  const boundedVariationApplied =
+    canSpendActionOnPressure && nearTieProbeTargets.length > 1;
+  const preferredProbeTarget = boundedVariationApplied
+    ? runnerPressurePreferredProbeTarget(
+        nearTieProbeTargets,
+        context.input.playerView.stateVersion,
+      )
+    : undefined;
+  const variationReason = boundedVariationApplied
+    ? "near_tie_state_version"
+    : "deterministic_priority_only";
+  return {
+    canSpendActionOnPressure,
+    pressureActionBudgetThisTurn: canSpendActionOnPressure ? 1 : 0,
+    maxCreditLossForProbe: 0,
+    allowedProbeTargets,
+    nearTieProbeTargets,
+    ...(preferredProbeTarget ? { preferredProbeTarget } : {}),
+    blockedReasons,
+    boundedVariationApplied,
+    variationReason,
+    evidence: [
+      `pressure_budget:${canSpendActionOnPressure ? "available" : "blocked"}`,
+      `pressure_action_budget:${canSpendActionOnPressure ? 1 : 0}`,
+      "max_credit_loss_for_probe:0",
+      `allowed_probe_targets:${allowedProbeTargets.join("|") || "none"}`,
+      `near_tie_probe_targets:${nearTieProbeTargets.join("|") || "none"}`,
+      `preferred_probe_target:${preferredProbeTarget ?? "none"}`,
+      `blocked_pressure_reasons:${blockedReasons.join("|") || "none"}`,
+      `bounded_variation_applied:${boundedVariationApplied}`,
+      `variation_reason:${variationReason}`,
+    ],
+  };
+}
+
+function runnerPressureProbeBasePriority(
+  evaluation: RunnerRunTargetEvaluation,
+): number {
+  const basePriority = evaluation.targetServerId === "rd" ? 760 : 740;
+  return basePriority + runnerRunTargetPriorityDelta(evaluation);
+}
+
+function runnerPressurePreferredProbeTarget(
+  targets: readonly string[],
+  stateVersion: number,
+): string | undefined {
+  if (targets.length === 0) return undefined;
+  const index = Math.abs(stateVersion) % targets.length;
+  return targets[index];
+}
+
+function runnerPressureProbeTargetAllowed(
+  evaluation: RunnerRunTargetEvaluation,
+): boolean {
+  if (evaluation.targetKind !== "rd" && evaluation.targetKind !== "hq") {
+    return false;
+  }
+  if (evaluation.knownAccessState === "known_no_current_payoff") return false;
+  if (evaluation.pathPassability !== "reachable") return false;
+  if (evaluation.creditsAfterRun < 0) return false;
+  return (
+    evaluation.accessPayoff === "unknown" ||
+    evaluation.accessPayoff === "fresh" ||
+    evaluation.accessPayoff === "access_bonus" ||
+    evaluation.recommendation === "run_now" ||
+    evaluation.recommendation === "run_if_free"
+  );
+}
+
+function runnerPressureProbeAllowance(
+  budget: RunnerPressureBudget,
+  serverId: string,
+): { priorityBonus: number; evidence: string[] } {
+  if (
+    !budget.canSpendActionOnPressure ||
+    !budget.allowedProbeTargets.includes(serverId)
+  ) {
+    return {
+      priorityBonus: 0,
+      evidence: budget.evidence,
+    };
+  }
+  const variationBonus =
+    budget.boundedVariationApplied && budget.preferredProbeTarget === serverId
+      ? RUNNER_PRESSURE_PROBE_VARIATION_BONUS
+      : 0;
+  return {
+    priorityBonus:
+      RUNNER_PRESSURE_PROBE_PRIORITY_BONUS + variationBonus,
+    evidence: [
+      ...budget.evidence,
+      "pressure_probe_allowed:true",
+      `pressure_probe_target:${serverId}`,
+      `pressure_probe_variation_bonus:${variationBonus}`,
+      "economy_pressure_tradeoff:probe_within_budget",
+    ],
+  };
 }
 
 function assessRunnerDrawOverflow(
