@@ -136,6 +136,82 @@ Prüfbare Floors:
 - Bei 3 bis 5 Credits darf Setup eine Economy-Aktion schlagen, wenn Rolle und Bedarf stark sind und der Runner nach der Zahlung den Floor hält oder einen akuten Blocker entfernt.
 - Ab 6 Credits kann Druck Vorrang haben, wenn RunTargetEvaluation einen guten Zielwert sieht.
 
+## `RunnerCreditReservePolicy`
+
+Die Contest-Reserve ist ein Nachtrag zu `RunnerCreditBasePlan` und `RunnerEconomyPosture`. Sie soll als internes Bewertungsobjekt oder eingebetteter Abschnitt umgesetzt werden; ein eigener öffentlicher Strategieanker ist nicht nötig. Ziel ist nicht "immer Credits sparen", sondern die Unterscheidung zwischen "Aktion jetzt bezahlbar" und "Runner bleibt nach der Aktion handlungsfähig".
+
+Mindestvertrag:
+
+```ts
+type RunnerCreditReservePhase =
+  | "opening"
+  | "midgame"
+  | "late_contest";
+
+type RunnerCreditReservePolicy = {
+  schemaVersion: 1;
+  phase: RunnerCreditReservePhase;
+  currentCredits: number;
+  minimumCreditFloor: number;
+  breakerUseReserve: number;
+  contestReserve: number;
+  developmentReserve: number;
+  emergencyReserve: number;
+  desiredCreditReserve: number;
+  remoteScoreThreat: "none" | "possible" | "visible" | "urgent";
+  canContestIfFunded: boolean;
+  belowReserveNow: boolean;
+  spendingWouldDropBelowReserve: boolean;
+  creditsAfterAction?: number;
+  reserveDrivers: string[];
+  reserveOverrides: string[];
+  evidence: string[];
+};
+```
+
+Die Werte sind AI-interne Heuristiken. Debug darf nur Phase, Counts, Reservewerte, Treiber und Override-Gründe zeigen, keine gegnerischen Hand-, Deck-, Remote- oder FullState-Daten.
+
+### Phasen und Startwerte
+
+- `opening`: Normaler Floor 2, gewünschte Reserve 4. Setup-Ausgaben sind eher erlaubt, wenn sie Breaker, Economy, Memory oder konkrete Handentwicklung freischalten.
+- `midgame`: Normaler Floor 3, gewünschte Reserve 5 bis 6. Ausgaben brauchen stärkeren Payoff, wenn danach keine relevante Run- oder Setup-Handlungsfähigkeit bleibt.
+- `late_contest`: Normaler Floor 3, gewünschte Reserve 6 bis 8. Sichtbare Remote-Score-Gefahr, siegnahe Korp oder installierte Coverage mit fehlenden Credits erhöhen die Contest-Reserve.
+
+Die konkrete Implementation darf Werte kalibrieren, muss aber die Treiber als Evidence ausgeben und darf keine starre "behalte immer X Credits"-Regel bauen.
+
+### Reserve-Treiber
+
+- `breakerUseReserve`: Credits, die ein installierter oder sicher verfügbarer Breaker für relevante Runs braucht. Sichtbare ICE-Pfade, bekannte Breakkosten und konservative Unknown-ICE-Schätzungen dürfen einfließen; verdeckte Kartenwerte nicht.
+- `contestReserve`: Credits, die der Runner braucht, um einen sichtbaren oder plausiblen Remote-Score-Threat zu contesten. Sie steigt bei remote installierten/avancierten Karten, Korp-Siegnahe, gutem Runner-Coverage-Profil und bezahlbarem Pfad nach Funding.
+- `developmentReserve`: Credits, die nützliche eigene Handkarten in naher Zukunft spielbar machen. Treiber sind `RunnerHandDevelopmentEvaluation`, fehlende Credits für Breaker/Rig/Memory/Economy und konkrete LegalAction-Nähe.
+- `emergencyReserve`: Credits für sichtbare Tag-, Trace-, Damage- oder Survival-Lagen. Sie darf nur aus öffentlichen oder Runner-eigenen Informationen entstehen.
+- `desiredCreditReserve`: Maximum aus Basisfloor, Breaker-, Contest-, Development- und Emergency-Reserve, begrenzt durch Phase und konkrete Evidence.
+
+### Reservebruch und Malus
+
+`spendingWouldDropBelowReserve` ist ein Bewertungsmalus, keine harte Sperre. Eine Ausgabe, ein Run oder eine Installation unter Reserve darf gewinnen, wenn sie side-sicher hohen Payoff hat oder den aktuellen Blocker direkt löst. Ohne solchen Grund soll Economy, Bank-Cashout, Draw/Search oder günstiger Setup-Aufbau steigen.
+
+Pflicht-Evidence für Reservebrüche:
+
+- `credits_after_action:<n>`
+- `desired_credit_reserve:<n>`
+- `reserve_breach:true`
+- `reserve_driver:<reason>`
+- `reserve_penalty:<n>`
+- `reserve_override:<reason>` falls der Bruch erlaubt wurde
+
+### Übersteuerungen
+
+Reservebrüche sind erlaubt bei:
+
+- bekannter Agenda, sicherem Steal-/Trash-Payoff oder unmittelbarem Runner-Closeout,
+- akutem Remote-Contest, wenn der Run selbst das Score-Fenster schließt,
+- Survival-, Tag-, Damage- oder Trace-Notfall,
+- Aktion, die einen aktiven Coverage-, MU-, Credit- oder Handentwicklungsblocker direkt löst,
+- sehr günstigem Druckfenster ohne sichtbare Remote-Score-Gefahr, wenn das separate PressureBudget die Aktion als plausibel freigibt.
+
+Das Folgepaket `act-2026-06-07-ai-runner-pressure-budget-variation` bleibt bewusst getrennt: Reserve bewertet Kostenbewusstsein und Score-Fenster; PressureBudget erlaubt begrenzte, günstige Druckaktionen trotz aktivem Economy-Aufbau. Deterministische Variation darf nur zwischen sicheren, plausiblen und ähnlich guten Kandidaten greifen.
+
 ## `RunnerDrawOverflowAssessment`
 
 Kartenziehen bleibt ein legitimer Weg, um fehlende Antworten zu finden, bekommt aber in der TacticalPlan-Schicht einen situativen Malus, wenn der Runner dadurch das Handlimit überschreitet oder eine bereits zu volle Hand weiter belastet. Die Bewertung ist AI-intern und nutzt nur eigene Runner-Handdaten, `maxHandSize`, `LegalActions`, HandDevelopment-/Creditbase-Evaluations und side-sichere Plan-Evidence.
@@ -217,3 +293,5 @@ Die bestehenden Folgeactivities bleiben passend:
 - `act-2026-06-07-runner-credit-base-planning`: erweitert `RunnerEconomyPosture` oder leitet `RunnerCreditBasePlan` daraus ab; Tests müssen 0-2 Credits, 3-5 Credits mit Setup, 6+ Credits mit Druck, Bank-Cashout, aktive Run-Kosten und blockierte Handkarten abdecken.
 - `act-2026-06-07-runner-development-tactical-mapping`: mappt Evaluation und Creditbase auf bestehende Goals und TacticalPlans; Tests müssen beweisen, dass schwache Runs unterdrückt werden und die finale Aktion legal bleibt.
 - `act-2026-06-07-runner-development-debug-regression`: prüft redigierte Debug-Oberflächen und Regressionen ohne Hidden-Info-Leak.
+- `act-2026-06-07-ai-runner-contest-reserve-implementation`: setzt `RunnerCreditReservePolicy` als Erweiterung von `RunnerEconomyPosture`/`RunnerCreditBasePlan` um und kalibriert Reserve-Malus plus Overrides.
+- `act-2026-06-07-ai-runner-pressure-budget-variation`: bleibt separater Scope für günstige Probe-/Pressure-Aktionen und deterministische Near-Tie-Variation trotz aktiver Reserve.

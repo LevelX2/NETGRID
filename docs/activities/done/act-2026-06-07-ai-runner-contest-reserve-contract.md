@@ -1,19 +1,21 @@
 ---
 activityId: act-2026-06-07-ai-runner-contest-reserve-contract
-status: inbox
+status: done
 kind: concept
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: false
 createdAt: 2026-06-07
-startedAt:
-completedAt:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - docs/architecture/ai/runner-hand-development-creditbase-contract-2026-06-07.md
+checks:
+  - git diff --check
 ---
 
 # Runner-Contest-Reserve und Credit-Floor fachlich kalibrieren
@@ -79,14 +81,14 @@ Die Runner-KI soll fachlich präziser unterscheiden, ob sie eine Aktion gerade b
 
 ## Akzeptanzkriterien
 
-- [ ] Der Vertragsnachtrag beschreibt, wie `contestReserve`, `breakerUseReserve`, `developmentReserve`, `emergencyReserve` und `desiredCreditReserve` berechnet oder eingegrenzt werden.
-- [ ] Die Regeln unterscheiden ausdrücklich zwischen "Run/Aktion bezahlbar" und "nach der Aktion noch handlungsfähig".
-- [ ] Der Vertrag stellt klar, dass Reservebrüche nicht hart blockiert werden, sondern stärkere Gründe benötigen.
-- [ ] Das Folgepaket für `RunnerPressureBudget`/ProbeAllowance ist referenziert oder als bewusst separater Scope bestätigt.
-- [ ] Remote-Score-Threat, Corp-Siegnahe, installierte Breaker und nützliche eigene Handkarten sind als Reserve-Treiber beschrieben.
-- [ ] Ausnahmen für bekannte Agenda, akuten Contest, Survival und blocker-lösende Aktionen sind enthalten.
-- [ ] Hidden-Info-, LegalAction-, Engine-, Replay- und StateHash-Grenzen sind als harte Grenzen enthalten.
-- [ ] Folgepakete für Umsetzung und Regression bleiben passend oder werden konkret angepasst.
+- [x] Der Vertragsnachtrag beschreibt, wie `contestReserve`, `breakerUseReserve`, `developmentReserve`, `emergencyReserve` und `desiredCreditReserve` berechnet oder eingegrenzt werden.
+- [x] Die Regeln unterscheiden ausdrücklich zwischen "Run/Aktion bezahlbar" und "nach der Aktion noch handlungsfähig".
+- [x] Der Vertrag stellt klar, dass Reservebrüche nicht hart blockiert werden, sondern stärkere Gründe benötigen.
+- [x] Das Folgepaket für `RunnerPressureBudget`/ProbeAllowance ist referenziert oder als bewusst separater Scope bestätigt.
+- [x] Remote-Score-Threat, Corp-Siegnahe, installierte Breaker und nützliche eigene Handkarten sind als Reserve-Treiber beschrieben.
+- [x] Ausnahmen für bekannte Agenda, akuten Contest, Survival und blocker-lösende Aktionen sind enthalten.
+- [x] Hidden-Info-, LegalAction-, Engine-, Replay- und StateHash-Grenzen sind als harte Grenzen enthalten.
+- [x] Folgepakete für Umsetzung und Regression bleiben passend oder werden konkret angepasst.
 
 ## Umsetzungshinweise
 
@@ -96,4 +98,4 @@ Die Runner-KI soll fachlich präziser unterscheiden, ob sie eine Aktion gerade b
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. Der bestehende Creditbase-Vertrag enthält jetzt den Abschnitt `RunnerCreditReservePolicy` mit Phasen, Mindestfeldern, Startwerten, Reserve-Treibern, Malus-/Override-Regeln und der expliziten Abgrenzung zu `RunnerPressureBudget`/ProbeAllowance. Die spätere Umsetzung soll die Policy als Erweiterung von `RunnerEconomyPosture`/`RunnerCreditBasePlan` behandeln, ohne neue Strategy-ID oder parallele Economy-Welt.
