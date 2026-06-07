@@ -4515,6 +4515,141 @@ describe("MVP 0.3 Runner AI", () => {
     expect(baselineDecision.reasonCode).toBe("runner.encounter.continue");
   });
 
+  it("does not pump Dwarf through Rock when the known remote trash becomes unaffordable", () => {
+    const state = dwarfRemoteEncounterState("ai-dwarf-rock-bbs-unaffordable", {
+      runnerCredits: 6,
+      iceDefinitionId: "onr_v1_265_rock-is-strong",
+      rootDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      scoredSuperiorNetBarriers: true,
+    });
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const pump = input.legalActions.find(
+      (action) =>
+        action.type === "pump_breaker" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_021_dwarf",
+    );
+    const continueRun = input.legalActions.find(
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.encounterContinue === true,
+    );
+    const decision = chooseRunnerAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+
+    expect(pump).toBeDefined();
+    expect(continueRun).toBeDefined();
+    if (!pump || !continueRun)
+      throw new Error("Missing Dwarf/Rock encounter actions");
+    expect(input.playerView.run?.encounteredIce?.strength).toBe(6);
+    expect(continueRun?.payload?.encounterWillEndRun).toBe(true);
+    expect(selected?.type).toBe("continue_run");
+    expect([
+      "runner.encounter.continue",
+      "runner.plan.safe_probe_run",
+    ]).toContain(decision.reasonCode);
+    const encounterDecision = chooseRunnerBaselineAction({
+      ...input,
+      legalActions: [pump, continueRun],
+    });
+    const encounterSelected = input.legalActions.find(
+      (action) => action.actionId === encounterDecision.actionId,
+    );
+    expect(encounterSelected?.type).toBe("continue_run");
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const semanticDecision = chooseRunnerAction({
+      ...input,
+      legalActions: [pump, continueRun],
+    });
+    const semanticSelected = input.legalActions.find(
+      (action) => action.actionId === semanticDecision.actionId,
+    );
+    expect(semanticSelected?.type).toBe("continue_run");
+    expect(JSON.stringify(semanticDecision.decisionDebug)).toContain(
+      "encounter_remote_payoff:trash_unaffordable",
+    );
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "legacy";
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|corp\.hq|corp\.rd/i,
+    );
+  });
+
+  it("still pumps Dwarf through Rock when enough credits remain to trash the known remote", () => {
+    const state = dwarfRemoteEncounterState("ai-dwarf-rock-bbs-affordable", {
+      runnerCredits: 8,
+      iceDefinitionId: "onr_v1_265_rock-is-strong",
+      rootDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      scoredSuperiorNetBarriers: true,
+    });
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const decision = chooseRunnerAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+
+    expect(selected?.type).toBe("pump_breaker");
+    expect(sourceDefinitionFromInput(input, selected!)).toBe(
+      "onr_v1_021_dwarf",
+    );
+    expect(decision.reasonCode).toBe("runner.encounter.pump_breaker");
+  });
+
+  it("still pumps Dwarf through Rock when a known remote agenda is the payoff", () => {
+    const state = dwarfRemoteEncounterState("ai-dwarf-rock-known-agenda", {
+      runnerCredits: 6,
+      iceDefinitionId: "onr_v1_265_rock-is-strong",
+      rootDefinitionId: "onr_v1_220_tycho-extension",
+      scoredSuperiorNetBarriers: true,
+    });
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const decision = chooseRunnerAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+
+    expect(selected?.type).toBe("pump_breaker");
+    expect(sourceDefinitionFromInput(input, selected!)).toBe(
+      "onr_v1_021_dwarf",
+    );
+    expect(decision.reasonCode).toBe("runner.encounter.pump_breaker");
+  });
+
+  it("still breaks a harmful Wall subroutine even when remote trash would be unaffordable", () => {
+    const state = dwarfRemoteEncounterState("ai-dwarf-razor-harmful-break", {
+      runnerCredits: 4,
+      iceDefinitionId: "onr_v1_262_razor-wire",
+      rootDefinitionId: "onr_v1_309_bbs-whispering-campaign",
+      scoredSuperiorNetBarriers: false,
+    });
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.1-normal",
+    });
+    const decision = chooseRunnerAction(input);
+    const selected = input.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+
+    expect(selected?.type).toBe("break_subroutine");
+    expect(sourceDefinitionFromInput(input, selected!)).toBe(
+      "onr_v1_021_dwarf",
+    );
+    expect(decision.reasonCode).toMatch(/^runner\.encounter\.break/);
+    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
+      "encounter_remote_payoff_blocked:true",
+    );
+  });
+
   it("continues into R&D access after passing the last ICE instead of jacking out", () => {
     let state = krashFilterEncounterState("ai-krash-filter-access-after-pass");
     state = apply(
@@ -24363,6 +24498,74 @@ function krashDataWallBbsRemoteInput(
     difficulty: "normal",
     profileId: "runner-ai-v1.4.1-normal",
   });
+}
+
+function dwarfRemoteEncounterState(
+  seed: string,
+  options: {
+    runnerCredits: number;
+    iceDefinitionId: string;
+    rootDefinitionId: string;
+    scoredSuperiorNetBarriers: boolean;
+  },
+): GameState {
+  let state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      runnerDeck: ONR_V1_2_3_RUNNER_DECK,
+      corpDeck: {
+        id: "ai_dwarf_remote_encounter_corp",
+        name: "AI Dwarf Remote Encounter Corp",
+        side: "corp",
+        identity: "corp_identity_001",
+        cards: [
+          { id: "onr_v1_219_superior-net-barriers", quantity: 1 },
+          { id: "onr_v1_220_tycho-extension", quantity: 2 },
+          { id: "onr_v1_203_hostile-takeover", quantity: 3 },
+          { id: "onr_v1_262_razor-wire", quantity: 1 },
+          { id: "onr_v1_265_rock-is-strong", quantity: 1 },
+          { id: "onr_v1_309_bbs-whispering-campaign", quantity: 1 },
+          { id: "simple_economy_operation", quantity: 6 },
+        ],
+      },
+      agendaPointsToWin: 7,
+    }),
+  );
+  state.runner.credits = 20;
+  state.corp.credits = 20;
+  moveRunnerProgramToRig(state, "onr_v1_021_dwarf");
+  if (options.scoredSuperiorNetBarriers)
+    putCorpCardInScoreArea(state, "onr_v1_219_superior-net-barriers");
+  ensureRemoteServer(state, "remote_1");
+  putCorpIceOnServer(state, "remote_1", options.iceDefinitionId);
+  const rootId = putCorpRootInServer(
+    state,
+    "remote_1",
+    options.rootDefinitionId,
+    0,
+  );
+  const rootType = DEMO_CARDS_BY_ID[options.rootDefinitionId]?.type;
+  state.cardInstances[rootId] = {
+    ...state.cardInstances[rootId]!,
+    faceup: true,
+    rezzed: rootType !== "agenda",
+  };
+  state.runner.credits = options.runnerCredits;
+
+  state = apply(
+    state,
+    "runner",
+    (action) =>
+      action.type === "start_run" && action.payload?.serverId === "remote_1",
+  );
+  state = apply(
+    state,
+    "corp",
+    (action) =>
+      action.type === "rez_ice" &&
+      sourceDefinition(state, action) === options.iceDefinitionId,
+  );
+  return state;
 }
 
 function knownRemoteDataWallBbsInput(

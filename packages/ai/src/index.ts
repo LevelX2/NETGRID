@@ -4493,9 +4493,16 @@ function semanticRuntimeRunnerEncounterActionExclusion(
   if (action.type === "pump_breaker") {
     const assessment = pumpViabilityAssessment(input, action);
     if (assessment.canLeadToBreak) return undefined;
+    const remotePayoffBlocked = assessment.evidence.includes(
+      "encounter_remote_payoff_blocked:true",
+    );
     return {
-      key: "pump_cannot_lead_to_useful_break",
-      label: "Pumpen ohne Zugriffspfad",
+      key: remotePayoffBlocked
+        ? "encounter_remote_payoff_unaffordable"
+        : "pump_cannot_lead_to_useful_break",
+      label: remotePayoffBlocked
+        ? "Encounter-Kosten machen Remote-Ziel unbezahlbar"
+        : "Pumpen ohne Zugriffspfad",
       reason: sortedUnique([
         "encounter_action:pump_breaker",
         ...assessment.evidence,
@@ -4505,9 +4512,16 @@ function semanticRuntimeRunnerEncounterActionExclusion(
   if (action.type === "break_subroutine") {
     const assessment = breakAccessPathAssessment(input, action);
     if (assessment.canPreserveAccessPath) return undefined;
+    const remotePayoffBlocked = assessment.evidence.includes(
+      "encounter_remote_payoff_blocked:true",
+    );
     return {
-      key: "break_cannot_preserve_access_path",
-      label: "Break ohne Zugriffspfad",
+      key: remotePayoffBlocked
+        ? "encounter_remote_payoff_unaffordable"
+        : "break_cannot_preserve_access_path",
+      label: remotePayoffBlocked
+        ? "Break macht Remote-Ziel unbezahlbar"
+        : "Break ohne Zugriffspfad",
       reason: sortedUnique([
         "encounter_action:break_subroutine",
         ...assessment.evidence,
@@ -4516,6 +4530,10 @@ function semanticRuntimeRunnerEncounterActionExclusion(
   }
   return undefined;
 }
+
+type VisibleEncounterSubroutine = NonNullable<
+  NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"][number]
+>;
 
 function breakAccessPathAssessment(
   input: AiDecisionInput,
@@ -4571,11 +4589,24 @@ function breakAccessPathAssessment(
     };
 
   const futureIce = server.ice.slice(0, Math.max(0, run.position.iceIndex));
-  if (futureIce.length <= 0)
+  if (futureIce.length <= 0) {
+    const remotePayoff = encounterRemotePayoffAfterBreakAssessment(
+      input,
+      server,
+      targetSubroutines,
+      creditsAfterBreak,
+      remainingCurrentEndRunAfterBreak,
+    );
+    if (remotePayoff.blocksBreak)
+      return {
+        canPreserveAccessPath: false,
+        evidence: remotePayoff.evidence,
+      };
     return {
       canPreserveAccessPath: true,
       evidence: [`break_credits_after:${creditsAfterBreak}`],
     };
+  }
 
   const pathAssessment = assessKnownRezzedIcePath(
     futureIce,
@@ -4586,7 +4617,22 @@ function breakAccessPathAssessment(
   if (
     pathAssessment.assessedKnownIceCount <= 0 ||
     pathAssessment.canReachAccess
-  )
+  ) {
+    const remotePayoff = encounterRemotePayoffAfterBreakAssessment(
+      input,
+      server,
+      targetSubroutines,
+      pathAssessment.creditsAfterPath,
+      remainingCurrentEndRunAfterBreak,
+    );
+    if (remotePayoff.blocksBreak)
+      return {
+        canPreserveAccessPath: false,
+        evidence: [
+          ...remotePayoff.evidence,
+          semanticRuntimeKnownIcePathReason(pathAssessment, server.id),
+        ],
+      };
     return {
       canPreserveAccessPath: true,
       evidence: [
@@ -4604,6 +4650,89 @@ function breakAccessPathAssessment(
   };
 }
 
+function encounterRemotePayoffAfterBreakAssessment(
+  input: AiDecisionInput,
+  server: AiDecisionInput["playerView"]["servers"][number],
+  targetSubroutines: VisibleEncounterSubroutine[],
+  creditsAfterAccessPath: number,
+  remainingCurrentEndRunAfterBreak: number,
+): { blocksBreak: boolean; evidence: string[] } {
+  if (!isRemoteServerTarget(server.id))
+    return { blocksBreak: false, evidence: [] };
+  if (targetSubroutines.length <= 0)
+    return { blocksBreak: false, evidence: [] };
+  if (remainingCurrentEndRunAfterBreak > 0)
+    return { blocksBreak: false, evidence: [] };
+  if (targetSubroutines.some(isImmediateSafetyThreatSubroutine))
+    return { blocksBreak: false, evidence: [] };
+  if (!targetSubroutines.every(isEndRunSubroutine))
+    return { blocksBreak: false, evidence: [] };
+
+  const evidenceBase = [
+    "encounter_remote_payoff_check:true",
+    "encounter_remote_payoff_blocked:true",
+    `encounter_remote_target:${server.id}`,
+    `encounter_credits_after_access_path:${creditsAfterAccessPath}`,
+  ];
+  if (server.root.length === 0)
+    return {
+      blocksBreak: true,
+      evidence: [...evidenceBase, "encounter_remote_payoff:no_root"],
+    };
+
+  const unknownRootCount = server.root.filter(
+    (card) => !card.known || typeof card.definitionId !== "string",
+  ).length;
+  if (unknownRootCount > 0) return { blocksBreak: false, evidence: [] };
+
+  const hasKnownAgenda = server.root.some((card) => {
+    const definitionId = card.definitionId;
+    return (
+      card.known &&
+      (card.type === "agenda" ||
+        (definitionId !== undefined &&
+          definitionTypeForMetrics(definitionId) === "agenda"))
+    );
+  });
+  if (hasKnownAgenda) return { blocksBreak: false, evidence: [] };
+
+  const hasAdvancedKnownRoot = server.root.some(
+    (card) => card.known && (card.advancementCounters ?? 0) > 0,
+  );
+  if (hasAdvancedKnownRoot) return { blocksBreak: false, evidence: [] };
+
+  const trashCosts = server.root
+    .map((card) => {
+      const type = card.definitionId
+        ? definitionTypeForMetrics(card.definitionId)
+        : card.type;
+      const trashCost = remoteRootTrashCostForMetrics(card);
+      return (type === "asset" || type === "upgrade") && trashCost !== undefined
+        ? trashCost
+        : undefined;
+    })
+    .filter((trashCost): trashCost is number => trashCost !== undefined);
+
+  if (trashCosts.length <= 0)
+    return {
+      blocksBreak: true,
+      evidence: [...evidenceBase, "encounter_remote_payoff:known_low_value"],
+    };
+
+  const cheapestTrashCost = Math.min(...trashCosts);
+  if (creditsAfterAccessPath >= cheapestTrashCost)
+    return { blocksBreak: false, evidence: [] };
+
+  return {
+    blocksBreak: true,
+    evidence: [
+      ...evidenceBase,
+      "encounter_remote_payoff:trash_unaffordable",
+      `encounter_remote_root_trash_cost:${cheapestTrashCost}`,
+    ],
+  };
+}
+
 function breakSubroutineIndexesForAction(action: LegalAction): Set<number> {
   const indexes = parseSubroutineIndexes(action.payload?.subroutineIndexes);
   const singleIndex = Number(action.payload?.subroutineIndex);
@@ -4613,9 +4742,7 @@ function breakSubroutineIndexesForAction(action: LegalAction): Set<number> {
 }
 
 function isImmediateSafetyThreatSubroutine(
-  subroutine: NonNullable<
-    NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"][number]
-  >,
+  subroutine: VisibleEncounterSubroutine,
 ): boolean {
   const type = subroutine.type.toLowerCase();
   return (
@@ -4629,11 +4756,7 @@ function isImmediateSafetyThreatSubroutine(
   );
 }
 
-function isEndRunSubroutine(
-  subroutine: NonNullable<
-    NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"][number]
-  >,
-): boolean {
+function isEndRunSubroutine(subroutine: VisibleEncounterSubroutine): boolean {
   return (
     subroutine.type === "end_the_run" ||
     subroutine.type === "end_the_run_unless_runner_pays"
@@ -13989,6 +14112,32 @@ function pumpViabilityAssessment(
 
   const creditsAfterPumpAndBreak =
     remainingCreditsAfterPumps - estimatedBreakCost;
+  const run = input.playerView.run;
+  const server =
+    run?.position?.kind === "ice"
+      ? input.playerView.servers.find(
+          (candidate) => candidate.id === run.position?.serverId,
+        )
+      : undefined;
+  if (server) {
+    const currentQuote = currentEncounteredIceCard(input)?.effectiveRunQuote;
+    const remotePayoff = encounterRemotePayoffAfterBreakAssessment(
+      input,
+      server,
+      currentQuote?.subroutines ?? [],
+      creditsAfterPumpAndBreak,
+      0,
+    );
+    if (remotePayoff.blocksBreak)
+      return {
+        canLeadToBreak: false,
+        evidence: [
+          ...remotePayoff.evidence,
+          `pump_credits_after_break:${creditsAfterPumpAndBreak}`,
+          `pump_required_count:${requiredPumps}`,
+        ],
+      };
+  }
   const reserveTarget = runnerCreditReserveTargetForInput(input);
   if (
     !runEffect.mustBreak &&

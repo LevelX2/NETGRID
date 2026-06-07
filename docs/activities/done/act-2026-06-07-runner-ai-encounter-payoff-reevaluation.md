@@ -1,19 +1,24 @@
 ---
 activityId: act-2026-06-07-runner-ai-encounter-payoff-reevaluation
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
+startedAt: 2026-06-07
+completedAt: 2026-06-07
 branch:
 releaseTarget: runner-ai-encounter-valuation
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - corepack pnpm exec prettier --check packages/ai/src/index.ts packages/ai/src/index.test.ts docs/activities/done/act-2026-06-07-runner-ai-encounter-payoff-reevaluation.md
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts
 relatedActivities:
   - act-2026-05-17-runner-ai-remote-trash-affordability
   - act-2026-05-17-runner-ai-krash-unnecessary-pump-chronicle
@@ -80,4 +85,9 @@ Die Runner-KI soll während einer ICE-Begegnung nach dem Rez eines zuvor verdeck
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt am 2026-06-07.
+
+- `pump_breaker` und `break_subroutine` bewerten jetzt bei reinen End-the-run-Breaks auf Remote-Servern den bekannten Root-Payoff nach den sichtbaren Encounter-Kosten.
+- Wenn ein bekannter Remote-Root nur noch unbezahlbaren Trash oder keinen aktuellen Nutzen bietet, wird der reine ETR-Pump-/Break-Pfad blockiert.
+- Bekannte Agenda-/Advanced-Root-Payoffs und schädliche Subroutinen bleiben ausdrücklich erlaubt.
+- Regressionen decken den gemeldeten `Dwarf`/`Rock Is Strong`/`Superior Net Barriers`/`BBS Whispering Campaign`-Fall, ausreichende Credits, bekannten Agenda-Payoff und einen schädlichen `Razor Wire`-Subroutine-Fall ab.
