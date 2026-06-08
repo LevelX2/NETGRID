@@ -28,8 +28,10 @@ import {
 } from "./runner-tactical-goals";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
+import { createAiHintsByCard } from "./ai-hints";
 
 export const TACTICAL_PLAN_SCHEMA_VERSION = "tactical-plan-v1" as const;
+const AI_HINTS_BY_CARD = createAiHintsByCard();
 
 export type PlanLifecycle =
   | "proposed"
@@ -774,6 +776,9 @@ function planStepCandidatePriority(
     if (!fit?.supportsActiveCapabilityNeed) return 0;
     return coverageAnswerRolePriority(fit.answerRole);
   }
+  if (step.kind === "gain_credits") {
+    return legalActionCreditNetGain(input, action) * 100;
+  }
   return 0;
 }
 
@@ -821,6 +826,12 @@ function candidateMatchesStep(
   }
   if (step.kind === "install_development_card") {
     return developmentCardStepMatchesAction(plan, action);
+  }
+  if (step.kind === "gain_credits") {
+    const creditGain = legalActionCreditGainForPlan(input, action);
+    if (creditGain > 0) {
+      return candidateTargetMatchesPlan(plan, candidate, action);
+    }
   }
   if (step.kind === "install_breaker" && action.type === "install_card") {
     const requiredCoverage = planRequiredBreakerCoverage(plan, step);
@@ -2269,7 +2280,11 @@ function runnerCreditBasePlans(
   runnerGoalEvidence: readonly string[],
 ): TacticalPlan[] {
   const creditBase = context.runnerEconomyPosture?.creditBasePlan;
-  if (!context.input.legalActions.some((action) => action.type === "gain_credit")) {
+  if (
+    !context.input.legalActions.some(
+      (action) => legalActionCreditGainForPlan(context.input, action) > 0,
+    )
+  ) {
     return [];
   }
   const drawOverflow = assessRunnerDrawOverflow(context);
@@ -4128,6 +4143,77 @@ function runnerHasConcreteFundingNeed(
 
 function actionCreditCost(action: LegalAction): number {
   return action.costs.reduce((sum, cost) => sum + (cost.credits ?? 0), 0);
+}
+
+function legalActionCreditNetGain(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number {
+  const gain = legalActionCreditGainForPlan(input, action);
+  if (gain <= 0) return 0;
+  return Math.max(0, gain - actionCreditCost(action));
+}
+
+function legalActionCreditGainForPlan(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number {
+  if (action.side !== input.side) return 0;
+  const knownGain = Math.max(
+    0,
+    legalActionNumberPayload(action, "gainCreditsAmount"),
+    legalActionNumberPayload(action, "gainedCredits"),
+    legalActionNumberPayload(action, "amount"),
+    legalActionCreditGainLabelAmount(legalActionCreditGainLabel(action)),
+    legalActionCreditHintGain(input, action),
+  );
+  if (action.type === "gain_credit") return Math.max(1, knownGain);
+  if (action.type === "play_event") return knownGain;
+  if (
+    action.type !== "activated_card_ability" &&
+    action.type !== "trigger_ability"
+  ) {
+    return 0;
+  }
+  return knownGain;
+}
+
+function legalActionCreditHintGain(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number {
+  const sourceCard = visibleCardForAction(input.playerView, action);
+  if (!sourceCard?.definitionId) return 0;
+  const hint = AI_HINTS_BY_CARD.get(sourceCard.definitionId);
+  const amounts = (hint?.effects ?? [])
+    .filter(
+      (effect) =>
+        (effect.kind === "action_economy" || effect.kind === "economy") &&
+        effect.timing === "action" &&
+        effect.scope === action.side &&
+        effect.resource === "credits",
+    )
+    .map((effect) => effect.amount ?? 0)
+    .filter((amount) => Number.isFinite(amount) && amount > 0);
+  if (amounts.length === 0) return 0;
+  return Math.max(...amounts);
+}
+
+function legalActionCreditGainLabel(action: LegalAction): string {
+  const abilityLabel = action.payload?.cardImplementationAbilityLabel;
+  return typeof abilityLabel === "string" ? abilityLabel : action.label;
+}
+
+function legalActionCreditGainLabelAmount(label: string): number {
+  const germanMatch = /(\d+)\s+Credits?\s+nehmen/i.exec(label);
+  const englishMatch = /(?:gain|take)\s+(\d+)\s+Credits?/i.exec(label);
+  const amount = Number(germanMatch?.[1] ?? englishMatch?.[1] ?? 0);
+  return Number.isFinite(amount) && amount > 0 ? amount : 0;
+}
+
+function legalActionNumberPayload(action: LegalAction, key: string): number {
+  const value = action.payload?.[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : 0;
 }
 
 function visibleSourceServerId(

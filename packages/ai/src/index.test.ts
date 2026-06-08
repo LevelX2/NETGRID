@@ -12776,6 +12776,77 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("maps installed action-economy abilities into the semantic credit plan", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = installedRunnerEconomyInput(
+      "ai-v142-semantic-installed-newsgroup-filter",
+      { newsgroupFilter: true, credits: 5 },
+    );
+    const newsgroupAction = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_045_newsgroup-filter",
+    );
+    const basicCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(newsgroupAction).toBeDefined();
+    expect(basicCredit).toBeDefined();
+    expect(newsgroupAction?.label).toContain("2 Credits nehmen");
+    if (!newsgroupAction || !basicCredit)
+      throw new Error("Missing semantic Newsgroup Filter fixture actions");
+
+    const scopedActions = [newsgroupAction, basicCredit];
+    const decision = chooseRunnerAction(
+      {
+        ...input,
+        legalActions: scopedActions,
+        playerView: {
+          ...input.playerView,
+          legalActions: scopedActions,
+        },
+      },
+      { persistTacticalPlanMemory: false },
+    );
+    const newsgroupAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (entry) => entry.actionId === newsgroupAction.actionId,
+      );
+    const basicAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) => entry.actionId === basicCredit.actionId,
+    );
+    const tacticalDebug =
+      decision.decisionDebug?.detailSections
+        ?.find((section) => section.id === "tactical_plan")
+        ?.items.join("\n") ?? "";
+
+    expect(decision.actionId).toBe(newsgroupAction.actionId);
+    expect(decision.decisionDebug?.planKind).toBe("runner.build_credit_base");
+    expect(decision.evidence).toContain(
+      "tactical_plan_type:runner.build_credit_base",
+    );
+    expect(decision.evidence).toContain("tactical_step:gain_credits");
+    expect(newsgroupAlternative).toEqual(
+      expect.objectContaining({
+        selected: true,
+        whyChosen: expect.arrayContaining(["selected_by_plan_mapping"]),
+      }),
+    );
+    expect(basicAlternative?.whyNot).toEqual(
+      expect.arrayContaining(["lower_plan_fit"]),
+    );
+    expect(tacticalDebug).toContain(
+      `mapped_legal_actions:${newsgroupAction.actionId}`,
+    );
+    expect(tacticalDebug).toContain(basicCredit.actionId);
+    expect(tacticalDebug).toContain("selected_step_kind:gain_credits");
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
   it("separates Broker pool loading from visible pool payout", () => {
     const payoutInput = installedRunnerEconomyInput(
       "ai-v141-installed-broker-take",
