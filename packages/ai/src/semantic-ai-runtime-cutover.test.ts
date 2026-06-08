@@ -983,12 +983,143 @@ describe("Semantic AI runtime cutover", () => {
     });
 
     expect(decision.actionId).toBe("mantis");
+    expect(decision.reasonCode).toBe("runner.semantic.coverage_search");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining([
+        "semantic_scope:coverage_search",
+        "activeRequiredCapability:Wall-Breaker",
+        "coverageAnswerFit:direct_card_search",
+        "coverageAnswerSource:Mantis, Fixer-at-Large",
+        "why_mantis_selected:searches_for_required_breaker_coverage",
+      ]),
+    );
+    expect(decision.evidence).not.toContain("semantic_scope:basic_install");
     expect(decision.decisionDebug?.planKind).toBe(
       "runner.obtain_breaker_coverage",
     );
-    expect(JSON.stringify(decision.decisionDebug)).toContain(
-      "coverageAnswerRole:program_search",
+    const mantisAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) => entry.actionId === "mantis",
     );
+    const planSelectionRow = mantisAlternative?.scoreBreakdown?.find(
+      (entry) => entry.key === "selected_by_plan_mapping",
+    );
+    expect(planSelectionRow?.value ?? 0).toBeGreaterThan(0);
+    expect(mantisAlternative).toEqual(
+      expect.objectContaining({
+        sourceTitle: "Mantis, Fixer-at-Large",
+        scoreBreakdown: expect.arrayContaining([
+          expect.objectContaining({
+            key: "runner_coverage_answer_fit",
+            label: "Coverage-Suchtreffer: Wall-Breaker",
+            reason: expect.stringContaining(
+              "coverageAnswerFit:direct_card_search",
+            ),
+          }),
+        ]),
+      }),
+    );
+    const decisionDebug = JSON.stringify(decision.decisionDebug);
+    expect(decisionDebug).toContain("coverageAnswerRole:program_search");
+    expect(decisionDebug).toContain("activeRequiredCapability:Wall-Breaker");
+    expect(decisionDebug).toContain("coverageAnswerFit:direct_card_search");
+    expect(decisionDebug).toContain(
+      "why_mantis_selected:searches_for_required_breaker_coverage",
+    );
+    expect(tacticalDebugItems(decision).some((item) =>
+      item.includes("id=runner.develop_hand_card:mantis-card") &&
+      item.includes("card_type=event"),
+    )).toBe(true);
+    expect(tacticalDebugItems(decision).some((item) =>
+      item.includes("id=runner.develop_hand_card:mantis-card") &&
+      item.includes("step=install_development_card"),
+    )).toBe(true);
+  });
+
+  it("keeps Bodyweight event plan display data as play-not-install fallback", () => {
+    const input = runnerWallCoverageInput([
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction(
+        "bodyweight",
+        "runner",
+        "play_event",
+        "Bodyweight Synthetic Blood spielen",
+        { credits: 2 },
+        { source: "bodyweight-card" },
+      ),
+      legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
+    ]);
+    input.playerView.own.credits = 13;
+    input.playerView.own.gripOrHq = [
+      visibleCard("bodyweight-card", "runner", "event", {
+        definitionId: "onr_v1_079_bodyweight-synthetic-blood",
+        title: "Bodyweight Synthetic Blood",
+        rulesText: "Draw five cards.",
+      }),
+    ];
+
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe("bodyweight");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining(["semantic_scope:basic_economy_draw"]),
+    );
+    expect(tacticalDebugItems(decision).some((item) =>
+      item.includes("id=runner.develop_hand_card:bodyweight-card") &&
+      item.includes("card_type=event"),
+    )).toBe(true);
+  });
+
+  it("keeps The Short Circuit plan display data as a resource installation", () => {
+    const input = runnerWallCoverageInput([
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction(
+        "install-short-circuit",
+        "runner",
+        "install_card",
+        "The Short Circuit installieren",
+        { credits: 1 },
+        { source: "short-circuit-card" },
+      ),
+      legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
+    ]);
+    input.playerView.own.credits = 13;
+    input.playerView.own.gripOrHq = [
+      visibleCard("short-circuit-card", "runner", "resource", {
+        definitionId: "onr_v1_177_the-short-circuit",
+        title: "The Short Circuit",
+        rulesText:
+          "[A], [1]: Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Reshuffle your stack afterwards.",
+      }),
+    ];
+
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe("install-short-circuit");
+    expect(decision.evidence).toEqual(
+      expect.arrayContaining(["semantic_scope:setup_card_search"]),
+    );
+    expect(tacticalDebugItems(decision).some((item) =>
+      item.includes("id=runner.develop_hand_card:short-circuit-card") &&
+      item.includes("card_type=resource"),
+    )).toBe(true);
   });
 
   it("sets up The Short Circuit as a search engine before basic draw when no direct search is legal", () => {
@@ -1798,6 +1929,12 @@ function legalAction(
   };
   if (options.payload) action.payload = options.payload;
   return action;
+}
+
+function tacticalDebugItems(decision: ReturnType<typeof chooseRunnerAction>): string[] {
+  return decision.decisionDebug?.detailSections?.flatMap((section) =>
+    section.items,
+  ) ?? [];
 }
 
 function rdAccessEvent(

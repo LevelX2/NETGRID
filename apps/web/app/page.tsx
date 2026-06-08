@@ -9887,6 +9887,7 @@ type AiDecisionDebugPlanEntry = {
   target?: string;
   targetLabel?: string;
   targetRole?: string;
+  cardType?: string;
   priority?: number;
   status?: string;
   step?: string;
@@ -10168,6 +10169,7 @@ function aiDecisionDebugParsePlanEntry(item: string): AiDecisionDebugPlanEntry |
   const target = fields.get("target") || undefined;
   const targetLabel = fields.get("target_label") || undefined;
   const targetRole = fields.get("target_role") || undefined;
+  const cardType = fields.get("card_type") || undefined;
   const priority = aiDecisionDebugNumber(fields.get("priority"));
   const status = fields.get("status") || undefined;
   const step = fields.get("step") || undefined;
@@ -10178,6 +10180,7 @@ function aiDecisionDebugParsePlanEntry(item: string): AiDecisionDebugPlanEntry |
     ...(target ? { target } : {}),
     ...(targetLabel ? { targetLabel } : {}),
     ...(targetRole ? { targetRole } : {}),
+    ...(cardType ? { cardType } : {}),
     ...(priority !== undefined ? { priority } : {}),
     ...(status ? { status } : {}),
     ...(step ? { step } : {}),
@@ -10364,13 +10367,14 @@ function aiDecisionDebugPlanStepLabel(value: string, plan?: AiDecisionDebugPlanE
   const handCard = plan?.type === "runner.develop_hand_card"
     ? aiDecisionDebugPlanTargetLabel(plan)
     : "";
+  const developmentVerb = aiDecisionDebugDevelopmentCardVerb(plan);
   const labels: Record<string, string> = {
     advance_score_card: "Score-Karte advancen",
     build_bank_counter: "Credit-Bank aufbauen",
     cash_out_bank: "Credit-Bank auszahlen",
     draw_for_answer: coverage ? `Karten ziehen, um ${coverage} zu finden` : "Karten ziehen, um Antwort zu finden",
     gain_credits: "Credits nehmen",
-    install_development_card: handCard ? `${handCard} installieren` : "Handkarte installieren",
+    install_development_card: handCard ? `${handCard} ${developmentVerb}` : `Handkarte ${developmentVerb}`,
     install_breaker: coverage ? `${coverage} installieren` : "Breaker installieren",
     probe_central: "Zentralserver-Run prüfen",
     rez_outer_ice: "äußeres ICE rezzen",
@@ -10381,6 +10385,13 @@ function aiDecisionDebugPlanStepLabel(value: string, plan?: AiDecisionDebugPlanE
   };
   if (value === "probe_central" && runTarget) return runTarget;
   return labels[value] ?? value;
+}
+
+function aiDecisionDebugDevelopmentCardVerb(plan?: AiDecisionDebugPlanEntry): "installieren" | "spielen" | "nutzen" {
+  const cardType = plan?.cardType?.toLowerCase();
+  if (cardType === "event" || cardType === "prep") return "spielen";
+  if (cardType === "operation") return "spielen";
+  return "installieren";
 }
 
 function aiDecisionDebugPlanMappingLabel(value: string): string {

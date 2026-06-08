@@ -3520,6 +3520,11 @@ function chooseSemanticRuntimeAction(
     initialChoice,
   );
   const choice = wilsonAdjusted.choice;
+  const coverageSelectionDebug = semanticRuntimeCoverageSelectionDebug(
+    input,
+    choice.action,
+    effectivePlanRuntime,
+  );
   const legacyActionType = input.legalActions.find(
     (action) => action.actionId === legacyDecision.actionId,
   )?.type;
@@ -3544,6 +3549,7 @@ function chooseSemanticRuntimeAction(
       : {}),
     evidence: scrubEvidence([
       ...choice.evidence,
+      ...(coverageSelectionDebug?.evidence ?? []),
       `semantic_runtime_default:true`,
       `semantic_runtime_scope:${choice.scopeId}`,
       ...(effectivePlanRuntime.selectedPlan
@@ -4101,6 +4107,11 @@ function semanticRuntimeDecisionDebug(
   const legacyPlanKind = legacyDebug?.planKind;
   const legacyDebugSelectedActionType = legacyDebug?.selectedActionType;
   const memoryDebug = semanticRuntimeMemoryDebug(input);
+  const coverageSelectionDebug = semanticRuntimeCoverageSelectionDebug(
+    input,
+    selected.action,
+    planRuntime,
+  );
   const actionTypesDiffer =
     (legacyActionType !== undefined &&
       legacyActionType !== selected.action.type) ||
@@ -4112,6 +4123,7 @@ function semanticRuntimeDecisionDebug(
   const detailItems = [
     `semantic_runtime_scope:${selected.scopeId}`,
     `semantic_actual_action_type:${selected.action.type}`,
+    ...(coverageSelectionDebug?.evidence ?? []),
     ...(legacyActionType
       ? [`legacy_reference_action_type:${legacyActionType}`]
       : []),
@@ -4126,6 +4138,17 @@ function semanticRuntimeDecisionDebug(
   const selectedPlan = planRuntime.selectedPlan;
   const selectedStep = planRuntime.selectedStep;
   const selectedMapping = planRuntime.selectedMapping;
+  const selectedPlanSelection = semanticRuntimePlanSelectionDisplayContext(
+    input,
+    planRuntime,
+    selected.action.actionId,
+    selected,
+  );
+  const selectedDisplayScore = semanticRuntimeActionDisplayScore(
+    selected,
+    true,
+    selectedPlanSelection,
+  );
   return {
     schemaVersion: AI_DECISION_DEBUG_SCHEMA_VERSION,
     aiLevel: legacyDebug?.aiLevel ?? 2,
@@ -4137,7 +4160,10 @@ function semanticRuntimeDecisionDebug(
     ...(selected.confidence !== undefined
       ? { confidence: selected.confidence }
       : {}),
-    visibleReasons: scrubEvidence(selected.evidence).slice(0, 8),
+    visibleReasons: scrubEvidence([
+      ...(coverageSelectionDebug?.evidence ?? []),
+      ...selected.evidence,
+    ]).slice(0, 8),
     rankedAlternatives: semanticRuntimeRankedAlternatives(
       input,
       rankedChoices,
@@ -4149,11 +4175,24 @@ function semanticRuntimeDecisionDebug(
       selected.action.actionId,
       planRuntime,
     ),
-    scoreBreakdown: semanticRuntimeScoreBreakdown(
-      input,
-      selected.action,
-      selected.scopeId,
-    ),
+    scoreBreakdown: [
+      ...semanticRuntimeScoreBreakdown(
+        input,
+        selected.action,
+        selected.scopeId,
+      ),
+      ...semanticRuntimeCoveragePlanScoreBreakdown(
+        selected,
+        true,
+        selectedPlanSelection,
+      ),
+      ...semanticRuntimePlanSelectionScoreBreakdown(
+        selected,
+        true,
+        selectedDisplayScore,
+        selectedPlanSelection,
+      ),
+    ],
     whyNot:
       legacyActionType && legacyActionType !== selected.action.type
         ? [`legacy_reference_action_type:${legacyActionType}`]
@@ -4324,6 +4363,7 @@ function tacticalPlanRankDebugItem(
     ["target", tacticalPlanTargetDebugValue(plan.target)],
     ["target_label", plan.target?.label],
     ["target_role", tacticalPlanTargetRoleDebugValue(plan)],
+    ["card_type", tacticalPlanEvidenceValue(plan, "card_type:")],
     [
       "handLimitPressure",
       tacticalPlanEvidenceValue(plan, "hand_limit_pressure:"),
@@ -4777,6 +4817,7 @@ function semanticRuntimeActionAlternatives(
     (choice) => choice.action.actionId === selectedActionId,
   );
   const planSelection = semanticRuntimePlanSelectionDisplayContext(
+    input,
     planRuntime,
     selectedActionId,
     selectedChoice,
@@ -4800,12 +4841,21 @@ function semanticRuntimeActionAlternatives(
       displayScore,
       planSelection,
     );
+    const coverageScoreBreakdown = semanticRuntimeCoveragePlanScoreBreakdown(
+      choice,
+      selected,
+      planSelection,
+    );
+    const sourceCard = semanticRuntimeVisibleSourceCard(input, choice.action);
     return {
       rank: index + 1,
       actionId: choice.action.actionId,
       actionType: choice.action.type,
       label: choice.action.label,
       source: String(choice.action.source),
+      ...(sourceCard?.title
+        ? { sourceTitle: sourceCard.title }
+        : {}),
       selected,
       ...(choice.exclusion ? { excluded: true } : { priority: displayScore }),
       scoreBreakdown: [
@@ -4815,6 +4865,7 @@ function semanticRuntimeActionAlternatives(
           choice.scopeId,
           choice.exclusion,
         ),
+        ...coverageScoreBreakdown,
         ...planScoreBreakdown,
       ],
       ...(selected
@@ -4836,12 +4887,171 @@ type SemanticRuntimePlanSelectionDisplayContext = {
   selectedActionId: string;
   selectedRawScore: number;
   selectedByPlanMapping: boolean;
+  planMatchDisplayBoost: number;
+  coverageSelection?: SemanticRuntimeCoverageSelectionDebug;
   selectedPlanId?: string;
   selectedPlanType?: string;
   mappedActionOrder: Map<string, number>;
 };
 
+type SemanticRuntimeCoverageSelectionDebug = {
+  capabilityKind: string;
+  capabilityLabel: string;
+  answerFit: string;
+  sourceTitle: string;
+  evidence: string[];
+};
+
+function semanticRuntimeCoverageSelectionDebug(
+  input: AiDecisionInput,
+  action: LegalAction,
+  planRuntime: TacticalPlanRuntimeResult,
+): SemanticRuntimeCoverageSelectionDebug | undefined {
+  const selectedPlan = planRuntime.selectedPlan;
+  const selectedStep = planRuntime.selectedStep;
+  const selectedMapping = planRuntime.selectedMapping;
+  if (
+    selectedPlan?.type !== "runner.obtain_breaker_coverage" ||
+    !selectedStep ||
+    !selectedMapping ||
+    !selectedMapping.legalActions.some(
+      (candidate) => candidate.actionId === action.actionId,
+    )
+  ) {
+    return undefined;
+  }
+  const capabilityKind = selectedStep.requiredCapabilities.find((candidate) =>
+    candidate.kind.startsWith("breaker_"),
+  )?.kind;
+  if (!capabilityKind) return undefined;
+  const capabilityLabel =
+    semanticRuntimeCoverageCapabilityLabel(capabilityKind);
+  const answerRole =
+    semanticRuntimeCoverageAnswerRoleFromMapping(selectedMapping);
+  const answerFit = semanticRuntimeCoverageAnswerFit(
+    answerRole,
+    selectedStep.kind,
+    action,
+  );
+  const sourceCard = semanticRuntimeVisibleSourceCard(input, action);
+  const sourceTitle = sourceCard?.title ?? action.label;
+  const sourceIdentity = [
+    sourceTitle,
+    sourceCard?.definitionId,
+    String(action.source),
+  ].filter(Boolean).join(" ").toLowerCase();
+  const evidence = [
+    `activeRequiredCapability:${capabilityLabel}`,
+    `activeRequiredCapabilityRaw:${capabilityKind}`,
+    `coverageAnswerFit:${answerFit}`,
+    `coverageAnswerSource:${sourceTitle}`,
+    `coverageAnswerRole:${answerRole ?? "unknown"}`,
+    "why_coverage_answer_selected:searches_for_required_breaker_coverage",
+    ...(sourceIdentity.includes("mantis")
+      ? ["why_mantis_selected:searches_for_required_breaker_coverage"]
+      : []),
+  ];
+  return {
+    capabilityKind,
+    capabilityLabel,
+    answerFit,
+    sourceTitle,
+    evidence,
+  };
+}
+
+function semanticRuntimeCoverageAnswerRoleFromMapping(
+  mapping: PlanStepMappingResult,
+): string | undefined {
+  const joined = mapping.rationale.join("|");
+  const roles = [
+    ...[...joined.matchAll(/coverageAnswerRole:([a-z_]+)/g)].map(
+      (match) => match[1],
+    ),
+    ...[...joined.matchAll(/coverage_answer_role:([a-z_]+)/g)].map(
+      (match) => match[1],
+    ),
+  ].filter((role): role is string => Boolean(role));
+  const priority = [
+    "direct_breaker_install",
+    "program_search",
+    "recovery_answer",
+    "search_engine_setup",
+    "draw_for_answer",
+    "basic_draw_fallback",
+    "not_coverage_answer",
+  ];
+  return priority.find((role) => roles.includes(role)) ?? roles[0];
+}
+
+function semanticRuntimeCoverageAnswerFit(
+  answerRole: string | undefined,
+  stepKind: string,
+  action: LegalAction,
+): string {
+  if (answerRole === "program_search") return "direct_card_search";
+  if (answerRole === "search_engine_setup") return "search_engine_setup";
+  if (answerRole === "direct_breaker_install") return "direct_breaker_install";
+  if (answerRole === "draw_for_answer") return "draw_for_answer";
+  if (answerRole === "basic_draw_fallback") return "basic_draw_fallback";
+  if (answerRole === "recovery_answer") return "recovery_answer";
+  if (stepKind === "search_for_answer" && action.type !== "install_card") {
+    return "direct_card_search";
+  }
+  if (stepKind === "setup_search_engine") return "search_engine_setup";
+  if (stepKind === "draw_for_answer") return "draw_for_answer";
+  return "coverage_answer";
+}
+
+function semanticRuntimeCoverageCapabilityLabel(kind: string): string {
+  switch (kind) {
+    case "breaker_wall":
+    case "breaker_coverage":
+      return "Wall-Breaker";
+    case "breaker_sentry":
+      return "Sentry-Breaker";
+    case "breaker_code_gate":
+      return "Code-Gate-Breaker";
+    case "breaker_ap":
+      return "AP-Breaker";
+    case "breaker_trace":
+      return "Trace-Breaker";
+    case "breaker_watchdog":
+      return "Watchdog-Breaker";
+    case "breaker_black_ice":
+      return "Black-Ice-Breaker";
+    case "breaker_universal":
+      return "Universal-Breaker";
+    default:
+      return kind;
+  }
+}
+
+function semanticRuntimeCoveragePlanScoreBreakdown(
+  choice: SemanticRuntimeChoice,
+  selected: boolean,
+  context: SemanticRuntimePlanSelectionDisplayContext,
+): AiDecisionScoreComponent[] {
+  const coverageSelection = context.coverageSelection;
+  if (
+    !selected ||
+    !coverageSelection ||
+    choice.action.actionId !== context.selectedActionId
+  ) {
+    return [];
+  }
+  return [
+    {
+      key: "runner_coverage_answer_fit",
+      label: `Coverage-Suchtreffer: ${coverageSelection.capabilityLabel}`,
+      value: 0,
+      reason: coverageSelection.evidence.join("|"),
+    },
+  ];
+}
+
 function semanticRuntimePlanSelectionDisplayContext(
+  input: AiDecisionInput,
   planRuntime: TacticalPlanRuntimeResult,
   selectedActionId: string,
   selectedChoice: SemanticRuntimeChoice | undefined,
@@ -4850,6 +5060,9 @@ function semanticRuntimePlanSelectionDisplayContext(
   const mappedActionOrder = new Map(
     mappedActions.map((action, index) => [action.actionId, index]),
   );
+  const coverageSelection = selectedChoice
+    ? semanticRuntimeCoverageSelectionDebug(input, selectedChoice.action, planRuntime)
+    : undefined;
   const selectedByPlanMapping =
     mappedActionOrder.has(selectedActionId) &&
     selectedChoice?.evidence.some((entry) =>
@@ -4860,6 +5073,8 @@ function semanticRuntimePlanSelectionDisplayContext(
     selectedActionId,
     selectedRawScore: selectedChoice?.score ?? 0,
     selectedByPlanMapping,
+    planMatchDisplayBoost: selectedByPlanMapping ? 250 : 0,
+    ...(coverageSelection ? { coverageSelection } : {}),
     ...(planRuntime.selectedPlan?.planId
       ? { selectedPlanId: planRuntime.selectedPlan.planId }
       : {}),
@@ -4877,20 +5092,22 @@ function semanticRuntimeActionDisplayScore(
 ): number {
   if (choice.exclusion) return choice.score;
   if (!context.selectedByPlanMapping) return choice.score;
-  if (selected) return choice.score;
+  const selectedFinalScore = context.selectedRawScore +
+    context.planMatchDisplayBoost;
+  if (selected) return selectedFinalScore;
   const selectedOrder = context.mappedActionOrder.get(context.selectedActionId);
   const choiceOrder = context.mappedActionOrder.get(choice.action.actionId);
   if (choiceOrder !== undefined && selectedOrder !== undefined) {
     if (choiceOrder > selectedOrder) {
       return Math.min(
         choice.score,
-        context.selectedRawScore - ((choiceOrder - selectedOrder) * 25),
+        selectedFinalScore - ((choiceOrder - selectedOrder) * 25),
       );
     }
     return choice.score;
   }
-  if (choice.score > context.selectedRawScore) {
-    return context.selectedRawScore - 50;
+  if (choice.score > selectedFinalScore) {
+    return selectedFinalScore - 50;
   }
   return choice.score;
 }
@@ -4906,6 +5123,9 @@ function semanticRuntimePlanSelectionScoreBreakdown(
     `rawSemanticScore:${choice.score}`,
     `finalSelectionScore:${displayScore}`,
     context.selectedPlanType ? `selectedPlan:${context.selectedPlanType}` : "",
+    context.planMatchDisplayBoost
+      ? `planMatchDisplayBoost:${context.planMatchDisplayBoost}`
+      : "",
     context.mappedActionOrder.has(choice.action.actionId)
       ? "selected_by_plan_mapping_candidate:true"
       : "plan_mismatch:true",
@@ -4928,7 +5148,7 @@ function semanticRuntimeActionWhyChosen(
     return [
       "selected_by_plan_mapping",
       `rawSemanticScore:${choice.score}`,
-      `finalSelectionScore:${choice.score}`,
+      `finalSelectionScore:${choice.score + context.planMatchDisplayBoost}`,
       ...(context.selectedPlanType
         ? [`selectedPlan:${context.selectedPlanType}`]
         : []),
@@ -6678,6 +6898,11 @@ function semanticRuntimeScopeForAction(
     action.type === "trigger_ability" ||
     action.type === "activated_card_ability"
   ) {
+    const runnerCardScope = semanticRuntimeRunnerCardActionDisplayScope(
+      input,
+      action,
+    );
+    if (runnerCardScope) return runnerCardScope;
     return "basic_install";
   }
   if (action.type === "gain_credit" || action.type === "draw_card") {
@@ -6698,6 +6923,75 @@ function semanticRuntimeScopeForAction(
   }
   if (action.type === "end_turn") return "end_turn";
   return `${input.side}_legal_action`;
+}
+
+function semanticRuntimeRunnerCardActionDisplayScope(
+  input: AiDecisionInput,
+  action: LegalAction,
+): string | undefined {
+  if (input.side !== "runner" || action.side !== "runner") return undefined;
+  if (
+    action.type !== "install_card" &&
+    action.type !== "play_event" &&
+    action.type !== "trigger_ability" &&
+    action.type !== "activated_card_ability"
+  ) {
+    return undefined;
+  }
+  const sourceRole = semanticRuntimeRunnerSourceCardAnswerRole(input, action);
+  if (sourceRole === "search") {
+    return action.type === "install_card"
+      ? "setup_card_search"
+      : "coverage_search";
+  }
+  if (sourceRole === "draw" && action.type !== "install_card") {
+    return "basic_economy_draw";
+  }
+  return undefined;
+}
+
+function semanticRuntimeRunnerSourceCardAnswerRole(
+  input: AiDecisionInput,
+  action: LegalAction,
+): "search" | "draw" | undefined {
+  const sourceCard = semanticRuntimeVisibleSourceCard(input, action);
+  const sourceDefinitionId = sourceCard?.definitionId ||
+    sourceDefinitionIdForAction(input, action);
+  const roles = rolesForCardId(sourceDefinitionId);
+  const definition = sourceDefinitionId
+    ? RUNTIME_CARDS[sourceDefinitionId] ?? DEMO_CARDS_BY_ID[sourceDefinitionId]
+    : undefined;
+  const definitionDisplay = definition as
+    | {
+        title?: string;
+        type?: string;
+        subtypes?: string[];
+        rulesText?: string;
+        mechanics?: string[];
+      }
+    | undefined;
+  const text = [
+    sourceCard?.title,
+    sourceCard?.type,
+    ...(sourceCard?.subtypes ?? []),
+    sourceCard?.rulesText,
+    definitionDisplay?.title,
+    definitionDisplay?.type,
+    ...(definitionDisplay?.subtypes ?? []),
+    definitionDisplay?.rulesText,
+    ...(definitionDisplay?.mechanics ?? []),
+    ...roles,
+    action.label,
+  ].filter(Boolean).join(" ").toLowerCase();
+  if (
+    /runner\.search\.breaker|program_search|search_stack|stack_search|search|tutor/.test(
+      text,
+    )
+  ) {
+    return "search";
+  }
+  if (/draw|draw_card/.test(text)) return "draw";
+  return undefined;
 }
 
 function semanticRuntimeBaseScore(
@@ -14842,6 +15136,50 @@ function findVisibleCard(input: AiDecisionInput, instanceId: string) {
   return zones
     .flat()
     .find((card) => card.instanceId === instanceId && card.known);
+}
+
+function semanticRuntimeVisibleSourceCard(
+  input: AiDecisionInput,
+  action: LegalAction,
+): VisibleCard | undefined {
+  if (action.source !== "basic_action" && action.source !== "game_rule") {
+    const byInstance = findVisibleCard(input, action.source);
+    if (byInstance) return byInstance;
+  }
+  const payload = action.payload ?? {};
+  const definitionId =
+    typeof payload.cardDefinitionId === "string"
+      ? payload.cardDefinitionId
+      : typeof payload.sourceDefinitionId === "string"
+        ? payload.sourceDefinitionId
+        : typeof payload.sourceCardDefinitionId === "string"
+          ? payload.sourceCardDefinitionId
+          : action.source.startsWith("onr_") ||
+              action.source.startsWith("simple_")
+            ? action.source
+            : undefined;
+  const allVisibleCards = [
+    ...input.playerView.own.gripOrHq,
+    ...input.playerView.own.heapOrArchives,
+    ...input.playerView.own.scoreArea,
+    ...(input.playerView.own.rig ?? []),
+    ...input.playerView.servers.flatMap((server) => [
+      ...server.ice,
+      ...server.root,
+    ]),
+  ];
+  if (definitionId) {
+    const byDefinition = allVisibleCards.find(
+      (card) => card.known && card.definitionId === definitionId,
+    );
+    if (byDefinition) return byDefinition;
+  }
+  return allVisibleCards.find(
+    (card) =>
+      card.known &&
+      card.title !== undefined &&
+      action.label.toLowerCase().includes(card.title.toLowerCase()),
+  );
 }
 
 function findVisibleCorpServerCard(

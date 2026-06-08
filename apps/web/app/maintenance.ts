@@ -374,6 +374,7 @@ export function aiTracePlanLabel(value: string): string {
     basic_install: "Installieren / Aufbau",
     board_safety: "Board-Sicherheit",
     choice_resolution: "Auswahl auflösen",
+    coverage_search: "Coverage-Suche",
     encounter_survival: "ICE-Begegnung überstehen",
     end_turn: "Zug beenden",
     mandatory_draw: "Pflichtkarte ziehen",
@@ -392,6 +393,7 @@ export function aiTracePlanLabel(value: string): string {
     simple_rez: "ICE rezzen",
     simple_run_choice: "Run fortsetzen",
     simple_score_advance: "Agenda punkten/advancen",
+    setup_card_search: "Suchkarte vorbereiten",
     tag_removal: "Tags entfernen"
   };
   return labels[value] ?? value;
