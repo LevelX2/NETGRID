@@ -82,6 +82,7 @@ import {
   CARD_ROLES_BY_CARD,
   RUNTIME_CARDS,
   createAiHintsByCard,
+  type AiCardHint,
 } from "./ai-hints";
 import {
   assessKnownRezzedIcePath,
@@ -7071,6 +7072,77 @@ function semanticRuntimeRunnerScore(
   );
 }
 
+const LOAN_FROM_CHIBA_CARD_ID = "onr_v1_168_loan-from-chiba";
+
+type RunnerLoanGamePhase = "opening" | "midgame" | "late";
+
+type RunnerLoanLiabilitySeverity = "low" | "medium" | "high" | "critical";
+
+type RunnerLoanUseCase =
+  | "emergency_funding"
+  | "remote_contest_funding"
+  | "known_agenda_funding"
+  | "closeout_funding"
+  | "fund_critical_breaker_install"
+  | "generic_setup"
+  | "bad_use";
+
+type RunnerLoanDebtRepaymentRisk = "low" | "medium" | "high" | "critical";
+
+type RunnerLoanRunFundingContext = {
+  remoteScoreThreat: RunnerLoanAssessmentRemoteThreat;
+  remoteContestFunding: boolean;
+  knownAgendaPayoff: boolean;
+  knownAgendaFunding: boolean;
+  closeoutFunding: boolean;
+  bestTargetId?: string;
+  bestTargetPayoff?: RunnerRunTargetEvaluation["accessPayoff"];
+  bestTargetRecommendation?: RunnerRunTargetEvaluation["recommendation"];
+  bestTargetPathCost: number;
+  bestTargetCreditsAfterRun: number;
+  evidence: string[];
+};
+
+type RunnerLoanAssessmentRemoteThreat =
+  | "none"
+  | "possible"
+  | "visible"
+  | "urgent";
+
+type RunnerLoanProjectedSpend = {
+  plannedSpendAfterLoan: number;
+  directPlanSpendAfterLoan: number;
+  genericSetupSpendAfterLoan: number;
+  genericSetupSpendCount: number;
+  criticalBreakerSpendAfterLoan: number;
+  evidence: string[];
+};
+
+type RunnerLoanLiabilityAssessment = {
+  loanLiabilityAssessment: true;
+  loanInstallAction: boolean;
+  loanAlreadyInstalled: boolean;
+  currentCredits: number;
+  installCreditGain: number;
+  creditsAfterLoan: number;
+  plannedSpendAfterLoan: number;
+  creditsAfterPlannedSpend: number;
+  desiredCreditReserve: number;
+  contestReserve: number;
+  currentGamePhase: RunnerLoanGamePhase;
+  remoteScoreThreat: RunnerLoanAssessmentRemoteThreat;
+  knownAgendaPayoff: boolean;
+  activeFundingNeed: boolean;
+  debtRepaymentRisk: RunnerLoanDebtRepaymentRisk;
+  leavePlayPayCost: number;
+  startTurnCreditLoss: number;
+  resourceTrashRisk: boolean;
+  liabilitySeverity: RunnerLoanLiabilitySeverity;
+  loanUseCase: RunnerLoanUseCase;
+  scoreValue: number;
+  evidence: string[];
+};
+
 function semanticRuntimeRunnerScoreComponents(
   input: AiDecisionInput,
   action: LegalAction,
@@ -7078,6 +7150,11 @@ function semanticRuntimeRunnerScoreComponents(
 ): AiDecisionScoreComponent[] {
   const components: AiDecisionScoreComponent[] = [];
   const credits = input.playerView.own.credits;
+  const loanLiabilityAssessment = runnerLoanLiabilityAssessment(input, action);
+  const loanLiabilityComponent = runnerLoanLiabilityScoreComponent(
+    loanLiabilityAssessment,
+  );
+  if (loanLiabilityComponent) components.push(loanLiabilityComponent);
   if (action.type === "remove_tag" && input.playerView.own.tags > 0) {
     components.push({
       key: "runner_tags_present",
@@ -7144,7 +7221,10 @@ function semanticRuntimeRunnerScoreComponents(
         reason: "breaker_role",
       });
     }
-    if (roles.some((role) => isRunnerEconomyRole(role))) {
+    if (
+      roles.some((role) => isRunnerEconomyRole(role)) &&
+      !loanLiabilityAssessment?.loanInstallAction
+    ) {
       components.push({
         key: "runner_install_economy",
         label: "Economy-Aufbau",
@@ -7271,6 +7351,871 @@ function semanticRuntimeRunnerScoreComponents(
     });
   }
   return components;
+}
+
+function runnerLoanLiabilityScoreComponent(
+  assessment: RunnerLoanLiabilityAssessment | undefined,
+): AiDecisionScoreComponent | undefined {
+  if (!assessment || assessment.scoreValue === 0) return undefined;
+  return {
+    key: assessment.loanInstallAction
+      ? "runner_loan_liability_assessment"
+      : "runner_installed_loan_liability_reserve",
+    label: assessment.loanInstallAction
+      ? "Loan-Liability"
+      : "Loan-Rueckzahlungsreserve",
+    value: assessment.scoreValue,
+    reason: sortedUnique(assessment.evidence).join("|"),
+  };
+}
+
+function runnerLoanLiabilityAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+): RunnerLoanLiabilityAssessment | undefined {
+  if (input.side !== "runner" || action.side !== "runner") return undefined;
+  const loanDefinitionId = runnerLoanDefinitionIdForAction(input, action);
+  const loanInstallAction = loanDefinitionId !== undefined;
+  const installedLoan = runnerInstalledLoanCards(input)[0];
+  const loanAlreadyInstalled = installedLoan !== undefined;
+  if (!loanInstallAction && !loanAlreadyInstalled) return undefined;
+
+  const hint = AI_HINTS.get(loanDefinitionId ?? installedLoan?.definitionId ?? "");
+  const installCreditGain = loanInstallAction
+    ? runnerLoanValueHint(hint, "installCreditGain", 12)
+    : 0;
+  const startTurnCreditLoss = runnerLoanValueHint(
+    hint,
+    "startOfTurnCreditLoss",
+    1,
+  );
+  const leavePlayPayCost = runnerLoanValueHint(hint, "leavePlayPayCost", 10);
+  const currentCredits = input.playerView.own.credits;
+  const actionCreditGain = runnerProjectedCreditGainForAction(action);
+  const actionCreditSpend = actionCreditCost(action);
+  const creditsAfterLoan = loanInstallAction
+    ? currentCredits + installCreditGain - actionCreditSpend
+    : currentCredits;
+  const runtimeContext = runnerLoanRuntimeContext(input, creditsAfterLoan);
+  const projectedSpend = loanInstallAction
+    ? runnerLoanProjectedSpendAfterLoan(input, action, creditsAfterLoan)
+    : runnerInstalledLoanActionSpend(action);
+  const creditsAfterPlannedSpend = loanInstallAction
+    ? creditsAfterLoan - projectedSpend.plannedSpendAfterLoan
+    : currentCredits + actionCreditGain - actionCreditSpend;
+  const currentGamePhase = runnerLoanGamePhase(input);
+  const resourceTrashRisk = runnerLoanResourceTrashRisk(input);
+  const criticalBreakerFunding = loanInstallAction
+    ? runnerLoanCriticalBreakerFundingNeed(
+      input,
+      creditsAfterLoan,
+      runtimeContext.runFunding.remoteScoreThreat !== "none",
+    )
+    : { active: false, evidence: [] };
+  const emergencyFunding =
+    loanInstallAction &&
+    runnerLoanEmergencyFundingNeed(input, runtimeContext.desiredCreditReserve);
+  const activeFundingNeed =
+    runtimeContext.runFunding.remoteContestFunding ||
+    runtimeContext.runFunding.knownAgendaFunding ||
+    runtimeContext.runFunding.closeoutFunding ||
+    criticalBreakerFunding.active ||
+    emergencyFunding;
+  const genericSetupOnly =
+    loanInstallAction &&
+    !activeFundingNeed &&
+    projectedSpend.genericSetupSpendAfterLoan > 0;
+  const loanUseCase = runnerLoanUseCase({
+    loanInstallAction,
+    activeFundingNeed,
+    remoteContestFunding: runtimeContext.runFunding.remoteContestFunding,
+    knownAgendaFunding: runtimeContext.runFunding.knownAgendaFunding,
+    closeoutFunding: runtimeContext.runFunding.closeoutFunding,
+    criticalBreakerFunding: criticalBreakerFunding.active,
+    emergencyFunding,
+    genericSetupOnly,
+    action,
+    currentCredits,
+    leavePlayPayCost,
+    creditsAfterPlannedSpend,
+    desiredCreditReserve: runtimeContext.desiredCreditReserve,
+  });
+  const debtRepaymentRisk = runnerLoanDebtRepaymentRisk({
+    creditsAfterPlannedSpend,
+    leavePlayPayCost,
+    startTurnCreditLoss,
+    resourceTrashRisk,
+  });
+  const liabilitySeverity = runnerLoanLiabilitySeverity({
+    loanUseCase,
+    debtRepaymentRisk,
+    currentGamePhase,
+    activeFundingNeed,
+    creditsAfterPlannedSpend,
+    desiredCreditReserve: runtimeContext.desiredCreditReserve,
+    resourceTrashRisk,
+  });
+  const scoreValue = runnerLoanLiabilityScoreValue({
+    loanInstallAction,
+    loanUseCase,
+    liabilitySeverity,
+    debtRepaymentRisk,
+    currentGamePhase,
+    activeFundingNeed,
+    currentCredits,
+    leavePlayPayCost,
+    creditsAfterPlannedSpend,
+    desiredCreditReserve: runtimeContext.desiredCreditReserve,
+    plannedSpendAfterLoan: projectedSpend.plannedSpendAfterLoan,
+    genericSetupSpendAfterLoan: projectedSpend.genericSetupSpendAfterLoan,
+    action,
+  });
+  const allowedDespiteRisk = runnerLoanAllowedReason(loanUseCase);
+  const blockedOrDeferred = runnerLoanBlockedReason({
+    loanUseCase,
+    activeFundingNeed,
+    currentGamePhase,
+    creditsAfterPlannedSpend,
+    desiredCreditReserve: runtimeContext.desiredCreditReserve,
+    genericSetupOnly,
+    resourceTrashRisk,
+  });
+  const evidence = sortedUnique([
+    "loanLiabilityAssessment:true",
+    `loanAction:${loanInstallAction ? "install" : "installed_liability"}`,
+    `loanUseCase:${loanUseCase}`,
+    `currentCredits:${currentCredits}`,
+    `installCreditGain:${installCreditGain}`,
+    `creditsAfterLoan:${creditsAfterLoan}`,
+    `plannedSpendAfterLoan:${projectedSpend.plannedSpendAfterLoan}`,
+    `projectedCreditsAfterPlannedSpend:${creditsAfterPlannedSpend}`,
+    `desiredCreditReserve:${runtimeContext.desiredCreditReserve}`,
+    `contestReserve:${runtimeContext.contestReserve}`,
+    `currentGamePhase:${currentGamePhase}`,
+    `remoteScoreThreat:${runtimeContext.runFunding.remoteScoreThreat}`,
+    `knownAgendaPayoff:${runtimeContext.runFunding.knownAgendaPayoff}`,
+    `activeFundingNeed:${activeFundingNeed}`,
+    `debtRepaymentRisk:${debtRepaymentRisk}`,
+    `leavePlayPayCost:${leavePlayPayCost}`,
+    `startTurnCreditLoss:${startTurnCreditLoss}`,
+    `resourceTrashRisk:${resourceTrashRisk}`,
+    `liabilitySeverity:${liabilitySeverity}`,
+    `loanScoreValue:${scoreValue}`,
+    "loan_not_build_credit_base:true",
+    ...(runnerLoanSemanticEvidence(loanDefinitionId ?? installedLoan?.definitionId)
+      ?? []),
+    ...runtimeContext.evidence,
+    ...runtimeContext.runFunding.evidence,
+    ...projectedSpend.evidence,
+    ...criticalBreakerFunding.evidence,
+    ...(genericSetupOnly ? ["loanUseCaseEvidence:generic_setup_only"] : []),
+    ...(projectedSpend.genericSetupSpendAfterLoan > 0 &&
+    creditsAfterPlannedSpend < runtimeContext.desiredCreditReserve
+      ? [
+          "loan_overextended_setup_spend:true",
+          "credits_after_loan_spend_below_reserve:true",
+        ]
+      : []),
+    ...(allowedDespiteRisk
+      ? [`why_loan_allowed_despite_risk:${allowedDespiteRisk}`]
+      : []),
+    ...(blockedOrDeferred
+      ? [`why_loan_blocked_or_deferred:${blockedOrDeferred}`]
+      : []),
+  ]);
+
+  return {
+    loanLiabilityAssessment: true,
+    loanInstallAction,
+    loanAlreadyInstalled,
+    currentCredits,
+    installCreditGain,
+    creditsAfterLoan,
+    plannedSpendAfterLoan: projectedSpend.plannedSpendAfterLoan,
+    creditsAfterPlannedSpend,
+    desiredCreditReserve: runtimeContext.desiredCreditReserve,
+    contestReserve: runtimeContext.contestReserve,
+    currentGamePhase,
+    remoteScoreThreat: runtimeContext.runFunding.remoteScoreThreat,
+    knownAgendaPayoff: runtimeContext.runFunding.knownAgendaPayoff,
+    activeFundingNeed,
+    debtRepaymentRisk,
+    leavePlayPayCost,
+    startTurnCreditLoss,
+    resourceTrashRisk,
+    liabilitySeverity,
+    loanUseCase,
+    scoreValue,
+    evidence,
+  };
+}
+
+function runnerLoanDefinitionIdForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): string | undefined {
+  if (action.type !== "install_card") return undefined;
+  const definitionId = sourceDefinitionIdForAction(input, action);
+  return runnerDefinitionIsHighRiskLoan(definitionId) ? definitionId : undefined;
+}
+
+function runnerDefinitionIsHighRiskLoan(definitionId: string | undefined): boolean {
+  if (!definitionId) return false;
+  if (definitionId === LOAN_FROM_CHIBA_CARD_ID) return true;
+  const hint = AI_HINTS.get(definitionId);
+  const targets = new Set(
+    (hint?.effects ?? [])
+      .map((effect) => stringRecordValue(effect as Record<string, unknown>, "target"))
+      .filter((target): target is string => target !== undefined),
+  );
+  return (
+    targets.has("economy.high_risk_burst_credit") &&
+    targets.has("risk.debt_loss_condition") &&
+    targets.has("risk.lose_game_debt") &&
+    runnerLoanHintRiskTags(hint).includes("leave_play_penalty")
+  );
+}
+
+function runnerInstalledLoanCards(input: AiDecisionInput): VisibleCard[] {
+  return (input.playerView.own.rig ?? []).filter((card) =>
+    runnerDefinitionIsHighRiskLoan(card.definitionId),
+  );
+}
+
+function runnerLoanSemanticEvidence(
+  definitionId: string | undefined,
+): string[] | undefined {
+  if (!definitionId) return undefined;
+  const hint = AI_HINTS.get(definitionId);
+  if (!hint) return [`loanSource:${definitionId}`];
+  const targets = sortedUnique(
+    (hint.effects ?? [])
+      .map((effect) => stringRecordValue(effect as Record<string, unknown>, "target"))
+      .filter((target): target is string => target !== undefined)
+      .filter(
+        (target) =>
+          target === "economy.high_risk_burst_credit" ||
+          target === "risk.debt_loss_condition" ||
+          target === "risk.lose_game_debt",
+      ),
+  );
+  return [
+    `loanSource:${definitionId}`,
+    ...runnerLoanHintRiskTags(hint).map((tag) => `loanRiskTag:${tag}`),
+    ...targets.map((target) => `loanSemantic:${target}`),
+  ];
+}
+
+function runnerLoanHintRiskTags(hint: AiCardHint | undefined): string[] {
+  const riskTags = (hint as (AiCardHint & { riskTags?: unknown }) | undefined)
+    ?.riskTags;
+  return Array.isArray(riskTags)
+    ? riskTags.filter((tag): tag is string => typeof tag === "string")
+    : [];
+}
+
+function runnerLoanValueHint(
+  hint: AiCardHint | undefined,
+  key: "installCreditGain" | "startOfTurnCreditLoss" | "leavePlayPayCost",
+  fallback: number,
+): number {
+  const value = hint?.valueHints?.[key];
+  return typeof value === "number" && Number.isFinite(value) ? value : fallback;
+}
+
+function runnerLoanRuntimeContext(input: AiDecisionInput, creditsAfterLoan: number): {
+  desiredCreditReserve: number;
+  contestReserve: number;
+  runFunding: RunnerLoanRunFundingContext;
+  evidence: string[];
+} {
+  const deckCapabilities = deckCapabilitiesForInput(input);
+  const strategicIntent = runnerStrategicIntentForInput(input, deckCapabilities);
+  const handDevelopmentEvaluations = evaluateRunnerHandDevelopment({
+    input,
+    deckCapabilities,
+    strategicIntent,
+  });
+  const economyPosture = buildRunnerEconomyPosture({
+    input,
+    deckCapabilities,
+    strategicIntent,
+    handDevelopmentEvaluations,
+  });
+  const runTargets = evaluateRunnerRunTargets({
+    input,
+    deckCapabilities,
+    strategicIntent,
+    handDevelopmentEvaluations,
+  });
+  const runFunding = runnerLoanRunFundingContext({
+    input,
+    runTargets,
+    creditsAfterLoan,
+    desiredCreditReserve: economyPosture.desiredCreditReserve,
+    contestReserve: economyPosture.creditReservePolicy.contestReserve,
+  });
+  return {
+    desiredCreditReserve: economyPosture.desiredCreditReserve,
+    contestReserve: economyPosture.creditReservePolicy.contestReserve,
+    runFunding,
+    evidence: [
+      `loanRuntimeEconomyRecommendation:${economyPosture.recommendation}`,
+      `loanRuntimeCreditBase:${economyPosture.creditBasePlan.recommendation}`,
+      `loanRuntimeFundingNeed:${economyPosture.fundingNeed}`,
+      `loanRuntimeHandBlocked:${economyPosture.creditBasePlan.usefulHandCardsBlockedByCredits}`,
+    ],
+  };
+}
+
+function runnerLoanRunFundingContext(params: {
+  input: AiDecisionInput;
+  runTargets: readonly RunnerRunTargetEvaluation[];
+  creditsAfterLoan: number;
+  desiredCreditReserve: number;
+  contestReserve: number;
+}): RunnerLoanRunFundingContext {
+  const rankedTargets = [...params.runTargets].sort(
+    (left, right) => right.score - left.score || left.actionId.localeCompare(right.actionId),
+  );
+  const scoreThreatTarget = rankedTargets.find((target) => target.scoreThreat);
+  const agendaTarget = rankedTargets.find(
+    (target) => target.accessPayoff === "agenda",
+  );
+  const closeoutTarget = rankedTargets.find((target) =>
+    runnerLoanCloseoutTarget(params.input, target),
+  );
+  const bestTarget = scoreThreatTarget ?? agendaTarget ?? closeoutTarget ?? rankedTargets[0];
+  const remoteContestFunding =
+    scoreThreatTarget !== undefined &&
+    params.creditsAfterLoan >=
+      Math.max(scoreThreatTarget.pathCost, params.contestReserve) &&
+    (params.input.playerView.own.credits < params.contestReserve ||
+      scoreThreatTarget.pathPassability === "blocked_unpayable" ||
+      scoreThreatTarget.recommendation === "gain_credits_first");
+  const knownAgendaFunding =
+    agendaTarget !== undefined &&
+    params.creditsAfterLoan >= Math.max(0, agendaTarget.pathCost) &&
+    (params.input.playerView.own.credits < agendaTarget.pathCost ||
+      agendaTarget.recommendation === "gain_credits_first" ||
+      params.input.playerView.own.credits < params.desiredCreditReserve);
+  const closeoutFunding =
+    closeoutTarget !== undefined &&
+    params.creditsAfterLoan >= Math.max(0, closeoutTarget.pathCost) &&
+    params.input.playerView.own.credits < params.desiredCreditReserve;
+  const remoteScoreThreat: RunnerLoanAssessmentRemoteThreat = scoreThreatTarget
+    ? scoreThreatTarget.accessPayoff === "score_threat" &&
+      scoreThreatTarget.pathPassability === "reachable"
+      ? "urgent"
+      : "visible"
+    : params.runTargets.some(
+          (target) =>
+            target.targetKind === "remote" &&
+            target.knownAccessState === "unknown",
+        )
+      ? "possible"
+      : "none";
+  return {
+    remoteScoreThreat,
+    remoteContestFunding,
+    knownAgendaPayoff: agendaTarget !== undefined,
+    knownAgendaFunding,
+    closeoutFunding,
+    ...(bestTarget ? { bestTargetId: bestTarget.targetServerId } : {}),
+    ...(bestTarget ? { bestTargetPayoff: bestTarget.accessPayoff } : {}),
+    ...(bestTarget ? { bestTargetRecommendation: bestTarget.recommendation } : {}),
+    bestTargetPathCost: bestTarget?.pathCost ?? 0,
+    bestTargetCreditsAfterRun: bestTarget?.creditsAfterRun ?? params.input.playerView.own.credits,
+    evidence: [
+      `loanRunTargets:${params.runTargets.length}`,
+      `loanBestTarget:${bestTarget?.targetServerId ?? "none"}`,
+      `loanBestTargetPayoff:${bestTarget?.accessPayoff ?? "none"}`,
+      `loanBestTargetRecommendation:${bestTarget?.recommendation ?? "none"}`,
+      `loanBestTargetPathCost:${bestTarget?.pathCost ?? 0}`,
+      `loanRemoteContestFunding:${remoteContestFunding}`,
+      `loanKnownAgendaFunding:${knownAgendaFunding}`,
+      `loanCloseoutFunding:${closeoutFunding}`,
+    ],
+  };
+}
+
+function runnerLoanCloseoutTarget(
+  input: AiDecisionInput,
+  target: RunnerRunTargetEvaluation,
+): boolean {
+  if (input.playerView.own.agendaPoints < input.playerView.agendaPointsToWin - 2) {
+    return false;
+  }
+  return (
+    target.accessPayoff === "agenda" ||
+    target.accessPayoff === "access_bonus" ||
+    target.accessPayoff === "score_threat" ||
+    target.multiaccessAvailable
+  );
+}
+
+function runnerLoanProjectedSpendAfterLoan(
+  input: AiDecisionInput,
+  loanAction: LegalAction,
+  creditsAfterLoan: number,
+): RunnerLoanProjectedSpend {
+  const remainingClicks = Math.max(
+    0,
+    input.playerView.own.clicks - actionClickCost(loanAction),
+  );
+  const spendCandidates = input.playerView.own.gripOrHq
+    .filter(
+      (card) =>
+        card.known !== false &&
+        card.definitionId !== undefined &&
+        !runnerDefinitionIsHighRiskLoan(card.definitionId) &&
+        card.instanceId !== loanAction.source,
+    )
+    .map((card) => {
+      const cost = visibleCardPlayOrInstallCostForAi(card);
+      const roles = rolesForCardId(card.definitionId);
+      const kind = runnerLoanSpendCandidateKind(input, card, roles);
+      return { cost, kind };
+    })
+    .filter(
+      (candidate) =>
+        candidate.cost > 0 &&
+        candidate.cost <= creditsAfterLoan &&
+        candidate.kind !== "ignore",
+    )
+    .sort(
+      (left, right) =>
+        runnerLoanSpendKindRank(right.kind) - runnerLoanSpendKindRank(left.kind) ||
+        right.cost - left.cost,
+    )
+    .slice(0, remainingClicks);
+  const genericSetupSpendAfterLoan = spendCandidates
+    .filter((candidate) => candidate.kind === "generic_setup")
+    .reduce((sum, candidate) => sum + candidate.cost, 0);
+  const directPlanSpendAfterLoan = spendCandidates
+    .filter((candidate) => candidate.kind === "direct_plan")
+    .reduce((sum, candidate) => sum + candidate.cost, 0);
+  const criticalBreakerSpendAfterLoan = spendCandidates
+    .filter((candidate) => candidate.kind === "critical_breaker")
+    .reduce((sum, candidate) => sum + candidate.cost, 0);
+  const plannedSpendAfterLoan =
+    genericSetupSpendAfterLoan +
+    directPlanSpendAfterLoan +
+    criticalBreakerSpendAfterLoan;
+  return {
+    plannedSpendAfterLoan,
+    directPlanSpendAfterLoan,
+    genericSetupSpendAfterLoan,
+    genericSetupSpendCount: spendCandidates.filter(
+      (candidate) => candidate.kind === "generic_setup",
+    ).length,
+    criticalBreakerSpendAfterLoan,
+    evidence: [
+      `loanProjectedSpendCandidates:${spendCandidates.length}`,
+      `loanProjectedGenericSetupSpend:${genericSetupSpendAfterLoan}`,
+      `loanProjectedGenericSetupCount:${spendCandidates.filter((candidate) => candidate.kind === "generic_setup").length}`,
+      `loanProjectedDirectPlanSpend:${directPlanSpendAfterLoan}`,
+      `loanProjectedCriticalBreakerSpend:${criticalBreakerSpendAfterLoan}`,
+    ],
+  };
+}
+
+function runnerInstalledLoanActionSpend(action: LegalAction): RunnerLoanProjectedSpend {
+  const spend = Math.max(0, actionCreditCost(action) - runnerProjectedCreditGainForAction(action));
+  return {
+    plannedSpendAfterLoan: spend,
+    directPlanSpendAfterLoan: 0,
+    genericSetupSpendAfterLoan: spend,
+    genericSetupSpendCount: spend > 0 ? 1 : 0,
+    criticalBreakerSpendAfterLoan: 0,
+    evidence: [`installedLoanActionSpend:${spend}`],
+  };
+}
+
+type RunnerLoanSpendCandidateKind =
+  | "critical_breaker"
+  | "direct_plan"
+  | "generic_setup"
+  | "ignore";
+
+function runnerLoanSpendCandidateKind(
+  input: AiDecisionInput,
+  card: VisibleCard,
+  roles: readonly string[],
+): RunnerLoanSpendCandidateKind {
+  if (roles.some((role) => role.startsWith("breaker_"))) {
+    return runnerCardAddressesVisibleBreakerNeed(input, card)
+      ? "critical_breaker"
+      : "direct_plan";
+  }
+  if (roles.some((role) => isRunnerPressureRole(role))) return "direct_plan";
+  if (
+    roles.some(
+      (role) =>
+        role === "memory" ||
+        role === "memory_support" ||
+        role === "setup" ||
+        role === "build_rig" ||
+        isRunnerEconomyRole(role) ||
+        role.includes("draw") ||
+        role.includes("search"),
+    )
+  ) {
+    return "generic_setup";
+  }
+  if (card.type === "program" || card.type === "hardware" || card.type === "resource") {
+    return "generic_setup";
+  }
+  return "ignore";
+}
+
+function runnerLoanSpendKindRank(kind: RunnerLoanSpendCandidateKind): number {
+  switch (kind) {
+    case "critical_breaker":
+      return 4;
+    case "direct_plan":
+      return 3;
+    case "generic_setup":
+      return 2;
+    case "ignore":
+      return 0;
+  }
+}
+
+function runnerLoanCriticalBreakerFundingNeed(
+  input: AiDecisionInput,
+  creditsAfterLoan: number,
+  remoteThreatVisible: boolean,
+): { active: boolean; evidence: string[] } {
+  const candidates = input.playerView.own.gripOrHq.filter((card) => {
+    if (card.known === false || !card.definitionId) return false;
+    const roles = rolesForCardId(card.definitionId);
+    return (
+      roles.some((role) => role.startsWith("breaker_")) &&
+      runnerCardAddressesVisibleBreakerNeed(input, card) &&
+      visibleCardPlayOrInstallCostForAi(card) <= creditsAfterLoan
+    );
+  });
+  const active = candidates.length > 0 && remoteThreatVisible;
+  return {
+    active,
+    evidence: [
+      `loanCriticalBreakerFunding:${active}`,
+      `loanCriticalBreakerCandidates:${candidates.length}`,
+    ],
+  };
+}
+
+function runnerLoanEmergencyFundingNeed(
+  input: AiDecisionInput,
+  desiredCreditReserve: number,
+): boolean {
+  const safeEconomyAvailable = input.legalActions.some(
+    (action) =>
+      action.type === "gain_credit" ||
+      (action.type === "play_event" &&
+        rolesForAction(input, action).some(isRunnerEconomyRole)),
+  );
+  return (
+    input.playerView.own.credits <= 1 &&
+    (input.playerView.own.tags > 0 ||
+      runnerHasKnownUnaffordableLegalRun(input) ||
+      (!safeEconomyAvailable && input.playerView.own.gripOrHq.length <= 1) ||
+      (!safeEconomyAvailable && desiredCreditReserve <= 1))
+  );
+}
+
+function runnerLoanUseCase(params: {
+  loanInstallAction: boolean;
+  activeFundingNeed: boolean;
+  remoteContestFunding: boolean;
+  knownAgendaFunding: boolean;
+  closeoutFunding: boolean;
+  criticalBreakerFunding: boolean;
+  emergencyFunding: boolean;
+  genericSetupOnly: boolean;
+  action: LegalAction;
+  currentCredits: number;
+  leavePlayPayCost: number;
+  creditsAfterPlannedSpend: number;
+  desiredCreditReserve: number;
+}): RunnerLoanUseCase {
+  if (params.loanInstallAction) {
+    if (params.closeoutFunding) return "closeout_funding";
+    if (params.knownAgendaFunding) return "known_agenda_funding";
+    if (params.remoteContestFunding) return "remote_contest_funding";
+    if (params.criticalBreakerFunding) return "fund_critical_breaker_install";
+    if (params.emergencyFunding) return "emergency_funding";
+    if (params.genericSetupOnly) return "generic_setup";
+    return "bad_use";
+  }
+  if (
+    runnerProjectedCreditGainForAction(params.action) > 0 &&
+    params.currentCredits < params.leavePlayPayCost
+  ) {
+    return "emergency_funding";
+  }
+  if (
+    actionCreditCost(params.action) > 0 &&
+    params.creditsAfterPlannedSpend < params.desiredCreditReserve
+  ) {
+    return "bad_use";
+  }
+  return "generic_setup";
+}
+
+function runnerLoanDebtRepaymentRisk(params: {
+  creditsAfterPlannedSpend: number;
+  leavePlayPayCost: number;
+  startTurnCreditLoss: number;
+  resourceTrashRisk: boolean;
+}): RunnerLoanDebtRepaymentRisk {
+  if (
+    params.resourceTrashRisk &&
+    params.creditsAfterPlannedSpend < params.leavePlayPayCost
+  ) {
+    return "critical";
+  }
+  if (params.creditsAfterPlannedSpend <= params.startTurnCreditLoss + 1) {
+    return "critical";
+  }
+  if (params.creditsAfterPlannedSpend < params.leavePlayPayCost) return "high";
+  if (
+    params.creditsAfterPlannedSpend <
+    params.leavePlayPayCost + params.startTurnCreditLoss
+  ) {
+    return "medium";
+  }
+  return "low";
+}
+
+function runnerLoanLiabilitySeverity(params: {
+  loanUseCase: RunnerLoanUseCase;
+  debtRepaymentRisk: RunnerLoanDebtRepaymentRisk;
+  currentGamePhase: RunnerLoanGamePhase;
+  activeFundingNeed: boolean;
+  creditsAfterPlannedSpend: number;
+  desiredCreditReserve: number;
+  resourceTrashRisk: boolean;
+}): RunnerLoanLiabilitySeverity {
+  if (params.loanUseCase === "bad_use") return "critical";
+  if (params.debtRepaymentRisk === "critical") return "critical";
+  if (
+    params.resourceTrashRisk &&
+    params.creditsAfterPlannedSpend < params.desiredCreditReserve
+  ) {
+    return "critical";
+  }
+  if (!params.activeFundingNeed && params.currentGamePhase === "opening") {
+    return "high";
+  }
+  if (
+    params.debtRepaymentRisk === "high" ||
+    params.creditsAfterPlannedSpend < params.desiredCreditReserve
+  ) {
+    return "high";
+  }
+  if (
+    params.loanUseCase === "generic_setup" ||
+    params.debtRepaymentRisk === "medium"
+  ) {
+    return "medium";
+  }
+  return "low";
+}
+
+function runnerLoanLiabilityScoreValue(params: {
+  loanInstallAction: boolean;
+  loanUseCase: RunnerLoanUseCase;
+  liabilitySeverity: RunnerLoanLiabilitySeverity;
+  debtRepaymentRisk: RunnerLoanDebtRepaymentRisk;
+  currentGamePhase: RunnerLoanGamePhase;
+  activeFundingNeed: boolean;
+  currentCredits: number;
+  leavePlayPayCost: number;
+  creditsAfterPlannedSpend: number;
+  desiredCreditReserve: number;
+  plannedSpendAfterLoan: number;
+  genericSetupSpendAfterLoan: number;
+  action: LegalAction;
+}): number {
+  if (!params.loanInstallAction) {
+    const gain = runnerProjectedCreditGainForAction(params.action);
+    if (gain > 0 && params.currentCredits < params.leavePlayPayCost) {
+      return Math.min(
+        1450,
+        760 + (params.leavePlayPayCost - params.currentCredits) * 80,
+      );
+    }
+    if (
+      actionCreditCost(params.action) > 0 &&
+      params.creditsAfterPlannedSpend < params.desiredCreditReserve
+    ) {
+      return -1250 - Math.max(0, params.desiredCreditReserve - params.creditsAfterPlannedSpend) * 90;
+    }
+    return 0;
+  }
+
+  let value = 0;
+  switch (params.loanUseCase) {
+    case "closeout_funding":
+      value += 3400;
+      break;
+    case "known_agenda_funding":
+      value += 3000;
+      break;
+    case "remote_contest_funding":
+      value += 2700;
+      break;
+    case "fund_critical_breaker_install":
+      value += 2200;
+      break;
+    case "emergency_funding":
+      value += 1500;
+      break;
+    case "generic_setup":
+      value -= 2800;
+      break;
+    case "bad_use":
+      value -= 4300;
+      break;
+  }
+  if (!params.activeFundingNeed && params.currentGamePhase === "opening") {
+    value -= 900;
+  }
+  if (
+    params.genericSetupSpendAfterLoan > 0 &&
+    params.creditsAfterPlannedSpend < params.desiredCreditReserve
+  ) {
+    value -= 1250;
+  }
+  if (params.plannedSpendAfterLoan > 0 && params.creditsAfterPlannedSpend <= 3) {
+    value -= 700;
+  }
+  if (
+    params.liabilitySeverity === "critical" &&
+    params.loanUseCase !== "closeout_funding"
+  ) {
+    value -= 900;
+  } else if (
+    params.liabilitySeverity === "high" &&
+    params.loanUseCase === "generic_setup"
+  ) {
+    value -= 650;
+  } else if (
+    params.debtRepaymentRisk === "high" &&
+    params.loanUseCase !== "known_agenda_funding" &&
+    params.loanUseCase !== "remote_contest_funding" &&
+    params.loanUseCase !== "closeout_funding"
+  ) {
+    value -= 380;
+  }
+  return value;
+}
+
+function runnerLoanAllowedReason(useCase: RunnerLoanUseCase): string | undefined {
+  switch (useCase) {
+    case "remote_contest_funding":
+      return "funds_remote_contest";
+    case "known_agenda_funding":
+      return "funds_known_agenda_run";
+    case "closeout_funding":
+      return "funds_closeout";
+    case "fund_critical_breaker_install":
+      return "funds_critical_breaker_install";
+    case "emergency_funding":
+      return "emergency_funding";
+    case "generic_setup":
+    case "bad_use":
+      return undefined;
+  }
+}
+
+function runnerLoanBlockedReason(params: {
+  loanUseCase: RunnerLoanUseCase;
+  activeFundingNeed: boolean;
+  currentGamePhase: RunnerLoanGamePhase;
+  creditsAfterPlannedSpend: number;
+  desiredCreditReserve: number;
+  genericSetupOnly: boolean;
+  resourceTrashRisk: boolean;
+}): string | undefined {
+  if (params.loanUseCase === "bad_use") return "no_active_funding_need";
+  if (
+    params.genericSetupOnly &&
+    params.creditsAfterPlannedSpend < params.desiredCreditReserve
+  ) {
+    return "loan_overextended_setup_spend";
+  }
+  if (!params.activeFundingNeed && params.currentGamePhase === "opening") {
+    return "opening_generic_setup";
+  }
+  if (
+    params.resourceTrashRisk &&
+    params.creditsAfterPlannedSpend < params.desiredCreditReserve
+  ) {
+    return "resource_trash_risk_without_repayment_reserve";
+  }
+  if (params.creditsAfterPlannedSpend < params.desiredCreditReserve) {
+    return "credits_after_loan_spend_below_reserve";
+  }
+  return undefined;
+}
+
+function runnerLoanGamePhase(input: AiDecisionInput): RunnerLoanGamePhase {
+  if (
+    input.playerView.own.agendaPoints >= input.playerView.agendaPointsToWin - 2 ||
+    input.playerView.opponent.agendaPoints >= input.playerView.agendaPointsToWin - 2 ||
+    input.actionNumber >= 40
+  ) {
+    return "late";
+  }
+  if (
+    input.actionNumber <= 10 &&
+    input.playerView.own.agendaPoints === 0 &&
+    input.playerView.opponent.agendaPoints === 0
+  ) {
+    return "opening";
+  }
+  return "midgame";
+}
+
+function runnerLoanResourceTrashRisk(input: AiDecisionInput): boolean {
+  return (
+    input.playerView.own.tags > 0 ||
+    input.legalActions.some((action) => action.type === "remove_tag")
+  );
+}
+
+function runnerProjectedCreditGainForAction(action: LegalAction): number {
+  const payload = action.payload ?? {};
+  const payloadValues = [
+    payload.gainCreditsAmount,
+    payload.gainedCredits,
+    payload.creditsGained,
+    payload.amount,
+  ].filter((value): value is number => typeof value === "number");
+  const payloadGain = Math.max(0, ...payloadValues);
+  if (action.type === "gain_credit") return Math.max(1, payloadGain);
+  if (
+    action.type === "trigger_ability" ||
+    action.type === "activated_card_ability" ||
+    action.type === "play_event"
+  ) {
+    return payloadGain;
+  }
+  return 0;
+}
+
+function actionClickCost(action: LegalAction): number {
+  return Math.max(
+    1,
+    action.costs.reduce(
+      (sum, cost) =>
+        sum + (Number.isFinite(cost.clicks) ? (cost.clicks ?? 0) : 0),
+      0,
+    ),
+  );
 }
 
 function semanticRuntimeRunnerMultiRunEventExclusion(
@@ -8560,6 +9505,8 @@ function semanticRuntimeRunnerEvidence(
   const selfDamageSurvivalEvidence =
     runnerSelfDamageSurvivalAssessment(input, action)?.evidence ?? [];
   const blinkRiskEvidence = runnerBlinkRiskEvidenceForAction(input, action);
+  const loanLiabilityEvidence =
+    runnerLoanLiabilityAssessment(input, action)?.evidence ?? [];
   if (sacrificeAssessment?.memoryRequired) {
     return [
       `program_sacrifice_penalty:${runnerProgramInstallDisplacementPenalty(sacrificeAssessment)}`,
@@ -8569,6 +9516,7 @@ function semanticRuntimeRunnerEvidence(
       ...noRunEconomyCommitmentEvidence,
       ...selfDamageSurvivalEvidence,
       ...blinkRiskEvidence,
+      ...loanLiabilityEvidence,
     ];
   }
   if (
@@ -8576,7 +9524,8 @@ function semanticRuntimeRunnerEvidence(
     bankCommitmentEvidence.length > 0 ||
     noRunEconomyCommitmentEvidence.length > 0 ||
     selfDamageSurvivalEvidence.length > 0 ||
-    blinkRiskEvidence.length > 0
+    blinkRiskEvidence.length > 0 ||
+    loanLiabilityEvidence.length > 0
   )
     return [
       ...actionMuPressureEvidence,
@@ -8584,6 +9533,7 @@ function semanticRuntimeRunnerEvidence(
       ...noRunEconomyCommitmentEvidence,
       ...selfDamageSurvivalEvidence,
       ...blinkRiskEvidence,
+      ...loanLiabilityEvidence,
     ];
   if (
     action.type !== "trash_accessed_card" &&

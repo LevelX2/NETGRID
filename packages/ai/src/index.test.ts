@@ -15923,6 +15923,295 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(decision.reasonCode).toBe("runner.plan.contest_remote");
   });
 
+  it("defers Loan from Chiba in opening without active funding need", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = runnerActionPhaseInput(
+      "ai-risk-loan-opening-no-need",
+      (state) => {
+        state.runner.credits = 1;
+        emptyRunnerGripForTest(state);
+        moveRunnerCardToGrip(state, "onr_v1_168_loan-from-chiba");
+      },
+      runnerLoanFromChibaDeckConfig("opening-no-need"),
+    );
+    const loan = loanFromChibaInstallAction(input);
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(loan).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!loan || !gain) throw new Error("Missing opening Loan fixture");
+
+    const scopedInput = scopedLegalActions(input, [loan, gain]);
+    const decision = chooseRunnerAction(scopedInput);
+    const loanAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) => entry.actionId === loan.actionId,
+    );
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(scopedInput.legalActions.map((action) => action.actionId)).toContain(
+      decision.actionId,
+    );
+    expect(JSON.stringify(loanAlternative)).toContain(
+      "loanUseCase:bad_use",
+    );
+    expect(JSON.stringify(loanAlternative)).toContain(
+      "why_loan_blocked_or_deferred:no_active_funding_need",
+    );
+    expect(JSON.stringify(loanAlternative)).toContain(
+      "loan_not_build_credit_base:true",
+    );
+  });
+
+  it("penalizes Loan from Chiba when it only funds overextended setup spend", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = runnerActionPhaseInput(
+      "ai-risk-loan-overextended-setup",
+      (state) => {
+        state.runner.credits = 1;
+        emptyRunnerGripForTest(state);
+        moveRunnerCardToGrip(state, "onr_v1_168_loan-from-chiba");
+        moveRunnerCardToGrip(state, "onr_v1_144_tycho-mem-chip");
+        moveRunnerCardToGrip(state, "onr_v1_045_newsgroup-filter");
+      },
+      runnerLoanFromChibaDeckConfig("overextended-setup"),
+    );
+    const loan = loanFromChibaInstallAction(input);
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(loan).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!loan || !gain) throw new Error("Missing overextended Loan fixture");
+
+    const scopedInput = scopedLegalActions(input, [loan, gain]);
+    const decision = chooseRunnerAction(scopedInput);
+    const loanAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) => entry.actionId === loan.actionId,
+    );
+    const loanDebug = JSON.stringify(loanAlternative);
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(scopedInput.legalActions.map((action) => action.actionId)).toContain(
+      decision.actionId,
+    );
+    expect(loanDebug).toContain("loanUseCase:generic_setup");
+    expect(loanDebug).toContain("plannedSpendAfterLoan:10");
+    expect(loanDebug).toContain("projectedCreditsAfterPlannedSpend:3");
+    expect(loanDebug).toContain("loan_overextended_setup_spend:true");
+    expect(loanDebug).toContain("credits_after_loan_spend_below_reserve:true");
+  });
+
+  it("allows Loan from Chiba when it funds a concrete remote contest", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = runnerActionPhaseInput(
+      "ai-risk-loan-remote-contest",
+      (state) => {
+        state.runner.credits = 1;
+        emptyRunnerGripForTest(state);
+        moveRunnerCardToGrip(state, "onr_v1_168_loan-from-chiba");
+        moveRunnerProgramToRig(state, "simple_fracter");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+        const iceId = putCorpIceOnServer(
+          state,
+          "remote_1",
+          "simple_barrier_ice",
+        );
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+      runnerLoanFromChibaDeckConfig("remote-contest"),
+    );
+    const loan = loanFromChibaInstallAction(input);
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    expect(loan).toBeDefined();
+    expect(gain).toBeDefined();
+    expect(remoteRun).toBeDefined();
+    if (!loan || !gain || !remoteRun)
+      throw new Error("Missing remote contest Loan fixture");
+
+    const scopedInput = scopedLegalActions(input, [loan, gain, remoteRun]);
+    const decision = chooseRunnerAction(scopedInput);
+
+    expect(decision.actionId).toBe(loan.actionId);
+    expect(scopedInput.legalActions.map((action) => action.actionId)).toContain(
+      decision.actionId,
+    );
+    expect(decision.evidence).toContain("loanUseCase:remote_contest_funding");
+    expect(decision.evidence).toContain("loanRemoteContestFunding:true");
+    expect(decision.evidence).toContain(
+      "why_loan_allowed_despite_risk:funds_remote_contest",
+    );
+  });
+
+  it("allows Loan from Chiba when it funds a known agenda run", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = runnerActionPhaseInput(
+      "ai-risk-loan-known-agenda",
+      (state) => {
+        state.runner.credits = 0;
+        emptyRunnerGripForTest(state);
+        moveRunnerCardToGrip(state, "onr_v1_168_loan-from-chiba");
+        moveRunnerProgramToRig(state, "simple_fracter");
+        putCorpRootInServer(state, "remote_1", "simple_agenda", 0, {
+          faceup: true,
+          rezzed: true,
+        });
+        const iceId = putCorpIceOnServer(
+          state,
+          "remote_1",
+          "simple_barrier_ice",
+        );
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+      },
+      runnerLoanFromChibaDeckConfig("known-agenda"),
+    );
+    const loan = loanFromChibaInstallAction(input);
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    expect(loan).toBeDefined();
+    expect(gain).toBeDefined();
+    expect(remoteRun).toBeDefined();
+    if (!loan || !gain || !remoteRun)
+      throw new Error("Missing known agenda Loan fixture");
+
+    const scopedInput = scopedLegalActions(input, [loan, gain, remoteRun]);
+    const decision = chooseRunnerAction(scopedInput);
+
+    expect(decision.actionId).toBe(loan.actionId);
+    expect(scopedInput.legalActions.map((action) => action.actionId)).toContain(
+      decision.actionId,
+    );
+    expect(decision.evidence).toContain("loanUseCase:known_agenda_funding");
+    expect(decision.evidence).toContain("knownAgendaPayoff:true");
+    expect(decision.evidence).toContain(
+      "why_loan_allowed_despite_risk:funds_known_agenda_run",
+    );
+  });
+
+  it("boosts Loan from Chiba for late-game closeout funding", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = runnerActionPhaseInput(
+      "ai-risk-loan-closeout",
+      (state) => {
+        state.runner.credits = 1;
+        emptyRunnerGripForTest(state);
+        scoreRunnerAgendaForTest(state, "simple_agenda", 0);
+        scoreRunnerAgendaForTest(state, "simple_agenda", 1);
+        scoreRunnerAgendaForTest(state, "simple_agenda", 2);
+        moveRunnerCardToGrip(state, "onr_v1_168_loan-from-chiba");
+        moveRunnerHardwareToRig(state, "onr_v1_139_r-and-d-interface");
+        const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+        state.cardInstances[iceId] = {
+          ...state.cardInstances[iceId]!,
+          faceup: true,
+          rezzed: true,
+        };
+        moveRunnerProgramToRig(state, "simple_fracter");
+      },
+      runnerLoanFromChibaDeckConfig("closeout"),
+    );
+    const loan = loanFromChibaInstallAction(input);
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    expect(loan).toBeDefined();
+    expect(gain).toBeDefined();
+    expect(rdRun).toBeDefined();
+    if (!loan || !gain || !rdRun) throw new Error("Missing closeout Loan fixture");
+
+    const scopedInput = scopedLegalActions(input, [loan, gain, rdRun]);
+    const decision = chooseRunnerAction(scopedInput);
+
+    expect(decision.actionId).toBe(loan.actionId);
+    expect(scopedInput.legalActions.map((action) => action.actionId)).toContain(
+      decision.actionId,
+    );
+    expect(decision.evidence).toContain("loanUseCase:closeout_funding");
+    expect(decision.evidence).toContain("currentGamePhase:late");
+    expect(decision.evidence).toContain(
+      "why_loan_allowed_despite_risk:funds_closeout",
+    );
+  });
+
+  it("builds repayment reserve instead of spending down after Loan from Chiba is installed", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = runnerActionPhaseInput(
+      "ai-risk-loan-installed-liability-reserve",
+      (state) => {
+        state.runner.credits = 8;
+        emptyRunnerGripForTest(state);
+        moveRunnerResourceToRig(state, "onr_v1_168_loan-from-chiba");
+        moveRunnerCardToGrip(state, "onr_v1_144_tycho-mem-chip");
+      },
+      runnerLoanFromChibaDeckConfig("installed-liability"),
+    );
+    const memoryInstall = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_144_tycho-mem-chip",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(memoryInstall).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!memoryInstall || !gain)
+      throw new Error("Missing installed Loan liability fixture");
+
+    const scopedInput = scopedLegalActions(input, [memoryInstall, gain]);
+    const decision = chooseRunnerAction(scopedInput);
+    const memoryAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (entry) => entry.actionId === memoryInstall.actionId,
+      );
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(scopedInput.legalActions.map((action) => action.actionId)).toContain(
+      decision.actionId,
+    );
+    expect(decision.evidence).toContain("loanAction:installed_liability");
+    expect(decision.evidence).toContain("loanUseCase:emergency_funding");
+    expect(decision.evidence).toContain(
+      "why_loan_allowed_despite_risk:emergency_funding",
+    );
+    expect(JSON.stringify(memoryAlternative)).toContain(
+      "runner_installed_loan_liability_reserve",
+    );
+    expect(JSON.stringify(memoryAlternative)).toContain(
+      "debtRepaymentRisk:high",
+    );
+    expect(JSON.stringify(memoryAlternative)).toContain(
+      "credits_after_loan_spend_below_reserve:true",
+    );
+    expect(JSON.stringify(memoryAlternative)).toContain(
+      "why_loan_blocked_or_deferred:no_active_funding_need",
+    );
+  });
+
   it("keeps economy reserve decisions invariant to hidden Corp zones", () => {
     const stateA = toRunnerTurn(
       createGameAfterSetup({
@@ -24739,6 +25028,48 @@ function runnerCentralPressureDeckConfig(idSuffix: string): CreateGameConfig {
       ],
     },
   };
+}
+
+function runnerLoanFromChibaDeckConfig(idSuffix: string): CreateGameConfig {
+  return {
+    runnerDeck: {
+      id: `ai_loan_from_chiba_runner_${idSuffix}`,
+      name: "AI Loan from Chiba Runner",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "onr_v1_168_loan-from-chiba", quantity: 3 },
+        { id: "onr_v1_144_tycho-mem-chip", quantity: 3 },
+        { id: "onr_v1_045_newsgroup-filter", quantity: 3 },
+        { id: "onr_v1_139_r-and-d-interface", quantity: 3 },
+        { id: "onr_v1_129_hq-interface", quantity: 2 },
+        { id: "simple_fracter", quantity: 3 },
+        { id: "simple_economy_event", quantity: 8 },
+      ],
+    },
+    corpDeck: {
+      id: `ai_loan_from_chiba_corp_${idSuffix}`,
+      name: "AI Loan from Chiba Corp",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "simple_agenda", quantity: 8 },
+        { id: "simple_barrier_ice", quantity: 6 },
+        { id: "simple_economy_operation", quantity: 8 },
+      ],
+    },
+  };
+}
+
+function loanFromChibaInstallAction(
+  input: ReturnType<typeof buildAiDecisionInput>,
+): LegalAction | undefined {
+  return input.legalActions.find(
+    (action) =>
+      action.type === "install_card" &&
+      sourceDefinitionFromInput(input, action) ===
+        "onr_v1_168_loan-from-chiba",
+  );
 }
 
 function runnerCoverageSearchDeckConfig(idSuffix: string): CreateGameConfig {
