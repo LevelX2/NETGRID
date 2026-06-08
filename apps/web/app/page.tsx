@@ -189,6 +189,7 @@ import {
   runnerRigMemorySummary,
   runPositionStatusLabel,
   runWindowStatusLabel,
+  restrictedPoolUsesCreditBadge,
   serializeCuePositionPreference,
   showInstalledCorpState,
   shouldUseFieldCardChoice,
@@ -16727,6 +16728,16 @@ function CounterDisplayBadge({ display, scoreState }: { display: NonNullable<Vis
         ariaLabel={display.ariaLabel}
         className="recurringCreditBadge"
         testId="recurring-credit-badge"
+      />
+    );
+  }
+  if (restrictedPoolUsesCreditBadge(display)) {
+    return (
+      <CardCreditCounter
+        amount={amount}
+        ariaLabel={display.ariaLabel}
+        className="recurringCreditBadge restrictedCreditBadge"
+        testId="restricted-credit-badge"
       />
     );
   }

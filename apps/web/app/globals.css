@@ -7029,10 +7029,24 @@ select {
 
 .lane .recurringCreditBadge {
   top: calc(29px * var(--lane-card-scale, 1));
+  min-height: calc(20px * var(--lane-card-scale, 1));
+  gap: calc(3px * var(--lane-card-scale, 1));
+  padding: calc(2px * var(--lane-card-scale, 1)) calc(5px * var(--lane-card-scale, 1)) calc(2px * var(--lane-card-scale, 1)) calc(4px * var(--lane-card-scale, 1));
+  border-radius: calc(6px * var(--lane-card-scale, 1));
+}
+
+.lane .recurringCreditBadge::before {
+  width: calc(8px * var(--lane-card-scale, 1));
+  height: calc(8px * var(--lane-card-scale, 1));
+  border-width: calc(1.5px * var(--lane-card-scale, 1));
 }
 
 .lane .cardCreditCounterBadge.counted {
   padding: calc(2px * var(--lane-card-scale, 1)) calc(5px * var(--lane-card-scale, 1)) calc(2px * var(--lane-card-scale, 1)) calc(6px * var(--lane-card-scale, 1));
+}
+
+.lane .recurringCreditBadge.counted {
+  padding-left: calc(5px * var(--lane-card-scale, 1));
 }
 
 .lane .cardCreditCounterIcons {
@@ -7487,6 +7501,7 @@ select {
   max-width: calc(100% - 12px);
   min-height: 20px;
   padding: 1px;
+  isolation: isolate;
   pointer-events: none;
   filter: drop-shadow(0 2px 3px rgb(0 0 0 / 0.48));
 }
@@ -7501,6 +7516,40 @@ select {
 
 .recurringCreditBadge {
   top: 30px;
+}
+
+.recurringCreditBadge {
+  min-height: 22px;
+  padding: 3px 6px 3px 5px;
+  border: 1px solid rgb(118 255 214 / 0.74);
+  border-radius: 7px;
+  background:
+    radial-gradient(circle at 28% 18%, rgb(255 248 198 / 0.22), transparent 34%),
+    linear-gradient(135deg, rgb(8 61 48 / 0.95), rgb(8 21 31 / 0.96));
+  box-shadow:
+    0 4px 10px rgb(0 0 0 / 0.38),
+    0 0 0 1px rgb(255 230 142 / 0.24),
+    inset 0 1px 1px rgb(212 255 236 / 0.24);
+}
+
+.recurringCreditBadge::before {
+  content: "";
+  flex: 0 0 auto;
+  width: 9px;
+  height: 9px;
+  border: 2px solid rgb(126 255 218 / 0.88);
+  border-left-color: rgb(126 255 218 / 0.2);
+  border-radius: 999px;
+  box-shadow:
+    0 0 5px rgb(74 255 202 / 0.34),
+    inset 0 0 0 1px rgb(4 24 22 / 0.48);
+}
+
+.recurringCreditBadge.counted {
+  border-color: rgb(118 255 214 / 0.78);
+  background:
+    radial-gradient(circle at 26% 20%, rgb(255 250 215 / 0.34), transparent 32%),
+    linear-gradient(135deg, rgb(10 67 51 / 0.96), rgb(22 19 14 / 0.96));
 }
 
 .scoredAgendaCreditsBadge {

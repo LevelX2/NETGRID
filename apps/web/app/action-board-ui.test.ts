@@ -65,6 +65,7 @@ import {
   runWindowActions,
   runWindowStatusLabel,
   runnerRigMemorySummary,
+  restrictedPoolUsesCreditBadge,
   serverBoardRows,
   serverCounterChipsForDisplays,
   serverDisplayLabel,
@@ -1601,6 +1602,31 @@ describe("V1.0.6 resource and card-display helpers", () => {
       showCount: false,
       iconCount: 2
     });
+  });
+
+  it("routes restricted credit pools to the card credit badge pattern", () => {
+    expect(
+      restrictedPoolUsesCreditBadge({
+        id: "restricted_pool",
+        amount: 2,
+        displayKind: "restricted_pool",
+        label: "Installations-Bits",
+        ariaLabel: "2 Installations-Bits",
+        counterType: "bit",
+        usageHint: "spendable"
+      })
+    ).toBe(true);
+    expect(
+      restrictedPoolUsesCreditBadge({
+        id: "ablative",
+        amount: 2,
+        displayKind: "damage_prevention",
+        label: "Ablative-Counter",
+        ariaLabel: "2 Ablative-Counter",
+        counterType: "power",
+        usageHint: "status_marker"
+      })
+    ).toBe(false);
   });
 
   it("keeps contextual card action labels distinct for server-targeted events", () => {

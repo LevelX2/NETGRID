@@ -410,6 +410,10 @@ export function cardCreditCounterVisual(amount: number): CardCreditCounterVisual
   return { safeAmount, showCount, iconCount, iconColumns };
 }
 
+export function restrictedPoolUsesCreditBadge(display: NonNullable<VisibleCard["counterDisplays"]>[number]): boolean {
+  return display.displayKind === "restricted_pool" && display.counterType === "bit";
+}
+
 export function splitLegalActions(actions: LegalAction[]): { primaryActions: LegalAction[]; contextualActions: LegalAction[] } {
   const primaryActions: LegalAction[] = [];
   const contextualActions: LegalAction[] = [];
