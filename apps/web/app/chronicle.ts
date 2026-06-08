@@ -917,6 +917,32 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         chips.push(source, "Archives", "R&D", `${movedCount} bewegt`);
         break;
       }
+      if (
+        hiddenZoneAction === "p3_38_move_top_trash_to_grip" ||
+        (payload.returnedToGrip === true &&
+          stringValue(payload.sourceZone) === "heap" &&
+          stringValue(payload.destinationZone) === "grip")
+      ) {
+        const returnedCount = numberValue(payload.returnedCount) ?? numberValue(payload.movedCardCount) ?? 1;
+        const returnedTitle =
+          titleForDefinitionId(stringValue(payload.returnedCardDefinitionId)) ??
+          titleForDefinitionId(stringValue(payload.targetDefinitionId)) ??
+          titleForDefinitionId(stringValue(payload.targetCardDefinitionId));
+        const source =
+          titleForDefinitionId(sourceDefinitionId) ??
+          sourceTitle ??
+          cardTitle ??
+          "eine Karte";
+        category = "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = sourceDefinitionId ?? cardDefinitionId;
+        title = returnedTitle
+          ? phrase(subject, `${source} genutzt und ${returnedTitle} aus dem Heap in den Grip genommen`)
+          : phrase(subject, `${source} genutzt und ${cardCountText(returnedCount)} aus dem Heap in den Grip genommen`);
+        chips.push(source, "Heap", "Grip", ...(returnedTitle ? [returnedTitle] : [`${returnedCount} bewegt`]));
+        break;
+      }
       if (mergedCardResolverEffect) {
         const cardResolverEffect = mergedCardResolverEffect;
         category = cardResolverEffect.category ?? "card";

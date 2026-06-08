@@ -2929,6 +2929,31 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toEqual(["Runner", "KI", "Stack", "Verdeckt", "Hand", "Shuffle"]);
   });
 
+  it("names the public heap card returned by Junkyard BBS", () => {
+    const item = formatChronicleEvent(
+      makeEvent("activated_card_ability", {
+        actor: "runner",
+        hiddenZoneBarrier: true,
+        hiddenZoneAction: "p3_38_move_top_trash_to_grip",
+        sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+        cardDefinitionId: "onr_v1_165_junkyard-bbs",
+        returnedCardDefinitionId: "onr_v1_157_crash-everett-inventive-fixer",
+        returnedCount: 1,
+        sourceZone: "heap",
+        destinationZone: "grip",
+        returnedToGrip: true
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast Junkyard BBS genutzt und Crash Everett, Inventive Fixer aus dem Heap in den Grip genommen.");
+    expect(item.category).toBe("card");
+    expect(item.importance).toBe("important");
+    expect(item.visibility).toBe("public");
+    expect(item.cardDefinitionId).toBe("onr_v1_165_junkyard-bbs");
+    expect(item.chips).toEqual(["Runner", "Junkyard BBS", "Heap", "Grip", "Crash Everett, Inventive Fixer"]);
+  });
+
   it("describes Aujourd'Oui top-five program choices with revealed selected programs only", () => {
     const item = formatChronicleEvent(
       makeEvent("resolve_choice", {
