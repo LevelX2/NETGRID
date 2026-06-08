@@ -880,6 +880,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       ariaLabel: "14 gespeicherte Credits",
       counterType: "bit",
       usageHint: "spendable",
+      creditPool: { kind: "stored_credit" },
     });
     expect(assetState.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",
@@ -1176,6 +1177,7 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       ariaLabel: "6 gespeicherte Credits",
       counterType: "bit",
       usageHint: "spendable",
+      creditPool: { kind: "stored_credit" },
     });
 
     let unscored = toRunnerTurn(

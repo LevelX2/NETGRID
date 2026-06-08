@@ -886,6 +886,8 @@ function currentVisibleBankAmount(cards: readonly VisibleCard[]): number | undef
   const values = cards.flatMap((card) => [
     ...(card.counterDisplays ?? [])
       .filter((counter) =>
+        counter.creditPool?.kind === "stored_credit" ||
+        counter.creditPool?.kind === "recurring_credit" ||
         counter.displayKind === "stored_credits" ||
         counter.displayKind === "recurring_credit",
       )

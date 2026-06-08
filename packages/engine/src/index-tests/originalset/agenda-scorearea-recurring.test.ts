@@ -2607,6 +2607,7 @@ describe("Originalset Spotcheck 2026-05-16 Resource/Agenda ScoreArea hardening",
       ariaLabel: "10 gespeicherte Credits",
       counterType: "bit",
       usageHint: "spendable",
+      creditPool: { kind: "stored_credit" },
     });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "activated_card_ability",

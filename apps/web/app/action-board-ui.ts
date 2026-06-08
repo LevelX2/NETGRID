@@ -410,8 +410,15 @@ export function cardCreditCounterVisual(amount: number): CardCreditCounterVisual
   return { safeAmount, showCount, iconCount, iconColumns };
 }
 
-export function restrictedPoolUsesCreditBadge(display: NonNullable<VisibleCard["counterDisplays"]>[number]): boolean {
-  return display.displayKind === "restricted_pool" && display.counterType === "bit";
+export function counterDisplayUsesCreditBadge(display: NonNullable<VisibleCard["counterDisplays"]>[number]): boolean {
+  return (
+    display.creditPool !== undefined ||
+    (display.displayKind === "restricted_pool" && display.counterType === "bit")
+  );
+}
+
+export function counterDisplayUsesRefreshingCreditBadge(display: NonNullable<VisibleCard["counterDisplays"]>[number]): boolean {
+  return display.creditPool?.refresh !== undefined || display.displayKind === "recurring_credit";
 }
 
 export function splitLegalActions(actions: LegalAction[]): { primaryActions: LegalAction[]; contextualActions: LegalAction[] } {

@@ -24,6 +24,8 @@ import {
   cardCreditCounterVisual,
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
+  counterDisplayUsesCreditBadge,
+  counterDisplayUsesRefreshingCreditBadge,
   counterDisplayBadgeView,
   counterDisplayTooltipText,
   counterDisplaysForRendering,
@@ -65,7 +67,6 @@ import {
   runWindowActions,
   runWindowStatusLabel,
   runnerRigMemorySummary,
-  restrictedPoolUsesCreditBadge,
   serverBoardRows,
   serverCounterChipsForDisplays,
   serverDisplayLabel,
@@ -1604,29 +1605,51 @@ describe("V1.0.6 resource and card-display helpers", () => {
     });
   });
 
-  it("routes restricted credit pools to the card credit badge pattern", () => {
-    expect(
-      restrictedPoolUsesCreditBadge({
-        id: "restricted_pool",
-        amount: 2,
-        displayKind: "restricted_pool",
-        label: "Installations-Bits",
-        ariaLabel: "2 Installations-Bits",
-        counterType: "bit",
-        usageHint: "spendable"
-      })
-    ).toBe(true);
-    expect(
-      restrictedPoolUsesCreditBadge({
-        id: "ablative",
-        amount: 2,
-        displayKind: "damage_prevention",
-        label: "Ablative-Counter",
-        ariaLabel: "2 Ablative-Counter",
-        counterType: "power",
-        usageHint: "status_marker"
-      })
-    ).toBe(false);
+  it("distinguishes stored and refreshing credit pool badges", () => {
+    const brokerCredits: NonNullable<VisibleCard["counterDisplays"]>[number] = {
+      id: "stored_credits",
+      amount: 3,
+      displayKind: "stored_credits",
+      label: "Credits",
+      ariaLabel: "3 gespeicherte Credits",
+      counterType: "bit",
+      usageHint: "spendable",
+      creditPool: { kind: "stored_credit" }
+    };
+    const zetatechBits: NonNullable<VisibleCard["counterDisplays"]>[number] = {
+      id: "restricted_pool",
+      amount: 2,
+      displayKind: "restricted_pool",
+      label: "Installations-Bits",
+      ariaLabel: "2 Installations-Bits",
+      counterType: "bit",
+      usageHint: "spendable",
+      creditPool: {
+        kind: "restricted_credit",
+        capacity: 2,
+        uses: ["install_programs"],
+        refresh: {
+          timing: "start_of_runner_turn",
+          behavior: "refill_to_capacity_if_used"
+        }
+      }
+    };
+    const militechCounter: NonNullable<VisibleCard["counterDisplays"]>[number] = {
+      id: "militech",
+      amount: 1,
+      displayKind: "generic_counter",
+      label: "Militech-Counter",
+      ariaLabel: "1 Militech-Counter",
+      counterType: "militech",
+      usageHint: "status_marker"
+    };
+
+    expect(counterDisplayUsesCreditBadge(brokerCredits)).toBe(true);
+    expect(counterDisplayUsesRefreshingCreditBadge(brokerCredits)).toBe(false);
+    expect(counterDisplayUsesCreditBadge(zetatechBits)).toBe(true);
+    expect(counterDisplayUsesRefreshingCreditBadge(zetatechBits)).toBe(true);
+    expect(counterDisplayUsesCreditBadge(militechCounter)).toBe(false);
+    expect(counterDisplayUsesRefreshingCreditBadge(militechCounter)).toBe(false);
   });
 
   it("keeps contextual card action labels distinct for server-targeted events", () => {

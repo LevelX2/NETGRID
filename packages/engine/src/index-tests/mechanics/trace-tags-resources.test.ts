@@ -823,6 +823,7 @@ describe("V1.9.14 Trace/Tag/Resource Longtail", () => {
       ariaLabel: "3 gespeicherte Credits",
       counterType: "bit",
       usageHint: "spendable",
+      creditPool: { kind: "stored_credit" },
     });
     brokerActions = getLegalActions(state, "runner").filter(
       (action) => action.payload?.cardId === brokerId,

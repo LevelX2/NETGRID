@@ -1995,6 +1995,14 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
           amount: 2,
           displayKind: "recurring_credit",
           usageHint: "refreshing",
+          creditPool: expect.objectContaining({
+            kind: "recurring_credit",
+            capacity: 3,
+            refresh: {
+              timing: "start_of_runner_turn",
+              behavior: "refill_to_capacity_if_used",
+            },
+          }),
         }),
       ]),
     );
@@ -2009,6 +2017,13 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
           displayKind: "restricted_pool",
           counterType: "bit",
           label: "Link-Bits",
+          creditPool: expect.objectContaining({
+            kind: "restricted_credit",
+            refresh: {
+              timing: "start_of_runner_turn",
+              behavior: "refill_to_capacity_if_used",
+            },
+          }),
         }),
       ]),
     );

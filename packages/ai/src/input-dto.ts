@@ -472,6 +472,27 @@ function sanitizeCounterDisplay(display: CounterDisplay): CounterDisplay {
     ...(display.usageHint !== undefined
       ? { usageHint: display.usageHint }
       : {}),
+    ...(display.creditPool !== undefined
+      ? { creditPool: sanitizeCounterCreditPool(display.creditPool) }
+      : {}),
+  };
+}
+
+function sanitizeCounterCreditPool(
+  creditPool: NonNullable<CounterDisplay["creditPool"]>,
+): NonNullable<CounterDisplay["creditPool"]> {
+  return {
+    kind: creditPool.kind,
+    ...(creditPool.capacity !== undefined ? { capacity: creditPool.capacity } : {}),
+    ...(creditPool.uses !== undefined ? { uses: creditPool.uses.slice() } : {}),
+    ...(creditPool.refresh !== undefined
+      ? {
+          refresh: {
+            timing: creditPool.refresh.timing,
+            behavior: creditPool.refresh.behavior,
+          },
+        }
+      : {}),
   };
 }
 

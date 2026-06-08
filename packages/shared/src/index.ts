@@ -1548,6 +1548,35 @@ export type CounterUsageHint =
   | "score_modifier"
   | "status_marker";
 
+export type CounterCreditUse =
+  | "using_icebreaker_during_run"
+  | "using_icebreaker_during_run_non_noisy"
+  | "using_killer_during_run"
+  | "increase_link"
+  | "trash_nodes"
+  | "trash_upgrades"
+  | "install_programs"
+  | "remove_tags";
+
+export type CounterCreditPoolKind =
+  | "stored_credit"
+  | "restricted_credit"
+  | "recurring_credit";
+
+export type CounterCreditRefreshTiming = "start_of_runner_turn";
+
+export type CounterCreditRefreshBehavior = "refill_to_capacity_if_used";
+
+export type CounterCreditPool = {
+  kind: CounterCreditPoolKind;
+  capacity?: number;
+  uses?: readonly CounterCreditUse[];
+  refresh?: {
+    timing: CounterCreditRefreshTiming;
+    behavior: CounterCreditRefreshBehavior;
+  };
+};
+
 export type CounterDisplay = {
   id: string;
   amount: number;
@@ -1556,6 +1585,7 @@ export type CounterDisplay = {
   ariaLabel: string;
   counterType?: CounterType;
   usageHint?: CounterUsageHint;
+  creditPool?: CounterCreditPool;
 };
 
 export type VisibleEffectiveSubroutine = {

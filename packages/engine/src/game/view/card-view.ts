@@ -240,7 +240,7 @@ function counterDisplaysForKnownCard(
     ...(advancementCounterDisplays(instance.advancementCounters) ?? []),
     ...(storedCreditCounterDisplays(definition, instance) ?? []),
     ...(restrictedPoolCounterDisplays(definition, instance) ?? []),
-    ...(recurringCreditCounterDisplays(instance) ?? []),
+    ...(recurringCreditCounterDisplays(definition, instance) ?? []),
     ...(specialCounterDisplays(definition, instance) ?? []),
   ];
 }
@@ -284,15 +284,20 @@ function storedCreditCounterDisplays(
       ariaLabel: `${amount} gespeicherte Credits`,
       counterType: "bit",
       usageHint: "spendable",
+      creditPool: {
+        kind: "stored_credit",
+      },
     },
   ];
 }
 
 function recurringCreditCounterDisplays(
+  definition: CardDefinition,
   instance: CardInstance,
 ): VisibleCard["counterDisplays"] {
   const amount = Math.max(0, Math.floor(instance.counters?.recurring_credit ?? 0));
   if (amount <= 0) return undefined;
+  const capacity = Math.max(0, Math.floor(definition.recurringCredits ?? amount));
   return [
     {
       id: "recurring_credit",
@@ -302,6 +307,14 @@ function recurringCreditCounterDisplays(
       ariaLabel: `${amount} wiederkehrende Credits`,
       counterType: "recurring_credit",
       usageHint: "refreshing",
+      creditPool: {
+        kind: "recurring_credit",
+        capacity,
+        refresh: {
+          timing: "start_of_runner_turn",
+          behavior: "refill_to_capacity_if_used",
+        },
+      },
     },
   ];
 }
@@ -331,6 +344,19 @@ function restrictedPoolCounterDisplays(
       ariaLabel: `${amount} ${label}`,
       counterType: "bit",
       usageHint: "spendable",
+      creditPool: {
+        kind: "restricted_credit",
+        ...(restrictedSource
+          ? {
+              capacity: Math.max(0, Math.floor(restrictedSource.capacity)),
+              uses: restrictedSource.usableFor.slice(),
+              refresh: {
+                timing: restrictedSource.refresh.timing,
+                behavior: restrictedSource.refresh.mode,
+              },
+            }
+          : {}),
+      },
     },
   ];
 }
@@ -436,7 +462,7 @@ function specialCounterDisplays(
       label: "Militech-Counter",
       ariaLabelName: "Militech-Counter",
       counterType: "militech",
-      usageHint: "spendable",
+      usageHint: "status_marker",
     }),
     ...singleCounterDisplay(counters.power, {
       id: "power",

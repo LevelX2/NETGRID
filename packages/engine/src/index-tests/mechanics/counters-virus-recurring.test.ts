@@ -768,6 +768,7 @@ describe("V1.9.12 Counter/Virus/Recurring", () => {
         ariaLabel: "12 gespeicherte Credits",
         counterType: "bit",
         usageHint: "spendable",
+        creditPool: { kind: "stored_credit" },
       });
     }
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({

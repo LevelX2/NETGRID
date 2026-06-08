@@ -148,6 +148,8 @@ import {
   cardChoiceReadonlyConfirmationOptionId,
   cardChoiceUsesOrderedSelection,
   cardChoiceUsesReadableCards,
+  counterDisplayUsesCreditBadge,
+  counterDisplayUsesRefreshingCreditBadge,
   counterDisplayTooltipText,
   counterDisplaysForRendering,
   hostedOnDetailLabel,
@@ -189,7 +191,6 @@ import {
   runnerRigMemorySummary,
   runPositionStatusLabel,
   runWindowStatusLabel,
-  restrictedPoolUsesCreditBadge,
   serializeCuePositionPreference,
   showInstalledCorpState,
   shouldUseFieldCardChoice,
@@ -16743,12 +16744,17 @@ function CounterDisplayBadge({ display, scoreState }: { display: NonNullable<Vis
       />
     );
   }
-  if (restrictedPoolUsesCreditBadge(display)) {
+  if (counterDisplayUsesCreditBadge(display)) {
+    const hasRefreshMarker = counterDisplayUsesRefreshingCreditBadge(display);
     return (
       <CardCreditCounter
         amount={amount}
         ariaLabel={display.ariaLabel}
-        className="recurringCreditBadge restrictedCreditBadge"
+        className={
+          hasRefreshMarker
+            ? "recurringCreditBadge restrictedCreditBadge"
+            : "brokerStoredCreditsBadge restrictedCreditBadge"
+        }
         testId="restricted-credit-badge"
       />
     );
