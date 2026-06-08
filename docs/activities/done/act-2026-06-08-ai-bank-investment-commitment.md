@@ -1,19 +1,24 @@
 ---
 activityId: act-2026-06-08-ai-bank-investment-commitment
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-08
-startedAt:
-completedAt:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+  - packages/ai/src/semantic-ai-runtime-cutover.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts -t bank
 ---
 
 # Runner-KI: Bank-Investment-Commitment für Broker-artige Karten
@@ -56,15 +61,15 @@ Die Runner-KI soll `Broker` und vergleichbare Bankkarten nicht nur als einzelne 
 
 ## Akzeptanzkriterien
 
-- [ ] Die KI kann nach einer Bankkarten-Installation side-sicher ein aktives Bank-Investment-Commitment ableiten oder dokumentiert eng, welcher bestehende Planstatus diese Rolle übernimmt.
-- [ ] `Broker`-Install wird abgewertet, wenn die KI keinen plausiblen Folgeplan zum Aufladen/Bankaufbau hat.
-- [ ] Frisch installierter leerer `Broker` bevorzugt in stabiler Lage eine Build-Bank-Action gegenüber Low-Value-Runs, generischem Draw oder irrelevanten Installs.
-- [ ] Bei akutem Remote-Score-Threat, bekannter Agenda, Survival/Tag/Damage-Notfall, dringender Breaker-/MU-/Handentwicklung oder sehr hohem Run-Payoff darf der Bankaufbau übersteuert werden.
-- [ ] `cash_out_credit_bank` wird nur bei konkretem FundingNeed, kritischer Reserve oder klarer Finanzierungsschwelle bevorzugt.
-- [ ] Kein sinnloses Cashout direkt nach Aufbau ohne FundingNeed.
-- [ ] Die gewählte finale Action stammt weiterhin aus `input.legalActions`.
-- [ ] Debug/Evidence bleibt redigiert und enthält keine Hidden-Info.
-- [ ] Die neuen Tests bauen auf den bestehenden Broker-/DecisionDebug-/TacticalPlan-Regressionen auf, statt sie zu duplizieren.
+- [x] Die KI kann nach einer Bankkarten-Installation side-sicher ein aktives Bank-Investment-Commitment ableiten oder dokumentiert eng, welcher bestehende Planstatus diese Rolle übernimmt.
+- [x] `Broker`-Install wird abgewertet, wenn die KI keinen plausiblen Folgeplan zum Aufladen/Bankaufbau hat.
+- [x] Frisch installierter leerer `Broker` bevorzugt in stabiler Lage eine Build-Bank-Action gegenüber Low-Value-Runs, generischem Draw oder irrelevanten Installs.
+- [x] Bei akutem Remote-Score-Threat, bekannter Agenda, Survival/Tag/Damage-Notfall, dringender Breaker-/MU-/Handentwicklung oder sehr hohem Run-Payoff darf der Bankaufbau übersteuert werden.
+- [x] `cash_out_credit_bank` wird nur bei konkretem FundingNeed, kritischer Reserve oder klarer Finanzierungsschwelle bevorzugt.
+- [x] Kein sinnloses Cashout direkt nach Aufbau ohne FundingNeed.
+- [x] Die gewählte finale Action stammt weiterhin aus `input.legalActions`.
+- [x] Debug/Evidence bleibt redigiert und enthält keine Hidden-Info.
+- [x] Die neuen Tests bauen auf den bestehenden Broker-/DecisionDebug-/TacticalPlan-Regressionen auf, statt sie zu duplizieren.
 
 ## Umsetzungshinweise
 
@@ -80,4 +85,13 @@ Die Runner-KI soll `Broker` und vergleichbare Bankkarten nicht nur als einzelne 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt in der semantischen Runner-Runtime:
+
+- Neue side-sichere Bank-Commitment-Bewertung aus `input.legalActions`, eigener sichtbarer Rig-/Hand-View und vorhandener TacticalPlan-Memory.
+- Build-, Cashout-, Install- und Run-Konkurrenz bekommen redigierte Debug-/Score-Evidence mit `bankCommitmentActive`, `bankSource`, `bankStoredCredits`, `desiredBankTarget`, `buildBankPriority`, `cashOutPriority`, `bankCommitmentStatus`, `why_bank_build_over_run`, `why_run_over_bank_build`, `why_broker_install_deferred` und `why_cashout_now`.
+- Erster Broker-Load wird in stabiler Lage vor Low-Value-Run/generischem Draw priorisiert; zweite Aufladung bleibt schwächer.
+- Broker-Install ohne plausiblen späteren Load wird abgewertet.
+- Cashout ohne FundingNeed, kritische Reserve oder Bank-Schwelle wird semantisch ausgeschlossen; vorhandener Direkt-nach-Build-Schutz bleibt erhalten.
+- Bekannte Agenda-/Remote-Score-/High-Payoff-Runs dürfen ein aktives Bank-Build-Commitment übersteuern.
+
+Keine Engine-, LegalAction-, `applyAction`-, Replay-, StateHash-, Zufalls- oder UI-Änderung.

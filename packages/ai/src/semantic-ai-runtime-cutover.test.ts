@@ -716,6 +716,193 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
+  it("prefers the first empty Broker build over low-value runs and generic setup", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "broker-load",
+        "runner",
+        "activated_card_ability",
+        "3 Credits auf Broker legen",
+        { credits: 0 },
+        { source: "onr_v1_154_broker" },
+      ),
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        { payload: { serverId: "rd" } },
+      ),
+      legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
+    ]);
+    input.playerView.own.credits = 6;
+    input.playerView.own.rig = [
+      visibleCard("onr_v1_154_broker", "runner", "resource"),
+    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("broker-load");
+    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_bank_investment_commitment",
+          reason: expect.stringContaining(
+            "bankCommitmentStatus:build_first_load",
+          ),
+        }),
+      ]),
+    );
+    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: "run-rd",
+        scoreBreakdown: expect.arrayContaining([
+          expect.objectContaining({
+            key: "runner_bank_commitment_build_over_low_run",
+            reason: expect.stringContaining(
+              "why_bank_build_over_run:low_value_run",
+            ),
+          }),
+        ]),
+      }),
+    );
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("lets known agenda remotes override an active Broker build commitment", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "broker-load",
+        "runner",
+        "activated_card_ability",
+        "3 Credits auf Broker legen",
+        { credits: 0 },
+        { source: "onr_v1_154_broker" },
+      ),
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+    ]);
+    input.playerView.own.credits = 6;
+    input.playerView.own.rig = [
+      visibleCard("onr_v1_154_broker", "runner", "resource"),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [visibleCard("simple_agenda", "corp", "agenda")]),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("run-remote");
+    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_bank_commitment_run_override",
+          reason: expect.stringContaining(
+            "why_run_over_bank_build:known_agenda",
+          ),
+        }),
+      ]),
+    );
+  });
+
+  it("defers Broker cashout when no funding need or bank threshold is visible", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "broker-take",
+        "runner",
+        "activated_card_ability",
+        "Credits von Broker nehmen",
+        { credits: 0 },
+        { source: "onr_v1_154_broker" },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 6;
+    input.playerView.own.rig = [
+      visibleCard("onr_v1_154_broker", "runner", "resource", {
+        counters: { bit: 3 },
+        counterDisplays: [
+          {
+            id: "broker-bank",
+            amount: 3,
+            displayKind: "stored_credits",
+            label: "3",
+            ariaLabel: "3 stored credits",
+            usageHint: "spendable",
+          },
+        ],
+      }),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: "broker-take",
+        excluded: true,
+        scoreBreakdown: expect.arrayContaining([
+          expect.objectContaining({
+            key: "runner_bank_cashout_gate",
+            reason: expect.stringContaining("why_cashout_now:no_funding_need"),
+          }),
+        ]),
+      }),
+    );
+  });
+
+  it("devalues Broker install when a later bank load is not plausible", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "install-broker",
+        "runner",
+        "install_card",
+        "Install Broker",
+        { credits: 0 },
+        { source: "onr_v1_154_broker" },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 1;
+    input.playerView.own.gripOrHq = [
+      visibleCard("onr_v1_154_broker", "runner", "resource"),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: "install-broker",
+        scoreBreakdown: expect.arrayContaining([
+          expect.objectContaining({
+            key: "runner_bank_install_commitment",
+            reason: expect.stringContaining(
+              "why_broker_install_deferred:no_plausible_followup_load",
+            ),
+          }),
+        ]),
+      }),
+    );
+  });
+
   it("returns from an opportunistic central run to the blocked remote coverage plan", () => {
     const centralInput = aiInput("runner", [
       legalAction(

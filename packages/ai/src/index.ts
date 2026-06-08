@@ -5456,6 +5456,593 @@ function semanticRuntimePlanMemoryActionExclusion(
         "previous build_credit_bank plan is still stable and no concrete funding need is visible",
     };
   }
+  if (
+    input.side === "runner" &&
+    isRunnerBankCashOutAction(input, action) &&
+    !runnerBankCashOutIsUsefulNow(input, action)
+  ) {
+    return {
+      key: "bank_cashout_without_funding_need",
+      label: "Bank-Auszahlung ohne Bedarf",
+      reason: runnerBankInvestmentCommitmentEvidence(input, action)
+        .filter(
+          (entry) =>
+            entry.startsWith("bankCommitmentStatus:") ||
+            entry.startsWith("bankStoredCredits:") ||
+            entry.startsWith("cashOutPriority:") ||
+            entry.startsWith("why_cashout_now:"),
+        )
+        .join("|"),
+    };
+  }
+  return undefined;
+}
+
+type RunnerBankInvestmentCommitmentStatus =
+  | "inactive"
+  | "install_ready"
+  | "install_deferred"
+  | "build_first_load"
+  | "build_second_load"
+  | "hold"
+  | "cashout_ready"
+  | "cashout_deferred"
+  | "abandoned";
+
+type RunnerBankInvestmentCommitmentAssessment = {
+  active: boolean;
+  status: RunnerBankInvestmentCommitmentStatus;
+  bankSource: string;
+  storedCredits: number;
+  desiredBankTarget: number;
+  buildActionLegal: boolean;
+  cashOutActionLegal: boolean;
+  concreteFundingNeed: boolean;
+  criticalReserve: boolean;
+  cashOutThresholdMet: boolean;
+  runOverride?: string;
+  buildBankPriority: number;
+  cashOutPriority: number;
+};
+
+function runnerBankInvestmentCommitmentScoreComponents(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent[] {
+  if (input.side !== "runner" || action.side !== "runner") return [];
+  const assessment = runnerBankInvestmentCommitmentAssessment(input, action);
+  if (!assessment.active && assessment.status === "inactive") return [];
+
+  if (isRunnerBankBuildAction(input, action)) {
+    return [
+      {
+        key: "runner_bank_investment_commitment",
+        label: "Bank-Commitment",
+        value: assessment.buildBankPriority,
+        reason: runnerBankInvestmentCommitmentEvidence(input, action).join("|"),
+      },
+    ];
+  }
+
+  if (isRunnerBankCashOutAction(input, action)) {
+    return [
+      {
+        key: "runner_bank_cashout_gate",
+        label: "Bank-Auszahlung",
+        value: assessment.cashOutPriority,
+        reason: runnerBankInvestmentCommitmentEvidence(input, action).join("|"),
+      },
+    ];
+  }
+
+  if (isRunnerBankInstallAction(input, action)) {
+    const value = assessment.status === "install_deferred" ? -1600 : 350;
+    return [
+      {
+        key: "runner_bank_install_commitment",
+        label: "Bank-Install-Commitment",
+        value,
+        reason: runnerBankInvestmentCommitmentEvidence(input, action).join("|"),
+      },
+    ];
+  }
+
+  if (
+    action.type === "start_run" &&
+    assessment.active &&
+    assessment.buildActionLegal
+  ) {
+    const runOverride = runnerBankCommitmentRunOverride(input, action);
+    return [
+      {
+        key: runOverride
+          ? "runner_bank_commitment_run_override"
+          : "runner_bank_commitment_build_over_low_run",
+        label: "Bank-Commitment vs. Run",
+        value: runOverride ? 950 : -1800,
+        reason: runnerBankInvestmentCommitmentEvidence(input, action).join("|"),
+      },
+    ];
+  }
+
+  return [];
+}
+
+function runnerBankInvestmentCommitmentEvidence(
+  input: AiDecisionInput,
+  action: LegalAction,
+): string[] {
+  if (input.side !== "runner" || action.side !== "runner") return [];
+  const isBankRelevantAction =
+    isRunnerBankBuildAction(input, action) ||
+    isRunnerBankCashOutAction(input, action) ||
+    isRunnerBankInstallAction(input, action) ||
+    action.type === "start_run";
+  if (!isBankRelevantAction) return [];
+  const assessment = runnerBankInvestmentCommitmentAssessment(input, action);
+  if (!assessment.active && assessment.status === "inactive") return [];
+  return [
+    `bankCommitmentActive:${assessment.active}`,
+    `bankSource:${assessment.bankSource}`,
+    `bankStoredCredits:${assessment.storedCredits}`,
+    `desiredBankTarget:${assessment.desiredBankTarget}`,
+    `buildBankPriority:${assessment.buildBankPriority}`,
+    `cashOutPriority:${assessment.cashOutPriority}`,
+    `bankCommitmentStatus:${assessment.status}`,
+    `bankBuildLegal:${assessment.buildActionLegal}`,
+    `bankCashOutLegal:${assessment.cashOutActionLegal}`,
+    `bankConcreteFundingNeed:${assessment.concreteFundingNeed}`,
+    `bankCriticalReserve:${assessment.criticalReserve}`,
+    `bankCashOutThreshold:${assessment.cashOutThresholdMet}`,
+    ...(isRunnerBankBuildAction(input, action) &&
+    assessment.buildBankPriority > 0
+      ? [`why_bank_build_over_run:${assessment.status}`]
+      : []),
+    ...(action.type === "start_run" && assessment.runOverride
+      ? [`why_run_over_bank_build:${assessment.runOverride}`]
+      : action.type === "start_run" &&
+          assessment.active &&
+          assessment.buildActionLegal
+        ? ["why_bank_build_over_run:low_value_run"]
+        : []),
+    ...(isRunnerBankInstallAction(input, action) &&
+    assessment.status === "install_deferred"
+      ? ["why_broker_install_deferred:no_plausible_followup_load"]
+      : []),
+    ...(isRunnerBankCashOutAction(input, action)
+      ? [
+          `why_cashout_now:${
+            runnerBankCashOutIsUsefulNow(input, action)
+              ? assessment.criticalReserve
+                ? "critical_reserve"
+                : assessment.concreteFundingNeed
+                  ? "concrete_funding_need"
+                  : "bank_threshold"
+              : "no_funding_need"
+          }`,
+        ]
+      : []),
+  ];
+}
+
+function runnerBankInvestmentCommitmentAssessment(
+  input: AiDecisionInput,
+  action: LegalAction,
+): RunnerBankInvestmentCommitmentAssessment {
+  const storedCredits = runnerBankStoredCredits(input, action);
+  const desiredBankTarget = storedCredits <= 0 ? 3 : 6;
+  const buildActionLegal = input.legalActions.some((candidate) =>
+    isRunnerBankBuildAction(input, candidate),
+  );
+  const cashOutActionLegal = input.legalActions.some((candidate) =>
+    isRunnerBankCashOutAction(input, candidate),
+  );
+  const concreteFundingNeed = runnerBankHasConcreteFundingNeed(input);
+  const criticalReserve = input.playerView.own.credits <= 3;
+  const cashOutThresholdMet = storedCredits >= 6;
+  const runOverride =
+    action.type === "start_run"
+      ? runnerBankCommitmentRunOverride(input, action)
+      : undefined;
+  const previousPlan = getTacticalPlanMemorySnapshot(input);
+  const bankSource = runnerBankSourceLabel(input, action);
+  const stableBuildWindow =
+    input.playerView.own.credits >= 4 &&
+    input.playerView.own.clicks >= 1 &&
+    !concreteFundingNeed;
+  const active =
+    buildActionLegal ||
+    cashOutActionLegal ||
+    isRunnerBankInstallAction(input, action) ||
+    previousPlan?.type === "runner.build_credit_bank";
+
+  if (!active) {
+    return {
+      active: false,
+      status: "inactive",
+      bankSource,
+      storedCredits,
+      desiredBankTarget,
+      buildActionLegal,
+      cashOutActionLegal,
+      concreteFundingNeed,
+      criticalReserve,
+      cashOutThresholdMet,
+      ...(runOverride ? { runOverride } : {}),
+      buildBankPriority: 0,
+      cashOutPriority: 0,
+    };
+  }
+
+  if (
+    previousPlan?.type === "runner.build_credit_bank" &&
+    !buildActionLegal &&
+    !cashOutActionLegal
+  ) {
+    return {
+      active: true,
+      status: "abandoned",
+      bankSource,
+      storedCredits,
+      desiredBankTarget,
+      buildActionLegal,
+      cashOutActionLegal,
+      concreteFundingNeed,
+      criticalReserve,
+      cashOutThresholdMet,
+      ...(runOverride ? { runOverride } : {}),
+      buildBankPriority: -800,
+      cashOutPriority: -1200,
+    };
+  }
+
+  if (isRunnerBankInstallAction(input, action)) {
+    const plausibleFollowup = runnerBankInstallHasPlausibleFollowup(
+      input,
+      action,
+    );
+    return {
+      active: plausibleFollowup,
+      status: plausibleFollowup ? "install_ready" : "install_deferred",
+      bankSource,
+      storedCredits,
+      desiredBankTarget,
+      buildActionLegal,
+      cashOutActionLegal,
+      concreteFundingNeed,
+      criticalReserve,
+      cashOutThresholdMet,
+      ...(runOverride ? { runOverride } : {}),
+      buildBankPriority: plausibleFollowup ? 350 : -1600,
+      cashOutPriority: 0,
+    };
+  }
+
+  if (isRunnerBankCashOutAction(input, action)) {
+    const usefulNow =
+      criticalReserve || concreteFundingNeed || cashOutThresholdMet;
+    return {
+      active: true,
+      status: usefulNow ? "cashout_ready" : "cashout_deferred",
+      bankSource,
+      storedCredits,
+      desiredBankTarget,
+      buildActionLegal,
+      cashOutActionLegal,
+      concreteFundingNeed,
+      criticalReserve,
+      cashOutThresholdMet,
+      ...(runOverride ? { runOverride } : {}),
+      buildBankPriority: 0,
+      cashOutPriority: usefulNow
+        ? criticalReserve
+          ? 1250
+          : concreteFundingNeed
+            ? 1100
+            : 650
+        : -2200,
+    };
+  }
+
+  if (buildActionLegal && stableBuildWindow) {
+    const firstLoad = storedCredits <= 0;
+    return {
+      active: true,
+      status: firstLoad ? "build_first_load" : "build_second_load",
+      bankSource,
+      storedCredits,
+      desiredBankTarget,
+      buildActionLegal,
+      cashOutActionLegal,
+      concreteFundingNeed,
+      criticalReserve,
+      cashOutThresholdMet,
+      ...(runOverride ? { runOverride } : {}),
+      buildBankPriority: firstLoad ? 2050 : 720,
+      cashOutPriority: -1600,
+    };
+  }
+
+  return {
+    active: true,
+    status: "hold",
+    bankSource,
+    storedCredits,
+    desiredBankTarget,
+    buildActionLegal,
+    cashOutActionLegal,
+    concreteFundingNeed,
+    criticalReserve,
+    cashOutThresholdMet,
+    ...(runOverride ? { runOverride } : {}),
+    buildBankPriority: buildActionLegal ? -300 : 0,
+    cashOutPriority: cashOutActionLegal ? -900 : 0,
+  };
+}
+
+function runnerBankCashOutIsUsefulNow(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const assessment = runnerBankInvestmentCommitmentAssessment(input, action);
+  return (
+    assessment.criticalReserve ||
+    assessment.concreteFundingNeed ||
+    assessment.cashOutThresholdMet
+  );
+}
+
+function isRunnerBankInstallAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (
+    input.side !== "runner" ||
+    action.side !== "runner" ||
+    action.type !== "install_card"
+  )
+    return false;
+  return runnerCardLooksLikeCreditBank(
+    input,
+    findVisibleCard(input, action.source),
+  );
+}
+
+function isRunnerBankBuildAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (
+    input.side !== "runner" ||
+    action.side !== "runner" ||
+    (action.type !== "trigger_ability" &&
+      action.type !== "activated_card_ability")
+  )
+    return false;
+  const text = runnerBankActionText(input, action);
+  return (
+    /auf broker legen/.test(text) ||
+    /broker_load_credits/.test(text) ||
+    /(?:put|load|add|build).*(?:bank|broker)/.test(text) ||
+    /(?:bank|broker).*(?:counter|load|build)/.test(text)
+  );
+}
+
+function isRunnerBankCashOutAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (
+    input.side !== "runner" ||
+    action.side !== "runner" ||
+    (action.type !== "trigger_ability" &&
+      action.type !== "activated_card_ability")
+  )
+    return false;
+  const text = runnerBankActionText(input, action);
+  return (
+    /von broker nehmen/.test(text) ||
+    /broker_take_credits/.test(text) ||
+    /(?:take|cash|withdraw|payout).*(?:bank|broker)/.test(text) ||
+    /(?:bank|broker).*(?:take|cash|withdraw|payout)/.test(text)
+  );
+}
+
+function runnerBankActionText(
+  input: AiDecisionInput,
+  action: LegalAction,
+): string {
+  const sourceCard = findVisibleCard(input, action.source);
+  const payloadLabel =
+    typeof action.payload?.cardImplementationAbilityLabel === "string"
+      ? action.payload.cardImplementationAbilityLabel
+      : "";
+  const resourceAbility =
+    typeof action.payload?.resourceAbility === "string"
+      ? action.payload.resourceAbility
+      : "";
+  return [
+    action.label,
+    payloadLabel,
+    resourceAbility,
+    sourceCard?.title,
+    sourceCard?.definitionId,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+}
+
+function runnerCardLooksLikeCreditBank(
+  input: AiDecisionInput,
+  card: VisibleCard | undefined,
+): boolean {
+  if (!card?.definitionId) return false;
+  if (card.definitionId === "onr_v1_154_broker") return true;
+  const roles = rolesForCardId(card.definitionId);
+  const definition =
+    RUNTIME_CARDS[card.definitionId] ?? DEMO_CARDS_BY_ID[card.definitionId];
+  const definitionLike = definition as
+    | {
+        title?: string;
+        rulesText?: string;
+        mechanics?: unknown;
+      }
+    | undefined;
+  const mechanics = Array.isArray(definitionLike?.mechanics)
+    ? definitionLike.mechanics.join(" ")
+    : "";
+  const text = [
+    card.title,
+    card.definitionId,
+    definitionLike?.title,
+    definitionLike?.rulesText,
+    mechanics,
+    ...roles,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLowerCase();
+  return (
+    roles.some((role) => role.includes("economy")) &&
+    (/broker|bank|stored credits|counter_bank|temporary_resource_bank/.test(
+      text,
+    ) ||
+      /credit.*counter|counter.*credit/.test(text))
+  );
+}
+
+function runnerBankStoredCredits(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number {
+  const sourceCard = findVisibleCard(input, action.source);
+  const sourceAmount =
+    sourceCard &&
+    (runnerCardLooksLikeCreditBank(input, sourceCard) ||
+      isRunnerBankBuildAction(input, action) ||
+      isRunnerBankCashOutAction(input, action))
+      ? runnerVisibleCardStoredCredits(sourceCard)
+      : undefined;
+  if (sourceAmount !== undefined) return sourceAmount;
+  const bankAmounts = (input.playerView.own.rig ?? [])
+    .filter((card) => runnerCardLooksLikeCreditBank(input, card))
+    .map(runnerVisibleCardStoredCredits);
+  return bankAmounts.length > 0 ? Math.max(...bankAmounts) : 0;
+}
+
+function runnerVisibleCardStoredCredits(card: VisibleCard): number {
+  const counterValues = [
+    card.counters?.bit,
+    card.counters?.power,
+    card.counters?.recurring_credit,
+    ...(card.counterDisplays ?? [])
+      .filter((display) => {
+        const text = [
+          display.displayKind,
+          display.usageHint,
+          display.label,
+          display.ariaLabel,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+        return /stored|credit|spendable|bank/.test(text);
+      })
+      .map((display) => display.amount),
+  ]
+    .filter((value): value is number => typeof value === "number")
+    .map((value) => Math.max(0, Math.floor(value)));
+  return counterValues.length > 0 ? Math.max(...counterValues) : 0;
+}
+
+function runnerBankSourceLabel(
+  input: AiDecisionInput,
+  action: LegalAction,
+): string {
+  const definitionId = sourceDefinitionIdForAction(input, action);
+  if (definitionId) return definitionId;
+  const sourceCard = findVisibleCard(input, action.source);
+  if (sourceCard?.definitionId) return sourceCard.definitionId;
+  if (/broker/i.test(action.label)) return "broker";
+  return "credit_bank";
+}
+
+function runnerBankHasConcreteFundingNeed(input: AiDecisionInput): boolean {
+  if (runnerHandFundingTarget(input)) return true;
+  const credits = input.playerView.own.credits;
+  return input.legalActions.some((action) => {
+    if (action.side !== "runner") return false;
+    if (isRunnerBankCashOutAction(input, action)) return false;
+    if (action.type !== "install_card" && action.type !== "play_event")
+      return false;
+    if (actionCreditCost(action) <= credits) return false;
+    const roles = rolesForAction(input, action);
+    return roles.some(
+      (role) =>
+        role.startsWith("breaker_") ||
+        role.includes("memory") ||
+        role.includes("economy") ||
+        role.includes("pressure") ||
+        role.includes("setup"),
+    );
+  });
+}
+
+function runnerBankInstallHasPlausibleFollowup(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const creditsAfterInstall =
+    input.playerView.own.credits - actionCreditCost(action);
+  if (creditsAfterInstall < 4) return false;
+  if (input.playerView.own.clicks < 2) return false;
+  if (runnerBankHasConcreteFundingNeed(input)) return false;
+  return !input.legalActions.some(
+    (candidate) =>
+      candidate.type === "start_run" &&
+      Boolean(runnerBankCommitmentRunOverride(input, candidate)),
+  );
+}
+
+function runnerBankCommitmentRunOverride(
+  input: AiDecisionInput,
+  action: LegalAction,
+): string | undefined {
+  if (action.type !== "start_run") return undefined;
+  const serverId = semanticRuntimeServerId(action);
+  if (!serverId) return undefined;
+  const server = input.playerView.servers.find(
+    (entry) => entry.id === serverId,
+  );
+  if (
+    server?.root.some(
+      (card) =>
+        card.known &&
+        (card.type === "agenda" ||
+          (card.definitionId &&
+            definitionTypeForMetrics(card.definitionId) === "agenda")),
+    )
+  )
+    return "known_agenda";
+  if (
+    server?.root.some(
+      (card) => card.known && (card.advancementCounters ?? 0) > 0,
+    )
+  )
+    return "remote_score_threat";
+  const evaluation = runnerMultiRunTargetEvaluation(input, action, serverId);
+  if (!evaluation) return undefined;
+  if (runnerMultiRunHighPayoff(evaluation)) {
+    return `high_payoff:${evaluation.accessPayoff}`;
+  }
+  if (
+    evaluation.recommendation === "run_now" &&
+    evaluation.accessPayoff !== "unknown" &&
+    evaluation.knownAccessState !== "known_no_current_payoff"
+  ) {
+    return `run_now:${evaluation.accessPayoff}`;
+  }
   return undefined;
 }
 
@@ -5679,6 +6266,9 @@ function semanticRuntimeRunnerScoreComponents(
   }
   const multiRunEventComponent = runnerMultiRunEventScoreComponent(input, action);
   if (multiRunEventComponent) components.push(multiRunEventComponent);
+  components.push(
+    ...runnerBankInvestmentCommitmentScoreComponents(input, action),
+  );
   if (action.type === "install_card") {
     const roles = rolesForAction(input, action);
     const sourceCard = findVisibleCard(input, action.source);
@@ -7050,6 +7640,10 @@ function semanticRuntimeRunnerEvidence(
     input,
     action,
   );
+  const bankCommitmentEvidence = runnerBankInvestmentCommitmentEvidence(
+    input,
+    action,
+  );
   const selfDamageSurvivalEvidence =
     runnerSelfDamageSurvivalAssessment(input, action)?.evidence ?? [];
   const blinkRiskEvidence = runnerBlinkRiskEvidenceForAction(input, action);
@@ -7058,17 +7652,20 @@ function semanticRuntimeRunnerEvidence(
       `program_sacrifice_penalty:${runnerProgramInstallDisplacementPenalty(sacrificeAssessment)}`,
       ...sacrificeAssessment.evidence,
       ...actionMuPressureEvidence,
+      ...bankCommitmentEvidence,
       ...selfDamageSurvivalEvidence,
       ...blinkRiskEvidence,
     ];
   }
   if (
     actionMuPressureEvidence.length > 0 ||
+    bankCommitmentEvidence.length > 0 ||
     selfDamageSurvivalEvidence.length > 0 ||
     blinkRiskEvidence.length > 0
   )
     return [
       ...actionMuPressureEvidence,
+      ...bankCommitmentEvidence,
       ...selfDamageSurvivalEvidence,
       ...blinkRiskEvidence,
     ];
