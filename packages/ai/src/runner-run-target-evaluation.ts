@@ -8,6 +8,7 @@ import {
   evaluateKnownRemoteAccessPayoff,
   type KnownRemoteAccessPayoff,
 } from "./known-remote-access-payoff";
+import type { ActionSemanticCandidate } from "./action-semantic-candidate";
 import type { DeckCapabilityProfile } from "./deck-capabilities";
 import { createAiHintsByCard, type AiCardHint } from "./ai-hints";
 import type { RunnerHandDevelopmentEvaluation } from "./runner-hand-development";
@@ -41,6 +42,50 @@ export type RunnerInstalledRunPayoff = {
   riskPenalty: number;
   scoreBonus: number;
   multiaccessAvailable: boolean;
+  evidence: string[];
+};
+
+export type RunnerRunActionSourceKind =
+  | "basic_action"
+  | "event"
+  | "resource_ability"
+  | "program_ability"
+  | "hardware_ability"
+  | "identity_ability"
+  | "card_ability"
+  | "choice"
+  | "extra_action"
+  | "unknown";
+
+export type RunnerRunActionStructure =
+  | "direct_start_run"
+  | "event_run"
+  | "extra_run"
+  | "bonus_run"
+  | "followup_run"
+  | "multi_run_sequence"
+  | "target_choice"
+  | "run_enabler";
+
+export type RunnerRunActionProjectionStatus =
+  | "concrete_target"
+  | "missing_target_options";
+
+export type RunActionProjection = {
+  actionId: string;
+  actionType: string;
+  sourceKind: RunnerRunActionSourceKind;
+  sourceCardId?: string;
+  targetServerId?: string;
+  targetKind?: RunnerRunTargetKind;
+  structure: RunnerRunActionStructure;
+  accessPayoffSignals: string[];
+  constraintSignals: string[];
+  riskSignals: string[];
+  spendLimit?: number;
+  noNoisyBreakers: boolean;
+  bypassFirstIce: boolean;
+  projectionStatus: RunnerRunActionProjectionStatus;
   evidence: string[];
 };
 
@@ -138,6 +183,8 @@ export type RunnerRunTargetEvaluation = {
   creditsAfterRun: number;
   stealOrTrashAffordable: boolean | "unknown";
   installedRunPayoff: RunnerInstalledRunPayoff;
+  runActionPayoff: RunnerInstalledRunPayoff;
+  runActionProjection: RunActionProjection;
   riskyUniversalCoverage: boolean;
   scoreThreat: boolean;
   recommendation: RunnerRunTargetRecommendation;
@@ -165,10 +212,15 @@ export type EvaluateRunnerRunTargetsParams = {
   deckCapabilities?: DeckCapabilityProfile;
   beliefState?: BeliefState;
   handDevelopmentEvaluations?: readonly RunnerHandDevelopmentEvaluation[];
+  actionCandidates?: readonly ActionSemanticCandidate[];
 };
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 const INSTALLED_RUN_PAYOFF_SCORE_CAP = 180;
+
+type InternalRunActionProjection = RunActionProjection & {
+  action: LegalAction;
+};
 
 export function buildRunnerEconomyPosture(
   params: EvaluateRunnerRunTargetsParams,
@@ -564,9 +616,15 @@ export function evaluateRunnerRunTargets(
   params: EvaluateRunnerRunTargetsParams,
 ): RunnerRunTargetEvaluation[] {
   const economyPosture = buildRunnerEconomyPosture(params);
-  return params.input.legalActions
-    .filter((action) => action.type === "start_run")
-    .map((action) => evaluateRunnerRunTarget(params, action, economyPosture))
+  return internalRunActionProjections(params)
+    .filter(
+      (projection) =>
+        projection.projectionStatus === "concrete_target" &&
+        projection.targetServerId !== undefined,
+    )
+    .map((projection) =>
+      evaluateRunnerRunTarget(params, projection, economyPosture),
+    )
     .filter((evaluation): evaluation is RunnerRunTargetEvaluation =>
       evaluation !== undefined,
     )
@@ -580,12 +638,178 @@ export function evaluateRunnerRunTargets(
     );
 }
 
+export function projectRunnerRunActions(
+  params: EvaluateRunnerRunTargetsParams,
+): RunActionProjection[] {
+  return internalRunActionProjections(params).map((projection) =>
+    publicRunActionProjection(projection),
+  );
+}
+
+function internalRunActionProjections(
+  params: EvaluateRunnerRunTargetsParams,
+): InternalRunActionProjection[] {
+  const candidatesByActionId = new Map(
+    (params.actionCandidates ?? []).map((candidate) => [
+      candidate.actionId,
+      candidate,
+    ]),
+  );
+  const projections: InternalRunActionProjection[] = [];
+  for (const action of params.input.legalActions) {
+    if (action.side !== "runner") continue;
+    const candidate = candidatesByActionId.get(action.actionId);
+    const sourceCardId = sourceCardIdForRunAction(
+      params.input,
+      action,
+      candidate,
+    );
+    const hint = sourceCardId ? AI_HINTS_BY_CARD.get(sourceCardId) : undefined;
+    const signals = runActionSignals(action, candidate, hint);
+    if (!runActionRelevant(action, signals)) continue;
+    const sourceKind = runActionSourceKind(
+      params.input,
+      action,
+      candidate,
+      sourceCardId,
+      hint,
+    );
+    const structure = runActionStructure(action, signals);
+    const targetServerIds = targetServerIdsForRunAction(
+      params.input,
+      action,
+      candidate,
+      signals,
+    );
+    const spendLimit = runSpendLimitForAction(action);
+    const baseProjection = {
+      action,
+      actionId: action.actionId,
+      actionType: action.type,
+      sourceKind,
+      ...(sourceCardId ? { sourceCardId } : {}),
+      structure,
+      accessPayoffSignals: accessPayoffSignalsForRunAction(
+        action,
+        candidate,
+        hint,
+        signals,
+      ),
+      constraintSignals: constraintSignalsForRunAction(action, candidate, signals),
+      riskSignals: riskSignalsForRunAction(candidate, hint),
+      ...(spendLimit !== undefined ? { spendLimit } : {}),
+      noNoisyBreakers: noNoisyBreakersForRunAction(action, signals),
+      bypassFirstIce: bypassFirstIceForRunAction(action, signals),
+    } satisfies Omit<
+      InternalRunActionProjection,
+      "targetServerId" | "targetKind" | "projectionStatus" | "evidence"
+    >;
+    const baseEvidence = runActionProjectionEvidence(baseProjection);
+    if (targetServerIds.length === 0) {
+      projections.push({
+        ...baseProjection,
+        projectionStatus: "missing_target_options",
+        evidence: [
+          ...baseEvidence,
+          "run_action_projection_missing_target_options:true",
+        ],
+      });
+      continue;
+    }
+    for (const targetServerId of targetServerIds) {
+      const targetKind = targetKindForServerId(targetServerId);
+      if (!targetKind) continue;
+      projections.push({
+        ...baseProjection,
+        targetServerId,
+        targetKind,
+        projectionStatus: "concrete_target",
+        evidence: [
+          ...baseEvidence,
+          `run_action_projection_target:${targetServerId}`,
+          `run_action_projection_target_kind:${targetKind}`,
+        ],
+      });
+    }
+  }
+  return dedupeRunActionProjections(projections);
+}
+
+function publicRunActionProjection(
+  projection: InternalRunActionProjection,
+): RunActionProjection {
+  const { action: _action, ...publicProjection } = projection;
+  return publicProjection;
+}
+
+function dedupeRunActionProjections(
+  projections: readonly InternalRunActionProjection[],
+): InternalRunActionProjection[] {
+  const byKey = new Map<string, InternalRunActionProjection>();
+  for (const projection of projections) {
+    const key = `${projection.actionId}:${projection.targetServerId ?? "missing"}`;
+    const existing = byKey.get(key);
+    if (!existing) {
+      byKey.set(key, projection);
+      continue;
+    }
+    byKey.set(key, {
+      ...existing,
+      evidence: uniqueStrings([...existing.evidence, ...projection.evidence]),
+      accessPayoffSignals: uniqueStrings([
+        ...existing.accessPayoffSignals,
+        ...projection.accessPayoffSignals,
+      ]),
+      constraintSignals: uniqueStrings([
+        ...existing.constraintSignals,
+        ...projection.constraintSignals,
+      ]),
+      riskSignals: uniqueStrings([
+        ...existing.riskSignals,
+        ...projection.riskSignals,
+      ]),
+    });
+  }
+  return [...byKey.values()];
+}
+
+function runActionProjectionEvidence(
+  projection: Omit<
+    InternalRunActionProjection,
+    "targetServerId" | "targetKind" | "projectionStatus" | "evidence"
+  >,
+): string[] {
+  return [
+    "run_action_projection:side_safe",
+    `run_action_projection_action_type:${projection.actionType}`,
+    `run_action_projection_source_kind:${projection.sourceKind}`,
+    `run_action_projection_structure:${projection.structure}`,
+    ...(projection.sourceCardId
+      ? [`run_action_projection_source_card:${projection.sourceCardId}`]
+      : []),
+    ...(projection.spendLimit !== undefined
+      ? [`run_action_projection_spend_limit:${projection.spendLimit}`]
+      : []),
+    `run_action_projection_no_noisy_breakers:${projection.noNoisyBreakers}`,
+    `run_action_projection_bypass_first_ice:${projection.bypassFirstIce}`,
+    ...projection.accessPayoffSignals
+      .slice(0, 8)
+      .map((signal) => `run_action_projection_access_signal:${signal}`),
+    ...projection.constraintSignals
+      .slice(0, 6)
+      .map((signal) => `run_action_projection_constraint:${signal}`),
+    ...projection.riskSignals
+      .slice(0, 4)
+      .map((signal) => `run_action_projection_risk:${signal}`),
+  ];
+}
+
 function evaluateRunnerRunTarget(
   params: EvaluateRunnerRunTargetsParams,
-  action: LegalAction,
+  projection: InternalRunActionProjection,
   economyPosture: RunnerEconomyPosture,
 ): RunnerRunTargetEvaluation | undefined {
-  const targetServerId = actionServerId(action);
+  const targetServerId = projection.targetServerId;
   if (!targetServerId) return undefined;
   const targetKind = targetKindForServerId(targetServerId);
   if (!targetKind) return undefined;
@@ -603,17 +827,28 @@ function evaluateRunnerRunTarget(
     params.input,
     targetKind,
   );
+  const runActionPayoff = runActionPayoffForTarget(projection, targetKind);
+  const combinedRunPayoff = combineRunPayoffs(
+    installedRunPayoff,
+    runActionPayoff,
+  );
   const scoreThreat = targetKind === "remote" && remoteHasScoreThreat(server);
   const accessPayoff = accessPayoffWithInstalledRunPayoff({
     basePayoff: payoff.accessPayoff,
-    installedRunPayoff,
+    installedRunPayoff: combinedRunPayoff,
     scoreThreat,
   });
   const riskyUniversalCoverage = hasRiskyUniversalPressure(params) &&
     (server?.ice.length ?? 0) > 0;
-  const pathPassability = pathPassabilityFor(path);
+  const basePathPassability = pathPassabilityFor(path);
+  const spendLimitBlocksPath =
+    projection.spendLimit !== undefined &&
+    (path.visibleBreakCost ?? 0) > projection.spendLimit;
+  const pathPassability = spendLimitBlocksPath
+    ? "blocked_unpayable"
+    : basePathPassability;
   const creditsAfterRun = path.creditsAfterPath;
-  const multiaccessAvailable = installedRunPayoff.multiaccessAvailable;
+  const multiaccessAvailable = combinedRunPayoff.multiaccessAvailable;
   const stealOrTrashAffordable = stealOrTrashAffordableFor(accessPayoff);
   const recommendation = recommendationForRunTarget({
     targetKind,
@@ -622,7 +857,7 @@ function evaluateRunnerRunTarget(
     pathPassability,
     creditsAfterRun,
     economyPosture,
-    installedRunPayoff,
+    installedRunPayoff: combinedRunPayoff,
     scoreThreat,
   });
   const score = scoreRunTargetEvaluation({
@@ -635,14 +870,15 @@ function evaluateRunnerRunTarget(
     scoreThreat,
     recommendation,
     multiaccessAvailable,
-    installedRunPayoffScore: installedRunPayoff.scoreBonus,
+    installedRunPayoffScore: combinedRunPayoff.scoreBonus,
     accessPayoffScoreAdjustment: payoff.scoreAdjustment,
   });
+  const publicProjection = publicRunActionProjection(projection);
   return {
     schemaVersion: RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION,
     targetServerId,
     targetKind,
-    actionId: action.actionId,
+    actionId: projection.actionId,
     accessPayoff,
     knownAccessState: payoff.knownAccessState,
     multiaccessAvailable,
@@ -651,6 +887,8 @@ function evaluateRunnerRunTarget(
     creditsAfterRun,
     stealOrTrashAffordable,
     installedRunPayoff,
+    runActionPayoff,
+    runActionProjection: publicProjection,
     riskyUniversalCoverage,
     scoreThreat,
     recommendation,
@@ -665,15 +903,658 @@ function evaluateRunnerRunTarget(
       `credits_after_run:${creditsAfterRun}`,
       `multiaccess_available:${multiaccessAvailable}`,
       `installed_run_payoff_score:${installedRunPayoff.scoreBonus}`,
+      `run_action_payoff_score:${runActionPayoff.scoreBonus}`,
+      `combined_run_payoff_score:${combinedRunPayoff.scoreBonus}`,
       `access_payoff_score_adjustment:${payoff.scoreAdjustment}`,
+      `run_action_projection_status:${projection.projectionStatus}`,
+      `run_action_projection_source_kind:${projection.sourceKind}`,
+      `run_action_projection_structure:${projection.structure}`,
+      ...(projection.sourceCardId
+        ? [`run_action_projection_source_card:${projection.sourceCardId}`]
+        : []),
+      ...(projection.spendLimit !== undefined
+        ? [`run_action_projection_spend_limit:${projection.spendLimit}`]
+        : []),
+      `run_action_projection_spend_limit_blocks_path:${spendLimitBlocksPath}`,
+      `run_action_projection_no_noisy_breakers:${projection.noNoisyBreakers}`,
+      `run_action_projection_bypass_first_ice:${projection.bypassFirstIce}`,
       `risky_universal_coverage:${riskyUniversalCoverage}`,
       `score_threat:${scoreThreat}`,
       `recommendation:${recommendation}`,
       ...economyPosture.creditReservePolicy.evidence.slice(0, 12),
       ...payoff.evidence.slice(0, 28),
       ...installedRunPayoff.evidence.slice(0, 8),
+      ...runActionPayoff.evidence.slice(0, 8),
+      ...projection.evidence.slice(0, 12),
     ],
   };
+}
+
+function runActionRelevant(action: LegalAction, signals: readonly string[]): boolean {
+  if (action.type === "start_run") return true;
+  const text = `${action.type} ${action.label} ${payloadSearchText(action)} ${signals.join(" ")}`.toLowerCase();
+  if (text.includes("path blocked")) return false;
+  if (concretePayloadServerId(action) && text.includes("run")) return true;
+  const explicitRunSignals = [
+    "start_run",
+    "make_run",
+    "make a run",
+    "bonus_run",
+    "followup_run",
+    "follow-up run",
+    "multi_run_sequence",
+    "run_event",
+    "run_action",
+    "extra_run",
+    "wilson_gain_run_action",
+    "server_specific_hq",
+    "server_specific_rnd",
+    "server_specific_rd",
+    "server_specific_archives",
+    "server_specific_remote",
+    "future_run_effect",
+  ].some((needle) => text.includes(needle));
+  if (explicitRunSignals) return true;
+  return (
+    action.type === "play_event" &&
+    text.includes("run_pressure") &&
+    (text.includes("multiaccess") || text.includes("access_replacement"))
+  );
+}
+
+function runActionSignals(
+  action: LegalAction,
+  candidate: ActionSemanticCandidate | undefined,
+  hint: AiCardHint | undefined,
+): string[] {
+  const payloadSignals = payloadStringArray(action, [
+    "tacticSignals",
+    "actionTacticSignals",
+    "cardContextSignals",
+    "runActionSignals",
+    "runSignals",
+    "accessPayoffSignals",
+  ]);
+  const effectSignals = (hint?.effects ?? []).flatMap((effect) => {
+    const target = effectTarget(effect);
+    return uniqueStrings([
+      `effect:${effect.kind}`,
+      ...(effect.scope ? [`scope:${effect.scope}`] : []),
+      ...(effect.timing ? [`timing:${effect.timing}`] : []),
+      ...(target ? [`target:${target}`] : []),
+      ...accessSignalsForHintEffect(effect),
+    ]);
+  });
+  return uniqueStrings([
+    action.type,
+    action.source ?? "",
+    ...payloadSignals,
+    ...(candidate?.cardContextSignals ?? []),
+    ...(candidate?.actionTacticSignals ?? []),
+    candidate?.semanticActionType ?? "",
+    ...(hint?.roles ?? []),
+    ...(hint?.planRoles ?? []),
+    ...effectSignals,
+  ]).filter((signal) => signal.length > 0);
+}
+
+function runActionSourceKind(
+  input: AiDecisionInput,
+  action: LegalAction,
+  candidate: ActionSemanticCandidate | undefined,
+  sourceCardId: string | undefined,
+  hint: AiCardHint | undefined,
+): RunnerRunActionSourceKind {
+  if (action.type === "start_run" && action.source === "basic_action") {
+    return "basic_action";
+  }
+  const actionType = action.type as string;
+  if (action.type === "play_event") return "event";
+  if (action.type === "resolve_choice") return "choice";
+  if (actionType === "extra_action") return "extra_action";
+  const sourceType = sourceCardType(input, sourceCardId, candidate, hint);
+  if (sourceType === "resource") return "resource_ability";
+  if (sourceType === "program") return "program_ability";
+  if (sourceType === "hardware") return "hardware_ability";
+  if (sourceType === "identity") return "identity_ability";
+  if (candidate?.sourceKind === "card") return "card_ability";
+  if (action.type === "trigger_ability") return "card_ability";
+  return "unknown";
+}
+
+function runActionStructure(
+  action: LegalAction,
+  signals: readonly string[],
+): RunnerRunActionStructure {
+  if (action.type === "start_run") return "direct_start_run";
+  const text = `${action.type} ${action.label} ${payloadSearchText(action)} ${signals.join(" ")}`.toLowerCase();
+  if (text.includes("multi_run_sequence")) return "multi_run_sequence";
+  if (text.includes("followup_run") || text.includes("follow-up run")) {
+    return "followup_run";
+  }
+  if (booleanPayloadValue(action, "bonusRunNoClick") || text.includes("bonus_run")) {
+    return "bonus_run";
+  }
+  if (
+    text.includes("wilson_gain_run_action") ||
+    text.includes("extra_run") ||
+    text.includes("extra action")
+  ) {
+    return "extra_run";
+  }
+  if (action.type === "play_event") return "event_run";
+  if (action.type === "resolve_choice") return "target_choice";
+  return "run_enabler";
+}
+
+function targetServerIdsForRunAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  candidate: ActionSemanticCandidate | undefined,
+  signals: readonly string[],
+): string[] {
+  const directTargets = [
+    concretePayloadServerId(action),
+    ...payloadStringValues(action, [
+      "targetServerId",
+      "runServerId",
+      "attackedServerId",
+      "selectedServerId",
+      "server",
+    ]),
+    ...candidateServerTargets(candidate),
+  ];
+  const targetIds = directTargets
+    .map((targetId) => normalizeServerId(targetId))
+    .filter((targetId): targetId is string => targetId !== undefined);
+  const signalTargets = targetServerIdsFromSignals(input, signals);
+  return uniqueStrings([...targetIds, ...signalTargets]).filter(
+    (targetId) => targetKindForServerId(targetId) !== undefined,
+  );
+}
+
+function concretePayloadServerId(action: LegalAction): string | undefined {
+  return normalizeServerId(actionServerId(action));
+}
+
+function candidateServerTargets(
+  candidate: ActionSemanticCandidate | undefined,
+): string[] {
+  if (!candidate?.targetContext) return [];
+  const selectedTargets = candidate.targetContext.selectedTargets
+    .filter((target) => target.targetKind === "server")
+    .map((target) => target.targetId);
+  const availableTargets = (candidate.targetContext.availableTargets ?? [])
+    .filter((target) => target.targetKind === "server")
+    .map((target) => target.targetId);
+  return [...selectedTargets, ...availableTargets];
+}
+
+function targetServerIdsFromSignals(
+  input: AiDecisionInput,
+  signals: readonly string[],
+): string[] {
+  const text = signals.join(" ").toLowerCase();
+  const targetIds: string[] = [];
+  if (text.includes("server_specific_hq") || text.includes("scope:hq")) {
+    targetIds.push("hq");
+  }
+  if (
+    text.includes("server_specific_rnd") ||
+    text.includes("server_specific_rd") ||
+    text.includes("scope:rnd") ||
+    text.includes("scope:rd")
+  ) {
+    targetIds.push("rd");
+  }
+  if (
+    text.includes("server_specific_archives") ||
+    text.includes("scope:archives")
+  ) {
+    targetIds.push("archives");
+  }
+  if (text.includes("server_specific_remote") || text.includes("scope:remote")) {
+    const remoteServers = input.playerView.servers.filter((server) =>
+      server.id.startsWith("remote_"),
+    );
+    const remoteServer = remoteServers[0];
+    if (remoteServers.length === 1 && remoteServer) {
+      targetIds.push(remoteServer.id);
+    }
+  }
+  return uniqueStrings(targetIds);
+}
+
+function normalizeServerId(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const trimmed = value.trim().toLowerCase().replace(/^server[:.]/, "");
+  if (trimmed === "hq") return "hq";
+  if (
+    trimmed === "rd" ||
+    trimmed === "rnd" ||
+    trimmed === "r&d" ||
+    trimmed === "r_d"
+  ) {
+    return "rd";
+  }
+  if (trimmed === "archives") return "archives";
+  if (trimmed.startsWith("remote_")) return trimmed;
+  return undefined;
+}
+
+function sourceCardIdForRunAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  candidate: ActionSemanticCandidate | undefined,
+): string | undefined {
+  for (const id of payloadStringValues(action, [
+    "sourceDefinitionId",
+    "sourceCardDefinitionId",
+    "cardDefinitionId",
+    "definitionId",
+    "sourceId",
+    "cardId",
+  ])) {
+    if (AI_HINTS_BY_CARD.has(id)) return id;
+  }
+  if (candidate?.sourceCardId && AI_HINTS_BY_CARD.has(candidate.sourceCardId)) {
+    return candidate.sourceCardId;
+  }
+  for (const id of payloadStringValues(action, [
+    "sourceCardInstanceId",
+    "sourceInstanceId",
+    "cardInstanceId",
+    "instanceId",
+    "sourceCardId",
+  ])) {
+    const card = visibleOwnCardById(input, id);
+    if (card?.definitionId) return card.definitionId;
+  }
+  if (candidate?.sourceCardId) {
+    const card = visibleOwnCardById(input, candidate.sourceCardId);
+    if (card?.definitionId) return card.definitionId;
+  }
+  if (typeof action.source === "string" && AI_HINTS_BY_CARD.has(action.source)) {
+    return action.source;
+  }
+  return undefined;
+}
+
+function visibleOwnCardById(
+  input: AiDecisionInput,
+  id: string,
+): VisibleOwnCardLike | undefined {
+  return visibleOwnCards(input).find(
+    (card) => card.instanceId === id || card.definitionId === id,
+  );
+}
+
+type VisibleOwnCardLike = {
+  instanceId?: string;
+  definitionId?: string;
+  type?: string;
+  known?: boolean;
+};
+
+function visibleOwnCards(input: AiDecisionInput): VisibleOwnCardLike[] {
+  return [
+    input.playerView.own.identity,
+    ...(input.playerView.own.rig ?? []),
+    ...(input.playerView.own.gripOrHq ?? []),
+    ...(input.playerView.own.heapOrArchives ?? []),
+    ...(input.playerView.own.scoreArea ?? []),
+  ].filter((card) => card.known !== false);
+}
+
+function sourceCardType(
+  input: AiDecisionInput,
+  sourceCardId: string | undefined,
+  candidate: ActionSemanticCandidate | undefined,
+  hint: AiCardHint | undefined,
+): string | undefined {
+  if (hint?.cardType) return hint.cardType;
+  if (!sourceCardId) return undefined;
+  const visible = visibleOwnCardById(input, sourceCardId);
+  if (visible?.type) return visible.type;
+  return candidate?.sourceKind === "card" ? "card" : undefined;
+}
+
+function accessPayoffSignalsForRunAction(
+  action: LegalAction,
+  candidate: ActionSemanticCandidate | undefined,
+  hint: AiCardHint | undefined,
+  signals: readonly string[],
+): string[] {
+  const directSignals = payloadStringArray(action, [
+    "accessPayoffSignals",
+    "runPayoffSignals",
+    "payoffSignals",
+  ]);
+  const semanticSignals = signals.filter((signal) =>
+    /access|multiaccess|hq_info|topdeck|free_trash|trash|bypass/i.test(signal),
+  );
+  const candidateSignals = [
+    ...(candidate?.cardContextSignals ?? []),
+    ...(candidate?.actionTacticSignals ?? []),
+  ].filter((signal) => /access|multiaccess|trash|bypass/i.test(signal));
+  const effectSignals = (hint?.effects ?? []).flatMap(accessSignalsForHintEffect);
+  return uniqueStrings([
+    ...directSignals,
+    ...semanticSignals,
+    ...candidateSignals,
+    ...effectSignals,
+  ]);
+}
+
+function accessSignalsForHintEffect(
+  effect: NonNullable<AiCardHint["effects"]>[number],
+): string[] {
+  const target = effectTarget(effect);
+  if (effect.kind === "multiaccess") {
+    if (effect.scope === "hq") return ["access.hq_multiaccess"];
+    if (effect.scope === "rnd") return ["access.rnd_multiaccess"];
+    if (effect.scope === "archives") return ["access.archives_multiaccess"];
+    if (effect.scope === "remote") return ["access.remote_multiaccess"];
+    return ["access.multiaccess"];
+  }
+  if (effect.kind === "access_replacement") return ["access.replacement"];
+  if (effect.kind === "hq_info") return ["access.hq_info"];
+  if (effect.kind === "topdeck_info") return ["access.rnd_topdeck_info"];
+  if (
+    effect.kind === "persistent_counter_effect" &&
+    (effect.timing === "on_access" || effect.timing === "successful_run") &&
+    (target === "free_trash" ||
+      target === "trash_untrashable" ||
+      target === "access_trash_pressure")
+  ) {
+    return ["access.free_trash"];
+  }
+  if (effect.kind === "future_run_effect") return ["run.future_payoff"];
+  return [];
+}
+
+function constraintSignalsForRunAction(
+  action: LegalAction,
+  candidate: ActionSemanticCandidate | undefined,
+  signals: readonly string[],
+): string[] {
+  return uniqueStrings([
+    ...(runSpendLimitForAction(action) !== undefined ? ["spend_limit"] : []),
+    ...(noNoisyBreakersForRunAction(action, signals) ? ["no_noisy_breakers"] : []),
+    ...(bypassFirstIceForRunAction(action, signals) ? ["bypass_first_ice"] : []),
+    ...(candidate?.constraints ?? []).map(
+      (constraint) => `${constraint.kind}:${constraint.status}`,
+    ),
+  ]);
+}
+
+function riskSignalsForRunAction(
+  candidate: ActionSemanticCandidate | undefined,
+  hint: AiCardHint | undefined,
+): string[] {
+  const riskTags = (hint as { riskTags?: string[] } | undefined)?.riskTags ?? [];
+  return uniqueStrings([
+    ...riskTags,
+    ...(candidate?.risks ?? []).map((risk) => `${risk.kind}:${risk.severity}`),
+  ]);
+}
+
+function runSpendLimitForAction(action: LegalAction): number | undefined {
+  return numberPayloadValue(action, [
+    "runSpendingCap",
+    "runSpendLimit",
+    "spendingCap",
+    "runCreditLimit",
+  ]);
+}
+
+function noNoisyBreakersForRunAction(
+  action: LegalAction,
+  signals: readonly string[],
+): boolean {
+  if (booleanPayloadValue(action, "noNoisyBreakers")) return true;
+  const text = `${payloadSearchText(action)} ${signals.join(" ")}`.toLowerCase();
+  return (
+    text.includes("no_noisy") ||
+    text.includes("no noisy") ||
+    text.includes("noisy_breaker_restriction")
+  );
+}
+
+function bypassFirstIceForRunAction(
+  action: LegalAction,
+  signals: readonly string[],
+): boolean {
+  if (booleanPayloadValue(action, "bypassFirstIce")) return true;
+  const text = `${payloadSearchText(action)} ${signals.join(" ")}`.toLowerCase();
+  return (
+    text.includes("bypass_first_ice") ||
+    text.includes("bypass first ice") ||
+    text.includes("inside_job")
+  );
+}
+
+function runActionPayoffForTarget(
+  projection: RunActionProjection,
+  targetKind: RunnerRunTargetKind,
+): RunnerInstalledRunPayoff {
+  const values = emptyRunPayoffValues();
+  const evidence = new Set<string>();
+  if (projectionHasAccessSignal(projection, targetKind, "multiaccess")) {
+    values.immediateAccessValue += 90;
+    evidence.add(`run_action_payoff:${targetKind}:multiaccess`);
+  }
+  if (projectionHasAccessSignal(projection, targetKind, "hq_info")) {
+    values.immediateAccessValue += 60;
+    evidence.add("run_action_payoff:hq:hq_info");
+  }
+  if (projectionHasAccessSignal(projection, targetKind, "topdeck_info")) {
+    values.immediateAccessValue += 60;
+    evidence.add("run_action_payoff:rd:topdeck_info");
+  }
+  if (projectionHasAccessSignal(projection, targetKind, "free_trash")) {
+    values.immediateAccessValue += 70;
+    evidence.add(`run_action_payoff:${targetKind}:access_trash`);
+  }
+  if (projection.bypassFirstIce) {
+    values.futureSetupValue += 35;
+    evidence.add(`run_action_payoff:${targetKind}:bypass_first_ice`);
+  }
+  if (projection.structure === "multi_run_sequence") {
+    values.futureSetupValue += 35;
+    evidence.add(`run_action_payoff:${targetKind}:multi_run_sequence`);
+  }
+  if (projection.riskSignals.some((signal) => signal.includes("tag") || signal.includes("damage"))) {
+    values.riskPenalty += 25;
+    evidence.add(`run_action_payoff:${targetKind}:risk_penalty`);
+  }
+  const multiaccessAvailable = projectionHasAccessSignal(
+    projection,
+    targetKind,
+    "multiaccess",
+  );
+  return finalizeRunPayoff(values, multiaccessAvailable, [...evidence].sort());
+}
+
+function projectionHasAccessSignal(
+  projection: RunActionProjection,
+  targetKind: RunnerRunTargetKind,
+  kind: "multiaccess" | "hq_info" | "topdeck_info" | "free_trash",
+): boolean {
+  const signals = projection.accessPayoffSignals.map((signal) =>
+    signal.toLowerCase(),
+  );
+  if (kind === "multiaccess") {
+    return signals.some((signal) => {
+      if (!signal.includes("multiaccess")) return false;
+      if (signal.includes("hq") || signal.includes("hand")) return targetKind === "hq";
+      if (
+        signal.includes("rnd") ||
+        signal.includes("rd") ||
+        signal.includes("topdeck")
+      ) {
+        return targetKind === "rd";
+      }
+      if (signal.includes("archives")) return targetKind === "archives";
+      if (signal.includes("remote")) return targetKind === "remote";
+      return true;
+    });
+  }
+  if (kind === "hq_info") {
+    return targetKind === "hq" &&
+      signals.some((signal) => signal.includes("hq_info"));
+  }
+  if (kind === "topdeck_info") {
+    return targetKind === "rd" &&
+      signals.some(
+        (signal) => signal.includes("topdeck") || signal.includes("rnd_topdeck"),
+      );
+  }
+  return signals.some(
+    (signal) => signal.includes("free_trash") || signal.includes("access_trash"),
+  );
+}
+
+function combineRunPayoffs(
+  installedRunPayoff: RunnerInstalledRunPayoff,
+  runActionPayoff: RunnerInstalledRunPayoff,
+): RunnerInstalledRunPayoff {
+  return finalizeRunPayoff(
+    {
+      immediateAccessValue:
+        installedRunPayoff.immediateAccessValue +
+        runActionPayoff.immediateAccessValue,
+      futureSetupValue:
+        installedRunPayoff.futureSetupValue + runActionPayoff.futureSetupValue,
+      purgeTaxValue:
+        installedRunPayoff.purgeTaxValue + runActionPayoff.purgeTaxValue,
+      economyValue:
+        installedRunPayoff.economyValue + runActionPayoff.economyValue,
+      riskPenalty:
+        installedRunPayoff.riskPenalty + runActionPayoff.riskPenalty,
+    },
+    installedRunPayoff.multiaccessAvailable ||
+      runActionPayoff.multiaccessAvailable,
+    uniqueStrings([
+      ...installedRunPayoff.evidence,
+      ...runActionPayoff.evidence,
+    ]),
+  );
+}
+
+function emptyRunPayoffValues(): Omit<
+  RunnerInstalledRunPayoff,
+  "scoreBonus" | "multiaccessAvailable" | "evidence"
+> {
+  return {
+    immediateAccessValue: 0,
+    futureSetupValue: 0,
+    purgeTaxValue: 0,
+    economyValue: 0,
+    riskPenalty: 0,
+  };
+}
+
+function finalizeRunPayoff(
+  values: Omit<
+    RunnerInstalledRunPayoff,
+    "scoreBonus" | "multiaccessAvailable" | "evidence"
+  >,
+  multiaccessAvailable: boolean,
+  evidence: string[],
+): RunnerInstalledRunPayoff {
+  const rawScore =
+    values.immediateAccessValue +
+    values.futureSetupValue +
+    values.purgeTaxValue +
+    values.economyValue -
+    values.riskPenalty;
+  return {
+    ...values,
+    scoreBonus: Math.max(0, Math.min(INSTALLED_RUN_PAYOFF_SCORE_CAP, rawScore)),
+    multiaccessAvailable,
+    evidence: uniqueStrings(evidence).sort(),
+  };
+}
+
+function payloadRecord(action: LegalAction): Record<string, unknown> {
+  return (action.payload ?? {}) as Record<string, unknown>;
+}
+
+function payloadStringValues(
+  action: LegalAction,
+  keys: readonly string[],
+): string[] {
+  const payload = payloadRecord(action);
+  return keys.flatMap((key) => {
+    const value = payload[key];
+    if (typeof value === "string") return [value];
+    if (Array.isArray(value)) {
+      return value.filter((entry): entry is string => typeof entry === "string");
+    }
+    if (
+      value &&
+      typeof value === "object" &&
+      typeof (value as { serverId?: unknown }).serverId === "string"
+    ) {
+      return [(value as { serverId: string }).serverId];
+    }
+    return [];
+  });
+}
+
+function payloadStringArray(
+  action: LegalAction,
+  keys: readonly string[],
+): string[] {
+  return payloadStringValues(action, keys).map((value) =>
+    value.trim().toLowerCase(),
+  );
+}
+
+function payloadSearchText(action: LegalAction): string {
+  const payload = payloadRecord(action);
+  return Object.entries(payload)
+    .flatMap(([key, value]) => {
+      if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") {
+        return [`${key}:${value}`];
+      }
+      if (Array.isArray(value)) {
+        return value
+          .filter(
+            (entry): entry is string | number | boolean =>
+              typeof entry === "string" ||
+              typeof entry === "number" ||
+              typeof entry === "boolean",
+          )
+          .map((entry) => `${key}:${entry}`);
+      }
+      return [key];
+    })
+    .join(" ");
+}
+
+function booleanPayloadValue(action: LegalAction, key: string): boolean {
+  return payloadRecord(action)[key] === true;
+}
+
+function numberPayloadValue(
+  action: LegalAction,
+  keys: readonly string[],
+): number | undefined {
+  for (const key of keys) {
+    const value = payloadRecord(action)[key];
+    if (typeof value === "number" && Number.isFinite(value)) return value;
+    if (typeof value === "string") {
+      const numeric = Number(value);
+      if (Number.isFinite(numeric)) return numeric;
+    }
+  }
+  return undefined;
+}
+
+function uniqueStrings(values: readonly string[]): string[] {
+  return [...new Set(values.filter((value) => value.length > 0))];
 }
 
 function accessPayoffWithInstalledRunPayoff(params: {

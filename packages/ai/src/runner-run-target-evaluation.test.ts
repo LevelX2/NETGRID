@@ -12,11 +12,17 @@ import type { BeliefState, RunnerOpponentModel } from "./belief-state";
 import {
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,
+  projectRunnerRunActions,
 } from "./runner-run-target-evaluation";
 import {
   RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
   type RunnerHandDevelopmentEvaluation,
 } from "./runner-hand-development";
+
+const WILSON_DEFINITION_ID = "onr_v1_187_wilson-weeflerunner-apprentice";
+const ALL_HANDS_DEFINITION_ID = "onr_proteus_101_all-hands";
+const RUSH_HOUR_DEFINITION_ID = "onr_proteus_122_rush-hour";
+const ALL_NIGHTER_DEFINITION_ID = "onr_v1_076_all-nighter";
 
 describe("Runner RunTargetEvaluation + EconomyPosture", () => {
   it("recommends an unknown reachable R&D run", () => {
@@ -545,6 +551,236 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
+  it("projects Wilson's constrained run ability into HQ knownness evaluation", () => {
+    const wilson = wilsonRunAbilityAction("wilson-hq-run", "hq");
+    const input = aiInput({
+      credits: 6,
+      servers: [server("hq")],
+      legalActions: [wilson],
+      rig: [
+        visibleCard("wilson-installed", {
+          definitionId: WILSON_DEFINITION_ID,
+          title: "Wilson, Weeflerunner Apprentice",
+          type: "resource",
+        }),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      beliefState: beliefWithKnownHq(
+        [
+          "onr_v1_230_cortical-scanner",
+          "onr_v1_237_data-wall",
+          "onr_v1_281_accounts-receivable",
+          "simple_economy_operation",
+        ],
+        { handCount: 5, unknownRestCount: 1 },
+      ),
+    });
+    if (!evaluation) throw new Error("Expected Wilson HQ evaluation");
+
+    expect(evaluation).toMatchObject({
+      actionId: "wilson-hq-run",
+      targetServerId: "hq",
+      accessPayoff: "unknown",
+      knownAccessState: "unknown",
+      recommendation: "run_if_free",
+      runActionProjection: {
+        sourceKind: "resource_ability",
+        sourceCardId: WILSON_DEFINITION_ID,
+        spendLimit: 3,
+        structure: "extra_run",
+      },
+    });
+    expect(evidenceNumber(evaluation.evidence, "access_payoff_score_adjustment")).toBeLessThan(0);
+    expect(evaluation.evidence).toEqual(
+      expect.arrayContaining([
+        "run_action_projection_status:concrete_target",
+        "run_action_projection_spend_limit:3",
+        "hq_knownness_payoff:mostly_known_low_value",
+      ]),
+    );
+  });
+
+  it("projects Wilson's constrained run ability as high value when HQ contains a known agenda", () => {
+    const wilson = wilsonRunAbilityAction("wilson-known-agenda-hq", "hq");
+    const input = aiInput({
+      credits: 6,
+      servers: [server("hq")],
+      legalActions: [wilson],
+      rig: [
+        visibleCard("wilson-installed", {
+          definitionId: WILSON_DEFINITION_ID,
+          title: "Wilson, Weeflerunner Apprentice",
+          type: "resource",
+        }),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      beliefState: beliefWithKnownHq(["simple_agenda"], {
+        handCount: 1,
+        unknownRestCount: 0,
+      }),
+    });
+    if (!evaluation) throw new Error("Expected Wilson known-agenda evaluation");
+
+    expect(evaluation).toMatchObject({
+      actionId: "wilson-known-agenda-hq",
+      targetServerId: "hq",
+      accessPayoff: "agenda",
+      knownAccessState: "known_payoff",
+      recommendation: "run_now",
+    });
+    expect(evaluation.evidence).toEqual(
+      expect.arrayContaining([
+        "run_action_projection_source_card:onr_v1_187_wilson-weeflerunner-apprentice",
+        "central_memory_payoff:agenda",
+      ]),
+    );
+  });
+
+  it("projects All-Hands as HQ multiaccess and offsets a high-known low-value HQ penalty", () => {
+    const beliefState = beliefWithKnownHq(
+      [
+        "onr_v1_230_cortical-scanner",
+        "onr_v1_237_data-wall",
+        "onr_v1_281_accounts-receivable",
+        "simple_economy_operation",
+      ],
+      { handCount: 5, unknownRestCount: 1 },
+    );
+    const [wilsonBaseline] = evaluateRunnerRunTargets({
+      input: aiInput({
+        credits: 6,
+        servers: [server("hq")],
+        legalActions: [wilsonRunAbilityAction("wilson-hq-run", "hq")],
+      }),
+      beliefState,
+    });
+    const [allHands] = evaluateRunnerRunTargets({
+      input: aiInput({
+        credits: 6,
+        servers: [server("hq")],
+        legalActions: [
+          runEventAction("all-hands-hq", ALL_HANDS_DEFINITION_ID, "All-Hands"),
+        ],
+      }),
+      beliefState,
+    });
+    if (!wilsonBaseline || !allHands) {
+      throw new Error("Expected Wilson and All-Hands HQ evaluations");
+    }
+
+    expect(allHands).toMatchObject({
+      actionId: "all-hands-hq",
+      targetServerId: "hq",
+      accessPayoff: "access_bonus",
+      knownAccessState: "unknown",
+      multiaccessAvailable: true,
+      runActionProjection: {
+        sourceKind: "event",
+        sourceCardId: ALL_HANDS_DEFINITION_ID,
+        noNoisyBreakers: true,
+      },
+    });
+    expect(allHands.score).toBeGreaterThan(wilsonBaseline.score);
+    expect(allHands.evidence).toEqual(
+      expect.arrayContaining([
+        "hq_knownness_payoff:mostly_known_low_value",
+        "run_action_payoff:hq:multiaccess",
+        "run_action_projection_no_noisy_breakers:true",
+      ]),
+    );
+  });
+
+  it("projects Rush Hour as R&D multiaccess using the same target evaluation path", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [server("rd")],
+      legalActions: [
+        runEventAction("rush-hour-rd", RUSH_HOUR_DEFINITION_ID, "Rush Hour"),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+    if (!evaluation) throw new Error("Expected Rush Hour R&D evaluation");
+
+    expect(evaluation).toMatchObject({
+      actionId: "rush-hour-rd",
+      targetServerId: "rd",
+      accessPayoff: "access_bonus",
+      multiaccessAvailable: true,
+      recommendation: "run_now",
+      runActionProjection: {
+        sourceKind: "event",
+        sourceCardId: RUSH_HOUR_DEFINITION_ID,
+        targetKind: "rd",
+      },
+    });
+    expect(evaluation.evidence).toContain("run_action_payoff:rd:multiaccess");
+  });
+
+  it("keeps run-event projections conservative when no side-safe target options exist", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [server("hq"), server("rd")],
+      legalActions: [
+        runEventAction("all-nighter-no-target", ALL_NIGHTER_DEFINITION_ID, "All-Nighter"),
+      ],
+    });
+
+    const projections = projectRunnerRunActions({ input });
+    const evaluations = evaluateRunnerRunTargets({ input });
+
+    expect(projections).toHaveLength(1);
+    expect(projections[0]).toMatchObject({
+      actionId: "all-nighter-no-target",
+      projectionStatus: "missing_target_options",
+    });
+    expect(projections[0]?.evidence).toContain(
+      "run_action_projection_missing_target_options:true",
+    );
+    expect(evaluations).toEqual([]);
+  });
+
+  it("does not turn a blocked path into a reachable run just because the action has multiaccess", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [
+        server("hq", {
+          ice: [
+            visibleCard("hq-data-wall", {
+              definitionId: "onr_v1_237_data-wall",
+              title: "Data Wall",
+              type: "ice",
+              known: true,
+              rezzed: true,
+              subtypes: ["wall"],
+            }),
+          ],
+        }),
+      ],
+      legalActions: [
+        runEventAction("blocked-all-hands", ALL_HANDS_DEFINITION_ID, "All-Hands"),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+    if (!evaluation) throw new Error("Expected blocked All-Hands evaluation");
+
+    expect(evaluation).toMatchObject({
+      actionId: "blocked-all-hands",
+      targetServerId: "hq",
+      accessPayoff: "access_bonus",
+      multiaccessAvailable: true,
+      pathPassability: "blocked_missing_coverage",
+      recommendation: "find_breaker_first",
+    });
+  });
+
   it("suppresses a known remote root with no current access payoff", () => {
     const input = aiInput({
       credits: 6,
@@ -909,6 +1145,47 @@ function runAction(actionId: string, serverId: string): LegalAction {
     visibility: "public",
     expiresAtStateVersion: 2,
     payload: { serverId },
+  };
+}
+
+function wilsonRunAbilityAction(actionId: string, serverId: string): LegalAction {
+  return {
+    actionId,
+    side: "runner",
+    type: "trigger_ability",
+    label: `Wilson run ${serverId}`,
+    source: "card_ability",
+    timingPoint: "runner_action.main",
+    costs: [],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 2,
+    payload: {
+      sourceDefinitionId: WILSON_DEFINITION_ID,
+      runnerAbility: "wilson_gain_run_action",
+      serverId,
+      runSpendingCap: 3,
+    },
+  };
+}
+
+function runEventAction(
+  actionId: string,
+  sourceDefinitionId: string,
+  label: string,
+): LegalAction {
+  return {
+    actionId,
+    side: "runner",
+    type: "play_event",
+    label,
+    source: "card",
+    timingPoint: "runner_action.main",
+    costs: [{ clicks: 1 }],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 2,
+    payload: { sourceDefinitionId },
   };
 }
 

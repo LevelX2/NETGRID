@@ -3433,6 +3433,7 @@ function chooseSemanticRuntimeAction(
         input,
         strategicIntent: runnerStrategicIntent,
         deckCapabilities,
+        actionCandidates: actionSemanticCandidates,
         ...(runnerHandDevelopmentEvaluations
           ? { handDevelopmentEvaluations: runnerHandDevelopmentEvaluations }
           : {}),
