@@ -11383,6 +11383,54 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("draws for Blink damage buffer instead of repeating a risky remote score-threat run", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = blinkRiskRemoteScoreThreatInput(
+      "ai-blink-risk-remote-recovery",
+      {
+        handCards: 1,
+        recentBlinkFailure: true,
+      },
+    );
+    const remoteRun = blinkRunAction(input, "remote_1");
+    const drawCard = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(drawCard).toBeDefined();
+    if (!remoteRun || !drawCard)
+      throw new Error("Missing Blink remote recovery actions");
+
+    const scopedInput = scopedLegalActions(input, [remoteRun, drawCard]);
+    const decision = chooseRunnerAction(scopedInput, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe(drawCard.actionId);
+    expect(scopedInput.legalActions.map((action) => action.actionId)).toContain(
+      decision.actionId,
+    );
+    const debug = JSON.stringify(decision.decisionDebug);
+    expect(debug).toContain("blink_run_self_net_damage_risk");
+    expect(debug).toContain("path:blocked_by_blink_hand_buffer");
+    expect(debug).toContain("recommendation:draw_for_damage_buffer");
+    expect(debug).toContain("blocked_by_blink_hand_buffer:true");
+    expect(debug).toContain("blink_no_progress_run:true");
+    expect(debug).toContain("expected_etr_unbroken:true");
+    expect(debug).toContain("recentBlinkFailure:true");
+    expect(debug).toContain("recentBlinkDamageAmount:3");
+    expect(debug).toContain("sameServerRepeatedBlinkRiskPenalty:-900");
+    expect(debug).toContain(
+      "why_draw_for_damage_buffer_over_remote_run:recent_blink_damage",
+    );
+    expect(debug).not.toContain(
+      "why_blink_run_allowed_despite_risk:remote_score_threat",
+    );
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload|corp\.hq|corp\.rd|FullState|C:\\|\/Users\//i,
+    );
+  });
+
   it.each([
     { seed: "ai-blink-risk-one-hand-known-low-rd", handCards: 1 },
     { seed: "ai-blink-risk-two-hand-known-low-rd", handCards: 2 },
@@ -26098,6 +26146,58 @@ function blinkRiskRunInput(
   });
 }
 
+function blinkRiskRemoteScoreThreatInput(
+  seed: string,
+  options: {
+    handCards: number;
+    recentBlinkFailure?: boolean;
+  },
+): ReturnType<typeof buildAiDecisionInput> {
+  const state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      ...blinkRiskDeckConfig(seed),
+      agendaPointsToWin: 7,
+    }),
+  );
+  emptyRunnerGripForTest(state);
+  moveRunnerProgramToRig(state, "onr_v1_007_blink");
+  addRunnerGripCardsForBlinkRisk(state, options.handCards);
+  state.runner.credits = 8;
+  state.runner.clicks = 4;
+  state.corp.credits = 8;
+  putCorpRootInRemote(state, "simple_agenda", 2);
+  const iceId = putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+  state.cardInstances[iceId] = {
+    ...state.cardInstances[iceId]!,
+    faceup: true,
+    rezzed: true,
+  };
+  const eventTail: PublicGameEvent[] = options.recentBlinkFailure
+    ? [
+        syntheticBlinkPublicEvent(`${seed}:run-start`, 1, "run_started", {
+          actionType: "start_run",
+          actor: "runner",
+          serverId: "remote_1",
+        }),
+        syntheticBlinkPublicEvent(`${seed}:blink-fail`, 2, "break_subroutine", {
+          actionType: "break_subroutine",
+          actor: "runner",
+          blinkBreakSuccess: false,
+          blinkDamageAmount: 3,
+        }),
+      ]
+    : [];
+
+  return buildAiDecisionInput(state, "runner", {
+    difficulty: "normal",
+    profileId: "runner-ai-v1.4.2-normal",
+    decisionId: `${seed}:blink-risk-remote-score-threat`,
+    actionNumber: 1,
+    eventTail,
+  });
+}
+
 function blinkRiskEncounterInput(
   seed: string,
   options: {
@@ -26139,6 +26239,23 @@ function blinkRiskEncounterInput(
     decisionId: `${seed}:blink-risk-encounter`,
     actionNumber: 2,
   });
+}
+
+function syntheticBlinkPublicEvent(
+  eventId: string,
+  stateVersionAfter: number,
+  type: string,
+  publicPayload: Record<string, unknown>,
+): PublicGameEvent {
+  return {
+    eventId,
+    type,
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "public",
+    publicPayload,
+  };
 }
 
 function blinkRiskDeckConfig(seed: string): CreateGameConfig {

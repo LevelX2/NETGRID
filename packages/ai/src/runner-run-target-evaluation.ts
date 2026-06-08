@@ -103,6 +103,7 @@ export type RunnerKnownAccessState =
 export type RunnerPathPassability =
   | "reachable"
   | "blocked_missing_coverage"
+  | "blocked_by_blink_hand_buffer"
   | "blocked_unpayable"
   | "blocked_unbreakable";
 
@@ -110,6 +111,7 @@ export type RunnerRunTargetRecommendation =
   | "run_now"
   | "run_if_free"
   | "setup_first"
+  | "draw_for_damage_buffer"
   | "gain_credits_first"
   | "find_breaker_first"
   | "do_not_run_now";
@@ -136,6 +138,25 @@ export type BlinkRiskAssessment = {
   riskSeverity: BlinkRiskSeverity;
   payoffOverride: BlinkRiskPayoffOverride;
   stableCoverageAvailable: boolean;
+  pathDependsOnBlink: boolean;
+  breakWouldBeExcludedInEncounter: boolean;
+  blockedByHandBuffer: boolean;
+  noProgressRunExpected: boolean;
+  expectedEtrUnbroken: boolean;
+  recentFailure: boolean;
+  recentDamageAmount: number;
+  sameServerRepeatedRiskPenalty: number;
+  evidence: string[];
+};
+
+export type RunnerBlinkRecoveryAssessment = {
+  active: boolean;
+  targetServerId?: string;
+  currentHandCount: number;
+  handBufferTooLow: boolean;
+  recentFailure: boolean;
+  recentDamageAmount: number;
+  sameServerRepeatedRiskPenalty: number;
   evidence: string[];
 };
 
@@ -262,6 +283,7 @@ export function buildBlinkRiskAssessment(params: {
   payoffOverride: BlinkRiskPayoffOverride;
   stableCoverageAvailable: boolean;
   context: "run_path" | "encounter_break";
+  targetServerId?: string;
   evidence?: readonly string[];
 }): BlinkRiskAssessment {
   const currentHandCount = Math.max(0, Math.floor(params.currentHandCount));
@@ -287,8 +309,25 @@ export function buildBlinkRiskAssessment(params: {
     lethalOnHighFailure,
   });
   const lethalBlinkFailureRisk = lethalOnAnyFailure || lethalOnHighFailure;
+  const pathDependsOnBlink = !params.stableCoverageAvailable;
+  const breakWouldBeExcludedInEncounter =
+    pathDependsOnBlink && blinkRiskShouldAvoidRunSeverity(riskSeverity);
+  const blockedByHandBuffer =
+    pathDependsOnBlink &&
+    breakWouldBeExcludedInEncounter &&
+    params.context === "run_path";
+  const noProgressRunExpected =
+    blockedByHandBuffer && params.visibleSubroutinesLikely > 0;
+  const expectedEtrUnbroken = noProgressRunExpected;
+  const recent = params.targetServerId
+    ? recentBlinkFailureForServer(params.targetServerId, params.evidence ?? [])
+    : { recentFailure: false, recentDamageAmount: 0 };
+  const sameServerRepeatedRiskPenalty =
+    recent.recentFailure && noProgressRunExpected ? -900 : 0;
   const disposition =
-    params.payoffOverride !== "none"
+    blockedByHandBuffer
+      ? "why_blink_run_deferred_for_hand_buffer:self_net_damage_buffer_too_low"
+      : params.payoffOverride !== "none"
       ? `why_blink_run_allowed_despite_risk:${params.payoffOverride}`
       : blinkRiskShouldAvoidRunSeverity(riskSeverity)
         ? `why_blink_run_blocked:${riskSeverity}`
@@ -310,7 +349,26 @@ export function buildBlinkRiskAssessment(params: {
     `payoffOverride:${params.payoffOverride}`,
     `stableCoverageAvailable:${params.stableCoverageAvailable}`,
     `lethalBlinkFailureRisk:${lethalBlinkFailureRisk}`,
+    `blinkPreRunRiskApplied:${params.context === "run_path"}`,
+    `blinkPathDependsOnBlink:${pathDependsOnBlink}`,
+    `blinkBreakWouldBeExcludedInEncounter:${breakWouldBeExcludedInEncounter}`,
+    `blocked_by_blink_hand_buffer:${blockedByHandBuffer}`,
+    `blink_no_progress_run:${noProgressRunExpected}`,
+    `expected_etr_unbroken:${expectedEtrUnbroken}`,
+    `recentBlinkFailure:${recent.recentFailure}`,
+    `recentBlinkDamageAmount:${recent.recentDamageAmount}`,
+    `sameServerRepeatedBlinkRiskPenalty:${sameServerRepeatedRiskPenalty}`,
     disposition,
+    ...(blockedByHandBuffer
+      ? [
+          "blink_break_unusable_due_to_hand_buffer:true",
+          "recommendation:draw_for_damage_buffer",
+          "recommendation:find_stable_breaker_first",
+        ]
+      : []),
+    ...(sameServerRepeatedRiskPenalty < 0
+      ? ["repeated_no_progress_blink_run:true"]
+      : []),
     ...(params.evidence ?? []),
   ];
 
@@ -327,6 +385,14 @@ export function buildBlinkRiskAssessment(params: {
     riskSeverity,
     payoffOverride: params.payoffOverride,
     stableCoverageAvailable: params.stableCoverageAvailable,
+    pathDependsOnBlink,
+    breakWouldBeExcludedInEncounter,
+    blockedByHandBuffer,
+    noProgressRunExpected,
+    expectedEtrUnbroken,
+    recentFailure: recent.recentFailure,
+    recentDamageAmount: recent.recentDamageAmount,
+    sameServerRepeatedRiskPenalty,
     evidence,
   };
 }
@@ -354,7 +420,14 @@ export function assessBlinkRiskForRunAction(
     input.playerView.own.credits,
     server.root,
   );
-  if (fullPath.assessedKnownIceCount <= 0 || !fullPath.canReachAccess) {
+  const visibleEndRunSubroutineCount = visibleEndRunSubroutineCountForPath(
+    server.ice,
+  );
+  const blinkCanAttemptVisibleEtrPath = visibleEndRunSubroutineCount > 0;
+  if (
+    fullPath.assessedKnownIceCount <= 0 ||
+    (!fullPath.canReachAccess && !blinkCanAttemptVisibleEtrPath)
+  ) {
     return undefined;
   }
 
@@ -372,9 +445,7 @@ export function assessBlinkRiskForRunAction(
   const currentHandCount = input.playerView.own.gripOrHq.length;
   const handAfterActionCost =
     currentHandCount - (actionConsumesKnownOwnHandCard(input, action) ? 1 : 0);
-  const visibleSubroutinesLikely = visibleEndRunSubroutineCountForPath(
-    server.ice,
-  );
+  const visibleSubroutinesLikely = Math.max(1, visibleEndRunSubroutineCount);
   const payoffOverride = blinkRiskPayoffOverride(
     params.accessPayoff,
     params.scoreThreat,
@@ -388,12 +459,14 @@ export function assessBlinkRiskForRunAction(
     payoffOverride,
     stableCoverageAvailable,
     context: "run_path",
+    targetServerId,
     evidence: [
       `blinkRunTarget:${targetServerId}`,
       `blinkRiskStablePathReachable:${stablePath.canReachAccess}`,
       `blinkRiskFullPathReachable:${fullPath.canReachAccess}`,
       `blinkRiskKnownIceCount:${fullPath.assessedKnownIceCount}`,
       `blinkRiskPathCost:${fullPath.visibleBreakCost ?? 0}`,
+      ...recentBlinkFailureEvidence(input, targetServerId),
       ...(params.accessPayoff ? [`blinkRiskAccessPayoff:${params.accessPayoff}`] : []),
       ...(params.scoreThreat !== undefined
         ? [`blinkRiskScoreThreat:${params.scoreThreat}`]
@@ -405,7 +478,14 @@ export function assessBlinkRiskForRunAction(
 export function blinkRiskShouldAvoidRun(
   assessment: BlinkRiskAssessment | undefined,
 ): boolean {
-  if (!assessment || assessment.payoffOverride !== "none") return false;
+  if (!assessment) return false;
+  if (
+    assessment.blockedByHandBuffer &&
+    !blinkRiskHandBufferOverrideAllowed(assessment.payoffOverride)
+  ) {
+    return true;
+  }
+  if (assessment.payoffOverride !== "none") return false;
   return blinkRiskShouldAvoidRunSeverity(assessment.riskSeverity);
 }
 
@@ -413,19 +493,215 @@ export function blinkRiskScorePenalty(
   assessment: BlinkRiskAssessment | undefined,
 ): number {
   if (!assessment) return 0;
-  const overrideMultiplier = assessment.payoffOverride === "none" ? 1 : 0.25;
+  const overrideMultiplier =
+    assessment.payoffOverride === "none" ||
+    (assessment.blockedByHandBuffer &&
+      !blinkRiskHandBufferOverrideAllowed(assessment.payoffOverride))
+      ? 1
+      : 0.25;
+  const noProgressPenalty = assessment.noProgressRunExpected ? -1700 : 0;
   switch (assessment.riskSeverity) {
     case "lethal":
-      return Math.floor(-2400 * overrideMultiplier);
+      return (
+        Math.floor(-2400 * overrideMultiplier) +
+        noProgressPenalty +
+        assessment.sameServerRepeatedRiskPenalty
+      );
     case "high":
-      return Math.floor(-1800 * overrideMultiplier);
+      return (
+        Math.floor(-1800 * overrideMultiplier) +
+        noProgressPenalty +
+        assessment.sameServerRepeatedRiskPenalty
+      );
     case "medium":
-      return Math.floor(-640 * overrideMultiplier);
+      return (
+        Math.floor(-640 * overrideMultiplier) +
+        assessment.sameServerRepeatedRiskPenalty
+      );
     case "low":
-      return Math.floor(-160 * overrideMultiplier);
+      return (
+        Math.floor(-160 * overrideMultiplier) +
+        assessment.sameServerRepeatedRiskPenalty
+      );
     case "none":
-      return 0;
+      return assessment.sameServerRepeatedRiskPenalty;
   }
+}
+
+function blinkRiskHandBufferOverrideAllowed(
+  payoffOverride: BlinkRiskPayoffOverride,
+): boolean {
+  return payoffOverride === "known_agenda" || payoffOverride === "immediate_win";
+}
+
+function recentBlinkFailureEvidence(
+  input: AiDecisionInput,
+  targetServerId: string,
+): string[] {
+  const recent = recentBlinkFailureFromEvents(input, targetServerId);
+  return [
+    `recentBlinkFailure:${recent.recentFailure}`,
+    `recentBlinkDamageAmount:${recent.recentDamageAmount}`,
+    ...(recent.targetServerId
+      ? [`recentBlinkFailureTarget:${recent.targetServerId}`]
+      : []),
+  ];
+}
+
+function recentBlinkFailureForServer(
+  targetServerId: string,
+  evidence: readonly string[],
+): { recentFailure: boolean; recentDamageAmount: number } {
+  const recentFailure =
+    evidence.includes("recentBlinkFailure:true") &&
+    evidence.includes(`recentBlinkFailureTarget:${targetServerId}`);
+  return {
+    recentFailure,
+    recentDamageAmount: recentFailure
+      ? numberEvidenceValue(evidence, "recentBlinkDamageAmount")
+      : 0,
+  };
+}
+
+function recentBlinkFailureFromEvents(
+  input: AiDecisionInput,
+  targetServerId?: string,
+): {
+  recentFailure: boolean;
+  recentDamageAmount: number;
+  targetServerId?: string;
+} {
+  const history = [
+    ...(input.playerView.publicEvents ?? []),
+    ...(input.eventTail ?? []),
+  ];
+  let activeRunServerId: string | undefined;
+  for (let index = history.length - 1; index >= 0; index -= 1) {
+    const event = history[index]!;
+    const payload = event.publicPayload ?? {};
+    const actionType =
+      typeof payload.actionType === "string" ? payload.actionType : event.type;
+    const actor = typeof payload.actor === "string" ? payload.actor : undefined;
+    const serverId = publicEventServerId(payload);
+    if (actionType === "start_run" && serverId) {
+      activeRunServerId = serverId;
+    }
+    if (actionType === "end_turn" || actor === "corp") break;
+    if (actionType !== "break_subroutine") continue;
+    const damageAmount =
+      typeof payload.blinkDamageAmount === "number"
+        ? payload.blinkDamageAmount
+        : typeof payload.damageAmount === "number"
+          ? payload.damageAmount
+          : typeof payload.amount === "number"
+            ? payload.amount
+            : 0;
+    const blinkFailure =
+      payload.blinkBreakSuccess === false ||
+      (payload.sourceDefinitionId === BLINK_CARD_ID &&
+        payload.damageType === "net" &&
+        damageAmount > 0);
+    if (!blinkFailure) continue;
+    const failureServerId =
+      serverId ?? activeRunServerId ?? nearestPriorRunServer(history, index);
+    if (targetServerId && failureServerId && failureServerId !== targetServerId) {
+      continue;
+    }
+    return {
+      recentFailure: true,
+      recentDamageAmount: damageAmount,
+      ...(failureServerId ? { targetServerId: failureServerId } : {}),
+    };
+  }
+  return { recentFailure: false, recentDamageAmount: 0 };
+}
+
+function publicEventServerId(
+  payload: Record<string, unknown>,
+): string | undefined {
+  const serverId =
+    typeof payload.serverId === "string"
+      ? payload.serverId
+      : typeof payload.targetServerId === "string"
+        ? payload.targetServerId
+        : typeof payload.attackedServerId === "string"
+          ? payload.attackedServerId
+          : undefined;
+  return serverId;
+}
+
+function nearestPriorRunServer(
+  history: AiDecisionInput["eventTail"],
+  fromIndex: number,
+): string | undefined {
+  for (let index = fromIndex - 1; index >= 0; index -= 1) {
+    const event = history[index]!;
+    const payload = event.publicPayload ?? {};
+    const actionType =
+      typeof payload.actionType === "string" ? payload.actionType : event.type;
+    if (actionType === "start_run") return publicEventServerId(payload);
+    if (actionType === "end_turn") return undefined;
+  }
+  return undefined;
+}
+
+function numberEvidenceValue(
+  evidence: readonly string[],
+  key: string,
+): number {
+  const prefix = `${key}:`;
+  const raw = evidence.find((entry) => entry.startsWith(prefix))?.slice(
+    prefix.length,
+  );
+  const value = raw !== undefined ? Number(raw) : 0;
+  return Number.isFinite(value) ? value : 0;
+}
+
+export function runnerBlinkRecoveryAssessment(
+  input: AiDecisionInput,
+  targetServerId?: string,
+): RunnerBlinkRecoveryAssessment | undefined {
+  if (input.side !== "runner") return undefined;
+  const currentHandCount = input.playerView.own.gripOrHq.length;
+  const recent = targetServerId
+    ? recentBlinkFailureFromEvents(input, targetServerId)
+    : recentBlinkFailureFromEvents(input);
+  const handBufferTooLow = currentHandCount < BLINK_MAX_SINGLE_FAILURE_DAMAGE;
+  const active = recent.recentFailure && handBufferTooLow;
+  if (!active && !recent.recentFailure) return undefined;
+  const sameServerRepeatedRiskPenalty =
+    active && targetServerId && recent.targetServerId === targetServerId
+      ? -900
+      : 0;
+  return {
+    active,
+    ...(targetServerId ? { targetServerId } : {}),
+    currentHandCount,
+    handBufferTooLow,
+    recentFailure: recent.recentFailure,
+    recentDamageAmount: recent.recentDamageAmount,
+    sameServerRepeatedRiskPenalty,
+    evidence: [
+      `recentBlinkFailure:${recent.recentFailure}`,
+      `recentBlinkDamageAmount:${recent.recentDamageAmount}`,
+      `blinkRecoveryHandCount:${currentHandCount}`,
+      `blinkRecoveryHandBufferTooLow:${handBufferTooLow}`,
+      `sameServerRepeatedBlinkRiskPenalty:${sameServerRepeatedRiskPenalty}`,
+      ...(targetServerId ? [`blinkRecoveryTarget:${targetServerId}`] : []),
+      ...(recent.targetServerId
+        ? [`blinkRecoveryRecentTarget:${recent.targetServerId}`]
+        : []),
+      ...(active
+        ? [
+            "why_draw_for_damage_buffer_over_remote_run:recent_blink_damage",
+            "why_blink_run_deferred_for_hand_buffer:recent_blink_damage",
+          ]
+        : []),
+      ...(sameServerRepeatedRiskPenalty < 0
+        ? ["repeated_no_progress_blink_run:true"]
+        : []),
+    ],
+  };
 }
 
 type VisibleRigCard = NonNullable<
@@ -450,11 +726,10 @@ function actionConsumesKnownOwnHandCard(
 function visibleEndRunSubroutineCountForPath(
   iceCards: readonly VisibleServerIce[],
 ): number {
-  const count = iceCards.reduce(
+  return iceCards.reduce(
     (sum, ice) => sum + visibleEndRunSubroutineCountForIce(ice),
     0,
   );
-  return Math.max(1, count);
 }
 
 function visibleEndRunSubroutineCountForIce(ice: VisibleServerIce): number {
@@ -1133,9 +1408,11 @@ function evaluateRunnerRunTarget(
   const spendLimitBlocksPath =
     projection.spendLimit !== undefined &&
     (path.visibleBreakCost ?? 0) > projection.spendLimit;
-  const pathPassability = spendLimitBlocksPath
-    ? "blocked_unpayable"
-    : basePathPassability;
+  const pathPassability = blinkRiskAssessment?.blockedByHandBuffer
+    ? "blocked_by_blink_hand_buffer"
+    : spendLimitBlocksPath
+      ? "blocked_unpayable"
+      : basePathPassability;
   const creditsAfterRun = path.creditsAfterPath;
   const multiaccessAvailable = combinedRunPayoff.multiaccessAvailable;
   const stealOrTrashAffordable = stealOrTrashAffordableFor(accessPayoff);
@@ -1954,6 +2231,9 @@ function recommendationForRunTarget(params: {
   scoreThreat: boolean;
   blinkRiskAssessment?: BlinkRiskAssessment;
 }): RunnerRunTargetRecommendation {
+  if (params.pathPassability === "blocked_by_blink_hand_buffer") {
+    return "draw_for_damage_buffer";
+  }
   if (blinkRiskShouldAvoidRun(params.blinkRiskAssessment)) {
     return "do_not_run_now";
   }
@@ -2031,7 +2311,12 @@ function scoreRunTargetEvaluation(params: {
   blinkRiskAssessment?: BlinkRiskAssessment;
 }): number {
   const payoffScore = scoreForPayoff(params.accessPayoff);
-  const pathPenalty = params.pathPassability === "reachable" ? 0 : -420;
+  const pathPenalty =
+    params.pathPassability === "reachable"
+      ? 0
+      : params.pathPassability === "blocked_by_blink_hand_buffer"
+        ? -1200
+        : -420;
   const reservePenalty =
     params.creditsAfterRun < params.economyPosture.minimumCreditFloor ? -160 : 0;
   const multiaccessBonus = params.multiaccessAvailable ? 80 : 0;
@@ -2080,6 +2365,8 @@ function recommendationRank(recommendation: RunnerRunTargetRecommendation): numb
       return 5;
     case "setup_first":
       return 4;
+    case "draw_for_damage_buffer":
+      return 3;
     case "gain_credits_first":
       return 3;
     case "find_breaker_first":

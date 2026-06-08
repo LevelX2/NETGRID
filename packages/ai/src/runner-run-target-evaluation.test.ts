@@ -339,6 +339,162 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     );
   });
 
+  it("treats a Blink-only remote score threat with one hand card as no-progress setup first", () => {
+    const input = aiInput({
+      credits: 8,
+      servers: [
+        server("remote_1", {
+          ice: [barrierIce("remote-wall")],
+          root: [
+            visibleCard("remote-root", {
+              known: false,
+              advancementCounters: 2,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-remote-1", "remote_1")],
+      rig: [
+        visibleCard("runner-blink", {
+          definitionId: "onr_v1_007_blink",
+          title: "Blink",
+          type: "program",
+          subtypes: ["icebreaker"],
+        }),
+      ],
+      grip: [visibleCard("grip-card-1", { definitionId: "simple_run_event" })],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "remote_1",
+      accessPayoff: "score_threat",
+      scoreThreat: true,
+      pathPassability: "blocked_by_blink_hand_buffer",
+      recommendation: "draw_for_damage_buffer",
+    });
+    expect(evaluation?.blinkRiskAssessment).toMatchObject({
+      blockedByHandBuffer: true,
+      noProgressRunExpected: true,
+      expectedEtrUnbroken: true,
+      payoffOverride: "remote_score_threat",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "blinkPreRunRiskApplied:true",
+        "blinkPathDependsOnBlink:true",
+        "blinkBreakWouldBeExcludedInEncounter:true",
+        "blocked_by_blink_hand_buffer:true",
+        "blink_no_progress_run:true",
+        "expected_etr_unbroken:true",
+        "recommendation:draw_for_damage_buffer",
+        "why_blink_run_deferred_for_hand_buffer:self_net_damage_buffer_too_low",
+      ]),
+    );
+  });
+
+  it("keeps remote contest reachable when stable wall coverage is installed", () => {
+    const input = aiInput({
+      credits: 10,
+      servers: [
+        server("remote_1", {
+          ice: [barrierIce("remote-wall")],
+          root: [
+            visibleCard("remote-root", {
+              known: false,
+              advancementCounters: 2,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-remote-1", "remote_1")],
+      rig: [
+        visibleCard("runner-blink", {
+          definitionId: "onr_v1_007_blink",
+          title: "Blink",
+          type: "program",
+          subtypes: ["icebreaker"],
+        }),
+        visibleCard("runner-efficient-fracter", {
+          definitionId: "efficient_fracter",
+          title: "Efficient Fracter",
+          type: "program",
+          subtypes: ["icebreaker", "fracter"],
+          strength: 2,
+        }),
+      ],
+      grip: [visibleCard("grip-card-1", { definitionId: "simple_run_event" })],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "remote_1",
+      accessPayoff: "score_threat",
+      pathPassability: "reachable",
+      recommendation: "run_now",
+    });
+    expect(evaluation?.blinkRiskAssessment).toBeUndefined();
+  });
+
+  it("adds repeated-risk evidence after recent Blink failure on the same server", () => {
+    const eventTail: PublicGameEvent[] = [
+      syntheticPublicEvent("blink-run-started", 2, "run_started", {
+        actionType: "start_run",
+        actor: "runner",
+        serverId: "remote_1",
+      }),
+      syntheticPublicEvent("blink-failed", 3, "break_subroutine", {
+        actionType: "break_subroutine",
+        actor: "runner",
+        blinkBreakSuccess: false,
+        blinkDamageAmount: 3,
+      }),
+    ];
+    const input = aiInput({
+      credits: 8,
+      servers: [
+        server("remote_1", {
+          ice: [barrierIce("remote-wall")],
+          root: [
+            visibleCard("remote-root", {
+              known: false,
+              advancementCounters: 2,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-remote-1", "remote_1")],
+      rig: [
+        visibleCard("runner-blink", {
+          definitionId: "onr_v1_007_blink",
+          title: "Blink",
+          type: "program",
+          subtypes: ["icebreaker"],
+        }),
+      ],
+      grip: [visibleCard("grip-card-1", { definitionId: "simple_run_event" })],
+      eventTail,
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation?.blinkRiskAssessment).toMatchObject({
+      recentFailure: true,
+      recentDamageAmount: 3,
+      sameServerRepeatedRiskPenalty: -900,
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "recentBlinkFailure:true",
+        "recentBlinkDamageAmount:3",
+        "sameServerRepeatedBlinkRiskPenalty:-900",
+        "repeated_no_progress_blink_run:true",
+      ]),
+    );
+  });
+
   it("does not turn an unreachable payoff target into a legal run choice", () => {
     const input = aiInput({
       credits: 6,
@@ -1067,6 +1223,7 @@ function aiInput(params: {
   servers: PlayerView["servers"];
   legalActions: LegalAction[];
   rig?: VisibleCard[];
+  grip?: VisibleCard[];
   eventTail?: PublicGameEvent[];
 }): AiDecisionInput {
   const playerView: PlayerView = {
@@ -1080,7 +1237,7 @@ function aiInput(params: {
       credits: params.credits,
       clicks: 3,
       agendaPoints: 0,
-      gripOrHq: [],
+      gripOrHq: params.grip ?? [],
       stackOrRdCount: 20,
       heapOrArchives: [],
       scoreArea: [],
@@ -1116,6 +1273,23 @@ function aiInput(params: {
     decisionId: "runner-run-target-test:1:runner",
     actionNumber: 1,
     profileId: "runner-ai-test",
+  };
+}
+
+function syntheticPublicEvent(
+  eventId: string,
+  stateVersionAfter: number,
+  type: string,
+  publicPayload: Record<string, unknown>,
+): PublicGameEvent {
+  return {
+    eventId,
+    type,
+    stateVersionBefore: stateVersionAfter - 1,
+    stateVersionAfter,
+    stateHashAfter: `fnv1a:${eventId}`,
+    visibilityClass: "public",
+    publicPayload,
   };
 }
 
@@ -1225,6 +1399,24 @@ function visibleCard(
     known: true,
     ...overrides,
   };
+}
+
+function barrierIce(instanceId: string): VisibleCard {
+  return visibleCard(instanceId, {
+    definitionId: "simple_barrier_ice",
+    title: "Simple Barrier ICE",
+    type: "ice",
+    subtypes: ["barrier"],
+    known: true,
+    rezzed: true,
+    strength: 3,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "simple_barrier_ice",
+      effectiveStrength: 3,
+      subroutines: [{ id: "simple_barrier_ice_etr", type: "end_the_run" }],
+    },
+  });
 }
 
 function handDevelopmentEvaluation(

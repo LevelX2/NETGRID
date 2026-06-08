@@ -2517,6 +2517,8 @@ function runnerRunTargetPriorityDelta(
       return 40;
     case "setup_first":
       return -80;
+    case "draw_for_damage_buffer":
+      return -520;
     case "gain_credits_first":
       return -180;
     case "find_breaker_first":

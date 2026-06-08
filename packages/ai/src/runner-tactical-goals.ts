@@ -108,6 +108,7 @@ export function buildRunnerTacticalGoals(
   }
   const lowValueRuns = runTargets.filter((target) =>
     target.recommendation === "do_not_run_now" ||
+    target.recommendation === "draw_for_damage_buffer" ||
     target.knownAccessState === "known_no_current_payoff"
   );
   if (
@@ -150,7 +151,10 @@ export function buildRunnerTacticalGoals(
     }));
   }
   for (const target of runTargets.filter(
-    (evaluation) => evaluation.targetKind === "remote" && evaluation.scoreThreat,
+    (evaluation) =>
+      evaluation.targetKind === "remote" &&
+      evaluation.scoreThreat &&
+      evaluation.recommendation !== "draw_for_damage_buffer",
   )) {
     goals.push(goal({
       goalId: "runner.contest_remote_if_score_threat",

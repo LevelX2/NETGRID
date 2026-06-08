@@ -68,6 +68,7 @@ import {
   buildBlinkRiskAssessment,
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,
+  runnerBlinkRecoveryAssessment,
   type BlinkRiskAssessment,
   type BlinkRiskPayoffOverride,
   type RunnerRunTargetEvaluation,
@@ -7115,6 +7116,8 @@ function semanticRuntimeRunnerScoreComponents(
       reason: `hand:${input.playerView.own.gripOrHq.length}`,
     });
   }
+  const blinkRecoveryComponent = runnerBlinkRecoveryScoreComponent(input, action);
+  if (blinkRecoveryComponent) components.push(blinkRecoveryComponent);
   const multiRunEventComponent = runnerMultiRunEventScoreComponent(input, action);
   if (multiRunEventComponent) components.push(multiRunEventComponent);
   components.push(
@@ -7430,7 +7433,7 @@ function semanticRuntimeRunnerRunTargetGuidanceComponent(
       `known_access:${evaluation.knownAccessState}`,
       `path:${evaluation.pathPassability}`,
       `credits_after:${evaluation.creditsAfterRun}`,
-      ...(evaluation.blinkRiskAssessment?.evidence.slice(0, 14) ?? []),
+      ...(evaluation.blinkRiskAssessment?.evidence.slice(0, 24) ?? []),
     ].join("|"),
   };
 }
@@ -7445,6 +7448,8 @@ function semanticRuntimeRunTargetGuidanceValue(
       return evaluation.accessPayoff === "unknown" ? -1700 : -900;
     case "setup_first":
       return -1600;
+    case "draw_for_damage_buffer":
+      return -3600;
     case "gain_credits_first":
       return -2100;
     case "find_breaker_first":
@@ -7507,6 +7512,58 @@ function runnerMultiRunEventScoreValue(
   if (!canTakeRun) return -2200;
   if (phase === "followup_run") return payoffClass === "high_payoff" ? 220 : 80;
   return payoffClass === "high_payoff" ? 2100 : 1400;
+}
+
+function runnerBlinkRecoveryScoreComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (input.side !== "runner" || action.side !== "runner") return undefined;
+  const targetServerId =
+    action.type === "start_run" ? semanticRuntimeServerId(action) : undefined;
+  const assessment = runnerBlinkRecoveryAssessment(input, targetServerId);
+  if (!assessment?.active) return undefined;
+
+  if (action.type === "draw_card") {
+    return {
+      key: "runner_blink_damage_buffer_recovery",
+      label: "Blink-Schadenspuffer",
+      value: 1700,
+      reason: sortedUnique([
+        ...assessment.evidence,
+        "blink_recovery_action:draw_card",
+      ]).join("|"),
+    };
+  }
+
+  if (action.type === "install_card") {
+    const roles = rolesForAction(input, action);
+    if (roles.some((role) => role.startsWith("breaker_"))) {
+      return {
+        key: "runner_blink_stable_coverage_recovery",
+        label: "Stabile Breaker-Abdeckung",
+        value: 850,
+        reason: sortedUnique([
+          ...assessment.evidence,
+          "blink_recovery_action:stable_breaker_install",
+        ]).join("|"),
+      };
+    }
+  }
+
+  if (action.type === "gain_credit") {
+    return {
+      key: "runner_blink_setup_recovery",
+      label: "Blink-Setup-Erholung",
+      value: 360,
+      reason: sortedUnique([
+        ...assessment.evidence,
+        "blink_recovery_action:gain_credit",
+      ]).join("|"),
+    };
+  }
+
+  return undefined;
 }
 
 function runnerHandFundingTarget(
