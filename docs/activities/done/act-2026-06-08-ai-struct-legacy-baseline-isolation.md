@@ -1,21 +1,26 @@
 ---
 activityId: act-2026-06-08-ai-struct-legacy-baseline-isolation
-status: inbox
+status: done
 kind: architecture
 area: ai
 priority: high
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-06-08
-startedAt:
-completedAt:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-06-08-ai-stabilize-golden-deck-tests
   - act-2026-06-08-ai-struct-runtime-entrypoints
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/legacy/legacy-baseline.ts
+  - packages/ai/src/index.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/ai test
+  - git diff --check
 ---
 
 # AI-STRUCT-2: Legacy-Baseline sichtbar isolieren
@@ -64,4 +69,4 @@ Legacy-Baseline, alte Baseline-Scorer und Fallback-Entscheidungshilfen sollen au
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. Die öffentlichen Corp-/Runner-Baseline-Einstiege delegieren jetzt über `packages/ai/src/legacy/legacy-baseline.ts`; die gekoppelten Scorer- und Entscheidungshelfer bleiben verhaltensgleich in `index.ts`, sind dort aber als Legacy-Baseline-Implementierung markiert. Ein vollständiger Scorer-Modulmove bleibt bewusst aus, weil die Helfergraphen noch breit an den Restmonolithen gekoppelt sind und dieses Paket keine Verhaltensänderung riskieren soll.

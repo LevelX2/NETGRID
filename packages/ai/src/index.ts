@@ -113,6 +113,10 @@ import {
   type AiDecisionRuntimeOptions,
 } from "./runtime/choose-ai-action";
 import {
+  chooseCorpLegacyBaselineAction,
+  chooseRunnerLegacyBaselineAction,
+} from "./legacy/legacy-baseline";
+import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
   mapPlanStepToLegalActions,
@@ -3244,7 +3248,10 @@ export function chooseCorpAction(
 }
 
 export function chooseCorpBaselineAction(input: AiDecisionInput): AiDecision {
-  return decisionFromChoices(input, scoreActions(input, "corp"));
+  return chooseCorpLegacyBaselineAction(input, {
+    scoreActions,
+    decisionFromChoices,
+  });
 }
 
 export function chooseRunnerAction(
@@ -3271,7 +3278,10 @@ export function chooseRunnerAction(
 }
 
 export function chooseRunnerBaselineAction(input: AiDecisionInput): AiDecision {
-  return decisionFromChoices(input, scoreActions(input, "runner"));
+  return chooseRunnerLegacyBaselineAction(input, {
+    scoreActions,
+    decisionFromChoices,
+  });
 }
 
 type SemanticRuntimeChoice = RankedChoice & {
@@ -11389,6 +11399,7 @@ function createSimulationRng(seed: string): SimulationRng {
   return rng;
 }
 
+// Legacy baseline decision assembly for fallback and reference decisions.
 function decisionFromChoices(
   input: AiDecisionInput,
   choices: RankedChoice[],
@@ -13239,6 +13250,8 @@ function latestTraceContext(input: AiDecisionInput): {
   return {};
 }
 
+// Legacy baseline scorer implementation. The public entrypoint lives in
+// legacy/legacy-baseline.ts; this scorer stays colocated with its helper graph.
 function scoreActions(input: AiDecisionInput, side: Side): RankedChoice[] {
   const features = extractAiFeatures(input);
   return input.legalActions.map((action) =>
