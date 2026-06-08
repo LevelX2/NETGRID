@@ -520,6 +520,7 @@ type AiDecisionPreview = {
   selectedChoices?: Record<string, unknown>;
   detail: Record<string, unknown>;
 };
+type AiDecisionDebugExportStatus = "idle" | "copied" | "copy_failed" | "blocked";
 
 function removePendingUndo<T extends { pendingUndo?: unknown }>(payload: T): Omit<T, "pendingUndo"> {
   const { pendingUndo: _pendingUndo, ...withoutPendingUndo } = payload;
@@ -9457,6 +9458,7 @@ function FloatingAiDecisionDebugOverlay({
   const overlayRef = useRef<HTMLDivElement | null>(null);
   const dragOffsetRef = useRef<{ x: number; y: number } | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  const [exportStatus, setExportStatus] = useState<AiDecisionDebugExportStatus>("idle");
 
   useEffect(() => {
     if (position.kind !== "custom") return;
@@ -9471,6 +9473,11 @@ function FloatingAiDecisionDebugOverlay({
     window.addEventListener("resize", clampToViewport);
     return () => window.removeEventListener("resize", clampToViewport);
   }, [position, onPosition]);
+  useEffect(() => {
+    if (exportStatus === "idle") return;
+    const timeout = window.setTimeout(() => setExportStatus("idle"), 2400);
+    return () => window.clearTimeout(timeout);
+  }, [exportStatus]);
 
   const startDrag = (event: ReactPointerEvent<HTMLDivElement>) => {
     const overlay = overlayRef.current;
@@ -9502,6 +9509,21 @@ function FloatingAiDecisionDebugOverlay({
   const positionStyle: CSSProperties = position.kind === "custom" ? { left: `${position.xPercent}%`, top: `${position.yPercent}%`, transform: "none" } : {};
   const statusText = preview ? "Nächster Schritt" : aiDecisionDebugStatusLabel(status, traceCount);
   const windowClassName = `aiDecisionDebugWindow ${collapsed ? "is-collapsed" : ""}`;
+  const exportTrace = preview ? aiDecisionPreviewAsTrace(preview) : trace;
+  const exportMode: "trace" | "preview" = preview ? "preview" : "trace";
+  const exportButtonTitle = aiDecisionDebugHeaderExportTitle(exportStatus, Boolean(exportTrace));
+  const copyAiDecisionDebugJson = async () => {
+    if (!exportTrace) {
+      setExportStatus("copy_failed");
+      return;
+    }
+    try {
+      const copied = await copyTextToClipboard(serializeAiDecisionDebugVisibleJsonExport(exportTrace, exportMode, new Date().toISOString()));
+      setExportStatus(copied ? "copied" : "copy_failed");
+    } catch {
+      setExportStatus("blocked");
+    }
+  };
 
   const overlay = (
     <div ref={overlayRef} className={`aiDecisionDebugOverlay ${position.kind === "custom" ? "custom" : ""}`} style={positionStyle} data-testid="ai-decision-debug-overlay">
@@ -9522,6 +9544,17 @@ function FloatingAiDecisionDebugOverlay({
           </div>
           <div className="actionPanelFloatingControls">
             <Move size={14} aria-hidden="true" />
+            <button
+              className="button iconOnly"
+              type="button"
+              onPointerDown={(event) => event.stopPropagation()}
+              onClick={copyAiDecisionDebugJson}
+              disabled={!exportTrace}
+              aria-label={exportButtonTitle}
+              title={exportButtonTitle}
+            >
+              {exportStatus === "copied" ? <Check size={14} /> : exportStatus === "blocked" || exportStatus === "copy_failed" ? <AlertTriangle size={14} /> : <Clipboard size={14} />}
+            </button>
             <button
               className="button iconOnly"
               type="button"
@@ -9707,6 +9740,122 @@ function AiDecisionDebugTraceView({ trace, mode = "trace" }: { trace: Maintenanc
   );
 }
 
+function serializeAiDecisionDebugVisibleJsonExport(
+  trace: MaintenanceAiTraceDetail,
+  mode: "trace" | "preview",
+  exportedAt: string,
+): string {
+  const detail = trace.detail;
+  const actionRows = aiTraceActionRows(detail, mode === "preview" ? 32 : 8);
+  const rankedAlternatives = aiDecisionDebugRecordList(detail.rankedAlternatives).slice(0, mode === "preview" ? 12 : 4);
+  const planLayer = aiDecisionDebugPlanLayer(detail);
+  const memory = aiDecisionDebugMemoryExport(detail);
+  const privateHand = aiDecisionDebugPrivateHandExport(detail);
+  const payload = {
+    schemaVersion: "netgrid-ai-decision-display-export-v1",
+    redaction: "client-visible-ai-decision-debug-projection",
+    exportedAt,
+    mode,
+    source: {
+      traceId: trace.traceId,
+      matchId: trace.matchId,
+      eventId: trace.eventId,
+      stateVersion: trace.stateVersion,
+      matchVersion: trace.matchVersion,
+      side: trace.side,
+      turn: trace.turn,
+      decisionIndex: trace.decisionIndex,
+      selectedActionId: trace.selectedActionId,
+      selectedActionType: trace.selectedActionType,
+      planKind: trace.planKind,
+      score: trace.score,
+      confidence: trace.confidence,
+      createdAt: trace.createdAt,
+      sourceSchemaVersion: trace.schemaVersion,
+    },
+    display: {
+      title: mode === "preview" ? aiDecisionPreviewTitle(trace) : aiTraceTitle(trace),
+      metaRows: aiDecisionDebugOverlayMetaRows(trace, mode),
+      warnings: [
+        ...(detail.fallbackUsed === true ? ["Fallback genutzt"] : []),
+        ...(detail.timeoutUsed === true ? ["Timeout genutzt"] : []),
+      ],
+      reasons: safeStringList(detail.visibleReasons, 5),
+      exclusions: safeStringList(detail.whyNot, 5).filter(aiDecisionDebugIsCurrentWhyNot),
+      planLayer: {
+        summaryRows: planLayer.summaryRows,
+        plans: planLayer.entries.map(aiDecisionDebugPlanExport),
+        rawDiagnostic: planLayer.fallbackItems,
+      },
+      actionRanking: actionRows.map((action) => ({
+        rank: action.rank,
+        label: action.label,
+        selected: action.selected,
+        debugSelected: action.debugSelected,
+        excluded: action.excluded,
+        source: action.source,
+        priority: action.priority,
+        metrics: action.metrics,
+        reason: action.reason,
+        scoreRows: action.scoreRows,
+      })),
+      semanticActionRanking: rankedAlternatives.map((alternative, index) => ({
+        rank: typeof alternative.rank === "number" ? alternative.rank : index + 1,
+        label: aiDecisionDebugSemanticRankingLabel(alternative),
+        score: typeof alternative.score === "number" ? alternative.score : undefined,
+      })),
+      scoreRows: aiTraceScoreRows(detail, 8),
+      doctrineRows: aiTraceDoctrineRows(detail),
+      memory,
+      privateHand,
+      followUpNotes: aiTraceDebugGapNotes(detail).slice(0, 3),
+    },
+  };
+  const output = `${JSON.stringify(payload, null, 2)}\n`;
+  if (findForbiddenMaintenanceMarkers(output).length > 0) throw new Error("ai_decision_debug_export_redaction_failed");
+  return output;
+}
+
+function aiDecisionDebugPlanExport(plan: AiDecisionDebugPlanEntry) {
+  const titleUsesTarget = aiDecisionDebugPlanTitleUsesTarget(plan);
+  return {
+    rank: plan.rank,
+    title: aiDecisionDebugPlanTitle(plan),
+    secondary: aiDecisionDebugPlanSecondaryLabel(plan, titleUsesTarget),
+    selected: plan.selected,
+    status: plan.status ? aiDecisionDebugPlanStatusLabel(plan.status) : undefined,
+    step: plan.step ? aiDecisionDebugPlanStepLabel(plan.step, plan) : undefined,
+    blockers: plan.blockers.map(aiDecisionDebugPlanBlockerLabel),
+    capabilities: plan.capabilities.map(aiDecisionDebugPlanCapabilityLabel),
+    unblocks: plan.unblocks.map(aiDecisionDebugPlanReferenceLabel),
+    scores: plan.scores,
+  };
+}
+
+function aiDecisionDebugMemoryExport(detail: Record<string, unknown>) {
+  return {
+    rows: aiDecisionDebugMemoryRows(detail),
+    facts: aiDecisionDebugMemoryChipList(detail.facts, 6),
+    hypotheses: aiDecisionDebugMemoryHypothesisChipList(detail, 6),
+    uncertainty: aiDecisionDebugMemoryChipList(detail.beliefUncertainty, 4),
+    invalidations: aiDecisionDebugMemoryChipList(detail.invalidations, 5),
+  };
+}
+
+function aiDecisionDebugHeaderExportTitle(status: AiDecisionDebugExportStatus, available: boolean): string {
+  if (!available) return "Noch keine KI-Bewertung für JSON-Export verfügbar";
+  switch (status) {
+    case "idle":
+      return "KI-Bewertung als JSON kopieren";
+    case "copied":
+      return "JSON kopiert";
+    case "copy_failed":
+      return "Kopieren fehlgeschlagen";
+    case "blocked":
+      return "Export durch Redaktionsprüfung blockiert";
+  }
+}
+
 const AI_DECISION_DEBUG_OVERLAY_META_LABELS = new Set([
   "Entscheidung",
   "Ausgeführt",
@@ -9789,9 +9938,9 @@ function aiDecisionDebugActionTypeLabel(actionType: string | undefined): string 
 }
 
 function AiDecisionDebugPrivateHand({ detail }: { detail: Record<string, unknown> }) {
-  const preview = aiDecisionDebugRecord(detail.aiPrivateHandPreview);
-  if (!preview) {
-    const rows = aiDecisionDebugPrivateHandMissingRows(detail);
+  const privateHand = aiDecisionDebugPrivateHandExport(detail);
+  if (privateHand.cards.length === 0) {
+    const rows = privateHand.rows;
     if (rows.length === 0) return null;
     return (
       <AiDecisionDebugCollapsibleSection title="KI-Privathand" defaultOpen={false}>
@@ -9799,37 +9948,20 @@ function AiDecisionDebugPrivateHand({ detail }: { detail: Record<string, unknown
       </AiDecisionDebugCollapsibleSection>
     );
   }
-  const cards = aiDecisionDebugRecordList(preview.cards);
-  const rows: Array<[string, string]> = [
-    ["Seite", preview.side === "runner" ? "Runner" : preview.side === "corp" ? "Korp" : String(preview.side ?? "-")],
-    ["Credits", String(preview.credits ?? "-")],
-    ["Handkarten", String(preview.handCount ?? cards.length)],
-    ["Sichtbarkeit", preview.visibility === "preview_only_not_persisted" ? "nur Vorschau, nicht gespeichert" : String(preview.visibility ?? "-")]
-  ];
   return (
     <AiDecisionDebugCollapsibleSection title="KI-Privathand" defaultOpen={false}>
-      <AiDecisionDebugRows rows={rows} />
+      <AiDecisionDebugRows rows={privateHand.rows} />
       <div className="aiDecisionDebugActions">
-        {cards.map((card, index) => {
-          const title = typeof card.title === "string" ? card.title : typeof card.definitionId === "string" ? card.definitionId : `Karte ${index + 1}`;
-          const type = typeof card.type === "string" ? card.type : "unknown";
-          const cost = typeof card.playCost === "number" ? `${card.playCost} Kosten` : "Kosten ?";
-          const availability = aiDecisionDebugPrivateHandAvailabilityLabel(card.availability, card.missingCredits);
-          const legalActions = aiDecisionDebugRecordList(card.legalActions);
-          const rulesText = typeof card.rulesText === "string" ? card.rulesText : "";
+        {privateHand.cards.map((card) => {
           return (
-            <div className="aiDecisionDebugAction" key={`${String(card.instanceId ?? title)}:${index}`}>
+            <div className="aiDecisionDebugAction" key={card.key}>
               <div>
-                <strong>#{index + 1} {title}</strong>
-                <span>{[type, cost, availability].join(" · ")}</span>
+                <strong>#{card.rank} {card.title}</strong>
+                <span>{card.meta}</span>
               </div>
-              {rulesText ? <p><strong>Regeltext:</strong> {rulesText}</p> : null}
-              {legalActions.length > 0 ? (
-                <p>{legalActions.map((action) => {
-                  const label = typeof action.label === "string" ? action.label : aiDecisionDebugActionTypeLabel(typeof action.actionType === "string" ? action.actionType : undefined);
-                  const creditCost = typeof action.creditCost === "number" ? ` (${action.creditCost} Credits)` : "";
-                  return `${label}${creditCost}`;
-                }).join(" · ")}</p>
+              {card.rulesText ? <p><strong>Regeltext:</strong> {card.rulesText}</p> : null}
+              {card.legalActions.length > 0 ? (
+                <p>{card.legalActions.join(" · ")}</p>
               ) : (
                 <p>Keine aktuelle LegalAction aus dieser Handkarte.</p>
               )}
@@ -9839,6 +9971,50 @@ function AiDecisionDebugPrivateHand({ detail }: { detail: Record<string, unknown
       </div>
     </AiDecisionDebugCollapsibleSection>
   );
+}
+
+function aiDecisionDebugPrivateHandExport(detail: Record<string, unknown>): {
+  rows: Array<[string, string]>;
+  cards: Array<{
+    key: string;
+    rank: number;
+    title: string;
+    meta: string;
+    rulesText: string;
+    legalActions: string[];
+  }>;
+} {
+  const preview = aiDecisionDebugRecord(detail.aiPrivateHandPreview);
+  if (!preview) return { rows: aiDecisionDebugPrivateHandMissingRows(detail), cards: [] };
+  const cards = aiDecisionDebugRecordList(preview.cards);
+  const rows: Array<[string, string]> = [
+    ["Seite", preview.side === "runner" ? "Runner" : preview.side === "corp" ? "Korp" : String(preview.side ?? "-")],
+    ["Credits", String(preview.credits ?? "-")],
+    ["Handkarten", String(preview.handCount ?? cards.length)],
+    ["Sichtbarkeit", preview.visibility === "preview_only_not_persisted" ? "nur Vorschau, nicht gespeichert" : String(preview.visibility ?? "-")]
+  ];
+  return {
+    rows,
+    cards: cards.map((card, index) => {
+      const title = typeof card.title === "string" ? card.title : typeof card.definitionId === "string" ? card.definitionId : `Karte ${index + 1}`;
+      const type = typeof card.type === "string" ? card.type : "unknown";
+      const cost = typeof card.playCost === "number" ? `${card.playCost} Kosten` : "Kosten ?";
+      const availability = aiDecisionDebugPrivateHandAvailabilityLabel(card.availability, card.missingCredits);
+      const legalActions = aiDecisionDebugRecordList(card.legalActions).map((action) => {
+        const label = typeof action.label === "string" ? action.label : aiDecisionDebugActionTypeLabel(typeof action.actionType === "string" ? action.actionType : undefined);
+        const creditCost = typeof action.creditCost === "number" ? ` (${action.creditCost} Credits)` : "";
+        return `${label}${creditCost}`;
+      });
+      return {
+        key: `${String(card.instanceId ?? title)}:${index}`,
+        rank: index + 1,
+        title,
+        meta: [type, cost, availability].join(" · "),
+        rulesText: typeof card.rulesText === "string" ? card.rulesText : "",
+        legalActions
+      };
+    })
+  };
 }
 
 function aiDecisionDebugPrivateHandMissingRows(detail: Record<string, unknown>): Array<[string, string]> {
