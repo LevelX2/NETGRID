@@ -1,21 +1,27 @@
 ---
 activityId: act-2026-06-08-ai-struct-simulation-benchmark-split
-status: inbox
+status: done
 kind: architecture
 area: ai
 priority: normal
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-06-08
-startedAt:
-completedAt:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-06-08-ai-stabilize-golden-deck-tests
   - act-2026-06-08-ai-struct-runtime-entrypoints
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/simulation/benchmark-reports.ts
+  - packages/ai/src/index.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/ai test -- src/index.test.ts -t benchmark
+  - corepack pnpm --filter @netgrid/ai test
+  - git diff --check
 ---
 
 # AI-STRUCT-3: Simulation und Benchmark vom Live-Entrypoint trennen
@@ -68,4 +74,4 @@ AI-Simulation, Soak, Benchmarking und Metrikaggregation sollen aus dem Live-Entr
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. Benchmark-Gate- und Reportformatierung liegen jetzt in `packages/ai/src/simulation/benchmark-reports.ts` und werden über `index.ts` kompatibel re-exportiert. Die Simulationsausführung und die zugehörigen Metrikaggregationen bleiben wegen ihrer breiten Kopplung im aktuellen Paket noch im Monolithen; das neue Modul dokumentiert, dass diese Reporthelfer Simulation-only sind und nicht als Live-Entscheidungsgrundlage genutzt werden dürfen.
