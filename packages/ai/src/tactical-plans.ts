@@ -422,6 +422,14 @@ function redactedRunnerRunTargetEvaluationFacts(
 
 function redactedRunnerEconomyPostureFacts(posture: RunnerEconomyPosture): string[] {
   const creditBase = posture.creditBasePlan;
+  const reservePolicy = posture.creditReservePolicy;
+  const reserveShortfall = Math.max(
+    0,
+    reservePolicy.desiredCreditReserve - reservePolicy.currentCredits,
+  );
+  const creditReservePenalty = reservePolicy.belowReserveNow
+    ? Math.min(240, reserveShortfall * 30)
+    : 0;
   return [
     `runner_economy_min_floor:${posture.minimumCreditFloor}`,
     `runner_economy_desired_reserve:${posture.desiredCreditReserve}`,
@@ -441,11 +449,58 @@ function redactedRunnerEconomyPostureFacts(posture: RunnerEconomyPosture): strin
     `runner_economy_bank_relevant:${posture.bankToolsRelevant}`,
     `runner_economy_funding_need:${posture.fundingNeed}`,
     `runner_economy_recommendation:${posture.recommendation}`,
-    `runner_credit_reserve_phase:${posture.creditReservePolicy.phase}`,
-    `runner_credit_reserve_remote_score_threat:${posture.creditReservePolicy.remoteScoreThreat}`,
-    `runner_credit_reserve_contest:${posture.creditReservePolicy.contestReserve}`,
-    `runner_credit_reserve_below_now:${posture.creditReservePolicy.belowReserveNow}`,
+    `runner_credit_reserve_current_credits:${reservePolicy.currentCredits}`,
+    `runner_credit_reserve_desired:${reservePolicy.desiredCreditReserve}`,
+    `runner_credit_reserve_phase:${reservePolicy.phase}`,
+    `runner_credit_reserve_remote_score_threat:${reservePolicy.remoteScoreThreat}`,
+    `runner_credit_reserve_contest:${reservePolicy.contestReserve}`,
+    `runner_credit_reserve_below_now:${reservePolicy.belowReserveNow}`,
+    `runner_credit_reserve_spending_would_drop:${reservePolicy.spendingWouldDropBelowReserve}`,
+    `runner_credit_reserve_penalty:${creditReservePenalty}`,
+    `runner_credit_reserve_reasons:${reservePolicy.reserveDrivers.join("|") || "none"}`,
+    `runner_credit_reserve_overrides:${reservePolicy.reserveOverrides.join("|") || "none"}`,
+    `why_economy_over_run_or_install:${runnerEconomyOverRunOrInstallReason(posture)}`,
+    `why_spend_allowed_despite_reserve:${runnerSpendAllowedDespiteReserveReason(posture)}`,
   ];
+}
+
+function runnerEconomyOverRunOrInstallReason(
+  posture: RunnerEconomyPosture,
+): string {
+  const policy = posture.creditReservePolicy;
+  if (
+    !posture.fundingNeed &&
+    !policy.belowReserveNow &&
+    posture.recommendation !== "build_economy" &&
+    posture.recommendation !== "cash_out_bank"
+  ) {
+    return "none";
+  }
+  if (policy.remoteScoreThreat !== "none" && policy.belowReserveNow) {
+    return "remote_contest_reserve";
+  }
+  if (posture.recommendation === "cash_out_bank") return "bank_tool_cashout";
+  if (posture.creditBasePlan.usefulHandCardsBlockedByCredits > 0) {
+    return "useful_hand_funding";
+  }
+  if (policy.currentCredits < policy.minimumCreditFloor) return "minimum_floor";
+  if (policy.belowReserveNow) return "desired_reserve";
+  return "economy_priority";
+}
+
+function runnerSpendAllowedDespiteReserveReason(
+  posture: RunnerEconomyPosture,
+): string {
+  switch (posture.creditBasePlan.recommendation) {
+    case "allow_setup_spend":
+      return "setup_card_payoff";
+    case "allow_pressure":
+      return "pressure_payoff_or_probe";
+    case "build_credit_base":
+    case "fund_useful_hand_card":
+    case "preserve_reserve":
+      return "not_allowed";
+  }
 }
 
 function planCanMapToCurrentAction(plan: TacticalPlan): boolean {
@@ -2023,6 +2078,7 @@ function runnerPressureProbeAllowance(
       `pressure_probe_target:${serverId}`,
       `pressure_probe_variation_bonus:${variationBonus}`,
       "economy_pressure_tradeoff:probe_within_budget",
+      "why_spend_allowed_despite_reserve:pressure_budget_probe",
     ],
   };
 }

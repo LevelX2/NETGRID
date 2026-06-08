@@ -223,6 +223,11 @@ describe("Runner Golden Deck strategy and debug", () => {
     expect(tacticalDebug).toContain(
       "runner_credit_base_recommendation:allow_setup_spend",
     );
+    expect(tacticalDebug).toContain("runner_credit_reserve_current_credits:5");
+    expect(tacticalDebug).toContain("runner_credit_reserve_desired:6");
+    expect(tacticalDebug).toContain(
+      "why_spend_allowed_despite_reserve:setup_card_payoff",
+    );
     expect(tacticalDebug).toContain(
       "selected_development_goal:hand_development_role:access_payoff",
     );

@@ -4225,7 +4225,7 @@ function tacticalPlanDebugItems(
       .slice(0, 12)
       .map((fact) => `runner_run_target_used:${fact}`),
     ...(planRuntime.runnerEconomyPostureUsed ?? [])
-      .slice(0, 12)
+      .slice(0, 28)
       .map((fact) => `runner_economy_posture_used:${fact}`),
     ...(planRuntime.runnerHandDevelopmentEvaluationsUsed ?? [])
       .slice(0, 12)

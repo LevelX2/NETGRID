@@ -1,20 +1,28 @@
 ---
 activityId: act-2026-06-07-ai-runner-contest-reserve-debug-regression
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: normal
 primaryAgent: test-quality-agent
 requiresImplementation: true
 createdAt: 2026-06-07
-startedAt:
-completedAt:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-06-07-ai-runner-contest-reserve-implementation
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/tactical-plans.ts
+  - packages/ai/src/index.ts
+  - packages/ai/src/runner-tactical-goals.test.ts
+  - packages/ai/src/runner-golden-deck-debug.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai test -- src/runner-tactical-goals.test.ts src/runner-golden-deck-debug.test.ts
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/ai test
+  - git diff --check
 ---
 
 # Runner-Contest-Reserve debuggen und gegen Regressionen absichern
@@ -81,4 +89,4 @@ Die neue Contest-Reserve-Logik soll in AI-Debugfacts nachvollziehbar und durch f
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. Die redigierte Runner-Economy-Posture-Debugfläche enthält jetzt konkrete Reservewerte, Reservegründe, abgeleiteten Reserve-Malus sowie Erklärfacts für `why_economy_over_run_or_install` und `why_spend_allowed_despite_reserve`. Der Debugausschnitt für Economy-Posture wurde begrenzt erweitert, damit diese Facts im DecisionDebug sichtbar bleiben. Regressionen sichern Remote-Score-Threat-Reserve, erlaubten Setup-Spend, PressureBudget-Probe-Override und Redaction ab; es wurde keine Reservebewertung oder Action-Auswahl absichtlich geändert.

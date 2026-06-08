@@ -177,6 +177,22 @@ describe("Runner TacticalGoalIntegration", () => {
     expect(JSON.stringify(result.runnerEconomyPostureUsed)).toContain(
       "runner_credit_reserve_contest:8",
     );
+    expect(result.runnerEconomyPostureUsed).toEqual(
+      expect.arrayContaining([
+        "runner_credit_reserve_current_credits:6",
+        "runner_credit_reserve_desired:8",
+        "runner_credit_reserve_spending_would_drop:false",
+        "runner_credit_reserve_penalty:60",
+        "why_economy_over_run_or_install:remote_contest_reserve",
+        "why_spend_allowed_despite_reserve:not_allowed",
+      ]),
+    );
+    expect(result.runnerEconomyPostureUsed?.join("\n")).toContain(
+      "runner_credit_reserve_reasons:phase:late_contest|remote_score_threat:urgent",
+    );
+    expect(JSON.stringify(result.runnerEconomyPostureUsed)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState|decklist|C:\\|\/Users\//i,
+    );
   });
 
   it("blocks central probes while remote contest funding is needed", () => {
@@ -277,6 +293,17 @@ describe("Runner TacticalGoalIntegration", () => {
     );
     expect(JSON.stringify(result.planAlternatives)).toContain(
       "variation_reason:deterministic_priority_only",
+    );
+    expect(result.runnerEconomyPostureUsed).toEqual(
+      expect.arrayContaining([
+        "runner_credit_reserve_current_credits:3",
+        "runner_credit_reserve_desired:4",
+        "runner_credit_reserve_penalty:30",
+        "why_spend_allowed_despite_reserve:not_allowed",
+      ]),
+    );
+    expect(JSON.stringify(result.planAlternatives)).toContain(
+      "why_spend_allowed_despite_reserve:pressure_budget_probe",
     );
   });
 
