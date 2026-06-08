@@ -41,11 +41,136 @@ describe("belief-state R&D top freshness", () => {
   });
 });
 
-function runnerInput(events: PublicGameEvent[]): AiDecisionInput {
+describe("belief-state HQ hand memory retention", () => {
+  it("keeps known safe HQ ICE after an unknown draw and unrelated known operation play", () => {
+    const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
+      "onr_v1_230_cortical-scanner",
+      "onr_v1_237_data-wall",
+    ]);
+    const unknownDraw = publicEvent("evt_draw", "mandatory_draw", 2, {
+      actor: "corp",
+      actionType: "mandatory_draw",
+    });
+    const playedDrawnOperation = publicEvent("evt_play", "play_operation", 3, {
+      actor: "corp",
+      actionType: "play_operation",
+      serverId: "hq",
+      cardDefinitionId: "onr_v1_281_accounts-receivable",
+    });
+
+    const belief = reconstructBeliefState(
+      runnerInput([hqLook, unknownDraw, playedDrawnOperation], 2),
+    );
+    const hqMemory = belief.runnerOpponentModel?.hqHandMemory;
+
+    expect(hqMemory).toMatchObject({
+      handCount: 2,
+      knownCount: 2,
+      allCardsKnown: true,
+      knownDefinitions: [
+        "onr_v1_230_cortical-scanner",
+        "onr_v1_237_data-wall",
+      ],
+    });
+    expect(hqMemory?.ledger).toMatchObject({
+      unknownRestCount: 0,
+      candidateGroups: [],
+      safeDefinitions: expect.arrayContaining([
+        expect.objectContaining({
+          definitionId: "onr_v1_230_cortical-scanner",
+          count: 1,
+        }),
+        expect.objectContaining({
+          definitionId: "onr_v1_237_data-wall",
+          count: 1,
+        }),
+      ]),
+    });
+  });
+
+  it("keeps a hidden ICE install candidate group after a draw without collapsing to memory none", () => {
+    const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
+      "onr_v1_230_cortical-scanner",
+      "onr_v1_237_data-wall",
+    ]);
+    const unknownDraw = publicEvent("evt_draw", "mandatory_draw", 2, {
+      actor: "corp",
+      actionType: "mandatory_draw",
+    });
+    const hiddenIceInstall = publicEvent("evt_install", "install_card", 3, {
+      actor: "corp",
+      actionType: "install_card",
+      serverId: "remote_1",
+      installPlacement: "ice",
+    });
+
+    const belief = reconstructBeliefState(
+      runnerInput([hqLook, unknownDraw, hiddenIceInstall], 2),
+    );
+    const hqMemory = belief.runnerOpponentModel?.hqHandMemory;
+
+    expect(hqMemory).toMatchObject({
+      handCount: 2,
+      knownDefinitions: [],
+      knownCount: 0,
+      allCardsKnown: false,
+    });
+    expect(hqMemory?.ledger).toMatchObject({
+      unknownRestCount: 1,
+      candidateGroups: [
+        expect.objectContaining({
+          reason: "hidden_ice_install_candidates",
+          serverId: "remote_1",
+          installPlacement: "ice",
+          candidateDefinitions: expect.arrayContaining([
+            { definitionId: "onr_v1_230_cortical-scanner", count: 1 },
+            { definitionId: "onr_v1_237_data-wall", count: 1 },
+          ]),
+        }),
+      ],
+    });
+  });
+
+  it("hard-invalidates HQ memory on hidden-zone reorder", () => {
+    const hqLook = hqPrivateLookEvent("evt_hq_look", 1, [
+      "onr_v1_230_cortical-scanner",
+      "onr_v1_237_data-wall",
+    ]);
+    const reorder = publicEvent("evt_reorder", "resolve_choice", 2, {
+      actor: "corp",
+      actionType: "resolve_choice",
+      hiddenZoneAction: "hq_shuffle",
+    });
+
+    const belief = reconstructBeliefState(
+      runnerInput([hqLook, reorder], 2),
+    );
+    const hqMemory = belief.runnerOpponentModel?.hqHandMemory;
+
+    expect(hqMemory).toMatchObject({
+      knownDefinitions: [],
+      knownCount: 0,
+      allCardsKnown: false,
+    });
+    expect(hqMemory?.ledger).toMatchObject({
+      safeDefinitions: [],
+      unknownRestCount: 2,
+      candidateGroups: [],
+    });
+    expect(hqMemory?.invalidationReasons.join("|")).toContain(
+      "shuffle_changed_hq_hand:evt_reorder",
+    );
+  });
+});
+
+function runnerInput(
+  events: PublicGameEvent[],
+  opponentHandCount = 0,
+): AiDecisionInput {
   const playerView = {
     stateVersion: events.at(-1)?.stateVersionAfter ?? 0,
     own: { gripOrHq: [] },
-    opponent: { handCount: 0 },
+    opponent: { handCount: opponentHandCount },
     servers: [],
     publicEvents: events,
   } as unknown as PlayerView;
@@ -61,6 +186,21 @@ function runnerInput(events: PublicGameEvent[]): AiDecisionInput {
     actionNumber: 1,
     profileId: "test",
   };
+}
+
+function hqPrivateLookEvent(
+  eventId: string,
+  stateVersionBefore: number,
+  knownHqDefinitionIds: string[],
+): PublicGameEvent {
+  return publicEvent(eventId, "resolve_choice", stateVersionBefore, {
+    actor: "runner",
+    actionType: "resolve_choice",
+    hiddenZoneAction: "p3_33_private_look",
+    privateLookZone: "hq",
+    privateLookCount: knownHqDefinitionIds.length,
+    knownHqDefinitionIds,
+  });
 }
 
 function publicEvent(

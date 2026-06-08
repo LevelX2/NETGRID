@@ -636,6 +636,7 @@ function evaluateRunnerRunTarget(
     recommendation,
     multiaccessAvailable,
     installedRunPayoffScore: installedRunPayoff.scoreBonus,
+    accessPayoffScoreAdjustment: payoff.scoreAdjustment,
   });
   return {
     schemaVersion: RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION,
@@ -664,11 +665,12 @@ function evaluateRunnerRunTarget(
       `credits_after_run:${creditsAfterRun}`,
       `multiaccess_available:${multiaccessAvailable}`,
       `installed_run_payoff_score:${installedRunPayoff.scoreBonus}`,
+      `access_payoff_score_adjustment:${payoff.scoreAdjustment}`,
       `risky_universal_coverage:${riskyUniversalCoverage}`,
       `score_threat:${scoreThreat}`,
       `recommendation:${recommendation}`,
       ...economyPosture.creditReservePolicy.evidence.slice(0, 12),
-      ...payoff.evidence.slice(0, 8),
+      ...payoff.evidence.slice(0, 28),
       ...installedRunPayoff.evidence.slice(0, 8),
     ],
   };
@@ -698,6 +700,7 @@ function payoffForTarget(
 ): {
   accessPayoff: RunnerAccessPayoff;
   knownAccessState: RunnerKnownAccessState;
+  scoreAdjustment: number;
   evidence: string[];
 } {
   if (targetKind === "remote") {
@@ -721,6 +724,7 @@ function payoffForTarget(
   return {
     accessPayoff: "unknown",
     knownAccessState: "unknown",
+    scoreAdjustment: 0,
     evidence: [`${targetKind}_payoff:unknown`],
   };
 }
@@ -728,6 +732,7 @@ function payoffForTarget(
 function remotePayoffToRunTarget(payoff: KnownRemoteAccessPayoff): {
   accessPayoff: RunnerAccessPayoff;
   knownAccessState: RunnerKnownAccessState;
+  scoreAdjustment: number;
   evidence: string[];
 } {
   return {
@@ -739,6 +744,7 @@ function remotePayoffToRunTarget(payoff: KnownRemoteAccessPayoff): {
         : payoff.payoff === "unknown"
           ? "unknown"
           : "known_payoff",
+    scoreAdjustment: 0,
     evidence: payoff.evidence,
   };
 }
@@ -746,6 +752,7 @@ function remotePayoffToRunTarget(payoff: KnownRemoteAccessPayoff): {
 function centralPayoffToRunTarget(payoff: KnownCentralAccessPayoff): {
   accessPayoff: RunnerAccessPayoff;
   knownAccessState: RunnerKnownAccessState;
+  scoreAdjustment: number;
   evidence: string[];
 } {
   return {
@@ -757,6 +764,7 @@ function centralPayoffToRunTarget(payoff: KnownCentralAccessPayoff): {
         : payoff.payoff === "unknown"
           ? "unknown"
           : "known_payoff",
+    scoreAdjustment: -payoff.penalty,
     evidence: payoff.evidence,
   };
 }
@@ -826,6 +834,7 @@ function scoreRunTargetEvaluation(params: {
   recommendation: RunnerRunTargetRecommendation;
   multiaccessAvailable: boolean;
   installedRunPayoffScore: number;
+  accessPayoffScoreAdjustment: number;
 }): number {
   const payoffScore = scoreForPayoff(params.accessPayoff);
   const pathPenalty = params.pathPassability === "reachable" ? 0 : -420;
@@ -842,6 +851,7 @@ function scoreRunTargetEvaluation(params: {
     multiaccessBonus +
     installedRunPayoffBonus +
     scoreThreatBonus +
+    params.accessPayoffScoreAdjustment +
     recommendationScore
   );
 }

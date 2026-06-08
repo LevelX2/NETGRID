@@ -401,6 +401,150 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     expect(hqEvaluation?.evidence).toContain("hq_all_cards_known:true");
   });
 
+  it("downranks HQ when four of five cards are known low value and no multiaccess is present", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [server("hq"), server("rd")],
+      legalActions: [runAction("run-hq", "hq"), runAction("run-rd", "rd")],
+    });
+
+    const evaluations = evaluateRunnerRunTargets({
+      input,
+      beliefState: beliefWithKnownHq(
+        [
+          "onr_v1_230_cortical-scanner",
+          "onr_v1_237_data-wall",
+          "onr_v1_281_accounts-receivable",
+          "simple_economy_operation",
+        ],
+        { handCount: 5, unknownRestCount: 1 },
+      ),
+    });
+    const hq = evaluations.find(
+      (evaluation) => evaluation.targetServerId === "hq",
+    );
+    const rd = evaluations.find(
+      (evaluation) => evaluation.targetServerId === "rd",
+    );
+    if (!hq || !rd) throw new Error("Expected central evaluations");
+
+    expect(hq).toMatchObject({
+      targetServerId: "hq",
+      accessPayoff: "unknown",
+      knownAccessState: "unknown",
+      recommendation: "run_if_free",
+    });
+    expect(hq.score).toBeLessThan(rd.score);
+    expect(evidenceNumber(hq.evidence, "access_payoff_score_adjustment")).toBeLessThan(0);
+    expect(hq.evidence).toEqual(
+      expect.arrayContaining([
+        "hq_hand_known_count:4",
+        "hq_hand_count:5",
+        "hq_known_fraction:0.8",
+        "hq_unknown_fraction:0.2",
+        "hq_known_low_value_count:4",
+        "hq_knownness_payoff:mostly_known_low_value",
+      ]),
+    );
+  });
+
+  it("keeps HQ attractive as unknown when only one of five cards is known", () => {
+    const input = aiInput({
+      credits: 6,
+      servers: [server("hq")],
+      legalActions: [runAction("run-hq", "hq")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      beliefState: beliefWithKnownHq(["onr_v1_237_data-wall"], {
+        handCount: 5,
+        unknownRestCount: 4,
+      }),
+    });
+    if (!evaluation) throw new Error("Expected HQ evaluation");
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "hq",
+      accessPayoff: "unknown",
+      knownAccessState: "unknown",
+      recommendation: "run_if_free",
+    });
+    expect(evidenceNumber(evaluation.evidence, "access_payoff_score_adjustment")).toBe(0);
+    expect(evaluation.evidence).toEqual(
+      expect.arrayContaining([
+        "hq_known_fraction:0.2",
+        "hq_unknown_fraction:0.8",
+        "hq_knownness_payoff:meaningful_unknown_rest",
+      ]),
+    );
+  });
+
+  it("reduces but keeps the high-known HQ low-value penalty when HQ multiaccess is installed", () => {
+    const baseParams = {
+      credits: 6,
+      servers: [server("hq")],
+      legalActions: [runAction("run-hq", "hq")],
+    };
+    const beliefState = beliefWithKnownHq(
+      [
+        "onr_v1_230_cortical-scanner",
+        "onr_v1_237_data-wall",
+        "onr_v1_281_accounts-receivable",
+        "simple_economy_operation",
+      ],
+      { handCount: 5, unknownRestCount: 1 },
+    );
+    const [withoutMultiaccess] = evaluateRunnerRunTargets({
+      input: aiInput(baseParams),
+      beliefState,
+    });
+    const [withMultiaccess] = evaluateRunnerRunTargets({
+      input: aiInput({
+        ...baseParams,
+        rig: [
+          visibleCard("hq-interface", {
+            definitionId: "onr_v1_129_hq-interface",
+            title: "HQ Interface",
+            type: "hardware",
+          }),
+        ],
+      }),
+      beliefState,
+    });
+    if (!withoutMultiaccess || !withMultiaccess) {
+      throw new Error("Expected HQ evaluations");
+    }
+
+    const noMultiPenalty = Math.abs(
+      evidenceNumber(withoutMultiaccess.evidence, "access_payoff_score_adjustment"),
+    );
+    const multiPenalty = Math.abs(
+      evidenceNumber(withMultiaccess.evidence, "access_payoff_score_adjustment"),
+    );
+
+    expect(withoutMultiaccess).toMatchObject({
+      accessPayoff: "unknown",
+      multiaccessAvailable: false,
+    });
+    expect(withMultiaccess).toMatchObject({
+      accessPayoff: "access_bonus",
+      knownAccessState: "unknown",
+      multiaccessAvailable: true,
+      recommendation: "run_now",
+    });
+    expect(multiPenalty).toBeGreaterThan(0);
+    expect(multiPenalty).toBeLessThan(noMultiPenalty);
+    expect(withMultiaccess.evidence).toEqual(
+      expect.arrayContaining([
+        "hq_access_depth_estimate:2",
+        "hq_unknown_access_chance_estimate:0.4",
+        "hq_knownness_payoff:mostly_known_low_value",
+        "installed_run_payoff:hq:multiaccess",
+      ]),
+    );
+  });
+
   it("suppresses a known remote root with no current access payoff", () => {
     const input = aiInput({
       credits: 6,
@@ -823,6 +967,18 @@ function handDevelopmentEvaluation(
   };
 }
 
+function evidenceNumber(evidence: string[], key: string): number {
+  const prefix = `${key}:`;
+  const raw = evidence.find((entry) => entry.startsWith(prefix))?.slice(
+    prefix.length,
+  );
+  const value = raw !== undefined ? Number(raw) : Number.NaN;
+  if (!Number.isFinite(value)) {
+    throw new Error(`Missing numeric evidence for ${key}`);
+  }
+  return value;
+}
+
 function beliefWithRndTop(params: {
   freshness: RunnerOpponentModel["rndTopFreshness"]["freshness"];
   knownTopDefinitionId?: string;
@@ -883,7 +1039,13 @@ function beliefWithRndTop(params: {
   };
 }
 
-function beliefWithKnownHq(knownDefinitions: string[]): BeliefState {
+function beliefWithKnownHq(
+  knownDefinitions: string[],
+  options: {
+    handCount?: number;
+    unknownRestCount?: number;
+  } = {},
+): BeliefState {
   const rndTopFreshness: RunnerOpponentModel["rndTopFreshness"] = {
     lastKnownAccessEventId: "test-invalidated-rd",
     knownToRunner: false,
@@ -895,6 +1057,9 @@ function beliefWithKnownHq(knownDefinitions: string[]): BeliefState {
     count: 1,
     sourceEventIds: ["test-hq-look"],
   }));
+  const handCount = options.handCount ?? knownDefinitions.length;
+  const unknownRestCount = options.unknownRestCount ??
+    Math.max(0, handCount - knownDefinitions.length);
   return {
     side: "runner",
     version: "belief-test",
@@ -917,15 +1082,18 @@ function beliefWithKnownHq(knownDefinitions: string[]): BeliefState {
       rndTopFreshness,
       knownPositionMemory: [],
       hqHandMemory: {
-        handCount: knownDefinitions.length,
+        handCount,
         knownDefinitions,
         knownCount: knownDefinitions.length,
-        allCardsKnown: true,
+        allCardsKnown:
+          handCount > 0 &&
+          knownDefinitions.length === handCount &&
+          unknownRestCount === 0,
         sourceEventIds: ["test-hq-look"],
         invalidationReasons: [],
         ledger: {
           safeDefinitions,
-          unknownRestCount: 0,
+          unknownRestCount,
           candidateGroups: [],
           sourceEventIds: ["test-hq-look"],
           invalidationReasons: [],
