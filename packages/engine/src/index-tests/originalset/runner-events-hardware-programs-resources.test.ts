@@ -355,6 +355,8 @@ describe("Originalset Spotcheck 2026-05-16 Runner Event/Hardware Prevention hard
     social = applyChoice(social, "runner", `ice_${socialIceId}`);
     expect(social.run?.attackedServerId).toBe("hq");
     expect(social.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_111_social-engineering",
+      socialEngineeringRun: true,
       hiddenZoneBarrier: true,
       targets: expect.objectContaining({
         socialEngineeringGuessCorrect: false,

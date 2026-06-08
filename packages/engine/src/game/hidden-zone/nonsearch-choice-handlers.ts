@@ -637,6 +637,7 @@ function resolveSocialEngineeringChoice(
     host.state.pendingChoice = socialEngineeringGuessChoice(host, sourceCardId);
     host.state.activeSide = "corp";
     const payload = {
+      sourceDefinitionId: host.constants.runAccessPressureEventCardId,
       socialEngineeringStep: "runner_hidden_amount_selected",
       hiddenZoneBarrier: true,
     };
@@ -657,6 +658,7 @@ function resolveSocialEngineeringChoice(
       delete host.state.socialEngineeringSecret;
       delete host.state.pendingChoice;
       const payload = {
+        sourceDefinitionId: host.constants.runAccessPressureEventCardId,
         socialEngineeringGuessCorrect: true,
         secretHiddenAmountRevealed: secret.hiddenAmount,
         secretGuessAmount: guess,
@@ -668,6 +670,7 @@ function resolveSocialEngineeringChoice(
     }
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
+      sourceDefinitionId: host.constants.runAccessPressureEventCardId,
       socialEngineeringGuessCorrect: false,
       secretHiddenAmountRevealed: secret.hiddenAmount,
       secretGuessAmount: guess,
@@ -690,8 +693,10 @@ function resolveSocialEngineeringChoice(
     delete host.state.socialEngineeringSecret;
     delete host.state.pendingChoice;
     const payload = {
+      sourceDefinitionId: host.constants.runAccessPressureEventCardId,
       socialEngineeringGuessCorrect: false,
       autoPassChosenIce: true,
+      socialEngineeringRun: true,
       hiddenZoneBarrier: true,
       serverId,
       chosenIcePosition: server.ice.indexOf(iceId),
@@ -718,6 +723,7 @@ function startSocialEngineeringTargetChoice(
     delete host.state.pendingChoice;
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
+      sourceDefinitionId: host.constants.runAccessPressureEventCardId,
       socialEngineeringGuessCorrect: false,
       socialEngineeringNoIceTarget: true,
       hiddenZoneBarrier: true,

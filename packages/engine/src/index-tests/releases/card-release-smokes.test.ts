@@ -2871,10 +2871,15 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(correct.pendingChoice?.source).toContain("p3_58.social_engineering_hide");
     expect(getPlayerView(correct, "corp").pendingChoice).toBeUndefined();
     correct = applyChoice(correct, "runner", "hide_3");
+    expect(correct.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_111_social-engineering",
+      hiddenZoneBarrier: true,
+    });
     expect(correct.pendingChoice?.source).toContain("p3_58.social_engineering_guess");
     correct = applyChoice(correct, "corp", "guess_3");
     expect(correct.runner.credits).toBe(1);
     expect(correct.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_111_social-engineering",
       hiddenZoneBarrier: true,
       amounts: expect.objectContaining({
         secretHiddenAmountRevealed: 3,
@@ -2915,6 +2920,8 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     wrong = applyChoice(wrong, "runner", `ice_${iceId}`);
     expect(wrong.run?.position).toMatchObject({ kind: "server", serverId: "rd" });
     expect(wrong.eventLog.at(-1)?.publicPayload).toMatchObject({
+      sourceDefinitionId: "onr_v1_111_social-engineering",
+      socialEngineeringRun: true,
       hiddenZoneBarrier: true,
       targets: expect.objectContaining({
         socialEngineeringGuessCorrect: false,

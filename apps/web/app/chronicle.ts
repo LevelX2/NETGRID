@@ -67,6 +67,7 @@ const SKIVVISS_ID = "onr_v1_064_skivviss";
 const QUEST_FOR_CATTEKIN_ID = "onr_v1_172_quest-for-cattekin";
 const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
 const BLINK_ID = "onr_v1_007_blink";
+const SOCIAL_ENGINEERING_ID = "onr_v1_111_social-engineering";
 
 export function isISpySuccessfulRunFollowupPayload(payload: Record<string, unknown>): boolean {
   return payload.runnerUtilityAbility === "i_spy_put_spy_counter";
@@ -104,7 +105,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
   const sourceTitle = stringValue(payload.sourceTitle);
   let cardDefinitionId = stringValue(payload.cardDefinitionId);
-  const cardText = context.cardText ?? undefined;
+  let cardText = context.cardText ?? undefined;
   const isAi = Boolean(stringValue(payload.aiExplanation) || stringValue(payload.aiReasonCode));
   const subject = subjectFor(actor, side, isAi);
   const effect = summarizeEffect(cardText);
@@ -126,7 +127,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
   const v1922RunnerProgramAbility = stringValue(payload.v1922RunnerProgramAbility);
 
   const baseChipList = baseChips(actor, isAi);
-  const cardDetailLines = context.cardDetailLines ?? [];
+  let cardDetailLines = context.cardDetailLines ?? [];
   let category: ChronicleCategory = effect.category ?? categoryFor(actionType);
   let importance: ChronicleImportance = "normal";
   let visibility: ChronicleVisibility = "public";
@@ -229,6 +230,78 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
           ? `${sideLabel(setupSide)} hat ${setupDecision === "keep" ? "die Starthand behalten" : "einen Mulligan genommen"}`
           : `${sideLabel(setupSide)} hat die Mulligan-Entscheidung abgeschlossen`;
         chips.push("Setup", "Starthand", setupDecision === "keep" ? "Behalten" : setupDecision === "mulligan" ? "Mulligan" : "Entscheidung");
+        break;
+      }
+      if (
+        sourceDefinitionId === SOCIAL_ENGINEERING_ID ||
+        payload.socialEngineeringRun === true ||
+        payloadBooleanValue(payload, "socialEngineeringGuessCorrect") !== undefined ||
+        payloadBooleanValue(payload, "autoPassChosenIce") === true ||
+        payloadBooleanValue(payload, "socialEngineeringNoIceTarget") === true
+      ) {
+        const hiddenAmount = payloadNumberValue(payload, "secretHiddenAmountRevealed");
+        const guessAmount = payloadNumberValue(payload, "secretGuessAmount");
+        const guessCorrect = payloadBooleanValue(payload, "socialEngineeringGuessCorrect");
+        const noIceTarget = payloadBooleanValue(payload, "socialEngineeringNoIceTarget") === true;
+        const autoPassChosenIce =
+          payloadBooleanValue(payload, "autoPassChosenIce") === true ||
+          payload.socialEngineeringRun === true;
+        const runTarget =
+          serverLabel ??
+          selectedServerLabel ??
+          displayServerLabel(stringValue(payload.serverId)) ??
+          "einen Server";
+        const chosenIcePosition = payloadNumberValue(payload, "chosenIcePosition");
+        const chosenIceLabel =
+          chosenIcePosition !== undefined
+            ? `ICE ${chosenIcePosition + 1}`
+            : "das gewählte ICE";
+        const amountDetail = socialEngineeringAmountDetail(hiddenAmount, guessAmount);
+        category = autoPassChosenIce ? "run" : guessCorrect === true ? "danger" : "card";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = SOCIAL_ENGINEERING_ID;
+        cardTitle = "Social Engineering";
+        cardText = undefined;
+        cardDetailLines = [];
+        if (autoPassChosenIce) {
+          title = phrase(subject, `durch Social Engineering ${runTarget} und ${chosenIceLabel} gewählt; Run auf ${runTarget} gestartet und das ICE automatisch passiert`);
+          description = "Der Social-Engineering-Run entsteht aus der Zielauswahl; das gewählte ICE wird nur für diesen Run automatisch passiert.";
+          chips.push("Social Engineering", "Run", runTarget, chosenIceLabel, "Auto-Pass");
+          break;
+        }
+        if (guessCorrect === true) {
+          const lossText = hiddenAmount !== undefined ? `; Runner verliert ${creditText(hiddenAmount)}` : "; Runner verliert den versteckten Betrag";
+          title = `Social Engineering: Korp hat richtig geraten${lossText}`;
+          description = amountDetail;
+          chips.push(
+            "Social Engineering",
+            "Guess richtig",
+            ...(hiddenAmount !== undefined ? [`Runner ${hiddenAmount}`] : []),
+            ...(guessAmount !== undefined ? [`Korp ${guessAmount}`] : []),
+            ...(hiddenAmount !== undefined ? [`-${hiddenAmount} ${creditLabel(hiddenAmount)}`] : []),
+          );
+          break;
+        }
+        if (guessCorrect === false) {
+          title = noIceTarget
+            ? "Social Engineering: Korp hat falsch geraten; kein ICE-Ziel verfügbar"
+            : "Social Engineering: Korp hat falsch geraten; Runner wählt Server und ICE";
+          description = noIceTarget
+            ? `${amountDetail} Es gibt kein installiertes ICE, das für den Auto-Pass gewählt werden kann.`
+            : `${amountDetail} Der Runner darf danach einen Server und ein ICE für den Auto-Pass-Run wählen.`;
+          chips.push(
+            "Social Engineering",
+            "Guess falsch",
+            ...(hiddenAmount !== undefined ? [`Runner ${hiddenAmount}`] : []),
+            ...(guessAmount !== undefined ? [`Korp ${guessAmount}`] : []),
+            noIceTarget ? "Kein ICE" : "Zielwahl",
+          );
+          break;
+        }
+        title = phrase(subject, "für Social Engineering verdeckt Credits gewählt");
+        description = "Der Betrag bleibt bis zum Korp-Guess verdeckt.";
+        chips.push("Social Engineering", "Verdeckte Wahl");
         break;
       }
       if (payload.runnerProgramTrashBeforeInstall === true || payload.runnerProgramTrashBeforeInstallResolved === true) {
@@ -925,10 +998,12 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
           stringValue(payload.destinationZone) === "grip")
       ) {
         const returnedCount = numberValue(payload.returnedCount) ?? numberValue(payload.movedCardCount) ?? 1;
+        const returnedDefinitionId =
+          stringValue(payload.returnedCardDefinitionId) ??
+          stringValue(payload.targetDefinitionId) ??
+          stringValue(payload.targetCardDefinitionId);
         const returnedTitle =
-          titleForDefinitionId(stringValue(payload.returnedCardDefinitionId)) ??
-          titleForDefinitionId(stringValue(payload.targetDefinitionId)) ??
-          titleForDefinitionId(stringValue(payload.targetCardDefinitionId));
+          titleForDefinitionId(returnedDefinitionId);
         const source =
           titleForDefinitionId(sourceDefinitionId) ??
           sourceTitle ??
@@ -937,10 +1012,13 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         category = "card";
         importance = "important";
         visibility = "public";
-        cardDefinitionId = sourceDefinitionId ?? cardDefinitionId;
         title = returnedTitle
           ? phrase(subject, `${source} genutzt und ${returnedTitle} aus dem Heap in den Grip genommen`)
           : phrase(subject, `${source} genutzt und ${cardCountText(returnedCount)} aus dem Heap in den Grip genommen`);
+        if (returnedDefinitionId) cardDefinitionId = returnedDefinitionId;
+        if (returnedTitle) cardTitle = returnedTitle;
+        cardText = undefined;
+        cardDetailLines = [];
         chips.push(source, "Heap", "Grip", ...(returnedTitle ? [returnedTitle] : [`${returnedCount} bewegt`]));
         break;
       }
@@ -1331,6 +1409,31 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       }
       break;
     case "continue_run":
+      if (
+        payloadBooleanValue(payload, "socialEngineeringAutoPassedIce") === true ||
+        (
+          payloadBooleanValue(payload, "autoPassChosenIce") === true &&
+          (sourceDefinitionId === SOCIAL_ENGINEERING_ID || payload.socialEngineeringRun === true)
+        )
+      ) {
+        const target = serverLabel ?? displayServerLabel(stringValue(payload.serverId));
+        const chosenIcePosition = payloadNumberValue(payload, "chosenIcePosition");
+        const chosenIceLabel =
+          chosenIcePosition !== undefined
+            ? `ICE ${chosenIcePosition + 1}`
+            : "das gewählte ICE";
+        category = "run";
+        importance = "important";
+        visibility = "public";
+        cardDefinitionId = SOCIAL_ENGINEERING_ID;
+        cardTitle = "Social Engineering";
+        title = phrase(subject, `${chosenIceLabel} durch Social Engineering automatisch passiert`);
+        description = target
+          ? `Der Social-Engineering-Run auf ${target} läuft nach dem Auto-Pass weiter.`
+          : "Der Social-Engineering-Run läuft nach dem Auto-Pass weiter.";
+        chips.push("Social Engineering", "Auto-Pass", ...(target ? [target] : []), chosenIceLabel);
+        break;
+      }
       if (stringValue(payload.accessReplacement) === "archives_faceup_to_rd") {
         const movedCount = numberValue(payload.movedCount) ?? 0;
         const shuffledCount =
@@ -2763,6 +2866,18 @@ function creditLabel(amount: number): string {
   return amount === 1 ? "Credit" : "Credits";
 }
 
+function socialEngineeringAmountDetail(hiddenAmount: number | undefined, guessAmount: number | undefined): string {
+  const hiddenText =
+    hiddenAmount !== undefined
+      ? `Runner versteckte ${creditText(hiddenAmount)}`
+      : "Der versteckte Runner-Betrag wurde nicht öffentlich benannt";
+  const guessText =
+    guessAmount !== undefined
+      ? `die Korp riet ${creditText(guessAmount)}`
+      : "die Korp gab einen Guess ab";
+  return `${hiddenText}; ${guessText}.`;
+}
+
 function hqCardCountText(amount: number): string {
   return `${amount} HQ-Karte${amount === 1 ? "" : "n"}`;
 }
@@ -3078,7 +3193,14 @@ export function chronicleRunGroupLabelFromEvent(event: PublicGameEvent): string 
   const actionType = stringValue(event.publicPayload.actionType) ?? event.type;
   const startsRun =
     actionType === "start_run" ||
-    (actionType === "play_event" && event.publicPayload.runnerEventRun === true);
+    (actionType === "play_event" && event.publicPayload.runnerEventRun === true) ||
+    (
+      actionType === "resolve_choice" &&
+      (
+        event.publicPayload.socialEngineeringRun === true ||
+        payloadBooleanValue(event.publicPayload, "autoPassChosenIce") === true
+      )
+    );
   if (!startsRun) return null;
   const serverLabel = stringValue(event.publicPayload.serverLabel);
   const label = stringValue(event.publicPayload.label);
@@ -3153,6 +3275,19 @@ function stringValue(value: unknown): string | undefined {
 
 function numberValue(value: unknown): number | undefined {
   return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
+function payloadNumberValue(payload: Record<string, unknown>, key: string): number | undefined {
+  return numberValue(payload[key]) ?? numberValueFromRecord(payload.amounts, key);
+}
+
+function payloadBooleanValue(payload: Record<string, unknown>, key: string): boolean | undefined {
+  const direct = payload[key];
+  if (typeof direct === "boolean") return direct;
+  const targets = payload.targets;
+  if (!targets || typeof targets !== "object") return undefined;
+  const nested = (targets as Record<string, unknown>)[key];
+  return typeof nested === "boolean" ? nested : undefined;
 }
 
 function numberValueFromRecord(value: unknown, key: string): number | undefined {

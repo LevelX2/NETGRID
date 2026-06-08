@@ -163,6 +163,65 @@ describe("formatChronicleEvent", () => {
     expect(chronicleRunGroupLabelFromEvent(event)).toBe("Run auf Remote 1");
   });
 
+  it("describes the full Social Engineering choice chain and run start", () => {
+    const hiddenChoice = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "runner",
+        aiReasonCode: "runner.social_engineering",
+        sourceDefinitionId: "onr_v1_111_social-engineering",
+        hiddenZoneBarrier: true
+      }),
+      "corp"
+    );
+    const wrongGuess = formatChronicleEvent(
+      makeEvent("resolve_choice", {
+        actor: "corp",
+        sourceDefinitionId: "onr_v1_111_social-engineering",
+        hiddenZoneBarrier: true,
+        amounts: {
+          secretHiddenAmountRevealed: 3,
+          secretGuessAmount: 4
+        },
+        targets: {
+          socialEngineeringGuessCorrect: false
+        }
+      }),
+      "corp"
+    );
+    const targetChoiceEvent = makeEvent("resolve_choice", {
+      actor: "runner",
+      aiReasonCode: "runner.social_engineering",
+      sourceDefinitionId: "onr_v1_111_social-engineering",
+      hiddenZoneBarrier: true,
+      serverId: "hq",
+      serverLabel: "HQ",
+      socialEngineeringRun: true,
+      amounts: {
+        chosenIcePosition: 0
+      },
+      targets: {
+        socialEngineeringGuessCorrect: false,
+        autoPassChosenIce: true
+      }
+    });
+    const targetChoice = formatChronicleEvent(targetChoiceEvent, "corp");
+
+    expect(hiddenChoice.title).toBe("Die Runner-KI hat für Social Engineering verdeckt Credits gewählt.");
+    expect(hiddenChoice.description).toBe("Der Betrag bleibt bis zum Korp-Guess verdeckt.");
+    expect(hiddenChoice.chips).toEqual(expect.arrayContaining(["Social Engineering", "Verdeckte Wahl"]));
+    expect(wrongGuess.title).toBe("Social Engineering: Korp hat falsch geraten; Runner wählt Server und ICE.");
+    expect(wrongGuess.description).toBe("Runner versteckte 3 Credits; die Korp riet 4 Credits. Der Runner darf danach einen Server und ein ICE für den Auto-Pass-Run wählen.");
+    expect(wrongGuess.chips).toEqual(expect.arrayContaining(["Social Engineering", "Guess falsch", "Runner 3", "Korp 4", "Zielwahl"]));
+    expect(targetChoice.title).toBe("Die Runner-KI hat durch Social Engineering HQ und ICE 1 gewählt; Run auf HQ gestartet und das ICE automatisch passiert.");
+    expect(targetChoice.description).toBe("Der Social-Engineering-Run entsteht aus der Zielauswahl; das gewählte ICE wird nur für diesen Run automatisch passiert.");
+    expect(targetChoice.category).toBe("run");
+    expect(targetChoice.cardDefinitionId).toBe("onr_v1_111_social-engineering");
+    expect(targetChoice.cardTitle).toBe("Social Engineering");
+    expect(targetChoice.groupLabel).toBe("Run auf HQ");
+    expect(targetChoice.chips).toEqual(expect.arrayContaining(["Social Engineering", "Run", "HQ", "ICE 1", "Auto-Pass"]));
+    expect(chronicleRunGroupLabelFromEvent(targetChoiceEvent)).toBe("Run auf HQ");
+  });
+
   it("describes Runner jack-out as a run abort without access", () => {
     const item = formatChronicleEvent(
       makeEvent("jack_out", {
@@ -2995,7 +3054,8 @@ describe("formatChronicleEvent", () => {
     expect(item.category).toBe("card");
     expect(item.importance).toBe("important");
     expect(item.visibility).toBe("public");
-    expect(item.cardDefinitionId).toBe("onr_v1_165_junkyard-bbs");
+    expect(item.cardDefinitionId).toBe("onr_v1_157_crash-everett-inventive-fixer");
+    expect(item.cardTitle).toBe("Crash Everett, Inventive Fixer");
     expect(item.chips).toEqual(["Runner", "Junkyard BBS", "Heap", "Grip", "Crash Everett, Inventive Fixer"]);
   });
 

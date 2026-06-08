@@ -11716,6 +11716,8 @@ function chronicleEventBelongsToActiveRun(
 function chronicleResolveChoiceBelongsToRun(event: PublicGameEvent): boolean {
   const payload = event.publicPayload ?? {};
   if (
+    payload.socialEngineeringRun === true ||
+    chroniclePayloadTargetBoolean(payload, "autoPassChosenIce") === true ||
     typeof payload.traceStep === "string" ||
     payload.ambushDefinitionId ||
     payload.accessEffectSourceDefinitionId ||
@@ -11733,6 +11735,15 @@ function chronicleResolveChoiceBelongsToRun(event: PublicGameEvent): boolean {
       ((effect as Record<string, unknown>).reason === "access_effect" ||
         (effect as Record<string, unknown>).counterType === "pattel_antibody"),
   );
+}
+
+function chroniclePayloadTargetBoolean(payload: Record<string, unknown>, key: string): boolean | null {
+  const direct = payload[key];
+  if (typeof direct === "boolean") return direct;
+  const targets = payload.targets;
+  if (!targets || typeof targets !== "object") return null;
+  const nested = (targets as Record<string, unknown>)[key];
+  return typeof nested === "boolean" ? nested : null;
 }
 
 const chronicleRunContextActionTypes = new Set([
