@@ -866,6 +866,300 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
+  it("stops loading Broker when stored credits and runner pool are comfortable", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "broker-load",
+        "runner",
+        "activated_card_ability",
+        "Broker: 3 Credits auf Broker legen",
+        { credits: 0 },
+        { source: "onr_v1_154_broker" },
+      ),
+      legalAction(
+        "broker-take",
+        "runner",
+        "activated_card_ability",
+        "Broker: Credits von Broker nehmen",
+        { credits: 0 },
+        { source: "onr_v1_154_broker" },
+      ),
+      legalAction(
+        "install-short-circuit",
+        "runner",
+        "install_card",
+        "The Short Circuit installieren",
+        { credits: 1 },
+        { source: "onr_v1_177_the-short-circuit" },
+      ),
+    ]);
+    input.playerView.own.credits = 13;
+    input.playerView.own.rig = [
+      visibleCard("onr_v1_154_broker", "runner", "resource", {
+        counters: { bit: 21 },
+        counterDisplays: [
+          {
+            id: "broker-bank",
+            amount: 21,
+            displayKind: "stored_credits",
+            label: "21",
+            ariaLabel: "21 stored credits",
+            usageHint: "spendable",
+          },
+        ],
+      }),
+    ];
+    input.playerView.own.gripOrHq = [
+      visibleCard("onr_v1_177_the-short-circuit", "runner", "resource"),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).not.toBe("broker-load");
+    expect(decision.actionId).not.toBe("broker-take");
+    const decisionDebug = JSON.stringify(decision.decisionDebug);
+    expect(decisionDebug).toContain("bankStoredCredits:21");
+    expect(decisionDebug).toContain("bankComfortableCreditPool:true");
+    expect(decisionDebug).toContain("bankOverDesiredTarget:true");
+    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: "broker-load",
+        scoreBreakdown: expect.arrayContaining([
+          expect.objectContaining({
+            key: "runner_bank_investment_commitment",
+            reason: expect.stringContaining(
+              "bankCommitmentStatus:over_target_hold",
+            ),
+          }),
+        ]),
+      }),
+    );
+    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: "broker-take",
+        excluded: true,
+        scoreBreakdown: expect.arrayContaining([
+          expect.objectContaining({
+            key: "runner_bank_cashout_gate",
+            reason: expect.stringContaining("why_cashout_now:no_funding_need"),
+          }),
+        ]),
+      }),
+    );
+  });
+
+  it("uses legal Mantis search for missing wall coverage before basic draw", () => {
+    const input = runnerWallCoverageInput([
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction(
+        "mantis",
+        "runner",
+        "play_event",
+        "Mantis, Fixer-at-Large spielen",
+        { credits: 3 },
+        { source: "mantis-card" },
+      ),
+      legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
+    ]);
+    input.playerView.own.credits = 13;
+    input.playerView.own.gripOrHq = [
+      visibleCard("mantis-card", "runner", "event", {
+        definitionId: "onr_v1_099_mantis-fixer-at-large",
+        title: "Mantis, Fixer-at-Large",
+        rulesText:
+          "Search your stack for a program, reveal it and bring it into your grip. Shuffle your stack afterwards.",
+      }),
+    ];
+
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe("mantis");
+    expect(decision.decisionDebug?.planKind).toBe(
+      "runner.obtain_breaker_coverage",
+    );
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "coverageAnswerRole:program_search",
+    );
+  });
+
+  it("sets up The Short Circuit as a search engine before basic draw when no direct search is legal", () => {
+    const input = runnerWallCoverageInput([
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction(
+        "install-short-circuit",
+        "runner",
+        "install_card",
+        "The Short Circuit installieren",
+        { credits: 1 },
+        { source: "short-circuit-card" },
+      ),
+      legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
+    ]);
+    input.playerView.own.credits = 13;
+    input.playerView.own.gripOrHq = [
+      visibleCard("short-circuit-card", "runner", "resource", {
+        definitionId: "onr_v1_177_the-short-circuit",
+        title: "The Short Circuit",
+        rulesText:
+          "[A], [1]: Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Reshuffle your stack afterwards.",
+      }),
+    ];
+
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe("install-short-circuit");
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "selected_step_kind:setup_search_engine",
+    );
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "coverageAnswerRole:search_engine_setup",
+    );
+  });
+
+  it("uses Bodyweight draw-for-answer before basic draw when search is not legal", () => {
+    const input = runnerWallCoverageInput([
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction(
+        "bodyweight",
+        "runner",
+        "play_event",
+        "Bodyweight Synthetic Blood spielen",
+        { credits: 2 },
+        { source: "bodyweight-card" },
+      ),
+      legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
+    ]);
+    input.playerView.own.credits = 13;
+    input.playerView.own.gripOrHq = [
+      visibleCard("bodyweight-card", "runner", "event", {
+        definitionId: "onr_v1_079_bodyweight-synthetic-blood",
+        title: "Bodyweight Synthetic Blood",
+        rulesText: "Draw five cards.",
+      }),
+    ];
+
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe("bodyweight");
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "selected_step_kind:draw_for_answer",
+    );
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "coverageAnswerRole:draw_for_answer",
+    );
+  });
+
+  it("uses basic draw as draw-for-answer when no search or draw card is legal", () => {
+    const input = runnerWallCoverageInput([
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
+    ]);
+    input.playerView.own.credits = 13;
+
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe("draw");
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "selected_step_kind:draw_for_answer",
+    );
+    expect(JSON.stringify(decision.decisionDebug)).toContain(
+      "coverageAnswerRole:basic_draw_fallback",
+    );
+    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: "draw",
+        whyChosen: expect.arrayContaining(["selected_by_plan_mapping"]),
+      }),
+    );
+  });
+
+  it("keeps Archives pressure below the active wall-coverage plan and explains the mismatch", () => {
+    const input = runnerWallCoverageInput([
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction(
+        "run-archives",
+        "runner",
+        "start_run",
+        "Run Archives",
+        { credits: 0 },
+        { payload: { serverId: "archives" } },
+      ),
+      legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
+    ]);
+    input.playerView.own.credits = 13;
+    input.playerView.opponent.discardCount = 1;
+
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+    const archivesAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) => entry.actionId === "run-archives",
+    );
+    const selectedAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (entry) => entry.actionId === "draw",
+    );
+
+    expect(decision.actionId).toBe("draw");
+    expect(archivesAlternative?.whyNot).toEqual(
+      expect.arrayContaining([
+        "plan_mismatch",
+        "lower_final_score_after_adjustment",
+      ]),
+    );
+    expect(archivesAlternative?.priority ?? 0).toBeLessThan(
+      selectedAlternative?.priority ?? 0,
+    );
+    expect(JSON.stringify(archivesAlternative?.scoreBreakdown)).toContain(
+      "rawSemanticScore:",
+    );
+  });
+
   it("devalues Broker install when a later bank load is not plausible", () => {
     const input = aiInput("runner", [
       legalAction(
@@ -1411,6 +1705,23 @@ function playerView(side: Side, legalActions: LegalAction[]): PlayerView {
   };
 }
 
+function runnerWallCoverageInput(actions: LegalAction[]): AiDecisionInput {
+  const input = aiInput("runner", actions);
+  input.playerView.own.rig = [];
+  input.playerView.servers = [
+    server("hq"),
+    server("rd"),
+    server("archives"),
+    server("remote_1", [
+      visibleCard("simple_barrier_ice", "corp", "ice", {
+        rezzed: true,
+        subtypes: ["Wall"],
+      }),
+    ], [visibleCard("simple_agenda", "corp", "agenda")]),
+  ];
+  return input;
+}
+
 function identityCard(side: Side): VisibleCard {
   return {
     instanceId: `${side}-identity`,
@@ -1430,8 +1741,6 @@ function visibleCard(
   overrides: Omit<
     Partial<VisibleCard>,
     | "instanceId"
-    | "definitionId"
-    | "title"
     | "owner"
     | "controller"
     | "type"

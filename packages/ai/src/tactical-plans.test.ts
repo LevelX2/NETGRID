@@ -777,6 +777,166 @@ describe("tactical plan model", () => {
     );
   });
 
+  it("maps legal Mantis program search before draw fallbacks for missing wall coverage", () => {
+    const input = wallCoverageInput([
+      legalAction("run-remote", "runner", "start_run", {
+        serverId: "remote_1",
+      }),
+      legalAction("mantis", "runner", "play_event", {}, {
+        source: "mantis-card",
+        label: "Mantis, Fixer-at-Large spielen",
+      }),
+      legalAction("bodyweight", "runner", "play_event", {}, {
+        source: "bodyweight-card",
+        label: "Bodyweight Synthetic Blood spielen",
+      }),
+      legalAction("draw", "runner", "draw_card"),
+    ]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("mantis-card", "runner", "event", {
+        definitionId: "onr_v1_099_mantis-fixer-at-large",
+        title: "Mantis, Fixer-at-Large",
+        rulesText:
+          "Search your stack for a program, reveal it and bring it into your grip. Shuffle your stack afterwards.",
+      }),
+      visibleCard("bodyweight-card", "runner", "event", {
+        definitionId: "onr_v1_079_bodyweight-synthetic-blood",
+        title: "Bodyweight Synthetic Blood",
+        rulesText: "Draw five cards.",
+      }),
+    ];
+
+    const plans = buildTacticalPlans({ input });
+    const coveragePlan = plans.find(
+      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
+    );
+    const mapping = mapPlanStepToLegalActions(
+      coveragePlan!,
+      coveragePlan!.currentStep,
+      input.legalActions.map(candidateForUntargetedAction),
+      input,
+    );
+
+    expect(coveragePlan?.currentStep.kind).toBe("search_for_answer");
+    expect(coveragePlan?.currentStep.rationale).toEqual(
+      expect.arrayContaining(["coverage_answer_role:program_search"]),
+    );
+    expect(mapping.actionCandidateIds).toEqual(["mantis"]);
+    expect(mapping.rationale.join("\n")).toContain(
+      "coverageAnswerRole:program_search",
+    );
+  });
+
+  it("uses search-engine setup before basic draw when The Short Circuit is installable", () => {
+    const input = wallCoverageInput([
+      legalAction("run-remote", "runner", "start_run", {
+        serverId: "remote_1",
+      }),
+      legalAction("install-short-circuit", "runner", "install_card", {}, {
+        source: "short-circuit-card",
+        label: "The Short Circuit installieren",
+      }),
+      legalAction("draw", "runner", "draw_card"),
+    ]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("short-circuit-card", "runner", "resource", {
+        definitionId: "onr_v1_177_the-short-circuit",
+        title: "The Short Circuit",
+        rulesText:
+          "[A], [1]: Search your stack for a program. Show that program to the Corp, and then bring it into your hand. Reshuffle your stack afterwards.",
+      }),
+    ];
+
+    const plans = buildTacticalPlans({ input });
+    const coveragePlan = plans.find(
+      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
+    );
+    const mapping = mapPlanStepToLegalActions(
+      coveragePlan!,
+      coveragePlan!.currentStep,
+      input.legalActions.map(candidateForUntargetedAction),
+      input,
+    );
+
+    expect(coveragePlan?.currentStep.kind).toBe("setup_search_engine");
+    expect(coveragePlan?.currentStep.rationale).toEqual(
+      expect.arrayContaining(["coverage_answer_role:search_engine_setup"]),
+    );
+    expect(mapping.actionCandidateIds).toEqual(["install-short-circuit"]);
+    expect(mapping.rationale.join("\n")).toContain(
+      "coverageAnswerRole:search_engine_setup",
+    );
+  });
+
+  it("uses Bodyweight draw-for-answer before basic draw when no better search is legal", () => {
+    const input = wallCoverageInput([
+      legalAction("run-remote", "runner", "start_run", {
+        serverId: "remote_1",
+      }),
+      legalAction("bodyweight", "runner", "play_event", {}, {
+        source: "bodyweight-card",
+        label: "Bodyweight Synthetic Blood spielen",
+      }),
+      legalAction("draw", "runner", "draw_card"),
+    ]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("bodyweight-card", "runner", "event", {
+        definitionId: "onr_v1_079_bodyweight-synthetic-blood",
+        title: "Bodyweight Synthetic Blood",
+        rulesText: "Draw five cards.",
+      }),
+    ];
+
+    const plans = buildTacticalPlans({ input });
+    const coveragePlan = plans.find(
+      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
+    );
+    const mapping = mapPlanStepToLegalActions(
+      coveragePlan!,
+      coveragePlan!.currentStep,
+      input.legalActions.map(candidateForUntargetedAction),
+      input,
+    );
+
+    expect(coveragePlan?.currentStep.kind).toBe("draw_for_answer");
+    expect(mapping.actionCandidateIds).toEqual(["bodyweight", "draw"]);
+    expect(mapping.rationale.join("\n")).toContain(
+      "coverageAnswerRole:draw_for_answer",
+    );
+    expect(mapping.rationale.join("\n")).toContain(
+      "coverageAnswerRole:basic_draw_fallback",
+    );
+  });
+
+  it("uses basic draw as draw-for-answer fallback when no search or draw card is legal", () => {
+    const input = wallCoverageInput([
+      legalAction("run-remote", "runner", "start_run", {
+        serverId: "remote_1",
+      }),
+      legalAction("draw", "runner", "draw_card"),
+    ]);
+
+    const plans = buildTacticalPlans({ input });
+    const coveragePlan = plans.find(
+      (plan) => plan.planId === "runner.obtain_breaker_coverage:remote_1",
+    );
+    const mapping = mapPlanStepToLegalActions(
+      coveragePlan!,
+      coveragePlan!.currentStep,
+      input.legalActions.map(candidateForUntargetedAction),
+      input,
+    );
+
+    expect(coveragePlan?.currentStep.kind).toBe("draw_for_answer");
+    expect(coveragePlan?.currentStep.rationale).toEqual(
+      expect.arrayContaining(["coverage_answer_role:basic_draw_fallback"]),
+    );
+    expect(mapping.actionCandidateIds).toEqual(["draw"]);
+    expect(mapping.rationale.join("\n")).toContain(
+      "coverageAnswerRole:basic_draw_fallback",
+    );
+  });
+
   it("resolves missing MU before trying to install a breaker in hand", () => {
     const input = aiInput("runner", [
       legalAction("run-remote", "runner", "start_run", {
@@ -1851,8 +2011,6 @@ function visibleCard(
   overrides: Omit<
     Partial<VisibleCard>,
     | "instanceId"
-    | "definitionId"
-    | "title"
     | "owner"
     | "controller"
     | "type"
@@ -1944,6 +2102,23 @@ function coverageSearchPlan(kind: "breaker_wall" | "breaker_code_gate") {
     ],
     stateVersion: 1,
   });
+}
+
+function wallCoverageInput(actions: LegalAction[]): AiDecisionInput {
+  const input = aiInput("runner", actions);
+  input.playerView.own.rig = [];
+  input.playerView.servers = [
+    server("hq"),
+    server("rd"),
+    server("archives"),
+    server("remote_1", [
+      visibleCard("simple_barrier_ice", "corp", "ice", {
+        rezzed: true,
+        subtypes: ["Wall"],
+      }),
+    ], [visibleCard("simple_agenda", "corp", "agenda")]),
+  ];
+  return input;
 }
 
 function rdAccessEvent(

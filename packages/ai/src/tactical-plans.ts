@@ -59,6 +59,7 @@ export type PlanStepKind =
   | "pivot_to_alternative"
   | "draw_for_answer"
   | "search_for_answer"
+  | "setup_search_engine"
   | "gain_credits"
   | "install_development_card"
   | "build_remote"
@@ -671,7 +672,7 @@ export function mapPlanStepToLegalActions(
   const legalActionsById = new Map(
     input.legalActions.map((action) => [action.actionId, action]),
   );
-  const matchedCandidateIds = candidates
+  const matchedCandidates = candidates
     .filter((candidate) =>
       candidateMatchesStep(
         plan,
@@ -681,14 +682,28 @@ export function mapPlanStepToLegalActions(
         input,
       ),
     )
-    .map((candidate) => candidate.actionId);
+    .sort((left, right) =>
+      planStepCandidatePriority(
+        plan,
+        step,
+        right,
+        legalActionsById.get(right.actionId),
+        input,
+      ) -
+        planStepCandidatePriority(
+          plan,
+          step,
+          left,
+          legalActionsById.get(left.actionId),
+          input,
+        ) ||
+      left.actionId.localeCompare(right.actionId),
+    );
+  const matchedCandidateIds = matchedCandidates.map((candidate) => candidate.actionId);
   const legalActions = matchedCandidateIds
     .map((actionId) => legalActionsById.get(actionId))
     .filter((action): action is LegalAction => Boolean(action));
   const status = mappingStatusForStep(step, legalActions);
-  const matchedCandidates = candidates.filter((candidate) =>
-    matchedCandidateIds.includes(candidate.actionId),
-  );
   const rejectedFalseMatches = rejectedCoverageSearchFalseMatches(
     plan,
     step,
@@ -746,6 +761,41 @@ function mappingStatusForStep(
   return "blocked_no_legal_action";
 }
 
+function planStepCandidatePriority(
+  plan: TacticalPlan,
+  step: PlanStep,
+  candidate: ActionSemanticCandidate,
+  action: LegalAction | undefined,
+  input: AiDecisionInput,
+): number {
+  if (!action) return 0;
+  if (isCoverageAnswerStep(step)) {
+    const fit = coverageSearchActionFit(plan, step, candidate, action, input);
+    if (!fit?.supportsActiveCapabilityNeed) return 0;
+    return coverageAnswerRolePriority(fit.answerRole);
+  }
+  return 0;
+}
+
+function coverageAnswerRolePriority(role: CoverageAnswerRole): number {
+  switch (role) {
+    case "direct_breaker_install":
+      return 1000;
+    case "program_search":
+      return 900;
+    case "recovery_answer":
+      return 850;
+    case "search_engine_setup":
+      return 760;
+    case "draw_for_answer":
+      return 650;
+    case "basic_draw_fallback":
+      return 500;
+    case "not_coverage_answer":
+      return 0;
+  }
+}
+
 function candidateMatchesStep(
   plan: TacticalPlan,
   step: PlanStep,
@@ -760,6 +810,14 @@ function candidateMatchesStep(
     candidate.primaryProjectionStatus === "hidden_info_blocked"
   ) {
     return false;
+  }
+  if (isCoverageAnswerStep(step)) {
+    const fit = coverageSearchActionFit(plan, step, candidate, action, input);
+    if (fit !== undefined) {
+      return fit.supportsActiveCapabilityNeed &&
+        coverageAnswerRoleMatchesStep(step, fit.answerRole) &&
+        candidateTargetMatchesPlan(plan, candidate, action);
+    }
   }
   if (step.kind === "install_development_card") {
     return developmentCardStepMatchesAction(plan, action);
@@ -776,10 +834,6 @@ function candidateMatchesStep(
     ) {
       return false;
     }
-  }
-  if (step.kind === "search_for_answer") {
-    const fit = coverageSearchActionFit(plan, step, candidate, action, input);
-    if (fit !== undefined && !fit.supportsActiveCapabilityNeed) return false;
   }
   if (candidateSemanticsMatchStep(step, candidate)) {
     return candidateTargetMatchesPlan(plan, candidate, action) &&
@@ -849,6 +903,9 @@ function candidateSemanticsMatchStep(
         /breaker|icebreaker|program/.test(signalText);
     case "search_for_answer":
       return /program_search|breaker_search|search\.stack|search_for_answer|setup\.program_search/.test(signalText);
+    case "setup_search_engine":
+      return /install\.card/.test(signalText) &&
+        /program_search|breaker_search|search\.stack|search_for_answer|setup\.program_search|search/.test(signalText);
     case "build_bank_counter":
       return /temporary_resource_bank|counter_bank|charge_bank|build_credit_bank|finite_economy_pool/.test(signalText);
     case "cash_out_bank":
@@ -863,6 +920,30 @@ function candidateSemanticsMatchStep(
       return /score\.agenda|score\.action_counter_bank/.test(signalText);
     case "rez_outer_ice":
       return /corp_window\.rez|corp_rez_ice/.test(signalText);
+    default:
+      return false;
+  }
+}
+
+function isCoverageAnswerStep(step: PlanStep): boolean {
+  return (
+    step.kind === "search_for_answer" ||
+    step.kind === "setup_search_engine" ||
+    step.kind === "draw_for_answer"
+  ) && coverageSearchRequiredCapabilityForStep(step) !== undefined;
+}
+
+function coverageAnswerRoleMatchesStep(
+  step: PlanStep,
+  role: CoverageAnswerRole,
+): boolean {
+  switch (step.kind) {
+    case "search_for_answer":
+      return role === "program_search" || role === "recovery_answer";
+    case "setup_search_engine":
+      return role === "search_engine_setup";
+    case "draw_for_answer":
+      return role === "draw_for_answer" || role === "basic_draw_fallback";
     default:
       return false;
   }
@@ -890,6 +971,15 @@ function candidateSemanticText(candidate: ActionSemanticCandidate): string {
 
 type RecoveryTargetPlanFit = "none" | "low" | "medium" | "high";
 
+type CoverageAnswerRole =
+  | "direct_breaker_install"
+  | "program_search"
+  | "search_engine_setup"
+  | "draw_for_answer"
+  | "basic_draw_fallback"
+  | "recovery_answer"
+  | "not_coverage_answer";
+
 type RecoveryLoopPenalties = {
   repeatedRecoverySameCardPenalty: number;
   repeatedEconomyRecoveryLoopPenalty: number;
@@ -899,6 +989,7 @@ type RecoveryLoopPenalties = {
 
 type CoverageSearchActionFit = {
   supportsActiveCapabilityNeed: boolean;
+  answerRole: CoverageAnswerRole;
   recoveredCardId?: string;
   recoveredCardRole?: string;
   supportsCreditNeed: boolean;
@@ -918,23 +1009,7 @@ function coverageSearchActionFit(
 ): CoverageSearchActionFit | undefined {
   const requiredCoverage = coverageSearchRequiredCapability(plan, step);
   if (requiredCoverage === undefined) return undefined;
-  const sourceCard = visibleCardByInstanceId(input.playerView, String(action.source));
-  if (action.type === "draw_card") {
-    return {
-      supportsActiveCapabilityNeed: true,
-      supportsCreditNeed: false,
-      supportsDrawOrSearchNeed: true,
-      supportsSurvivalNeed: false,
-      recoveredCardPlanFit: "medium",
-      recoveryLoopRisk: "none",
-      evidence: [
-        `activeRequiredCapability:${requiredCoverage}`,
-        "planStepExpectedRole:draw_for_answer",
-        "matchedActionRole:draw_for_answer",
-        ...recoveryLoopPenaltyEvidence(noRecoveryLoopPenalties()),
-      ],
-    };
-  }
+  const sourceCard = visibleCardForAction(input.playerView, action);
   if (
     action.type === "install_card" &&
     sourceCard &&
@@ -942,6 +1017,7 @@ function coverageSearchActionFit(
   ) {
     return {
       supportsActiveCapabilityNeed: true,
+      answerRole: "direct_breaker_install",
       ...(sourceCard.definitionId
         ? { recoveredCardId: sourceCard.definitionId }
         : {}),
@@ -953,6 +1029,7 @@ function coverageSearchActionFit(
       recoveryLoopRisk: "none",
       evidence: [
         `activeRequiredCapability:${requiredCoverage}`,
+        "coverageAnswerRole:direct_breaker_install",
         "planStepExpectedRole:install_breaker",
         "matchedActionRole:install_breaker",
         `recoveredCardPlanFit:high`,
@@ -969,13 +1046,19 @@ function coverageSearchActionFit(
   );
   if (recoveryTarget) return recoveryTarget;
 
-  const explicitProgramSearch =
-    /program_search|breaker_search|search\.stack|search_for_answer|setup\.program_search/.test(
-      signalText,
-    );
-  if (explicitProgramSearch) {
+  const sourceRole = sourceCard
+    ? cardPlanRoleForCoverageSearch(sourceCard)
+    : undefined;
+  if (sourceCard && sourceRole?.includes("search")) {
+    const answerRole: CoverageAnswerRole =
+      action.type === "install_card" ? "search_engine_setup" : "program_search";
     return {
       supportsActiveCapabilityNeed: true,
+      ...(sourceCard.definitionId
+        ? { recoveredCardId: sourceCard.definitionId }
+        : {}),
+      answerRole,
+      recoveredCardRole: sourceRole,
       supportsCreditNeed: false,
       supportsDrawOrSearchNeed: true,
       supportsSurvivalNeed: false,
@@ -983,6 +1066,83 @@ function coverageSearchActionFit(
       recoveryLoopRisk: "none",
       evidence: [
         `activeRequiredCapability:${requiredCoverage}`,
+        `coverageAnswerRole:${answerRole}`,
+        answerRole === "search_engine_setup"
+          ? "planStepExpectedRole:setup_search_engine"
+          : "planStepExpectedRole:search_for_answer",
+        answerRole === "search_engine_setup"
+          ? "matchedActionRole:search_engine_setup"
+          : "matchedActionRole:program_search",
+        "recoveredCardPlanFit:high",
+        ...recoveryLoopPenaltyEvidence(noRecoveryLoopPenalties()),
+      ],
+    };
+  }
+
+  if (
+    sourceCard &&
+    sourceRole?.includes("draw") &&
+    action.type !== "install_card"
+  ) {
+    return {
+      supportsActiveCapabilityNeed: true,
+      ...(sourceCard?.definitionId
+        ? { recoveredCardId: sourceCard.definitionId }
+        : {}),
+      answerRole: "draw_for_answer",
+      recoveredCardRole: sourceRole,
+      supportsCreditNeed: false,
+      supportsDrawOrSearchNeed: true,
+      supportsSurvivalNeed: false,
+      recoveredCardPlanFit: "medium",
+      recoveryLoopRisk: "none",
+      evidence: [
+        `activeRequiredCapability:${requiredCoverage}`,
+        "coverageAnswerRole:draw_for_answer",
+        "planStepExpectedRole:draw_for_answer",
+        "matchedActionRole:draw_for_answer",
+        "recoveredCardPlanFit:medium",
+        ...recoveryLoopPenaltyEvidence(noRecoveryLoopPenalties()),
+      ],
+    };
+  }
+
+  if (action.type === "draw_card") {
+    return {
+      supportsActiveCapabilityNeed: true,
+      answerRole: "basic_draw_fallback",
+      supportsCreditNeed: false,
+      supportsDrawOrSearchNeed: true,
+      supportsSurvivalNeed: false,
+      recoveredCardPlanFit: "low",
+      recoveryLoopRisk: "none",
+      evidence: [
+        `activeRequiredCapability:${requiredCoverage}`,
+        "coverageAnswerRole:basic_draw_fallback",
+        "planStepExpectedRole:draw_for_answer",
+        "matchedActionRole:basic_draw_fallback",
+        "recoveredCardPlanFit:low",
+        ...recoveryLoopPenaltyEvidence(noRecoveryLoopPenalties()),
+      ],
+    };
+  }
+
+  const explicitProgramSearch =
+    /program_search|breaker_search|search\.stack|search_for_answer|setup\.program_search/.test(
+      signalText,
+    );
+  if (explicitProgramSearch) {
+    return {
+      supportsActiveCapabilityNeed: true,
+      answerRole: "program_search",
+      supportsCreditNeed: false,
+      supportsDrawOrSearchNeed: true,
+      supportsSurvivalNeed: false,
+      recoveredCardPlanFit: "high",
+      recoveryLoopRisk: "none",
+      evidence: [
+        `activeRequiredCapability:${requiredCoverage}`,
+        "coverageAnswerRole:program_search",
         "planStepExpectedRole:search_for_answer",
         "matchedActionRole:program_search",
         "recoveredCardPlanFit:high",
@@ -999,6 +1159,7 @@ function coverageSearchActionFit(
   const penalties = economyFalseMatchLoopPenalties(input, supportsCreditNeed);
   return {
     supportsActiveCapabilityNeed: false,
+    answerRole: "not_coverage_answer",
     recoveredCardRole: matchedActionRole,
     supportsCreditNeed,
     supportsDrawOrSearchNeed: false,
@@ -1007,6 +1168,7 @@ function coverageSearchActionFit(
     recoveryLoopRisk: matchedActionRole.includes("economy") ? "medium" : "low",
     evidence: [
       `activeRequiredCapability:${requiredCoverage}`,
+      "coverageAnswerRole:not_coverage_answer",
       "planStepExpectedRole:search_for_answer",
       `matchedActionRole:${matchedActionRole}`,
       "recoveredCardPlanFit:none",
@@ -1077,6 +1239,15 @@ function coverageSearchRequiredCapability(
   return capability?.kind;
 }
 
+function coverageSearchRequiredCapabilityForStep(
+  step: PlanStep,
+): RequiredCapabilityKind | undefined {
+  const capability = step.requiredCapabilities.find((candidate) =>
+    candidate.kind.startsWith("breaker_"),
+  );
+  return capability?.kind;
+}
+
 function recoveryTargetEvaluation(
   input: AiDecisionInput,
   action: LegalAction,
@@ -1088,7 +1259,7 @@ function recoveryTargetEvaluation(
   ) {
     return undefined;
   }
-  const sourceCard = visibleCardByInstanceId(input.playerView, String(action.source));
+  const sourceCard = visibleCardForAction(input.playerView, action);
   const sourceText = [
     sourceCard?.title,
     sourceCard?.definitionId,
@@ -1137,6 +1308,9 @@ function recoveryTargetEvaluation(
   );
   return {
     supportsActiveCapabilityNeed,
+    answerRole: supportsActiveCapabilityNeed
+      ? "recovery_answer"
+      : "not_coverage_answer",
     ...(targetDefinitionId ? { recoveredCardId: targetDefinitionId } : {}),
     recoveredCardRole: targetRole,
     supportsCreditNeed,
@@ -1146,6 +1320,9 @@ function recoveryTargetEvaluation(
     recoveryLoopRisk,
     evidence: [
       `activeRequiredCapability:${requiredCoverage}`,
+      `coverageAnswerRole:${
+        supportsActiveCapabilityNeed ? "recovery_answer" : "not_coverage_answer"
+      }`,
       "planStepExpectedRole:search_for_answer",
       `matchedActionRole:recovery`,
       `recoveredCardId:${targetDefinitionId ?? "unknown"}`,
@@ -1322,9 +1499,10 @@ function actionTypeMatchesStep(step: PlanStep, actionType: string): boolean {
       return (
         actionType === "trigger_ability" ||
         actionType === "activated_card_ability" ||
-        actionType === "play_event" ||
-        actionType === "draw_card"
+        actionType === "play_event"
       );
+    case "setup_search_engine":
+      return actionType === "install_card";
     case "gain_credits":
       return actionType === "gain_credit";
     case "install_development_card":
@@ -3382,13 +3560,22 @@ function runnerBreakerCoverageStep(
       ],
     });
   }
+  const legalAnswerRole = bestLegalCoverageAnswerRole(input, missingCoverage);
+  if (legalAnswerRole === "direct_breaker_install") {
+    return createPlanStep({
+      stepId: `install_breaker:${serverId}`,
+      kind: "install_breaker",
+      desiredActionSemantics: ["install.card"],
+      requiredCapabilities: [breakerCoverageCapability(missingCoverage, serverId)],
+      rationale: [
+        `legal breaker install can cover ${missingCoverage}`,
+        "coverage_answer_role:direct_breaker_install",
+      ],
+    });
+  }
   if (
-    input.legalActions.some(
-      (action) =>
-        action.type === "trigger_ability" ||
-        action.type === "activated_card_ability" ||
-        action.type === "play_event",
-    )
+    legalAnswerRole === "program_search" ||
+    legalAnswerRole === "recovery_answer"
   ) {
     return createPlanStep({
       stepId: `search_for_answer:${serverId}`,
@@ -3397,22 +3584,45 @@ function runnerBreakerCoverageStep(
         "card_ability.trigger",
         "card_ability.unknown",
         "play.runner_event",
+      ],
+      requiredCapabilities: [breakerCoverageCapability(missingCoverage, serverId)],
+      rationale: [
+        `legal search or recovery action can find ${missingCoverage} coverage`,
+        `coverage_answer_role:${legalAnswerRole}`,
+      ],
+    });
+  }
+  if (legalAnswerRole === "search_engine_setup") {
+    return createPlanStep({
+      stepId: `setup_search_engine:${serverId}`,
+      kind: "setup_search_engine",
+      desiredActionSemantics: ["install.card"],
+      requiredCapabilities: [breakerCoverageCapability(missingCoverage, serverId)],
+      rationale: [
+        `legal search engine setup can prepare ${missingCoverage} coverage`,
+        "coverage_answer_role:search_engine_setup",
+      ],
+    });
+  }
+  if (
+    legalAnswerRole === "draw_for_answer" ||
+    legalAnswerRole === "basic_draw_fallback"
+  ) {
+    return createPlanStep({
+      stepId: `draw_for_answer:${serverId}`,
+      kind: "draw_for_answer",
+      desiredActionSemantics: [
+        "play.runner_event",
+        "card_ability.trigger",
+        "card_ability.unknown",
         "draw.card",
       ],
       requiredCapabilities: [breakerCoverageCapability(missingCoverage, serverId)],
       rationale: [
-        `search or event actions may find ${missingCoverage} coverage`,
-      ],
-    });
-  }
-  if (input.legalActions.some((action) => action.type === "draw_card")) {
-    return createPlanStep({
-      stepId: `draw_for_answer:${serverId}`,
-      kind: "draw_for_answer",
-      desiredActionSemantics: ["draw.card"],
-      requiredCapabilities: [breakerCoverageCapability(missingCoverage, serverId)],
-      rationale: [
-        `drawing is the safest available path toward ${missingCoverage} coverage`,
+        legalAnswerRole === "draw_for_answer"
+          ? `legal draw action can dig for ${missingCoverage} coverage`
+          : `basic draw is the fallback path toward ${missingCoverage} coverage`,
+        `coverage_answer_role:${legalAnswerRole}`,
       ],
     });
   }
@@ -3497,6 +3707,81 @@ function deckCapabilityEvidenceForRequiredCoverage(
           ? "in_deck/draw_only"
           : "missing";
   return [`deck_capability:breaker_${coverage}=${status}`];
+}
+
+function bestLegalCoverageAnswerRole(
+  input: AiDecisionInput,
+  requiredCoverage: RequiredCapabilityKind,
+): CoverageAnswerRole | undefined {
+  const roles = input.legalActions
+    .map((action) =>
+      coverageAnswerRoleForLegalAction(input, action, requiredCoverage),
+    )
+    .filter(
+      (role): role is CoverageAnswerRole =>
+        role !== undefined && role !== "not_coverage_answer",
+    )
+    .sort(
+      (left, right) =>
+        coverageAnswerRolePriority(right) - coverageAnswerRolePriority(left),
+    );
+  return roles[0];
+}
+
+function coverageAnswerRoleForLegalAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  requiredCoverage: RequiredCapabilityKind,
+): CoverageAnswerRole | undefined {
+  if (action.side !== "runner") return undefined;
+  const sourceCard = visibleCardForAction(input.playerView, action);
+  if (
+    action.type === "install_card" &&
+    sourceCard &&
+    cardProvidesBreakerCoverage(sourceCard, requiredCoverage)
+  ) {
+    return "direct_breaker_install";
+  }
+  const sourceRole = sourceCard
+    ? cardPlanRoleForCoverageSearch(sourceCard)
+    : undefined;
+  if (sourceRole?.includes("search")) {
+    return action.type === "install_card"
+      ? "search_engine_setup"
+      : "program_search";
+  }
+  if (sourceRole?.includes("draw") && action.type !== "install_card") {
+    return "draw_for_answer";
+  }
+  if (
+    action.type === "trigger_ability" ||
+    action.type === "activated_card_ability"
+  ) {
+    const targetDefinitionId = recoveryTargetDefinitionId(input, action);
+    const sourceText = [
+      sourceCard?.title,
+      sourceCard?.definitionId,
+      sourceCard?.rulesText,
+      action.label,
+    ].filter(Boolean).join(" ").toLowerCase();
+    if (
+      /recovery|trash|heap|junkyard|bbs/.test(sourceText) ||
+      targetDefinitionId !== undefined
+    ) {
+      const targetRole = targetDefinitionId
+        ? cardDefinitionPlanRoleForCoverageSearch(targetDefinitionId)
+        : "unknown";
+      if (
+        targetDefinitionId !== undefined &&
+        cardDefinitionProvidesBreakerCoverage(targetDefinitionId, requiredCoverage)
+      ) return "recovery_answer";
+      if (targetRole.includes("search") || targetRole.includes("draw")) {
+        return "recovery_answer";
+      }
+    }
+  }
+  if (action.type === "draw_card") return "basic_draw_fallback";
+  return undefined;
 }
 
 function deckCapabilityBlockersForRequiredCoverage(
@@ -3875,6 +4160,44 @@ function visibleCardByInstanceId(
   ]);
   return [...ownCards, ...serverCards].find(
     (card) => card.instanceId === instanceId,
+  );
+}
+
+function visibleCardForAction(
+  playerView: PlayerView,
+  action: LegalAction,
+): VisibleCard | undefined {
+  const source = String(action.source ?? "");
+  const byInstance = visibleCardByInstanceId(playerView, source);
+  if (byInstance) return byInstance;
+  const payload = action.payload ?? {};
+  const definitionId =
+    typeof payload.cardDefinitionId === "string"
+      ? payload.cardDefinitionId
+      : typeof payload.sourceDefinitionId === "string"
+        ? payload.sourceDefinitionId
+        : typeof payload.sourceCardDefinitionId === "string"
+          ? payload.sourceCardDefinitionId
+          : source.startsWith("onr_") || source.startsWith("simple_")
+            ? source
+            : undefined;
+  const allVisibleCards = [
+    ...playerView.own.gripOrHq,
+    ...playerView.own.heapOrArchives,
+    ...(playerView.own.rig ?? []),
+    ...playerView.own.scoreArea,
+    ...playerView.servers.flatMap((server) => [...server.ice, ...server.root]),
+  ];
+  if (definitionId) {
+    const byDefinition = allVisibleCards.find(
+      (card) => card.definitionId === definitionId,
+    );
+    if (byDefinition) return byDefinition;
+  }
+  return allVisibleCards.find(
+    (card) =>
+      card.title !== undefined &&
+      action.label.toLowerCase().includes(card.title.toLowerCase()),
   );
 }
 

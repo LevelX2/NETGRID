@@ -3660,22 +3660,31 @@ function tacticalPlanMappedChoice(
   const mappedActionIds = new Set(
     mapping.legalActions.map((action) => action.actionId),
   );
+  const mappedChoices = mapping.legalActions
+    .map((action) =>
+      choices.find(
+        (choice) =>
+          !choice.exclusion &&
+          choice.action.actionId === action.actionId,
+      ),
+    )
+    .filter((choice): choice is SemanticRuntimeChoice => Boolean(choice));
   const mappedChoice =
-    choices.find(
-      (choice) =>
-        !choice.exclusion &&
-        mappedActionIds.has(choice.action.actionId) &&
-        choice.score > 0,
-    ) ??
-    choices.find(
-      (choice) =>
-        !choice.exclusion && mappedActionIds.has(choice.action.actionId),
-    );
+    mappedChoices.find((choice) => choice.score > 0) ?? mappedChoices[0];
   if (!mappedChoice) return {};
   if (
     overrideChoice &&
     overrideChoice.action.actionId !== mappedChoice.action.actionId
   ) {
+    if (
+      tacticalPlanCoverageMappingBlocksRunOverride(
+        mapping,
+        overrideChoice,
+        mappedActionIds,
+      )
+    ) {
+      return { choice: mappedChoice };
+    }
     const scoreGap = roundScore(overrideChoice.score - mappedChoice.score);
     const mappedNonPositiveAgainstPositive =
       mappedChoice.score <= 0 && overrideChoice.score > 0;
@@ -3691,6 +3700,18 @@ function tacticalPlanMappedChoice(
     }
   }
   return { choice: mappedChoice };
+}
+
+function tacticalPlanCoverageMappingBlocksRunOverride(
+  mapping: PlanStepMappingResult,
+  overrideChoice: SemanticRuntimeChoice,
+  mappedActionIds: ReadonlySet<string>,
+): boolean {
+  return (
+    mapping.plan.type === "runner.obtain_breaker_coverage" &&
+    overrideChoice.action.type === "start_run" &&
+    !mappedActionIds.has(overrideChoice.action.actionId)
+  );
 }
 
 function tacticalPlanMappingOverrideEvidence(
@@ -4126,6 +4147,7 @@ function semanticRuntimeDecisionDebug(
       input,
       rankedChoices,
       selected.action.actionId,
+      planRuntime,
     ),
     scoreBreakdown: semanticRuntimeScoreBreakdown(
       input,
@@ -4749,7 +4771,16 @@ function semanticRuntimeActionAlternatives(
   input: AiDecisionInput,
   rankedChoices: SemanticRuntimeChoice[],
   selectedActionId: string,
+  planRuntime: TacticalPlanRuntimeResult,
 ): NonNullable<AiDecisionDebug["actionAlternatives"]> {
+  const selectedChoice = rankedChoices.find(
+    (choice) => choice.action.actionId === selectedActionId,
+  );
+  const planSelection = semanticRuntimePlanSelectionDisplayContext(
+    planRuntime,
+    selectedActionId,
+    selectedChoice,
+  );
   const orderedChoices = rankedChoices.slice().sort((left, right) => {
     const leftSelected = left.action.actionId === selectedActionId;
     const rightSelected = right.action.actionId === selectedActionId;
@@ -4758,6 +4789,17 @@ function semanticRuntimeActionAlternatives(
   });
   return orderedChoices.slice(0, 32).map((choice, index) => {
     const selected = choice.action.actionId === selectedActionId;
+    const displayScore = semanticRuntimeActionDisplayScore(
+      choice,
+      selected,
+      planSelection,
+    );
+    const planScoreBreakdown = semanticRuntimePlanSelectionScoreBreakdown(
+      choice,
+      selected,
+      displayScore,
+      planSelection,
+    );
     return {
       rank: index + 1,
       actionId: choice.action.actionId,
@@ -4765,25 +4807,154 @@ function semanticRuntimeActionAlternatives(
       label: choice.action.label,
       source: String(choice.action.source),
       selected,
-      ...(choice.exclusion ? { excluded: true } : { priority: choice.score }),
-      scoreBreakdown: semanticRuntimeScoreBreakdown(
-        input,
-        choice.action,
-        choice.scopeId,
-        choice.exclusion,
-      ),
+      ...(choice.exclusion ? { excluded: true } : { priority: displayScore }),
+      scoreBreakdown: [
+        ...semanticRuntimeScoreBreakdown(
+          input,
+          choice.action,
+          choice.scopeId,
+          choice.exclusion,
+        ),
+        ...planScoreBreakdown,
+      ],
       ...(selected
-        ? { whyChosen: ["semantic_runtime_actual"] }
+        ? { whyChosen: semanticRuntimeActionWhyChosen(choice, planSelection) }
         : {
             whyNot: choice.exclusion
               ? [
                   `semantic_excluded:${choice.exclusion.key}`,
                   choice.exclusion.reason,
                 ]
-              : ["semantic_score_below_selected"],
+              : semanticRuntimeActionWhyNot(choice, displayScore, planSelection),
           }),
     };
   });
+}
+
+type SemanticRuntimePlanSelectionDisplayContext = {
+  selectedChoice?: SemanticRuntimeChoice;
+  selectedActionId: string;
+  selectedRawScore: number;
+  selectedByPlanMapping: boolean;
+  selectedPlanId?: string;
+  selectedPlanType?: string;
+  mappedActionOrder: Map<string, number>;
+};
+
+function semanticRuntimePlanSelectionDisplayContext(
+  planRuntime: TacticalPlanRuntimeResult,
+  selectedActionId: string,
+  selectedChoice: SemanticRuntimeChoice | undefined,
+): SemanticRuntimePlanSelectionDisplayContext {
+  const mappedActions = planRuntime.selectedMapping?.legalActions ?? [];
+  const mappedActionOrder = new Map(
+    mappedActions.map((action, index) => [action.actionId, index]),
+  );
+  const selectedByPlanMapping =
+    mappedActionOrder.has(selectedActionId) &&
+    selectedChoice?.evidence.some((entry) =>
+      entry.startsWith("tactical_plan_mapping_overridden:true"),
+    ) !== true;
+  return {
+    ...(selectedChoice ? { selectedChoice } : {}),
+    selectedActionId,
+    selectedRawScore: selectedChoice?.score ?? 0,
+    selectedByPlanMapping,
+    ...(planRuntime.selectedPlan?.planId
+      ? { selectedPlanId: planRuntime.selectedPlan.planId }
+      : {}),
+    ...(planRuntime.selectedPlan?.type
+      ? { selectedPlanType: planRuntime.selectedPlan.type }
+      : {}),
+    mappedActionOrder,
+  };
+}
+
+function semanticRuntimeActionDisplayScore(
+  choice: SemanticRuntimeChoice,
+  selected: boolean,
+  context: SemanticRuntimePlanSelectionDisplayContext,
+): number {
+  if (choice.exclusion) return choice.score;
+  if (!context.selectedByPlanMapping) return choice.score;
+  if (selected) return choice.score;
+  const selectedOrder = context.mappedActionOrder.get(context.selectedActionId);
+  const choiceOrder = context.mappedActionOrder.get(choice.action.actionId);
+  if (choiceOrder !== undefined && selectedOrder !== undefined) {
+    if (choiceOrder > selectedOrder) {
+      return Math.min(
+        choice.score,
+        context.selectedRawScore - ((choiceOrder - selectedOrder) * 25),
+      );
+    }
+    return choice.score;
+  }
+  if (choice.score > context.selectedRawScore) {
+    return context.selectedRawScore - 50;
+  }
+  return choice.score;
+}
+
+function semanticRuntimePlanSelectionScoreBreakdown(
+  choice: SemanticRuntimeChoice,
+  selected: boolean,
+  displayScore: number,
+  context: SemanticRuntimePlanSelectionDisplayContext,
+): AiDecisionScoreComponent[] {
+  if (!context.selectedByPlanMapping || choice.exclusion) return [];
+  const reason = [
+    `rawSemanticScore:${choice.score}`,
+    `finalSelectionScore:${displayScore}`,
+    context.selectedPlanType ? `selectedPlan:${context.selectedPlanType}` : "",
+    context.mappedActionOrder.has(choice.action.actionId)
+      ? "selected_by_plan_mapping_candidate:true"
+      : "plan_mismatch:true",
+  ].filter(Boolean).join("|");
+  return [
+    {
+      key: selected ? "selected_by_plan_mapping" : "plan_selection_adjustment",
+      label: selected ? "Plan-Auswahl" : "Plan-Abgleich",
+      value: roundScore(displayScore - choice.score),
+      reason,
+    },
+  ];
+}
+
+function semanticRuntimeActionWhyChosen(
+  choice: SemanticRuntimeChoice,
+  context: SemanticRuntimePlanSelectionDisplayContext,
+): string[] {
+  if (context.selectedByPlanMapping) {
+    return [
+      "selected_by_plan_mapping",
+      `rawSemanticScore:${choice.score}`,
+      `finalSelectionScore:${choice.score}`,
+      ...(context.selectedPlanType
+        ? [`selectedPlan:${context.selectedPlanType}`]
+        : []),
+    ];
+  }
+  return ["semantic_runtime_actual"];
+}
+
+function semanticRuntimeActionWhyNot(
+  choice: SemanticRuntimeChoice,
+  displayScore: number,
+  context: SemanticRuntimePlanSelectionDisplayContext,
+): string[] {
+  if (context.selectedByPlanMapping) {
+    const mapped = context.mappedActionOrder.has(choice.action.actionId);
+    return [
+      mapped ? "lower_plan_fit" : "plan_mismatch",
+      mapped ? "selected_by_plan_mapping" : "excluded_by_current_plan",
+      `rawSemanticScore:${choice.score}`,
+      `finalSelectionScore:${displayScore}`,
+      ...(displayScore < choice.score
+        ? ["lower_final_score_after_adjustment"]
+        : []),
+    ];
+  }
+  return ["semantic_score_below_selected"];
 }
 
 function semanticRuntimeScoreBreakdown(
@@ -5484,6 +5655,7 @@ type RunnerBankInvestmentCommitmentStatus =
   | "install_deferred"
   | "build_first_load"
   | "build_second_load"
+  | "over_target_hold"
   | "hold"
   | "cashout_ready"
   | "cashout_deferred"
@@ -5495,6 +5667,9 @@ type RunnerBankInvestmentCommitmentAssessment = {
   bankSource: string;
   storedCredits: number;
   desiredBankTarget: number;
+  combinedCreditAccess: number;
+  comfortableCreditPool: boolean;
+  overDesiredTarget: boolean;
   buildActionLegal: boolean;
   cashOutActionLegal: boolean;
   concreteFundingNeed: boolean;
@@ -5550,7 +5725,8 @@ function runnerBankInvestmentCommitmentScoreComponents(
   if (
     action.type === "start_run" &&
     assessment.active &&
-    assessment.buildActionLegal
+    assessment.buildActionLegal &&
+    assessment.buildBankPriority > 0
   ) {
     const runOverride = runnerBankCommitmentRunOverride(input, action);
     return [
@@ -5586,9 +5762,12 @@ function runnerBankInvestmentCommitmentEvidence(
     `bankSource:${assessment.bankSource}`,
     `bankStoredCredits:${assessment.storedCredits}`,
     `desiredBankTarget:${assessment.desiredBankTarget}`,
+    `bankCombinedCreditAccess:${assessment.combinedCreditAccess}`,
     `buildBankPriority:${assessment.buildBankPriority}`,
     `cashOutPriority:${assessment.cashOutPriority}`,
     `bankCommitmentStatus:${assessment.status}`,
+    `bankComfortableCreditPool:${assessment.comfortableCreditPool}`,
+    `bankOverDesiredTarget:${assessment.overDesiredTarget}`,
     `bankBuildLegal:${assessment.buildActionLegal}`,
     `bankCashOutLegal:${assessment.cashOutActionLegal}`,
     `bankConcreteFundingNeed:${assessment.concreteFundingNeed}`,
@@ -5602,7 +5781,8 @@ function runnerBankInvestmentCommitmentEvidence(
       ? [`why_run_over_bank_build:${assessment.runOverride}`]
       : action.type === "start_run" &&
           assessment.active &&
-          assessment.buildActionLegal
+          assessment.buildActionLegal &&
+          assessment.buildBankPriority > 0
         ? ["why_bank_build_over_run:low_value_run"]
         : []),
     ...(isRunnerBankInstallAction(input, action) &&
@@ -5630,7 +5810,6 @@ function runnerBankInvestmentCommitmentAssessment(
   action: LegalAction,
 ): RunnerBankInvestmentCommitmentAssessment {
   const storedCredits = runnerBankStoredCredits(input, action);
-  const desiredBankTarget = storedCredits <= 0 ? 3 : 6;
   const buildActionLegal = input.legalActions.some((candidate) =>
     isRunnerBankBuildAction(input, candidate),
   );
@@ -5639,7 +5818,16 @@ function runnerBankInvestmentCommitmentAssessment(
   );
   const concreteFundingNeed = runnerBankHasConcreteFundingNeed(input);
   const criticalReserve = input.playerView.own.credits <= 3;
-  const cashOutThresholdMet = storedCredits >= 6;
+  const comfortableCreditPool = runnerBankHasComfortableCreditPool(input);
+  const desiredBankTarget = runnerBankDesiredTarget(storedCredits, {
+    comfortableCreditPool,
+    concreteFundingNeed,
+    criticalReserve,
+  });
+  const overDesiredTarget = storedCredits > 0 && storedCredits >= desiredBankTarget;
+  const combinedCreditAccess = input.playerView.own.credits + storedCredits;
+  const cashOutThresholdMet =
+    storedCredits >= 6 && !comfortableCreditPool;
   const runOverride =
     action.type === "start_run"
       ? runnerBankCommitmentRunOverride(input, action)
@@ -5663,6 +5851,9 @@ function runnerBankInvestmentCommitmentAssessment(
       bankSource,
       storedCredits,
       desiredBankTarget,
+      combinedCreditAccess,
+      comfortableCreditPool,
+      overDesiredTarget,
       buildActionLegal,
       cashOutActionLegal,
       concreteFundingNeed,
@@ -5685,6 +5876,9 @@ function runnerBankInvestmentCommitmentAssessment(
       bankSource,
       storedCredits,
       desiredBankTarget,
+      combinedCreditAccess,
+      comfortableCreditPool,
+      overDesiredTarget,
       buildActionLegal,
       cashOutActionLegal,
       concreteFundingNeed,
@@ -5707,6 +5901,9 @@ function runnerBankInvestmentCommitmentAssessment(
       bankSource,
       storedCredits,
       desiredBankTarget,
+      combinedCreditAccess,
+      comfortableCreditPool,
+      overDesiredTarget,
       buildActionLegal,
       cashOutActionLegal,
       concreteFundingNeed,
@@ -5727,6 +5924,9 @@ function runnerBankInvestmentCommitmentAssessment(
       bankSource,
       storedCredits,
       desiredBankTarget,
+      combinedCreditAccess,
+      comfortableCreditPool,
+      overDesiredTarget,
       buildActionLegal,
       cashOutActionLegal,
       concreteFundingNeed,
@@ -5746,12 +5946,39 @@ function runnerBankInvestmentCommitmentAssessment(
 
   if (buildActionLegal && stableBuildWindow) {
     const firstLoad = storedCredits <= 0;
+    if (!firstLoad && overDesiredTarget) {
+      return {
+        active: true,
+        status: "over_target_hold",
+        bankSource,
+        storedCredits,
+        desiredBankTarget,
+        combinedCreditAccess,
+        comfortableCreditPool,
+        overDesiredTarget,
+        buildActionLegal,
+        cashOutActionLegal,
+        concreteFundingNeed,
+        criticalReserve,
+        cashOutThresholdMet,
+        ...(runOverride ? { runOverride } : {}),
+        buildBankPriority: -1800,
+        cashOutPriority: cashOutActionLegal
+          ? cashOutThresholdMet
+            ? 650
+            : -900
+          : 0,
+      };
+    }
     return {
       active: true,
       status: firstLoad ? "build_first_load" : "build_second_load",
       bankSource,
       storedCredits,
       desiredBankTarget,
+      combinedCreditAccess,
+      comfortableCreditPool,
+      overDesiredTarget,
       buildActionLegal,
       cashOutActionLegal,
       concreteFundingNeed,
@@ -5769,6 +5996,9 @@ function runnerBankInvestmentCommitmentAssessment(
     bankSource,
     storedCredits,
     desiredBankTarget,
+    combinedCreditAccess,
+    comfortableCreditPool,
+    overDesiredTarget,
     buildActionLegal,
     cashOutActionLegal,
     concreteFundingNeed,
@@ -5790,6 +6020,23 @@ function runnerBankCashOutIsUsefulNow(
     assessment.concreteFundingNeed ||
     assessment.cashOutThresholdMet
   );
+}
+
+function runnerBankHasComfortableCreditPool(input: AiDecisionInput): boolean {
+  return input.playerView.own.credits >= 10;
+}
+
+function runnerBankDesiredTarget(
+  storedCredits: number,
+  context: {
+    comfortableCreditPool: boolean;
+    concreteFundingNeed: boolean;
+    criticalReserve: boolean;
+  },
+): number {
+  if (storedCredits <= 0) return 3;
+  if (context.criticalReserve || context.concreteFundingNeed) return 6;
+  return context.comfortableCreditPool ? 3 : 6;
 }
 
 function isRunnerBankInstallAction(

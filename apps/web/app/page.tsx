@@ -10368,7 +10368,7 @@ function aiDecisionDebugPlanStepLabel(value: string, plan?: AiDecisionDebugPlanE
     advance_score_card: "Score-Karte advancen",
     build_bank_counter: "Credit-Bank aufbauen",
     cash_out_bank: "Credit-Bank auszahlen",
-    draw_for_answer: coverage ? `Karte ziehen / ${coverage} suchen` : "Karte ziehen / Antwort suchen",
+    draw_for_answer: coverage ? `Karten ziehen, um ${coverage} zu finden` : "Karten ziehen, um Antwort zu finden",
     gain_credits: "Credits nehmen",
     install_development_card: handCard ? `${handCard} installieren` : "Handkarte installieren",
     install_breaker: coverage ? `${coverage} installieren` : "Breaker installieren",
@@ -10376,7 +10376,8 @@ function aiDecisionDebugPlanStepLabel(value: string, plan?: AiDecisionDebugPlanE
     rez_outer_ice: "äußeres ICE rezzen",
     run_target: runTarget || "Run auf Zielserver prüfen",
     score_agenda: "Agenda punkten",
-    search_for_answer: coverage ? `Suchkarte für ${coverage} nutzen` : "Such-/Antwortkarte nutzen"
+    search_for_answer: coverage ? `Suchkarte für ${coverage} nutzen` : "Such-/Antwortkarte nutzen",
+    setup_search_engine: coverage ? `Such-Engine für ${coverage} installieren` : "Such-Engine installieren"
   };
   if (value === "probe_central" && runTarget) return runTarget;
   return labels[value] ?? value;

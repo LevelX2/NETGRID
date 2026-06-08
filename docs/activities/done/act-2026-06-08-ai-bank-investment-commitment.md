@@ -94,4 +94,6 @@ Umgesetzt in der semantischen Runner-Runtime:
 - Cashout ohne FundingNeed, kritische Reserve oder Bank-Schwelle wird semantisch ausgeschlossen; vorhandener Direkt-nach-Build-Schutz bleibt erhalten.
 - Bekannte Agenda-/Remote-Score-/High-Payoff-Runs dürfen ein aktives Bank-Build-Commitment übersteuern.
 
+Nachhärtung vom 2026-06-08: Bei bereits gefülltem Broker und komfortablem Runner-Creditpool wird das situative Bankziel abgesenkt. Erreicht oder überschreitet der gespeicherte Broker-Pool dieses Ziel, bewertet die KI weiteres Aufladen als `over_target_hold` statt als zweiten Bankaufbau. Cashout bleibt ohne konkreten FundingNeed, kritische Reserve oder nicht-komfortablen Pool weiterhin deferiert; der Zustand wird redigiert über `bankStoredCredits`, `desiredBankTarget`, `bankCombinedCreditAccess`, `bankComfortableCreditPool` und `bankOverDesiredTarget` sichtbar gemacht.
+
 Keine Engine-, LegalAction-, `applyAction`-, Replay-, StateHash-, Zufalls- oder UI-Änderung.
