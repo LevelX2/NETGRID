@@ -66,6 +66,7 @@ const SHELL_TRADERS_ID = "onr_v1_176_the-shell-traders";
 const SKIVVISS_ID = "onr_v1_064_skivviss";
 const QUEST_FOR_CATTEKIN_ID = "onr_v1_172_quest-for-cattekin";
 const VACUUM_LINK_ID = "onr_v1_275_vacuum-link";
+const BLINK_ID = "onr_v1_007_blink";
 
 export function isISpySuccessfulRunFollowupPayload(payload: Record<string, unknown>): boolean {
   return payload.runnerUtilityAbility === "i_spy_put_spy_counter";
@@ -1291,6 +1292,31 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         const targetIceTitle = stringValue(payload.targetIceTitle);
         const targetIceSuffix = targetIceTitle ? ` auf ${targetIceTitle}` : "";
         const endsRunAfterBreak = payload.breakerEndsRunAfterBreak === true;
+        const sourceDefinitionId = stringValue(payload.sourceDefinitionId);
+        const blinkDieRoll = numberValue(payload.blinkDieRoll);
+        const blinkBreakSuccess = payload.blinkBreakSuccess === true ? true : payload.blinkBreakSuccess === false ? false : undefined;
+        const blinkDamageAmount = numberValue(payload.blinkDamageAmount);
+        const isBlinkBreak = sourceDefinitionId === BLINK_ID || cardDefinitionId === BLINK_ID || cardTitle === "Blink";
+        if (isBlinkBreak && blinkDieRoll !== undefined && blinkBreakSuccess !== undefined) {
+          const damageAmount = blinkDamageAmount ?? (blinkBreakSuccess ? 0 : blinkDieRoll);
+          cardDefinitionId = BLINK_ID;
+          cardTitle = "Blink";
+          importance = blinkBreakSuccess ? "important" : "critical";
+          description = blinkBreakSuccess
+            ? `Blink würfelt eine ${blinkDieRoll}: ${subroutineLabel}${targetIceSuffix} wurde gebrochen.`
+            : `Blink würfelt eine ${blinkDieRoll}: ${subroutineLabel}${targetIceSuffix} wurde nicht gebrochen; der Runner erleidet ${damageAmount} Net Damage.`;
+          chips.push(
+            "Blink",
+            `Wurf ${blinkDieRoll}`,
+            blinkBreakSuccess ? "Gebrochen" : "Nicht gebrochen",
+            ...(blinkBreakSuccess ? [] : [`${damageAmount} Net Damage`]),
+            ...(targetIceTitle ? [targetIceTitle] : [])
+          );
+          title = blinkBreakSuccess
+            ? phrase(subject, `mit Blink ${subroutineLabel}${targetIceSuffix} nach Wurf ${blinkDieRoll} gebrochen`)
+            : phrase(subject, `mit Blink ${subroutineLabel}${targetIceSuffix} nach Wurf ${blinkDieRoll} nicht gebrochen`);
+          break;
+        }
         description = `${breakSubroutineTotalCost !== undefined ? `${creditText(breakSubroutineTotalCost)}: ` : ""}${subroutineLabel}${targetIceSuffix} gebrochen${endsRunAfterBreak ? "; der Run endet durch diesen Break-Effekt, ohne dass das ICE als passiert gilt" : ""}.`;
         chips.push(
           "Subroutine",
@@ -2925,6 +2951,10 @@ function extractCardTitleFromLabel(actionType: string, label: string | undefined
   if (actionType === "trigger_ability") {
     const title = label.match(/^(.+?):\s+.+$/)?.[1]?.trim();
     if (title && !isGenericCardLabel(title)) return title;
+  }
+  if (actionType === "break_subroutine") {
+    const title = sourceTitleFromActionLabel(label);
+    if (title) return title;
   }
   const patterns: RegExp[] = [];
   if (["install_card", "play_event", "play_operation", "rez_ice", "pump_breaker", "trash_accessed_card", "trash_resource", "steal_agenda"].includes(actionType)) {

@@ -1621,6 +1621,51 @@ describe("formatChronicleEvent", () => {
     expect(breakAction.chips).toEqual(expect.arrayContaining(["Subroutine", "Subroutine 1", "Gebrochen", "2 Credits", "Krash", "Filter"]));
   });
 
+  it("describes successful Blink die rolls on break actions", () => {
+    const item = formatChronicleEvent(
+      makeEvent("break_subroutine", {
+        actor: "runner",
+        label: "Blink: Subroutine 1 brechen",
+        aiReasonCode: "runner.encounter.break_etr",
+        targetIceTitle: "Crystal Wall",
+        subroutineIndex: 0,
+        blinkDieRoll: 5,
+        blinkBreakSuccess: true,
+        blinkDamageAmount: 0
+      }),
+      "corp"
+    );
+
+    expect(item.title).toBe("Die Runner-KI hat mit Blink Subroutine 1 auf Crystal Wall nach Wurf 5 gebrochen.");
+    expect(item.description).toBe("Blink würfelt eine 5: Subroutine 1 auf Crystal Wall wurde gebrochen.");
+    expect(item.cardDefinitionId).toBe("onr_v1_007_blink");
+    expect(item.cardTitle).toBe("Blink");
+    expect(item.chips).toEqual(expect.arrayContaining(["Blink", "Wurf 5", "Gebrochen", "Crystal Wall"]));
+    expect(JSON.stringify(item)).not.toContain("Net Damage");
+  });
+
+  it("describes failed Blink die rolls without claiming a break", () => {
+    const item = formatChronicleEvent(
+      makeEvent("break_subroutine", {
+        actor: "runner",
+        title: "Blink",
+        targetIceTitle: "Crystal Wall",
+        subroutineIndex: 0,
+        blinkDieRoll: 2,
+        blinkBreakSuccess: false,
+        blinkDamageAmount: 2
+      }),
+      "runner"
+    );
+
+    expect(item.title).toBe("Du hast mit Blink Subroutine 1 auf Crystal Wall nach Wurf 2 nicht gebrochen.");
+    expect(item.description).toBe("Blink würfelt eine 2: Subroutine 1 auf Crystal Wall wurde nicht gebrochen; der Runner erleidet 2 Net Damage.");
+    expect(item.importance).toBe("critical");
+    expect(item.chips).toEqual(expect.arrayContaining(["Blink", "Wurf 2", "Nicht gebrochen", "2 Net Damage", "Crystal Wall"]));
+    expect(JSON.stringify(item)).not.toContain("Grip");
+    expect(JSON.stringify(item)).not.toContain("Heap");
+  });
+
   it("describes Dropp errata break as all subroutines and run-ending", () => {
     const item = formatChronicleEvent(
       makeEvent("break_subroutine", {

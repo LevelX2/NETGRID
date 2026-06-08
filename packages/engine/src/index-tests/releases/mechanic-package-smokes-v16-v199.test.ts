@@ -5333,6 +5333,18 @@ describe("V1.9.0 Mechanikpaket I", () => {
       );
       expect(dieRecord).toBeDefined();
       const die = dieRecord ? Math.floor(dieRecord.value * 6) + 1 : 0;
+      const publicPayload = state.eventLog.at(-1)?.publicPayload;
+      expect(publicPayload).toMatchObject({
+        actionType: "break_subroutine",
+        targetIceDefinitionId: "onr_v1_279_wall-of-static",
+        targetIceTitle: "Wall of Static",
+        subroutineIndex: 0,
+        blinkDieRoll: die,
+        blinkBreakSuccess: die >= 4,
+        blinkDamageAmount: die >= 4 ? 0 : die,
+      });
+      expect(JSON.stringify(publicPayload)).not.toContain("privatePayload");
+      expect(JSON.stringify(publicPayload)).not.toContain("cardInstances");
       const repeatBlinkBreakActions = getLegalActions(state, "runner").filter(
         (action) =>
           action.type === "break_subroutine" &&

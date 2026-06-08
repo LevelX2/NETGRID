@@ -1,19 +1,29 @@
 ---
 activityId: act-2026-06-08-blink-die-chronicle-transparency
-status: inbox
+status: done
 kind: fix
 area: cards
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-08
-startedAt:
-completedAt:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/public-context.ts
+  - packages/engine/src/index-tests/releases/mechanic-package-smokes-v16-v199.test.ts
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts -t "Blink|breaker pump"
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/releases/mechanic-package-smokes-v16-v199.test.ts -t "Blink as deterministic"
+  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts
+  - corepack pnpm --filter @netgrid/web typecheck
+  - corepack pnpm --filter @netgrid/engine typecheck (failed: existing unrelated trace-runtime-deps.test.ts fixture type mismatch)
+  - git diff --check
 ---
 
 # Blink-Würfelwurf in der Spielchronik transparent machen
@@ -69,4 +79,6 @@ Die Spielchronik zeigt bei jeder Nutzung von `Blink` nachvollziehbar, welcher W�
 
 ## Ergebnisnotiz
 
-Noch offen.
+Blink-`break_subroutine`-PublicEvents spiegeln den öffentlichen Würfelwurf, Erfolgsstatus und Net-Damage-Betrag jetzt aus dem aufgelösten `LegalAction`-Payload. Die Web-Chronik erkennt Blink-Breaks robust über Breaker-Titel/Quelle und beschreibt Erfolgswürfe als gebrochene Ziel-Subroutine sowie Fehlschläge als nicht gebrochene Ziel-Subroutine mit öffentlichem Net-Damage-Betrag, ohne verdeckte Grip-/Heap-Kartenidentitäten auszugeben.
+
+Fokussierte Engine- und Web-Regressionen decken Erfolgs- und Fehlschlagszweig ab. `@netgrid/web`-Typecheck, vollständiger `chronicle.test.ts` und `git diff --check` bestanden. `@netgrid/engine`-Typecheck wurde ausgeführt, scheitert aber an einem bestehenden, nicht paketbezogenen Fixture-Typfehler in `src/game/card-implementation/trace-runtime-deps.test.ts`.
