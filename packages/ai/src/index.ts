@@ -5705,6 +5705,9 @@ function semanticRuntimeRunnerScoreComponents(
     components.push(
       ...semanticRuntimeRepeatedRunTargetComponents(input, serverId),
     );
+    const runTargetGuidance =
+      semanticRuntimeRunnerRunTargetGuidanceComponent(input, action);
+    if (runTargetGuidance) components.push(runTargetGuidance);
   }
   if (action.type === "trash_accessed_card") {
     components.push(
@@ -5870,6 +5873,55 @@ function runnerMultiRunTargetEvaluation(
     deckCapabilities,
     strategicIntent,
   })[0];
+}
+
+function semanticRuntimeRunnerRunTargetGuidanceComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (action.type !== "start_run") return undefined;
+  const targetServerId = semanticRuntimeServerId(action);
+  if (!targetServerId) return undefined;
+  const evaluation = runnerMultiRunTargetEvaluation(
+    input,
+    action,
+    targetServerId,
+  );
+  if (!evaluation) return undefined;
+  const value = semanticRuntimeRunTargetGuidanceValue(evaluation);
+  if (value === 0) return undefined;
+  return {
+    key: "runner_run_target_semantic_guidance",
+    label: "RunTarget-Empfehlung",
+    value,
+    reason: [
+      `target:${evaluation.targetServerId}`,
+      `recommendation:${evaluation.recommendation}`,
+      `payoff:${evaluation.accessPayoff}`,
+      `known_access:${evaluation.knownAccessState}`,
+      `path:${evaluation.pathPassability}`,
+      `credits_after:${evaluation.creditsAfterRun}`,
+    ].join("|"),
+  };
+}
+
+function semanticRuntimeRunTargetGuidanceValue(
+  evaluation: RunnerRunTargetEvaluation,
+): number {
+  switch (evaluation.recommendation) {
+    case "run_now":
+      return 0;
+    case "run_if_free":
+      return evaluation.accessPayoff === "unknown" ? -1700 : -900;
+    case "setup_first":
+      return -1600;
+    case "gain_credits_first":
+      return -2100;
+    case "find_breaker_first":
+      return -2600;
+    case "do_not_run_now":
+      return -5000;
+  }
 }
 
 function runnerMultiRunEvaluationPlausible(

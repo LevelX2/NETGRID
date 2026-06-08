@@ -1,19 +1,24 @@
 ---
 activityId: act-2026-06-08-ai-stabilize-golden-deck-tests
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: test-quality-agent
 requiresImplementation: true
 createdAt: 2026-06-08
-startedAt:
-completedAt:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai exec tsc --noEmit
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-golden-deck-debug.test.ts
+  - corepack pnpm --filter @netgrid/ai test
+  - git diff --check
 ---
 
 # AI-STABILIZE-1: Golden-Deck-Fails vor Strukturarbeit klären
@@ -54,12 +59,12 @@ Der aktuelle rote `@netgrid/ai`-Teststatus soll vor jeder größeren Strukturver
 
 ## Akzeptanzkriterien
 
-- [ ] Die zwei im Review genannten Golden-Deck-Fails sind reproduziert oder als bereits behoben belegt.
-- [ ] Pro Fail ist dokumentiert, ob `run-hq` fachlich korrekt war oder korrigiert wurde.
-- [ ] `packages/ai/src/runner-golden-deck-debug.test.ts` ist grün.
-- [ ] `corepack pnpm --filter @netgrid/ai test` ist grün oder verbleibende fremde Fails sind konkret benannt und nicht durch dieses Paket verursacht.
-- [ ] `corepack pnpm --filter @netgrid/ai typecheck` ist grün.
-- [ ] `git diff --check` ist grün.
+- [x] Die zwei im Review genannten Golden-Deck-Fails sind reproduziert oder als bereits behoben belegt.
+- [x] Pro Fail ist dokumentiert, ob `run-hq` fachlich korrekt war oder korrigiert wurde.
+- [x] `packages/ai/src/runner-golden-deck-debug.test.ts` ist grün.
+- [x] `corepack pnpm --filter @netgrid/ai test` ist grün oder verbleibende fremde Fails sind konkret benannt und nicht durch dieses Paket verursacht.
+- [x] `corepack pnpm --filter @netgrid/ai typecheck` ist grün.
+- [x] `git diff --check` ist grün.
 
 ## Umsetzungshinweise
 
@@ -69,4 +74,10 @@ Der aktuelle rote `@netgrid/ai`-Teststatus soll vor jeder größeren Strukturver
 
 ## Ergebnisnotiz
 
-Noch offen.
+Reproduziert: Die zwei bekannten Fails in `packages/ai/src/runner-golden-deck-debug.test.ts` traten weiterhin auf (`run-hq` statt `install-access-card`, `run-hq` statt `gain-credit`).
+
+Befund: `run-hq` war in beiden Fixtures fachlich nicht korrekt. Es handelte sich um eine Semantic-Run-Zentrierungs-Regression: generische `start_run`-Priorität plus HQ-/Free-Server-Komponenten überstimmten gemappte TacticalPlans für Handentwicklung beziehungsweise Creditbase, obwohl `evaluateRunnerRunTargets` den HQ-Run nur als `run_if_free` oder `gain_credits_first` bewertete.
+
+Korrektur in `packages/ai/src/index.ts`: Semantic Runtime berücksichtigt für `start_run` jetzt eine negative `runner_run_target_semantic_guidance`-Komponente aus `evaluateRunnerRunTargets`, wenn der Run nicht `run_now` ist. Dadurch bleiben echte Payoff-Runs ungedämpft, während `run_if_free`, `setup_first`, `gain_credits_first`, `find_breaker_first` und `do_not_run_now` nicht mehr klare Setup-/Economy-Pläne überstimmen.
+
+Ergebnis: `runner-golden-deck-debug.test.ts`, Typecheck, `@netgrid/ai test` und `git diff --check` sind grün.
