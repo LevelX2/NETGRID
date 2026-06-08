@@ -903,6 +903,215 @@ describe("Semantic AI runtime cutover", () => {
     );
   });
 
+  it("defers low-value runs while Top Runners' Conference value is unrealized", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        { payload: { serverId: "rd" } },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+      legalAction("draw", "runner", "draw_card", "Draw", { credits: 0 }),
+    ]);
+    input.playerView.own.credits = 4;
+    input.playerView.own.rig = [
+      visibleCard("onr_v1_184_top-runners-conference", "runner", "resource"),
+    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("gain-credit");
+    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: "run-rd",
+        scoreBreakdown: expect.arrayContaining([
+          expect.objectContaining({
+            key: "runner_no_run_economy_run_penalty",
+            reason: expect.stringContaining(
+              "why_run_deferred_for_conference:low_value_run",
+            ),
+          }),
+        ]),
+      }),
+    );
+    expect(JSON.stringify(decision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
+  it("devalues Top Runners' Conference install without a setup window", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "install-conference",
+        "runner",
+        "install_card",
+        "Install Top Runners' Conference",
+        { credits: 0 },
+        { source: "onr_v1_184_top-runners-conference" },
+      ),
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        { payload: { serverId: "rd" } },
+      ),
+    ]);
+    input.playerView.own.credits = 5;
+    input.playerView.own.gripOrHq = [
+      visibleCard("onr_v1_184_top-runners-conference", "runner", "resource"),
+    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("run-rd");
+    expect(decision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: "install-conference",
+        scoreBreakdown: expect.arrayContaining([
+          expect.objectContaining({
+            key: "runner_no_run_economy_install_commitment",
+            reason: expect.stringContaining(
+              "why_conference_install_deferred:no_setup_window",
+            ),
+          }),
+        ]),
+      }),
+    );
+  });
+
+  it("allows known agenda runs to break Top Runners' Conference commitment", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "run-remote",
+        "runner",
+        "start_run",
+        "Run remote",
+        { credits: 0 },
+        { payload: { serverId: "remote_1" } },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 4;
+    input.playerView.own.rig = [
+      visibleCard("onr_v1_184_top-runners-conference", "runner", "resource"),
+    ];
+    input.playerView.servers = [
+      server("hq"),
+      server("rd"),
+      server("archives"),
+      server("remote_1", [], [visibleCard("simple_agenda", "corp", "agenda")]),
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("run-remote");
+    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_no_run_economy_run_override",
+          reason: expect.stringContaining(
+            "why_run_allowed_despite_conference:known_agenda",
+          ),
+        }),
+      ]),
+    );
+  });
+
+  it("reduces Top Runners' Conference run penalty after start-of-turn value is realized", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        { payload: { serverId: "rd" } },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 6;
+    input.playerView.own.rig = [
+      visibleCard("onr_v1_184_top-runners-conference", "runner", "resource"),
+    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+    input.eventTail = [
+      {
+        eventId: "conference-start-credit",
+        type: "automatic_effects_resolved",
+        stateVersionBefore: 1,
+        stateVersionAfter: 2,
+        stateHashAfter: "fnv1a:conference",
+        visibilityClass: "public",
+        publicPayload: {
+          resolvedEffects: [
+            {
+              kind: "gain_credits",
+              side: "runner",
+              amount: 2,
+              reason: "start_of_turn",
+              sourceDefinitionId: "onr_v1_184_top-runners-conference",
+              sourceTitle: "Top Runners' Conference",
+              visibility: "public",
+            },
+          ],
+        },
+      },
+    ];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(decision.actionId).toBe("run-rd");
+    expect(decision.decisionDebug?.scoreBreakdown).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          key: "runner_no_run_economy_run_penalty",
+          value: -850,
+          reason: expect.stringContaining("realizedValueEstimate:2"),
+        }),
+      ]),
+    );
+  });
+
+  it("does not treat turn-start economy without run drawback as no-run commitment", () => {
+    const input = aiInput("runner", [
+      legalAction(
+        "run-rd",
+        "runner",
+        "start_run",
+        "Run R&D",
+        { credits: 0 },
+        { payload: { serverId: "rd" } },
+      ),
+      legalAction("gain-credit", "runner", "gain_credit", "Gain 1", {
+        credits: 0,
+      }),
+    ]);
+    input.playerView.own.credits = 6;
+    input.playerView.own.rig = [
+      visibleCard("onr_v1_295_night-shift", "runner", "resource"),
+    ];
+    input.playerView.servers = [server("hq"), server("rd"), server("archives")];
+
+    const decision = chooseRunnerAction(input);
+
+    expect(JSON.stringify(decision.decisionDebug)).not.toContain(
+      "noRunEconomyCommitmentActive:true",
+    );
+  });
+
   it("returns from an opportunistic central run to the blocked remote coverage plan", () => {
     const centralInput = aiInput("runner", [
       legalAction(

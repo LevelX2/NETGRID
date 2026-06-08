@@ -1,19 +1,23 @@
 ---
 activityId: act-2026-06-08-ai-no-run-economy-commitment
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-08
-startedAt:
-completedAt:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/index.ts
+  - packages/ai/src/semantic-ai-runtime-cutover.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts
+  - corepack pnpm --filter @netgrid/ai typecheck
 ---
 
 # Runner-KI: No-Run-Economy-Commitment für Top Runners' Conference
@@ -57,14 +61,14 @@ Die Runner-KI soll `Top Runners' Conference` und vergleichbare Karten mit Start-
 
 ## Akzeptanzkriterien
 
-- [ ] Die KI erkennt Karten mit `economy.turn_start_credit` plus Run-Drawback als No-Run-Economy-Commitment oder dokumentiert eng, warum ein bestehendes Modell dafür genutzt wird.
-- [ ] `Top Runners' Conference` wird in stabiler Economy-/Setup-Lage nicht installiert, wenn die KI unmittelbar danach nur einen normalen Low-Value-Run plant.
-- [ ] Nach aktiver `Top Runners' Conference` werden Low-Value-Runs gegenüber Credit/Draw/Install/Setup nachvollziehbar abgewertet.
-- [ ] Bekannte Agenda, Remote-Score-Threat oder ein klarer Notfall dürfen das Commitment brechen; Debug/Evidence zeigt den Override-Grund.
-- [ ] Der Commitment-Malus sinkt, wenn Start-of-turn-Credits bereits realisiert wurden.
-- [ ] Andere Start-of-turn-Economy-Karten ohne Run-ending-Drawback werden nicht fälschlich als No-Run-Commitment behandelt.
-- [ ] Die gewählte finale Action stammt weiterhin aus `input.legalActions`.
-- [ ] Debug/Evidence bleibt redigiert und enthält keine Hidden-Info.
+- [x] Die KI erkennt Karten mit `economy.turn_start_credit` plus Run-Drawback als No-Run-Economy-Commitment oder dokumentiert eng, warum ein bestehendes Modell dafür genutzt wird.
+- [x] `Top Runners' Conference` wird in stabiler Economy-/Setup-Lage nicht installiert, wenn die KI unmittelbar danach nur einen normalen Low-Value-Run plant.
+- [x] Nach aktiver `Top Runners' Conference` werden Low-Value-Runs gegenüber Credit/Draw/Install/Setup nachvollziehbar abgewertet.
+- [x] Bekannte Agenda, Remote-Score-Threat oder ein klarer Notfall dürfen das Commitment brechen; Debug/Evidence zeigt den Override-Grund.
+- [x] Der Commitment-Malus sinkt, wenn Start-of-turn-Credits bereits realisiert wurden.
+- [x] Andere Start-of-turn-Economy-Karten ohne Run-ending-Drawback werden nicht fälschlich als No-Run-Commitment behandelt.
+- [x] Die gewählte finale Action stammt weiterhin aus `input.legalActions`.
+- [x] Debug/Evidence bleibt redigiert und enthält keine Hidden-Info.
 
 ## Umsetzungshinweise
 
@@ -79,4 +83,14 @@ Die Runner-KI soll `Top Runners' Conference` und vergleichbare Karten mit Start-
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt in der semantischen Runner-Runtime:
+
+- Neue side-sichere No-Run-Economy-Commitment-Erkennung aus AI-Hints (`economy.turn_start_credit` plus `risk.ends_on_run`) und Mechanics-Fallback (`start_of_turn_credit_gain` plus `trash_on_run`).
+- Aktive Karten wie `Top Runners' Conference` senken Low-Value-Run-Scoring, solange Start-of-turn-Wert offen ist, und geben Credit/Draw/Setup-Actions leichten Haltebonus.
+- Install solcher Karten wird abgewertet, wenn nur ein unmittelbarer Low-Value-Run als Folgesituation plausibel ist und kein Setup-Fenster besteht.
+- Bekannte Agenda-/Remote-Score-/High-Payoff-Runs dürfen das Commitment brechen.
+- Der Run-Malus sinkt nach öffentlich sichtbarer Start-of-turn-Credit-Realisierung.
+- Redigierte Debug-/Evidence-Felder ergänzt: `noRunEconomyCommitmentActive`, `noRunEconomySource`, `commitmentStrength`, `realizedValueEstimate`, `expectedFutureValue`, `runBreaksCommitment`, `noRunCommitmentPenalty`, `why_run_deferred_for_conference`, `why_run_allowed_despite_conference`.
+- Regressionen decken aktive `Top Runners' Conference`, Install-Defer, Agenda-Override, realisierten Wert und eine Nicht-Fehlklassifikation für Start-of-turn-Economy ohne Run-Drawback ab.
+
+Keine Engine-, LegalAction-, `applyAction`-, Replay-, StateHash-, Zufalls- oder UI-Änderung.
