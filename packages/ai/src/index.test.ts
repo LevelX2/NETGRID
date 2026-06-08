@@ -12690,6 +12690,92 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(assertAiInputIsSideSafe(shortTermInput)).toBe(true);
   });
 
+  it("uses installed action-economy hints before the basic credit action", () => {
+    const newsgroupInput = installedRunnerEconomyInput(
+      "ai-v141-installed-newsgroup-filter",
+      { newsgroupFilter: true, credits: 5 },
+    );
+    const newsgroupAction = newsgroupInput.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(newsgroupInput, action) ===
+          "onr_v1_045_newsgroup-filter",
+    );
+    const newsgroupBasicCredit = newsgroupInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(newsgroupAction).toBeDefined();
+    expect(newsgroupBasicCredit).toBeDefined();
+    expect(newsgroupAction?.label).toContain("2 Credits nehmen");
+    if (!newsgroupAction || !newsgroupBasicCredit)
+      throw new Error("Missing Newsgroup Filter economy fixture actions");
+
+    const newsgroupDecision = chooseRunnerAction({
+      ...newsgroupInput,
+      legalActions: [newsgroupAction, newsgroupBasicCredit],
+    });
+
+    expect(newsgroupDecision.actionId).toBe(newsgroupAction.actionId);
+    expect(newsgroupDecision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(newsgroupDecision.evidence).toContain(
+      "installed_economy_kind:direct_payout",
+    );
+    expect(newsgroupDecision.evidence).toContain(
+      "installed_economy_immediate_gain:2",
+    );
+    expect(newsgroupDecision.evidence).toContain(
+      "installed_economy_net_credits:2",
+    );
+    expect(newsgroupDecision.decisionDebug?.actionAlternatives).toContainEqual(
+      expect.objectContaining({
+        actionId: newsgroupAction.actionId,
+        selected: true,
+        economy: expect.objectContaining({
+          economyKind: "direct_payout",
+          immediateGain: 2,
+          netCredits: 2,
+        }),
+      }),
+    );
+
+    const siliconInput = installedRunnerEconomyInput(
+      "ai-v141-installed-silicon-saloon",
+      { siliconSaloon: true, credits: 5 },
+    );
+    const siliconAction = siliconInput.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(siliconInput, action) ===
+          "onr_v1_179_silicon-saloon-franchise",
+    );
+    const siliconBasicCredit = siliconInput.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+
+    expect(siliconAction).toBeDefined();
+    expect(siliconBasicCredit).toBeDefined();
+    if (!siliconAction || !siliconBasicCredit)
+      throw new Error("Missing Silicon Saloon economy fixture actions");
+
+    const siliconDecision = chooseRunnerAction({
+      ...siliconInput,
+      legalActions: [siliconAction, siliconBasicCredit],
+    });
+
+    expect(siliconDecision.actionId).toBe(siliconAction.actionId);
+    expect(siliconDecision.reasonCode).toBe("runner.plan.recover_economy");
+    expect(siliconDecision.evidence).toContain(
+      "installed_economy_kind:direct_payout",
+    );
+    expect(siliconDecision.evidence).toContain(
+      "installed_economy_immediate_gain:1",
+    );
+    expect(JSON.stringify(siliconDecision.decisionDebug)).not.toMatch(
+      /cardInstances|privatePayload|fullGameState/i,
+    );
+  });
+
   it("separates Broker pool loading from visible pool payout", () => {
     const payoutInput = installedRunnerEconomyInput(
       "ai-v141-installed-broker-take",
@@ -24887,6 +24973,8 @@ function installedRunnerEconomyInput(
   seed: string,
   options: {
     brokerCounters?: number;
+    newsgroupFilter?: boolean;
+    siliconSaloon?: boolean;
     shortTermCounters?: number;
     credits: number;
   },
@@ -24901,6 +24989,12 @@ function installedRunnerEconomyInput(
         identity: "runner_identity_001",
         cards: [
           { id: "onr_v1_154_broker", quantity: 1 },
+          ...(options.newsgroupFilter
+            ? [{ id: "onr_v1_045_newsgroup-filter", quantity: 1 }]
+            : []),
+          ...(options.siliconSaloon
+            ? [{ id: "onr_v1_179_silicon-saloon-franchise", quantity: 1 }]
+            : []),
           { id: "onr_v1_178_short-term-contract", quantity: 1 },
           { id: "simple_economy_event", quantity: 6 },
           { id: "simple_fracter", quantity: 2 },
@@ -24931,6 +25025,10 @@ function installedRunnerEconomyInput(
     );
     setHostedBitsForTest(state, shortTermId, options.shortTermCounters);
   }
+  if (options.newsgroupFilter === true)
+    moveRunnerProgramToRig(state, "onr_v1_045_newsgroup-filter");
+  if (options.siliconSaloon === true)
+    moveRunnerResourceToRig(state, "onr_v1_179_silicon-saloon-franchise");
   state.runner.credits = options.credits;
   state.runner.clicks = 3;
   return buildAiDecisionInput(state, "runner", {

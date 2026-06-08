@@ -5513,10 +5513,16 @@ function classifyInstalledEconomyAction(
     sourceCard,
     storedCredits,
   );
+  const hintActionGain = runnerInstalledHintActionCreditGain(
+    input,
+    action,
+    sourceCard,
+  );
   const activatedBuild = activatedRunnerEconomyCreditBuild(action, sourceCard);
   const immediateGain = Math.max(
     0,
     activatedGain,
+    hintActionGain,
     numberPayload(action, "gainCreditsAmount"),
     numberPayload(action, "gainedCredits"),
     numberPayload(action, "amount"),
@@ -5661,11 +5667,75 @@ function activatedRunnerEconomyCreditGain(
     /von Broker nehmen/i.test(label)
   )
     return storedCredits;
+  const amount = runnerCreditGainLabelAmount(label);
+  return Math.min(storedCredits, amount);
+}
+
+function runnerInstalledHintActionCreditGain(
+  input: AiDecisionInput,
+  action: LegalAction,
+  sourceCard: VisibleCard,
+): number {
+  if (
+    action.type !== "activated_card_ability" &&
+    action.type !== "trigger_ability"
+  )
+    return 0;
+  if (!sourceCard.definitionId) return 0;
+  const hint = AI_HINTS.get(sourceCard.definitionId);
+  const directActionAmounts = runnerHintActionCreditAmounts(
+    sourceCard,
+    "action_economy",
+  );
+  const economyAmounts = runnerHintActionCreditAmounts(sourceCard, "economy");
+  const allAmounts = [...directActionAmounts, ...economyAmounts];
+  if (!hint || allAmounts.length === 0) return 0;
+
+  const labelAmount = runnerCreditGainLabelAmount(
+    typeof action.payload?.cardImplementationAbilityLabel === "string"
+      ? action.payload.cardImplementationAbilityLabel
+      : action.label,
+  );
+  if (labelAmount > 0) {
+    if (allAmounts.includes(labelAmount)) return labelAmount;
+    if (directActionAmounts.length > 0)
+      return Math.max(labelAmount, ...directActionAmounts);
+    return labelAmount;
+  }
+
+  if (directActionAmounts.length > 0) return Math.max(...directActionAmounts);
+  const sourceAbilityActionCount = input.legalActions.filter(
+    (candidate) =>
+      candidate.source === action.source &&
+      (candidate.type === "activated_card_ability" ||
+        candidate.type === "trigger_ability"),
+  ).length;
+  return sourceAbilityActionCount === 1 ? Math.max(...economyAmounts) : 0;
+}
+
+function runnerHintActionCreditAmounts(
+  sourceCard: VisibleCard,
+  kind: "action_economy" | "economy",
+): number[] {
+  if (!sourceCard.definitionId) return [];
+  const hint = AI_HINTS.get(sourceCard.definitionId);
+  return (hint?.effects ?? [])
+    .filter(
+      (effect) =>
+        effect.kind === kind &&
+        effect.timing === "action" &&
+        effect.scope === "runner" &&
+        effect.resource === "credits",
+    )
+    .map((effect) => effect.amount ?? 0)
+    .filter((amount) => Number.isFinite(amount) && amount > 0);
+}
+
+function runnerCreditGainLabelAmount(label: string): number {
   const match = /(\d+)\s+Credits?\s+nehmen/i.exec(label);
   if (!match) return 0;
   const amount = Number(match[1]);
-  if (!Number.isFinite(amount) || amount <= 0) return 0;
-  return Math.min(storedCredits, amount);
+  return Number.isFinite(amount) && amount > 0 ? amount : 0;
 }
 
 function activatedRunnerEconomyCreditBuild(
