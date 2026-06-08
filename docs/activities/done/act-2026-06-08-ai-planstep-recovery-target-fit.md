@@ -1,19 +1,26 @@
 ---
 activityId: act-2026-06-08-ai-planstep-recovery-target-fit
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-08
-startedAt:
-completedAt:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/tactical-plans.ts
+  - packages/ai/src/tactical-plans.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts -t search
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/semantic-ai-runtime-cutover.test.ts
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - git diff --check
 ---
 
 # AI-MAP-RECOVERY-1: PlanStep-Mapping und Recovery-Zielbewertung schärfen
@@ -84,15 +91,15 @@ Die Runner-KI soll Coverage-/Breaker-PlanSteps nur auf LegalActions mappen, die 
 
 ## Akzeptanzkriterien
 
-- [ ] Bei fehlender Wall-Coverage erfüllt `Livewire's Contacts` keinen `search_for_answer`-Step.
-- [ ] Bei fehlender Wall-Coverage erfüllt `Junkyard BBS` den Coverage-Plan nicht, wenn als Recovery-Ziel nur `Livewire's Contacts` oder eine andere nicht planrelevante Economykarte bekannt ist.
-- [ ] `Junkyard BBS` darf den Coverage-Plan erfüllen, wenn die recoverbare Karte ein passender Breaker, eine passende Suchkarte oder ein akzeptierter Draw-for-Answer ist.
-- [ ] Bei einem Credit-Blocker statt Coverage-Blocker darf `Livewire's Contacts` weiterhin `gain_credits_for_path` oder Economy-Pläne unterstützen.
-- [ ] Ein wiederholter Livewire/Junkyard-Loop ohne Coverage-Fortschritt erhält einen nachvollziehbaren Malus.
-- [ ] Der Loop-Malus greift nicht oder schwächer, wenn ein echter FundingNeed durch die wiederholte Economy erfüllt wird.
-- [ ] Wenn kein valider Search-/Recovery-Match existiert, bleibt der Coverage-Plan sichtbar blockiert und Debug/Evidence nennt den fehlenden Match.
-- [ ] Die finale Action stammt weiterhin aus `input.legalActions`.
-- [ ] Debug/Evidence bleibt redigiert und enthält keine Hidden-Info.
+- [x] Bei fehlender Wall-Coverage erfüllt `Livewire's Contacts` keinen `search_for_answer`-Step.
+- [x] Bei fehlender Wall-Coverage erfüllt `Junkyard BBS` den Coverage-Plan nicht, wenn als Recovery-Ziel nur `Livewire's Contacts` oder eine andere nicht planrelevante Economykarte bekannt ist.
+- [x] `Junkyard BBS` darf den Coverage-Plan erfüllen, wenn die recoverbare Karte ein passender Breaker, eine passende Suchkarte oder ein akzeptierter Draw-for-Answer ist.
+- [x] Bei einem Credit-Blocker statt Coverage-Blocker darf `Livewire's Contacts` weiterhin `gain_credits_for_path` oder Economy-Pläne unterstützen.
+- [x] Ein wiederholter Livewire/Junkyard-Loop ohne Coverage-Fortschritt erhält einen nachvollziehbaren Malus.
+- [x] Der Loop-Malus greift nicht oder schwächer, wenn ein echter FundingNeed durch die wiederholte Economy erfüllt wird.
+- [x] Wenn kein valider Search-/Recovery-Match existiert, bleibt der Coverage-Plan sichtbar blockiert und Debug/Evidence nennt den fehlenden Match.
+- [x] Die finale Action stammt weiterhin aus `input.legalActions`.
+- [x] Debug/Evidence bleibt redigiert und enthält keine Hidden-Info.
 
 ## Umsetzungshinweise
 
@@ -107,4 +114,8 @@ Die Runner-KI soll Coverage-/Breaker-PlanSteps nur auf LegalActions mappen, die 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Das Coverage-/Search-PlanStep-Mapping bewertet nun konkrete Action-Fits, bevor breite Semantik- und ActionType-Fallbacks greifen. `Livewire's Contacts` und andere reine Economy-Actions erfüllen bei fehlender Breaker-Coverage keinen `search_for_answer`-Step mehr; ohne Coverage-Capability bleibt Livewire für Credit-Blocker weiterhin matchbar.
+
+`Junkyard BBS` bewertet Recovery-Ziele über bekannte Zieldefinitionen oder sichtbare Zielkarten. Planrelevante Breaker-, Search- oder Draw-for-Answer-Ziele werden zugelassen; Economy-Ziele wie `onr_v1_097_livewires-contacts` werden für Coverage-Plans abgelehnt. Die Rationale nennt redigiert `blocked_no_valid_search_action`, `rejectedFalseMatches`, `activeRequiredCapability`, `matchedActionRole`, `recoveryTargetEvaluation`, `recoveredCardPlanFit`, `recoveryLoopRisk`, `why_livewire_not_search`, `why_junkyard_recovery_allowed_or_rejected`, `repeatedRecoverySameCardPenalty`, `repeatedEconomyRecoveryLoopPenalty`, `noProgressOnRequiredCapabilityPenalty` und den Funding-Bypass.
+
+Keine Engine-, LegalAction-, `applyAction`-, Replay-, StateHash-, Zufalls- oder Hidden-Info-Pfade geändert.

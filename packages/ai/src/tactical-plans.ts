@@ -1,9 +1,10 @@
-import type {
-  AiDecisionInput,
-  LegalAction,
-  PlayerView,
-  Side,
-  VisibleCard,
+import {
+  DEMO_CARDS_BY_ID,
+  type AiDecisionInput,
+  type LegalAction,
+  type PlayerView,
+  type Side,
+  type VisibleCard,
 } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
 import type {
@@ -688,6 +689,20 @@ export function mapPlanStepToLegalActions(
   const matchedCandidates = candidates.filter((candidate) =>
     matchedCandidateIds.includes(candidate.actionId),
   );
+  const rejectedFalseMatches = rejectedCoverageSearchFalseMatches(
+    plan,
+    step,
+    candidates,
+    legalActionsById,
+    input,
+  );
+  const matchedCoverageSearchFits = matchedCoverageSearchRationales(
+    plan,
+    step,
+    matchedCandidates,
+    legalActionsById,
+    input,
+  );
   return {
     plan,
     step: {
@@ -702,6 +717,12 @@ export function mapPlanStepToLegalActions(
       ...step.rationale,
       `mapped_candidate_count:${matchedCandidateIds.length}`,
       `mapped_legal_action_count:${legalActions.length}`,
+      ...(status !== "matched" &&
+      coverageSearchRequiredCapability(plan, step) !== undefined
+        ? ["blocked_no_valid_search_action"]
+        : []),
+      ...rejectedFalseMatches.slice(0, 6),
+      ...matchedCoverageSearchFits.slice(0, 4),
       ...matchedCandidates.slice(0, 4).map(candidateMappingRationale),
     ],
   };
@@ -755,6 +776,10 @@ function candidateMatchesStep(
     ) {
       return false;
     }
+  }
+  if (step.kind === "search_for_answer") {
+    const fit = coverageSearchActionFit(plan, step, candidate, action, input);
+    if (fit !== undefined && !fit.supportsActiveCapabilityNeed) return false;
   }
   if (candidateSemanticsMatchStep(step, candidate)) {
     return candidateTargetMatchesPlan(plan, candidate, action) &&
@@ -861,6 +886,416 @@ function candidateSemanticText(candidate: ActionSemanticCandidate): string {
     .filter((entry): entry is string => typeof entry === "string")
     .join(" ")
     .toLowerCase();
+}
+
+type RecoveryTargetPlanFit = "none" | "low" | "medium" | "high";
+
+type RecoveryLoopPenalties = {
+  repeatedRecoverySameCardPenalty: number;
+  repeatedEconomyRecoveryLoopPenalty: number;
+  noProgressOnRequiredCapabilityPenalty: number;
+  fundingNeedReducesRecoveryLoopPenalty: boolean;
+};
+
+type CoverageSearchActionFit = {
+  supportsActiveCapabilityNeed: boolean;
+  recoveredCardId?: string;
+  recoveredCardRole?: string;
+  supportsCreditNeed: boolean;
+  supportsDrawOrSearchNeed: boolean;
+  supportsSurvivalNeed: boolean;
+  recoveredCardPlanFit: RecoveryTargetPlanFit;
+  recoveryLoopRisk: "none" | "low" | "medium" | "high";
+  evidence: string[];
+};
+
+function coverageSearchActionFit(
+  plan: TacticalPlan,
+  step: PlanStep,
+  candidate: ActionSemanticCandidate,
+  action: LegalAction,
+  input: AiDecisionInput,
+): CoverageSearchActionFit | undefined {
+  const requiredCoverage = coverageSearchRequiredCapability(plan, step);
+  if (requiredCoverage === undefined) return undefined;
+  const sourceCard = visibleCardByInstanceId(input.playerView, String(action.source));
+  if (action.type === "draw_card") {
+    return {
+      supportsActiveCapabilityNeed: true,
+      supportsCreditNeed: false,
+      supportsDrawOrSearchNeed: true,
+      supportsSurvivalNeed: false,
+      recoveredCardPlanFit: "medium",
+      recoveryLoopRisk: "none",
+      evidence: [
+        `activeRequiredCapability:${requiredCoverage}`,
+        "planStepExpectedRole:draw_for_answer",
+        "matchedActionRole:draw_for_answer",
+        ...recoveryLoopPenaltyEvidence(noRecoveryLoopPenalties()),
+      ],
+    };
+  }
+  if (
+    action.type === "install_card" &&
+    sourceCard &&
+    cardProvidesBreakerCoverage(sourceCard, requiredCoverage)
+  ) {
+    return {
+      supportsActiveCapabilityNeed: true,
+      ...(sourceCard.definitionId
+        ? { recoveredCardId: sourceCard.definitionId }
+        : {}),
+      recoveredCardRole: "breaker",
+      supportsCreditNeed: false,
+      supportsDrawOrSearchNeed: false,
+      supportsSurvivalNeed: false,
+      recoveredCardPlanFit: "high",
+      recoveryLoopRisk: "none",
+      evidence: [
+        `activeRequiredCapability:${requiredCoverage}`,
+        "planStepExpectedRole:install_breaker",
+        "matchedActionRole:install_breaker",
+        `recoveredCardPlanFit:high`,
+        ...recoveryLoopPenaltyEvidence(noRecoveryLoopPenalties()),
+      ],
+    };
+  }
+
+  const signalText = candidateSemanticText(candidate);
+  const recoveryTarget = recoveryTargetEvaluation(
+    input,
+    action,
+    requiredCoverage,
+  );
+  if (recoveryTarget) return recoveryTarget;
+
+  const explicitProgramSearch =
+    /program_search|breaker_search|search\.stack|search_for_answer|setup\.program_search/.test(
+      signalText,
+    );
+  if (explicitProgramSearch) {
+    return {
+      supportsActiveCapabilityNeed: true,
+      supportsCreditNeed: false,
+      supportsDrawOrSearchNeed: true,
+      supportsSurvivalNeed: false,
+      recoveredCardPlanFit: "high",
+      recoveryLoopRisk: "none",
+      evidence: [
+        `activeRequiredCapability:${requiredCoverage}`,
+        "planStepExpectedRole:search_for_answer",
+        "matchedActionRole:program_search",
+        "recoveredCardPlanFit:high",
+        ...recoveryLoopPenaltyEvidence(noRecoveryLoopPenalties()),
+      ],
+    };
+  }
+
+  const matchedActionRole = sourceCard
+    ? cardPlanRoleForCoverageSearch(sourceCard)
+    : action.type;
+  const supportsCreditNeed =
+    actionCreditCost(action) < 0 || matchedActionRole.includes("economy");
+  const penalties = economyFalseMatchLoopPenalties(input, supportsCreditNeed);
+  return {
+    supportsActiveCapabilityNeed: false,
+    recoveredCardRole: matchedActionRole,
+    supportsCreditNeed,
+    supportsDrawOrSearchNeed: false,
+    supportsSurvivalNeed: false,
+    recoveredCardPlanFit: "none",
+    recoveryLoopRisk: matchedActionRole.includes("economy") ? "medium" : "low",
+    evidence: [
+      `activeRequiredCapability:${requiredCoverage}`,
+      "planStepExpectedRole:search_for_answer",
+      `matchedActionRole:${matchedActionRole}`,
+      "recoveredCardPlanFit:none",
+      matchedActionRole.includes("economy")
+        ? "why_livewire_not_search:economy_does_not_satisfy_coverage"
+        : "rejectedFalseMatches:action_does_not_satisfy_coverage",
+      ...recoveryLoopPenaltyEvidence(penalties),
+    ],
+  };
+}
+
+function rejectedCoverageSearchFalseMatches(
+  plan: TacticalPlan,
+  step: PlanStep,
+  candidates: readonly ActionSemanticCandidate[],
+  legalActionsById: ReadonlyMap<string, LegalAction>,
+  input: AiDecisionInput,
+): string[] {
+  if (coverageSearchRequiredCapability(plan, step) === undefined) return [];
+  return candidates
+    .map((candidate) => {
+      const action = legalActionsById.get(candidate.actionId);
+      if (!action || candidate.actorSide !== plan.side) return undefined;
+      const fit = coverageSearchActionFit(plan, step, candidate, action, input);
+      if (!fit || fit.supportsActiveCapabilityNeed) return undefined;
+      return [
+        `rejectedFalseMatches:${candidate.actionId}`,
+        ...fit.evidence,
+        `recoveryTargetEvaluation:${fit.recoveredCardId ?? "none"}:${fit.recoveredCardPlanFit}`,
+        `recoveryLoopRisk:${fit.recoveryLoopRisk}`,
+      ].join("|");
+    })
+    .filter((entry): entry is string => Boolean(entry));
+}
+
+function matchedCoverageSearchRationales(
+  plan: TacticalPlan,
+  step: PlanStep,
+  candidates: readonly ActionSemanticCandidate[],
+  legalActionsById: ReadonlyMap<string, LegalAction>,
+  input: AiDecisionInput,
+): string[] {
+  if (coverageSearchRequiredCapability(plan, step) === undefined) return [];
+  return candidates
+    .map((candidate) => {
+      const action = legalActionsById.get(candidate.actionId);
+      if (!action || candidate.actorSide !== plan.side) return undefined;
+      const fit = coverageSearchActionFit(plan, step, candidate, action, input);
+      if (!fit?.supportsActiveCapabilityNeed) return undefined;
+      return [
+        `matchedCoverageSearchFit:${candidate.actionId}`,
+        ...fit.evidence,
+        `recoveryTargetEvaluation:${fit.recoveredCardId ?? "none"}:${fit.recoveredCardPlanFit}`,
+        `recoveryLoopRisk:${fit.recoveryLoopRisk}`,
+      ].join("|");
+    })
+    .filter((entry): entry is string => Boolean(entry));
+}
+
+function coverageSearchRequiredCapability(
+  plan: TacticalPlan,
+  step: PlanStep,
+): RequiredCapabilityKind | undefined {
+  const capability = [
+    ...step.requiredCapabilities,
+    ...plan.requiredCapabilities,
+  ].find((candidate) => candidate.kind.startsWith("breaker_"));
+  return capability?.kind;
+}
+
+function recoveryTargetEvaluation(
+  input: AiDecisionInput,
+  action: LegalAction,
+  requiredCoverage: RequiredCapabilityKind,
+): CoverageSearchActionFit | undefined {
+  if (
+    action.type !== "trigger_ability" &&
+    action.type !== "activated_card_ability"
+  ) {
+    return undefined;
+  }
+  const sourceCard = visibleCardByInstanceId(input.playerView, String(action.source));
+  const sourceText = [
+    sourceCard?.title,
+    sourceCard?.definitionId,
+    sourceCard?.rulesText,
+    action.label,
+  ].filter(Boolean).join(" ").toLowerCase();
+  const targetDefinitionId = recoveryTargetDefinitionId(input, action);
+  const isRecovery =
+    /recovery|trash|heap|junkyard|bbs/.test(sourceText) ||
+    targetDefinitionId !== undefined;
+  if (!isRecovery) return undefined;
+  const targetCard = recoveryTargetVisibleCard(input, action);
+  const targetRole =
+    targetCard
+      ? cardPlanRoleForCoverageSearch(targetCard)
+      : targetDefinitionId
+        ? cardDefinitionPlanRoleForCoverageSearch(targetDefinitionId)
+        : "unknown";
+  const supportsCoverage =
+    targetCard?.known === true
+      ? cardProvidesBreakerCoverage(targetCard, requiredCoverage)
+      : targetDefinitionId !== undefined &&
+        cardDefinitionProvidesBreakerCoverage(targetDefinitionId, requiredCoverage);
+  const supportsDrawOrSearchNeed =
+    targetRole.includes("search") || targetRole.includes("draw");
+  const supportsCreditNeed = targetRole.includes("economy");
+  const recoveredCardPlanFit: RecoveryTargetPlanFit = supportsCoverage
+    ? "high"
+    : supportsDrawOrSearchNeed
+      ? "medium"
+      : supportsCreditNeed
+        ? "low"
+        : "none";
+  const supportsActiveCapabilityNeed =
+    supportsCoverage || supportsDrawOrSearchNeed;
+  const recoveryLoopRisk =
+    supportsActiveCapabilityNeed
+      ? "none"
+      : supportsCreditNeed
+        ? "high"
+        : "medium";
+  const penalties = recoveryLoopPenaltiesForCoverageSearch(
+    input,
+    supportsActiveCapabilityNeed,
+    supportsCreditNeed,
+  );
+  return {
+    supportsActiveCapabilityNeed,
+    ...(targetDefinitionId ? { recoveredCardId: targetDefinitionId } : {}),
+    recoveredCardRole: targetRole,
+    supportsCreditNeed,
+    supportsDrawOrSearchNeed,
+    supportsSurvivalNeed: false,
+    recoveredCardPlanFit,
+    recoveryLoopRisk,
+    evidence: [
+      `activeRequiredCapability:${requiredCoverage}`,
+      "planStepExpectedRole:search_for_answer",
+      `matchedActionRole:recovery`,
+      `recoveredCardId:${targetDefinitionId ?? "unknown"}`,
+      `recoveredCardRole:${targetRole}`,
+      `supportsActiveCapabilityNeed:${supportsActiveCapabilityNeed}`,
+      `supportsCreditNeed:${supportsCreditNeed}`,
+      `supportsDrawOrSearchNeed:${supportsDrawOrSearchNeed}`,
+      `supportsSurvivalNeed:false`,
+      `recoveredCardPlanFit:${recoveredCardPlanFit}`,
+      `recoveryLoopRisk:${recoveryLoopRisk}`,
+      ...recoveryLoopPenaltyEvidence(penalties),
+      supportsActiveCapabilityNeed
+        ? "why_junkyard_recovery_allowed_or_rejected:allowed_plan_fit"
+        : "why_junkyard_recovery_allowed_or_rejected:rejected_no_plan_fit",
+    ],
+  };
+}
+
+function noRecoveryLoopPenalties(): RecoveryLoopPenalties {
+  return {
+    repeatedRecoverySameCardPenalty: 0,
+    repeatedEconomyRecoveryLoopPenalty: 0,
+    noProgressOnRequiredCapabilityPenalty: 0,
+    fundingNeedReducesRecoveryLoopPenalty: false,
+  };
+}
+
+function recoveryLoopPenaltiesForCoverageSearch(
+  input: AiDecisionInput,
+  supportsActiveCapabilityNeed: boolean,
+  supportsCreditNeed: boolean,
+): RecoveryLoopPenalties {
+  if (supportsActiveCapabilityNeed) return noRecoveryLoopPenalties();
+  const fundingNeed = runnerHasConcreteFundingNeed(input, []);
+  if (supportsCreditNeed) {
+    return {
+      repeatedRecoverySameCardPenalty: fundingNeed ? 20 : 80,
+      repeatedEconomyRecoveryLoopPenalty: fundingNeed ? 60 : 220,
+      noProgressOnRequiredCapabilityPenalty: fundingNeed ? 90 : 180,
+      fundingNeedReducesRecoveryLoopPenalty: fundingNeed,
+    };
+  }
+  return {
+    repeatedRecoverySameCardPenalty: 50,
+    repeatedEconomyRecoveryLoopPenalty: 0,
+    noProgressOnRequiredCapabilityPenalty: 160,
+    fundingNeedReducesRecoveryLoopPenalty: false,
+  };
+}
+
+function economyFalseMatchLoopPenalties(
+  input: AiDecisionInput,
+  supportsCreditNeed: boolean,
+): RecoveryLoopPenalties {
+  if (!supportsCreditNeed) return noRecoveryLoopPenalties();
+  const fundingNeed = runnerHasConcreteFundingNeed(input, []);
+  return {
+    repeatedRecoverySameCardPenalty: 0,
+    repeatedEconomyRecoveryLoopPenalty: fundingNeed ? 40 : 120,
+    noProgressOnRequiredCapabilityPenalty: fundingNeed ? 80 : 160,
+    fundingNeedReducesRecoveryLoopPenalty: fundingNeed,
+  };
+}
+
+function recoveryLoopPenaltyEvidence(
+  penalties: RecoveryLoopPenalties,
+): string[] {
+  return [
+    `repeatedRecoverySameCardPenalty:${penalties.repeatedRecoverySameCardPenalty}`,
+    `repeatedEconomyRecoveryLoopPenalty:${penalties.repeatedEconomyRecoveryLoopPenalty}`,
+    `noProgressOnRequiredCapabilityPenalty:${penalties.noProgressOnRequiredCapabilityPenalty}`,
+    `fundingNeedReducesRecoveryLoopPenalty:${penalties.fundingNeedReducesRecoveryLoopPenalty}`,
+  ];
+}
+
+function recoveryTargetDefinitionId(
+  input: AiDecisionInput,
+  action: LegalAction,
+): string | undefined {
+  const payload = action.payload ?? {};
+  const direct =
+    payload.targetCardDefinitionId ??
+    payload.returnedCardDefinitionId ??
+    payload.cardDefinitionId ??
+    payload.targetDefinitionId;
+  if (typeof direct === "string") return direct;
+  const targetCard = recoveryTargetVisibleCard(input, action);
+  return targetCard?.definitionId;
+}
+
+function recoveryTargetVisibleCard(
+  input: AiDecisionInput,
+  action: LegalAction,
+): VisibleCard | undefined {
+  const payload = action.payload ?? {};
+  const targetId =
+    payload.targetCardId ??
+    payload.cardImplementationTopTrashTargetId ??
+    payload.returnedCardId;
+  return typeof targetId === "string"
+    ? visibleCardByInstanceId(input.playerView, targetId)
+    : undefined;
+}
+
+function cardPlanRoleForCoverageSearch(card: VisibleCard): string {
+  if (cardProvidesBreakerCoverage(card, "breaker_coverage")) return "breaker";
+  const text = cardCoverageSearchText(card);
+  if (/search|tutor/.test(text)) return "search";
+  if (/draw/.test(text)) return "draw";
+  if (/credit|economy|gain\s+\d+/.test(text)) return "economy";
+  return card.type ?? "unknown";
+}
+
+function cardDefinitionPlanRoleForCoverageSearch(definitionId: string): string {
+  if (cardDefinitionProvidesBreakerCoverage(definitionId, "breaker_coverage"))
+    return "breaker";
+  const definition = DEMO_CARDS_BY_ID[definitionId];
+  const text = [
+    definition?.title,
+    definition?.type,
+    ...(definition?.subtypes ?? []),
+    definition?.rulesText,
+    ...(definition?.mechanics ?? []),
+  ].filter(Boolean).join(" ").toLowerCase();
+  if (/search|tutor/.test(text)) return "search";
+  if (/draw/.test(text)) return "draw";
+  if (/credit|economy|gain_credits|gain\s+\d+/.test(text)) return "economy";
+  return definition?.type ?? "unknown";
+}
+
+function cardDefinitionProvidesBreakerCoverage(
+  definitionId: string,
+  requiredCoverage: RequiredCapabilityKind,
+): boolean {
+  const definition = DEMO_CARDS_BY_ID[definitionId];
+  if (!definition) return false;
+  return cardProvidesBreakerCoverage(
+    {
+      instanceId: definitionId,
+      definitionId,
+      title: definition.title,
+      owner: "runner",
+      controller: "runner",
+      type: definition.type,
+      known: true,
+      subtypes: definition.subtypes,
+      rulesText: definition.rulesText,
+    },
+    requiredCoverage,
+  );
 }
 
 function planRequiredBreakerCoverage(

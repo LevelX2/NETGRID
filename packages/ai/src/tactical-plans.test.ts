@@ -270,6 +270,255 @@ describe("tactical plan model", () => {
     );
   });
 
+  it("rejects pure economy events as breaker-coverage search matches", () => {
+    const action = legalAction("play-livewire", "runner", "play_event", {}, {
+      source: "onr_v1_097_livewires-contacts",
+      label: "Livewire's Contacts",
+    });
+    const plan = coverageSearchPlan("breaker_wall");
+    const candidate: ActionSemanticCandidate = {
+      ...candidateForAction(action),
+      sourceKind: "card",
+      sourceCardId: "onr_v1_097_livewires-contacts",
+      semanticActionType: "play.runner_event",
+      actionTacticSignals: ["recover_economy"],
+      evidence: ["candidate carries burst economy semantics"],
+    };
+    const input = aiInput("runner", [action]);
+    input.playerView.own.gripOrHq = [
+      visibleCard("onr_v1_097_livewires-contacts", "runner", "event", {
+        rulesText: "Gain 3 credits.",
+      }),
+    ];
+
+    const mapping = mapPlanStepToLegalActions(
+      plan,
+      plan.currentStep,
+      [candidate],
+      input,
+    );
+
+    expect(mapping.status).toBe("blocked_missing_capability");
+    expect(mapping.actionCandidateIds).toEqual([]);
+    expect(mapping.rationale.join("\n")).toContain(
+      "why_livewire_not_search:economy_does_not_satisfy_coverage",
+    );
+    expect(mapping.rationale.join("\n")).toContain(
+      "blocked_no_valid_search_action",
+    );
+  });
+
+  it("still maps Livewire's Contacts to credit blockers outside coverage search", () => {
+    const action = legalAction("play-livewire", "runner", "play_event", {}, {
+      source: "onr_v1_097_livewires-contacts",
+      label: "Livewire's Contacts",
+    });
+    const plan = createTacticalPlan({
+      planId: "runner.build_credit_base",
+      side: "runner",
+      type: "runner.build_credit_base",
+      status: "active",
+      priority: 800,
+      horizonTurns: 1,
+      currentStep: createPlanStep({
+        stepId: "gain_credits:runner_credit_base",
+        kind: "gain_credits",
+        desiredActionSemantics: ["play.runner_event", "recover_economy"],
+        requiredCapabilities: [
+          {
+            capabilityId: "credits:runner",
+            kind: "credits",
+            side: "runner",
+            evidence: ["credit blocker needs funding"],
+          },
+        ],
+      }),
+      requiredCapabilities: [
+        {
+          capabilityId: "credits:runner",
+          kind: "credits",
+          side: "runner",
+          evidence: ["credit blocker needs funding"],
+        },
+      ],
+      stateVersion: 1,
+    });
+    const candidate: ActionSemanticCandidate = {
+      ...candidateForAction(action),
+      sourceKind: "card",
+      sourceCardId: "onr_v1_097_livewires-contacts",
+      semanticActionType: "play.runner_event",
+      actionTacticSignals: ["recover_economy"],
+      evidence: ["candidate carries burst economy semantics"],
+    };
+    const input = aiInput("runner", [action]);
+
+    const mapping = mapPlanStepToLegalActions(
+      plan,
+      plan.currentStep,
+      [candidate],
+      input,
+    );
+
+    expect(mapping.status).toBe("matched");
+    expect(mapping.actionCandidateIds).toEqual(["play-livewire"]);
+    expect(mapping.legalActions[0]).toBe(input.legalActions[0]);
+    expect(mapping.rationale.join("\n")).not.toContain(
+      "blocked_no_valid_search_action",
+    );
+  });
+
+  it("rejects Junkyard BBS recovery when the top heap card does not fit coverage", () => {
+    const action = legalAction(
+      "junkyard-livewire",
+      "runner",
+      "activated_card_ability",
+      {
+        targetCardDefinitionId: "onr_v1_097_livewires-contacts",
+      },
+      {
+        source: "junkyard-1",
+        label: "Junkyard BBS: return top heap card",
+      },
+    );
+    const plan = coverageSearchPlan("breaker_wall");
+    const candidate: ActionSemanticCandidate = {
+      ...candidateForAction(action),
+      sourceKind: "card",
+      sourceCardId: "onr_v1_165_junkyard-bbs",
+      semanticActionType: "card_ability.trigger",
+      actionTacticSignals: ["setup.recovery", "trash_recovery"],
+      evidence: ["candidate carries top trash recovery semantics"],
+    };
+    const input = aiInput("runner", [action]);
+    input.playerView.own.rig = [
+      visibleCard("junkyard-1", "runner", "resource"),
+    ];
+
+    const mapping = mapPlanStepToLegalActions(
+      plan,
+      plan.currentStep,
+      [candidate],
+      input,
+    );
+
+    expect(mapping.status).toBe("blocked_missing_capability");
+    expect(mapping.actionCandidateIds).toEqual([]);
+    expect(mapping.rationale.join("\n")).toContain(
+      "recoveryTargetEvaluation:onr_v1_097_livewires-contacts:low",
+    );
+    expect(mapping.rationale.join("\n")).toContain(
+      "why_junkyard_recovery_allowed_or_rejected:rejected_no_plan_fit",
+    );
+    expect(mapping.rationale.join("\n")).toContain(
+      "repeatedRecoverySameCardPenalty:80",
+    );
+    expect(mapping.rationale.join("\n")).toContain(
+      "repeatedEconomyRecoveryLoopPenalty:220",
+    );
+    expect(mapping.rationale.join("\n")).toContain(
+      "noProgressOnRequiredCapabilityPenalty:180",
+    );
+  });
+
+  it("reduces Junkyard economy recovery loop penalty when credits are genuinely short", () => {
+    const action = legalAction(
+      "junkyard-livewire-funded",
+      "runner",
+      "activated_card_ability",
+      {
+        targetCardDefinitionId: "onr_v1_097_livewires-contacts",
+      },
+      {
+        source: "junkyard-1",
+        label: "Junkyard BBS: return top heap card",
+      },
+    );
+    const plan = coverageSearchPlan("breaker_wall");
+    const candidate: ActionSemanticCandidate = {
+      ...candidateForAction(action),
+      sourceKind: "card",
+      sourceCardId: "onr_v1_165_junkyard-bbs",
+      semanticActionType: "card_ability.trigger",
+      actionTacticSignals: ["setup.recovery", "trash_recovery"],
+      evidence: ["candidate carries top trash recovery semantics"],
+    };
+    const input = aiInput("runner", [action]);
+    input.playerView.own.credits = 1;
+    input.playerView.own.rig = [
+      visibleCard("junkyard-1", "runner", "resource"),
+    ];
+
+    const mapping = mapPlanStepToLegalActions(
+      plan,
+      plan.currentStep,
+      [candidate],
+      input,
+    );
+
+    expect(mapping.status).toBe("blocked_missing_capability");
+    expect(mapping.actionCandidateIds).toEqual([]);
+    expect(mapping.rationale.join("\n")).toContain(
+      "fundingNeedReducesRecoveryLoopPenalty:true",
+    );
+    expect(mapping.rationale.join("\n")).toContain(
+      "repeatedRecoverySameCardPenalty:20",
+    );
+    expect(mapping.rationale.join("\n")).toContain(
+      "repeatedEconomyRecoveryLoopPenalty:60",
+    );
+    expect(mapping.rationale.join("\n")).toContain(
+      "noProgressOnRequiredCapabilityPenalty:90",
+    );
+  });
+
+  it("allows Junkyard BBS recovery when the recovered card fits coverage", () => {
+    const action = legalAction(
+      "junkyard-fracter",
+      "runner",
+      "activated_card_ability",
+      {
+        targetCardDefinitionId: "simple_fracter",
+      },
+      {
+        source: "junkyard-1",
+        label: "Junkyard BBS: return top heap card",
+      },
+    );
+    const plan = coverageSearchPlan("breaker_wall");
+    const candidate: ActionSemanticCandidate = {
+      ...candidateForAction(action),
+      sourceKind: "card",
+      sourceCardId: "onr_v1_165_junkyard-bbs",
+      semanticActionType: "card_ability.trigger",
+      actionTacticSignals: ["setup.recovery", "trash_recovery"],
+      evidence: ["candidate carries top trash recovery semantics"],
+    };
+    const input = aiInput("runner", [action]);
+    input.playerView.own.rig = [
+      visibleCard("junkyard-1", "runner", "resource"),
+    ];
+
+    const mapping = mapPlanStepToLegalActions(
+      plan,
+      plan.currentStep,
+      [candidate],
+      input,
+    );
+
+    expect(mapping.status).toBe("matched");
+    expect(mapping.actionCandidateIds).toEqual(["junkyard-fracter"]);
+    expect(mapping.rationale.join("\n")).toContain(
+      "source:onr_v1_165_junkyard-bbs",
+    );
+    expect(mapping.rationale.join("\n")).toContain(
+      "repeatedRecoverySameCardPenalty:0",
+    );
+    expect(mapping.rationale.join("\n")).toContain(
+      "repeatedEconomyRecoveryLoopPenalty:0",
+    );
+  });
+
   it("maps bank steps from candidate bank semantics without label hints", () => {
     const action = legalAction("use-bank", "runner", "trigger_ability", {}, {
       source: "broker-1",
@@ -1654,6 +1903,47 @@ function legalAction(
     expiresAtStateVersion: 2,
     ...(Object.keys(payload).length > 0 ? { payload } : {}),
   };
+}
+
+function coverageSearchPlan(kind: "breaker_wall" | "breaker_code_gate") {
+  return createTacticalPlan({
+    planId: "runner.obtain_breaker_coverage:remote_1",
+    side: "runner",
+    type: "runner.obtain_breaker_coverage",
+    status: "active",
+    priority: 900,
+    horizonTurns: 1,
+    currentStep: createPlanStep({
+      stepId: "search_for_answer:remote_1",
+      kind: "search_for_answer",
+      desiredActionSemantics: [
+        "card_ability.trigger",
+        "card_ability.unknown",
+        "play.runner_event",
+        "draw.card",
+      ],
+      requiredCapabilities: [
+        {
+          capabilityId: `coverage:${kind}`,
+          kind,
+          side: "runner",
+          target: { kind: "capability", id: kind },
+          evidence: [`activeRequiredCapability:${kind}`],
+        },
+      ],
+      rationale: ["need breaker coverage before the run"],
+    }),
+    requiredCapabilities: [
+      {
+        capabilityId: `coverage:${kind}`,
+        kind,
+        side: "runner",
+        target: { kind: "capability", id: kind },
+        evidence: [`activeRequiredCapability:${kind}`],
+      },
+    ],
+    stateVersion: 1,
+  });
 }
 
 function rdAccessEvent(
