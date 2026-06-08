@@ -1,22 +1,30 @@
 ---
 activityId: act-2026-06-08-ai-test-index-modularization
-status: inbox
+status: done
 kind: cleanup
 area: ai
 priority: high
 primaryAgent: test-quality-agent
 requiresImplementation: true
 createdAt: 2026-06-08
-startedAt:
-completedAt:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
 branch:
 releaseTarget:
 blockedBy:
   - act-2026-06-08-ai-struct-runtime-entrypoints
   - act-2026-06-08-ai-struct-legacy-baseline-isolation
   - act-2026-06-08-ai-struct-simulation-benchmark-split
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/simulation/benchmark-reports.test.ts
+  - packages/ai/src/index.test.ts
+  - docs/reviews/ai/ai-test-modularization-boundaries-2026-06-08.md
+checks:
+  - corepack pnpm --filter @netgrid/ai test -- src/simulation/benchmark-reports.test.ts
+  - corepack pnpm --filter @netgrid/ai test -- src/index.test.ts
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - corepack pnpm --filter @netgrid/ai test
+  - git diff --check
 ---
 
 # AI-TEST-1: index.test.ts entlang neuer Modulgrenzen verkleinern
@@ -71,4 +79,4 @@ checks: []
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. Drei Benchmark-Report-/Gate-Regressionen wurden aus `index.test.ts` nach `packages/ai/src/simulation/benchmark-reports.test.ts` verschoben. Die Tests prüfen dieselben Report-, Gate-, Safety- und Redaction-Verträge wie zuvor; `index.test.ts` erhielt keine neuen fachfremden Regressionen. Die Zielgrenzen für künftige Runtime-, Legacy-, Simulation-, Runner- und Corp-Regressionen sind in `docs/reviews/ai/ai-test-modularization-boundaries-2026-06-08.md` dokumentiert.
