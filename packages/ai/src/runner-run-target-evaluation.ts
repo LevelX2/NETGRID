@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import {
+  DEMO_CARDS_BY_ID,
+  type AiDecisionInput,
+  type LegalAction,
+} from "@netgrid/shared";
 import type { BeliefState } from "./belief-state";
 import {
   evaluateKnownCentralAccessPayoff,
@@ -110,6 +114,31 @@ export type RunnerRunTargetRecommendation =
   | "find_breaker_first"
   | "do_not_run_now";
 
+export type BlinkRiskSeverity = "none" | "low" | "medium" | "high" | "lethal";
+
+export type BlinkRiskPayoffOverride =
+  | "none"
+  | "known_agenda"
+  | "remote_score_threat"
+  | "immediate_win"
+  | "survival";
+
+export type BlinkRiskAssessment = {
+  currentHandCount: number;
+  handAfterActionCost: number;
+  blinkUsesLikely: number;
+  visibleSubroutinesLikely: number;
+  maxSingleFailureDamage: 3;
+  worstCaseDamageEstimate: number;
+  lethalOnAnyFailure: boolean;
+  lethalOnHighFailure: boolean;
+  survivesOneFailedBlinkUse: boolean;
+  riskSeverity: BlinkRiskSeverity;
+  payoffOverride: BlinkRiskPayoffOverride;
+  stableCoverageAvailable: boolean;
+  evidence: string[];
+};
+
 export type RunnerCreditBasePlanRecommendation =
   | "build_credit_base"
   | "fund_useful_hand_card"
@@ -186,6 +215,7 @@ export type RunnerRunTargetEvaluation = {
   runActionPayoff: RunnerInstalledRunPayoff;
   runActionProjection: RunActionProjection;
   riskyUniversalCoverage: boolean;
+  blinkRiskAssessment?: BlinkRiskAssessment;
   scoreThreat: boolean;
   recommendation: RunnerRunTargetRecommendation;
   score: number;
@@ -217,10 +247,264 @@ export type EvaluateRunnerRunTargetsParams = {
 
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 const INSTALLED_RUN_PAYOFF_SCORE_CAP = 180;
+export const BLINK_CARD_ID = "onr_v1_007_blink";
+const BLINK_MAX_SINGLE_FAILURE_DAMAGE = 3 as const;
 
 type InternalRunActionProjection = RunActionProjection & {
   action: LegalAction;
 };
+
+export function buildBlinkRiskAssessment(params: {
+  currentHandCount: number;
+  handAfterActionCost: number;
+  blinkUsesLikely: number;
+  visibleSubroutinesLikely: number;
+  payoffOverride: BlinkRiskPayoffOverride;
+  stableCoverageAvailable: boolean;
+  context: "run_path" | "encounter_break";
+  evidence?: readonly string[];
+}): BlinkRiskAssessment {
+  const currentHandCount = Math.max(0, Math.floor(params.currentHandCount));
+  const handAfterActionCost = Math.max(
+    0,
+    Math.floor(params.handAfterActionCost),
+  );
+  const blinkUsesLikely = Math.max(1, Math.floor(params.blinkUsesLikely));
+  const visibleSubroutinesLikely = Math.max(
+    1,
+    Math.floor(params.visibleSubroutinesLikely),
+  );
+  const worstCaseDamageEstimate =
+    blinkUsesLikely * BLINK_MAX_SINGLE_FAILURE_DAMAGE;
+  const lethalOnAnyFailure = handAfterActionCost <= 0;
+  const lethalOnHighFailure = handAfterActionCost <= 2;
+  const survivesOneFailedBlinkUse =
+    handAfterActionCost >= BLINK_MAX_SINGLE_FAILURE_DAMAGE;
+  const riskSeverity = blinkRiskSeverityFor({
+    handAfterActionCost,
+    worstCaseDamageEstimate,
+    lethalOnAnyFailure,
+    lethalOnHighFailure,
+  });
+  const lethalBlinkFailureRisk = lethalOnAnyFailure || lethalOnHighFailure;
+  const disposition =
+    params.payoffOverride !== "none"
+      ? `why_blink_run_allowed_despite_risk:${params.payoffOverride}`
+      : blinkRiskShouldAvoidRunSeverity(riskSeverity)
+        ? `why_blink_run_blocked:${riskSeverity}`
+        : "why_blink_run_allowed_despite_risk:hand_buffer";
+  const evidence = [
+    "blinkRiskApplied:true",
+    `blinkRiskContext:${params.context}`,
+    `currentHandCount:${currentHandCount}`,
+    `handAfterActionCost:${handAfterActionCost}`,
+    `blinkHandBuffer:${handAfterActionCost}`,
+    `blinkUsesLikely:${blinkUsesLikely}`,
+    `visibleSubroutinesLikely:${visibleSubroutinesLikely}`,
+    `maxSingleFailureDamage:${BLINK_MAX_SINGLE_FAILURE_DAMAGE}`,
+    `worstCaseDamageEstimate:${worstCaseDamageEstimate}`,
+    `lethalOnAnyFailure:${lethalOnAnyFailure}`,
+    `lethalOnHighFailure:${lethalOnHighFailure}`,
+    `survivesOneFailedBlinkUse:${survivesOneFailedBlinkUse}`,
+    `blinkRiskSeverity:${riskSeverity}`,
+    `payoffOverride:${params.payoffOverride}`,
+    `stableCoverageAvailable:${params.stableCoverageAvailable}`,
+    `lethalBlinkFailureRisk:${lethalBlinkFailureRisk}`,
+    disposition,
+    ...(params.evidence ?? []),
+  ];
+
+  return {
+    currentHandCount,
+    handAfterActionCost,
+    blinkUsesLikely,
+    visibleSubroutinesLikely,
+    maxSingleFailureDamage: BLINK_MAX_SINGLE_FAILURE_DAMAGE,
+    worstCaseDamageEstimate,
+    lethalOnAnyFailure,
+    lethalOnHighFailure,
+    survivesOneFailedBlinkUse,
+    riskSeverity,
+    payoffOverride: params.payoffOverride,
+    stableCoverageAvailable: params.stableCoverageAvailable,
+    evidence,
+  };
+}
+
+export function assessBlinkRiskForRunAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+  params: { accessPayoff?: RunnerAccessPayoff; scoreThreat?: boolean } = {},
+): BlinkRiskAssessment | undefined {
+  if (input.side !== "runner" || action.side !== "runner") return undefined;
+  if (action.type !== "start_run") return undefined;
+  const targetServerId = concretePayloadServerId(action);
+  if (!targetServerId) return undefined;
+  const server = input.playerView.servers.find(
+    (candidate) => candidate.id === targetServerId,
+  );
+  if (!server || server.ice.length <= 0) return undefined;
+  const rig = input.playerView.own.rig ?? [];
+  const blinkInstalled = rig.some(isVisibleBlinkCard);
+  if (!blinkInstalled) return undefined;
+
+  const fullPath = assessKnownRezzedIcePath(
+    server.ice,
+    rig,
+    input.playerView.own.credits,
+    server.root,
+  );
+  if (fullPath.assessedKnownIceCount <= 0 || !fullPath.canReachAccess) {
+    return undefined;
+  }
+
+  const stableRig = rig.filter((card) => !isVisibleBlinkCard(card));
+  const stablePath = assessKnownRezzedIcePath(
+    server.ice,
+    stableRig,
+    input.playerView.own.credits,
+    server.root,
+  );
+  const stableCoverageAvailable =
+    stablePath.assessedKnownIceCount > 0 && stablePath.canReachAccess;
+  if (stableCoverageAvailable) return undefined;
+
+  const currentHandCount = input.playerView.own.gripOrHq.length;
+  const handAfterActionCost =
+    currentHandCount - (actionConsumesKnownOwnHandCard(input, action) ? 1 : 0);
+  const visibleSubroutinesLikely = visibleEndRunSubroutineCountForPath(
+    server.ice,
+  );
+  const payoffOverride = blinkRiskPayoffOverride(
+    params.accessPayoff,
+    params.scoreThreat,
+  );
+
+  return buildBlinkRiskAssessment({
+    currentHandCount,
+    handAfterActionCost,
+    blinkUsesLikely: visibleSubroutinesLikely,
+    visibleSubroutinesLikely,
+    payoffOverride,
+    stableCoverageAvailable,
+    context: "run_path",
+    evidence: [
+      `blinkRunTarget:${targetServerId}`,
+      `blinkRiskStablePathReachable:${stablePath.canReachAccess}`,
+      `blinkRiskFullPathReachable:${fullPath.canReachAccess}`,
+      `blinkRiskKnownIceCount:${fullPath.assessedKnownIceCount}`,
+      `blinkRiskPathCost:${fullPath.visibleBreakCost ?? 0}`,
+      ...(params.accessPayoff ? [`blinkRiskAccessPayoff:${params.accessPayoff}`] : []),
+      ...(params.scoreThreat !== undefined
+        ? [`blinkRiskScoreThreat:${params.scoreThreat}`]
+        : []),
+    ],
+  });
+}
+
+export function blinkRiskShouldAvoidRun(
+  assessment: BlinkRiskAssessment | undefined,
+): boolean {
+  if (!assessment || assessment.payoffOverride !== "none") return false;
+  return blinkRiskShouldAvoidRunSeverity(assessment.riskSeverity);
+}
+
+export function blinkRiskScorePenalty(
+  assessment: BlinkRiskAssessment | undefined,
+): number {
+  if (!assessment) return 0;
+  const overrideMultiplier = assessment.payoffOverride === "none" ? 1 : 0.25;
+  switch (assessment.riskSeverity) {
+    case "lethal":
+      return Math.floor(-2400 * overrideMultiplier);
+    case "high":
+      return Math.floor(-1800 * overrideMultiplier);
+    case "medium":
+      return Math.floor(-640 * overrideMultiplier);
+    case "low":
+      return Math.floor(-160 * overrideMultiplier);
+    case "none":
+      return 0;
+  }
+}
+
+type VisibleRigCard = NonNullable<
+  AiDecisionInput["playerView"]["own"]["rig"]
+>[number];
+type VisibleServerIce =
+  AiDecisionInput["playerView"]["servers"][number]["ice"][number];
+
+function isVisibleBlinkCard(card: VisibleRigCard): boolean {
+  return card.known && card.definitionId === BLINK_CARD_ID;
+}
+
+function actionConsumesKnownOwnHandCard(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  return input.playerView.own.gripOrHq.some(
+    (card) => card.known && card.instanceId === action.source,
+  );
+}
+
+function visibleEndRunSubroutineCountForPath(
+  iceCards: readonly VisibleServerIce[],
+): number {
+  const count = iceCards.reduce(
+    (sum, ice) => sum + visibleEndRunSubroutineCountForIce(ice),
+    0,
+  );
+  return Math.max(1, count);
+}
+
+function visibleEndRunSubroutineCountForIce(ice: VisibleServerIce): number {
+  if (!ice.known || ice.rezzed !== true || !ice.definitionId) return 0;
+  const quote = ice.effectiveRunQuote;
+  if (quote && quote.iceDefinitionId === ice.definitionId) {
+    return quote.subroutines.filter((subroutine) =>
+      subroutine.type === "end_the_run" ||
+      subroutine.type === "end_the_run_unless_runner_pays",
+    ).length;
+  }
+  return (
+    DEMO_CARDS_BY_ID[ice.definitionId]?.subroutines?.filter(
+      (subroutine) =>
+        subroutine.type === "end_the_run" ||
+        subroutine.type === "end_the_run_unless_runner_pays",
+    ).length ?? 0
+  );
+}
+
+function blinkRiskPayoffOverride(
+  accessPayoff: RunnerAccessPayoff | undefined,
+  scoreThreat: boolean | undefined,
+): BlinkRiskPayoffOverride {
+  if (accessPayoff === "agenda") return "known_agenda";
+  if (scoreThreat === true || accessPayoff === "score_threat") {
+    return "remote_score_threat";
+  }
+  return "none";
+}
+
+function blinkRiskSeverityFor(params: {
+  handAfterActionCost: number;
+  worstCaseDamageEstimate: number;
+  lethalOnAnyFailure: boolean;
+  lethalOnHighFailure: boolean;
+}): BlinkRiskSeverity {
+  if (params.lethalOnAnyFailure) return "lethal";
+  if (params.lethalOnHighFailure) return "high";
+  if (params.handAfterActionCost < params.worstCaseDamageEstimate) {
+    return "medium";
+  }
+  return params.worstCaseDamageEstimate > 0 ? "low" : "none";
+}
+
+function blinkRiskShouldAvoidRunSeverity(
+  riskSeverity: BlinkRiskSeverity,
+): boolean {
+  return riskSeverity === "lethal" || riskSeverity === "high";
+}
 
 export function buildRunnerEconomyPosture(
   params: EvaluateRunnerRunTargetsParams,
@@ -838,6 +1122,11 @@ function evaluateRunnerRunTarget(
     installedRunPayoff: combinedRunPayoff,
     scoreThreat,
   });
+  const blinkRiskAssessment = assessBlinkRiskForRunAction(
+    params.input,
+    projection.action,
+    { accessPayoff, scoreThreat },
+  );
   const riskyUniversalCoverage = hasRiskyUniversalPressure(params) &&
     (server?.ice.length ?? 0) > 0;
   const basePathPassability = pathPassabilityFor(path);
@@ -859,6 +1148,7 @@ function evaluateRunnerRunTarget(
     economyPosture,
     installedRunPayoff: combinedRunPayoff,
     scoreThreat,
+    ...(blinkRiskAssessment ? { blinkRiskAssessment } : {}),
   });
   const score = scoreRunTargetEvaluation({
     targetKind,
@@ -872,6 +1162,7 @@ function evaluateRunnerRunTarget(
     multiaccessAvailable,
     installedRunPayoffScore: combinedRunPayoff.scoreBonus,
     accessPayoffScoreAdjustment: payoff.scoreAdjustment,
+    ...(blinkRiskAssessment ? { blinkRiskAssessment } : {}),
   });
   const publicProjection = publicRunActionProjection(projection);
   return {
@@ -890,6 +1181,7 @@ function evaluateRunnerRunTarget(
     runActionPayoff,
     runActionProjection: publicProjection,
     riskyUniversalCoverage,
+    ...(blinkRiskAssessment ? { blinkRiskAssessment } : {}),
     scoreThreat,
     recommendation,
     score,
@@ -919,6 +1211,7 @@ function evaluateRunnerRunTarget(
       `run_action_projection_no_noisy_breakers:${projection.noNoisyBreakers}`,
       `run_action_projection_bypass_first_ice:${projection.bypassFirstIce}`,
       `risky_universal_coverage:${riskyUniversalCoverage}`,
+      ...(blinkRiskAssessment?.evidence ?? []),
       `score_threat:${scoreThreat}`,
       `recommendation:${recommendation}`,
       ...economyPosture.creditReservePolicy.evidence.slice(0, 12),
@@ -1659,7 +1952,26 @@ function recommendationForRunTarget(params: {
   economyPosture: RunnerEconomyPosture;
   installedRunPayoff: RunnerInstalledRunPayoff;
   scoreThreat: boolean;
+  blinkRiskAssessment?: BlinkRiskAssessment;
 }): RunnerRunTargetRecommendation {
+  if (blinkRiskShouldAvoidRun(params.blinkRiskAssessment)) {
+    return "do_not_run_now";
+  }
+  if (
+    params.blinkRiskAssessment &&
+    params.blinkRiskAssessment.payoffOverride === "none" &&
+    params.blinkRiskAssessment.riskSeverity === "medium" &&
+    params.knownAccessState === "known_no_current_payoff"
+  ) {
+    return "do_not_run_now";
+  }
+  if (
+    params.blinkRiskAssessment &&
+    params.blinkRiskAssessment.payoffOverride === "none" &&
+    params.blinkRiskAssessment.riskSeverity === "medium"
+  ) {
+    return "setup_first";
+  }
   if (params.pathPassability === "blocked_missing_coverage") {
     return "find_breaker_first";
   }
@@ -1716,6 +2028,7 @@ function scoreRunTargetEvaluation(params: {
   multiaccessAvailable: boolean;
   installedRunPayoffScore: number;
   accessPayoffScoreAdjustment: number;
+  blinkRiskAssessment?: BlinkRiskAssessment;
 }): number {
   const payoffScore = scoreForPayoff(params.accessPayoff);
   const pathPenalty = params.pathPassability === "reachable" ? 0 : -420;
@@ -1725,6 +2038,7 @@ function scoreRunTargetEvaluation(params: {
   const installedRunPayoffBonus = params.installedRunPayoffScore;
   const scoreThreatBonus = params.scoreThreat ? 180 : 0;
   const recommendationScore = recommendationRank(params.recommendation) * 20;
+  const blinkRiskPenalty = blinkRiskScorePenalty(params.blinkRiskAssessment);
   return (
     payoffScore +
     pathPenalty +
@@ -1733,6 +2047,7 @@ function scoreRunTargetEvaluation(params: {
     installedRunPayoffBonus +
     scoreThreatBonus +
     params.accessPayoffScoreAdjustment +
+    blinkRiskPenalty +
     recommendationScore
   );
 }

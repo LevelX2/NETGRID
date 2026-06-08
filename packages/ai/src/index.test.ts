@@ -11348,6 +11348,173 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(assertAiInputIsSideSafe(input)).toBe(true);
   });
 
+  it("blocks a Blink-dependent run with zero hand cards", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = blinkRiskRunInput("ai-blink-risk-zero-hand", {
+      handCards: 0,
+    });
+    const rdRun = blinkRunAction(input, "rd");
+    const drawCard = input.legalActions.find(
+      (action) => action.type === "draw_card",
+    );
+    expect(rdRun).toBeDefined();
+    expect(drawCard).toBeDefined();
+    if (!rdRun || !drawCard) throw new Error("Missing Blink zero-hand actions");
+
+    const scopedInput = scopedLegalActions(input, [rdRun, drawCard]);
+    const decision = chooseRunnerAction(scopedInput, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe(drawCard.actionId);
+    expect(scopedInput.legalActions.map((action) => action.actionId)).toContain(
+      decision.actionId,
+    );
+    const debug = JSON.stringify(decision.decisionDebug);
+    expect(debug).toContain("blink_run_self_net_damage_risk");
+    expect(debug).toContain("blinkRiskSeverity:lethal");
+    expect(debug).toContain("currentHandCount:0");
+    expect(debug).toContain("lethalBlinkFailureRisk:true");
+    expect(debug).toContain(
+      "why_blink_run_blocked:self_net_damage_buffer_too_low",
+    );
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload|corp\.hq|corp\.rd|FullState|C:\\|\/Users\//i,
+    );
+  });
+
+  it.each([
+    { seed: "ai-blink-risk-one-hand-known-low-rd", handCards: 1 },
+    { seed: "ai-blink-risk-two-hand-known-low-rd", handCards: 2 },
+  ])(
+    "blocks a low-value R&D Blink run with a thin hand buffer: $seed",
+    ({ seed, handCards }) => {
+      process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+      const input = blinkRiskRunInput(seed, {
+        handCards,
+        knownLowValueRdTop: true,
+      });
+      const rdRun = blinkRunAction(input, "rd");
+      const gainCredit = input.legalActions.find(
+        (action) => action.type === "gain_credit",
+      );
+      expect(rdRun).toBeDefined();
+      expect(gainCredit).toBeDefined();
+      if (!rdRun || !gainCredit)
+        throw new Error("Missing Blink low-value R&D actions");
+
+      const scopedInput = scopedLegalActions(input, [rdRun, gainCredit]);
+      const decision = chooseRunnerAction(scopedInput, {
+        persistTacticalPlanMemory: false,
+      });
+
+      expect(decision.actionId).toBe(gainCredit.actionId);
+      expect(scopedInput.legalActions.map((action) => action.actionId)).toContain(
+        decision.actionId,
+      );
+      const debug = JSON.stringify(decision.decisionDebug);
+      expect(debug).toContain("blink_run_self_net_damage_risk");
+      expect(debug).toContain(`currentHandCount:${handCards}`);
+      expect(debug).toContain("blinkRiskSeverity:high");
+      expect(debug).toContain("blinkRiskAccessPayoff:known_low_value");
+      expect(debug).toContain("known_access_state:known_no_current_payoff");
+      expect(debug).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+    },
+  );
+
+  it("keeps a three-card unknown R&D Blink run possible with risk evidence", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = blinkRiskRunInput("ai-blink-risk-three-hand-unknown-rd", {
+      handCards: 3,
+    });
+    const rdRun = blinkRunAction(input, "rd");
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(rdRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!rdRun || !gainCredit)
+      throw new Error("Missing Blink three-hand actions");
+
+    const scopedInput = scopedLegalActions(input, [rdRun, gainCredit]);
+    const decision = chooseRunnerAction(scopedInput, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe(rdRun.actionId);
+    const serialized = JSON.stringify(decision);
+    expect(serialized).toContain("blinkRiskApplied:true");
+    expect(serialized).toContain("blinkRiskSeverity:low");
+    expect(serialized).toContain("survivesOneFailedBlinkUse:true");
+    expect(serialized).toContain(
+      "why_blink_run_allowed_despite_risk:hand_buffer",
+    );
+    expect(serialized).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+  });
+
+  it("excludes lethal Blink break actions during encounters", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = blinkRiskEncounterInput("ai-blink-risk-encounter-lethal", {
+      handCards: 0,
+    });
+    const blinkBreak = blinkBreakAction(input);
+    const continueRun = input.legalActions.find(
+      (action) =>
+        action.type === "continue_run" &&
+        action.payload?.encounterContinue === true,
+    );
+    expect(blinkBreak).toBeDefined();
+    expect(continueRun).toBeDefined();
+    if (!blinkBreak || !continueRun)
+      throw new Error("Missing Blink lethal encounter actions");
+
+    const scopedInput = scopedLegalActions(input, [blinkBreak, continueRun]);
+    const decision = chooseRunnerAction(scopedInput, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe(continueRun.actionId);
+    const debug = JSON.stringify(decision.decisionDebug);
+    expect(debug).toContain("blink_break_self_net_damage_risk");
+    expect(debug).toContain("blinkRiskContext:encounter_break");
+    expect(debug).toContain("blinkRiskSeverity:lethal");
+    expect(debug).toContain(
+      "why_blink_break_blocked:self_net_damage_buffer_too_low",
+    );
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload|corp\.hq|corp\.rd|FullState|C:\\|\/Users\//i,
+    );
+  });
+
+  it("prefers a stable legal breaker over Blink for the same subroutine", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = blinkRiskEncounterInput("ai-blink-risk-stable-breaker", {
+      handCards: 3,
+      stableBreaker: true,
+    });
+    const blinkBreak = blinkBreakAction(input);
+    const stableBreak = input.legalActions.find(
+      (action) =>
+        action.type === "break_subroutine" &&
+        sourceDefinitionFromInput(input, action) === "efficient_fracter",
+    );
+    expect(blinkBreak).toBeDefined();
+    expect(stableBreak).toBeDefined();
+    if (!blinkBreak || !stableBreak)
+      throw new Error("Missing Blink stable-breaker actions");
+
+    const scopedInput = scopedLegalActions(input, [blinkBreak, stableBreak]);
+    const decision = chooseRunnerAction(scopedInput, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe(stableBreak.actionId);
+    const debug = JSON.stringify(decision.decisionDebug);
+    expect(debug).toContain("blink_break_stable_alternative_available");
+    expect(debug).toContain("why_blink_break_blocked:stable_breaker_available");
+    expect(debug).not.toMatch(/cardInstances|privatePayload|fullGameState/i);
+  });
+
   it.each([
     { seed: "ai-faked-hit-self-damage-empty-hand", extraHandCards: 0 as const },
     {
@@ -25880,6 +26047,164 @@ function fakedHitSelfDamageInput(
     decisionId: `${seed}:faked-hit-guard`,
     actionNumber: 1,
   });
+}
+
+function blinkRiskRunInput(
+  seed: string,
+  options: {
+    handCards: number;
+    knownLowValueRdTop?: boolean;
+    stableBreaker?: boolean;
+  },
+): ReturnType<typeof buildAiDecisionInput> {
+  const state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      ...blinkRiskDeckConfig(seed),
+      agendaPointsToWin: 7,
+    }),
+  );
+  emptyRunnerGripForTest(state);
+  moveRunnerProgramToRig(state, "onr_v1_007_blink");
+  if (options.stableBreaker) moveRunnerProgramToRig(state, "efficient_fracter");
+  addRunnerGripCardsForBlinkRisk(state, options.handCards);
+  state.runner.credits = 8;
+  state.runner.clicks = 4;
+  state.corp.credits = 8;
+  const iceId = putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+  state.cardInstances[iceId] = {
+    ...state.cardInstances[iceId]!,
+    faceup: true,
+    rezzed: true,
+  };
+  if (options.knownLowValueRdTop) {
+    putCorpCardOnTopOfRd(state, "simple_economy_operation");
+  }
+
+  return buildAiDecisionInput(state, "runner", {
+    difficulty: "normal",
+    profileId: "runner-ai-v1.4.2-normal",
+    decisionId: `${seed}:blink-risk-run`,
+    actionNumber: 1,
+    eventTail: options.knownLowValueRdTop
+      ? [
+          syntheticRndPrivateLookEvent(
+            `${seed}:known-low-rd-top`,
+            state.stateVersion + 1,
+            ["simple_economy_operation"],
+          ),
+        ]
+      : [],
+  });
+}
+
+function blinkRiskEncounterInput(
+  seed: string,
+  options: {
+    handCards: number;
+    stableBreaker?: boolean;
+  },
+): ReturnType<typeof buildAiDecisionInput> {
+  let state = toRunnerTurn(
+    createGameAfterSetup({
+      seed,
+      ...blinkRiskDeckConfig(seed),
+      agendaPointsToWin: 7,
+    }),
+  );
+  emptyRunnerGripForTest(state);
+  moveRunnerProgramToRig(state, "onr_v1_007_blink");
+  if (options.stableBreaker) moveRunnerProgramToRig(state, "efficient_fracter");
+  addRunnerGripCardsForBlinkRisk(state, options.handCards);
+  state.runner.credits = 8;
+  state.runner.clicks = 4;
+  state.corp.credits = 8;
+  putCorpIceOnServer(state, "rd", "simple_barrier_ice");
+  state = apply(
+    state,
+    "runner",
+    (action) => action.type === "start_run" && action.payload?.serverId === "rd",
+  );
+  state = apply(
+    state,
+    "corp",
+    (action) =>
+      action.type === "rez_ice" &&
+      sourceDefinition(state, action) === "simple_barrier_ice",
+  );
+
+  return buildAiDecisionInput(state, "runner", {
+    difficulty: "normal",
+    profileId: "runner-ai-v1.4.2-normal",
+    decisionId: `${seed}:blink-risk-encounter`,
+    actionNumber: 2,
+  });
+}
+
+function blinkRiskDeckConfig(seed: string): CreateGameConfig {
+  return {
+    runnerDeck: {
+      id: `${seed}_blink_runner`,
+      name: "AI Blink Risk Runner",
+      side: "runner",
+      identity: "runner_identity_001",
+      cards: [
+        { id: "onr_v1_007_blink", quantity: 1 },
+        { id: "efficient_fracter", quantity: 1 },
+        { id: "simple_economy_event", quantity: 8 },
+        { id: "simple_run_event", quantity: 8 },
+      ],
+    },
+    corpDeck: {
+      id: `${seed}_blink_corp`,
+      name: "AI Blink Risk Corp",
+      side: "corp",
+      identity: "corp_identity_001",
+      cards: [
+        { id: "simple_agenda", quantity: 6 },
+        { id: "simple_barrier_ice", quantity: 4 },
+        { id: "simple_economy_operation", quantity: 8 },
+      ],
+    },
+  };
+}
+
+function addRunnerGripCardsForBlinkRisk(
+  state: GameState,
+  count: number,
+): void {
+  const moved: CardInstanceId[] = [];
+  const sequence = ["simple_economy_event", "simple_run_event"] as const;
+  for (let index = 0; index < count; index += 1) {
+    const definitionId = sequence[index % sequence.length] ?? sequence[0];
+    moved.push(
+      moveRunnerCardCopyToGrip(
+        state,
+        definitionId,
+        moved,
+      ),
+    );
+  }
+}
+
+function blinkRunAction(
+  input: ReturnType<typeof buildAiDecisionInput>,
+  serverId: string,
+): LegalAction | undefined {
+  return input.legalActions.find(
+    (action) =>
+      action.type === "start_run" && action.payload?.serverId === serverId,
+  );
+}
+
+function blinkBreakAction(
+  input: ReturnType<typeof buildAiDecisionInput>,
+): LegalAction | undefined {
+  return input.legalActions.find(
+    (action) =>
+      action.type === "break_subroutine" &&
+      sourceDefinitionFromInput(input, action) === "onr_v1_007_blink",
+  );
 }
 
 function fakedHitAction(

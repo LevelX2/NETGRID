@@ -1,19 +1,25 @@
 ---
 activityId: act-2026-06-08-blink-self-net-damage-risk-assessment
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-08
-startedAt:
-completedAt:
-branch:
+startedAt: 2026-06-08
+completedAt: 2026-06-08
+branch: main
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/runner-run-target-evaluation.ts
+  - packages/ai/src/index.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "Blink"
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - git diff --check
 ---
 
 # Blink Self-Net-Damage Risk Assessment
@@ -77,16 +83,16 @@ Die Runner-KI bewertet `Blink` nicht mehr wie sichere Universal-Coverage, sonder
 
 ## Akzeptanzkriterien
 
-- [ ] Die KI behandelt `Blink` nicht mehr als sichere Universal-Coverage, wenn ein Run-Pfad realistisch Blink-Breaks benötigt.
-- [ ] Bei `Blink` installiert, 0 Handkarten und Run-Pfad erfordert Blink: Die KI startet den Run nicht oder wählt im Encounter keine tödlich riskante Blink-Break-Action.
-- [ ] Bei `Blink` installiert, 1 Handkarte und Low-Value-HQ-/R&D-Ziel: Die KI wählt keinen riskanten Blink-Run.
-- [ ] Bei `Blink` installiert, 2 Handkarten und bekannt niedrigem Payoff-Ziel: Die KI wählt keinen riskanten Blink-Run.
-- [ ] Bei `Blink` installiert, mindestens 3 Handkarten und plausiblem unbekanntem oder hohem Payoff: Ein Blink-Run bleibt möglich, aber mit sichtbarer Risiko-Evidence.
-- [ ] Bei Remote Score Threat, bekannter Agenda oder Immediate-Win-Situation kann ein riskanter Blink-Run nur begründet zugelassen werden; Debug/Evidence erklärt den Override.
-- [ ] Wenn eine stabile Breaker-Alternative vorhanden und bezahlbar ist, bevorzugt die KI stabile Coverage gegenüber riskantem Blink.
-- [ ] Encounter-`break_subroutine`-LegalActions mit Blink werden bei lethal failure risk hart ausgeschlossen oder extrem abgewertet, solange kein Immediate-Win-/Notfallgrund besteht.
-- [ ] Die finale Action bleibt immer aus `input.legalActions`.
-- [ ] Hidden-Info-, Redaction-, Replay- und StateHash-Grenzen bleiben unverändert.
+- [x] Die KI behandelt `Blink` nicht mehr als sichere Universal-Coverage, wenn ein Run-Pfad realistisch Blink-Breaks benötigt.
+- [x] Bei `Blink` installiert, 0 Handkarten und Run-Pfad erfordert Blink: Die KI startet den Run nicht oder wählt im Encounter keine tödlich riskante Blink-Break-Action.
+- [x] Bei `Blink` installiert, 1 Handkarte und Low-Value-HQ-/R&D-Ziel: Die KI wählt keinen riskanten Blink-Run.
+- [x] Bei `Blink` installiert, 2 Handkarten und bekannt niedrigem Payoff-Ziel: Die KI wählt keinen riskanten Blink-Run.
+- [x] Bei `Blink` installiert, mindestens 3 Handkarten und plausiblem unbekanntem oder hohem Payoff: Ein Blink-Run bleibt möglich, aber mit sichtbarer Risiko-Evidence.
+- [x] Bei Remote Score Threat, bekannter Agenda oder Immediate-Win-Situation kann ein riskanter Blink-Run nur begründet zugelassen werden; Debug/Evidence erklärt den Override.
+- [x] Wenn eine stabile Breaker-Alternative vorhanden und bezahlbar ist, bevorzugt die KI stabile Coverage gegenüber riskantem Blink.
+- [x] Encounter-`break_subroutine`-LegalActions mit Blink werden bei lethal failure risk hart ausgeschlossen oder extrem abgewertet, solange kein Immediate-Win-/Notfallgrund besteht.
+- [x] Die finale Action bleibt immer aus `input.legalActions`.
+- [x] Hidden-Info-, Redaction-, Replay- und StateHash-Grenzen bleiben unverändert.
 
 ## Umsetzungshinweise
 
@@ -113,4 +119,4 @@ Die Runner-KI bewertet `Blink` nicht mehr wie sichere Universal-Coverage, sonder
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. `RunnerRunTargetEvaluation` berechnet ein side-sicheres `BlinkRiskAssessment` für sichtbare Blink-abhängige Pfade, blockiert Runs ohne Payoff-Override bei tödlichem oder hohem Handpuffer-Risiko und hält 3+-Hand-Runs mit Risiko-Evidence möglich. Die semantische Runtime schließt riskante Blink-Break-Actions im Encounter aus und bevorzugt stabile legale Breaker-Alternativen. Keine Engine-, LegalAction-, Replay-, StateHash- oder Public-View-Änderungen.

@@ -62,8 +62,14 @@ import {
   type RunnerStrategicIntentProfile,
 } from "./runner-strategic-intent";
 import {
+  BLINK_CARD_ID,
+  assessBlinkRiskForRunAction,
+  blinkRiskShouldAvoidRun,
+  buildBlinkRiskAssessment,
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,
+  type BlinkRiskAssessment,
+  type BlinkRiskPayoffOverride,
   type RunnerRunTargetEvaluation,
 } from "./runner-run-target-evaluation";
 import { evaluateRunnerHandDevelopment } from "./runner-hand-development";
@@ -4854,6 +4860,11 @@ function semanticRuntimeActionExclusion(
     semanticRuntimeRunnerMultiRunEventExclusion(input, action);
   if (multiRunEventExclusion) return multiRunEventExclusion;
   if (input.side !== "runner" || action.type !== "start_run") return undefined;
+  const blinkRunExclusion = semanticRuntimeRunnerBlinkRunExclusion(
+    input,
+    action,
+  );
+  if (blinkRunExclusion) return blinkRunExclusion;
   const serverId = semanticRuntimeServerId(action);
   const knownCentralPayoffExclusion =
     semanticRuntimeKnownCentralPayoffExclusion(input, serverId);
@@ -4906,6 +4917,34 @@ function semanticRuntimeRunnerSelfDamageSurvivalExclusion(
   };
 }
 
+function semanticRuntimeRunnerBlinkRunExclusion(
+  input: AiDecisionInput,
+  action: LegalAction,
+): SemanticRuntimeExclusion | undefined {
+  if (input.side !== "runner" || action.type !== "start_run") {
+    return undefined;
+  }
+  const targetServerId = semanticRuntimeServerId(action);
+  if (!targetServerId) return undefined;
+  const evaluation = runnerMultiRunTargetEvaluation(
+    input,
+    action,
+    targetServerId,
+  );
+  const assessment =
+    evaluation?.blinkRiskAssessment ?? assessBlinkRiskForRunAction(input, action);
+  if (!blinkRiskShouldAvoidRun(assessment)) return undefined;
+  return {
+    key: "blink_run_self_net_damage_risk",
+    label: "Blink-Run mit Self-Net-Damage-Risiko",
+    reason: sortedUnique([
+      ...(assessment?.evidence ?? []),
+      ...(evaluation?.evidence.slice(0, 16) ?? []),
+      "why_blink_run_blocked:self_net_damage_buffer_too_low",
+    ]).join("|"),
+  };
+}
+
 function semanticRuntimeRunnerProgramSacrificeExclusion(
   input: AiDecisionInput,
   action: LegalAction,
@@ -4949,6 +4988,11 @@ function semanticRuntimeRunnerEncounterActionExclusion(
     };
   }
   if (action.type === "break_subroutine") {
+    const blinkExclusion = semanticRuntimeRunnerBlinkBreakExclusion(
+      input,
+      action,
+    );
+    if (blinkExclusion) return blinkExclusion;
     const assessment = breakAccessPathAssessment(input, action);
     if (assessment.canPreserveAccessPath) return undefined;
     const remotePayoffBlocked = assessment.evidence.includes(
@@ -4973,6 +5017,150 @@ function semanticRuntimeRunnerEncounterActionExclusion(
 type VisibleEncounterSubroutine = NonNullable<
   NonNullable<VisibleCard["effectiveRunQuote"]>["subroutines"][number]
 >;
+
+function semanticRuntimeRunnerBlinkBreakExclusion(
+  input: AiDecisionInput,
+  action: LegalAction,
+): SemanticRuntimeExclusion | undefined {
+  const assessment = blinkRiskAssessmentForEncounterBreak(input, action);
+  if (!assessment) return undefined;
+  if (assessment.stableCoverageAvailable) {
+    return {
+      key: "blink_break_stable_alternative_available",
+      label: "Stabiler Breaker statt Blink",
+      reason: sortedUnique([
+        ...assessment.evidence,
+        "why_blink_break_blocked:stable_breaker_available",
+      ]).join("|"),
+    };
+  }
+  if (!blinkRiskShouldAvoidRun(assessment)) return undefined;
+  return {
+    key: "blink_break_self_net_damage_risk",
+    label: "Blink-Break mit Self-Net-Damage-Risiko",
+    reason: sortedUnique([
+      ...assessment.evidence,
+      "why_blink_break_blocked:self_net_damage_buffer_too_low",
+    ]).join("|"),
+  };
+}
+
+function blinkRiskAssessmentForEncounterBreak(
+  input: AiDecisionInput,
+  action: LegalAction,
+): BlinkRiskAssessment | undefined {
+  if (input.side !== "runner" || action.type !== "break_subroutine") {
+    return undefined;
+  }
+  if (sourceDefinitionIdForAction(input, action) !== BLINK_CARD_ID) {
+    return undefined;
+  }
+  const breakIndexes = breakSubroutineIndexesForAction(action);
+  const quote = currentEncounteredIceCard(input)?.effectiveRunQuote;
+  const targetSubroutines = [...breakIndexes]
+    .map((index) => quote?.subroutines[index])
+    .filter((subroutine): subroutine is NonNullable<typeof subroutine> =>
+      Boolean(subroutine),
+    );
+  const currentHandCount = input.playerView.own.gripOrHq.length;
+  const visibleSubroutinesLikely = Math.max(
+    1,
+    breakIndexes.size || targetSubroutines.length,
+  );
+  const stableCoverageAvailable = stableBreakAlternativeForBlinkAction(
+    input,
+    action,
+  );
+  const payoffOverride = blinkEncounterPayoffOverride(
+    input,
+    targetSubroutines,
+  );
+
+  return buildBlinkRiskAssessment({
+    currentHandCount,
+    handAfterActionCost: currentHandCount,
+    blinkUsesLikely: visibleSubroutinesLikely,
+    visibleSubroutinesLikely,
+    payoffOverride,
+    stableCoverageAvailable,
+    context: "encounter_break",
+    evidence: [
+      "blinkBreakAction:true",
+      `blinkBreakSubroutineCount:${visibleSubroutinesLikely}`,
+      `blinkBreakStableAlternative:${stableCoverageAvailable}`,
+      `blinkBreakPayoffOverride:${payoffOverride}`,
+      ...(input.playerView.run?.position?.serverId
+        ? [`blinkBreakServer:${input.playerView.run.position.serverId}`]
+        : []),
+    ],
+  });
+}
+
+function stableBreakAlternativeForBlinkAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  const targetIceId =
+    typeof action.payload?.iceId === "string" ? action.payload.iceId : "";
+  const targetIndexes = breakSubroutineIndexesForAction(action);
+  return input.legalActions.some((candidate) => {
+    if (
+      candidate.actionId === action.actionId ||
+      candidate.type !== "break_subroutine" ||
+      sourceDefinitionIdForAction(input, candidate) === BLINK_CARD_ID
+    ) {
+      return false;
+    }
+    if (
+      targetIceId &&
+      typeof candidate.payload?.iceId === "string" &&
+      candidate.payload.iceId !== targetIceId
+    ) {
+      return false;
+    }
+    const candidateIndexes = breakSubroutineIndexesForAction(candidate);
+    if (targetIndexes.size === 0 || candidateIndexes.size === 0) return true;
+    return [...targetIndexes].some((index) => candidateIndexes.has(index));
+  });
+}
+
+function blinkEncounterPayoffOverride(
+  input: AiDecisionInput,
+  targetSubroutines: VisibleEncounterSubroutine[],
+): BlinkRiskPayoffOverride {
+  if (targetSubroutines.some(isImmediateSafetyThreatSubroutine)) {
+    return "survival";
+  }
+  const run = input.playerView.run;
+  const server =
+    run?.position?.kind === "ice"
+      ? input.playerView.servers.find(
+          (candidate) => candidate.id === run.position?.serverId,
+        )
+      : undefined;
+  if (!server || !isRemoteServerTarget(server.id)) return "none";
+  if (server.root.some(visibleRootIsKnownAgenda)) return "known_agenda";
+  if (
+    server.root.some(
+      (card) => card.known && (card.advancementCounters ?? 0) > 0,
+    )
+  ) {
+    return "remote_score_threat";
+  }
+  return "none";
+}
+
+function visibleRootIsKnownAgenda(
+  card: AiDecisionInput["playerView"]["servers"][number]["root"][number],
+): boolean {
+  const definitionId = card.definitionId;
+  return (
+    card.known &&
+    (card.type === "agenda" ||
+      (definitionId !== undefined &&
+        definitionTypeForMetrics(definitionId) === "agenda"))
+  );
+}
 
 function breakAccessPathAssessment(
   input: AiDecisionInput,
@@ -5798,6 +5986,7 @@ function semanticRuntimeRunnerRunTargetGuidanceComponent(
       `known_access:${evaluation.knownAccessState}`,
       `path:${evaluation.pathPassability}`,
       `credits_after:${evaluation.creditsAfterRun}`,
+      ...(evaluation.blinkRiskAssessment?.evidence.slice(0, 14) ?? []),
     ].join("|"),
   };
 }
@@ -6863,19 +7052,26 @@ function semanticRuntimeRunnerEvidence(
   );
   const selfDamageSurvivalEvidence =
     runnerSelfDamageSurvivalAssessment(input, action)?.evidence ?? [];
+  const blinkRiskEvidence = runnerBlinkRiskEvidenceForAction(input, action);
   if (sacrificeAssessment?.memoryRequired) {
     return [
       `program_sacrifice_penalty:${runnerProgramInstallDisplacementPenalty(sacrificeAssessment)}`,
       ...sacrificeAssessment.evidence,
       ...actionMuPressureEvidence,
       ...selfDamageSurvivalEvidence,
+      ...blinkRiskEvidence,
     ];
   }
   if (
     actionMuPressureEvidence.length > 0 ||
-    selfDamageSurvivalEvidence.length > 0
+    selfDamageSurvivalEvidence.length > 0 ||
+    blinkRiskEvidence.length > 0
   )
-    return [...actionMuPressureEvidence, ...selfDamageSurvivalEvidence];
+    return [
+      ...actionMuPressureEvidence,
+      ...selfDamageSurvivalEvidence,
+      ...blinkRiskEvidence,
+    ];
   if (
     action.type !== "trash_accessed_card" &&
     action.type !== "decline_trash"
@@ -6883,6 +7079,28 @@ function semanticRuntimeRunnerEvidence(
     return [];
   }
   return runnerRemoteTrashAccessContext(input, action).evidence;
+}
+
+function runnerBlinkRiskEvidenceForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): string[] {
+  if (input.side !== "runner") return [];
+  if (action.type === "start_run") {
+    const targetServerId = semanticRuntimeServerId(action);
+    if (!targetServerId) return [];
+    const evaluation = runnerMultiRunTargetEvaluation(
+      input,
+      action,
+      targetServerId,
+    );
+    return (
+      evaluation?.blinkRiskAssessment?.evidence ??
+      assessBlinkRiskForRunAction(input, action)?.evidence ??
+      []
+    );
+  }
+  return blinkRiskAssessmentForEncounterBreak(input, action)?.evidence ?? [];
 }
 
 function runnerSelfDamageGuardedDecision(
