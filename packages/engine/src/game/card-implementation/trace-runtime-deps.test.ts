@@ -130,6 +130,8 @@ function host(): TraceRuntimeDepsHost {
         },
         callbacks: {
           sanitizeId: (value) => value.replace(/[^a-zA-Z0-9_.-]/g, "_"),
+          addHackerTrackerTraceCounters: () => 0,
+          resolveTraceTrashRunnerResourceSuccess: () => ({}),
         },
         constants: {
           PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID: "paris" as CardDefinitionId,

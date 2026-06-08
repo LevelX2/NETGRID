@@ -192,6 +192,7 @@ import {
   continueRunThroughMovement,
   continueRunThroughMovementWindow,
   enterEncounterFromMovementWindow,
+  passCorpApproachRezWindowIfOpen,
   traceChoiceOptionIdForDefinition,
   addCorpCardToHqForTest,
   addRezzedCorpRootForTest,
@@ -3746,6 +3747,7 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
         action.type === "rez_ice" &&
         sourceDefinition(state, action) === "simple_barrier_ice",
     );
+    state = passCorpApproachRezWindowIfOpen(state);
     state = apply(
       state,
       "runner",

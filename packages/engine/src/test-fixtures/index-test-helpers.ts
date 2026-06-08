@@ -6,6 +6,7 @@ import {
   type GameState,
   type ServerId,
 } from "@netgrid/shared";
+import { getLegalActions } from "../index";
 import { apply } from "./mechanic-smoke-fixtures";
 
 export function expectCurrentRulesBaseline(state: Pick<GameState, "baseline">): void {
@@ -34,6 +35,22 @@ export function enterEncounterFromMovementWindow(state: GameState): GameState {
   if (state.timingPoint !== "run.jack_out_window" || state.run?.phase !== "movement")
     return state;
   return continueRunAction(state);
+}
+
+export function passCorpApproachRezWindowIfOpen(state: GameState): GameState {
+  if (
+    state.timingPoint !== "run.approach_ice" ||
+    state.activeSide !== "corp" ||
+    state.run?.phase !== "approach_ice"
+  )
+    return state;
+  const approachedIceId = state.run.approachedIceId;
+  if (!approachedIceId || !state.cardInstances[approachedIceId]?.rezzed)
+    return state;
+  const legalActions = getLegalActions(state, "corp");
+  const passAction = legalActions.find((action) => action.type === "decline_rez");
+  if (!passAction) return state;
+  return apply(state, "corp", (action) => action.actionId === passAction.actionId);
 }
 
 export function traceChoiceOptionIdForDefinition(
@@ -158,4 +175,3 @@ export function addInstalledRunnerProgramForTest(
   };
   return cardId;
 }
-

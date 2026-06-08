@@ -192,6 +192,7 @@ import {
   continueRunThroughMovement,
   continueRunThroughMovementWindow,
   enterEncounterFromMovementWindow,
+  passCorpApproachRezWindowIfOpen,
   traceChoiceOptionIdForDefinition,
   addCorpCardToHqForTest,
   addRezzedCorpRootForTest,
@@ -2267,6 +2268,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
           action.payload?.serverId === targetServerId,
       );
       state = apply(state, "corp", (action) => action.type === "rez_ice");
+      state = passCorpApproachRezWindowIfOpen(state);
       state = apply(
         state,
         "runner",

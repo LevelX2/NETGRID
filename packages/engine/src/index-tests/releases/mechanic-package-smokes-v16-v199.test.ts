@@ -192,6 +192,7 @@ import {
   continueRunThroughMovement,
   continueRunThroughMovementWindow,
   enterEncounterFromMovementWindow,
+  passCorpApproachRezWindowIfOpen,
   traceChoiceOptionIdForDefinition,
   addCorpCardToHqForTest,
   addRezzedCorpRootForTest,
@@ -1489,7 +1490,9 @@ describe("V1.6.2 Mechanikpaket B", () => {
           action.type === "start_run" && action.payload?.serverId === serverId,
       );
       return enterEncounterFromMovementWindow(
-        apply(state, "corp", (action) => action.type === "rez_ice"),
+        passCorpApproachRezWindowIfOpen(
+          apply(state, "corp", (action) => action.type === "rez_ice"),
+        ),
       );
     };
 
@@ -2018,7 +2021,9 @@ describe("V1.6.2 Mechanikpaket B", () => {
           action.payload?.serverId === targetServerId,
       );
       return enterEncounterFromMovementWindow(
-        apply(state, "corp", (action) => action.type === "rez_ice"),
+        passCorpApproachRezWindowIfOpen(
+          apply(state, "corp", (action) => action.type === "rez_ice"),
+        ),
       );
     };
     const pumpAndBreakPrinted = (state: GameState): GameState => {

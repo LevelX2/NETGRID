@@ -192,6 +192,7 @@ import {
   continueRunThroughMovement,
   continueRunThroughMovementWindow,
   enterEncounterFromMovementWindow,
+  passCorpApproachRezWindowIfOpen,
   traceChoiceOptionIdForDefinition,
   addCorpCardToHqForTest,
   addRezzedCorpRootForTest,
@@ -2877,10 +2878,12 @@ describe("V1.9.20 Global Modifier/Special-State WIP", () => {
       "corp",
       (action) => action.type === "rez_ice",
     );
-    const unrezzedGridAfterRez = apply(
-      unrezzedGrid,
-      "corp",
-      (action) => action.actionId === unrezzedGridRez.actionId,
+    const unrezzedGridAfterRez = passCorpApproachRezWindowIfOpen(
+      apply(
+        unrezzedGrid,
+        "corp",
+        (action) => action.actionId === unrezzedGridRez.actionId,
+      ),
     );
     expect(
       getPlayerView(unrezzedGridAfterRez, "runner").run?.encounteredIce

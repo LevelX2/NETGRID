@@ -36,6 +36,10 @@ export type RezCardHost = {
       cardId: CardInstanceId,
       legalAction?: LegalAction,
     ) => void;
+    handlePostIceRezContinuation?: (
+      cardId: CardInstanceId,
+      legalAction?: LegalAction,
+    ) => boolean;
     beginEncounter: (
       cardId: CardInstanceId,
       legalAction?: LegalAction,
@@ -228,6 +232,8 @@ export function rezCard(
     host.run.handleRunRootRezPostRez(cardId, legalAction);
     return;
   }
+  if (host.run.handlePostIceRezContinuation?.(cardId, legalAction))
+    return;
   host.run.beginEncounter(cardId, legalAction);
 }
 

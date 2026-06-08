@@ -413,6 +413,7 @@ import { type CounterLifecycleRuntimeDepsHost } from "../card-implementation/cou
 import { type TraceRuntimeDepsHost } from "../card-implementation/trace-runtime-deps";
 import {
   beginEncounter,
+  continueAfterCorpRootRezIfWindowIsComplete,
   isApproachIceExposeViewingWindowOpen,
   isApproachIceExposeWindowOpen,
   resolveApproachIceExposeAbility,
@@ -424,6 +425,7 @@ import {
 import {
   buildCorpApproachActions,
   buildCorpRunRootRezWindowActions,
+  corpRunRootRezActionsAvailable,
   corpRunRootRezWindowKey,
   handleRunRootRezPostRez,
   isCorpRunRootRezWindowOpen,
@@ -929,6 +931,20 @@ export function createCardLifecycleRuntimeHosts(
             cardId,
             legalAction,
           ),
+        handlePostIceRezContinuation: (cardId, legalAction) => {
+          const continuation = continueAfterCorpRootRezIfWindowIsComplete(
+            encounterEntryHostForState(state),
+            legalAction,
+          );
+          if (continuation.handled) return true;
+          const run = state.run;
+          return Boolean(
+            state.timingPoint === "run.approach_ice" &&
+              run?.phase === "approach_ice" &&
+              run.approachedIceId === cardId &&
+              corpRunRootRezActionsAvailable(runRezWindowHostForState(state)),
+          );
+        },
         beginEncounter: (cardId, legalAction) =>
           beginEncounter(
             encounterEntryHostForState(state),

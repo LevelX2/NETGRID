@@ -2568,6 +2568,119 @@ describe("MVP 0.1 runs, access and scoring", () => {
     expect(replay.actualFinalStateHash).toBe(hashState(state));
   });
 
+  it("keeps root rez options open after rezzing approached ICE", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "ice-rez-before-root-rez",
+        runnerDeck: ONR_V1_RUNNER_DECK,
+        corpDeck: {
+          ...ONR_V1_CORP_DECK,
+          cards: [
+            { id: "onr_v1_230_cortical-scanner", quantity: 1 },
+            { id: "onr_v1_350_antiquated-interface-routines", quantity: 1 },
+            ...ONR_V1_CORP_DECK.cards.filter(
+              (card) =>
+                card.id !== "onr_v1_230_cortical-scanner" &&
+                card.id !== "onr_v1_350_antiquated-interface-routines",
+            ),
+          ],
+        },
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.corp.credits = 23;
+    state.runner.credits = 10;
+    const antiquatedId = putCorpRootInRemote(
+      state,
+      "onr_v1_350_antiquated-interface-routines",
+    );
+    const scannerId = putCorpIceOnServer(
+      state,
+      "remote_1",
+      "onr_v1_230_cortical-scanner",
+    );
+    const initial = structuredClone(state);
+    const replayStart = state.eventLog.length;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+
+    expect(state.timingPoint).toBe("run.approach_ice");
+    expect(state.activeSide).toBe("corp");
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "rez_ice" &&
+          action.payload?.cardId === scannerId &&
+          action.payload?.rootRez !== true,
+      ),
+    ).toBe(true);
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "rez_ice" &&
+          action.payload?.cardId === antiquatedId &&
+          action.payload?.rootRez === true,
+      ),
+    ).toBe(true);
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        action.payload?.cardId === scannerId &&
+        action.payload?.rootRez !== true,
+    );
+
+    expect(state.cardInstances[scannerId]?.rezzed).toBe(true);
+    expect(state.corp.credits).toBe(16);
+    expect(state.timingPoint).toBe("run.approach_ice");
+    expect(state.activeSide).toBe("corp");
+    expect(state.run).toMatchObject({
+      phase: "approach_ice",
+      approachedIceId: scannerId,
+    });
+    expect(getLegalActions(state, "runner")).toEqual([]);
+    expect(JSON.stringify(getPlayerView(state, "runner"))).not.toContain(
+      "Antiquated Interface Routines",
+    );
+    expect(
+      getLegalActions(state, "corp").some(
+        (action) =>
+          action.type === "rez_ice" &&
+          action.payload?.cardId === antiquatedId &&
+          action.payload?.rootRez === true,
+      ),
+    ).toBe(true);
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        action.payload?.cardId === antiquatedId &&
+        action.payload?.rootRez === true,
+    );
+
+    expect(state.cardInstances[antiquatedId]?.rezzed).toBe(true);
+    expect(state.timingPoint).toBe("run.encounter_ice");
+    expect(state.activeSide).toBe("runner");
+    expect(state.run).toMatchObject({
+      phase: "encounter_ice",
+      encounteredIceId: scannerId,
+    });
+    expect(validateGameState(state).ok).toBe(true);
+
+    const replay = replayEvents(initial, state.eventLog.slice(replayStart));
+    expect(replay.ok).toBe(true);
+    expect(replay.actualFinalStateHash).toBe(hashState(state));
+  });
+
   it("continues directly into a rezzed ICE encounter after the last run root rez", () => {
     let state = createGameAfterSetup({
       seed: "root-rez-tesseract-before-rezzed-crystal-wall",
