@@ -102,6 +102,17 @@ import {
 } from "./action-semantic-candidate";
 import { evaluateKnownCentralAccessPayoff } from "./known-central-access-payoff";
 import {
+  FORBIDDEN_AI_INPUT_FIELDS,
+  buildAiDecisionInput,
+  selectAiDecisionSideForState,
+  type AiDecisionInputWithDeckCapabilities,
+  type AiDecisionSideSelection,
+} from "./runtime/ai-decision-input";
+import {
+  chooseAiActionFromSides,
+  type AiDecisionRuntimeOptions,
+} from "./runtime/choose-ai-action";
+import {
   evaluateTacticalPlans,
   getTacticalPlanMemorySnapshot,
   mapPlanStepToLegalActions,
@@ -153,6 +164,11 @@ export {
   AI_DECISION_INPUT_TOP_LEVEL_FIELDS,
   buildAiDecisionInputDto,
 } from "./input-dto";
+export {
+  buildAiDecisionInput,
+  selectAiDecisionSideForState,
+} from "./runtime/ai-decision-input";
+export type { AiDecisionSideSelection } from "./runtime/ai-decision-input";
 
 export {
   chooseCorpPlanAction,
@@ -3204,150 +3220,14 @@ type CorpTagPunishSkipReason =
   | "unknown_higher_priority"
   | "unknown";
 
-export type AiDecisionSideSelection =
-  | {
-      side: Side;
-      legalActions: LegalAction[];
-      activeSideLegalActions: LegalAction[];
-      inactiveSideLegalActions: LegalAction[];
-      terminal: false;
-    }
-  | {
-      side: undefined;
-      legalActions: [];
-      activeSideLegalActions: LegalAction[];
-      inactiveSideLegalActions: LegalAction[];
-      terminal: boolean;
-      error?: string;
-    };
-
-const FORBIDDEN_AI_INPUT_FIELDS = [
-  "cardInstances",
-  "privatePayload",
-  "sessionToken",
-  "reconnectToken",
-  "joinToken",
-  "tokenHash",
-  "fullGameState",
-];
-
-export function buildAiDecisionInput(
-  state: GameState,
-  side: Side,
-  options: {
-    difficulty?: AiDifficulty;
-    decisionId?: string;
-    actionNumber?: number;
-    profileId?: string;
-    eventTail?: PublicGameEvent[];
-    ownDeckSnapshot?: AiDeckDoctrineDeckSnapshot;
-    ownDeckDoctrine?: AiDeckDoctrineProfile;
-  } = {},
-): AiDecisionInput {
-  const playerView = getPlayerView(state, side);
-  const legalActions = getLegalActions(state, side);
-  const ownDeckDoctrine =
-    options.ownDeckDoctrine ??
-    (options.ownDeckSnapshot
-      ? buildDeckDoctrineProfile(options.ownDeckSnapshot)
-      : undefined);
-  const input = buildAiDecisionInputDto({
-    side,
-    playerView,
-    eventTail: options.eventTail ?? playerView.publicEvents,
-    legalActions,
-    difficulty: options.difficulty ?? "normal",
-    seed: state.seed,
-    decisionId:
-      options.decisionId ?? `${state.matchId}:${state.stateVersion}:${side}`,
-    actionNumber: options.actionNumber ?? state.stateVersion,
-    profileId:
-      options.profileId ?? `${side}-ai-v0.9-${options.difficulty ?? "normal"}`,
-    ...(ownDeckDoctrine ? { ownDeckDoctrine } : {}),
-  });
-  if (!options.ownDeckSnapshot) return input;
-  const ownDeckCapabilities = buildDeckCapabilityProfile({
-    side,
-    playerView,
-    legalActions,
-    deckSnapshot: options.ownDeckSnapshot,
-  });
-  const ownRunnerStrategicIntent =
-    side === "runner"
-      ? buildRunnerStrategicIntentProfile({
-          strategyProfile: buildDeckStrategyProfile(options.ownDeckSnapshot),
-          deckCapabilities: ownDeckCapabilities,
-        })
-      : undefined;
-  const enriched: AiDecisionInputWithDeckCapabilities = {
-    ...input,
-    ownDeckCapabilities,
-    ...(ownRunnerStrategicIntent ? { ownRunnerStrategicIntent } : {}),
-  };
-  return enriched;
-}
-
-export function selectAiDecisionSideForState(
-  state: GameState,
-): AiDecisionSideSelection {
-  const activeSide = state.activeSide;
-  const inactiveSide = oppositeSide(activeSide);
-  const activeSideLegalActions = getLegalActions(state, activeSide);
-  const inactiveSideLegalActions = getLegalActions(state, inactiveSide);
-  if (activeSideLegalActions.length > 0) {
-    return {
-      side: activeSide,
-      legalActions: activeSideLegalActions,
-      activeSideLegalActions,
-      inactiveSideLegalActions,
-      terminal: false,
-    };
-  }
-  if (inactiveSideLegalActions.length > 0) {
-    return {
-      side: inactiveSide,
-      legalActions: inactiveSideLegalActions,
-      activeSideLegalActions,
-      inactiveSideLegalActions,
-      terminal: false,
-    };
-  }
-  const terminal = Boolean(state.winner) || state.phase === "game_over";
-  return {
-    side: undefined,
-    legalActions: [],
-    activeSideLegalActions,
-    inactiveSideLegalActions,
-    terminal,
-    ...(terminal
-      ? {}
-      : {
-          error: `No legal actions for either side at ${state.stateVersion} (activeSide ${state.activeSide}, phase ${state.phase}, timingPoint ${state.timingPoint}).`,
-        }),
-  };
-}
-
-function oppositeSide(side: Side): Side {
-  return side === "runner" ? "corp" : "runner";
-}
-
-type AiDecisionRuntimeOptions = {
-  persistTacticalPlanMemory?: boolean;
-};
-
-type AiDecisionInputWithDeckCapabilities = AiDecisionInput & {
-  ownDeckCapabilities?: DeckCapabilityProfile;
-  ownRunnerStrategicIntent?: RunnerStrategicIntentProfile;
-  ownRunnerTacticalGoals?: RunnerTacticalGoal[];
-};
-
 export function chooseAiAction(
   input: AiDecisionInput,
   options: AiDecisionRuntimeOptions = {},
 ): AiDecision {
-  return input.side === "runner"
-    ? chooseRunnerAction(input, options)
-    : chooseCorpAction(input, options);
+  return chooseAiActionFromSides(input, options, {
+    corp: chooseCorpAction,
+    runner: chooseRunnerAction,
+  });
 }
 
 export function chooseCorpAction(
