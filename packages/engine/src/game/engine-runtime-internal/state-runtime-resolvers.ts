@@ -100,6 +100,10 @@ import {
   spendCredits,
 } from "../state/economy-mutation";
 import {
+  abilityUsageSourceUsed,
+  markAbilityUsageSourceUsed,
+} from "../../ability-engine/card-implementation-ability-limits";
+import {
   addCardCounter,
   cardCounter,
   cardInstanceWithoutCounters,
@@ -1441,19 +1445,24 @@ function preventOneVirusCounterWithDisinfectant(
   state: GameState,
 ): { prevented: boolean; creditsPaid: number } {
   const flags = ensureCorpTurnFlags(state);
-  const used = new Set(flags.disinfectantUsedSourceIdsThisTurn ?? []);
   const sourceId = rezzedCorpRootCardIds(state)
     .filter((cardId: CardInstanceId) =>
       hasCorpUtilityKind(state, cardId, "disinfectant_avoid_virus_counter"),
     )
-    .filter((cardId: CardInstanceId) => !used.has(cardId))
+    .filter(
+      (cardId: CardInstanceId) =>
+        !abilityUsageSourceUsed(
+          flags.disinfectantUsedSourceIdsThisTurn,
+          cardId,
+        ),
+    )
     .sort()[0];
   if (!sourceId || state.corp.credits < 1) return { prevented: false, creditsPaid: 0 };
   state.corp.credits -= 1;
-  flags.disinfectantUsedSourceIdsThisTurn = [
-    ...(flags.disinfectantUsedSourceIdsThisTurn ?? []),
+  flags.disinfectantUsedSourceIdsThisTurn = markAbilityUsageSourceUsed(
+    flags.disinfectantUsedSourceIdsThisTurn,
     sourceId,
-  ];
+  );
   return { prevented: true, creditsPaid: 1 };
 }
 

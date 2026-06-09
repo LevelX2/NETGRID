@@ -105,7 +105,7 @@ export function ensureRunnerTurnFlags(
     successfulRunThisTurn: false,
     damagePreventionUsage: {},
     runnerActionsTakenThisTurn: 0,
-    brokerActionCardIdsThisTurn: [],
+    abilityUsedSourceIdsByLimitKey: {},
     startOfTurnFloatingCreditsApplied: false,
     allNighterBonusRunPending: false,
     forgoNextActionPending: false,
@@ -139,7 +139,7 @@ export function ensureRunnerTurnFlags(
   flags.successfulRunThisTurn ??= false;
   flags.damagePreventionUsage ??= {};
   flags.runnerActionsTakenThisTurn ??= 0;
-  flags.brokerActionCardIdsThisTurn ??= [];
+  flags.abilityUsedSourceIdsByLimitKey ??= {};
   flags.startOfTurnFloatingCreditsApplied ??= false;
   flags.allNighterBonusRunPending ??= false;
   flags.forgoNextActionPending ??= false;

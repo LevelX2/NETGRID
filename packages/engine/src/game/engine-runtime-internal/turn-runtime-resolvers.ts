@@ -100,6 +100,11 @@ import {
   spendCredits,
 } from "../state/economy-mutation";
 import {
+  abilityUsageSourceUsed,
+  clearAbilityUsageSourceIds,
+  markAbilityUsageSourceUsed,
+} from "../../ability-engine/card-implementation-ability-limits";
+import {
   addCardCounter,
   cardCounter,
   cardInstanceWithoutCounters,
@@ -2045,15 +2050,15 @@ function resolvePdcaCounterAction(state: GameState, legalAction: LegalAction): v
   )
     throw new Error("Die PDCA-Fähigkeit passt nicht zur Quelle.");
   const flags = ensureCorpTurnFlags(state);
-  if (flags.pdcaUsedSourceIdsThisTurn?.includes(sourceId))
+  if (abilityUsageSourceUsed(flags.pdcaUsedSourceIdsThisTurn, sourceId))
     throw new Error("Diese PDCA-Fähigkeit wurde diesen Zug bereits genutzt.");
   if (cardCounter(state, sourceId, "pdca") <= 0)
     throw new Error("Es ist kein PDCA-Counter vorhanden.");
   spendCardCounter(state, sourceId, "pdca", 1);
-  flags.pdcaUsedSourceIdsThisTurn = [
-    ...(flags.pdcaUsedSourceIdsThisTurn ?? []),
+  flags.pdcaUsedSourceIdsThisTurn = markAbilityUsageSourceUsed(
+    flags.pdcaUsedSourceIdsThisTurn,
     sourceId,
-  ].sort();
+  );
   state.corp.clicks += 1;
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
@@ -2120,9 +2125,11 @@ function startCorpTurn(
   ensureRunnerTurnFlags(state).damagePreventionUsage = {};
   ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
   ensureRunnerTurnFlags(state).corpRezzedIceThisTurn = 0;
-  ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn = [];
+  ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn =
+    clearAbilityUsageSourceIds();
   ensureCorpTurnFlags(state).employeeEmpowermentStartTurnResolvedSourceIds = [];
-  ensureCorpTurnFlags(state).pdcaUsedSourceIdsThisTurn = [];
+  ensureCorpTurnFlags(state).pdcaUsedSourceIdsThisTurn =
+    clearAbilityUsageSourceIds();
   applyFutureExtraActionGrantsAtTurnStart(state, "corp", effects);
   applyScoredAgendaCreditEconomyAtCorpStart(state, effects);
   applyScoredAgendaActionEconomyAtCorpStart(state, effects);
@@ -2170,7 +2177,7 @@ function startRunnerTurn(
   delete flags.promisesPromisesSourceDefinitionId;
   delete flags.promisesPromisesSourceTitle;
   flags.damagePreventionUsage = {};
-  flags.brokerActionCardIdsThisTurn = [];
+  flags.abilityUsedSourceIdsByLimitKey = {};
   flags.startOfTurnFloatingCreditsApplied = false;
   flags.allNighterBonusRunPending = false;
   flags.valuPakProgramInstallActionsRemaining = 0;
@@ -2183,7 +2190,8 @@ function startRunnerTurn(
   flags.preyingMantisDamageDueSourceIdsThisTurn = [];
   flags.corpRezzedIceThisTurn = 0;
   delete flags.lastRezzedBlackIceThisTurn;
-  ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn = [];
+  ensureCorpTurnFlags(state).disinfectantUsedSourceIdsThisTurn =
+    clearAbilityUsageSourceIds();
   delete flags.incubatorPendingTransforms;
   consumeRunnerFutureActionDebt(state);
   resolveBizarreEncryptionDelayedAgendas(state, effects);

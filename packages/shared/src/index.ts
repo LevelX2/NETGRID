@@ -1390,7 +1390,7 @@ export type GameState = {
     damagePreventionUsage?: Record<CardInstanceId, number>;
     runnerActionsTakenThisTurn?: number;
     lastDamageRunnerActionOrdinal?: number;
-    brokerActionCardIdsThisTurn?: CardInstanceId[];
+    abilityUsedSourceIdsByLimitKey?: Record<string, CardInstanceId[]>;
     startOfTurnFloatingCreditsApplied?: boolean;
     incubatorPendingTransforms?: number;
     allNighterBonusRunPending?: boolean;

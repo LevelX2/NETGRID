@@ -366,7 +366,7 @@ function testHost(): DamageCoreHost {
           successfulRunThisTurn: false,
           damagePreventionUsage: {},
           runnerActionsTakenThisTurn: 0,
-          brokerActionCardIdsThisTurn: [],
+          abilityUsedSourceIdsByLimitKey: {},
           startOfTurnFloatingCreditsApplied: false,
           allNighterBonusRunPending: false,
           forgoNextActionPending: false,

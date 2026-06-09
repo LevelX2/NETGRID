@@ -263,7 +263,7 @@ function testHost(
           successfulRunThisTurn: false,
           damagePreventionUsage: {},
           runnerActionsTakenThisTurn: 0,
-          brokerActionCardIdsThisTurn: [],
+          abilityUsedSourceIdsByLimitKey: {},
           startOfTurnFloatingCreditsApplied: false,
           allNighterBonusRunPending: false,
         }),

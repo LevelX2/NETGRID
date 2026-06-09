@@ -1,21 +1,39 @@
 ---
 activityId: act-2026-06-09-neutral-ability-usage-limit-state
-status: inbox
+status: done
 kind: architecture
 area: engine
 priority: normal
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-06-09
-startedAt:
-completedAt:
+startedAt: 2026-06-09
+completedAt: 2026-06-09
 branch:
 releaseTarget:
 blockedBy: []
 relatedActivities:
   - act-2026-05-18-runner-ai-resource-economy-plan
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/shared/src/index.ts
+  - packages/engine/src/ability-engine/card-implementation-ability-limits.ts
+  - packages/engine/src/ability-engine/card-implementation-ability-limits.test.ts
+  - packages/engine/src/game/state/turn-flags-counters.ts
+  - packages/engine/src/game/engine-runtime-internal/turn-runtime-resolvers.ts
+  - packages/engine/src/game/engine-runtime-internal/state-runtime-resolvers.ts
+  - packages/engine/src/game/corp/scored-agenda-abilities.ts
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-06.md
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/ability-engine/card-implementation-ability-limits.test.ts
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/trace-tags-resources.test.ts -t Broker
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/originalset/runner-events-hardware-programs-resources.test.ts -t Broker
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/releases/card-release-smokes.test.ts -t Disinfectant
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/proteus/action-economy-debt-suite.test.ts -t PDCA
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/originalset/trace-prevention-assets.test.ts -t Disinfectant
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/state/turn-flags-counters.test.ts
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - git diff --check
 ---
 
 # Ability-Usage-Limits neutral speichern
@@ -53,12 +71,12 @@ Kartenspezifische Usage-Flag-Namen für generische Ability-Limits sollen durch e
 
 ## Akzeptanzkriterien
 
-- [ ] `runnerCardImplementationAbilityLimitHost` nutzt keinen Broker-namentlichen State mehr für generische `once_per_turn_per_source`-Limits.
-- [ ] Mindestens zwei bisher getrennte, wirklich gleiche Usage-Flag-Muster sind über dieselbe neutrale Struktur oder denselben Helper angebunden.
-- [ ] Turn-/Run-/Trace-Resetpunkte bleiben deterministisch und sind fokussiert getestet.
-- [ ] Stale-Action-Revalidation schlägt weiterhin fehl, wenn dieselbe Quelle ihr Limit bereits genutzt hat.
-- [ ] Keine verdeckten Kartendaten erscheinen neu in PlayerViews, PublicEvents, KI-Inputs, Logs oder Reconnect-Payloads.
-- [ ] `git diff --check`, relevante Engine-Tests und Typecheck laufen grün.
+- [x] `runnerCardImplementationAbilityLimitHost` nutzt keinen Broker-namentlichen State mehr für generische `once_per_turn_per_source`-Limits.
+- [x] Mindestens zwei bisher getrennte, wirklich gleiche Usage-Flag-Muster sind über dieselbe neutrale Struktur oder denselben Helper angebunden.
+- [x] Turn-/Run-/Trace-Resetpunkte bleiben deterministisch und sind fokussiert getestet.
+- [x] Stale-Action-Revalidation schlägt weiterhin fehl, wenn dieselbe Quelle ihr Limit bereits genutzt hat.
+- [x] Keine verdeckten Kartendaten erscheinen neu in PlayerViews, PublicEvents, KI-Inputs, Logs oder Reconnect-Payloads.
+- [x] `git diff --check`, relevante Engine-Tests und Typecheck laufen grün.
 
 ## Umsetzungshinweise
 
@@ -72,4 +90,4 @@ Kartenspezifische Usage-Flag-Namen für generische Ability-Limits sollen durch e
 
 ## Ergebnisnotiz
 
-Noch offen.
+Erledigt. Der generische CardImplementation-Limit-Adapter speichert `once_per_turn_per_source` nicht mehr in `brokerActionCardIdsThisTurn`, sondern in `runnerTurnFlags.abilityUsedSourceIdsByLimitKey` keyed nach Limit-Art und Scope. Run- und Trace-Limits binden an ihre natürlichen Lifecycle-Felder (`successfulRunAbilityUsedSourceIds`, `postBidLinkSourceIds`, `baseLinkSourceId`) an. Gemeinsame `abilityUsage...`-Helper normalisieren und markieren Source-Usage und werden jetzt auch von `Disinfectant` und `PDCA` für Generation, Revalidation und Reset genutzt. Das alte Broker-State-Feld wurde entfernt; Kartenregeln, LegalAction-Disziplin, Replay/StateHash und Hidden-Info-Flächen bleiben unverändert.

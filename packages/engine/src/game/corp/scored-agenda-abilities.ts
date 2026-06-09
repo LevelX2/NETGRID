@@ -5,6 +5,7 @@ import type {
   LegalAction,
   ResolvedGameEffect,
 } from "@netgrid/shared";
+import { abilityUsageSourceUsed } from "../../ability-engine/card-implementation-ability-limits";
 import type { CardScoredAgendaImplementation } from "../../ability-engine/definition-types";
 import type { ScoredAgendaActionProfile } from "../../mechanics/agenda-scoring";
 
@@ -199,9 +200,10 @@ export function buildScoredAgendaAbilityActionsForCard(
     host.cards.scoredAgendaKindForDefinition(definition) ===
     "corp_damage_replacement_pdca_action_counter"
   ) {
-    const alreadyUsed =
-      host.state.corpTurnFlags?.pdcaUsedSourceIdsThisTurn?.includes(agendaId) ===
-      true;
+    const alreadyUsed = abilityUsageSourceUsed(
+      host.state.corpTurnFlags?.pdcaUsedSourceIdsThisTurn,
+      agendaId,
+    );
     if (
       host.state.phase === "corp_action_phase" &&
       host.state.activeSide === "corp" &&

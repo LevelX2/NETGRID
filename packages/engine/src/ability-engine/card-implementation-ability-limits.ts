@@ -1,9 +1,8 @@
 /**
  * Evaluates declarative CardImplementation ability limits.
  *
- * This module owns generic limit keys and checks, while the actual turn-flag
- * storage is supplied by the host through dependencies. It currently supports
- * only the narrow once-per-turn-per-source shape used by migrated cards.
+ * This module owns generic limit keys and checks, while the actual state
+ * storage is supplied by the host through dependencies.
  */
 import type { CardInstanceId, GameState } from "@netgrid/shared";
 import type { CardAbilityLimitImplementation } from "./definition-types";
@@ -20,30 +19,74 @@ export type CardImplementationAbilityLimitHost = {
   ) => void;
 };
 
+export function normalizeAbilityUsageSourceIds(
+  sourceCardIds: readonly CardInstanceId[] | undefined,
+): CardInstanceId[] {
+  return [...new Set(sourceCardIds ?? [])].sort();
+}
+
+export function abilityUsageSourceUsed(
+  sourceCardIds: readonly CardInstanceId[] | undefined,
+  sourceCardId: CardInstanceId,
+): boolean {
+  return (sourceCardIds ?? []).includes(sourceCardId);
+}
+
+export function markAbilityUsageSourceUsed(
+  sourceCardIds: readonly CardInstanceId[] | undefined,
+  sourceCardId: CardInstanceId,
+): CardInstanceId[] {
+  if (abilityUsageSourceUsed(sourceCardIds, sourceCardId))
+    return normalizeAbilityUsageSourceIds(sourceCardIds);
+  return normalizeAbilityUsageSourceIds([...(sourceCardIds ?? []), sourceCardId]);
+}
+
+export function clearAbilityUsageSourceIds(): CardInstanceId[] {
+  return [];
+}
+
 /**
  * Host binding for the current Runner-turn source-wide limit storage.
  *
  * The flag lives in GameState for replay determinism; this adapter deliberately
- * does not introduce a second limit store or Broker-specific runtime branch.
+ * does not introduce card-specific runtime branches.
  */
 export const runnerCardImplementationAbilityLimitHost: CardImplementationAbilityLimitHost =
   {
     usedSourceIdsThisTurn: (state, limit) => {
       if (limit.kind === "once_per_run_per_source")
         return state.run?.successfulRunAbilityUsedSourceIds;
-      return state.runnerTurnFlags?.brokerActionCardIdsThisTurn;
+      if (limit.kind === "once_per_trace_per_source")
+        return state.trace?.postBidLinkSourceIds;
+      if (limit.kind === "one_base_link_card_per_trace_attempt")
+        return state.trace?.baseLinkSourceId ? [state.trace.baseLinkSourceId] : [];
+      return state.runnerTurnFlags?.abilityUsedSourceIdsByLimitKey?.[
+        cardImplementationAbilityLimitKey(limit)
+      ];
     },
     setUsedSourceIdsThisTurn: (state, limit, sourceCardIds) => {
       if (limit.kind === "once_per_run_per_source") {
         if (!state.run) return;
-        state.run.successfulRunAbilityUsedSourceIds = sourceCardIds.slice().sort();
+        state.run.successfulRunAbilityUsedSourceIds =
+          normalizeAbilityUsageSourceIds(sourceCardIds);
         return;
       }
+      if (limit.kind === "once_per_trace_per_source") {
+        if (!state.trace) return;
+        state.trace.postBidLinkSourceIds =
+          normalizeAbilityUsageSourceIds(sourceCardIds);
+        return;
+      }
+      if (limit.kind === "one_base_link_card_per_trace_attempt") return;
       const flags = (state.runnerTurnFlags ??= {
         stoleAgendaThisTurn: false,
         stoleAgendaLastTurn: false,
       });
-      flags.brokerActionCardIdsThisTurn = sourceCardIds.slice().sort();
+      const key = cardImplementationAbilityLimitKey(limit);
+      flags.abilityUsedSourceIdsByLimitKey = {
+        ...(flags.abilityUsedSourceIdsByLimitKey ?? {}),
+        [key]: normalizeAbilityUsageSourceIds(sourceCardIds),
+      };
     },
   };
 
@@ -69,7 +112,10 @@ export function canUseCardImplementationAbilityLimit(
   if (!limit) return true;
   if (!sourceCardId) return false;
   assertSupportedAbilityLimit(limit);
-  return !sourceIdsUsedForLimit(host, state, limit).includes(sourceCardId);
+  const used = sourceIdsUsedForLimit(host, state, limit);
+  if (limit.kind === "one_base_link_card_per_trace_attempt")
+    return used.length === 0;
+  return !abilityUsageSourceUsed(used, sourceCardId);
 }
 
 export function markCardImplementationAbilityLimitUsed(
@@ -82,11 +128,11 @@ export function markCardImplementationAbilityLimitUsed(
   // this helper only defines the CardImplementation-level keying contract.
   assertSupportedAbilityLimit(limit);
   const used = sourceIdsUsedForLimit(host, state, limit);
-  if (used.includes(sourceCardId)) return;
+  if (abilityUsageSourceUsed(used, sourceCardId)) return;
   host.setUsedSourceIdsThisTurn(
     state,
     limit,
-    [...used, sourceCardId].sort(),
+    markAbilityUsageSourceUsed(used, sourceCardId),
   );
 }
 
