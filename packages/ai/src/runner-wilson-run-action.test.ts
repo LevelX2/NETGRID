@@ -53,6 +53,24 @@ describe("Runner Wilson run action utilization", () => {
     );
   });
 
+  it("uses Wilson instead of ending after normal Runner actions are spent", () => {
+    const wilson = wilsonTriggerAction();
+    const endTurn = endTurnAction();
+    const input = runnerInput({
+      credits: 5,
+      servers: [server("hq")],
+      legalActions: [wilson, endTurn],
+    });
+    input.playerView.own.clicks = 0;
+
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe(wilson.actionId);
+    expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
+  });
+
   it("prefers the Wilson-only run action for the same planned target", () => {
     const normalRun = runAction("runner.start_run.rd", "rd", "Run auf R&D");
     const wilsonRun = runAction("runner.wilson.start_run.rd", "rd", "Wilson-Run auf R&D", {
@@ -197,6 +215,12 @@ function runAction(
 function gainCreditAction(): LegalAction {
   return legalAction("runner.gain_credit", "gain_credit", "Credit nehmen", {
     costs: [{ clicks: 1 }],
+  });
+}
+
+function endTurnAction(): LegalAction {
+  return legalAction("runner.end_turn", "end_turn", "Zug beenden", {
+    costs: [],
   });
 }
 

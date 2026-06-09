@@ -299,6 +299,28 @@ export function buildRunnerMainActions(
   const bonusRunPending =
     flags.allNighterBonusRunPending === true ||
     pirateBroadcastNextServerId !== undefined;
+  for (const sourceCardId of activeWilsonSourceIds(runDurationPaymentHost(state))) {
+    const used = flags.wilsonUsedSourceIdsThisTurn ?? [];
+    if (!used.includes(sourceCardId)) {
+      actions.push(
+        action(
+          state,
+          "runner",
+          "trigger_ability",
+          "Wilson: Run-Aktion erhalten",
+          sourceCardId,
+          [],
+          {
+            cardId: sourceCardId,
+            runnerAbility: "wilson_gain_run_action",
+            sourceDefinitionId: definitionFor(state, sourceCardId).id,
+            gainActionsAmount: 1,
+            runSpendingCap: 3,
+          },
+        ),
+      );
+    }
+  }
   if (!hasClicks && !bonusRunPending) {
     pushCardImplementationEndOfRunnerTurnActions(
       cardImplementationRuntimeDeps,
@@ -327,28 +349,6 @@ export function buildRunnerMainActions(
     return actions;
   }
   if (hasClicks) {
-    for (const sourceCardId of activeWilsonSourceIds(runDurationPaymentHost(state))) {
-      const used = flags.wilsonUsedSourceIdsThisTurn ?? [];
-      if (!used.includes(sourceCardId)) {
-        actions.push(
-          action(
-            state,
-            "runner",
-            "trigger_ability",
-            "Wilson: Run-Aktion erhalten",
-            sourceCardId,
-            [],
-            {
-              cardId: sourceCardId,
-              runnerAbility: "wilson_gain_run_action",
-              sourceDefinitionId: definitionFor(state, sourceCardId).id,
-              gainActionsAmount: 1,
-              runSpendingCap: 3,
-            },
-          ),
-        );
-      }
-    }
     actions.push(buildRunnerGainCreditAction(state));
     if (state.runner.stack.length > 0)
       actions.push(

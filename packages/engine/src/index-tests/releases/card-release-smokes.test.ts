@@ -2404,13 +2404,18 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "runner",
       (action) => action.type === "install_card" && action.payload?.cardId === wilsonId,
     );
-    state.runner.clicks = 1;
+    expect(state.runner.clicks).toBe(0);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.payload?.runnerAbility === "wilson_gain_run_action",
+      ),
+    ).toBe(true);
     state = apply(
       state,
       "runner",
       (action) => action.payload?.runnerAbility === "wilson_gain_run_action",
     );
-    expect(state.runner.clicks).toBe(2);
+    expect(state.runner.clicks).toBe(1);
     expect(state.runnerTurnFlags?.wilsonRunOnlyActionsRemaining).toBe(1);
     expect(
       getLegalActions(state, "runner").some(
@@ -2437,6 +2442,65 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       limit: 3,
       spent: 0,
     });
+  });
+
+  it("offers Wilson after all normal Runner actions have been spent with Wilson unused", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p361-wilson-after-fourth-normal-action",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          id: "p361_wilson_saved_action_runner",
+          name: "P3.61 Wilson Saved Action Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_187_wilson-weeflerunner-apprentice", quantity: 1 },
+            { id: "simple_economy_event", quantity: 10 },
+            { id: "simple_agenda", quantity: 6 },
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.traceTags.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 10;
+    installRunnerResourceForTest(
+      state,
+      "onr_v1_187_wilson-weeflerunner-apprentice",
+    );
+    state.runner.clicks = 4;
+
+    for (let spentClick = 0; spentClick < 4; spentClick += 1) {
+      state = apply(state, "runner", (action) => action.type === "gain_credit");
+    }
+
+    expect(state.runner.clicks).toBe(0);
+    expect(
+      getLegalActions(state, "runner").some(
+        (action) => action.payload?.runnerAbility === "wilson_gain_run_action",
+      ),
+    ).toBe(true);
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.payload?.runnerAbility === "wilson_gain_run_action",
+    );
+    expect(state.runner.clicks).toBe(1);
+    expect(state.runnerTurnFlags?.wilsonRunOnlyActionsRemaining).toBe(1);
+    const wilsonActions = getLegalActions(state, "runner");
+    expect(wilsonActions.some((action) => action.type === "gain_credit")).toBe(
+      false,
+    );
+    expect(
+      wilsonActions.some(
+        (action) =>
+          action.type === "start_run" &&
+          action.payload?.wilsonRunOnlyAction === true &&
+          action.payload?.serverId === "hq",
+      ),
+    ).toBe(true);
   });
 
   it("resolves P3.60 Karl de Veres successful-run credits and Nevinyrral start-turn actions from CardImplementation", () => {
