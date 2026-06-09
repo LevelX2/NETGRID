@@ -746,7 +746,7 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         sourceKind: "resource_ability",
         sourceCardId: WILSON_DEFINITION_ID,
         spendLimit: 3,
-        structure: "extra_run",
+        structure: "direct_start_run",
       },
     });
     expect(evidenceNumber(evaluation.evidence, "access_payoff_score_adjustment")).toBeLessThan(0);
@@ -755,6 +755,54 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
         "run_action_projection_status:concrete_target",
         "run_action_projection_spend_limit:3",
         "hq_knownness_payoff:mostly_known_low_value",
+      ]),
+    );
+  });
+
+  it("marks Wilson's direct run blocked when the visible path exceeds its spend cap", () => {
+    const wilson = wilsonRunAbilityAction("wilson-expensive-hq-run", "hq");
+    const input = aiInput({
+      credits: 10,
+      servers: [
+        server("hq", {
+          ice: [expensiveBarrierIce("hq-expensive-wall")],
+        }),
+      ],
+      legalActions: [wilson],
+      rig: [
+        visibleCard("wilson-installed", {
+          definitionId: WILSON_DEFINITION_ID,
+          title: "Wilson, Weeflerunner Apprentice",
+          type: "resource",
+        }),
+        visibleCard("runner-efficient-fracter", {
+          definitionId: "efficient_fracter",
+          title: "Efficient Fracter",
+          type: "program",
+          subtypes: ["icebreaker", "fracter"],
+          strength: 3,
+        }),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+    if (!evaluation) throw new Error("Expected Wilson expensive HQ evaluation");
+
+    expect(evaluation).toMatchObject({
+      actionId: "wilson-expensive-hq-run",
+      targetServerId: "hq",
+      pathPassability: "blocked_unpayable",
+      pathCost: 4,
+      runActionProjection: {
+        sourceKind: "resource_ability",
+        spendLimit: 3,
+      },
+    });
+    expect(evaluation.evidence).toEqual(
+      expect.arrayContaining([
+        "path_cost:4",
+        "run_action_projection_spend_limit:3",
+        "run_action_projection_spend_limit_blocks_path:true",
       ]),
     );
   });
@@ -1326,18 +1374,21 @@ function wilsonRunAbilityAction(actionId: string, serverId: string): LegalAction
   return {
     actionId,
     side: "runner",
-    type: "trigger_ability",
+    type: "start_run",
     label: `Wilson run ${serverId}`,
-    source: "card_ability",
+    source: "wilson-installed",
     timingPoint: "runner_action.main",
-    costs: [],
+    costs: [{ clicks: 1 }],
     targetRequirements: [],
     visibility: "public",
     expiresAtStateVersion: 2,
     payload: {
+      cardId: "wilson-installed",
       sourceDefinitionId: WILSON_DEFINITION_ID,
       runnerAbility: "wilson_gain_run_action",
       serverId,
+      wilsonRunOnlyAction: true,
+      wilsonRunSourceCardId: "wilson-installed",
       runSpendingCap: 3,
     },
   };
@@ -1415,6 +1466,24 @@ function barrierIce(instanceId: string): VisibleCard {
       iceDefinitionId: "simple_barrier_ice",
       effectiveStrength: 3,
       subroutines: [{ id: "simple_barrier_ice_etr", type: "end_the_run" }],
+    },
+  });
+}
+
+function expensiveBarrierIce(instanceId: string): VisibleCard {
+  return visibleCard(instanceId, {
+    definitionId: "simple_barrier_ice",
+    title: "Expensive Barrier ICE",
+    type: "ice",
+    subtypes: ["barrier"],
+    known: true,
+    rezzed: true,
+    strength: 6,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "simple_barrier_ice",
+      effectiveStrength: 6,
+      subroutines: [{ id: "expensive_barrier_ice_etr", type: "end_the_run" }],
     },
   });
 }

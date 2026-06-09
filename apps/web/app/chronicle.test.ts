@@ -140,6 +140,26 @@ describe("formatChronicleEvent", () => {
     expect(item.chips).toContain("R&D");
   });
 
+  it("labels Wilson runs without adding cap details to chronicle chips", () => {
+    const item = formatChronicleEvent(
+      makeEvent("start_run", {
+        actor: "runner",
+        aiReasonCode: "runner.wilson.run_only_action_preferred",
+        label: "Wilson-Run auf HQ",
+        serverLabel: "HQ",
+        runnerAbility: "wilson_gain_run_action",
+        wilsonRunOnlyAction: true,
+        runSpendingCap: 3,
+      }),
+      "corp"
+    );
+
+    expect(item.title).toBe("Die Runner-KI hat einen Wilson-Run auf HQ gestartet.");
+    expect(item.chips).toEqual(["Runner", "KI", "Run", "HQ"]);
+    expect(item.chips).not.toContain("Wilson");
+    expect(item.chips).not.toContain("Limit 3 Credits");
+  });
+
   it("formats runner event runs as run starts for the chronicle group", () => {
     const event = makeEvent("play_event", {
       actor: "runner",

@@ -1323,7 +1323,14 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       category = "run";
       importance = "important";
       const target = serverLabel ?? runTargetFromLabel(label);
-      title = phrase(subject, `einen Run auf ${target} gestartet`);
+      const isWilsonRun =
+        payload.wilsonRunOnlyAction === true ||
+        stringValue(payload.runnerAbility) === "wilson_gain_run_action" ||
+        /^Wilson-Run\b/i.test(label ?? "");
+      title = phrase(
+        subject,
+        `einen ${isWilsonRun ? "Wilson-Run" : "Run"} auf ${target} gestartet`,
+      );
       chips.push("Run", target);
       break;
     }
