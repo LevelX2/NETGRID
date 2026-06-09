@@ -3951,4 +3951,86 @@ describe("Originalset spotcheck: reorder, counters and run-lock hardening", () =
     });
     expect(stolenResult.ok).toBe(false);
   });
+
+  it("labels Vapor Ops advancement move choices with counter amount and target", () => {
+    let state = apply(
+      MECHANIC_SMOKE_GAMES.agendaScoring("spotcheck-vapor-ops-move-labels"),
+      "corp",
+      (action) => action.type === "mandatory_draw",
+    );
+    state.corp.credits = 50;
+    state.corp.clicks = 50;
+
+    const vaporId = putCorpRootInRemote(state, "onr_v1_347_vapor-ops");
+    const simpleAgendaId = putCorpRootInRemote(state, "simple_agenda");
+    const geneticsVisionaryId = putCorpRootInRemote(
+      state,
+      "onr_v1_202_genetics-visionary-acquisition",
+    );
+    state.cardInstances[vaporId] = {
+      ...state.cardInstances[vaporId]!,
+      advancementCounters: 3,
+    };
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" && String(action.payload?.cardId) === vaporId,
+    );
+
+    const moveAction = mustAction(
+      state,
+      "corp",
+      (action) =>
+        action.type === "activated_card_ability" &&
+        action.payload?.cardId === vaporId &&
+        action.payload?.cardImplementationAbilityLabel ===
+          "Vapor Ops: Advancement-Counter bewegen",
+    );
+    expect(moveAction.label).toBe("Vapor Ops: Advancement-Counter bewegen");
+
+    state = apply(
+      state,
+      "corp",
+      (action) => action.actionId === moveAction.actionId,
+    );
+
+    const corpChoice = getPlayerView(state, "corp").pendingChoice;
+    const runnerChoice = getPlayerView(state, "runner").pendingChoice;
+    expect(corpChoice?.prompt).toBe(
+      "Vapor Ops: Advancement-Counter bewegen",
+    );
+    expect(runnerChoice).toBeUndefined();
+    const labels = corpChoice?.options.map((option) => option.label) ?? [];
+    expect(new Set(labels).size).toBe(labels.length);
+    expect(labels).toEqual(
+      expect.arrayContaining([
+        "1 Advancement-Counter von Vapor Ops auf Simple Agenda bewegen",
+        "3 Advancement-Counter von Vapor Ops auf Simple Agenda bewegen",
+        "1 Advancement-Counter von Vapor Ops auf Genetics-Visionary Acquisition bewegen",
+        "3 Advancement-Counter von Vapor Ops auf Genetics-Visionary Acquisition bewegen",
+      ]),
+    );
+    expect(
+      state.pendingChoice?.options.find(
+        (option) => option.value === `${vaporId}|${geneticsVisionaryId}|3`,
+      )?.label,
+    ).toBe(
+      "3 Advancement-Counter von Vapor Ops auf Genetics-Visionary Acquisition bewegen",
+    );
+
+    state = applyChoices(state, "corp", [
+      state.pendingChoice?.options.find(
+        (option) => option.value === `${vaporId}|${geneticsVisionaryId}|3`,
+      )?.id ?? "",
+    ]);
+    expect(state.cardInstances[vaporId]?.advancementCounters).toBe(0);
+    expect(state.cardInstances[simpleAgendaId]?.advancementCounters).toBe(0);
+    expect(
+      state.cardInstances[geneticsVisionaryId]?.advancementCounters,
+    ).toBe(3);
+    expect(JSON.stringify(state.eventLog.at(-1)?.publicPayload)).not.toMatch(
+      /Simple Agenda|Genetics-Visionary Acquisition|privatePayload|cardInstances/,
+    );
+  });
 });

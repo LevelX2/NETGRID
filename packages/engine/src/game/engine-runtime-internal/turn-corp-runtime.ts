@@ -399,7 +399,7 @@ function startCardImplementationMoveAdvancementChoice(
     choiceId: `p3_34_move_advancement_${state.stateVersion + 1}`,
     side: "corp",
     source: `p3_34.move_advancement:${sourceDefinitionId}:${sourceCardId}:${sourceMode}:${maxAmount}:${state.stateVersion + 1}`,
-    prompt: "Advancement-Counter bewegen",
+    prompt: `${definitionFor(state, sourceCardId).title}: Advancement-Counter bewegen`,
     kind: "select_option",
     options,
     minSelections: 1,

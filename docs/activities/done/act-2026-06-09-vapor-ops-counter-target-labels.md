@@ -1,14 +1,14 @@
 ---
 activityId: act-2026-06-09-vapor-ops-counter-target-labels
-status: inbox
+status: done
 kind: fix
 area: web
 priority: normal
 primaryAgent: small-adjustments-agent
 requiresImplementation: true
 createdAt: 2026-06-09
-startedAt:
-completedAt:
+startedAt: 2026-06-09
+completedAt: 2026-06-09
 branch:
 releaseTarget:
 blockedBy: []
@@ -16,8 +16,13 @@ relatedActivities:
   - act-2026-05-17-installed-card-action-label-cleanup
   - act-2026-05-19-shell-traders-action-labels-target-card
   - act-2026-05-19-run-window-action-label-compactness
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/engine-runtime-internal/turn-corp-runtime.ts
+  - packages/engine/src/index-tests/originalset/hidden-access-run-regressions.test.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/originalset/hidden-access-run-regressions.test.ts -t Vapor
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - git diff --check
 ---
 
 # Vapor Ops: Counter-Bewegungsoptionen mit Ziel und Anzahl beschriften
@@ -54,12 +59,12 @@ Die zweistufige Aktionsauswahl für `Vapor Ops` soll bei mehreren möglichen Zie
 
 ## Akzeptanzkriterien
 
-- [ ] Bei `Vapor Ops` mit mehreren Countern und mehreren advancebaren Zielkarten zeigt die nachgelagerte Auswahl pro Option Zielkarte und Counteranzahl.
-- [ ] Es gibt keine parallelen Optionen mit identischem sichtbarem Text, wenn sie unterschiedliche Ziele oder Counteranzahlen auslösen.
-- [ ] Der direkt an `Vapor Ops` angezeigte Button bleibt knapp, aber nicht irreführend; falls die Folgeliste nicht sicher eindeutig ist, enthält schon der erste Schritt ausreichend Kontext.
-- [ ] Vergleichbare `move_advancement_counters`-Optionen aus demselben generischen Pfad sind geprüft und verhalten sich konsistent.
-- [ ] Korp-eigene Zielnamen leaken nicht in Runner-/Spectator-/Public-Ansichten, PublicEvents, Logs, Reconnect-Payloads oder KI-Inputs.
-- [ ] Fokussierte Engine- oder Webtests decken mindestens den `Vapor Ops`-Mehrziel-/Mehrcounter-Fall ab.
+- [x] Bei `Vapor Ops` mit mehreren Countern und mehreren advancebaren Zielkarten zeigt die nachgelagerte Auswahl pro Option Zielkarte und Counteranzahl.
+- [x] Es gibt keine parallelen Optionen mit identischem sichtbarem Text, wenn sie unterschiedliche Ziele oder Counteranzahlen auslösen.
+- [x] Der direkt an `Vapor Ops` angezeigte Button bleibt knapp, aber nicht irreführend; falls die Folgeliste nicht sicher eindeutig ist, enthält schon der erste Schritt ausreichend Kontext.
+- [x] Vergleichbare `move_advancement_counters`-Optionen aus demselben generischen Pfad sind geprüft und verhalten sich konsistent.
+- [x] Korp-eigene Zielnamen leaken nicht in Runner-/Spectator-/Public-Ansichten, PublicEvents, Logs, Reconnect-Payloads oder KI-Inputs.
+- [x] Fokussierte Engine- oder Webtests decken mindestens den `Vapor Ops`-Mehrziel-/Mehrcounter-Fall ab.
 
 ## Umsetzungshinweise
 
@@ -75,4 +80,6 @@ Die zweistufige Aktionsauswahl für `Vapor Ops` soll bei mehreren möglichen Zie
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die generischen `move_advancement_counters`-Choice-Optionen enthielten bereits Zielkarte und Counteranzahl. Der Pending-Choice-Prompt nennt jetzt die Quellkarte, sodass auch der geöffnete Auswahlzustand eindeutig bleibt. Der neue Regressionstest deckt `Vapor Ops` mit mehreren Countern und zwei Zielkarten ab, prüft eindeutige Labels, die Corp-only-PlayerView und ein `publicPayload` ohne private Kartendaten.
+
+`Falsified Transactions Expert` nutzt denselben generischen Move-Pfad; die Labelregel greift dort ohne kartenspezifischen Sonderfall. Offene Folgepunkte aus diesem Paket: keine.
