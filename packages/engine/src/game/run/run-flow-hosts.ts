@@ -101,7 +101,7 @@ import {
 import type { FortPassWindowHost } from "./fort-pass-window";
 import {
   isTokyoUnsuccessfulRunSource,
-  parisCityGridTracePoolSource,
+  fortTraceBitPoolSource,
   runnerCanUseBreakerOnCurrentFort,
   runnerStealthRecurringCredits,
   tokyoUnsuccessfulRunAmountForCard,
@@ -981,9 +981,9 @@ export function createRunFlowAdapters(host: RunFlowHost): RunFlowAdapters {
         host.damage.openReplacementWindow(state, event, action),
       openDamageResolutionWindow: (event, action) =>
         host.damage.openDamageResolutionWindow(state, event, action),
-      parisCityGridTracePoolSource: () =>
+      fortTraceBitPoolSource: () =>
         state.run
-          ? parisCityGridTracePoolSource(fortRunSideFamiliesHostForState(state))
+          ? fortTraceBitPoolSource(fortRunSideFamiliesHostForState(state))
           : undefined,
       rabbitTraceLimitReductionForIceTrace: () =>
         host.trace.rabbitTraceLimitReductionForIceTrace(state),

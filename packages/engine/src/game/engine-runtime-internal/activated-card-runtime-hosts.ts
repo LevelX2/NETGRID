@@ -443,16 +443,16 @@ import {
   applyPostBreakStealthLoss,
   clearActivityGatedFortRunMarkers,
   isActivityGatedFortRunBlocked,
-  isParisTracePoolSource,
+  isFortTraceBitPoolSource,
   markFortActivityForRunGate,
-  parisCityGridTracePoolSource,
-  parisCityGridTracePoolTotal,
-  parisTracePoolCapacityForCard,
+  fortTraceBitPoolSource,
+  fortTraceBitPoolTotal,
+  fortTraceBitPoolCapacityForCard,
   resolveAardvarkInterceptionChoice,
   resolveHammerStealthLossChoice,
   runnerStealthRecurringCredits,
   shouldOpenAardvarkInterception,
-  spendParisCityGridTracePool,
+  spendFortTraceBitPool,
   startAardvarkInterceptionChoice,
   validateActivityGatedFortRun,
   type FortRunSideFamiliesHost,
@@ -754,7 +754,7 @@ export function createActivatedCardRuntimeHosts(
         corpTracePaymentDeps,
         runnerTracePaymentDeps,
         runnerTraceLinkCreditSourceIds: () =>
-          runnerTracePaymentDeps.runnerTraceLinkCreditSourceIds(state),
+          runnerTracePaymentDeps.runnerTraceLinkCreditSources(state).map((source) => source.sourceCardInstanceId),
         hostedPaymentCredits: (cardId) => hostedPaymentCredits(state, cardId),
         spendRunnerCredits: (amount) => spendCredits(state, "runner", amount),
         recordRunActionSpendingCapSpend: (amount) =>
@@ -774,9 +774,9 @@ export function createActivatedCardRuntimeHosts(
         krumzTraceBitTotal: () => krumzTraceBitTotal(state),
       },
       fort: {
-        parisCityGridTracePoolSource: () =>
+        fortTraceBitPoolSource: () =>
           state.run
-            ? parisCityGridTracePoolSource(fortRunSideFamiliesHostForState(state))
+            ? fortTraceBitPoolSource(fortRunSideFamiliesHostForState(state))
             : undefined,
       },
       run: {

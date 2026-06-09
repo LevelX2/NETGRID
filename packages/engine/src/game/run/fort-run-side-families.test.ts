@@ -14,12 +14,12 @@ import {
   clearActivityGatedFortRunMarkers,
   isActivityGatedFortRunBlocked,
   markFortActivityForRunGate,
-  parisCityGridTracePoolSource,
-  parisCityGridTracePoolTotal,
+  fortTraceBitPoolSource,
+  fortTraceBitPoolTotal,
   resolveAardvarkInterceptionChoice,
   runnerCanUseBreakerOnCurrentFort,
   shouldOpenAardvarkInterception,
-  spendParisCityGridTracePool,
+  spendFortTraceBitPool,
   startAardvarkInterceptionChoice,
   validateActivityGatedFortRun,
   type FortRunSideFamiliesHost,
@@ -349,16 +349,16 @@ describe("fort run side families", () => {
     const state = makeState();
     const host = hostFor(state);
 
-    expect(parisCityGridTracePoolSource(host)).toEqual({
+    expect(fortTraceBitPoolSource(host)).toEqual({
       cardId: "paris_1",
       serverId: "rd",
     });
-    expect(parisCityGridTracePoolTotal(host)).toBe(3);
-    expect(spendParisCityGridTracePool(host, "paris_1", "rd", 2)).toBe(2);
+    expect(fortTraceBitPoolTotal(host)).toBe(3);
+    expect(spendFortTraceBitPool(host, "paris_1", "rd", 2)).toBe(2);
     expect(state.cardInstances.paris_1?.counters?.bit).toBe(1);
     expect(() =>
-      spendParisCityGridTracePool(host, "paris_1", "hq", 1),
-    ).toThrow(/Paris City Grid/);
+      spendFortTraceBitPool(host, "paris_1", "hq", 1),
+    ).toThrow(/Fort-Trace-Bit-Pool/);
   });
 
   it("applies post-break stealth loss through existing hosted-credit callbacks", () => {

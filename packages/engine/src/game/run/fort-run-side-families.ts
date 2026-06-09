@@ -20,7 +20,7 @@ import {
   RAMMING_PISTON_ID,
 } from "../../compatibility/runtime-compatibility";
 
-const PARIS_CITY_GRID_TRACE_POOL_BITS = 3;
+const DEFAULT_FORT_TRACE_BIT_POOL_BITS = 3;
 
 type ActiveRun = NonNullable<GameState["run"]>;
 
@@ -433,7 +433,7 @@ export function validateActivityGatedFortRun(
   };
 }
 
-export function parisTracePoolImplementationForCard(
+export function fortTraceBitPoolImplementationForCard(
   host: FortRunSideFamiliesHost,
   cardId: CardInstanceId,
 ):
@@ -449,21 +449,21 @@ export function parisTracePoolImplementationForCard(
   );
 }
 
-export function parisTracePoolCapacityForCard(
+export function fortTraceBitPoolCapacityForCard(
   host: FortRunSideFamiliesHost,
   cardId: CardInstanceId,
 ): number {
   return (
-    parisTracePoolImplementationForCard(host, cardId)?.amount ??
-    PARIS_CITY_GRID_TRACE_POOL_BITS
+    fortTraceBitPoolImplementationForCard(host, cardId)?.amount ??
+    DEFAULT_FORT_TRACE_BIT_POOL_BITS
   );
 }
 
-export function isParisTracePoolSource(
+export function isFortTraceBitPoolSource(
   host: FortRunSideFamiliesHost,
   cardId: CardInstanceId,
 ): boolean {
-  return parisTracePoolImplementationForCard(host, cardId) !== undefined;
+  return fortTraceBitPoolImplementationForCard(host, cardId) !== undefined;
 }
 
 export function tokyoUnsuccessfulRunAmountForCard(
@@ -484,7 +484,7 @@ export function isTokyoUnsuccessfulRunSource(
   return tokyoUnsuccessfulRunAmountForCard(host, cardId) !== undefined;
 }
 
-export function parisCityGridTracePoolSource(
+export function fortTraceBitPoolSource(
   host: FortRunSideFamiliesHost,
 ): { cardId: CardInstanceId; serverId: Exclude<ServerId, "new_remote"> } | undefined {
   const run = host.state.run;
@@ -497,30 +497,30 @@ export function parisCityGridTracePoolSource(
       const instance = host.state.cardInstances[rootId];
       return (
         instance?.rezzed === true &&
-        Boolean(parisTracePoolImplementationForCard(host, rootId)) &&
+        Boolean(fortTraceBitPoolImplementationForCard(host, rootId)) &&
         host.counters.cardCounter(rootId, "bit") > 0
       );
     });
   return cardId ? { cardId, serverId: server.id } : undefined;
 }
 
-export function parisCityGridTracePoolTotal(
+export function fortTraceBitPoolTotal(
   host: FortRunSideFamiliesHost,
 ): number {
-  const source = parisCityGridTracePoolSource(host);
+  const source = fortTraceBitPoolSource(host);
   return source ? host.counters.cardCounter(source.cardId, "bit") : 0;
 }
 
-export function spendParisCityGridTracePool(
+export function spendFortTraceBitPool(
   host: FortRunSideFamiliesHost,
   sourceCardId: CardInstanceId | undefined,
   serverId: Exclude<ServerId, "new_remote"> | undefined,
   amount: number,
 ): number {
   if (!Number.isInteger(amount) || amount < 0)
-    throw new Error("Paris-City-Grid-Bit-Ausgabe ist ungueltig.");
+    throw new Error("Fort-Trace-Bit-Pool-Ausgabe ist ungueltig.");
   if (amount <= 0) return 0;
-  const current = parisCityGridTracePoolSource(host);
+  const current = fortTraceBitPoolSource(host);
   if (
     !current ||
     current.cardId !== sourceCardId ||
@@ -528,10 +528,10 @@ export function spendParisCityGridTracePool(
     !host.state.run ||
     host.state.run.attackedServerId !== serverId
   ) {
-    throw new Error("Paris City Grid ist fuer diesen Trace nicht verfuegbar.");
+    throw new Error("Fort-Trace-Bit-Pool ist fuer diesen Trace nicht verfuegbar.");
   }
   if (host.counters.cardCounter(current.cardId, "bit") < amount)
-    throw new Error("Paris City Grid hat nicht genug Bits.");
+    throw new Error("Fort-Trace-Bit-Pool hat nicht genug Bits.");
   host.counters.spendCardCounter(current.cardId, "bit", amount);
   return amount;
 }

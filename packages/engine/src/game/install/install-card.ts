@@ -101,8 +101,8 @@ export type InstallCardHost = {
     expireCorporateRetreatInstallCreditAbilities: () => void;
     consumeEdgerunnerTempsInstallAction: (legalAction: LegalAction) => void;
     isRegionUpgrade: (definition: CardDefinition) => boolean;
-    isParisTracePoolSource: (cardId: CardInstanceId) => boolean;
-    parisTracePoolCapacityForCard: (cardId: CardInstanceId) => number;
+    isFortTraceBitPoolSource: (cardId: CardInstanceId) => boolean;
+    fortTraceBitPoolCapacityForCard: (cardId: CardInstanceId) => number;
   };
   hosting: {
     canHostProgramOnDaemon: (
@@ -634,8 +634,8 @@ function installCorpCard(
   if (rootRezOnInstall) {
     appendRootRezOnInstallEffect(host, server, cardId, definition, legalAction);
   }
-  if (rootRezOnInstall && host.corp.isParisTracePoolSource(cardId)) {
-    const capacity = host.corp.parisTracePoolCapacityForCard(cardId);
+  if (rootRezOnInstall && host.corp.isFortTraceBitPoolSource(cardId)) {
+    const capacity = host.corp.fortTraceBitPoolCapacityForCard(cardId);
     host.counters.setCardCounter(cardId, "bit", capacity);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),

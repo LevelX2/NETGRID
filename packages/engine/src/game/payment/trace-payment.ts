@@ -17,21 +17,23 @@ import type {
 
 export type CorpTracePaymentSourceKind =
   | "temporary_trace_credit"
-  | "paris_city_grid_pool"
+  | "fort_trace_bit_pool"
   | "corp_credits"
-  | "krumz_trace_bit"
-  | "hacker_tracker_counter";
+  | "corp_trace_bit_pool"
+  | "corp_trace_counter_pool";
 
 export type RunnerTracePaymentSourceKind =
   | "runner_credits"
-  | "restricted_trace_link_credit"
-  | "hells_run_trace_credit";
+  | "runner_trace_link_credit";
+
+export type RunnerTracePaymentPublicKind = "hells_run_trace_credit";
 
 export type CorpTracePaymentBreakdown = {
   kind: CorpTracePaymentSourceKind;
   amount: number;
   sourceCardInstanceId?: CardInstanceId;
   sourceDefinitionId?: CardDefinitionId;
+  serverId?: Exclude<ServerId, "new_remote">;
 };
 
 export type RunnerTracePaymentBreakdown = {
@@ -39,6 +41,7 @@ export type RunnerTracePaymentBreakdown = {
   amount: number;
   sourceCardInstanceId?: CardInstanceId;
   sourceDefinitionId?: CardDefinitionId;
+  publicKind?: RunnerTracePaymentPublicKind;
 };
 
 export type CorpTracePaymentQuote = {
@@ -48,20 +51,20 @@ export type CorpTracePaymentQuote = {
   breakdown: CorpTracePaymentBreakdown[];
   normalCreditsToPay: number;
   temporaryTraceCreditsToPay: number;
-  parisCityGridPoolToPay: number;
-  krumzBitsToPay: number;
-  hackerTrackerCountersToPay: number;
+  fortTraceBitPoolToPay: number;
+  corpTraceBitsToPay: number;
+  corpTraceCountersToPay: number;
 };
 
 export type CorpTracePaymentReceipt = {
   temporaryTraceCreditsSpent: number;
   temporaryTraceCreditsRemaining?: number;
-  parisCityGridPoolSpent: number;
-  parisCityGridPoolRemaining?: number;
-  parisCityGridPoolServerId?: Exclude<ServerId, "new_remote">;
+  fortTraceBitPoolSpent: number;
+  fortTraceBitPoolRemaining?: number;
+  fortTraceBitPoolServerId?: Exclude<ServerId, "new_remote">;
   corpCreditsSpent: number;
-  krumzBitsSpent: number;
-  hackerTrackerCountersSpent: number;
+  corpTraceBitsSpent: number;
+  corpTraceCountersSpent: number;
 };
 
 export type RunnerTracePaymentPurpose = "runner_trace_bid" | "post_bid_link";
@@ -85,6 +88,22 @@ export type RunnerTracePaymentReceipt = {
   sourceDefinitionIds: CardDefinitionId[];
 };
 
+export type RunnerTraceLinkCreditSource = {
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  publicKind?: RunnerTracePaymentPublicKind;
+};
+
+type TracePaymentPool<K extends string, P extends string | undefined = undefined> = {
+  kind: K;
+  priority: number;
+  available: number;
+  sourceCardInstanceId?: CardInstanceId;
+  sourceDefinitionId?: CardDefinitionId;
+  serverId?: Exclude<ServerId, "new_remote">;
+  publicKind?: P;
+};
+
 export type CorpTracePaymentDependencies = {
   encounterTemporaryTraceCreditsAvailable: (
     state: GameState,
@@ -95,8 +114,8 @@ export type CorpTracePaymentDependencies = {
     trace: TraceState,
     amount: number,
   ) => number;
-  parisCityGridTracePoolTotal: (state: GameState) => number;
-  spendParisCityGridTracePool: (
+  fortTraceBitPoolTotal: (state: GameState) => number;
+  spendFortTraceBitPool: (
     state: GameState,
     sourceCardId: CardInstanceId | undefined,
     serverId: Exclude<ServerId, "new_remote"> | undefined,
@@ -104,10 +123,10 @@ export type CorpTracePaymentDependencies = {
   ) => number;
   corpCreditsAvailable: (state: GameState) => number;
   spendCorpCredits: (state: GameState, amount: number) => void;
-  krumzTraceBitTotal: (state: GameState) => number;
-  spendKrumzTraceBits: (state: GameState, amount: number) => number;
-  hackerTrackerCounterTotal: (state: GameState) => number;
-  spendHackerTrackerCounters: (state: GameState, amount: number) => number;
+  corpTraceBitPoolTotal: (state: GameState) => number;
+  spendCorpTraceBitPool: (state: GameState, amount: number) => number;
+  corpTraceCounterPoolTotal: (state: GameState) => number;
+  spendCorpTraceCounterPool: (state: GameState, amount: number) => number;
   cardCounter: (
     state: GameState,
     cardId: CardInstanceId,
@@ -116,7 +135,9 @@ export type CorpTracePaymentDependencies = {
 };
 
 export type RunnerTracePaymentDependencies = {
-  runnerTraceLinkCreditSourceIds: (state: GameState) => CardInstanceId[];
+  runnerTraceLinkCreditSources: (
+    state: GameState,
+  ) => RunnerTraceLinkCreditSource[];
   hostedPaymentCredits: (state: GameState, cardId: CardInstanceId) => number;
   spendHostedPaymentCredits: (
     state: GameState,
@@ -131,7 +152,6 @@ export type RunnerTracePaymentDependencies = {
     state: GameState,
     cardId: CardInstanceId,
   ) => CardDefinitionId;
-  hellsRunDefinitionId: CardDefinitionId;
 };
 
 function isValidBidAmount(bid: number): boolean {
@@ -159,12 +179,14 @@ function paymentBreakdown(
   amount: number,
   sourceCardInstanceId?: CardInstanceId,
   sourceDefinitionId?: CardDefinitionId,
+  serverId?: Exclude<ServerId, "new_remote">,
 ): CorpTracePaymentBreakdown {
   return {
     kind,
     amount,
     ...(sourceCardInstanceId ? { sourceCardInstanceId } : {}),
     ...(sourceDefinitionId ? { sourceDefinitionId } : {}),
+    ...(serverId ? { serverId } : {}),
   };
 }
 
@@ -173,13 +195,50 @@ function runnerPaymentBreakdown(
   amount: number,
   sourceCardInstanceId?: CardInstanceId,
   sourceDefinitionId?: CardDefinitionId,
+  publicKind?: RunnerTracePaymentPublicKind,
 ): RunnerTracePaymentBreakdown {
   return {
     kind,
     amount,
     ...(sourceCardInstanceId ? { sourceCardInstanceId } : {}),
     ...(sourceDefinitionId ? { sourceDefinitionId } : {}),
+    ...(publicKind ? { publicKind } : {}),
   };
+}
+
+function allocatedPaymentBreakdowns<
+  K extends string,
+  P extends string | undefined = undefined,
+>(
+  amount: number,
+  pools: TracePaymentPool<K, P>[],
+): Array<
+  TracePaymentPool<K, P> & {
+    amount: number;
+  }
+> {
+  let remaining = amount;
+  const breakdown: Array<TracePaymentPool<K, P> & { amount: number }> = [];
+  for (const pool of pools
+    .slice()
+    .sort((left, right) => left.priority - right.priority)) {
+    if (remaining <= 0) break;
+    const available = Math.max(0, Math.floor(pool.available));
+    const spent = Math.min(available, remaining);
+    if (spent <= 0) continue;
+    breakdown.push({ ...pool, amount: spent });
+    remaining -= spent;
+  }
+  return breakdown;
+}
+
+function allocatedAmount<K extends string>(
+  breakdown: Array<{ kind: K; amount: number }>,
+  kind: K,
+): number {
+  return breakdown
+    .filter((entry) => entry.kind === kind)
+    .reduce((sum, entry) => sum + entry.amount, 0);
 }
 
 function emptyRunnerTracePaymentQuote(
@@ -208,33 +267,52 @@ function quoteRunnerTracePayment(
   if (!isValidPaymentAmount(amount))
     return emptyRunnerTracePaymentQuote(purpose, amount);
 
-  let remaining = amount;
-  let traceLinkCreditsToPay = 0;
-  let hellsRunCreditsToPay = 0;
-  const breakdown: RunnerTracePaymentBreakdown[] = [];
+  const traceLinkPools = deps.runnerTraceLinkCreditSources(state).map(
+    (source, index): TracePaymentPool<
+      RunnerTracePaymentSourceKind,
+      RunnerTracePaymentPublicKind | undefined
+    > => ({
+      kind: "runner_trace_link_credit",
+      priority: index,
+      available: deps.hostedPaymentCredits(state, source.sourceCardInstanceId),
+      sourceCardInstanceId: source.sourceCardInstanceId,
+      sourceDefinitionId: source.sourceDefinitionId,
+      ...(source.publicKind ? { publicKind: source.publicKind } : {}),
+    }),
+  );
+  const traceLinkBreakdown = allocatedPaymentBreakdowns(amount, traceLinkPools);
+  let remaining =
+    amount -
+    traceLinkBreakdown.reduce((sum, entry) => sum + entry.amount, 0);
   const sourceDefinitionIds = new Set<CardDefinitionId>();
-  for (const cardId of deps.runnerTraceLinkCreditSourceIds(state)) {
-    if (remaining <= 0) break;
-    const available = Math.max(
-      0,
-      Math.floor(deps.hostedPaymentCredits(state, cardId)),
-    );
-    const spent = Math.min(available, remaining);
-    if (spent <= 0) continue;
-    const definitionId = deps.definitionIdForCard(state, cardId);
-    const isHellsRun = definitionId === deps.hellsRunDefinitionId;
-    breakdown.push(
-      runnerPaymentBreakdown(
-        isHellsRun ? "hells_run_trace_credit" : "restricted_trace_link_credit",
-        spent,
-        cardId,
-        definitionId,
-      ),
-    );
-    remaining -= spent;
-    traceLinkCreditsToPay += spent;
-    if (isHellsRun) hellsRunCreditsToPay += spent;
-    sourceDefinitionIds.add(definitionId);
+  const breakdown: RunnerTracePaymentBreakdown[] = traceLinkBreakdown.map(
+    (entry) => {
+      if (entry.sourceDefinitionId) sourceDefinitionIds.add(entry.sourceDefinitionId);
+      return runnerPaymentBreakdown(
+        entry.kind,
+        entry.amount,
+        entry.sourceCardInstanceId,
+        entry.sourceDefinitionId,
+        entry.publicKind,
+      );
+    },
+  );
+  const traceLinkCreditsToPay = traceLinkBreakdown.reduce(
+    (sum, entry) => sum + entry.amount,
+    0,
+  );
+  const hellsRunCreditsToPay = traceLinkBreakdown
+    .filter((entry) => entry.publicKind === "hells_run_trace_credit")
+    .reduce((sum, entry) => sum + entry.amount, 0);
+  for (const entry of breakdown) {
+    if (entry.sourceDefinitionId) {
+      const currentDefinitionId =
+        entry.sourceCardInstanceId !== undefined
+          ? deps.definitionIdForCard(state, entry.sourceCardInstanceId)
+          : entry.sourceDefinitionId;
+      if (currentDefinitionId !== entry.sourceDefinitionId)
+        throw new Error("Trace-Link-Zahlungsquelle ist ungueltig.");
+    }
   }
 
   const normalCreditsToPay = Math.min(
@@ -290,9 +368,9 @@ export function quoteCorpTraceBidPayment(
       breakdown: [],
       normalCreditsToPay: 0,
       temporaryTraceCreditsToPay: 0,
-      parisCityGridPoolToPay: 0,
-      krumzBitsToPay: 0,
-      hackerTrackerCountersToPay: 0,
+      fortTraceBitPoolToPay: 0,
+      corpTraceBitsToPay: 0,
+      corpTraceCountersToPay: 0,
     };
   }
 
@@ -300,67 +378,95 @@ export function quoteCorpTraceBidPayment(
     0,
     Math.floor(trace.corpTemporaryTraceCredits?.remaining ?? 0),
   );
-  const temporaryTraceCreditsToPay = Math.min(
-    deps.encounterTemporaryTraceCreditsAvailable(state, trace) +
-      implementationTemporaryTraceCreditsAvailable,
-    bid,
-  );
-  const parisCityGridPoolAvailable =
-    trace.parisCityGridPoolSourceCardInstanceId &&
-    trace.parisCityGridPoolServerId
-      ? deps.parisCityGridTracePoolTotal(state)
+  const fortTraceBitPoolAvailable =
+    trace.fortTraceBitPoolSourceCardInstanceId && trace.fortTraceBitPoolServerId
+      ? deps.fortTraceBitPoolTotal(state)
       : 0;
-  const parisCityGridPoolToPay = Math.min(
-    parisCityGridPoolAvailable,
-    bid - temporaryTraceCreditsToPay,
+  const breakdown = allocatedPaymentBreakdowns<CorpTracePaymentSourceKind>(bid, [
+    {
+      kind: "temporary_trace_credit",
+      priority: 10,
+      available:
+        deps.encounterTemporaryTraceCreditsAvailable(state, trace) +
+        implementationTemporaryTraceCreditsAvailable,
+      ...((trace.corpTemporaryTraceCredits?.sourceCardInstanceId ??
+        trace.encounterTemporaryTraceCreditSourceIceId)
+        ? {
+            sourceCardInstanceId:
+              trace.corpTemporaryTraceCredits?.sourceCardInstanceId ??
+              trace.encounterTemporaryTraceCreditSourceIceId,
+          }
+        : {}),
+      ...((trace.corpTemporaryTraceCredits?.sourceDefinitionId ??
+        trace.encounterTemporaryTraceCreditSourceDefinitionId)
+        ? {
+            sourceDefinitionId:
+              trace.corpTemporaryTraceCredits?.sourceDefinitionId ??
+              trace.encounterTemporaryTraceCreditSourceDefinitionId,
+          }
+        : {}),
+    },
+    {
+      kind: "fort_trace_bit_pool",
+      priority: 20,
+      available: fortTraceBitPoolAvailable,
+      ...(trace.fortTraceBitPoolSourceCardInstanceId
+        ? { sourceCardInstanceId: trace.fortTraceBitPoolSourceCardInstanceId }
+        : {}),
+      ...(trace.fortTraceBitPoolServerId
+        ? { serverId: trace.fortTraceBitPoolServerId }
+        : {}),
+    },
+    {
+      kind: "corp_credits",
+      priority: 30,
+      available: deps.corpCreditsAvailable(state),
+    },
+    {
+      kind: "corp_trace_bit_pool",
+      priority: 40,
+      available: deps.corpTraceBitPoolTotal(state),
+    },
+    {
+      kind: "corp_trace_counter_pool",
+      priority: 50,
+      available: deps.corpTraceCounterPoolTotal(state),
+    },
+  ]);
+  const paidTotal = breakdown.reduce((sum, entry) => sum + entry.amount, 0);
+  const temporaryTraceCreditsToPay = allocatedAmount(
+    breakdown,
+    "temporary_trace_credit",
   );
-  const normalCreditsToPay = Math.min(
-    deps.corpCreditsAvailable(state),
-    bid - temporaryTraceCreditsToPay - parisCityGridPoolToPay,
+  const fortTraceBitPoolToPay = allocatedAmount(breakdown, "fort_trace_bit_pool");
+  const normalCreditsToPay = allocatedAmount(breakdown, "corp_credits");
+  const corpTraceBitsToPay = allocatedAmount(breakdown, "corp_trace_bit_pool");
+  const corpTraceCountersToPay = allocatedAmount(
+    breakdown,
+    "corp_trace_counter_pool",
   );
-  const krumzBitsToPay = Math.min(
-    deps.krumzTraceBitTotal(state),
-    bid -
-      temporaryTraceCreditsToPay -
-      parisCityGridPoolToPay -
-      normalCreditsToPay,
-  );
-  const hackerTrackerCountersToPay =
-    bid -
-    temporaryTraceCreditsToPay -
-    parisCityGridPoolToPay -
-    normalCreditsToPay -
-    krumzBitsToPay;
-  const canPay =
-    hackerTrackerCountersToPay <= deps.hackerTrackerCounterTotal(state);
+  const canPay = paidTotal === bid;
 
   return {
     side: "corp",
     bid,
     canPay,
-    breakdown: positiveBreakdown([
-      paymentBreakdown(
-        "temporary_trace_credit",
-        temporaryTraceCreditsToPay,
-        trace.corpTemporaryTraceCredits?.sourceCardInstanceId ??
-          trace.encounterTemporaryTraceCreditSourceIceId,
-        trace.corpTemporaryTraceCredits?.sourceDefinitionId ??
-          trace.encounterTemporaryTraceCreditSourceDefinitionId,
+    breakdown: positiveBreakdown(
+      breakdown.map((entry) =>
+        paymentBreakdown(
+          entry.kind,
+          entry.amount,
+          entry.sourceCardInstanceId,
+          entry.sourceDefinitionId,
+          entry.serverId,
+        ),
       ),
-      paymentBreakdown(
-        "paris_city_grid_pool",
-        parisCityGridPoolToPay,
-        trace.parisCityGridPoolSourceCardInstanceId,
-      ),
-      paymentBreakdown("corp_credits", normalCreditsToPay),
-      paymentBreakdown("krumz_trace_bit", krumzBitsToPay),
-      paymentBreakdown("hacker_tracker_counter", hackerTrackerCountersToPay),
-    ]),
+    ),
     normalCreditsToPay,
     temporaryTraceCreditsToPay,
-    parisCityGridPoolToPay,
-    krumzBitsToPay,
-    hackerTrackerCountersToPay,
+    fortTraceBitPoolToPay,
+    corpTraceBitsToPay,
+    corpTraceCountersToPay,
   };
 }
 
@@ -373,9 +479,30 @@ function quoteMatchesCurrent(
     left.canPay === right.canPay &&
     left.normalCreditsToPay === right.normalCreditsToPay &&
     left.temporaryTraceCreditsToPay === right.temporaryTraceCreditsToPay &&
-    left.parisCityGridPoolToPay === right.parisCityGridPoolToPay &&
-    left.krumzBitsToPay === right.krumzBitsToPay &&
-    left.hackerTrackerCountersToPay === right.hackerTrackerCountersToPay
+    left.fortTraceBitPoolToPay === right.fortTraceBitPoolToPay &&
+    left.corpTraceBitsToPay === right.corpTraceBitsToPay &&
+    left.corpTraceCountersToPay === right.corpTraceCountersToPay &&
+    sameCorpBreakdown(left.breakdown, right.breakdown)
+  );
+}
+
+function sameCorpBreakdown(
+  left: CorpTracePaymentBreakdown[],
+  right: CorpTracePaymentBreakdown[],
+): boolean {
+  return (
+    left.length === right.length &&
+    left.every((entry, index) => {
+      const other = right[index];
+      return (
+        other !== undefined &&
+        entry.kind === other.kind &&
+        entry.amount === other.amount &&
+        entry.sourceCardInstanceId === other.sourceCardInstanceId &&
+        entry.sourceDefinitionId === other.sourceDefinitionId &&
+        entry.serverId === other.serverId
+      );
+    })
   );
 }
 
@@ -402,7 +529,8 @@ function sameRunnerBreakdown(
         entry.kind === other.kind &&
         entry.amount === other.amount &&
         entry.sourceCardInstanceId === other.sourceCardInstanceId &&
-        entry.sourceDefinitionId === other.sourceDefinitionId
+        entry.sourceDefinitionId === other.sourceDefinitionId &&
+        entry.publicKind === other.publicKind
       );
     })
   );
@@ -499,11 +627,7 @@ function payRunnerTracePaymentQuote(
     deps.recordRunActionSpendingCapSpend(state, quote.amount);
   deps.recordRunnerRunCreditSpend(state, quote.amount);
   for (const entry of quote.breakdown) {
-    if (
-      entry.kind !== "restricted_trace_link_credit" &&
-      entry.kind !== "hells_run_trace_credit"
-    )
-      continue;
+    if (entry.kind !== "runner_trace_link_credit") continue;
     if (!entry.sourceCardInstanceId)
       throw new Error("Trace-Link-Zahlungsquelle fehlt.");
     deps.spendHostedPaymentCredits(
@@ -645,34 +769,34 @@ export function payCorpTraceBidQuote(
     encounterTemporaryTraceCreditsSpent;
   if (temporaryTraceCreditsSpent !== validQuote.temporaryTraceCreditsToPay)
     throw new Error("Temporary Trace Credits sind nicht mehr gueltig.");
-  const parisCityGridPoolSpent = deps.spendParisCityGridTracePool(
+  const fortTraceBitPoolSpent = deps.spendFortTraceBitPool(
     state,
-    trace.parisCityGridPoolSourceCardInstanceId,
-    trace.parisCityGridPoolServerId,
-    validQuote.parisCityGridPoolToPay,
+    trace.fortTraceBitPoolSourceCardInstanceId,
+    trace.fortTraceBitPoolServerId,
+    validQuote.fortTraceBitPoolToPay,
   );
-  if (parisCityGridPoolSpent !== validQuote.parisCityGridPoolToPay)
-    throw new Error("Paris City Grid ist fuer diesen Trace nicht verfuegbar.");
+  if (fortTraceBitPoolSpent !== validQuote.fortTraceBitPoolToPay)
+    throw new Error("Fort-Trace-Bit-Pool ist fuer diesen Trace nicht verfuegbar.");
   deps.spendCorpCredits(state, validQuote.normalCreditsToPay);
-  const krumzBitsSpent = deps.spendKrumzTraceBits(
+  const corpTraceBitsSpent = deps.spendCorpTraceBitPool(
     state,
-    validQuote.krumzBitsToPay,
+    validQuote.corpTraceBitsToPay,
   );
-  if (krumzBitsSpent !== validQuote.krumzBitsToPay)
-    throw new Error("Krumz hat nicht genug Bits.");
-  const hackerTrackerCountersSpent = deps.spendHackerTrackerCounters(
+  if (corpTraceBitsSpent !== validQuote.corpTraceBitsToPay)
+    throw new Error("Korp-Trace-Bit-Pool hat nicht genug Bits.");
+  const corpTraceCountersSpent = deps.spendCorpTraceCounterPool(
     state,
-    validQuote.hackerTrackerCountersToPay,
+    validQuote.corpTraceCountersToPay,
   );
-  if (hackerTrackerCountersSpent !== validQuote.hackerTrackerCountersToPay)
-    throw new Error("Hacker Tracker Central hat nicht genug Counter.");
+  if (corpTraceCountersSpent !== validQuote.corpTraceCountersToPay)
+    throw new Error("Korp-Trace-Counter-Pool hat nicht genug Counter.");
 
   const receipt: CorpTracePaymentReceipt = {
     temporaryTraceCreditsSpent,
-    parisCityGridPoolSpent,
+    fortTraceBitPoolSpent,
     corpCreditsSpent: validQuote.normalCreditsToPay,
-    krumzBitsSpent,
-    hackerTrackerCountersSpent,
+    corpTraceBitsSpent,
+    corpTraceCountersSpent,
   };
   if (temporaryTraceCreditsSpent > 0) {
     receipt.temporaryTraceCreditsRemaining =
@@ -680,17 +804,17 @@ export function payCorpTraceBidQuote(
       (state.run?.encounterTemporaryTraceCredits?.remaining ?? 0);
   }
   if (
-    parisCityGridPoolSpent > 0 &&
-    trace.parisCityGridPoolSourceCardInstanceId
+    fortTraceBitPoolSpent > 0 &&
+    trace.fortTraceBitPoolSourceCardInstanceId
   ) {
-    receipt.parisCityGridPoolRemaining = deps.cardCounter(
+    receipt.fortTraceBitPoolRemaining = deps.cardCounter(
       state,
-      trace.parisCityGridPoolSourceCardInstanceId,
+      trace.fortTraceBitPoolSourceCardInstanceId,
       "bit",
     );
   }
-  if (parisCityGridPoolSpent > 0 && trace.parisCityGridPoolServerId) {
-    receipt.parisCityGridPoolServerId = trace.parisCityGridPoolServerId;
+  if (fortTraceBitPoolSpent > 0 && trace.fortTraceBitPoolServerId) {
+    receipt.fortTraceBitPoolServerId = trace.fortTraceBitPoolServerId;
   }
   return receipt;
 }
@@ -713,20 +837,20 @@ export function corpTracePaymentPublicPayload(
         }
       : {}),
     corpCreditBid: receipt.corpCreditsSpent,
-    ...(receipt.parisCityGridPoolSpent > 0
+    ...(receipt.fortTraceBitPoolSpent > 0
       ? {
-          parisCityGridPoolSpent: receipt.parisCityGridPoolSpent,
-          parisCityGridPoolRemaining: receipt.parisCityGridPoolRemaining ?? 0,
-          parisCityGridPoolServerId: receipt.parisCityGridPoolServerId,
+          parisCityGridPoolSpent: receipt.fortTraceBitPoolSpent,
+          parisCityGridPoolRemaining: receipt.fortTraceBitPoolRemaining ?? 0,
+          parisCityGridPoolServerId: receipt.fortTraceBitPoolServerId,
         }
       : {}),
-    ...(receipt.krumzBitsSpent > 0
-      ? { krumzBitsSpent: receipt.krumzBitsSpent }
+    ...(receipt.corpTraceBitsSpent > 0
+      ? { krumzBitsSpent: receipt.corpTraceBitsSpent }
       : {}),
-    ...(receipt.hackerTrackerCountersSpent > 0
+    ...(receipt.corpTraceCountersSpent > 0
       ? {
-          hackerTrackerCountersSpent: receipt.hackerTrackerCountersSpent,
-          traceHostedCreditBoost: receipt.hackerTrackerCountersSpent,
+          hackerTrackerCountersSpent: receipt.corpTraceCountersSpent,
+          traceHostedCreditBoost: receipt.corpTraceCountersSpent,
         }
       : {}),
   };

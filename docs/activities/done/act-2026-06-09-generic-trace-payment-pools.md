@@ -1,21 +1,38 @@
 ---
 activityId: act-2026-06-09-generic-trace-payment-pools
-status: inbox
+status: done
 kind: architecture
 area: engine
 priority: normal
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-06-09
-startedAt:
-completedAt:
+startedAt: 2026-06-09
+completedAt: 2026-06-09
 branch:
 releaseTarget:
 blockedBy: []
 relatedActivities:
   - act-2026-05-17-generic-counter-credit-pool-resolver
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/payment/trace-payment.ts
+  - packages/engine/src/game/payment/trace-payment.test.ts
+  - packages/engine/src/game/trace/trace-orchestration.ts
+  - packages/engine/src/game/run/encounter-printed-effects.ts
+  - packages/engine/src/game/run/fort-run-side-families.ts
+  - packages/shared/src/index.ts
+  - packages/engine/src/game/engine-runtime-internal/
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-06.md
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/payment/trace-payment.test.ts
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/trace/trace-orchestration.test.ts src/game/run/encounter-printed-effects.test.ts
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/assets-nodes-upgrades.test.ts -t "Krumz|Paris City Grid|Turbeau"
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/trace-tags-resources.test.ts -t "Hacker Tracker"
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/originalset/agenda-scorearea-recurring.test.ts -t "Hell's Run"
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/payment/trace-payment.test.ts src/game/trace/trace-orchestration.test.ts src/game/run/encounter-printed-effects.test.ts
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/install/install-card.test.ts src/game/rez/rez-card.test.ts src/game/run/fort-run-side-families.test.ts
+  - git diff --check
 ---
 
 # Trace-Payment-Pools generisch parametrieren
@@ -56,12 +73,12 @@ Trace-Zahlungsquellen sollen nicht mehr als einzelne Kartenpfade wie `Paris City
 
 ## Akzeptanzkriterien
 
-- [ ] Mindestens zwei bisher getrennte Trace-Payment-Quellen laufen über dieselbe generische Quote-/Spend-Struktur.
-- [ ] Hells-Run-artige Runner-Trace-Link-Credits sind nicht mehr über einen hart codierten DefinitionId-Vergleich als eigene Payment-Kind-Ausnahme modelliert.
-- [ ] Fort-gebundene Trace-Bits sind intern neutral benannt, auch wenn PublicPayload oder Chronik weiterhin die Quelle anzeigen darf.
-- [ ] Quote-Revalidation verhindert stale Payment weiterhin deterministisch.
-- [ ] PublicPayload bleibt side-sicher und enthält keine verdeckten Quellen.
-- [ ] Fokussierte Engine-Tests decken Corp-Trace-Pool, Runner-Trace-Link-Pool und einen negativen stale-Quote-Fall ab.
+- [x] Mindestens zwei bisher getrennte Trace-Payment-Quellen laufen über dieselbe generische Quote-/Spend-Struktur.
+- [x] Hells-Run-artige Runner-Trace-Link-Credits sind nicht mehr über einen hart codierten DefinitionId-Vergleich als eigene Payment-Kind-Ausnahme modelliert.
+- [x] Fort-gebundene Trace-Bits sind intern neutral benannt, auch wenn PublicPayload oder Chronik weiterhin die Quelle anzeigen darf.
+- [x] Quote-Revalidation verhindert stale Payment weiterhin deterministisch.
+- [x] PublicPayload bleibt side-sicher und enthält keine verdeckten Quellen.
+- [x] Fokussierte Engine-Tests decken Corp-Trace-Pool, Runner-Trace-Link-Pool und einen negativen stale-Quote-Fall ab.
 
 ## Umsetzungshinweise
 
@@ -76,4 +93,6 @@ Trace-Zahlungsquellen sollen nicht mehr als einzelne Kartenpfade wie `Paris City
 
 ## Ergebnisnotiz
 
-Noch offen.
+Trace-Payment nutzt jetzt intern priorisierte `TracePaymentPool`-Descriptors. Korp-Bids allokieren temporäre Trace-Credits, Fort-Trace-Bits, normale Credits, Korp-Trace-Bits und Korp-Trace-Counter über denselben Quote-Pfad; Runner-Bids nutzen für PK-/Hell's-Run-artige Credits denselben `runner_trace_link_credit`-Kind. `Hell's Run` wird im Payment-Modul nicht mehr über eine DefinitionId-Ausnahme als eigener Payment-Kind behandelt, sondern nur noch als optionales Public-Kind aus der Source-Discovery für die bestehende sichtbare Payload markiert.
+
+Interne Fort-Bit-Pool-Felder und Helper heißen `fortTraceBitPool...`; die bestehenden öffentlichen `parisCityGridPool...`-Payloadfelder bleiben für aktuelle Anzeige- und Regressionstests erhalten. Quote-Revalidation vergleicht jetzt neben Summen auch Breakdown-Kind, Source und Server. Neue Payment-Unit-Tests decken Corp-Pools, Runner-Trace-Link-Pools und stale Quote-Drift ab; fokussierte Trace-/Index-Smokes, betroffene Install-/Rez-/Fort-Run-Units, Typecheck und `git diff --check` sind grün.

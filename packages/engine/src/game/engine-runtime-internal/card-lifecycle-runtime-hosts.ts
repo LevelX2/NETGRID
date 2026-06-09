@@ -445,16 +445,16 @@ import {
   applyPostBreakStealthLoss,
   clearActivityGatedFortRunMarkers,
   isActivityGatedFortRunBlocked,
-  isParisTracePoolSource,
+  isFortTraceBitPoolSource,
   markFortActivityForRunGate,
-  parisCityGridTracePoolSource,
-  parisCityGridTracePoolTotal,
-  parisTracePoolCapacityForCard,
+  fortTraceBitPoolSource,
+  fortTraceBitPoolTotal,
+  fortTraceBitPoolCapacityForCard,
   resolveAardvarkInterceptionChoice,
   resolveHammerStealthLossChoice,
   runnerStealthRecurringCredits,
   shouldOpenAardvarkInterception,
-  spendParisCityGridTracePool,
+  spendFortTraceBitPool,
   startAardvarkInterceptionChoice,
   validateActivityGatedFortRun,
   type FortRunSideFamiliesHost,
@@ -836,13 +836,13 @@ export function createCardLifecycleRuntimeHosts(
         consumeEdgerunnerTempsInstallAction: (legalAction) =>
           consumeEdgerunnerTempsInstallAction(state, legalAction),
         isRegionUpgrade,
-        isParisTracePoolSource: (cardId) =>
-          isParisTracePoolSource(
+        isFortTraceBitPoolSource: (cardId) =>
+          isFortTraceBitPoolSource(
             fortRunSideFamiliesHostForState(state),
             cardId,
           ),
-        parisTracePoolCapacityForCard: (cardId) =>
-          parisTracePoolCapacityForCard(
+        fortTraceBitPoolCapacityForCard: (cardId) =>
+          fortTraceBitPoolCapacityForCard(
             fortRunSideFamiliesHostForState(state),
             cardId,
           ),
@@ -988,13 +988,13 @@ export function createCardLifecycleRuntimeHosts(
           ),
       },
       fort: {
-        isParisTracePoolSource: (cardId) =>
-          isParisTracePoolSource(
+        isFortTraceBitPoolSource: (cardId) =>
+          isFortTraceBitPoolSource(
             fortRunSideFamiliesHostForState(state),
             cardId,
           ),
-        parisTracePoolCapacityForCard: (cardId) =>
-          parisTracePoolCapacityForCard(
+        fortTraceBitPoolCapacityForCard: (cardId) =>
+          fortTraceBitPoolCapacityForCard(
             fortRunSideFamiliesHostForState(state),
             cardId,
           ),

@@ -1214,8 +1214,8 @@ export type TraceState = {
   traceBidLimit?: number;
   corpBidMax?: number;
   rabbitTraceLimitReduction?: number;
-  parisCityGridPoolSourceCardInstanceId?: CardInstanceId;
-  parisCityGridPoolServerId?: Exclude<ServerId, "new_remote">;
+  fortTraceBitPoolSourceCardInstanceId?: CardInstanceId;
+  fortTraceBitPoolServerId?: Exclude<ServerId, "new_remote">;
   encounterTemporaryTraceCreditSourceIceId?: CardInstanceId;
   encounterTemporaryTraceCreditSourceDefinitionId?: CardDefinitionId;
   status:

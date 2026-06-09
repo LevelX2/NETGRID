@@ -116,7 +116,7 @@ function host(): TraceRuntimeDepsHost {
           krumzTraceBitTotal: () => 0,
         },
         fort: {
-          parisCityGridTracePoolSource: () => undefined,
+          fortTraceBitPoolSource: () => undefined,
         },
         run: {
           markSubmarineUplinkJackOutAfterEncounter: () => undefined,

@@ -56,7 +56,7 @@ export type EncounterPrintedEffectHost = {
       event: ImminentEvent,
       legalAction: LegalAction,
     ) => boolean;
-    parisCityGridTracePoolSource: () =>
+    fortTraceBitPoolSource: () =>
       | { cardId: CardInstanceId; serverId: Exclude<ServerId, "new_remote"> }
       | undefined;
     rabbitTraceLimitReductionForIceTrace: () => number;
@@ -267,20 +267,20 @@ export function startTraceFromPrintedSubroutine(
     run.resolvedSubroutineIndexes.push(subroutineIndex);
   const sourceDefinition = host.callbacks.definitionFor(sourceCardInstanceId);
   const traceId = `${run.runId}.${sourceCardInstanceId}.${subroutineIndex}.trace`;
-  const parisPoolSource = host.callbacks.parisCityGridTracePoolSource();
+  const fortTraceBitPoolSource = host.callbacks.fortTraceBitPoolSource();
   const encounterTemporaryTraceCredits =
     run.encounterTemporaryTraceCredits?.sourceIceId === sourceCardInstanceId
       ? Math.max(0, Math.floor(run.encounterTemporaryTraceCredits.remaining ?? 0))
       : 0;
-  const parisBits = parisPoolSource
-    ? host.callbacks.cardCounter(parisPoolSource.cardId, "bit")
+  const fortTraceBits = fortTraceBitPoolSource
+    ? host.callbacks.cardCounter(fortTraceBitPoolSource.cardId, "bit")
     : 0;
   const baseCorpBidMax =
     state.corp.credits +
     encounterTemporaryTraceCredits +
     host.callbacks.hackerTrackerCounterTotal() +
     host.callbacks.krumzTraceBitTotal() +
-    parisBits;
+    fortTraceBits;
   const rabbitTraceLimitReduction =
     host.callbacks.rabbitTraceLimitReductionForIceTrace();
   const corpBidMax = Math.max(
@@ -297,10 +297,10 @@ export function startTraceFromPrintedSubroutine(
     ...(traceBidLimit !== undefined ? { traceBidLimit } : {}),
     corpBidMax,
     ...(rabbitTraceLimitReduction > 0 ? { rabbitTraceLimitReduction } : {}),
-    ...(parisPoolSource
+    ...(fortTraceBitPoolSource
       ? {
-          parisCityGridPoolSourceCardInstanceId: parisPoolSource.cardId,
-          parisCityGridPoolServerId: parisPoolSource.serverId,
+          fortTraceBitPoolSourceCardInstanceId: fortTraceBitPoolSource.cardId,
+          fortTraceBitPoolServerId: fortTraceBitPoolSource.serverId,
         }
       : {}),
     ...(encounterTemporaryTraceCredits > 0
@@ -331,10 +331,10 @@ export function startTraceFromPrintedSubroutine(
       ...(traceBidLimit !== undefined ? { traceBidLimit } : {}),
       corpBidMax,
       ...(rabbitTraceLimitReduction > 0 ? { rabbitTraceLimitReduction } : {}),
-      ...(parisPoolSource
+      ...(fortTraceBitPoolSource
         ? {
-            parisCityGridPoolAvailable: parisBits,
-            parisCityGridPoolServerId: parisPoolSource.serverId,
+            parisCityGridPoolAvailable: fortTraceBits,
+            parisCityGridPoolServerId: fortTraceBitPoolSource.serverId,
             sourceDefinitionId: sourceDefinition.id,
           }
         : {}),

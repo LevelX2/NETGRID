@@ -471,8 +471,8 @@ function testHost(
       expireCorporateRetreatInstallCreditAbilities: () => undefined,
       consumeEdgerunnerTempsInstallAction: () => undefined,
       isRegionUpgrade: (definition) => definition.subtypes.includes("region"),
-      isParisTracePoolSource: () => false,
-      parisTracePoolCapacityForCard: () => 0,
+      isFortTraceBitPoolSource: () => false,
+      fortTraceBitPoolCapacityForCard: () => 0,
     },
     hosting: {
       canHostProgramOnDaemon: () => true,

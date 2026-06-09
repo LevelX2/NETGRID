@@ -2715,8 +2715,8 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       baseTraceStrength: 10,
       corpBidMax: 8,
       sourceDefinitionId: "onr_v1_372_turbeau-delacroix",
-      parisCityGridPoolSourceCardInstanceId: parisId,
-      parisCityGridPoolServerId: "remote_1",
+      fortTraceBitPoolSourceCardInstanceId: parisId,
+      fortTraceBitPoolServerId: "remote_1",
     });
     traceState = applyChoice(traceState, "corp", "bid_6");
     expect(cardCounterAmount(traceState, parisId, "bit")).toBe(0);

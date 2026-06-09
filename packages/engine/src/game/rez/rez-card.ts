@@ -79,8 +79,8 @@ export type RezCardHost = {
     ) => void;
   };
   fort: {
-    isParisTracePoolSource: (cardId: CardInstanceId) => boolean;
-    parisTracePoolCapacityForCard: (cardId: CardInstanceId) => number;
+    isFortTraceBitPoolSource: (cardId: CardInstanceId) => boolean;
+    fortTraceBitPoolCapacityForCard: (cardId: CardInstanceId) => number;
   };
   constants: {
     KRUMZ_TRACE_ASSET_CARD_ID: CardDefinitionId;
@@ -214,8 +214,8 @@ export function rezCard(
   ) {
     host.counters.setCardCounter(cardId, "bit", 1);
   }
-  if (host.fort.isParisTracePoolSource(cardId)) {
-    const capacity = host.fort.parisTracePoolCapacityForCard(cardId);
+  if (host.fort.isFortTraceBitPoolSource(cardId)) {
+    const capacity = host.fort.fortTraceBitPoolCapacityForCard(cardId);
     host.counters.setCardCounter(cardId, "bit", capacity);
     if (legalAction) {
       legalAction.payload = {

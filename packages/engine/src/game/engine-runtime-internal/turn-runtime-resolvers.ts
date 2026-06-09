@@ -464,16 +464,16 @@ import {
   applyPostBreakStealthLoss,
   clearActivityGatedFortRunMarkers,
   isActivityGatedFortRunBlocked,
-  isParisTracePoolSource,
+  isFortTraceBitPoolSource,
   markFortActivityForRunGate,
-  parisCityGridTracePoolSource,
-  parisCityGridTracePoolTotal,
-  parisTracePoolCapacityForCard,
+  fortTraceBitPoolSource,
+  fortTraceBitPoolTotal,
+  fortTraceBitPoolCapacityForCard,
   resolveAardvarkInterceptionChoice,
   resolveHammerStealthLossChoice,
   runnerStealthRecurringCredits,
   shouldOpenAardvarkInterception,
-  spendParisCityGridTracePool,
+  spendFortTraceBitPool,
   startAardvarkInterceptionChoice,
   validateActivityGatedFortRun,
   type FortRunSideFamiliesHost,
@@ -2356,8 +2356,8 @@ function applyCorpStartOfTurnEffects(
         ),
       );
     }
-    if (isParisTracePoolSource(fortRunSideFamiliesHostForState(state), cardId)) {
-      const capacity = parisTracePoolCapacityForCard(
+    if (isFortTraceBitPoolSource(fortRunSideFamiliesHostForState(state), cardId)) {
+      const capacity = fortTraceBitPoolCapacityForCard(
         fortRunSideFamiliesHostForState(state),
         cardId,
       );

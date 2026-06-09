@@ -468,16 +468,16 @@ import {
   applyPostBreakStealthLoss,
   clearActivityGatedFortRunMarkers,
   isActivityGatedFortRunBlocked,
-  isParisTracePoolSource,
+  isFortTraceBitPoolSource,
   markFortActivityForRunGate,
-  parisCityGridTracePoolSource,
-  parisCityGridTracePoolTotal,
-  parisTracePoolCapacityForCard,
+  fortTraceBitPoolSource,
+  fortTraceBitPoolTotal,
+  fortTraceBitPoolCapacityForCard,
   resolveAardvarkInterceptionChoice,
   resolveHammerStealthLossChoice,
   runnerStealthRecurringCredits,
   shouldOpenAardvarkInterception,
-  spendParisCityGridTracePool,
+  spendFortTraceBitPool,
   startAardvarkInterceptionChoice,
   validateActivityGatedFortRun,
   type FortRunSideFamiliesHost,
@@ -991,10 +991,10 @@ export function runnerInstalledHardwareTrashTarget(
 export const corpTracePaymentDeps: CorpTracePaymentDependencies = {
   encounterTemporaryTraceCreditsAvailable,
   spendEncounterTemporaryTraceCredits,
-  parisCityGridTracePoolTotal: (state) =>
-    parisCityGridTracePoolTotal(fortRunSideFamiliesHostForState(state)),
-  spendParisCityGridTracePool: (state, sourceCardId, serverId, amount) =>
-    spendParisCityGridTracePool(
+  fortTraceBitPoolTotal: (state) =>
+    fortTraceBitPoolTotal(fortRunSideFamiliesHostForState(state)),
+  spendFortTraceBitPool: (state, sourceCardId, serverId, amount) =>
+    spendFortTraceBitPool(
       fortRunSideFamiliesHostForState(state),
       sourceCardId,
       serverId,
@@ -1002,15 +1002,15 @@ export const corpTracePaymentDeps: CorpTracePaymentDependencies = {
     ),
   corpCreditsAvailable: (state) => state.corp.credits,
   spendCorpCredits: (state, amount) => spendCredits(state, "corp", amount),
-  krumzTraceBitTotal,
-  spendKrumzTraceBits,
-  hackerTrackerCounterTotal,
-  spendHackerTrackerCounters,
+  corpTraceBitPoolTotal: krumzTraceBitTotal,
+  spendCorpTraceBitPool: spendKrumzTraceBits,
+  corpTraceCounterPoolTotal: hackerTrackerCounterTotal,
+  spendCorpTraceCounterPool: spendHackerTrackerCounters,
   cardCounter,
 };
 
 export const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
-  runnerTraceLinkCreditSourceIds: (state) =>
+  runnerTraceLinkCreditSources: (state) =>
     [
       ...restrictedHostedCreditSourceIds(state, "increase_link"),
       ...[...state.runner.rig.hardware, ...state.runner.rig.resources].filter(
@@ -1019,7 +1019,18 @@ export const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
           definitionFor(state, cardId).id === HELLS_RUN_ID &&
           cardCounter(state, cardId, "recurring_credit") > 0,
       ),
-    ].sort(),
+    ]
+      .sort()
+      .map((cardId) => {
+        const sourceDefinitionId = definitionFor(state, cardId).id;
+        return {
+          sourceCardInstanceId: cardId,
+          sourceDefinitionId,
+          ...(sourceDefinitionId === HELLS_RUN_ID
+            ? { publicKind: "hells_run_trace_credit" as const }
+            : {}),
+        };
+      }),
   hostedPaymentCredits,
   spendHostedPaymentCredits,
   runnerCreditsAvailable: (state) => state.runner.credits,
@@ -1033,7 +1044,6 @@ export const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
     recordRunActionSpendingCapSpend(runDurationPaymentHost(state), amount);
   },
   definitionIdForCard: (state, cardId) => definitionFor(state, cardId).id,
-  hellsRunDefinitionId: HELLS_RUN_ID,
 };
 
 export function isV097OrLater(state: GameState): boolean {

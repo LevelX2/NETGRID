@@ -361,9 +361,9 @@ function testHost(
       },
     },
     fort: {
-      isParisTracePoolSource: (cardId) =>
+      isFortTraceBitPoolSource: (cardId) =>
         options.parisCapacity?.has(cardId) ?? false,
-      parisTracePoolCapacityForCard: (cardId) =>
+      fortTraceBitPoolCapacityForCard: (cardId) =>
         options.parisCapacity?.get(cardId) ?? 0,
     },
     constants: {

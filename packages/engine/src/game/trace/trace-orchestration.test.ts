@@ -604,20 +604,20 @@ function testHost(
   const corpTracePaymentDeps: CorpTracePaymentDependencies = {
     encounterTemporaryTraceCreditsAvailable: () => 0,
     spendEncounterTemporaryTraceCredits: () => 0,
-    parisCityGridTracePoolTotal: () => 0,
-    spendParisCityGridTracePool: () => 0,
+    fortTraceBitPoolTotal: () => 0,
+    spendFortTraceBitPool: () => 0,
     corpCreditsAvailable: (targetState) => targetState.corp.credits,
     spendCorpCredits: (targetState, amount) => {
       targetState.corp.credits -= amount;
     },
-    krumzTraceBitTotal: () => 0,
-    spendKrumzTraceBits: () => 0,
-    hackerTrackerCounterTotal: () => 0,
-    spendHackerTrackerCounters: () => 0,
+    corpTraceBitPoolTotal: () => 0,
+    spendCorpTraceBitPool: () => 0,
+    corpTraceCounterPoolTotal: () => 0,
+    spendCorpTraceCounterPool: () => 0,
     cardCounter: () => 0,
   };
   const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
-    runnerTraceLinkCreditSourceIds: () => [],
+    runnerTraceLinkCreditSources: () => [],
     hostedPaymentCredits: () => 0,
     spendHostedPaymentCredits: () => undefined,
     runnerCreditsAvailable: (targetState) => targetState.runner.credits,
@@ -630,7 +630,6 @@ function testHost(
     },
     definitionIdForCard: (targetState, cardId) =>
       targetState.cardInstances[cardId]!.definitionId,
-    hellsRunDefinitionId: "hells_run" as CardDefinitionId,
   };
   return {
     state,
@@ -716,7 +715,7 @@ function testHost(
       krumzTraceBitTotal: () => 0,
     },
     fort: {
-      parisCityGridTracePoolSource: () => undefined,
+      fortTraceBitPoolSource: () => undefined,
     },
     run: {
       markSubmarineUplinkJackOutAfterEncounter: (cardId) => {

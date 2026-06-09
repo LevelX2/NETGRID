@@ -192,7 +192,7 @@ function makeHost(
     openDamageResolutionWindow: () => false,
     openEventModificationWindow: () => false,
     openReplacementWindow: () => false,
-    parisCityGridTracePoolSource: () => undefined,
+    fortTraceBitPoolSource: () => undefined,
     rabbitTraceLimitReductionForIceTrace: () => 0,
     resolveDamageImminentEvent: (event) =>
       ({

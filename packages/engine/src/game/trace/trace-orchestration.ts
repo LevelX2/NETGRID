@@ -100,7 +100,7 @@ export type TraceOrchestrationHost = {
     krumzTraceBitTotal: () => number;
   };
   fort: {
-    parisCityGridTracePoolSource: () =>
+    fortTraceBitPoolSource: () =>
       | {
           cardId: CardInstanceId;
           serverId: Exclude<ServerId, "new_remote">;
@@ -157,13 +157,13 @@ export function startTraceFromOperation(
   if (!sourceCardInstanceId || !state.cardInstances[sourceCardInstanceId])
     throw new Error("Trace-Operation hat keine gueltige Quellenkarte.");
   const traceId = `op_trace.${state.stateVersion + 1}.${host.callbacks.sanitizeId(sourceDefinitionId)}.${sourceCardInstanceId}`;
-  const parisPoolSource = host.fort.parisCityGridTracePoolSource();
+  const fortTraceBitPoolSource = host.fort.fortTraceBitPoolSource();
   const corpBidMax =
     state.corp.credits +
     host.counters.hackerTrackerCounterTotal() +
     host.counters.krumzTraceBitTotal() +
-    (parisPoolSource
-      ? host.counters.cardCounter(parisPoolSource.cardId, "bit")
+    (fortTraceBitPoolSource
+      ? host.counters.cardCounter(fortTraceBitPoolSource.cardId, "bit")
       : 0);
   state.trace = {
     traceId,
@@ -173,10 +173,10 @@ export function startTraceFromOperation(
     corpBidMax,
     status: "corp_bid",
     successEffect,
-    ...(parisPoolSource
+    ...(fortTraceBitPoolSource
       ? {
-          parisCityGridPoolSourceCardInstanceId: parisPoolSource.cardId,
-          parisCityGridPoolServerId: parisPoolSource.serverId,
+          fortTraceBitPoolSourceCardInstanceId: fortTraceBitPoolSource.cardId,
+          fortTraceBitPoolServerId: fortTraceBitPoolSource.serverId,
         }
       : {}),
     returnPhase: state.phase,
@@ -197,14 +197,14 @@ export function startTraceFromOperation(
     sourceCardId: sourceCardInstanceId,
     sourceDefinitionId,
     baseTraceStrength,
-    ...(parisPoolSource
+    ...(fortTraceBitPoolSource
       ? {
           corpBidMax,
           parisCityGridPoolAvailable: host.counters.cardCounter(
-            parisPoolSource.cardId,
+            fortTraceBitPoolSource.cardId,
             "bit",
           ),
-          parisCityGridPoolServerId: parisPoolSource.serverId,
+          parisCityGridPoolServerId: fortTraceBitPoolSource.serverId,
         }
       : {}),
   };
