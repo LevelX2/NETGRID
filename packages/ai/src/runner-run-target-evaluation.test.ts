@@ -1012,6 +1012,135 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
     });
   });
 
+  it("defers a known remote trash target when trash would break reserve", () => {
+    const input = aiInput({
+      credits: 4,
+      servers: [
+        server("remote_1", {
+          ice: [
+            visibleCard("remote-vacuum-link", {
+              definitionId: "onr_v1_275_vacuum-link",
+              title: "Vacuum Link",
+              type: "ice",
+              subtypes: ["sentry", "random"],
+              known: true,
+              rezzed: true,
+            }),
+          ],
+          root: [
+            visibleCard("remote-euromarket", {
+              definitionId: "onr_v1_322_euromarket-consortium",
+              title: "Euromarket Consortium",
+              type: "asset",
+              known: true,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [
+        runAction("run-remote-1", "remote_1"),
+        gainCreditAction("gain-credit"),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "remote_1",
+      accessPayoff: "trash_unaffordable",
+      knownAccessState: "known_no_current_payoff",
+      recommendation: "gain_credits_first",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "pre_run_access_decision:defer_until_funded",
+        "trash_decline_reason:reserve_would_break",
+        "known_remote_root_credits_after_trash:0",
+        "known_remote_root_trash_preserves_reserve:false",
+        "known_remote_run_no_progress_context:visible_random_ice",
+      ]),
+    );
+  });
+
+  it("keeps a known remote trash target valuable when trash preserves reserve", () => {
+    const input = aiInput({
+      credits: 8,
+      servers: [
+        server("remote_1", {
+          root: [
+            visibleCard("remote-euromarket", {
+              definitionId: "onr_v1_322_euromarket-consortium",
+              title: "Euromarket Consortium",
+              type: "asset",
+              known: true,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-remote-1", "remote_1")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "remote_1",
+      accessPayoff: "trash_affordable",
+      knownAccessState: "known_payoff",
+      recommendation: "run_now",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "pre_run_access_decision:trash",
+        "known_remote_root_credits_after_trash:4",
+        "known_remote_root_trash_preserves_reserve:true",
+      ]),
+    );
+  });
+
+  it("uses own installed trash credits for known remote trash commitment", () => {
+    const input = aiInput({
+      credits: 6,
+      rig: [
+        visibleCard("runner-poltergeist", {
+          definitionId: "onr_v1_048_poltergeist",
+          title: "Poltergeist",
+          type: "program",
+          known: true,
+        }),
+      ],
+      servers: [
+        server("remote_1", {
+          root: [
+            visibleCard("remote-euromarket", {
+              definitionId: "onr_v1_322_euromarket-consortium",
+              title: "Euromarket Consortium",
+              type: "asset",
+              known: true,
+            }),
+          ],
+        }),
+      ],
+      legalActions: [runAction("run-remote-1", "remote_1")],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({ input });
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "remote_1",
+      accessPayoff: "trash_affordable",
+      knownAccessState: "known_payoff",
+      recommendation: "run_now",
+    });
+    expect(evaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "known_remote_root_trash_dedicated_credits:2",
+        "known_remote_root_general_trash_cost:2",
+        "known_remote_root_credits_after_trash:4",
+        "known_remote_root_trash_support_source:onr_v1_048_poltergeist",
+      ]),
+    );
+  });
+
   it("turns a remote score threat behind visible unbreakable ICE into find-breaker setup", () => {
     const input = aiInput({
       credits: 6,

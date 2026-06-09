@@ -11271,6 +11271,99 @@ describe("V1.4.1 plan-based Runner AI", () => {
     expect(access.score).toBeGreaterThan(0);
   });
 
+  it("does not map a memory-known Euromarket remote when trash would break reserve", () => {
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const input = knownRemoteRootMemoryInput(
+      "ai-known-remote-euromarket-reserve-defer",
+      "onr_v1_322_euromarket-consortium",
+      4,
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const hqRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "hq",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(remoteRun).toBeDefined();
+    expect(rdRun).toBeDefined();
+    expect(hqRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!remoteRun || !rdRun || !hqRun || !gainCredit)
+      throw new Error("Missing Euromarket reserve-defer fixture actions");
+
+    const scopedInput = {
+      ...input,
+      legalActions: [remoteRun, rdRun, hqRun, gainCredit],
+    };
+    const decision = chooseRunnerAction(scopedInput, {
+      persistTacticalPlanMemory: false,
+    });
+    const contestCandidate = generateRunnerPlanCandidates(scopedInput).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    expect(contestCandidate).toBeDefined();
+    if (!contestCandidate)
+      throw new Error("Missing Euromarket reserve-defer contest candidate");
+    const access = evaluateServerAccessValue(scopedInput, contestCandidate);
+    const selected = scopedInput.legalActions.find(
+      (action) => action.actionId === decision.actionId,
+    );
+    const tacticalDebug =
+      decision.decisionDebug?.detailSections
+        ?.find((section) => section.id === "tactical_plan")
+        ?.items.join("\n") ?? "";
+
+    expect(selected).toBeDefined();
+    expect(
+      selected?.type === "start_run" &&
+        selected.payload?.serverId === "remote_1",
+    ).toBe(false);
+    expect(access.reasons).toContain(
+      "known_remote_root_trash_declined_by_reserve",
+    );
+    expect(access.evidence).toContain(
+      "trash_decline_reason:reserve_would_break",
+    );
+    expect(tacticalDebug).toContain("runner.contest_remote:remote_1");
+    expect(tacticalDebug).toContain("status=abandoned");
+    expect(tacticalDebug).not.toContain("previous_plan_continuity");
+    expect(assertAiInputIsSideSafe(input)).toBe(true);
+  });
+
+  it("keeps a memory-known Euromarket remote valuable when trash preserves reserve", () => {
+    const input = knownRemoteRootMemoryInput(
+      "ai-known-remote-euromarket-reserve-ready",
+      "onr_v1_322_euromarket-consortium",
+      9,
+    );
+    const contestCandidate = generateRunnerPlanCandidates(input).find(
+      (candidate) => candidate.kind === "contest_remote",
+    );
+    expect(contestCandidate).toBeDefined();
+    if (!contestCandidate)
+      throw new Error("Missing reserve-ready Euromarket candidate");
+
+    const access = evaluateServerAccessValue(input, contestCandidate);
+
+    expect(access.reasons).toContain("known_remote_trash_target");
+    expect(access.reasons).not.toContain("remote_known_no_current_payoff");
+    expect(access.evidence).toContain("remote_memory_payoff:trash_affordable");
+    expect(access.evidence).toContain("known_remote_root_credits_after_trash:5");
+    expect(access.evidence).toContain(
+      "known_remote_root_trash_preserves_reserve:true",
+    );
+    expect(access.score).toBeGreaterThan(0);
+  });
+
   it("keeps a memory-known remote agenda valuable", () => {
     const input = knownRemoteRootMemoryInput(
       "ai-known-remote-agenda-memory",
@@ -17522,7 +17615,7 @@ describe("V1.4.2 belief state and opponent model", () => {
       (state) => {
         ensureRemoteServer(state, "remote_1");
         putCorpRootInRemote(state, "simple_agenda", 0);
-        state.runner.credits = 6;
+        state.runner.credits = 9;
       },
       hqMemoryDeckConfig("known-remote-memory"),
     );

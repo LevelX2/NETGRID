@@ -1,19 +1,28 @@
 ---
 activityId: act-2026-06-09-ai-remote-prerun-access-commitment
-status: inbox
+status: done
 kind: fix
 area: ai
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-09
-startedAt:
-completedAt:
+startedAt: 2026-06-09
+completedAt: 2026-06-09
 branch:
 releaseTarget: runner-ai-known-remote-payoff-follow-up
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/ai/src/known-remote-access-payoff.ts
+  - packages/ai/src/runner-run-target-evaluation.test.ts
+  - packages/ai/src/index.test.ts
+checks:
+  - "corepack pnpm --filter @netgrid/ai typecheck"
+  - "corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-evaluation.test.ts"
+  - "corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t \"memory-known|Euromarket|known remote|post-ICE trash guard|known remote contest viable\""
+  - "corepack pnpm --filter @netgrid/ai exec vitest run src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts"
+  - "git diff --check"
+  - "corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts (nicht paketblockierend: bestehende/angrenzende Debug-Erwartung `uses Semantic Runtime actual actions in DecisionDebug instead of legacy plan winners` erwartet `semantic_runtime_actual`, aktueller Einzeltest liefert `selected_by_plan_mapping`)"
 relatedActivities:
   - act-2026-05-17-runner-ai-remote-trash-affordability
   - act-2026-06-07-runner-ai-encounter-payoff-reevaluation
@@ -99,19 +108,19 @@ KnownRemoteRoot
 
 ## Akzeptanzkriterien
 
-- [ ] Es gibt eine zentrale oder klar wiederverwendete Auswertung für Pre-Run-Commitment bei bekannten Remote-Roots.
-- [ ] Die Auswertung trennt mindestens `steal`, `trash`, `decline`, `defer_until_funded` und `unknown` oder äquivalente interne Kategorien.
-- [ ] Decline-Gründe sind debugfähig und side-sicher, insbesondere `insufficient_credits`, `reserve_would_break`, `low_value_target`, `no_current_payoff` und `unknown` oder äquivalente Namen.
-- [ ] Der Euromarket-Fall ist als Regression abgedeckt: bekannter Remote-Root, Trashkosten 4, Runner 4 Credits, Trash würde die Reserve brechen; die Runner-KI wählt keinen Run auf dieses Remote als besten Remote-Contest.
-- [ ] Derselbe bekannte Euromarket-Fall mit genug Credits für Trash plus Reserve darf weiterhin als sinnvoller Remote-Run bewertet werden.
-- [ ] Eine bekannte Remote-Agenda bleibt ein positiver Remote-Run-Fall.
-- [ ] Ein bekanntes Asset/Upgrade/Node-Ziel mit unbezahlbarem Trash wird weiter abgewertet und regressiert nicht gegenüber dem bestehenden `Known Remote Access Payoff`-Fix.
-- [ ] Wenn ein bekannter Remote-Root nicht getrasht wurde und der Remote-Zustand unverändert ist, erhält derselbe Remote keinen Planfortschreibungsbonus.
-- [ ] Wenn sich Credits, Root-Inhalt, Free-Trash-Möglichkeit oder Score-Threat relevant ändern, kann der Remote-Run wieder erlaubt und sinnvoll bewertet werden.
-- [ ] Ein rezzed/random ICE-Kontext wie `Vacuum Link` kann den bekannten No-Payoff-Run zusätzlich abwerten, ohne als kartenspezifische Sonderregel implementiert zu werden.
-- [ ] Finale Action-Auswahl bleibt ausschließlich aus `input.legalActions`.
-- [ ] Debug/Evidence leakt keine verdeckten Kartendaten und nennt nur side-sichere bekannte Fakten, Counts, Kosten und Entscheidungsgründe.
-- [ ] Fokussierte AI-Checks laufen grün oder ausgelassene Checks sind im Ergebnis begründet.
+- [x] Es gibt eine zentrale oder klar wiederverwendete Auswertung für Pre-Run-Commitment bei bekannten Remote-Roots.
+- [x] Die Auswertung trennt mindestens `steal`, `trash`, `decline`, `defer_until_funded` und `unknown` oder äquivalente interne Kategorien.
+- [x] Decline-Gründe sind debugfähig und side-sicher, insbesondere `insufficient_credits`, `reserve_would_break`, `low_value_target`, `no_current_payoff` und `unknown` oder äquivalente Namen.
+- [x] Der Euromarket-Fall ist als Regression abgedeckt: bekannter Remote-Root, Trashkosten 4, Runner 4 Credits, Trash würde die Reserve brechen; die Runner-KI wählt keinen Run auf dieses Remote als besten Remote-Contest.
+- [x] Derselbe bekannte Euromarket-Fall mit genug Credits für Trash plus Reserve darf weiterhin als sinnvoller Remote-Run bewertet werden.
+- [x] Eine bekannte Remote-Agenda bleibt ein positiver Remote-Run-Fall.
+- [x] Ein bekanntes Asset/Upgrade/Node-Ziel mit unbezahlbarem Trash wird weiter abgewertet und regressiert nicht gegenüber dem bestehenden `Known Remote Access Payoff`-Fix.
+- [x] Wenn ein bekannter Remote-Root nicht getrasht wurde und der Remote-Zustand unverändert ist, erhält derselbe Remote keinen Planfortschreibungsbonus.
+- [x] Wenn sich Credits, Root-Inhalt, Free-Trash-Möglichkeit oder Score-Threat relevant ändern, kann der Remote-Run wieder erlaubt und sinnvoll bewertet werden.
+- [x] Ein rezzed/random ICE-Kontext wie `Vacuum Link` kann den bekannten No-Payoff-Run zusätzlich abwerten, ohne als kartenspezifische Sonderregel implementiert zu werden.
+- [x] Finale Action-Auswahl bleibt ausschließlich aus `input.legalActions`.
+- [x] Debug/Evidence leakt keine verdeckten Kartendaten und nennt nur side-sichere bekannte Fakten, Counts, Kosten und Entscheidungsgründe.
+- [x] Fokussierte AI-Checks laufen grün oder ausgelassene Checks sind im Ergebnis begründet.
 
 ## Umsetzungshinweise
 
@@ -172,4 +181,6 @@ wouldTrash =
 
 ## Ergebnisnotiz
 
-Noch offen.
+Umgesetzt. `evaluateKnownRemoteAccessPayoff` enthält jetzt eine side-sichere Pre-Run-Commitment-Projektion für bekannte Remote-Roots mit `accessDecision`, Decline-Gründen, Trashkosten nach sichtbarem Pfad, Credits nach Trash, Reserve-Ziel, Zielwert, dedizierten eigenen Trash-Credits und generischem sichtbarem Random-ICE-No-Progress-Kontext. Reserve-brechender, niedrigwertiger Euromarket-Trash wird als `knownNoCurrentPayoff`/`defer_until_funded` behandelt und der zugehörige `runner.contest_remote`-Plan bleibt abandoned; Euromarket mit genug Credits beziehungsweise installierter Poltergeist-Trash-Credit-Unterstützung bleibt positiv. Bekannte Remote-Agendas und bestehende unbezahlbare Remote-Trash-Regressionen bleiben abgedeckt.
+
+Checks grün: AI-Typecheck, `runner-run-target-evaluation.test.ts`, fokussierter `index.test.ts`-Filter, `tactical-plans.test.ts`, `semantic-ai-runtime-cutover.test.ts`, `git diff --check`. Nicht paketblockierend: der vollständige `src/index.test.ts`-Lauf scheitert weiterhin isoliert bei `uses Semantic Runtime actual actions in DecisionDebug instead of legacy plan winners`, weil die bestehende Erwartung `semantic_runtime_actual` verlangt, der aktuelle Einzeltest aber `selected_by_plan_mapping` liefert; dieser Debug-Erwartungsfall wurde nicht in diesem Activity-Scope geändert.
