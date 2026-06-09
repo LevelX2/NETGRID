@@ -458,10 +458,10 @@ import {
 } from "../run/fort-pass-window";
 import {
   applyPostBreakStealthLoss,
-  clearRovingSubmarineActivityMarkers,
-  isRovingSubmarineRunBlocked,
+  clearActivityGatedFortRunMarkers,
+  isActivityGatedFortRunBlocked,
   isParisTracePoolSource,
-  markRovingSubmarineActivityForServer,
+  markFortActivityForRunGate,
   parisCityGridTracePoolSource,
   parisCityGridTracePoolTotal,
   parisTracePoolCapacityForCard,
@@ -471,7 +471,7 @@ import {
   shouldOpenAardvarkInterception,
   spendParisCityGridTracePool,
   startAardvarkInterceptionChoice,
-  validateRovingSubmarineRunGate,
+  validateActivityGatedFortRun,
   type FortRunSideFamiliesHost,
 } from "../run/fort-run-side-families";
 import {
@@ -960,8 +960,8 @@ export function createPlayBoardRuntimeHosts(deps: RuntimeDeps, runtime: Record<s
           trashRunnerInstalledCardToHeap(state, cardId, legalAction),
       },
       fort: {
-        markRovingSubmarineActivityForServer: (serverId, legalAction) =>
-          markRovingSubmarineActivityForServer(
+        markFortActivityForRunGate: (serverId, legalAction) =>
+          markFortActivityForRunGate(
             fortRunSideFamiliesHostForState(state),
             serverId,
             legalAction,

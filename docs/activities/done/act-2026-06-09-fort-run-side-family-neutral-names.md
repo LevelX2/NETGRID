@@ -1,21 +1,32 @@
 ---
 activityId: act-2026-06-09-fort-run-side-family-neutral-names
-status: inbox
+status: done
 kind: cleanup
 area: engine
 priority: normal
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-06-09
-startedAt:
-completedAt:
+startedAt: 2026-06-09
+completedAt: 2026-06-09
 branch:
 releaseTarget:
 blockedBy: []
 relatedActivities:
   - act-2026-06-09-generic-trace-payment-pools
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/run/fort-run-side-families.ts
+  - packages/engine/src/game/board/board-state-action-execution.ts
+  - packages/engine/src/game/install/install-card.ts
+  - packages/engine/src/game/run/start-run-action-execution.ts
+  - packages/engine/src/game/turn/runner-main-actions.ts
+  - packages/engine/src/game/engine-runtime-internal/
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-06.md
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/run/fort-run-side-families.test.ts src/game/board/board-state-action-execution.test.ts src/game/install/install-card.test.ts src/game/run/start-run-action-execution.test.ts src/game/turn/runner-main-actions.test.ts src/game/turn/main-action-hosts.test.ts
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/per-card-longtail.test.ts -t "Roving Submarine"
+  - git diff --check
 ---
 
 # Fort-Run-Familien neutral benennen
@@ -55,11 +66,11 @@ Allgemeine Fort-/Run-Funktionen sollen nach ihrer Mechanikfamilie benannt werden
 
 ## Akzeptanzkriterien
 
-- [ ] Mindestens eine Fort-Run-Familie mit generischem Ability-Kind nutzt im Runtime-Code neutrale Funktionsnamen.
-- [ ] Tests oder Smokes zeigen, dass LegalActions und Revalidation vor und nach der Umbenennung fachlich gleich bleiben.
-- [ ] Sichtbare Kartentitel bleiben dort erhalten, wo Spieler die Quelle erkennen sollen.
-- [ ] Keine verdeckten Korp-Kartennamen gelangen neu in Runner-/Spectator-/Public-Kontexte.
-- [ ] Die Umbenennung lässt sich über `rg` nachvollziehen: allgemeine Runtime-Pfade enthalten weniger erste-Karten-Namen für die migrierte Familie.
+- [x] Mindestens eine Fort-Run-Familie mit generischem Ability-Kind nutzt im Runtime-Code neutrale Funktionsnamen.
+- [x] Tests oder Smokes zeigen, dass LegalActions und Revalidation vor und nach der Umbenennung fachlich gleich bleiben.
+- [x] Sichtbare Kartentitel bleiben dort erhalten, wo Spieler die Quelle erkennen sollen.
+- [x] Keine verdeckten Korp-Kartennamen gelangen neu in Runner-/Spectator-/Public-Kontexte.
+- [x] Die Umbenennung lässt sich über `rg` nachvollziehen: allgemeine Runtime-Pfade enthalten weniger erste-Karten-Namen für die migrierte Familie.
 
 ## Umsetzungshinweise
 
@@ -80,4 +91,6 @@ Allgemeine Fort-/Run-Funktionen sollen nach ihrer Mechanikfamilie benannt werden
 
 ## Ergebnisnotiz
 
-Noch offen.
+Die Roving-artige Fort-Run-Gate-Familie wurde als Musterfamilie neutralisiert. Allgemeine Runtime- und Host-Pfade nutzen jetzt unter anderem `activityGatedFortRunSourceIds`, `isActivityGatedFortRunBlocked`, `markFortActivityForRunGate`, `validateActivityGatedFortRun` und `clearActivityGatedFortRunMarkers`; die öffentlichen Markierungs-Payloads heißen `fortRunGateActivityMarked` und `fortRunGateSourceCount`.
+
+Kartenspezifische Namen bleiben in der echten `Roving Submarine`-CardImplementation, in sichtbaren Kartentiteln und in kartenspezifischen Regressionen erhalten. `rg` findet die alten Roving-Funktions- und Payload-Schlüssel in den allgemeinen Engine-Pfaden nicht mehr; fokussierte Unit-Tests, Engine-Typecheck, ein Roving-Index-Smoke und `git diff --check` sind grün.

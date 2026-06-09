@@ -462,10 +462,10 @@ import {
 } from "../run/fort-pass-window";
 import {
   applyPostBreakStealthLoss,
-  clearRovingSubmarineActivityMarkers,
-  isRovingSubmarineRunBlocked,
+  clearActivityGatedFortRunMarkers,
+  isActivityGatedFortRunBlocked,
   isParisTracePoolSource,
-  markRovingSubmarineActivityForServer,
+  markFortActivityForRunGate,
   parisCityGridTracePoolSource,
   parisCityGridTracePoolTotal,
   parisTracePoolCapacityForCard,
@@ -475,7 +475,7 @@ import {
   shouldOpenAardvarkInterception,
   spendParisCityGridTracePool,
   startAardvarkInterceptionChoice,
-  validateRovingSubmarineRunGate,
+  validateActivityGatedFortRun,
   type FortRunSideFamiliesHost,
 } from "../run/fort-run-side-families";
 import {
@@ -2116,7 +2116,7 @@ function startCorpTurn(
   state.corp.clicks = 3;
   state.runner.clicks = 0;
   clearValuPakProgramInstallFlags(state);
-  clearRovingSubmarineActivityMarkers(fortRunSideFamiliesHostForState(state));
+  clearActivityGatedFortRunMarkers(fortRunSideFamiliesHostForState(state));
   ensureRunnerTurnFlags(state).damagePreventionUsage = {};
   ensureRunnerTurnFlags(state).runnerReceivedTagThisTurn = false;
   ensureRunnerTurnFlags(state).corpRezzedIceThisTurn = 0;

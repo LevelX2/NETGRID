@@ -165,8 +165,8 @@ function hostFor(
       },
     },
     fort: {
-      markRovingSubmarineActivityForServer: (serverId, action) =>
-        calls.push(`roving:${serverId}:${action.type}`),
+      markFortActivityForRunGate: (serverId, action) =>
+        calls.push(`fortRunGate:${serverId}:${action.type}`),
     },
   };
 }
@@ -195,7 +195,7 @@ describe("board-state-action-execution", () => {
     expect(calls).toEqual([]);
   });
 
-  it("advances an installed card and marks Roving Submarine activity", () => {
+  it("advances an installed card and marks Fort-Run-Gate activity", () => {
     const calls: string[] = [];
     const targetState = baseState();
     const result = handleBoardStateActionExecution(
@@ -210,7 +210,7 @@ describe("board-state-action-execution", () => {
     expect(calls).toEqual([
       "click:corp",
       "credits:corp:1",
-      "roving:remote_1:advance_card",
+      "fortRunGate:remote_1:advance_card",
     ]);
   });
 

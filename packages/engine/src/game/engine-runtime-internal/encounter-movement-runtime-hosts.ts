@@ -458,10 +458,10 @@ import {
 } from "../run/fort-pass-window";
 import {
   applyPostBreakStealthLoss,
-  clearRovingSubmarineActivityMarkers,
-  isRovingSubmarineRunBlocked,
+  clearActivityGatedFortRunMarkers,
+  isActivityGatedFortRunBlocked,
   isParisTracePoolSource,
-  markRovingSubmarineActivityForServer,
+  markFortActivityForRunGate,
   parisCityGridTracePoolSource,
   parisCityGridTracePoolTotal,
   parisTracePoolCapacityForCard,
@@ -471,7 +471,7 @@ import {
   shouldOpenAardvarkInterception,
   spendParisCityGridTracePool,
   startAardvarkInterceptionChoice,
-  validateRovingSubmarineRunGate,
+  validateActivityGatedFortRun,
   type FortRunSideFamiliesHost,
 } from "../run/fort-run-side-families";
 import {
@@ -1036,8 +1036,8 @@ export function createEncounterMovementRuntimeHosts(
         ensureRunnerTurnFlags: () => ensureRunnerTurnFlags(state),
       },
       run: {
-        validateRovingSubmarineRunGate: (serverId) =>
-          validateRovingSubmarineRunGate(
+        validateActivityGatedFortRun: (serverId) =>
+          validateActivityGatedFortRun(
             fortRunSideFamiliesHostForState(state),
             serverId,
           ),

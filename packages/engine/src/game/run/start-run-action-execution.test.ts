@@ -88,7 +88,7 @@ function hostFor(
         gameState.runnerTurnFlags as NonNullable<GameState["runnerTurnFlags"]>,
     },
     run: {
-      validateRovingSubmarineRunGate: (serverId) =>
+      validateActivityGatedFortRun: (serverId) =>
         calls.push(`validate:${serverId}`),
       startRun: (serverId, legalAction) => {
         calls.push(`start:${serverId}:${legalAction.type}`);

@@ -52,7 +52,7 @@ export type RunnerMainActionGenerationHost = {
   run: {
     activeRunActionSpendingCapSourceIds: HostFn<string[]>;
     runDurationPaymentHost: HostFn<unknown>;
-    isRovingSubmarineRunBlocked: HostFn<boolean>;
+    isActivityGatedFortRunBlocked: HostFn<boolean>;
     fortRunSideFamiliesHostForState: HostFn<unknown>;
     runStartTaxForServerUpgrades: HostFn<{
       amount: number;
@@ -199,7 +199,7 @@ export function buildRunnerMainActions(
   const activeRunActionSpendingCapSourceIds =
     host.run.activeRunActionSpendingCapSourceIds;
   const runDurationPaymentHost = host.run.runDurationPaymentHost;
-  const isRovingSubmarineRunBlocked = host.run.isRovingSubmarineRunBlocked;
+  const isActivityGatedFortRunBlocked = host.run.isActivityGatedFortRunBlocked;
   const fortRunSideFamiliesHostForState =
     host.run.fortRunSideFamiliesHostForState;
   const runStartTaxForServerUpgrades = host.run.runStartTaxForServerUpgrades;
@@ -1067,7 +1067,7 @@ export function buildRunnerMainActions(
     }
   }
   for (const server of state.corp.servers) {
-    const rovingRunBlocked = isRovingSubmarineRunBlocked(
+    const rovingRunBlocked = isActivityGatedFortRunBlocked(
       fortRunSideFamiliesHostForState(state),
       server.id,
     );
@@ -1247,7 +1247,7 @@ function buildPirateBroadcastForcedRunActions(
   );
   if (!server) return [];
   if (
-    host.run.isRovingSubmarineRunBlocked(
+    host.run.isActivityGatedFortRunBlocked(
       host.run.fortRunSideFamiliesHostForState(state),
       server.id,
     )

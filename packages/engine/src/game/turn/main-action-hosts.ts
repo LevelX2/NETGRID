@@ -246,7 +246,7 @@ export function createMainActionHostComposition(
         activeRunActionSpendingCapSourceIds:
           run.activeRunActionSpendingCapSourceIds,
         runDurationPaymentHost: run.runDurationPaymentHost,
-        isRovingSubmarineRunBlocked: run.isRovingSubmarineRunBlocked,
+        isActivityGatedFortRunBlocked: run.isActivityGatedFortRunBlocked,
         fortRunSideFamiliesHostForState: run.fortRunSideFamiliesHostForState,
         runStartTaxForServerUpgrades: run.runStartTaxForServerUpgrades,
         newsgroupTauntingRunStartTax: run.newsgroupTauntingRunStartTax,

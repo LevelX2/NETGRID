@@ -223,7 +223,7 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
     run: {
       activeRunActionSpendingCapSourceIds: () => [],
       runDurationPaymentHost: () => ({}),
-      isRovingSubmarineRunBlocked: () => false,
+      isActivityGatedFortRunBlocked: () => false,
       fortRunSideFamiliesHostForState: () => ({}),
       runStartTaxForServerUpgrades: () => ({
         amount: 0,

@@ -70,7 +70,7 @@ export type InstallCardHost = {
       keepCardId: CardInstanceId,
       legalAction: LegalAction,
     ) => void;
-    markRovingSubmarineActivityForServer: (
+    markFortActivityForRunGate: (
       serverId: Exclude<ServerId, "new_remote">,
       legalAction: LegalAction,
     ) => void;
@@ -581,7 +581,7 @@ function installCorpCard(
       rezzed: false,
       zone: { side: "corp", zone: "serverIce", serverId: server.id },
     };
-    host.servers.markRovingSubmarineActivityForServer(server.id, legalAction);
+    host.servers.markFortActivityForRunGate(server.id, legalAction);
     host.corp.consumeEdgerunnerTempsInstallAction(legalAction);
     applyArmageddonDoomCounterInstallRolls(host, cardId, legalAction);
     return;
@@ -649,7 +649,7 @@ function installCorpCard(
   if (host.corp.isRegionUpgrade(definition)) {
     host.servers.trashOlderRegionUpgradesInServer(server, cardId, legalAction);
   }
-  host.servers.markRovingSubmarineActivityForServer(server.id, legalAction);
+  host.servers.markFortActivityForRunGate(server.id, legalAction);
   host.corp.consumeEdgerunnerTempsInstallAction(legalAction);
   applyArmageddonDoomCounterInstallRolls(host, cardId, legalAction);
 }

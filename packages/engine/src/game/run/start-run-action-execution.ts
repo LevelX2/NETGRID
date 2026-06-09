@@ -16,7 +16,7 @@ export type StartRunActionExecutionHost = {
     ensureRunnerTurnFlags: () => NonNullable<GameState["runnerTurnFlags"]>;
   };
   run: {
-    validateRovingSubmarineRunGate: (
+    validateActivityGatedFortRun: (
       serverId: Exclude<ServerId, "new_remote">,
     ) => void;
     startRun: (
@@ -68,7 +68,7 @@ export function executeStartRunAction(
   } else if (legalAction.payload?.pirateBroadcastRun === true) {
     throw new Error("Es ist keine Pirate-Broadcast-Sequenz offen.");
   }
-  host.run.validateRovingSubmarineRunGate(serverId);
+  host.run.validateActivityGatedFortRun(serverId);
   let runOnlyActionSourceCardId: CardInstanceId | undefined;
   if (legalAction.payload?.runOnlyAction === true) {
     const explicitSourceCardId = String(

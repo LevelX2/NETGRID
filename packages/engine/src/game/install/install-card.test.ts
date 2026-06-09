@@ -432,7 +432,7 @@ function testHost(
       trashOlderRegionUpgradesInServer: (_server, keepCardId) => {
         calls.regionReplacement.push(keepCardId);
       },
-      markRovingSubmarineActivityForServer: () => undefined,
+      markFortActivityForRunGate: () => undefined,
     },
     zones: {
       removeFromAllZones,

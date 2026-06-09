@@ -41,7 +41,7 @@ export type BoardStateActionExecutionHost = {
     ) => void;
   };
   fort: {
-    markRovingSubmarineActivityForServer: (
+    markFortActivityForRunGate: (
       serverId: Exclude<ServerId, "new_remote">,
       legalAction: LegalAction,
     ) => void;
@@ -91,7 +91,7 @@ function executeAdvanceCardAction(
   instance.advancementCounters += 1;
   const zone = instance.zone;
   if (zone.side === "corp" && zone.zone === "serverRoot")
-    host.fort.markRovingSubmarineActivityForServer(zone.serverId, legalAction);
+    host.fort.markFortActivityForRunGate(zone.serverId, legalAction);
 }
 
 function trashResource(

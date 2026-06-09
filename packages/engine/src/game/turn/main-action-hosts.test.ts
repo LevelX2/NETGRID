@@ -317,7 +317,7 @@ function hostFor(
     run: {
       activeRunActionSpendingCapSourceIds: () => [],
       runDurationPaymentHost: () => ({}),
-      isRovingSubmarineRunBlocked: () => false,
+      isActivityGatedFortRunBlocked: () => false,
       fortRunSideFamiliesHostForState: () => ({}),
       runStartTaxForServerUpgrades: () => ({
         amount: 0,

@@ -341,7 +341,7 @@ export function resolveAardvarkInterceptionChoice(
   };
 }
 
-export function rovingSubmarineIdsForServer(
+export function activityGatedFortRunSourceIds(
   host: FortRunSideFamiliesHost,
   serverId: Exclude<ServerId, "new_remote">,
 ): CardInstanceId[] {
@@ -357,67 +357,67 @@ export function rovingSubmarineIdsForServer(
     .sort();
 }
 
-export function isRovingSubmarineRunBlocked(
+export function isActivityGatedFortRunBlocked(
   host: FortRunSideFamiliesHost,
   serverId: Exclude<ServerId, "new_remote">,
 ): boolean {
-  const rovingIds = rovingSubmarineIdsForServer(host, serverId);
+  const sourceIds = activityGatedFortRunSourceIds(host, serverId);
   return (
-    rovingIds.length > 0 &&
-    !rovingIds.some((rovingId) => host.counters.cardCounter(rovingId, "mark") > 0)
+    sourceIds.length > 0 &&
+    !sourceIds.some((sourceId) => host.counters.cardCounter(sourceId, "mark") > 0)
   );
 }
 
-export function clearRovingSubmarineActivityMarkers(
+export function clearActivityGatedFortRunMarkers(
   host: FortRunSideFamiliesHost,
 ): void {
   for (const server of host.state.corp.servers) {
-    for (const rovingId of rovingSubmarineIdsForServer(host, server.id)) {
-      host.counters.setCardCounter(rovingId, "mark", 0);
+    for (const sourceId of activityGatedFortRunSourceIds(host, server.id)) {
+      host.counters.setCardCounter(sourceId, "mark", 0);
     }
   }
 }
 
-export function markRovingSubmarineActivityForServer(
+export function markFortActivityForRunGate(
   host: FortRunSideFamiliesHost,
   serverId: Exclude<ServerId, "new_remote">,
   legalAction?: LegalAction,
 ): FortRunSideFamilyResult {
-  const rovingIds = rovingSubmarineIdsForServer(host, serverId);
-  if (rovingIds.length === 0) return { handled: false };
-  for (const rovingId of rovingIds) host.counters.setCardCounter(rovingId, "mark", 1);
+  const sourceIds = activityGatedFortRunSourceIds(host, serverId);
+  if (sourceIds.length === 0) return { handled: false };
+  for (const sourceId of sourceIds) host.counters.setCardCounter(sourceId, "mark", 1);
   if (legalAction) {
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
-      rovingSubmarineActivityMarked: true,
-      rovingSubmarineSourceCount: rovingIds.length,
+      fortRunGateActivityMarked: true,
+      fortRunGateSourceCount: sourceIds.length,
       targetServerLabel: host.servers.publicServerLabel(serverId) ?? serverId,
     };
   }
   return {
     handled: true,
-    sourceCardId: rovingIds[0],
-    sourceDefinitionId: host.cards.definitionFor(rovingIds[0]!).id,
+    sourceCardId: sourceIds[0],
+    sourceDefinitionId: host.cards.definitionFor(sourceIds[0]!).id,
     serverId,
     serverLabel: host.servers.publicServerLabel(serverId),
     stateChanged: true,
   };
 }
 
-export function validateRovingSubmarineRunGate(
+export function validateActivityGatedFortRun(
   host: FortRunSideFamiliesHost,
   serverId: Exclude<ServerId, "new_remote">,
 ): FortRunEligibilityResult {
-  const rovingIds = rovingSubmarineIdsForServer(host, serverId);
-  if (rovingIds.length === 0)
+  const sourceIds = activityGatedFortRunSourceIds(host, serverId);
+  if (sourceIds.length === 0)
     return {
       handled: false,
       runAllowed: true,
       serverId,
       serverLabel: host.servers.publicServerLabel(serverId),
     };
-  const hasActivity = rovingIds.some(
-    (rovingId) => host.counters.cardCounter(rovingId, "mark") > 0,
+  const hasActivity = sourceIds.some(
+    (sourceId) => host.counters.cardCounter(sourceId, "mark") > 0,
   );
   if (!hasActivity)
     throw new Error(
@@ -425,8 +425,8 @@ export function validateRovingSubmarineRunGate(
     );
   return {
     handled: true,
-    sourceCardId: rovingIds[0],
-    sourceDefinitionId: host.cards.definitionFor(rovingIds[0]!).id,
+    sourceCardId: sourceIds[0],
+    sourceDefinitionId: host.cards.definitionFor(sourceIds[0]!).id,
     serverId,
     serverLabel: host.servers.publicServerLabel(serverId),
     runAllowed: true,

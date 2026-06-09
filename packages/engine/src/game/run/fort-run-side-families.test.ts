@@ -11,9 +11,9 @@ import type {
 import { describe, expect, it } from "vitest";
 import {
   applyPostBreakStealthLoss,
-  clearRovingSubmarineActivityMarkers,
-  isRovingSubmarineRunBlocked,
-  markRovingSubmarineActivityForServer,
+  clearActivityGatedFortRunMarkers,
+  isActivityGatedFortRunBlocked,
+  markFortActivityForRunGate,
   parisCityGridTracePoolSource,
   parisCityGridTracePoolTotal,
   resolveAardvarkInterceptionChoice,
@@ -21,7 +21,7 @@ import {
   shouldOpenAardvarkInterception,
   spendParisCityGridTracePool,
   startAardvarkInterceptionChoice,
-  validateRovingSubmarineRunGate,
+  validateActivityGatedFortRun,
   type FortRunSideFamiliesHost,
 } from "./fort-run-side-families";
 
@@ -323,25 +323,25 @@ describe("fort run side families", () => {
     const host = hostFor(state);
     const action = { payload: {} } as LegalAction;
 
-    expect(isRovingSubmarineRunBlocked(host, "rd")).toBe(true);
-    expect(() => validateRovingSubmarineRunGate(host, "rd")).toThrow(
+    expect(isActivityGatedFortRunBlocked(host, "rd")).toBe(true);
+    expect(() => validateActivityGatedFortRun(host, "rd")).toThrow(
       /Roving Submarine/,
     );
 
-    markRovingSubmarineActivityForServer(host, "rd", action);
+    markFortActivityForRunGate(host, "rd", action);
 
     expect(state.cardInstances.roving_1?.counters?.mark).toBe(1);
     expect(action.payload).toMatchObject({
-      rovingSubmarineActivityMarked: true,
-      rovingSubmarineSourceCount: 1,
+      fortRunGateActivityMarked: true,
+      fortRunGateSourceCount: 1,
       targetServerLabel: "R&D",
     });
-    expect(validateRovingSubmarineRunGate(host, "rd")).toMatchObject({
+    expect(validateActivityGatedFortRun(host, "rd")).toMatchObject({
       runAllowed: true,
       sourceDefinitionId: "onr_v1_368_roving-submarine",
     });
 
-    clearRovingSubmarineActivityMarkers(host);
+    clearActivityGatedFortRunMarkers(host);
     expect(state.cardInstances.roving_1?.counters?.mark).toBe(0);
   });
 
