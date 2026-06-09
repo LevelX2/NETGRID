@@ -9,6 +9,7 @@ Diese Übersicht trennt Rohquellen, Arbeitsplanung und dauerhafte Projektartefak
 - `releases/`: gebündelte Releasefamilien mit Requirements, Specs, Testmatrizen, Reviews, Final Reviews und historischen Plänen.
 - `architecture/`: releaseübergreifende Architekturentscheidungen, technische Zielbilder und Engine-/Schichtgrenzen.
 - `reviews/`: Querschnittsreviews, Audits, Inventare und strukturierte Nachprüfungen ohne eigene Releasefamilie.
+- `runbooks/`: wiederholbare lokale Betriebs-, Diagnose-, Wartungs- und Arbeitsabläufe.
 - `archive/`: historische, nicht mehr führende Artefakte, die bewusst im Arbeitsbaum bleiben.
 - `derived/`: bestehender Übergangs- und Bestandsbereich für abgeleitete Artefakte wie Releasepläne, Requirements, Specs, Testmatrizen, Implementation Reviews, Final Reviews und größere Analyseberichte.
 - `codex/`: aktueller Codex-Status, Runbooks und Arbeitsnotizen mit Projektsteuerungsbezug.
@@ -19,7 +20,6 @@ Diese Übersicht trennt Rohquellen, Arbeitsplanung und dauerhafte Projektartefak
 Weitere Strukturpakete führen diese Zielbereiche schrittweise ein, sobald ein kleiner Linkaudit- und Move-Schnitt sie braucht:
 
 - `decisions/`: kleine Projekt-, Produkt-, Asset-, Git- und Dokumentationsentscheidungen.
-- `runbooks/`: wiederholbare Betriebs-, Diagnose-, Wartungs- und Arbeitsabläufe.
 - `operations/`: ops-nahe Dauerartefakte zu Deployment, Maintenance, Observability und Incidents.
 - `design/`: spätere echte Designsystem-Struktur, falls aus Mockups später Komponentenmodelle, Tokens und Designentscheidungen entstehen.
 

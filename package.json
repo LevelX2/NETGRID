@@ -31,6 +31,8 @@
     "storage:restore": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts restore",
     "storage:inspect": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts inspect",
     "storage:import-legacy": "pnpm --filter @netgrid/server exec tsx src/storage-cli.ts import-legacy",
+    "local-transfer:export": "powershell -ExecutionPolicy Bypass -File scripts/export-local-transfer.ps1",
+    "local-transfer:import": "powershell -ExecutionPolicy Bypass -File scripts/import-local-transfer.ps1",
     "lint": "corepack pnpm -r --if-present lint",
     "typecheck": "corepack pnpm -r --if-present typecheck",
     "test": "corepack pnpm -r --if-present test && vitest run tests/specs/phase1-artifacts.test.ts tests/specs/visibility-contract.test.ts --passWithNoTests",
