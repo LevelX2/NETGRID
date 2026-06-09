@@ -194,6 +194,21 @@ describe("install/rez card implementation runtime deps", () => {
     expect(gameState.runnerTurnFlags).toMatchObject({
       valuPakProgramInstallActionsRemaining: 5,
       valuPakTemporaryProgramInstallCredits: 1,
+      restrictedActionGrants: {
+        valu_pak_program_install: {
+          side: "runner",
+          sourceCardInstanceId: sourceCardId,
+          sourceDefinitionId,
+          actionType: "install_card",
+          remainingActions: 5,
+          costProfile: "temporary_credit_bundle",
+          temporaryCredits: {
+            amount: 1,
+            usableFor: "runner_program_install",
+          },
+          cleanupTiming: "side_turn_end",
+        },
+      },
     });
     expect(result.publicPayload).toEqual({
       v1922RunnerEventAbility: "program_install_action_bundle",

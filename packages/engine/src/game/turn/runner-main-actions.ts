@@ -1134,6 +1134,7 @@ export function buildRunnerMainActions(
       }
     }
     for (const sourceCardId of unusedRunOnlyActionSourceIds) {
+      const sourceDefinition = definitionFor(state, sourceCardId);
       if (
         !rovingRunBlocked &&
         (runStartTaxCredits === 0 ||
@@ -1145,15 +1146,18 @@ export function buildRunnerMainActions(
             state,
             "runner",
             "start_run",
-            `Wilson-Run auf ${server.label}`,
+            `${sourceDefinition.title}: Run auf ${server.label}`,
             sourceCardId,
             runCosts,
             {
               ...runPayload,
               cardId: sourceCardId,
               runnerAbility: "gain_run_only_action",
-              sourceDefinitionId: definitionFor(state, sourceCardId).id,
+              sourceDefinitionId: sourceDefinition.id,
               gainActionsAmount: 1,
+              restrictedActionGrantActionType: "start_run",
+              restrictedActionGrantCostProfile: "extra_click",
+              restrictedActionGrantRemainingActions: 1,
               runOnlyAction: true,
               runOnlyActionSourceCardId: sourceCardId,
               runSpendingCap: 3,
@@ -1187,6 +1191,9 @@ export function buildRunnerMainActions(
                 : flags.bodyweightDataCrecheExtraRunPending === true
                 ? BODYWEIGHT_DATA_CRECHE_ID
                 : ALL_NIGHTER_ID,
+            restrictedActionGrantActionType: "start_run",
+            restrictedActionGrantCostProfile: "no_click",
+            restrictedActionGrantRemainingActions: 1,
             ...(pirateBroadcastNextServerId
               ? { pirateBroadcastRun: true }
               : {}),
@@ -1287,6 +1294,9 @@ function buildPirateBroadcastForcedRunActions(
     ...(runStartTaxCredits > 0 ? { runStartTaxCredits } : {}),
     bonusRunNoClick: true,
     bonusRunSource: input.pirateBroadcastPending.sourceDefinitionId,
+    restrictedActionGrantActionType: "start_run",
+    restrictedActionGrantCostProfile: "no_click",
+    restrictedActionGrantRemainingActions: 1,
     pirateBroadcastRun: true,
   };
   return [

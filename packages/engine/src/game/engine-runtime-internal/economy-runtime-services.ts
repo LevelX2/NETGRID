@@ -109,6 +109,15 @@ import {
   spendCardCounter,
 } from "../state/turn-flags-counters";
 import {
+  RESTRICTED_ACTION_GRANT_KEYS,
+  clearRestrictedActionGrant,
+  consumeRestrictedActionGrant,
+  restrictedActionGrant,
+  restrictedActionGrantRemaining,
+  restrictedActionGrantTemporaryCredits,
+  spendRestrictedActionGrantTemporaryCredits,
+} from "../state/restricted-action-grants";
+import {
   cleanupEmptyRemotes,
   createRemote,
   ensureSpecialZones,
@@ -754,6 +763,15 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
   }
 
   function edgerunnerTempsInstallActionsRemaining(state: GameState): number {
+    const grant = restrictedActionGrant(
+      state.corpTurnFlags,
+      RESTRICTED_ACTION_GRANT_KEYS.edgerunnerTempsInstall,
+    );
+    if (grant)
+      return restrictedActionGrantRemaining(
+        state.corpTurnFlags,
+        RESTRICTED_ACTION_GRANT_KEYS.edgerunnerTempsInstall,
+      );
     return Math.max(
       0,
       Math.floor(
@@ -763,7 +781,12 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
   }
 
   function clearEdgerunnerTempsInstallFlags(state: GameState): void {
-    ensureCorpTurnFlags(state).edgerunnerTempsInstallActionsRemaining = 0;
+    const flags = ensureCorpTurnFlags(state);
+    clearRestrictedActionGrant(
+      flags,
+      RESTRICTED_ACTION_GRANT_KEYS.edgerunnerTempsInstall,
+    );
+    flags.edgerunnerTempsInstallActionsRemaining = 0;
   }
 
   function consumeEdgerunnerTempsInstallAction(
@@ -782,10 +805,16 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
       throw new Error(
         "Edgerunner, Inc., Temps hat keine Installationsaktionen mehr.",
       );
-    flags.edgerunnerTempsInstallActionsRemaining = Math.max(
-      0,
-      remainingBefore - 1,
-    );
+    const remainingAfter = restrictedActionGrant(
+      flags,
+      RESTRICTED_ACTION_GRANT_KEYS.edgerunnerTempsInstall,
+    )
+      ? consumeRestrictedActionGrant(
+          flags,
+          RESTRICTED_ACTION_GRANT_KEYS.edgerunnerTempsInstall,
+        )
+      : Math.max(0, remainingBefore - 1);
+    flags.edgerunnerTempsInstallActionsRemaining = remainingAfter;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       v1922CorpOperationAbility: "install_action_bundle",
@@ -796,20 +825,36 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
   }
 
   function valuPakProgramInstallActionsRemaining(state: GameState): number {
+    const flags = ensureRunnerTurnFlags(state);
+    const grant = restrictedActionGrant(
+      flags,
+      RESTRICTED_ACTION_GRANT_KEYS.valuPakProgramInstall,
+    );
+    if (grant)
+      return restrictedActionGrantRemaining(
+        flags,
+        RESTRICTED_ACTION_GRANT_KEYS.valuPakProgramInstall,
+      );
     return Math.max(
       0,
-      Math.floor(
-        ensureRunnerTurnFlags(state).valuPakProgramInstallActionsRemaining ?? 0,
-      ),
+      Math.floor(flags.valuPakProgramInstallActionsRemaining ?? 0),
     );
   }
 
   function valuPakTemporaryProgramInstallCredits(state: GameState): number {
+    const flags = ensureRunnerTurnFlags(state);
+    const grant = restrictedActionGrant(
+      flags,
+      RESTRICTED_ACTION_GRANT_KEYS.valuPakProgramInstall,
+    );
+    if (grant)
+      return restrictedActionGrantTemporaryCredits(
+        flags,
+        RESTRICTED_ACTION_GRANT_KEYS.valuPakProgramInstall,
+      );
     return Math.max(
       0,
-      Math.floor(
-        ensureRunnerTurnFlags(state).valuPakTemporaryProgramInstallCredits ?? 0,
-      ),
+      Math.floor(flags.valuPakTemporaryProgramInstallCredits ?? 0),
     );
   }
 
@@ -870,6 +915,10 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
 
   function clearValuPakProgramInstallFlags(state: GameState): void {
     const flags = ensureRunnerTurnFlags(state);
+    clearRestrictedActionGrant(
+      flags,
+      RESTRICTED_ACTION_GRANT_KEYS.valuPakProgramInstall,
+    );
     flags.valuPakProgramInstallActionsRemaining = 0;
     flags.valuPakTemporaryProgramInstallCredits = 0;
   }
@@ -890,11 +939,17 @@ export function createEconomyRuntimeServices(deps: RuntimeDeps) {
       throw new Error(
         "Valu-Pak Software Bundle hat keine Installationsaktionen mehr.",
       );
-    flags.valuPakProgramInstallActionsRemaining = Math.max(
-      0,
-      remainingBefore - 1,
-    );
-    if (flags.valuPakProgramInstallActionsRemaining <= 0)
+    const remainingAfter = restrictedActionGrant(
+      flags,
+      RESTRICTED_ACTION_GRANT_KEYS.valuPakProgramInstall,
+    )
+      ? consumeRestrictedActionGrant(
+          flags,
+          RESTRICTED_ACTION_GRANT_KEYS.valuPakProgramInstall,
+        )
+      : Math.max(0, remainingBefore - 1);
+    flags.valuPakProgramInstallActionsRemaining = remainingAfter;
+    if (remainingAfter <= 0)
       flags.valuPakTemporaryProgramInstallCredits = 0;
     legalAction.payload = {
       ...(legalAction.payload ?? {}),

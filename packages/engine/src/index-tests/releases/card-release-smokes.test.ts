@@ -2416,14 +2416,15 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(actionsAfterInstall.some((action) => action.type === "end_turn")).toBe(
       true,
     );
-    expect(
-      actionsAfterInstall.some(
-        (action) =>
-          action.type === "start_run" &&
-          action.payload?.runOnlyAction === true &&
-          action.payload?.serverId === "rd",
-      ),
-    ).toBe(true);
+    const rdRunOnlyAction = actionsAfterInstall.find(
+      (action) =>
+        action.type === "start_run" &&
+        action.payload?.runOnlyAction === true &&
+        action.payload?.serverId === "rd",
+    );
+    expect(rdRunOnlyAction?.label).toBe(
+      "Wilson, Weeflerunner Apprentice: Run auf R&D",
+    );
     state = apply(
       state,
       "runner",

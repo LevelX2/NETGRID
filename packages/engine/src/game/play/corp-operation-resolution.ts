@@ -25,6 +25,10 @@ import {
 } from "../../mechanics/hidden-zone";
 import { EDGERUNNER_TEMPS_INSTALL_OPERATION_ID } from "../../mechanics/longtail-card-effects";
 import { definitionFor, mustInstance } from "../state/card-server-lookup";
+import {
+  RESTRICTED_ACTION_GRANT_KEYS,
+  setRestrictedActionGrant,
+} from "../state/restricted-action-grants";
 
 type CorpOperationResolver = {
   name: string;
@@ -246,6 +250,21 @@ const CORP_OPERATION_RESOLVERS: Record<string, CorpOperationResolver> = {
         );
       }
       const flags = host.corp.ensureTurnFlags();
+      const sourceCardId = sourceCardIdFromAction(legalAction);
+      setRestrictedActionGrant(
+        flags,
+        RESTRICTED_ACTION_GRANT_KEYS.edgerunnerTempsInstall,
+        {
+          side: "corp",
+          sourceCardInstanceId: sourceCardId,
+          sourceDefinitionId:
+            EDGERUNNER_TEMPS_INSTALL_OPERATION_ID as CardDefinitionId,
+          actionType: "install_card",
+          remainingActions: 3,
+          costProfile: "extra_click",
+          cleanupTiming: "side_turn_end",
+        },
+      );
       flags.edgerunnerTempsInstallActionsRemaining = 3;
       host.state.corp.clicks += 3;
       legalAction.payload = {
@@ -440,6 +459,20 @@ export function resolveCorpUtilityOperation(
         );
       }
       const flags = host.corp.ensureTurnFlags();
+      const sourceCardId = sourceCardIdFromAction(legalAction);
+      setRestrictedActionGrant(
+        flags,
+        RESTRICTED_ACTION_GRANT_KEYS.edgerunnerTempsInstall,
+        {
+          side: "corp",
+          sourceCardInstanceId: sourceCardId,
+          sourceDefinitionId: definition.id,
+          actionType: "install_card",
+          remainingActions: utility.amount,
+          costProfile: "extra_click",
+          cleanupTiming: "side_turn_end",
+        },
+      );
       flags.edgerunnerTempsInstallActionsRemaining = utility.amount;
       host.state.corp.clicks += utility.amount;
       legalAction.payload = {

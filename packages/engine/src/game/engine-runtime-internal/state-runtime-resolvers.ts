@@ -117,6 +117,10 @@ import {
   spendCardCounter,
 } from "../state/turn-flags-counters";
 import {
+  RESTRICTED_ACTION_GRANT_KEYS,
+  spendRestrictedActionGrantTemporaryCredits,
+} from "../state/restricted-action-grants";
+import {
   cleanupEmptyRemotes,
   createRemote,
   ensureSpecialZones,
@@ -1874,9 +1878,14 @@ function spendRunnerInstallCredits(
     remaining,
   );
   if (temporary > 0) {
+    spendRestrictedActionGrantTemporaryCredits(
+      flags,
+      RESTRICTED_ACTION_GRANT_KEYS.valuPakProgramInstall,
+      temporary,
+    );
     flags.valuPakTemporaryProgramInstallCredits = Math.max(
       0,
-      valuPakTemporaryProgramInstallCredits(state) - temporary,
+      Math.floor(flags.valuPakTemporaryProgramInstallCredits ?? 0) - temporary,
     );
     remaining -= temporary;
   }

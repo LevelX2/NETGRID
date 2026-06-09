@@ -334,6 +334,32 @@ export type FutureExtraActionGrant = {
   restriction?: RestrictedActionFamily;
 };
 
+export type RestrictedActionGrantState = {
+  side: Side;
+  sourceCardInstanceId: CardInstanceId;
+  sourceDefinitionId: CardDefinitionId;
+  actionType: ActionType;
+  remainingActions: number;
+  costProfile:
+    | "normal_click"
+    | "extra_click"
+    | "no_click"
+    | "temporary_credit_bundle";
+  temporaryCredits?: {
+    amount: number;
+    usableFor: "runner_program_install";
+  };
+  spendingCap?: {
+    limit: number;
+    appliesTo: "run_icebreaker_or_link";
+  };
+  cleanupTiming: "side_turn_end" | "side_turn_start" | "on_remaining_zero";
+};
+
+export type RestrictedActionGrantBucket = Partial<
+  Record<string, RestrictedActionGrantState>
+>;
+
 export type ActionEconomyState = {
   pendingOffer?: TurnBoundExtraActionOffer;
   grants?: TurnBoundExtraActionGrant[];
@@ -1391,6 +1417,7 @@ export type GameState = {
     runnerActionsTakenThisTurn?: number;
     lastDamageRunnerActionOrdinal?: number;
     abilityUsedSourceIdsByLimitKey?: Record<string, CardInstanceId[]>;
+    restrictedActionGrants?: RestrictedActionGrantBucket;
     startOfTurnFloatingCreditsApplied?: boolean;
     incubatorPendingTransforms?: number;
     allNighterBonusRunPending?: boolean;
@@ -1418,6 +1445,7 @@ export type GameState = {
   corpTurnFlags?: {
     scoredBlackOpsAgendaThisTurn: boolean;
     scoredBlackOpsAgendaLastTurn: boolean;
+    restrictedActionGrants?: RestrictedActionGrantBucket;
     edgerunnerTempsInstallActionsRemaining?: number;
     disinfectantUsedSourceIdsThisTurn?: CardInstanceId[];
     employeeEmpowermentStartTurnResolvedSourceIds?: CardInstanceId[];

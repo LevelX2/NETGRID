@@ -7,6 +7,7 @@ import {
   type CardInstance,
   type CardInstanceId,
   type GameState,
+  type RestrictedActionGrantBucket,
   type TraceSuccessEffect,
   type ValidationResult,
 } from "@netgrid/shared";
@@ -389,6 +390,16 @@ export function validateGameState(state: GameState): ValidationResult {
         "corpTurnFlags.edgerunnerTempsInstallActionsRemaining must be an integer from 0 to 3.",
       );
   }
+  validateRestrictedActionGrants(
+    errors,
+    "runnerTurnFlags.restrictedActionGrants",
+    state.runnerTurnFlags?.restrictedActionGrants,
+  );
+  validateRestrictedActionGrants(
+    errors,
+    "corpTurnFlags.restrictedActionGrants",
+    state.corpTurnFlags?.restrictedActionGrants,
+  );
   if (state.eventModificationWindow) {
     if (!state.imminentEvent)
       errors.push("EventModificationWindow requires an ImminentEvent.");
@@ -540,4 +551,40 @@ function isSupportedTraceSuccessEffect(effect: TraceSuccessEffect): boolean {
     Number.isInteger(effect.amount) &&
     effect.amount >= 0
   );
+}
+
+function validateRestrictedActionGrants(
+  errors: string[],
+  path: string,
+  grants: RestrictedActionGrantBucket | undefined,
+): void {
+  if (!grants) return;
+  for (const [key, grant] of Object.entries(grants)) {
+    if (!grant) continue;
+    const grantPath = `${path}.${key}`;
+    if (typeof grant.sourceCardInstanceId !== "string")
+      errors.push(`${grantPath}.sourceCardInstanceId must be a string.`);
+    if (typeof grant.sourceDefinitionId !== "string")
+      errors.push(`${grantPath}.sourceDefinitionId must be a string.`);
+    if (typeof grant.actionType !== "string")
+      errors.push(`${grantPath}.actionType must be a string.`);
+    if (
+      !Number.isInteger(grant.remainingActions) ||
+      grant.remainingActions < 0
+    )
+      errors.push(`${grantPath}.remainingActions must be a non-negative integer.`);
+    if (
+      grant.temporaryCredits &&
+      (!Number.isInteger(grant.temporaryCredits.amount) ||
+        grant.temporaryCredits.amount < 0)
+    )
+      errors.push(
+        `${grantPath}.temporaryCredits.amount must be a non-negative integer.`,
+      );
+    if (
+      grant.spendingCap &&
+      (!Number.isInteger(grant.spendingCap.limit) || grant.spendingCap.limit < 0)
+    )
+      errors.push(`${grantPath}.spendingCap.limit must be a non-negative integer.`);
+  }
 }

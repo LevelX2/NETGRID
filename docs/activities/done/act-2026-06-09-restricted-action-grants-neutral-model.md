@@ -1,21 +1,42 @@
 ---
 activityId: act-2026-06-09-restricted-action-grants-neutral-model
-status: inbox
+status: done
 kind: architecture
 area: engine
 priority: normal
 primaryAgent: architecture-review-agent
 requiresImplementation: true
 createdAt: 2026-06-09
-startedAt:
-completedAt:
+startedAt: 2026-06-09
+completedAt: 2026-06-09
 branch:
 releaseTarget:
 blockedBy: []
 relatedActivities:
   - act-2026-06-08-ai-run-action-projection
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/shared/src/index.ts
+  - packages/engine/src/game/state/restricted-action-grants.ts
+  - packages/engine/src/game/state/restricted-action-grants.test.ts
+  - packages/engine/src/game/card-implementation/install-rez-runtime-deps.ts
+  - packages/engine/src/game/engine-runtime-internal/economy-runtime-services.ts
+  - packages/engine/src/game/engine-runtime-internal/state-runtime-resolvers.ts
+  - packages/engine/src/game/play/corp-operation-resolution.ts
+  - packages/engine/src/game/turn/runner-main-actions.ts
+  - packages/engine/src/game/validation.ts
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/game/state/restricted-action-grants.test.ts src/game/card-implementation/install-rez-runtime-deps.test.ts src/game/run/start-run-action-execution.test.ts
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/per-card-longtail.test.ts -t Valu-Pak
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/per-card-longtail.test.ts -t Edgerunner
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/releases/card-release-smokes.test.ts -t Wilson
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/releases/mechanic-package-smokes-v16-v199.test.ts -t All-Nighter
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/originalset/per-card-followups.test.ts -t Bodyweight
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-wilson-run-action.test.ts src/runner-run-target-evaluation.test.ts -t Wilson
+  - corepack pnpm --filter @netgrid/ai exec vitest run src/runner-run-target-evaluation.test.ts
+  - corepack pnpm --filter @netgrid/shared typecheck
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/ai typecheck
+  - git diff --check
 ---
 
 # Eingeschränkte Zusatzaktionen neutral modellieren
@@ -65,12 +86,12 @@ Sehr ähnliche Zusatzaktions-Mechaniken sollen nicht je Karte eigene State- und 
 
 ## Akzeptanzkriterien
 
-- [ ] Das allgemeine Run-only-Action-Label ist nicht mehr fest `Wilson-Run`, sondern neutral oder quellenbasiert.
-- [ ] Mindestens zwei Zusatzaktionspfade nutzen denselben neutralen Helper oder dasselbe State-Profil, sofern ihre Semantik identisch genug ist.
-- [ ] Valu-Pak-/Edgerunner-/Bonus-Run-Resetlogik bleibt deterministisch und fokussiert getestet.
-- [ ] Die Runner-KI erkennt Run-only-Aktionen weiterhin als serverbezogene Runs mit `runSpendingCap`.
-- [ ] Keine neue Möglichkeit entsteht, Zusatzaktionen außerhalb ihrer Einschränkung einzusetzen.
-- [ ] Engine- und AI-Regressionen für Run-only-Spending-Cap und relevante Bonusaktionspfade bleiben grün.
+- [x] Das allgemeine Run-only-Action-Label ist nicht mehr fest `Wilson-Run`, sondern neutral oder quellenbasiert.
+- [x] Mindestens zwei Zusatzaktionspfade nutzen denselben neutralen Helper oder dasselbe State-Profil, sofern ihre Semantik identisch genug ist.
+- [x] Valu-Pak-/Edgerunner-/Bonus-Run-Resetlogik bleibt deterministisch und fokussiert getestet.
+- [x] Die Runner-KI erkennt Run-only-Aktionen weiterhin als serverbezogene Runs mit `runSpendingCap`.
+- [x] Keine neue Möglichkeit entsteht, Zusatzaktionen außerhalb ihrer Einschränkung einzusetzen.
+- [x] Engine- und AI-Regressionen für Run-only-Spending-Cap und relevante Bonusaktionspfade bleiben grün.
 
 ## Umsetzungshinweise
 
@@ -87,4 +108,4 @@ Sehr ähnliche Zusatzaktions-Mechaniken sollen nicht je Karte eigene State- und 
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen. `RestrictedActionGrantState` beschreibt eingeschränkte Zusatzaktionen jetzt neutral mit Quelle, `actionType`, verbleibenden Aktionen, Kostenprofil, optionalen temporären Credits, optionalem Spending-Cap und Cleanup-Timing. Valu-Pak und Edgerunner schreiben und konsumieren dasselbe neutrale Grant-Profil; die alten kartenspezifischen Felder bleiben als Spiegel für bestehende öffentliche Payloads erhalten. Das allgemeine Run-only-Label ist quellenbasiert (`<Kartentitel>: Run auf ...`) und die Payload trägt neutrale Restricted-Grant-Metadaten, ohne die AI-Auswertung von `runSpendingCap` zu ändern.

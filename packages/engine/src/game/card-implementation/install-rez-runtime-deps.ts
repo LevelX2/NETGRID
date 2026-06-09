@@ -6,6 +6,10 @@ import type {
 } from "@netgrid/shared";
 import type { CardEffectHiddenInfoResult } from "../../ability-engine/effect-interpreter";
 import type { CardImplementationRuntimeDependencies } from "../../ability-engine/card-implementation-runtime";
+import {
+  RESTRICTED_ACTION_GRANT_KEYS,
+  setRestrictedActionGrant,
+} from "../state/restricted-action-grants";
 
 export type InstallRezRuntimeDepsKey =
   | "rezzedIceTargetCount"
@@ -166,6 +170,29 @@ function startRunnerProgramInstallActionBundle(
       "Valu-Pak Software Bundle findet kein installierbares Programm.",
     );
   const flags = host.runner.ensureTurnFlags(state);
+  const sourceCardId = String(
+    legalAction.payload?.cardId ?? legalAction.source ?? "",
+  ) as CardInstanceId;
+  if (!sourceCardId)
+    throw new Error("Valu-Pak Software Bundle fehlt als Quelle.");
+  const sourceDefinitionId = host.cards.definitionFor(state, sourceCardId).id;
+  setRestrictedActionGrant(
+    flags,
+    RESTRICTED_ACTION_GRANT_KEYS.valuPakProgramInstall,
+    {
+      side: "runner",
+      sourceCardInstanceId: sourceCardId,
+      sourceDefinitionId,
+      actionType: "install_card",
+      remainingActions: actionCount,
+      costProfile: "temporary_credit_bundle",
+      temporaryCredits: {
+        amount: temporaryCredit,
+        usableFor: "runner_program_install",
+      },
+      cleanupTiming: "side_turn_end",
+    },
+  );
   flags.valuPakProgramInstallActionsRemaining = actionCount;
   flags.valuPakTemporaryProgramInstallCredits = temporaryCredit;
   state.runner.clicks += actionCount;

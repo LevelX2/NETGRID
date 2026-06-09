@@ -1853,6 +1853,20 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.runnerTurnFlags?.valuPakTemporaryProgramInstallCredits).toBe(
       1,
     );
+    expect(
+      state.runnerTurnFlags?.restrictedActionGrants?.valu_pak_program_install,
+    ).toMatchObject({
+      side: "runner",
+      sourceDefinitionId: "onr_v1_117_valu-pak-software-bundle",
+      actionType: "install_card",
+      remainingActions: 5,
+      costProfile: "temporary_credit_bundle",
+      temporaryCredits: {
+        amount: 1,
+        usableFor: "runner_program_install",
+      },
+      cleanupTiming: "side_turn_end",
+    });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_event",
       cardDefinitionId: "onr_v1_117_valu-pak-software-bundle",
@@ -1896,6 +1910,12 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     expect(state.runnerTurnFlags?.valuPakTemporaryProgramInstallCredits).toBe(
       0,
     );
+    expect(
+      state.runnerTurnFlags?.restrictedActionGrants?.valu_pak_program_install,
+    ).toMatchObject({
+      remainingActions: 4,
+      temporaryCredits: { amount: 0 },
+    });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
       cardDefinitionId: "simple_decoder",
@@ -5397,6 +5417,16 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(state.corp.clicks).toBe(12);
     expect(state.corpTurnFlags?.edgerunnerTempsInstallActionsRemaining).toBe(3);
+    expect(
+      state.corpTurnFlags?.restrictedActionGrants?.edgerunner_temps_install,
+    ).toMatchObject({
+      side: "corp",
+      sourceDefinitionId: "onr_v1_289_edgerunner-inc-temps",
+      actionType: "install_card",
+      remainingActions: 3,
+      costProfile: "extra_click",
+      cleanupTiming: "side_turn_end",
+    });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "play_operation",
       cardDefinitionId: "onr_v1_289_edgerunner-inc-temps",
@@ -5443,6 +5473,9 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       state.corp.servers.some((server) => server.ice.includes(iceId)),
     ).toBe(true);
     expect(state.corpTurnFlags?.edgerunnerTempsInstallActionsRemaining).toBe(2);
+    expect(
+      state.corpTurnFlags?.restrictedActionGrants?.edgerunner_temps_install,
+    ).toMatchObject({ remainingActions: 2 });
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "install_card",
       v1922CorpOperationAbility: "install_action_bundle",
