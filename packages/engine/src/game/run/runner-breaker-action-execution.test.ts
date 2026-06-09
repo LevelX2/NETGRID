@@ -302,7 +302,7 @@ describe("runner-breaker-action-execution", () => {
     expect(calls).toEqual([`spend:1:${BREAKER_ID}`, "aardvark:pump_breaker"]);
   });
 
-  it("executes a basic break through validation, payment, effects and tracking", () => {
+  it("executes a basic break through validation, payment and effects", () => {
     const calls: string[] = [];
 
     handleRunnerBreakerActionExecution(
@@ -318,19 +318,76 @@ describe("runner-breaker-action-execution", () => {
       `spend:1:${BREAKER_ID}`,
       "effect:break_subroutine:0",
       "stealthLoss",
-      "bartmoss",
-      "dupre",
-      "snowball",
     ]);
   });
 
-  it("delegates multi-break and Blink special paths without duplicating engines", () => {
+  it("routes breaker tracking only through neutral special profiles", () => {
+    const bartmossCalls: string[] = [];
+    handleRunnerBreakerActionExecution(
+      hostFor(state(), bartmossCalls, {
+        breaker: {
+          breakAbilityForLegalAction: () =>
+            ({
+              type: "break_subroutine",
+              specialEffects: [{ kind: "post_encounter_self_trash_check" }],
+            }) as unknown as RuntimeIcebreakerAbility,
+        },
+      }),
+      legalAction("break_subroutine", {
+        breakerId: BREAKER_ID,
+        subroutineIndex: 0,
+      }),
+    );
+
+    expect(bartmossCalls).toEqual([
+      "assertCost",
+      `spend:1:${BREAKER_ID}`,
+      "effect:break_subroutine:0",
+      "stealthLoss",
+      "bartmoss",
+    ]);
+
+    const dupreCalls: string[] = [];
+    handleRunnerBreakerActionExecution(
+      hostFor(state(), dupreCalls, {
+        breaker: {
+          breakAbilityForLegalAction: () =>
+            ({
+              type: "break_subroutine",
+              specialEffects: [
+                { kind: "run_end_add_counter_if_used_on_last_fort" },
+              ],
+            }) as unknown as RuntimeIcebreakerAbility,
+        },
+      }),
+      legalAction("break_subroutine", {
+        breakerId: BREAKER_ID,
+        subroutineIndex: 0,
+      }),
+    );
+
+    expect(dupreCalls).toEqual([
+      "assertCost",
+      `spend:1:${BREAKER_ID}`,
+      "effect:break_subroutine:0",
+      "stealthLoss",
+      "dupre",
+    ]);
+  });
+
+  it("delegates multi-break and random damage special paths without duplicating engines", () => {
     const multiCalls: string[] = [];
     handleRunnerBreakerActionExecution(
       hostFor(state(), multiCalls, {
         breaker: {
           breakAbilityForLegalAction: () =>
-            ({ type: "break_subroutine", count: 2 }) as RuntimeIcebreakerAbility,
+            ({
+              type: "break_subroutine",
+              count: 2,
+              specialEffects: [
+                { kind: "strength_bonus_per_successful_break_this_run" },
+              ],
+            }) as unknown as RuntimeIcebreakerAbility,
         },
       }),
       legalAction("break_subroutine", {
@@ -339,7 +396,7 @@ describe("runner-breaker-action-execution", () => {
       }),
     );
 
-    expect(multiCalls).toEqual(["multiBreak", "bartmoss", "dupre", "snowball"]);
+    expect(multiCalls).toEqual(["multiBreak", "snowball"]);
 
     const blinkCalls: string[] = [];
     handleRunnerBreakerActionExecution(
@@ -348,8 +405,16 @@ describe("runner-breaker-action-execution", () => {
           breakAbilityForLegalAction: () =>
             ({
               type: "break_subroutine",
-              special: "blink_random_break_or_net_damage",
-            }) as RuntimeIcebreakerAbility,
+              specialEffects: [
+                {
+                  kind: "random_break_or_damage",
+                  successDieResults: [4, 5, 6],
+                  failureDamageType: "net",
+                  maxFailureDamage: 3,
+                  oncePerSubroutinePerEncounter: true,
+                },
+              ],
+            }) as unknown as RuntimeIcebreakerAbility,
         },
       }),
       legalAction("break_subroutine", {

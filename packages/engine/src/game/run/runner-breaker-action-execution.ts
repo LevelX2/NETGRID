@@ -6,7 +6,10 @@ import type {
   GameState,
   LegalAction,
 } from "@netgrid/shared";
-import type { RuntimeIcebreakerAbility } from "../../ability-engine/icebreaker-abilities";
+import {
+  icebreakerAbilityHasSpecialEffect,
+  type RuntimeIcebreakerAbility,
+} from "../../ability-engine/icebreaker-abilities";
 
 type ActiveRun = NonNullable<GameState["run"]>;
 type Subroutine = NonNullable<CardDefinition["subroutines"]>[number];
@@ -212,9 +215,7 @@ function executeBreakSubroutineAction(
       (breakAbility?.count ?? 1) > 1)
   ) {
     host.breaker.resolveMultiBreakSubroutinesAction(breakerId, legalAction);
-    host.tracking.recordBartmossEncounterUsage(breakerId);
-    host.tracking.recordDupreBreakUsage(breakerId);
-    host.tracking.recordSnowballBreakUsage(breakerId);
+    recordBreakerSpecialEffects(host, breakerId, breakAbility);
     if (breakAbility?.onUseEndRun) host.run.finishRun(false, legalAction);
     return;
   }
@@ -257,13 +258,13 @@ function executeBreakSubroutineAction(
     return;
   }
   if (breakerId) {
-    if (breakAbility?.special === "blink_random_break_or_net_damage") {
+    if (icebreakerAbilityHasSpecialEffect(breakAbility, "random_break_or_damage")) {
       host.breaker.resolveBlinkBreakSubroutineAction(
         breakerId,
         Number(legalAction.payload?.subroutineIndex),
         legalAction,
       );
-      if (breakAbility.onUseEndRun) host.run.finishRun(false, legalAction);
+      if (breakAbility?.onUseEndRun) host.run.finishRun(false, legalAction);
       return;
     }
   }
@@ -275,11 +276,31 @@ function executeBreakSubroutineAction(
   ]);
   if (breakerId) {
     host.fort.applyPostBreakStealthLoss(breakerId, legalAction);
-    host.tracking.recordBartmossEncounterUsage(breakerId);
-    host.tracking.recordDupreBreakUsage(breakerId);
-    host.tracking.recordSnowballBreakUsage(breakerId);
+    recordBreakerSpecialEffects(host, breakerId, breakAbility);
     recordNextSentryFreeBreakIfEarned(host, breakerId, breakAbility);
     if (breakAbility?.onUseEndRun) host.run.finishRun(false, legalAction);
+  }
+}
+
+function recordBreakerSpecialEffects(
+  host: RunnerBreakerActionExecutionHost,
+  breakerId: CardInstanceId,
+  breakAbility: RuntimeIcebreakerAbility | undefined,
+): void {
+  for (const effect of breakAbility?.specialEffects ?? []) {
+    switch (effect.kind) {
+      case "post_encounter_self_trash_check":
+        host.tracking.recordBartmossEncounterUsage(breakerId);
+        break;
+      case "run_end_add_counter_if_used_on_last_fort":
+        host.tracking.recordDupreBreakUsage(breakerId);
+        break;
+      case "strength_bonus_per_successful_break_this_run":
+        host.tracking.recordSnowballBreakUsage(breakerId);
+        break;
+      default:
+        break;
+    }
   }
 }
 
@@ -340,8 +361,10 @@ function recordNextSentryFreeBreakIfEarned(
   breakAbility: RuntimeIcebreakerAbility | undefined,
 ): void {
   if (
-    breakAbility?.special !==
-    "set_next_sentry_free_break_after_fully_breaking_wall"
+    !icebreakerAbilityHasSpecialEffect(
+      breakAbility,
+      "set_next_sentry_free_break_after_fully_breaking_wall",
+    )
   )
     return;
   const run = host.state.run;

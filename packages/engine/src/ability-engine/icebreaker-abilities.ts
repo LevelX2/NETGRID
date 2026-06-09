@@ -8,7 +8,21 @@ import { cardImplementationForDefinitionId } from "../card-implementations/regis
 import type {
   CardIcebreakerAbilityImplementation,
   CardIcebreakerBreakMatcherImplementation,
+  CardIcebreakerBreakSpecialImplementation,
 } from "./definition-types";
+
+export type RuntimeIcebreakerSpecialEffect =
+  | {
+      kind: "random_break_or_damage";
+      successDieResults: readonly number[];
+      failureDamageType: "net";
+      maxFailureDamage: 3;
+      oncePerSubroutinePerEncounter: true;
+    }
+  | { kind: "post_encounter_self_trash_check" }
+  | { kind: "strength_bonus_per_successful_break_this_run" }
+  | { kind: "run_end_add_counter_if_used_on_last_fort" }
+  | { kind: "set_next_sentry_free_break_after_fully_breaking_wall" };
 
 export type RuntimeIcebreakerAbility = AbilityDefinition & {
   iceSubtypes?: readonly string[];
@@ -25,6 +39,7 @@ export type RuntimeIcebreakerAbility = AbilityDefinition & {
     | "snowball_run_strength_per_successful_break"
     | "dupre_strength_counter_and_last_fort"
     | "set_next_sentry_free_break_after_fully_breaking_wall";
+  specialEffects?: readonly RuntimeIcebreakerSpecialEffect[];
   source: "shared_card_definition" | "card_implementation";
 };
 
@@ -43,6 +58,41 @@ function breakMatcherFields(
   if (matcher.kind === "subroutine_tag")
     return { subroutineBreakTags: [matcher.tag] };
   return { subroutineBreakTags: ["trace"] };
+}
+
+function specialEffectsForImplementation(
+  special: CardIcebreakerBreakSpecialImplementation | undefined,
+): readonly RuntimeIcebreakerSpecialEffect[] | undefined {
+  if (!special) return undefined;
+  switch (special.kind) {
+    case "blink_random_break_or_net_damage":
+      return [
+        {
+          kind: "random_break_or_damage",
+          successDieResults: [4, 5, 6],
+          failureDamageType: "net",
+          maxFailureDamage: 3,
+          oncePerSubroutinePerEncounter: true,
+        },
+      ];
+    case "bartmoss_post_encounter_self_trash_check":
+      return [{ kind: "post_encounter_self_trash_check" }];
+    case "snowball_run_strength_per_successful_break":
+      return [{ kind: "strength_bonus_per_successful_break_this_run" }];
+    case "dupre_strength_counter_and_last_fort":
+      return [{ kind: "run_end_add_counter_if_used_on_last_fort" }];
+    case "set_next_sentry_free_break_after_fully_breaking_wall":
+      return [{ kind: "set_next_sentry_free_break_after_fully_breaking_wall" }];
+    default:
+      return undefined;
+  }
+}
+
+export function icebreakerAbilityHasSpecialEffect(
+  ability: RuntimeIcebreakerAbility | undefined,
+  kind: RuntimeIcebreakerSpecialEffect["kind"],
+): boolean {
+  return ability?.specialEffects?.some((effect) => effect.kind === kind) ?? false;
 }
 
 function abilityForImplementation(
@@ -71,6 +121,7 @@ function abilityForImplementation(
   const stealthLoss = ability.onSuccessfulBreak?.find(
     (effect) => effect.kind === "lose_bits_from_stealth_sources",
   );
+  const specialEffects = specialEffectsForImplementation(ability.special);
   return {
     id: abilityId,
     type: "break_subroutine",
@@ -93,6 +144,7 @@ function abilityForImplementation(
       ? { onUseEndRun: true }
       : {}),
     ...(ability.special ? { special: ability.special.kind } : {}),
+    ...(specialEffects ? { specialEffects } : {}),
     ...breakMatcherFields(ability.matches),
     source: "card_implementation",
   };

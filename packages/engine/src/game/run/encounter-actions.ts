@@ -9,12 +9,12 @@ import type {
 import { dynamicSubroutineAttributionFor } from "../../ability-engine/additional-subroutine-modifiers";
 import { normalizeSubtypeLabel } from "../../ability-engine/card-implementation-modifiers";
 import {
+  icebreakerAbilityHasSpecialEffect,
   icebreakerAbilitiesForDefinition,
   type RuntimeIcebreakerAbility,
 } from "../../ability-engine/icebreaker-abilities";
 import { cardImplementationForDefinitionId } from "../../card-implementations/registry";
 import {
-  BLINK_ID,
   MYSTERY_BOX_ID,
   PILE_DRIVER_ID,
   SELF_MODIFYING_CODE_ID,
@@ -306,12 +306,18 @@ export function buildRunnerEncounterActions(
         continue;
       }
       subroutines.forEach((subroutine, index) => {
-        if (breaker.id === BLINK_ID && blinkUsedSubroutines.includes(index))
-          return;
         const breakAbility = breakAbilities.find((candidate) =>
           breakAbilityMatchesSubroutine(candidate, subroutine),
         );
         if (!breakAbility) return;
+        if (
+          icebreakerAbilityHasSpecialEffect(
+            breakAbility,
+            "random_break_or_damage",
+          ) &&
+          blinkUsedSubroutines.includes(index)
+        )
+          return;
         const singleBreakCost = host.costs.breakSubroutineCostBreakdown(
           breakAbility.cost.credits,
           1,

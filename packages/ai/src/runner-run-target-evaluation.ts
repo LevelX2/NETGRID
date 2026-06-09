@@ -130,7 +130,7 @@ export type BlinkRiskAssessment = {
   handAfterActionCost: number;
   blinkUsesLikely: number;
   visibleSubroutinesLikely: number;
-  maxSingleFailureDamage: 3;
+  maxSingleFailureDamage: number;
   worstCaseDamageEstimate: number;
   lethalOnAnyFailure: boolean;
   lethalOnHighFailure: boolean;
@@ -269,11 +269,40 @@ export type EvaluateRunnerRunTargetsParams = {
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 const INSTALLED_RUN_PAYOFF_SCORE_CAP = 180;
 export const BLINK_CARD_ID = "onr_v1_007_blink";
-const BLINK_MAX_SINGLE_FAILURE_DAMAGE = 3 as const;
+
+export type RandomBreakOrDamageRiskProfile = {
+  kind: "random_break_or_damage";
+  profileId: "blink";
+  definitionIds: readonly string[];
+  failureDamageType: "net";
+  maxSingleFailureDamage: number;
+};
+
+export const BLINK_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE: RandomBreakOrDamageRiskProfile =
+  {
+    kind: "random_break_or_damage",
+    profileId: "blink",
+    definitionIds: [BLINK_CARD_ID],
+    failureDamageType: "net",
+    maxSingleFailureDamage: 3,
+  };
+
+const RANDOM_BREAK_OR_DAMAGE_RISK_PROFILES = [
+  BLINK_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE,
+] as const;
 
 type InternalRunActionProjection = RunActionProjection & {
   action: LegalAction;
 };
+
+export function randomBreakOrDamageRiskProfileForDefinitionId(
+  definitionId: string | undefined,
+): RandomBreakOrDamageRiskProfile | undefined {
+  if (!definitionId) return undefined;
+  return RANDOM_BREAK_OR_DAMAGE_RISK_PROFILES.find((profile) =>
+    profile.definitionIds.includes(definitionId),
+  );
+}
 
 export function buildBlinkRiskAssessment(params: {
   currentHandCount: number;
@@ -283,9 +312,16 @@ export function buildBlinkRiskAssessment(params: {
   payoffOverride: BlinkRiskPayoffOverride;
   stableCoverageAvailable: boolean;
   context: "run_path" | "encounter_break";
+  riskProfile?: RandomBreakOrDamageRiskProfile;
   targetServerId?: string;
   evidence?: readonly string[];
 }): BlinkRiskAssessment {
+  const riskProfile =
+    params.riskProfile ?? BLINK_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE;
+  const maxSingleFailureDamage = Math.max(
+    1,
+    Math.floor(riskProfile.maxSingleFailureDamage),
+  );
   const currentHandCount = Math.max(0, Math.floor(params.currentHandCount));
   const handAfterActionCost = Math.max(
     0,
@@ -296,12 +332,11 @@ export function buildBlinkRiskAssessment(params: {
     1,
     Math.floor(params.visibleSubroutinesLikely),
   );
-  const worstCaseDamageEstimate =
-    blinkUsesLikely * BLINK_MAX_SINGLE_FAILURE_DAMAGE;
+  const worstCaseDamageEstimate = blinkUsesLikely * maxSingleFailureDamage;
   const lethalOnAnyFailure = handAfterActionCost <= 0;
   const lethalOnHighFailure = handAfterActionCost <= 2;
   const survivesOneFailedBlinkUse =
-    handAfterActionCost >= BLINK_MAX_SINGLE_FAILURE_DAMAGE;
+    handAfterActionCost >= maxSingleFailureDamage;
   const riskSeverity = blinkRiskSeverityFor({
     handAfterActionCost,
     worstCaseDamageEstimate,
@@ -340,7 +375,9 @@ export function buildBlinkRiskAssessment(params: {
     `blinkHandBuffer:${handAfterActionCost}`,
     `blinkUsesLikely:${blinkUsesLikely}`,
     `visibleSubroutinesLikely:${visibleSubroutinesLikely}`,
-    `maxSingleFailureDamage:${BLINK_MAX_SINGLE_FAILURE_DAMAGE}`,
+    `randomBreakOrDamageRiskProfile:${riskProfile.profileId}`,
+    `randomBreakOrDamageFailureDamageType:${riskProfile.failureDamageType}`,
+    `maxSingleFailureDamage:${maxSingleFailureDamage}`,
     `worstCaseDamageEstimate:${worstCaseDamageEstimate}`,
     `lethalOnAnyFailure:${lethalOnAnyFailure}`,
     `lethalOnHighFailure:${lethalOnHighFailure}`,
@@ -377,7 +414,7 @@ export function buildBlinkRiskAssessment(params: {
     handAfterActionCost,
     blinkUsesLikely,
     visibleSubroutinesLikely,
-    maxSingleFailureDamage: BLINK_MAX_SINGLE_FAILURE_DAMAGE,
+    maxSingleFailureDamage,
     worstCaseDamageEstimate,
     lethalOnAnyFailure,
     lethalOnHighFailure,
@@ -411,8 +448,8 @@ export function assessBlinkRiskForRunAction(
   );
   if (!server || server.ice.length <= 0) return undefined;
   const rig = input.playerView.own.rig ?? [];
-  const blinkInstalled = rig.some(isVisibleBlinkCard);
-  if (!blinkInstalled) return undefined;
+  const riskProfile = randomBreakOrDamageRiskProfilesForRig(rig)[0];
+  if (!riskProfile) return undefined;
 
   const fullPath = assessKnownRezzedIcePath(
     server.ice,
@@ -431,7 +468,9 @@ export function assessBlinkRiskForRunAction(
     return undefined;
   }
 
-  const stableRig = rig.filter((card) => !isVisibleBlinkCard(card));
+  const stableRig = rig.filter(
+    (card) => !randomBreakOrDamageRiskProfileForVisibleBreaker(card),
+  );
   const stablePath = assessKnownRezzedIcePath(
     server.ice,
     stableRig,
@@ -459,6 +498,7 @@ export function assessBlinkRiskForRunAction(
     payoffOverride,
     stableCoverageAvailable,
     context: "run_path",
+    riskProfile,
     targetServerId,
     evidence: [
       `blinkRunTarget:${targetServerId}`,
@@ -662,11 +702,13 @@ export function runnerBlinkRecoveryAssessment(
   targetServerId?: string,
 ): RunnerBlinkRecoveryAssessment | undefined {
   if (input.side !== "runner") return undefined;
+  const riskProfile = BLINK_RANDOM_BREAK_OR_DAMAGE_RISK_PROFILE;
   const currentHandCount = input.playerView.own.gripOrHq.length;
   const recent = targetServerId
     ? recentBlinkFailureFromEvents(input, targetServerId)
     : recentBlinkFailureFromEvents(input);
-  const handBufferTooLow = currentHandCount < BLINK_MAX_SINGLE_FAILURE_DAMAGE;
+  const handBufferTooLow =
+    currentHandCount < riskProfile.maxSingleFailureDamage;
   const active = recent.recentFailure && handBufferTooLow;
   if (!active && !recent.recentFailure) return undefined;
   const sameServerRepeatedRiskPenalty =
@@ -684,6 +726,7 @@ export function runnerBlinkRecoveryAssessment(
     evidence: [
       `recentBlinkFailure:${recent.recentFailure}`,
       `recentBlinkDamageAmount:${recent.recentDamageAmount}`,
+      `randomBreakOrDamageRiskProfile:${riskProfile.profileId}`,
       `blinkRecoveryHandCount:${currentHandCount}`,
       `blinkRecoveryHandBufferTooLow:${handBufferTooLow}`,
       `sameServerRepeatedBlinkRiskPenalty:${sameServerRepeatedRiskPenalty}`,
@@ -710,8 +753,21 @@ type VisibleRigCard = NonNullable<
 type VisibleServerIce =
   AiDecisionInput["playerView"]["servers"][number]["ice"][number];
 
-function isVisibleBlinkCard(card: VisibleRigCard): boolean {
-  return card.known && card.definitionId === BLINK_CARD_ID;
+function randomBreakOrDamageRiskProfilesForRig(
+  rig: readonly VisibleRigCard[],
+): RandomBreakOrDamageRiskProfile[] {
+  return rig
+    .map(randomBreakOrDamageRiskProfileForVisibleBreaker)
+    .filter(
+      (profile): profile is RandomBreakOrDamageRiskProfile => profile !== undefined,
+    );
+}
+
+function randomBreakOrDamageRiskProfileForVisibleBreaker(
+  card: VisibleRigCard,
+): RandomBreakOrDamageRiskProfile | undefined {
+  if (!card.known) return undefined;
+  return randomBreakOrDamageRiskProfileForDefinitionId(card.definitionId);
 }
 
 function actionConsumesKnownOwnHandCard(

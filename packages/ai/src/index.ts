@@ -62,12 +62,12 @@ import {
   type RunnerStrategicIntentProfile,
 } from "./runner-strategic-intent";
 import {
-  BLINK_CARD_ID,
   assessBlinkRiskForRunAction,
   blinkRiskShouldAvoidRun,
   buildBlinkRiskAssessment,
   buildRunnerEconomyPosture,
   evaluateRunnerRunTargets,
+  randomBreakOrDamageRiskProfileForDefinitionId,
   runnerBlinkRecoveryAssessment,
   type BlinkRiskAssessment,
   type BlinkRiskPayoffOverride,
@@ -5427,9 +5427,10 @@ function blinkRiskAssessmentForEncounterBreak(
   if (input.side !== "runner" || action.type !== "break_subroutine") {
     return undefined;
   }
-  if (sourceDefinitionIdForAction(input, action) !== BLINK_CARD_ID) {
-    return undefined;
-  }
+  const riskProfile = randomBreakOrDamageRiskProfileForDefinitionId(
+    sourceDefinitionIdForAction(input, action),
+  );
+  if (!riskProfile) return undefined;
   const breakIndexes = breakSubroutineIndexesForAction(action);
   const quote = currentEncounteredIceCard(input)?.effectiveRunQuote;
   const targetSubroutines = [...breakIndexes]
@@ -5459,6 +5460,7 @@ function blinkRiskAssessmentForEncounterBreak(
     payoffOverride,
     stableCoverageAvailable,
     context: "encounter_break",
+    riskProfile,
     evidence: [
       "blinkBreakAction:true",
       `blinkBreakSubroutineCount:${visibleSubroutinesLikely}`,
@@ -5482,7 +5484,9 @@ function stableBreakAlternativeForBlinkAction(
     if (
       candidate.actionId === action.actionId ||
       candidate.type !== "break_subroutine" ||
-      sourceDefinitionIdForAction(input, candidate) === BLINK_CARD_ID
+      randomBreakOrDamageRiskProfileForDefinitionId(
+        sourceDefinitionIdForAction(input, candidate),
+      ) !== undefined
     ) {
       return false;
     }
