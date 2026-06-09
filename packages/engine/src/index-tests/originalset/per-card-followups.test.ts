@@ -192,6 +192,7 @@ import {
   continueRunThroughMovement,
   continueRunThroughMovementWindow,
   enterEncounterFromMovementWindow,
+  passRootRezWindowBeforeAccessIfOpen,
   traceChoiceOptionIdForDefinition,
   addCorpCardToHqForTest,
   addRezzedCorpRootForTest,
@@ -763,6 +764,156 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
     });
   });
 
+  it("offers Experimental AI as a root rez before access and still resolves the ambush when declined", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-experimental-ai-root-rez-window",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.agendaScoring.runner,
+          id: "spotcheck_experimental_ai_blink_runner",
+          name: "Spotcheck Experimental AI Blink Runner",
+          cards: [
+            { id: "onr_v1_007_blink", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.agendaScoring.runner.cards,
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.agendaScoring.corp,
+      }),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 4;
+    const blinkId = installRunnerProgramForTest(state, "onr_v1_007_blink");
+    const experimentalAiId = putCorpRootInRemote(
+      state,
+      "onr_v1_323_experimental-ai",
+    );
+    state.cardInstances[experimentalAiId] = {
+      ...state.cardInstances[experimentalAiId]!,
+      advancementCounters: 1,
+    };
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+
+    expect(state.timingPoint).toBe("run.jack_out_window");
+    expect(state.run?.position).toEqual({ kind: "server", serverId: "remote_1" });
+    expect(getLegalActions(state, "runner")).toEqual([]);
+    const corpActions = getLegalActions(state, "corp");
+    expect(corpActions).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          type: "rez_ice",
+          costs: [{ credits: 2 }],
+          payload: expect.objectContaining({
+            cardId: experimentalAiId,
+            rootRez: true,
+            serverId: "remote_1",
+          }),
+        }),
+        expect.objectContaining({
+          type: "decline_rez",
+          payload: expect.objectContaining({ runRootRezPass: true }),
+        }),
+      ]),
+    );
+
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "decline_rez" &&
+        action.payload?.runRootRezPass === true,
+    );
+    expect(state.cardInstances[experimentalAiId]?.rezzed).toBe(false);
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    expect(state.timingPoint).toBe("access.resolve_card");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+
+    expect(state.runner.heap).toContain(blinkId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      hiddenZoneAction: "v1919_access_ambush_trash_installed",
+      ambushDefinitionId: "onr_v1_323_experimental-ai",
+      advancementCounterCount: 1,
+      trashedCount: 1,
+      trashedCardDefinitionId: "onr_v1_007_blink",
+      trashedCardDefinitionIds: "onr_v1_007_blink",
+    });
+  });
+
+  it("keeps Experimental AI ambush and later Runner trash separate after root rez", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "spotcheck-experimental-ai-root-rezzed-access",
+        runnerDeck: {
+          ...MECHANIC_SMOKE_DECKS.agendaScoring.runner,
+          id: "spotcheck_experimental_ai_rez_blink_runner",
+          name: "Spotcheck Experimental AI Rez Blink Runner",
+          cards: [
+            { id: "onr_v1_007_blink", quantity: 1 },
+            ...MECHANIC_SMOKE_DECKS.agendaScoring.runner.cards,
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.agendaScoring.corp,
+      }),
+    );
+    state.runner.credits = 20;
+    state.corp.credits = 4;
+    const blinkId = installRunnerProgramForTest(state, "onr_v1_007_blink");
+    const experimentalAiId = putCorpRootInRemote(
+      state,
+      "onr_v1_323_experimental-ai",
+    );
+    state.cardInstances[experimentalAiId] = {
+      ...state.cardInstances[experimentalAiId]!,
+      advancementCounters: 1,
+    };
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "rez_ice" &&
+        sourceDefinition(state, action) === "onr_v1_323_experimental-ai",
+    );
+
+    expect(state.cardInstances[experimentalAiId]?.rezzed).toBe(true);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "rez_ice",
+      cardDefinitionId: "onr_v1_323_experimental-ai",
+    });
+    state = apply(state, "runner", (action) => action.type === "continue_run");
+    state = apply(state, "runner", (action) => action.type === "access_card");
+    expect(state.runner.heap).toContain(blinkId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "access_card",
+      ambushDefinitionId: "onr_v1_323_experimental-ai",
+      trashedCardDefinitionId: "onr_v1_007_blink",
+    });
+
+    state = apply(
+      state,
+      "runner",
+      (action) => action.type === "trash_accessed_card",
+    );
+
+    expect(state.corp.archives).toContain(experimentalAiId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "trash_accessed_card",
+      cardDefinitionId: "onr_v1_323_experimental-ai",
+    });
+  });
+
   it("uses Experimental AI advancement counters as the installed-program trash count", () => {
     let state = toRunnerTurn(
       MECHANIC_SMOKE_GAMES.agendaScoring("spotcheck-experimental-ai"),
@@ -783,6 +934,14 @@ describe("Originalset Spotcheck 2026-05-15 Ramming/Galveston Nachtest", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    state = apply(
+      state,
+      "corp",
+      (action) =>
+        action.type === "decline_rez" &&
+        action.payload?.runRootRezPass === true,
+    );
+    state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.runner.heap.map((id) => state.cardInstances[id]?.definitionId)).toEqual(
       expect.arrayContaining(["simple_decoder", "simple_fracter"]),
@@ -2735,6 +2894,7 @@ describe("Originalset spotcheck 2026-05-15 immunity/cinderella follow-up", () =>
     const accessInitial = structuredClone(access);
     const accessReplayStart = access.eventLog.length;
     access = apply(access, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "remote_1");
+    access = passRootRezWindowBeforeAccessIfOpen(access);
     access = apply(access, "runner", (action) => action.type === "access_card");
     expect(access.runner.heap).toEqual(expect.arrayContaining([firstHardware, secondHardware]));
     expect(access.eventLog.at(-1)?.publicPayload).toMatchObject({

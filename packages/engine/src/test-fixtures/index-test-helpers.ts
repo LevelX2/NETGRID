@@ -53,6 +53,21 @@ export function passCorpApproachRezWindowIfOpen(state: GameState): GameState {
   return apply(state, "corp", (action) => action.actionId === passAction.actionId);
 }
 
+export function passRootRezWindowBeforeAccessIfOpen(state: GameState): GameState {
+  const passAction = getLegalActions(state, "corp").find(
+    (action) =>
+      action.type === "decline_rez" && action.payload?.runRootRezPass === true,
+  );
+  if (!passAction) return state;
+  let next = apply(state, "corp", (action) => action.actionId === passAction.actionId);
+  const continueAction = getLegalActions(next, "runner").find(
+    (action) => action.type === "continue_run",
+  );
+  if (!continueAction) return next;
+  next = apply(next, "runner", (action) => action.actionId === continueAction.actionId);
+  return next;
+}
+
 export function traceChoiceOptionIdForDefinition(
   state: GameState,
   definitionId: string,

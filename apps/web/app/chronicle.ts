@@ -2055,6 +2055,13 @@ function formatChronicleEffect(event: PublicGameEvent, effect: ResolvedGameEffec
       amount,
     );
     if (accessDamage) return accessDamage;
+    const accessAmbushTrash = accessAmbushTrashInstalledChronicleItem(
+      event,
+      effect,
+      index,
+      actor,
+    );
+    if (accessAmbushTrash) return accessAmbushTrash;
     const redactedAccessAmbushCounter = redactedAccessAmbushCounterChronicleItem(
       event,
       effect,
@@ -2431,6 +2438,80 @@ function accessEffectDamageChronicleItem(
     cardTitle: source,
     cardDetailLines: [],
     groupLabel: groupLabelFor("run", actor, undefined, displayServerLabel(effect.serverLabel), undefined),
+  };
+}
+
+function accessAmbushTrashInstalledChronicleItem(
+  event: PublicGameEvent,
+  effect: ResolvedGameEffect,
+  index: number,
+  actor: Side | undefined,
+): ChronicleItem | null {
+  if (effect.kind !== "trash_card" || effect.reason !== "access_effect")
+    return null;
+  const payload = event.publicPayload ?? {};
+  const sourceDefinitionId =
+    stringValue(effect.sourceDefinitionId) ??
+    stringValue(payload.ambushDefinitionId) ??
+    stringValue(payload.accessEffectSourceDefinitionId);
+  const isAccessAmbushTrash =
+    stringValue(payload.hiddenZoneAction) ===
+      "v1919_access_ambush_trash_installed" || Boolean(sourceDefinitionId);
+  if (!isAccessAmbushTrash) return null;
+  const source =
+    stringValue(effect.sourceTitle) ??
+    titleForDefinitionId(sourceDefinitionId) ??
+    "Access-Ambush";
+  const trashedTitles = titlesForDefinitionIds(
+    stringValue(payload.trashedCardDefinitionIds) ??
+      stringValue(effect.cardDefinitionId),
+  );
+  const trashedCount =
+    numberValue(payload.trashedCount) ??
+    (trashedTitles.length > 0
+      ? trashedTitles.length
+      : (numberValue(effect.amount) ?? 0));
+  const counterCount =
+    numberValue(payload.advancementCounterCount) ??
+    numberValue(payload.targetTrashCount);
+  const counterText =
+    counterCount !== undefined
+      ? `${counterCount} Advancement-Counter`
+      : "Advancement-Counter";
+  const targetText =
+    trashedTitles.length > 0
+      ? joinChronicleParts(trashedTitles)
+      : trashedCount > 0
+        ? `${trashedCount} Programm${trashedCount === 1 ? "" : "e"}`
+        : "kein Programm";
+  const trashVerb = trashedCount === 1 ? "trashte" : "trashten";
+  const title =
+    trashedCount > 0
+      ? `${source} wurde beim Zugriff ausgelöst: ${counterText} ${trashVerb} ${targetText}`
+      : `${source} wurde beim Zugriff ausgelöst: ${counterText} trashte kein Programm`;
+  const serverLabel = displayServerLabel(effect.serverLabel);
+  return {
+    id: `${event.eventId}:effect:${effect.effectId || index}`,
+    category: "run",
+    importance: trashedCount > 0 ? "important" : "normal",
+    visibility: "public",
+    ...(actor ? { actor } : {}),
+    title: ensurePeriod(title),
+    chips: uniqueChips([
+      ...baseChips(actor, false),
+      "Access-Ambush",
+      source,
+      ...(counterCount !== undefined ? [counterText] : []),
+      ...(trashedTitles.length > 0
+        ? trashedTitles
+        : trashedCount > 0
+          ? [`${trashedCount} Programm${trashedCount === 1 ? "" : "e"}`]
+          : ["Kein Programm"]),
+    ]),
+    ...(sourceDefinitionId ? { cardDefinitionId: sourceDefinitionId } : {}),
+    cardTitle: source,
+    cardDetailLines: [],
+    groupLabel: groupLabelFor("run", actor, undefined, serverLabel, undefined),
   };
 }
 

@@ -193,6 +193,7 @@ import {
   continueRunThroughMovementWindow,
   enterEncounterFromMovementWindow,
   passCorpApproachRezWindowIfOpen,
+  passRootRezWindowBeforeAccessIfOpen,
   traceChoiceOptionIdForDefinition,
   addCorpCardToHqForTest,
   addRezzedCorpRootForTest,
@@ -1353,6 +1354,7 @@ describe("V1.9.17 Generic Asset/Node WIP", () => {
           action.type === "start_run" &&
           action.payload?.serverId === "remote_1",
       );
+      state = passRootRezWindowBeforeAccessIfOpen(state);
       state = apply(state, "runner", (action) => action.type === "access_card");
       if (definitionId === "onr_v1_345_trap") {
         expect(state.pendingChoice?.source).toContain("p3_35.access_payment");
@@ -1852,6 +1854,7 @@ describe("V1.9.18 Generic Upgrade/Root/Server WIP", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    unrezzed = passRootRezWindowBeforeAccessIfOpen(unrezzed);
     unrezzed = apply(unrezzed, "runner", (action) => action.type === "access_card");
     unrezzed = apply(unrezzed, "runner", (action) => action.type === "decline_trash");
     unrezzed = apply(unrezzed, "runner", (action) => action.type === "access_card");

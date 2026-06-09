@@ -1,19 +1,36 @@
 ---
 activityId: act-2026-06-09-experimental-ai-access-chronicle
-status: inbox
+status: done
 kind: fix
 area: cards
 priority: high
 primaryAgent: card-enablement-ai-knowledge-agent
 requiresImplementation: true
 createdAt: 2026-06-09
-startedAt:
-completedAt:
+startedAt: 2026-06-09
+completedAt: 2026-06-09
 branch:
 releaseTarget:
 blockedBy: []
-resultArtifacts: []
-checks: []
+resultArtifacts:
+  - packages/engine/src/game/run/run-core-execution.ts
+  - packages/engine/src/test-fixtures/index-test-helpers.ts
+  - packages/engine/src/index-tests/originalset/per-card-followups.test.ts
+  - packages/engine/src/index-tests/mechanics/agenda-global-random.test.ts
+  - packages/engine/src/index-tests/mechanics/assets-nodes-upgrades.test.ts
+  - packages/engine/src/index-tests/originalset/hidden-access-run-regressions.test.ts
+  - packages/engine/src/index-tests/originalset/corp-assets-upgrades-operations.test.ts
+  - apps/web/app/chronicle.ts
+  - apps/web/app/chronicle.test.ts
+  - KI-Wissen-NETGRID/03 Betrieb/Log 2026-06.md
+checks:
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/originalset/per-card-followups.test.ts src/index-tests/mechanics/agenda-global-random.test.ts src/game/run/run-core-execution.test.ts src/game/run/run-rez-window.test.ts src/game/run/run-flow.test.ts
+  - corepack pnpm --filter @netgrid/web exec vitest run app/chronicle.test.ts
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/run-access-multiaccess.test.ts src/index-tests/mechanics/per-card-longtail.test.ts src/index-tests/mechanics/assets-nodes-upgrades.test.ts
+  - corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/originalset/hidden-access-run-regressions.test.ts src/index-tests/originalset/corp-assets-upgrades-operations.test.ts
+  - corepack pnpm --filter @netgrid/engine typecheck
+  - corepack pnpm --filter @netgrid/web typecheck
+  - git diff --check
 ---
 
 # Experimental AI: Rez-Fenster und Access-Ambush in Chronik klären
@@ -80,4 +97,9 @@ Nach einem Run auf ein Remote mit verdecktem `Experimental AI` soll die Human-Ko
 
 ## Ergebnisnotiz
 
-Noch offen.
+Abgeschlossen am 2026-06-09.
+
+- `startRun` öffnet bei ICE-losen Servern vor dem Access ein `run.jack_out_window`, wenn unrezzed Remote-Root-Karten legal rezbar sind. Dadurch bekommt die Korp auch bei einem Run direkt auf ein Remote-Root die bestehende Root-Rez-Entscheidung; Runner-Actions bleiben bis zum Pass leer.
+- Der bestehende Access-Vertrag bleibt erhalten: Wenn die Korp das Rezzen überspringt, führt der Runner den Run per `continue_run` in den Access weiter; der `Experimental AI`-Ambush löst auch unrezzed aus.
+- Beim vorherigen Root-Rez von `Experimental AI` bleiben Rez-Event, Access-Ambush und späterer Runner-Trash der Karte getrennte öffentliche Schritte.
+- Die Chronicle formatiert `v1919_access_ambush_trash_installed`-Effekte aus der Engine-Payload konkret: Quelle, Advancement-Counter und getrashtes öffentlich bekanntes Runner-Programm werden verbunden; ohne öffentlichen Zielnamen fällt der Text auf die Programm-Anzahl zurück.

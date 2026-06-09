@@ -192,6 +192,7 @@ import {
   continueRunThroughMovement,
   continueRunThroughMovementWindow,
   enterEncounterFromMovementWindow,
+  passRootRezWindowBeforeAccessIfOpen,
   traceChoiceOptionIdForDefinition,
   addCorpCardToHqForTest,
   addRezzedCorpRootForTest,
@@ -477,6 +478,7 @@ describe("Originalset Spotcheck 2026-05-16 Corp Asset/Upgrade Rest hardening", (
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
     expect(state.run?.accessedCardId).toBe(namatokiId);
     state = apply(state, "runner", (action) => action.type === "trash_accessed_card");

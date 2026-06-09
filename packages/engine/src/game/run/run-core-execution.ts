@@ -276,12 +276,33 @@ export function startRun(
       approachedIceId,
       legalAction,
     );
+  } else if (openServerMovementWindowBeforeAccess(host, server.id)) {
+    return;
   } else {
     enterAccessFromSuccessfulRun(
       host.access.runAccessTransitionHost(),
       legalAction,
     );
   }
+}
+
+function openServerMovementWindowBeforeAccess(
+  host: RunCoreExecutionHost,
+  serverId: Exclude<ServerId, "new_remote">,
+): boolean {
+  const movementHost = host.run.movementHost();
+  if (!movementHost.rules.isV097OrLater()) return false;
+  if (!movementHost.rules.corpRunRootRezActionsAvailable()) return false;
+  const run = host.state.run;
+  if (!run) return false;
+  host.state.run = {
+    ...run,
+    phase: "movement",
+    position: { kind: "server", serverId },
+  };
+  host.state.timingPoint = "run.jack_out_window";
+  host.state.activeSide = "runner";
+  return true;
 }
 
 function assertRequiredHostGroups(host: RunCoreExecutionHost): void {

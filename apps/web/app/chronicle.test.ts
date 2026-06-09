@@ -889,6 +889,61 @@ describe("formatChronicleEvent", () => {
     expect(effects[0]?.title).not.toContain("verdeckter Effekt");
   });
 
+  it("names Experimental AI access ambush program trash with counters and public target", () => {
+    const event = makeEvent("access_card", {
+      actor: "runner",
+      hiddenZoneAction: "v1919_access_ambush_trash_installed",
+      ambushDefinitionId: "onr_v1_323_experimental-ai",
+      advancementCounterCount: 1,
+      targetTrashCount: 1,
+      trashedCount: 1,
+      trashedCardDefinitionIds: "onr_v1_007_blink",
+      resolvedEffects: [
+        {
+          effectId: "experimental_ai_trash",
+          kind: "trash_card",
+          visibility: "hidden_info_barrier",
+          side: "runner",
+          amount: 1,
+          reason: "access_effect",
+          sourceDefinitionId: "onr_v1_323_experimental-ai",
+          sourceTitle: "Experimental AI",
+          cardDefinitionId: "onr_v1_007_blink"
+        }
+      ]
+    });
+    const unnamedTargetEvent = makeEvent("access_card", {
+      actor: "runner",
+      hiddenZoneAction: "v1919_access_ambush_trash_installed",
+      ambushDefinitionId: "onr_v1_323_experimental-ai",
+      advancementCounterCount: 1,
+      targetTrashCount: 1,
+      trashedCount: 1,
+      resolvedEffects: [
+        {
+          effectId: "experimental_ai_trash_unknown",
+          kind: "trash_card",
+          visibility: "hidden_info_barrier",
+          side: "runner",
+          amount: 1,
+          reason: "access_effect",
+          sourceDefinitionId: "onr_v1_323_experimental-ai",
+          sourceTitle: "Experimental AI"
+        }
+      ]
+    });
+
+    const effects = formatChronicleEffectItems(event, "corp");
+    const unnamedEffects = formatChronicleEffectItems(unnamedTargetEvent, "corp");
+
+    expect(effects[0]?.title).toBe("Experimental AI wurde beim Zugriff ausgelöst: 1 Advancement-Counter trashte Blink.");
+    expect(effects[0]?.chips).toEqual(expect.arrayContaining(["Access-Ambush", "Experimental AI", "1 Advancement-Counter", "Blink"]));
+    expect(effects[0]?.cardDefinitionId).toBe("onr_v1_323_experimental-ai");
+    expect(effects[0]?.title).not.toContain("verdeckte Karte");
+    expect(unnamedEffects[0]?.title).toBe("Experimental AI wurde beim Zugriff ausgelöst: 1 Advancement-Counter trashte 1 Programm.");
+    expect(unnamedEffects[0]?.title).not.toContain("Blink");
+  });
+
   it("shows Playful AI die results and follow-up choices in the chronicle", () => {
     const played = formatChronicleEvent(
       makeEvent("play_event", {

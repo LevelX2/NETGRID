@@ -192,6 +192,7 @@ import {
   continueRunThroughMovement,
   continueRunThroughMovementWindow,
   enterEncounterFromMovementWindow,
+  passRootRezWindowBeforeAccessIfOpen,
   traceChoiceOptionIdForDefinition,
   addCorpCardToHqForTest,
   addRezzedCorpRootForTest,
@@ -224,6 +225,7 @@ describe("Originalset Spotcheck 2026-05-15 Ambush/Hidden/Trace Nachtest", () => 
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    remoteState = passRootRezWindowBeforeAccessIfOpen(remoteState);
     remoteState = apply(
       remoteState,
       "runner",
@@ -1656,6 +1658,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    state = passRootRezWindowBeforeAccessIfOpen(state);
     state = apply(state, "runner", (action) => action.type === "access_card");
     const trash = mustAction(state, "runner", (action) => action.type === "trash_accessed_card");
     expect(trash.payload).toMatchObject({
@@ -1706,6 +1709,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    upgradeState = passRootRezWindowBeforeAccessIfOpen(upgradeState);
     upgradeState = apply(upgradeState, "runner", (action) => action.type === "access_card");
     expect(
       getLegalActions(upgradeState, "runner").some(
@@ -2843,6 +2847,7 @@ describe("Originalset Spotcheck 2026-05-15 Virus/Link/Archives Nachtest", () => 
         (action) =>
           action.type === "start_run" && action.payload?.serverId === "remote_1",
       );
+      state = passRootRezWindowBeforeAccessIfOpen(state);
       state = apply(state, "runner", (action) => action.type === "access_card");
       expect(state.runner.coreDamage).toBe(advancementCounters);
       const expectedPayload: Record<string, unknown> = {

@@ -193,6 +193,7 @@ import {
   continueRunThroughMovementWindow,
   enterEncounterFromMovementWindow,
   passCorpApproachRezWindowIfOpen,
+  passRootRezWindowBeforeAccessIfOpen,
   traceChoiceOptionIdForDefinition,
   addCorpCardToHqForTest,
   addRezzedCorpRootForTest,
@@ -419,6 +420,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    accessState = passRootRezWindowBeforeAccessIfOpen(accessState);
     accessState = apply(
       accessState,
       "runner",
@@ -716,6 +718,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    hardwareState = passRootRezWindowBeforeAccessIfOpen(hardwareState);
     hardwareState = apply(
       hardwareState,
       "runner",
@@ -746,6 +749,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    coreDamageState = passRootRezWindowBeforeAccessIfOpen(coreDamageState);
     coreDamageState = apply(
       coreDamageState,
       "runner",
@@ -771,6 +775,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    netDamageState = passRootRezWindowBeforeAccessIfOpen(netDamageState);
     netDamageState = apply(
       netDamageState,
       "runner",
@@ -1220,6 +1225,7 @@ describe("V1.9.19 Agenda/Overadvance WIP", () => {
         (action) =>
           action.type === "start_run" && action.payload?.serverId === "remote_1",
       );
+      next = passRootRezWindowBeforeAccessIfOpen(next);
       next = apply(next, "runner", (action) => action.type === "access_card");
       if (
         getLegalActions(next, "runner").some(
