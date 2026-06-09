@@ -144,11 +144,11 @@ describe("formatChronicleEvent", () => {
     const item = formatChronicleEvent(
       makeEvent("start_run", {
         actor: "runner",
-        aiReasonCode: "runner.wilson.run_only_action_preferred",
+        aiReasonCode: "runner.run_only_action.preferred",
         label: "Wilson-Run auf HQ",
         serverLabel: "HQ",
-        runnerAbility: "wilson_gain_run_action",
-        wilsonRunOnlyAction: true,
+        runnerAbility: "gain_run_only_action",
+        runOnlyAction: true,
         runSpendingCap: 3,
       }),
       "corp"

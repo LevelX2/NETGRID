@@ -370,13 +370,13 @@ import {
   type RunEndCleanupHost,
 } from "../run/run-end-cleanup";
 import {
-  activeWilsonSourceIds,
+  activeRunActionSpendingCapSourceIds,
   availableRunnerRunStartCredits,
   hostedPaymentCredits,
   isRestrictedHostedCreditSource,
   payRunStartTaxCredits,
   recordRunnerRunCreditSpend,
-  recordWilsonRunCapSpend,
+  recordRunActionSpendingCapSpend,
   restrictedHostedCreditSourceForDefinition,
   restrictedHostedCreditSourceIds,
   restrictedHostedCredits,
@@ -1027,6 +1027,10 @@ export const runnerTracePaymentDeps: RunnerTracePaymentDependencies = {
   recordRunnerRunCreditSpend: (state, amount) => {
     if (!state.run) return;
     recordRunnerRunCreditSpend(runDurationPaymentHost(state), amount);
+  },
+  recordRunActionSpendingCapSpend: (state, amount) => {
+    if (!state.run) return;
+    recordRunActionSpendingCapSpend(runDurationPaymentHost(state), amount);
   },
   definitionIdForCard: (state, cardId) => definitionFor(state, cardId).id,
   hellsRunDefinitionId: HELLS_RUN_ID,

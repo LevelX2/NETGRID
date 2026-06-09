@@ -1385,10 +1385,10 @@ function wilsonRunAbilityAction(actionId: string, serverId: string): LegalAction
     payload: {
       cardId: "wilson-installed",
       sourceDefinitionId: WILSON_DEFINITION_ID,
-      runnerAbility: "wilson_gain_run_action",
+      runnerAbility: "gain_run_only_action",
       serverId,
-      wilsonRunOnlyAction: true,
-      wilsonRunSourceCardId: "wilson-installed",
+      runOnlyAction: true,
+      runOnlyActionSourceCardId: "wilson-installed",
       runSpendingCap: 3,
     },
   };

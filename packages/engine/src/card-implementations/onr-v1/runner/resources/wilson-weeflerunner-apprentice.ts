@@ -6,7 +6,7 @@ export const wilsonWeeflerunnerApprenticeImplementation: CardImplementationDefin
   {
     cardDefinitionId: "onr_v1_187_wilson-weeflerunner-apprentice",
     remainingReplacementLongtail: {
-      kind: "wilson_run_action_spending_cap",
+      kind: "run_action_spending_cap",
       actionGain: 1,
       spendingCap: 3,
       appliesTo: ["icebreaker_use", "increase_link"],

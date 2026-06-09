@@ -111,7 +111,11 @@ export function hostedPaymentCredits(
   state: GameState,
   cardId: CardInstanceId,
 ): number {
-  return cardCounter(state, cardId, hostedPaymentCounterTypeForSource(state, cardId));
+  return cardCounter(
+    state,
+    cardId,
+    hostedPaymentCounterTypeForSource(state, cardId),
+  );
 }
 
 export function spendHostedPaymentCredits(
@@ -193,12 +197,15 @@ export function runnerRunRecurringCreditSourceIds(
   const restrictedRunCostSources =
     breakerId === undefined
       ? runnerRig.filter((cardId) => {
-          const source =
-            restrictedHostedCreditSourceForDefinition(definitionFor(state, cardId));
+          const source = restrictedHostedCreditSourceForDefinition(
+            definitionFor(state, cardId),
+          );
           return (
             Boolean(source) &&
             source?.counterType === "bit" &&
-            source.usableFor.includes("using_icebreaker_during_run_non_noisy") &&
+            source.usableFor.includes(
+              "using_icebreaker_during_run_non_noisy",
+            ) &&
             cardCounter(state, cardId, "bit") > 0
           );
         })
@@ -218,7 +225,8 @@ export function runnerRunRecurringCreditSourceIds(
     }),
   ];
   const legacySources = runnerRig.filter((cardId) => {
-    if (isRestrictedHostedCreditSource(definitionFor(state, cardId))) return false;
+    if (isRestrictedHostedCreditSource(definitionFor(state, cardId)))
+      return false;
     if (cardCounter(state, cardId, "recurring_credit") <= 0) return false;
     const definition = definitionFor(state, cardId);
     if (
@@ -227,9 +235,9 @@ export function runnerRunRecurringCreditSourceIds(
     ) {
       return Boolean(
         state.run &&
-          breakerId &&
-          state.runner.rig.programs.includes(breakerId) &&
-          cardHasSubtype(definitionFor(state, breakerId), "killer"),
+        breakerId &&
+        state.runner.rig.programs.includes(breakerId) &&
+        cardHasSubtype(definitionFor(state, breakerId), "killer"),
       );
     }
     if (
@@ -282,7 +290,7 @@ export function spendRunnerRunCredits(
   if (amount <= 0) return { handled: false };
   if (availableRunnerRunCredits(host, breakerId) < amount)
     throw new Error("Der Runner kann die Run-Kosten nicht bezahlen.");
-  if (breakerId) recordWilsonRunCapSpend(host, amount);
+  if (breakerId) recordRunActionSpendingCapSpend(host, amount);
   const run = mustRun(host.state);
   recordRunnerRunCreditSpend(host, amount);
   let remaining = amount;
@@ -346,8 +354,7 @@ export function recordRunnerRunCreditSpend(
   if (!run.runCreditSpendCap) return { handled: false };
   const spend = Math.max(0, Math.floor(amount));
   const nextSpent =
-    Math.max(0, Math.floor(run.runCreditSpendCap.spentDuringRun ?? 0)) +
-    spend;
+    Math.max(0, Math.floor(run.runCreditSpendCap.spentDuringRun ?? 0)) + spend;
   if (nextSpent > run.runCreditSpendCap.announcedSpendCap)
     throw new Error("Der Runner darf in diesem Run nicht mehr Bits ausgeben.");
   run.runCreditSpendCap.spentDuringRun = nextSpent;
@@ -502,28 +509,32 @@ export function payEncounterSubroutineRunCost(
   };
 }
 
-export function recordWilsonRunCapSpend(
+export function recordRunActionSpendingCapSpend(
   host: RunDurationPaymentHost,
   amount: number,
 ): RunSpendingCapResult {
   const run = host.state.run;
-  if (!run?.wilsonRunSpendingCap) return { handled: false };
-  const nextSpent = run.wilsonRunSpendingCap.spent + amount;
-  if (nextSpent > run.wilsonRunSpendingCap.limit)
-    throw new Error("Wilson erlaubt maximal 3 Credits fuer Icebreaker oder Link.");
-  run.wilsonRunSpendingCap.spent = nextSpent;
+  if (!run?.runActionSpendingCap) return { handled: false };
+  const nextSpent = run.runActionSpendingCap.spent + amount;
+  if (nextSpent > run.runActionSpendingCap.limit)
+    throw new Error(
+      "Diese Run-Aktion erlaubt maximal 3 Credits fuer Icebreaker oder Link.",
+    );
+  run.runActionSpendingCap.spent = nextSpent;
   return {
     handled: true,
     runSpendingCapUsed: nextSpent,
   };
 }
 
-export function activeWilsonSourceIds(host: RunDurationPaymentHost): CardInstanceId[] {
+export function activeRunActionSpendingCapSourceIds(
+  host: RunDurationPaymentHost,
+): CardInstanceId[] {
   return host.state.runner.rig.resources
     .filter(
       (cardId) =>
         remainingReplacementLongtailKindForCard(host.state, cardId) ===
-        "wilson_run_action_spending_cap",
+        "run_action_spending_cap",
     )
     .sort();
 }
@@ -537,7 +548,11 @@ function restrictedHostedCreditSourceMatchesUse(
   if (!runnerInstalledCardIds(state).includes(cardId)) return false;
   const definition = definitionFor(state, cardId);
   const source = restrictedHostedCreditSourceForDefinition(definition);
-  if (!source || source.counterType !== "bit" || !source.usableFor.includes(use))
+  if (
+    !source ||
+    source.counterType !== "bit" ||
+    !source.usableFor.includes(use)
+  )
     return false;
   if (cardCounter(state, cardId, "bit") <= 0) return false;
   if (
@@ -552,7 +567,11 @@ function restrictedHostedCreditSourceMatchesUse(
     use === "using_killer_during_run"
   ) {
     const breakerId = options.breakerId;
-    if (!state.run || !breakerId || !state.runner.rig.programs.includes(breakerId))
+    if (
+      !state.run ||
+      !breakerId ||
+      !state.runner.rig.programs.includes(breakerId)
+    )
       return false;
     const breakerDefinition = definitionFor(state, breakerId);
     if (!cardHasSubtype(breakerDefinition, "icebreaker")) return false;
@@ -582,16 +601,20 @@ function hasStealthPaymentBlockOnServer(
   state: GameState,
   serverId: Exclude<ActiveRun["attackedServerId"], "new_remote">,
 ): boolean {
-  const server = state.corp.servers.find((candidate) => candidate.id === serverId);
+  const server = state.corp.servers.find(
+    (candidate) => candidate.id === serverId,
+  );
   if (!server) throw new Error(`Server fehlt: ${serverId}`);
   return server.root.some((cardId) => {
     const instance = state.cardInstances[cardId];
     return (
       instance?.rezzed === true &&
-      cardImplementationForDefinitionId(definitionFor(state, cardId).id)
-        ?.fortRunWindows?.some(
-          (window) => window.kind === "block_stealth_bits_during_runs_on_this_fort",
-        ) === true
+      cardImplementationForDefinitionId(
+        definitionFor(state, cardId).id,
+      )?.fortRunWindows?.some(
+        (window) =>
+          window.kind === "block_stealth_bits_during_runs_on_this_fort",
+      ) === true
     );
   });
 }

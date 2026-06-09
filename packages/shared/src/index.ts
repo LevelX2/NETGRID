@@ -1145,7 +1145,7 @@ export type RunState = {
   speedTrapPendingRezCardId?: CardInstanceId;
   speedTrapPendingRezTimingPoint?: string;
   speedTrapPendingRezActiveSide?: Side;
-  wilsonRunSpendingCap?: {
+  runActionSpendingCap?: {
     sourceCardInstanceId: CardInstanceId;
     limit: number;
     spent: number;
@@ -1413,8 +1413,7 @@ export type GameState = {
       definitionId: CardDefinitionId;
       serverId: Exclude<ServerId, "new_remote">;
     };
-    wilsonUsedSourceIdsThisTurn?: CardInstanceId[];
-    wilsonRunOnlyActionsRemaining?: number;
+    runOnlyActionUsedSourceIdsThisTurn?: CardInstanceId[];
   };
   corpTurnFlags?: {
     scoredBlackOpsAgendaThisTurn: boolean;

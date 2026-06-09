@@ -82,6 +82,7 @@ export type TraceOrchestrationHost = {
     runnerTraceLinkCreditSourceIds: () => CardInstanceId[];
     hostedPaymentCredits: (cardId: CardInstanceId) => number;
     spendRunnerCredits: (amount: number) => void;
+    recordRunActionSpendingCapSpend: (amount: number) => void;
   };
   runner: {
     identityModifierAmount: (
@@ -111,16 +112,14 @@ export type TraceOrchestrationHost = {
       cardId: CardInstanceId,
       legalAction: LegalAction,
     ) => void;
-    applyPrintedTraceSuccessFollowups: (
-      options: {
-        trace: CurrentTrace;
-        traceStep: "runner_bid" | "post_bid_link";
-        legalAction: LegalAction;
-        runnerLinkFallback?: number;
-        extraPayload?: Record<string, unknown> | undefined;
-        deletePendingChoice?: boolean | undefined;
-      },
-    ) => TraceSuccessFollowupResult;
+    applyPrintedTraceSuccessFollowups: (options: {
+      trace: CurrentTrace;
+      traceStep: "runner_bid" | "post_bid_link";
+      legalAction: LegalAction;
+      runnerLinkFallback?: number;
+      extraPayload?: Record<string, unknown> | undefined;
+      deletePendingChoice?: boolean | undefined;
+    }) => TraceSuccessFollowupResult;
   };
   trace: {
     supportsTraceSuccessEffect: (effect: TraceSuccessEffect) => boolean;
@@ -249,7 +248,9 @@ export function handleTraceOrchestrationAction(
     return { handled: false };
   if (legalAction.side !== "corp")
     throw new Error("Nur die Korp darf V1.9.18-City-Grid-Traces nutzen.");
-  const sourceCardId = String(legalAction.payload?.cardId ?? "") as CardInstanceId;
+  const sourceCardId = String(
+    legalAction.payload?.cardId ?? "",
+  ) as CardInstanceId;
   if (!host.corp.rezzedCorpRootCardIds().includes(sourceCardId))
     throw new Error(
       "Die V1.9.18-City-Grid-Trace-Faehigkeit ist nicht rezzed installiert.",
@@ -483,14 +484,14 @@ function resolveTraceBaseLinkChoice(
       : undefined;
   if (!cardId) throw new Error("Diese Base-Link-Quelle ist nicht legal.");
   const candidate = assertTraceBaseLinkChoiceValid(state, cardId);
+  host.payment.recordRunActionSpendingCapSpend(candidate.creditCost);
   host.payment.spendRunnerCredits(candidate.creditCost);
   if (state.run)
     host.run.markSubmarineUplinkJackOutAfterEncounter(
       candidate.sourceCardInstanceId,
       legalAction,
     );
-  const runnerLink =
-    calculateRunnerLinkCore(host) + candidate.baseLinkValue;
+  const runnerLink = calculateRunnerLinkCore(host) + candidate.baseLinkValue;
   const nextTrace = {
     ...trace,
     baseLinkSourceId: candidate.sourceCardInstanceId,
@@ -849,7 +850,8 @@ function completeTraceWithoutRun(
     ? { amount: 0, sourceDefinitionIds: [] as string[] }
     : applyTraceAvoidRewardsForOperation(state, trace);
   const traceResourceTrashPayload =
-    successful && trace.successEffect.type === "trash_runner_resource_and_add_tag"
+    successful &&
+    trace.successEffect.type === "trash_runner_resource_and_add_tag"
       ? host.callbacks.resolveTraceTrashRunnerResourceSuccess(
           trace.sourceDefinitionId,
           trace.sourceCardInstanceId,
@@ -941,7 +943,11 @@ function traceSuccessCancelCandidates(
   const candidates: TracePostBidLinkCandidate[] = [];
   for (const cardId of host.cards.runnerInstalledCardIds().sort()) {
     const instance = host.state.cardInstances[cardId];
-    if (!instance || instance.controller !== "runner" || instance.tapped === true)
+    if (
+      !instance ||
+      instance.controller !== "runner" ||
+      instance.tapped === true
+    )
       continue;
     const definition = host.cards.definitionFor(cardId);
     for (const { ability } of host.cards.activatedTraceAbilities(
@@ -1033,8 +1039,7 @@ function resolveTraceSuccessCancelChoice(
   const candidate = traceSuccessCancelCandidates(host, trace).find(
     (item) => item.cardId === cardId,
   );
-  if (!candidate)
-    throw new Error("Diese Trace-Cancel-Quelle ist nicht legal.");
+  if (!candidate) throw new Error("Diese Trace-Cancel-Quelle ist nicht legal.");
   if (host.state.runner.credits < candidate.creditCost)
     throw new Error("Der Runner kann die Trace-Cancel-Kosten nicht bezahlen.");
   host.payment.spendRunnerCredits(candidate.creditCost);
@@ -1078,10 +1083,12 @@ function traceEffectHasNonTagComponent(effect: TraceSuccessEffect): boolean {
 }
 
 function runnerTraceLinkCredits(host: TraceOrchestrationHost): number {
-  return host.payment.runnerTraceLinkCreditSourceIds().reduce(
-    (sum, cardId) => sum + host.payment.hostedPaymentCredits(cardId),
-    0,
-  );
+  return host.payment
+    .runnerTraceLinkCreditSourceIds()
+    .reduce(
+      (sum, cardId) => sum + host.payment.hostedPaymentCredits(cardId),
+      0,
+    );
 }
 
 function selectedBidAmount(
@@ -1100,9 +1107,7 @@ function selectedBidAmount(
   return amount;
 }
 
-export function calculateRunnerLinkCore(
-  host: TraceOrchestrationHost,
-): number {
+export function calculateRunnerLinkCore(host: TraceOrchestrationHost): number {
   const { state } = host;
   const identity = host.cards.definitionFor(state.runner.identity);
   const baseLink = identity.baseLink ?? 0;
@@ -1149,9 +1154,10 @@ export function calculateRunnerLink(host: TraceOrchestrationHost): number {
   return effectiveLink;
 }
 
-function costForTraceAbility(
-  ability: ActivatedCardAbilityImplementation,
-): { creditCost: number; tapSource: boolean } {
+function costForTraceAbility(ability: ActivatedCardAbilityImplementation): {
+  creditCost: number;
+  tapSource: boolean;
+} {
   const creditCosts = ability.costs.filter((cost) => cost.kind === "credit");
   const tapCosts = ability.costs.filter((cost) => cost.kind === "tap_source");
   if (
@@ -1167,7 +1173,10 @@ function costForTraceAbility(
       "Trace CardImplementation ability supports nonnegative credit and optional tap_source costs.",
     );
   }
-  return { creditCost: creditCosts[0]?.amount ?? 0, tapSource: tapCosts.length === 1 };
+  return {
+    creditCost: creditCosts[0]?.amount ?? 0,
+    tapSource: tapCosts.length === 1,
+  };
 }
 
 function tapTraceSource(

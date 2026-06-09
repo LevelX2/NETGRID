@@ -254,37 +254,6 @@ export function handleTriggerAbilityExecution(
     };
     return handled(legalAction);
   }
-  if (legalAction.payload?.runnerAbility === "wilson_gain_run_action") {
-    if (legalAction.side !== "runner")
-      throw new Error("Nur der Runner darf Wilson nutzen.");
-    if (state.phase !== "runner_action_phase" || state.activeSide !== "runner")
-      throw new Error("Wilson ist nur im Runner-Zug nutzbar.");
-    const sourceCardId = String(
-      legalAction.payload?.cardId ?? "",
-    ) as CardInstanceId;
-    if (
-      !state.runner.rig.resources.includes(sourceCardId) ||
-      host.cards.remainingReplacementLongtailKindForCard(
-        state,
-        sourceCardId,
-      ) !== "wilson_run_action_spending_cap"
-    )
-      throw new Error("Wilson ist nicht installiert.");
-    const flags = host.runner.ensureTurnFlags(state);
-    const used = flags.wilsonUsedSourceIdsThisTurn ?? [];
-    if (used.includes(sourceCardId))
-      throw new Error("Wilson wurde diesen Zug bereits genutzt.");
-    flags.wilsonUsedSourceIdsThisTurn = [...used, sourceCardId];
-    flags.wilsonRunOnlyActionsRemaining =
-      Math.max(0, Math.floor(flags.wilsonRunOnlyActionsRemaining ?? 0)) + 1;
-    state.runner.clicks += 1;
-    legalAction.payload = {
-      ...(legalAction.payload ?? {}),
-      wilsonRunOnlyActionsRemaining: flags.wilsonRunOnlyActionsRemaining,
-      runnerClicksAfter: state.runner.clicks,
-    };
-    return handled(legalAction);
-  }
   if (
     legalAction.payload?.v1920RunnerRunLockAbility ===
     "fang_2_0_pay_to_run"

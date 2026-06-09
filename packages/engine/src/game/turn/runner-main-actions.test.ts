@@ -221,7 +221,7 @@ function testRunnerMainHost(state: GameState): RunnerMainActionGenerationHost {
         serverId,
     },
     run: {
-      activeWilsonSourceIds: () => [],
+      activeRunActionSpendingCapSourceIds: () => [],
       runDurationPaymentHost: () => ({}),
       isRovingSubmarineRunBlocked: () => false,
       fortRunSideFamiliesHostForState: () => ({}),

@@ -17,9 +17,7 @@ import type {
   PlayerAction,
   Side,
 } from "@netgrid/shared";
-import type {
-  ActivatedCardAbilityImplementation,
-} from "../../ability-engine/definition-types";
+import type { ActivatedCardAbilityImplementation } from "../../ability-engine/definition-types";
 import type {
   CorpTracePaymentDependencies,
   RunnerTracePaymentDependencies,
@@ -236,7 +234,11 @@ describe("trace orchestration", () => {
       kind: "select_option",
       options: [
         { id: "pass", label: "Keine Link-Faehigkeit nutzen" },
-        { id: `trace_link_${programId}`, label: "PVR: +1 Link", value: programId },
+        {
+          id: `trace_link_${programId}`,
+          label: "PVR: +1 Link",
+          value: programId,
+        },
       ],
       minSelections: 1,
       maxSelections: 1,
@@ -261,6 +263,7 @@ describe("trace orchestration", () => {
     );
 
     expect(state.runner.credits).toBe(4);
+    expect(calls.runActionCapSpends).toEqual([1]);
     expect(calls.submarineMarkers).toEqual([programId]);
     expect(calls.followups).toEqual(["post_bid_link:trace_1"]);
     expect(action.payload).toMatchObject({
@@ -275,6 +278,74 @@ describe("trace orchestration", () => {
       runnerLink: 2,
       runnerStrength: 4,
       postBidTraceLinkChoiceOpened: false,
+    });
+  });
+
+  it("records base-link payments against run-action spending cap", () => {
+    const sourceId = "source_1" as CardInstanceId;
+    const sourceDefinition = definition("trace_source", "operation");
+    const accessId = "access_kiribati_1" as CardInstanceId;
+    const accessDefinition = definition(
+      "onr_v1_150_access-to-kiribati",
+      "resource",
+    );
+    const state = minimalState({
+      cardInstances: {
+        [sourceId]: instance(sourceId, sourceDefinition.id, "corp"),
+        [accessId]: instance(accessId, accessDefinition.id, "runner"),
+      },
+      runnerResources: [accessId],
+    });
+    state.trace = activeTrace(sourceId, sourceDefinition.id, "base_link", {
+      traceStrength: 4,
+    });
+    state.run = { runId: "run_1", attackedServerId: "rd" } as any;
+    state.pendingChoice = {
+      choiceId: "trace_1.base_link.2",
+      side: "runner",
+      source: "trace_base_link:trace_1",
+      prompt: "Base-Link-Karte fuer Trace nutzen",
+      kind: "select_option",
+      options: [
+        { id: "pass", label: "Keine Base-Link-Karte nutzen" },
+        {
+          id: `trace_base_link_${accessId}`,
+          label: "Access to Kiribati: Base Link 1",
+          value: accessId,
+        },
+      ],
+      minSelections: 1,
+      maxSelections: 1,
+      stateVersion: 2,
+      visibility: "hidden_info_barrier",
+    };
+    const calls = testCalls();
+    const action = actionFor("runner", "resolve_choice");
+
+    resolveTraceChoice(
+      testHost(
+        state,
+        {
+          [sourceDefinition.id]: sourceDefinition,
+          [accessDefinition.id]: accessDefinition,
+        },
+        calls,
+      ),
+      action,
+      playerChoice(`trace_base_link_${accessId}`),
+    );
+
+    expect(state.runner.credits).toBe(4);
+    expect(calls.runActionCapSpends).toEqual([1]);
+    expect(state.trace).toMatchObject({
+      status: "runner_bid",
+      runnerLink: 2,
+    });
+    expect(action.payload).toMatchObject({
+      traceStep: "base_link",
+      baseLinkUsed: true,
+      traceBaseLinkCostPaid: 1,
+      baseLinkValue: 1,
     });
   });
 
@@ -496,12 +567,14 @@ function playerChoice(optionId: string): PlayerAction {
 type TestCalls = {
   submarineMarkers: CardInstanceId[];
   followups: string[];
+  runActionCapSpends: number[];
 };
 
 function testCalls(): TestCalls {
   return {
     submarineMarkers: [],
     followups: [],
+    runActionCapSpends: [],
   };
 }
 
@@ -519,7 +592,8 @@ function testHost(
   } = {},
 ): TraceOrchestrationHost {
   const definitionFor = (cardId: CardInstanceId) => {
-    const foundDefinition = definitions[state.cardInstances[cardId]!.definitionId];
+    const foundDefinition =
+      definitions[state.cardInstances[cardId]!.definitionId];
     if (!foundDefinition) {
       if (cardId === state.runner.identity)
         return definition("runner_identity_def", "identity", { baseLink: 1 });
@@ -551,6 +625,9 @@ function testHost(
       targetState.runner.credits -= amount;
     },
     recordRunnerRunCreditSpend: () => undefined,
+    recordRunActionSpendingCapSpend: (_targetState, amount) => {
+      calls.runActionCapSpends.push(amount);
+    },
     definitionIdForCard: (targetState, cardId) =>
       targetState.cardInstances[cardId]!.definitionId,
     hellsRunDefinitionId: "hells_run" as CardDefinitionId,
@@ -619,6 +696,9 @@ function testHost(
       spendRunnerCredits: (amount) => {
         state.runner.credits -= amount;
       },
+      recordRunActionSpendingCapSpend: (amount) => {
+        calls.runActionCapSpends.push(amount);
+      },
     },
     runner: {
       identityModifierAmount: (
@@ -659,7 +739,8 @@ function testHost(
     },
     constants: {
       PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID:
-        options.parisTraceDefinitionId ?? ("paris_city_grid" as CardDefinitionId),
+        options.parisTraceDefinitionId ??
+        ("paris_city_grid" as CardDefinitionId),
     },
   };
 }

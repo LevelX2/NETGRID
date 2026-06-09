@@ -102,6 +102,7 @@ function host(): TraceRuntimeDepsHost {
           runnerTraceLinkCreditSourceIds: () => [],
           hostedPaymentCredits: () => 0,
           spendRunnerCredits: () => undefined,
+          recordRunActionSpendingCapSpend: () => undefined,
         },
         runner: {
           identityModifierAmount: () => 0,

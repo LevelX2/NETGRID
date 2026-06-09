@@ -1516,7 +1516,7 @@ function runActionRelevant(action: LegalAction, signals: readonly string[]): boo
     "run_event",
     "run_action",
     "extra_run",
-    "wilson_gain_run_action",
+    "gain_run_only_action",
     "server_specific_hq",
     "server_specific_rnd",
     "server_specific_rd",
@@ -1606,7 +1606,7 @@ function runActionStructure(
     return "bonus_run";
   }
   if (
-    text.includes("wilson_gain_run_action") ||
+    text.includes("gain_run_only_action") ||
     text.includes("extra_run") ||
     text.includes("extra action")
   ) {

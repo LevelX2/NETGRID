@@ -1324,8 +1324,8 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
       importance = "important";
       const target = serverLabel ?? runTargetFromLabel(label);
       const isWilsonRun =
-        payload.wilsonRunOnlyAction === true ||
-        stringValue(payload.runnerAbility) === "wilson_gain_run_action" ||
+        payload.runOnlyAction === true ||
+        stringValue(payload.runnerAbility) === "gain_run_only_action" ||
         /^Wilson-Run\b/i.test(label ?? "");
       title = phrase(
         subject,

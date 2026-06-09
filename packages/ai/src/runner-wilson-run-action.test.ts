@@ -49,9 +49,9 @@ describe("Runner Wilson run action utilization", () => {
 
     expect(decision.actionId).toBe(wilson.actionId);
     expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
-    expect(debugText).toContain("wilson_run_only_action_preferred");
-    expect(debugText).toContain("wilson_target_server:rd");
-    expect(debugText).toContain("wilson_cap_limit:3");
+    expect(debugText).toContain("run_only_action_preferred");
+    expect(debugText).toContain("run_action_spending_cap_target_server:rd");
+    expect(debugText).toContain("run_action_spending_cap_limit:3");
     expect(debugText).not.toMatch(
       /cardInstances|privatePayload|FullState|sessionToken|reconnectToken|joinToken|decklist|hidden-card/i,
     );
@@ -99,8 +99,8 @@ describe("Runner Wilson run action utilization", () => {
 
     expect(decision.actionId).toBe(wilsonRun.actionId);
     expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
-    expect(debugText).toContain("wilson_run_only_action_preferred");
-    expect(debugText).toContain("wilson_target_server:rd");
+    expect(debugText).toContain("run_only_action_preferred");
+    expect(debugText).toContain("run_action_spending_cap_target_server:rd");
     expect(debugText).not.toMatch(/cardInstances|privatePayload|FullState|decklist|hidden-card/i);
   });
 
@@ -151,8 +151,8 @@ describe("Runner Wilson run action utilization", () => {
 
     expect(decision.actionId).toBe(runRd.actionId);
     expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
-    expect(debugText).toContain("wilson_cap_risk_skip:visible_break_cost_gt_cap");
-    expect(debugText).toContain("wilson_visible_break_cost:5");
+    expect(debugText).toContain("run_action_spending_cap_risk_skip:visible_break_cost_gt_cap");
+    expect(debugText).toContain("run_action_spending_cap_visible_break_cost:5");
     expect(debugText).not.toMatch(
       /cardInstances|privatePayload|FullState|sessionToken|reconnectToken|joinToken|decklist|hidden-card/i,
     );
@@ -238,11 +238,11 @@ function wilsonRunAction(
     payload: {
       serverId,
       cardId: "wilson-1",
-      runnerAbility: "wilson_gain_run_action",
+      runnerAbility: "gain_run_only_action",
       sourceDefinitionId: WILSON_DEFINITION_ID,
       gainActionsAmount: 1,
-      wilsonRunOnlyAction: true,
-      wilsonRunSourceCardId: "wilson-1",
+      runOnlyAction: true,
+      runOnlyActionSourceCardId: "wilson-1",
       runSpendingCap: 3,
     },
   });

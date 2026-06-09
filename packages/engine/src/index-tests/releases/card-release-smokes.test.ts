@@ -2410,7 +2410,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       actionsAfterInstall.some(
         (action) =>
           action.type === "trigger_ability" &&
-          action.payload?.runnerAbility === "wilson_gain_run_action",
+          action.payload?.runnerAbility === "gain_run_only_action",
       ),
     ).toBe(false);
     expect(actionsAfterInstall.some((action) => action.type === "end_turn")).toBe(
@@ -2420,7 +2420,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       actionsAfterInstall.some(
         (action) =>
           action.type === "start_run" &&
-          action.payload?.wilsonRunOnlyAction === true &&
+          action.payload?.runOnlyAction === true &&
           action.payload?.serverId === "rd",
       ),
     ).toBe(true);
@@ -2429,15 +2429,14 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "runner",
       (action) =>
         action.type === "start_run" &&
-        action.payload?.wilsonRunOnlyAction === true &&
+        action.payload?.runOnlyAction === true &&
         action.payload?.serverId === "rd",
     );
     expect(state.runner.clicks).toBe(0);
-    expect(state.runnerTurnFlags?.wilsonUsedSourceIdsThisTurn).toContain(
+    expect(state.runnerTurnFlags?.runOnlyActionUsedSourceIdsThisTurn).toContain(
       wilsonId,
     );
-    expect(state.runnerTurnFlags?.wilsonRunOnlyActionsRemaining ?? 0).toBe(0);
-    expect(state.run?.wilsonRunSpendingCap).toMatchObject({
+    expect(state.run?.runActionSpendingCap).toMatchObject({
       limit: 3,
       spent: 0,
     });
@@ -2480,7 +2479,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       actionsAfterNormalClicks.some(
         (action) =>
           action.type === "trigger_ability" &&
-          action.payload?.runnerAbility === "wilson_gain_run_action",
+          action.payload?.runnerAbility === "gain_run_only_action",
       ),
     ).toBe(false);
     expect(
@@ -2497,7 +2496,7 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       actionsAfterNormalClicks.some(
         (action) =>
           action.type === "start_run" &&
-          action.payload?.wilsonRunOnlyAction === true &&
+          action.payload?.runOnlyAction === true &&
           action.payload?.serverId === "hq",
       ),
     ).toBe(true);
@@ -2506,11 +2505,11 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "runner",
       (action) =>
         action.type === "start_run" &&
-        action.payload?.wilsonRunOnlyAction === true &&
+        action.payload?.runOnlyAction === true &&
         action.payload?.serverId === "hq",
     );
     expect(state.runner.clicks).toBe(0);
-    expect(state.run?.wilsonRunSpendingCap).toMatchObject({
+    expect(state.run?.runActionSpendingCap).toMatchObject({
       limit: 3,
       spent: 0,
     });
@@ -2548,15 +2547,15 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       "runner",
       (action) =>
         action.type === "start_run" &&
-        action.payload?.wilsonRunOnlyAction === true &&
+        action.payload?.runOnlyAction === true &&
         action.payload?.serverId === "hq",
     );
 
     expect(state.runner.clicks).toBe(4);
-    expect(state.runnerTurnFlags?.wilsonUsedSourceIdsThisTurn).toContain(
+    expect(state.runnerTurnFlags?.runOnlyActionUsedSourceIdsThisTurn).toContain(
       wilsonId,
     );
-    expect(state.run?.wilsonRunSpendingCap).toMatchObject({
+    expect(state.run?.runActionSpendingCap).toMatchObject({
       limit: 3,
       spent: 0,
     });

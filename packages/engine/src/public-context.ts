@@ -1140,7 +1140,7 @@ export function publicContextForAction(
     "linkModifierAmount",
     "runSpendingCap",
     "runSpendingCapSpent",
-    "wilsonRunSpendingCapActive",
+    "runActionSpendingCapActive",
     "powerGridOverloadTrashCount",
     "powerGridOverloadChoiceOpened",
     "eligibleHardwareCount",

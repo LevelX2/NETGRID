@@ -141,8 +141,7 @@ export function createMainActionHostComposition(
       install: {
         corpNewDataFortCreationLocked: install.corpNewDataFortCreationLocked,
         corpIceInstallTotalCost: install.corpIceInstallTotalCost,
-        canInstallCorpRootCardInServer:
-          install.canInstallCorpRootCardInServer,
+        canInstallCorpRootCardInServer: install.canInstallCorpRootCardInServer,
         canInstallCorpRootCardInNewRemote:
           install.canInstallCorpRootCardInNewRemote,
         isRegionUpgrade: install.isRegionUpgrade,
@@ -151,8 +150,7 @@ export function createMainActionHostComposition(
           install.corpRootAgendaOrNodeCapacityInServer,
         corpRootAssetIdsInServer: install.corpRootAssetIdsInServer,
         corpRootMainCardIdsInServer: install.corpRootMainCardIdsInServer,
-        isInstalledCorpCardAdvanceable:
-          install.isInstalledCorpCardAdvanceable,
+        isInstalledCorpCardAdvanceable: install.isInstalledCorpCardAdvanceable,
       },
       rez: {
         rootInstallRezzesOnInstall: rez.rootInstallRezzesOnInstall,
@@ -204,7 +202,8 @@ export function createMainActionHostComposition(
           actions.buildRunnerResourceInstallAction,
         buildRunnerStackSearchProgramToGripAction:
           actions.buildRunnerStackSearchProgramToGripAction,
-        buildRunnerValuPakInstallAction: actions.buildRunnerValuPakInstallAction,
+        buildRunnerValuPakInstallAction:
+          actions.buildRunnerValuPakInstallAction,
         buildRunnerValuPakSequenceEndAction:
           actions.buildRunnerValuPakSequenceEndAction,
         buildRunnerShellTradersSetAsideAction:
@@ -244,7 +243,8 @@ export function createMainActionHostComposition(
         serverChoiceDisplayLabel: callbacks.serverChoiceDisplayLabel,
       },
       run: {
-        activeWilsonSourceIds: run.activeWilsonSourceIds,
+        activeRunActionSpendingCapSourceIds:
+          run.activeRunActionSpendingCapSourceIds,
         runDurationPaymentHost: run.runDurationPaymentHost,
         isRovingSubmarineRunBlocked: run.isRovingSubmarineRunBlocked,
         fortRunSideFamiliesHostForState: run.fortRunSideFamiliesHostForState,
@@ -284,8 +284,7 @@ export function createMainActionHostComposition(
         runnerInstallableProgramIdsForValuPak:
           specialZones.runnerInstallableProgramIdsForValuPak,
         specialZoneHarnessActions: specialZones.specialZoneHarnessActions,
-        shellTradersPrepareTargetIds:
-          specialZones.shellTradersPrepareTargetIds,
+        shellTradersPrepareTargetIds: specialZones.shellTradersPrepareTargetIds,
         shellTradersInstallCost: specialZones.shellTradersInstallCost,
         shellTradersPreparedTargetIds:
           specialZones.shellTradersPreparedTargetIds,

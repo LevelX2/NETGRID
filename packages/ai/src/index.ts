@@ -3516,12 +3516,12 @@ function chooseSemanticRuntimeAction(
         input,
       )
     : planRuntime;
-  const wilsonAdjusted = runnerWilsonAdjustedSemanticChoice(
+  const runOnlyActionAdjusted = runnerRunOnlyActionAdjustedSemanticChoice(
     input,
     choices,
     initialChoice,
   );
-  const choice = wilsonAdjusted.choice;
+  const choice = runOnlyActionAdjusted.choice;
   const coverageSelectionDebug = semanticRuntimeCoverageSelectionDebug(
     input,
     choice.action,
@@ -3536,7 +3536,7 @@ function chooseSemanticRuntimeAction(
     ? rememberTacticalPlanRuntime(
         input,
         effectivePlanRuntime,
-        wilsonAdjusted.memoryAction ?? choice.action,
+        runOnlyActionAdjusted.memoryAction ?? choice.action,
       )
     : undefined;
   return {
@@ -3580,7 +3580,7 @@ function chooseSemanticRuntimeAction(
     decisionDebug: semanticRuntimeDecisionDebug(
       input,
       choice,
-      wilsonAdjusted.rankedChoices,
+      runOnlyActionAdjusted.rankedChoices,
       legacyDecision,
       legacyActionType,
       effectivePlanRuntime,
@@ -3805,7 +3805,7 @@ function tacticalPlanRuntimeWithoutSelectedMapping(
   return rest;
 }
 
-function runnerWilsonAdjustedSemanticChoice(
+function runnerRunOnlyActionAdjustedSemanticChoice(
   input: AiDecisionInput,
   rankedChoices: readonly SemanticRuntimeChoice[],
   selectedChoice: SemanticRuntimeChoice,
@@ -3821,31 +3821,30 @@ function runnerWilsonAdjustedSemanticChoice(
   if (!targetServerId) {
     return { choice: selectedChoice, rankedChoices: rankedChoices.slice() };
   }
-  const capAssessment = runnerWilsonRunCapAssessment(
+  const capAssessment = runnerRunActionSpendingCapAssessment(
     input,
     selectedChoice.action,
   );
-  const wilsonEvidence = [
-    `wilson_target_server:${targetServerId}`,
-    `wilson_visible_break_cost:${capAssessment.visibleBreakCost}`,
-    "wilson_cap_limit:3",
+  const capEvidence = [
+    `run_action_spending_cap_target_server:${targetServerId}`,
+    `run_action_spending_cap_visible_break_cost:${capAssessment.visibleBreakCost}`,
+    "run_action_spending_cap_limit:3",
   ];
 
   if (!capAssessment.ok) {
-    const hasWilsonOption = rankedChoices.some(
+    const hasRunOnlyActionOption = rankedChoices.some(
       (choice) =>
-        choice.action.payload?.runnerAbility === "wilson_gain_run_action" ||
-        (choice.action.type === "start_run" &&
-          choice.action.payload?.wilsonRunOnlyAction === true &&
-          semanticRuntimeServerId(choice.action) === targetServerId),
+        choice.action.type === "start_run" &&
+        choice.action.payload?.runOnlyAction === true &&
+        semanticRuntimeServerId(choice.action) === targetServerId,
     );
-    if (!hasWilsonOption) {
+    if (!hasRunOnlyActionOption) {
       return { choice: selectedChoice, rankedChoices: rankedChoices.slice() };
     }
     const adjusted = semanticRuntimeChoiceWithEvidence(selectedChoice, {
       evidence: [
-        `wilson_cap_risk_skip:${capAssessment.reason}`,
-        ...wilsonEvidence,
+        `run_action_spending_cap_risk_skip:${capAssessment.reason}`,
+        ...capEvidence,
       ],
     });
     return {
@@ -3854,9 +3853,9 @@ function runnerWilsonAdjustedSemanticChoice(
     };
   }
 
-  if (selectedChoice.action.payload?.wilsonRunOnlyAction === true) {
+  if (selectedChoice.action.payload?.runOnlyAction === true) {
     const adjusted = semanticRuntimeChoiceWithEvidence(selectedChoice, {
-      evidence: ["wilson_run_only_action_preferred", ...wilsonEvidence],
+      evidence: ["run_only_action_preferred", ...capEvidence],
     });
     return {
       choice: adjusted,
@@ -3864,20 +3863,20 @@ function runnerWilsonAdjustedSemanticChoice(
     };
   }
 
-  const wilsonRunOnlyChoice = rankedChoices.find(
+  const runOnlyActionChoice = rankedChoices.find(
     (choice) =>
       !choice.exclusion &&
       choice.action.type === "start_run" &&
-      choice.action.payload?.wilsonRunOnlyAction === true &&
+      choice.action.payload?.runOnlyAction === true &&
       semanticRuntimeServerId(choice.action) === targetServerId,
   );
-  if (wilsonRunOnlyChoice) {
-    const adjusted = semanticRuntimeChoiceWithEvidence(wilsonRunOnlyChoice, {
+  if (runOnlyActionChoice) {
+    const adjusted = semanticRuntimeChoiceWithEvidence(runOnlyActionChoice, {
       minimumScore: selectedChoice.score + 80,
-      reasonCode: "runner.wilson.run_only_action_preferred",
+      reasonCode: "runner.run_only_action.preferred",
       explanation:
-        "Wilson stellt für dasselbe Run-Ziel eine legale Zusatz-Run-Aktion bereit.",
-      evidence: ["wilson_run_only_action_preferred", ...wilsonEvidence],
+        "Eine Run-only-Aktion stellt für dasselbe Ziel eine legale Zusatz-Run-Aktion bereit.",
+      evidence: ["run_only_action_preferred", ...capEvidence],
     });
     return {
       choice: adjusted,
@@ -3886,28 +3885,7 @@ function runnerWilsonAdjustedSemanticChoice(
     };
   }
 
-  const wilsonTriggerChoice = rankedChoices.find(
-    (choice) =>
-      !choice.exclusion &&
-      choice.action.type === "trigger_ability" &&
-      choice.action.payload?.runnerAbility === "wilson_gain_run_action",
-  );
-  if (!wilsonTriggerChoice) {
-    return { choice: selectedChoice, rankedChoices: rankedChoices.slice() };
-  }
-
-  const adjusted = semanticRuntimeChoiceWithEvidence(wilsonTriggerChoice, {
-    minimumScore: selectedChoice.score + 120,
-    reasonCode: "runner.wilson.run_action_preferred",
-    explanation:
-      "Wilson wird genutzt, bevor der Runner den ohnehin gewählten Run startet.",
-    evidence: ["wilson_run_action_preferred", ...wilsonEvidence],
-  });
-  return {
-    choice: adjusted,
-    rankedChoices: replaceSemanticRuntimeChoice(rankedChoices, adjusted),
-    memoryAction: selectedChoice.action,
-  };
+  return { choice: selectedChoice, rankedChoices: rankedChoices.slice() };
 }
 
 function semanticRuntimeChoiceWithEvidence(
@@ -3945,7 +3923,7 @@ function replaceSemanticRuntimeChoice(
   );
 }
 
-function runnerWilsonRunCapAssessment(
+function runnerRunActionSpendingCapAssessment(
   input: AiDecisionInput,
   action: LegalAction,
 ): {
@@ -4134,7 +4112,11 @@ function semanticRuntimeDecisionDebug(
       ? [`legacy_debug_selected_action_type:${legacyDebugSelectedActionType}`]
       : []),
     ...scrubEvidence(selected.evidence)
-      .filter((entry) => entry.startsWith("wilson_"))
+      .filter(
+        (entry) =>
+          entry.startsWith("run_only_action_") ||
+          entry.startsWith("run_action_spending_cap_"),
+      )
       .slice(0, 8),
   ];
   const selectedPlan = planRuntime.selectedPlan;

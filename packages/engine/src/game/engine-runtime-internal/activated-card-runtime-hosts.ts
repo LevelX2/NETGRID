@@ -356,12 +356,12 @@ import {
   type RunEndCleanupHost,
 } from "../run/run-end-cleanup";
 import {
-  activeWilsonSourceIds,
+  activeRunActionSpendingCapSourceIds,
   availableRunnerRunStartCredits,
   hostedPaymentCredits,
   isRestrictedHostedCreditSource,
   payRunStartTaxCredits,
-  recordWilsonRunCapSpend,
+  recordRunActionSpendingCapSpend,
   restrictedHostedCreditSourceForDefinition,
   restrictedHostedCreditSourceIds,
   restrictedHostedCredits,
@@ -757,6 +757,8 @@ export function createActivatedCardRuntimeHosts(
           runnerTracePaymentDeps.runnerTraceLinkCreditSourceIds(state),
         hostedPaymentCredits: (cardId) => hostedPaymentCredits(state, cardId),
         spendRunnerCredits: (amount) => spendCredits(state, "runner", amount),
+        recordRunActionSpendingCapSpend: (amount) =>
+          recordRunActionSpendingCapSpend(runDurationPaymentHost(state), amount),
       },
       runner: {
         identityModifierAmount: (side, kind, duration) =>

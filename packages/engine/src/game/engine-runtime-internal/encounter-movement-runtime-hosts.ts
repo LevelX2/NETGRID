@@ -363,12 +363,12 @@ import {
   type RunEndCleanupHost,
 } from "../run/run-end-cleanup";
 import {
-  activeWilsonSourceIds,
+  activeRunActionSpendingCapSourceIds,
   availableRunnerRunStartCredits,
   hostedPaymentCredits,
   isRestrictedHostedCreditSource,
   payRunStartTaxCredits,
-  recordWilsonRunCapSpend,
+  recordRunActionSpendingCapSpend,
   restrictedHostedCreditSourceForDefinition,
   restrictedHostedCreditSourceIds,
   restrictedHostedCredits,
@@ -1043,8 +1043,8 @@ export function createEncounterMovementRuntimeHosts(
           ),
         startRun: (serverId, legalAction, options) =>
           runtime.startRun(state, serverId, undefined, 1, options, legalAction),
-        activeWilsonSourceIds: () =>
-          activeWilsonSourceIds(runDurationPaymentHost(state)),
+        activeRunActionSpendingCapSourceIds: () =>
+          activeRunActionSpendingCapSourceIds(runDurationPaymentHost(state)),
       },
     };
   }

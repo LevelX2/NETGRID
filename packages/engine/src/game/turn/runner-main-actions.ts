@@ -50,7 +50,7 @@ export type RunnerMainActionGenerationHost = {
     serverChoiceDisplayLabel: HostFn<string>;
   };
   run: {
-    activeWilsonSourceIds: HostFn<string[]>;
+    activeRunActionSpendingCapSourceIds: HostFn<string[]>;
     runDurationPaymentHost: HostFn<unknown>;
     isRovingSubmarineRunBlocked: HostFn<boolean>;
     fortRunSideFamiliesHostForState: HostFn<unknown>;
@@ -196,7 +196,8 @@ export function buildRunnerMainActions(
   const shellTradersInstallCost = host.specialZones.shellTradersInstallCost;
   const shellTradersPreparedTargetIds =
     host.specialZones.shellTradersPreparedTargetIds;
-  const activeWilsonSourceIds = host.run.activeWilsonSourceIds;
+  const activeRunActionSpendingCapSourceIds =
+    host.run.activeRunActionSpendingCapSourceIds;
   const runDurationPaymentHost = host.run.runDurationPaymentHost;
   const isRovingSubmarineRunBlocked = host.run.isRovingSubmarineRunBlocked;
   const fortRunSideFamiliesHostForState =
@@ -269,11 +270,11 @@ export function buildRunnerMainActions(
   const actions: LegalAction[] = [];
   const flags = ensureRunnerTurnFlags(state);
   const hasClicks = state.runner.clicks > 0;
-  const unusedWilsonSourceIds = activeWilsonSourceIds(
+  const unusedRunOnlyActionSourceIds = activeRunActionSpendingCapSourceIds(
     runDurationPaymentHost(state),
   ).filter(
     (sourceCardId) =>
-      !(flags.wilsonUsedSourceIdsThisTurn ?? []).includes(sourceCardId),
+      !(flags.runOnlyActionUsedSourceIdsThisTurn ?? []).includes(sourceCardId),
   );
   const pirateBroadcastPending = flags.pirateBroadcastPending;
   const pirateBroadcastNextServerId =
@@ -305,7 +306,7 @@ export function buildRunnerMainActions(
   const bonusRunPending =
     flags.allNighterBonusRunPending === true ||
     pirateBroadcastNextServerId !== undefined;
-  if (!hasClicks && !bonusRunPending && unusedWilsonSourceIds.length === 0) {
+  if (!hasClicks && !bonusRunPending && unusedRunOnlyActionSourceIds.length === 0) {
     pushCardImplementationEndOfRunnerTurnActions(
       cardImplementationRuntimeDeps,
       state,
@@ -1132,30 +1133,7 @@ export function buildRunnerMainActions(
         );
       }
     }
-    if (
-      Math.max(0, Math.floor(flags.wilsonRunOnlyActionsRemaining ?? 0)) > 0 &&
-      !rovingRunBlocked &&
-      (runStartTaxCredits === 0 ||
-        availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
-        runStartTaxCredits)
-    ) {
-      actions.push(
-        action(
-          state,
-          "runner",
-          "start_run",
-          `Wilson-Run auf ${server.label}`,
-          "basic_action",
-          runCosts,
-          {
-            ...runPayload,
-            wilsonRunOnlyAction: true,
-            runSpendingCap: 3,
-          },
-        ),
-      );
-    }
-    for (const sourceCardId of unusedWilsonSourceIds) {
+    for (const sourceCardId of unusedRunOnlyActionSourceIds) {
       if (
         !rovingRunBlocked &&
         (runStartTaxCredits === 0 ||
@@ -1173,11 +1151,11 @@ export function buildRunnerMainActions(
             {
               ...runPayload,
               cardId: sourceCardId,
-              runnerAbility: "wilson_gain_run_action",
+              runnerAbility: "gain_run_only_action",
               sourceDefinitionId: definitionFor(state, sourceCardId).id,
               gainActionsAmount: 1,
-              wilsonRunOnlyAction: true,
-              wilsonRunSourceCardId: sourceCardId,
+              runOnlyAction: true,
+              runOnlyActionSourceCardId: sourceCardId,
               runSpendingCap: 3,
             },
           ),

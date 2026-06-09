@@ -78,45 +78,6 @@ describe("trigger ability execution", () => {
     });
   });
 
-  it("resolves Wilson run-action trigger and preserves turn flag markers", () => {
-    const state = createGame({
-      seed: "arch-70-trigger-ability-wilson",
-      setupMode: "completed",
-    });
-    state.phase = "runner_action_phase";
-    state.activeSide = "runner";
-    state.runner.clicks = 1;
-    const sourceCardId = "wilson" as CardInstanceId;
-    state.runner.rig.resources.push(sourceCardId);
-    state.cardInstances[sourceCardId] = instance(
-      sourceCardId,
-      "wilson_definition",
-      "runner",
-    );
-    const action = triggerAction(state, "runner", {
-      runnerAbility: "wilson_gain_run_action",
-      cardId: sourceCardId,
-    });
-
-    handleTriggerAbilityExecution(
-      testHost(state, {
-        remainingReplacementKind: "wilson_run_action_spending_cap",
-      }),
-      action,
-    );
-
-    expect(state.runner.clicks).toBe(2);
-    expect(state.runnerTurnFlags?.wilsonUsedSourceIdsThisTurn).toEqual([
-      sourceCardId,
-    ]);
-    expect(state.runnerTurnFlags?.wilsonRunOnlyActionsRemaining).toBe(1);
-    expect(action.payload).toMatchObject({
-      runnerAbility: "wilson_gain_run_action",
-      wilsonRunOnlyActionsRemaining: 1,
-      runnerClicksAfter: 2,
-    });
-  });
-
   it("delegates runner-special triggers without importing the engine index", () => {
     const state = createGame({
       seed: "arch-70-trigger-ability-runner-special-delegate",

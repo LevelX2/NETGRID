@@ -1042,7 +1042,7 @@ export type CardRemainingReplacementLongtailImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "wilson_run_action_spending_cap";
+      kind: "run_action_spending_cap";
       actionGain: 1;
       spendingCap: 3;
       appliesTo: readonly ["icebreaker_use", "increase_link"];

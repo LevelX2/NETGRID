@@ -126,6 +126,7 @@ export type RunnerTracePaymentDependencies = {
   runnerCreditsAvailable: (state: GameState) => number;
   spendRunnerCredits: (state: GameState, amount: number) => void;
   recordRunnerRunCreditSpend: (state: GameState, amount: number) => void;
+  recordRunActionSpendingCapSpend: (state: GameState, amount: number) => void;
   definitionIdForCard: (
     state: GameState,
     cardId: CardInstanceId,
@@ -242,7 +243,9 @@ function quoteRunnerTracePayment(
   );
   remaining -= normalCreditsToPay;
   if (normalCreditsToPay > 0)
-    breakdown.push(runnerPaymentBreakdown("runner_credits", normalCreditsToPay));
+    breakdown.push(
+      runnerPaymentBreakdown("runner_credits", normalCreditsToPay),
+    );
 
   return {
     side: "runner",
@@ -429,7 +432,9 @@ export function assertRunnerTraceBidPaymentQuoteValid(
   if (state.trace?.status !== "runner_bid")
     throw new Error("Es ist kein Runner-Trace-Bid offen.");
   if (quote.purpose !== "runner_trace_bid")
-    throw new Error("Die Runner-Trace-Zahlungsquote ist nicht fuer Runner-Bids.");
+    throw new Error(
+      "Die Runner-Trace-Zahlungsquote ist nicht fuer Runner-Bids.",
+    );
   if (!isValidPaymentAmount(quote.amount))
     throw new Error("Der Trace-Bid ist ungueltig.");
   const current = quoteRunnerTraceBidPayment(deps, state, quote.amount);
@@ -490,6 +495,8 @@ function payRunnerTracePaymentQuote(
   state: GameState,
   quote: RunnerTracePaymentQuote,
 ): RunnerTracePaymentReceipt {
+  if (quote.purpose === "post_bid_link")
+    deps.recordRunActionSpendingCapSpend(state, quote.amount);
   deps.recordRunnerRunCreditSpend(state, quote.amount);
   for (const entry of quote.breakdown) {
     if (
@@ -634,7 +641,8 @@ export function payCorpTraceBidQuote(
       remainingTemporaryTracePayment,
     );
   const temporaryTraceCreditsSpent =
-    implementationTemporaryTraceCreditsSpent + encounterTemporaryTraceCreditsSpent;
+    implementationTemporaryTraceCreditsSpent +
+    encounterTemporaryTraceCreditsSpent;
   if (temporaryTraceCreditsSpent !== validQuote.temporaryTraceCreditsToPay)
     throw new Error("Temporary Trace Credits sind nicht mehr gueltig.");
   const parisCityGridPoolSpent = deps.spendParisCityGridTracePool(
@@ -671,7 +679,10 @@ export function payCorpTraceBidQuote(
       (trace.corpTemporaryTraceCredits?.remaining ?? 0) +
       (state.run?.encounterTemporaryTraceCredits?.remaining ?? 0);
   }
-  if (parisCityGridPoolSpent > 0 && trace.parisCityGridPoolSourceCardInstanceId) {
+  if (
+    parisCityGridPoolSpent > 0 &&
+    trace.parisCityGridPoolSourceCardInstanceId
+  ) {
     receipt.parisCityGridPoolRemaining = deps.cardCounter(
       state,
       trace.parisCityGridPoolSourceCardInstanceId,

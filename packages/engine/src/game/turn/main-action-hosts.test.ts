@@ -265,7 +265,9 @@ function hostFor(
     scored: {
       effectiveAgendaDifficulty: unexpected("effectiveAgendaDifficulty"),
       effectiveAgendaDifficultyDeps: {},
-      scoredAgendaKindForDefinition: unexpected("scoredAgendaKindForDefinition"),
+      scoredAgendaKindForDefinition: unexpected(
+        "scoredAgendaKindForDefinition",
+      ),
       serverChoiceDisplayLabel: (_state: GameState, serverId: string) =>
         serverId,
       scoredAgendaAbilityHost: () => ({}),
@@ -313,7 +315,7 @@ function hostFor(
       uniqueDirectLongtailImplementationForCard: () => undefined,
     },
     run: {
-      activeWilsonSourceIds: () => [],
+      activeRunActionSpendingCapSourceIds: () => [],
       runDurationPaymentHost: () => ({}),
       isRovingSubmarineRunBlocked: () => false,
       fortRunSideFamiliesHostForState: () => ({}),

@@ -11,7 +11,7 @@ import {
   payEncounterTaxForFutureIce,
   payJackOutAdditionalCost,
   payRunStartTaxCredits,
-  recordWilsonRunCapSpend,
+  recordRunActionSpendingCapSpend,
   runDurationPaymentHost,
   runJackOutAdditionalCost,
   spendRunnerRunCredits,
@@ -70,10 +70,15 @@ function makeState(): GameState {
         side: "runner",
         zone: "rig",
       }),
-      vewy: instance("vewy", "onr_v1_071_vewy-vewy-quiet", {
-        side: "runner",
-        zone: "rig",
-      }, { counters: { bit: 2 } }),
+      vewy: instance(
+        "vewy",
+        "onr_v1_071_vewy-vewy-quiet",
+        {
+          side: "runner",
+          zone: "rig",
+        },
+        { counters: { bit: 2 } },
+      ),
     },
     run: {
       runId: "run_1",
@@ -118,17 +123,17 @@ describe("run duration payment", () => {
 
   it("counts Wilson run spend and blocks overspend", () => {
     const state = makeState();
-    state.run!.wilsonRunSpendingCap = {
+    state.run!.runActionSpendingCap = {
       sourceCardInstanceId: "wilson" as CardInstanceId,
       limit: 3,
       spent: 2,
     };
     const host = runDurationPaymentHost(state);
 
-    recordWilsonRunCapSpend(host, 1);
-    expect(state.run?.wilsonRunSpendingCap?.spent).toBe(3);
-    expect(() => recordWilsonRunCapSpend(host, 1)).toThrow(
-      "Wilson erlaubt maximal 3 Credits fuer Icebreaker oder Link.",
+    recordRunActionSpendingCapSpend(host, 1);
+    expect(state.run?.runActionSpendingCap?.spent).toBe(3);
+    expect(() => recordRunActionSpendingCapSpend(host, 1)).toThrow(
+      "Diese Run-Aktion erlaubt maximal 3 Credits fuer Icebreaker oder Link.",
     );
   });
 
@@ -143,7 +148,11 @@ describe("run duration payment", () => {
     const jackOutResult = payJackOutAdditionalCost(host, jackOut, {
       serverLabel: "R&D",
     });
-    expect(jackOutResult).toMatchObject({ handled: true, paid: true, amount: 2 });
+    expect(jackOutResult).toMatchObject({
+      handled: true,
+      paid: true,
+      amount: 2,
+    });
     expect(jackOut.payload).toMatchObject({
       serverLabel: "R&D",
       jackOutAdditionalCost: 2,

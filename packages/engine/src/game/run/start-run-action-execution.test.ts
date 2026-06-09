@@ -35,7 +35,6 @@ function state(): GameState {
     runnerTurnFlags: {
       allNighterBonusRunPending: true,
       bodyweightDataCrecheExtraRunPending: true,
-      wilsonRunOnlyActionsRemaining: 1,
     },
     cardInstances: {},
     eventLog: [],
@@ -65,7 +64,9 @@ function action(
 function hostFor(
   gameState: GameState,
   calls: string[],
-  activeWilsonIds: CardInstanceId[] = ["wilson_1" as CardInstanceId],
+  activeRunOnlyActionSourceIds: CardInstanceId[] = [
+    "wilson_1" as CardInstanceId,
+  ],
 ): StartRunActionExecutionHost {
   return {
     state: gameState,
@@ -105,7 +106,7 @@ function hostFor(
           accessCount: 1,
         } as NonNullable<GameState["run"]>;
       },
-      activeWilsonSourceIds: () => activeWilsonIds,
+      activeRunActionSpendingCapSourceIds: () => activeRunOnlyActionSourceIds,
     },
   };
 }
@@ -125,10 +126,10 @@ describe("start-run-action-execution", () => {
 
   it("returns unhandled for unrelated actions", () => {
     const calls: string[] = [];
-    const result = handleStartRunActionExecution(
-      hostFor(state(), calls),
-      { ...action(), type: "gain_credit" } as LegalAction,
-    );
+    const result = handleStartRunActionExecution(hostFor(state(), calls), {
+      ...action(),
+      type: "gain_credit",
+    } as LegalAction);
 
     expect(result).toEqual({ handled: false });
     expect(calls).toEqual([]);
@@ -171,24 +172,30 @@ describe("start-run-action-execution", () => {
     expect(calls).toEqual(["validate:hq", "start:hq:start_run", "pay_tax:0"]);
   });
 
-  it("applies Wilson run-only action and spending-cap payload", () => {
+  it("applies direct run-only action and spending-cap payload", () => {
     const gameState = state();
     const calls: string[] = [];
-    const legalAction = action({ serverId: "archives", wilsonRunOnlyAction: true });
+    const legalAction = action({
+      serverId: "archives",
+      runOnlyAction: true,
+      runOnlyActionSourceCardId: "wilson_1",
+    });
 
     handleStartRunActionExecution(hostFor(gameState, calls), legalAction);
 
-    expect(gameState.runnerTurnFlags?.wilsonRunOnlyActionsRemaining).toBe(0);
-    expect(gameState.run?.wilsonRunSpendingCap).toEqual({
+    expect(
+      gameState.runnerTurnFlags?.runOnlyActionUsedSourceIdsThisTurn,
+    ).toEqual(["wilson_1"]);
+    expect(gameState.run?.runActionSpendingCap).toEqual({
       sourceCardInstanceId: "wilson_1",
       limit: 3,
       spent: 0,
     });
     expect(legalAction.payload).toMatchObject({
-      wilsonRunOnlyAction: true,
+      runOnlyAction: true,
       runSpendingCap: 3,
       runSpendingCapSpent: 0,
-      wilsonRunSpendingCapActive: true,
+      runActionSpendingCapActive: true,
     });
   });
 
@@ -196,21 +203,20 @@ describe("start-run-action-execution", () => {
     const gameState = state();
     const calls: string[] = [];
     gameState.runner.clicks = 0;
-    gameState.runnerTurnFlags!.wilsonRunOnlyActionsRemaining = 0;
     const legalAction = action({
       serverId: "hq",
       cardId: "wilson_1",
-      wilsonRunOnlyAction: true,
-      wilsonRunSourceCardId: "wilson_1",
+      runOnlyAction: true,
+      runOnlyActionSourceCardId: "wilson_1",
     });
 
     handleStartRunActionExecution(hostFor(gameState, calls), legalAction);
 
     expect(gameState.runner.clicks).toBe(0);
-    expect(gameState.runnerTurnFlags?.wilsonUsedSourceIdsThisTurn).toEqual([
-      "wilson_1",
-    ]);
-    expect(gameState.run?.wilsonRunSpendingCap).toEqual({
+    expect(
+      gameState.runnerTurnFlags?.runOnlyActionUsedSourceIdsThisTurn,
+    ).toEqual(["wilson_1"]);
+    expect(gameState.run?.runActionSpendingCap).toEqual({
       sourceCardInstanceId: "wilson_1",
       limit: 3,
       spent: 0,
@@ -223,17 +229,23 @@ describe("start-run-action-execution", () => {
     ]);
   });
 
-  it("preserves Wilson exhaustion and run-start-tax delegation", () => {
+  it("preserves run-only source exhaustion and run-start-tax delegation", () => {
     const gameState = state();
     const calls: string[] = [];
-    gameState.runnerTurnFlags!.wilsonRunOnlyActionsRemaining = 0;
+    gameState.runnerTurnFlags!.runOnlyActionUsedSourceIdsThisTurn = [
+      "wilson_1" as CardInstanceId,
+    ];
 
     expect(() =>
       handleStartRunActionExecution(
         hostFor(gameState, calls),
-        action({ serverId: "hq", wilsonRunOnlyAction: true }),
+        action({
+          serverId: "hq",
+          runOnlyAction: true,
+          runOnlyActionSourceCardId: "wilson_1",
+        }),
       ),
-    ).toThrow("Es ist keine Wilson-Run-Aktion verfuegbar.");
+    ).toThrow("Diese Run-Aktion wurde diesen Zug bereits genutzt.");
 
     const taxAction = action({ serverId: "hq", runStartTaxCredits: 2 });
     handleStartRunActionExecution(hostFor(state(), calls), taxAction);
@@ -254,7 +266,11 @@ describe("start-run-action-execution", () => {
     expect(() =>
       handleStartRunActionExecution(
         hostFor(gameState, calls),
-        action({ serverId: "hq", bonusRunNoClick: true, pirateBroadcastRun: true }),
+        action({
+          serverId: "hq",
+          bonusRunNoClick: true,
+          pirateBroadcastRun: true,
+        }),
       ),
     ).toThrow("Pirate Broadcast verlangt den nächsten Data Fort.");
     expect(() =>

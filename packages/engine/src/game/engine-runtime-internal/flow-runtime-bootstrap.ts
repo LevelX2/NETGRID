@@ -371,13 +371,13 @@ import {
   type RunEndCleanupHost,
 } from "../run/run-end-cleanup";
 import {
-  activeWilsonSourceIds,
+  activeRunActionSpendingCapSourceIds,
   availableRunnerRunCredits,
   availableRunnerRunStartCredits,
   hostedPaymentCredits,
   isRestrictedHostedCreditSource,
   payRunStartTaxCredits,
-  recordWilsonRunCapSpend,
+  recordRunActionSpendingCapSpend,
   restrictedHostedCreditSourceForDefinition,
   restrictedHostedCreditSourceIds,
   restrictedHostedCredits,
