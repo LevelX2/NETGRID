@@ -2252,6 +2252,14 @@ function runnerHandDevelopmentPlans(
           `hand_development_need:${evaluation.currentNeed}`,
           `hand_development_fit:${evaluation.strategicFit}`,
           `hand_development_priority:${evaluation.priority}`,
+          ...(evaluation.persistentInstallEvaluation
+            ? [
+                `persistent_install_stackability:${evaluation.persistentInstallEvaluation.stackabilityClass}`,
+                `persistent_install_delta:${evaluation.persistentInstallEvaluation.capabilityDelta}`,
+                `persistent_install_duplicate:${evaluation.persistentInstallEvaluation.duplicateRole}`,
+                `persistent_install_fit:${evaluation.persistentInstallEvaluation.finalInstallFit}`,
+              ]
+            : []),
           ...evaluation.evidence.slice(0, 6),
           ...runnerGoalEvidence,
         ],
@@ -2367,6 +2375,14 @@ function usefulLegalRunnerHandDevelopment(
   if (evaluation.availability !== "legal_now") return false;
   if (!evaluation.legalActionId) return false;
   if (
+    evaluation.persistentInstallEvaluation &&
+    (evaluation.persistentInstallEvaluation.finalInstallFit <= 0 ||
+      evaluation.persistentInstallEvaluation.duplicateRole ===
+        "redundant_duplicate")
+  ) {
+    return false;
+  }
+  if (
     evaluation.developmentRole === "duplicate_or_low_value" ||
     evaluation.developmentRole === "unknown"
   ) {
@@ -2393,6 +2409,13 @@ function runnerHandDevelopmentPlanPriority(
   const roleScore = runnerHandDevelopmentRolePriority(evaluation);
   const needScore = runnerHandDevelopmentNeedPriority(evaluation);
   const fitScore = runnerHandDevelopmentFitPriority(evaluation);
+  const installFitScore =
+    evaluation.persistentInstallEvaluation !== undefined
+      ? Math.min(
+          0,
+          Math.round(evaluation.persistentInstallEvaluation.finalInstallFit / 4),
+        )
+      : 0;
   const creditBaseScore =
     creditBase?.recommendation === "allow_setup_spend" ? 40 :
     creditBase?.recommendation === "preserve_reserve" ? -40 :
@@ -2402,7 +2425,12 @@ function runnerHandDevelopmentPlanPriority(
     0,
     Math.min(
       960,
-      roleScore + needScore + fitScore + creditBaseScore + drawOverflowScore,
+      roleScore +
+        needScore +
+        fitScore +
+        installFitScore +
+        creditBaseScore +
+        drawOverflowScore,
     ),
   );
 }

@@ -1,11 +1,16 @@
 import type { AiDecisionInput, LegalAction, VisibleCard } from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
-import type { DeckCapabilityProfile } from "./deck-capabilities";
+import type {
+  BreakerCoverageKind,
+  DeckCapabilityProfile,
+} from "./deck-capabilities";
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import { CARD_ROLES_BY_CARD, RUNTIME_CARDS, createAiHintsByCard } from "./ai-hints";
 
 export const RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION =
   "runner-hand-development-evaluation-v1" as const;
+export const RUNNER_PERSISTENT_INSTALL_EVALUATION_SCHEMA_VERSION =
+  "runner-persistent-install-evaluation-v1" as const;
 
 export type RunnerHandDevelopmentAvailability =
   | "legal_now"
@@ -55,6 +60,60 @@ export type RunnerHandDevelopmentFundingNeed = {
   reason: "cannot_pay" | "would_break_floor" | "would_break_run_reserve";
 };
 
+export type RunnerPersistentInstallCapabilityDelta =
+  | "none"
+  | "backup_only"
+  | "new_coverage"
+  | "stable_upgrade"
+  | "cost_upgrade"
+  | "risk_reduction"
+  | "cumulative_capacity"
+  | "synergy_support";
+
+export type RunnerPersistentInstallStackabilityClass =
+  | "absolute_non_stackable"
+  | "replacement_upgrade"
+  | "backup_redundancy"
+  | "cumulative_capacity"
+  | "action_bank_parallel"
+  | "synergy_support"
+  | "risk_mitigation"
+  | "unknown";
+
+export type RunnerPersistentInstallDuplicateRole =
+  | "none"
+  | "useful_backup"
+  | "redundant_duplicate"
+  | "emergency_redundancy";
+
+export type RunnerPersistentInstallEvaluation = {
+  schemaVersion: typeof RUNNER_PERSISTENT_INSTALL_EVALUATION_SCHEMA_VERSION;
+  actionId: string;
+  cardId?: string;
+  title?: string;
+  cardType?: VisibleCard["type"];
+  installCost: number;
+  creditsAfterInstall: number;
+  handAfterInstall: number;
+  memoryCost?: number;
+  memoryAfterInstall?: number;
+  installedSameDefinitionCount: number;
+  installedSameFunctionalGroupCount: number;
+  existingFunctionalCoverage: string[];
+  newFunctionalCoverage: string[];
+  capabilityDelta: RunnerPersistentInstallCapabilityDelta;
+  stackabilityClass: RunnerPersistentInstallStackabilityClass;
+  duplicateRole: RunnerPersistentInstallDuplicateRole;
+  marginalUtilityScore: number;
+  opportunityPenalty: number;
+  reservePenalty: number;
+  handBufferPenalty: number;
+  muPressurePenalty: number;
+  displacementPenalty: number;
+  finalInstallFit: number;
+  evidence: string[];
+};
+
 export type RunnerHandDevelopmentEvaluation = {
   schemaVersion: typeof RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION;
   cardInstanceId: string;
@@ -69,6 +128,7 @@ export type RunnerHandDevelopmentEvaluation = {
   fundingNeed?: RunnerHandDevelopmentFundingNeed;
   deferReason: RunnerHandDevelopmentDeferReason;
   legalActionId?: string;
+  persistentInstallEvaluation?: RunnerPersistentInstallEvaluation;
   evidence: string[];
 };
 
@@ -96,6 +156,20 @@ type CardContext = {
   memoryCost?: number;
   memoryAvailable?: number;
   duplicateInstalled: boolean;
+};
+
+type PersistentFunctionalProfile = {
+  functionalCoverage: string[];
+  primaryGroups: string[];
+  breakerCoverage: BreakerCoverageKind[];
+  riskyBreaker: boolean;
+  damagePrevention: boolean;
+  handSizeSupport: boolean;
+  memorySupport: boolean;
+  bankTool: boolean;
+  accessSupport: boolean;
+  searchSupport: boolean;
+  absoluteNonStackable: boolean;
 };
 
 const AI_HINTS = createAiHintsByCard();
@@ -129,6 +203,14 @@ export function redactedRunnerHandDevelopmentFacts(
         ? [`missing_credits:${evaluation.fundingNeed.missingCredits}`]
         : []),
       `defer:${evaluation.deferReason}`,
+      ...(evaluation.persistentInstallEvaluation
+        ? [
+            `stackability:${evaluation.persistentInstallEvaluation.stackabilityClass}`,
+            `delta:${evaluation.persistentInstallEvaluation.capabilityDelta}`,
+            `duplicate:${evaluation.persistentInstallEvaluation.duplicateRole}`,
+            `install_fit:${evaluation.persistentInstallEvaluation.finalInstallFit}`,
+          ]
+        : []),
     ].join("|"),
   );
 }
@@ -140,24 +222,37 @@ function evaluateHandCard(
   const context = buildCardContext(params, card);
   const developmentRole = roleForCard(context);
   const availability = availabilityForCard(context, developmentRole);
-  const currentNeed = currentNeedForCard(params, context, developmentRole);
+  const baseNeed = currentNeedForCard(params, context, developmentRole);
+  const persistentInstallEvaluation = evaluateRunnerPersistentInstall(
+    params,
+    context,
+    developmentRole,
+    baseNeed,
+  );
+  const currentNeed = currentNeedAdjustedByPersistentInstall(
+    baseNeed,
+    persistentInstallEvaluation,
+  );
   const strategicFit = strategicFitForCard(
     params.strategicIntent,
     availability,
     developmentRole,
     currentNeed,
+    persistentInstallEvaluation,
   );
   const fundingNeed = fundingNeedForCard(params.input, context, availability);
   const deferReason = deferReasonForCard(
     availability,
     developmentRole,
     currentNeed,
+    persistentInstallEvaluation,
   );
   const priority = priorityForCard({
     availability,
     developmentRole,
     strategicFit,
     currentNeed,
+    ...(persistentInstallEvaluation ? { persistentInstallEvaluation } : {}),
   });
 
   return {
@@ -174,6 +269,7 @@ function evaluateHandCard(
     ...(fundingNeed ? { fundingNeed } : {}),
     deferReason,
     ...(context.legalAction ? { legalActionId: context.legalAction.actionId } : {}),
+    ...(persistentInstallEvaluation ? { persistentInstallEvaluation } : {}),
     evidence: redactedEvidenceForCard({
       context,
       developmentRole,
@@ -181,6 +277,7 @@ function evaluateHandCard(
       strategicFit,
       currentNeed,
       ...(fundingNeed ? { fundingNeed } : {}),
+      ...(persistentInstallEvaluation ? { persistentInstallEvaluation } : {}),
     }),
   };
 }
@@ -359,12 +456,211 @@ function currentNeedForCard(
   }
 }
 
+function currentNeedAdjustedByPersistentInstall(
+  currentNeed: RunnerHandDevelopmentCurrentNeed,
+  evaluation: RunnerPersistentInstallEvaluation | undefined,
+): RunnerHandDevelopmentCurrentNeed {
+  if (!evaluation) return currentNeed;
+  if (evaluation.finalInstallFit <= -650) {
+    return currentNeed === "acute" ? "later" : "none";
+  }
+  if (
+    currentNeed === "none" &&
+    (evaluation.capabilityDelta === "cumulative_capacity" ||
+      evaluation.capabilityDelta === "risk_reduction" ||
+      evaluation.capabilityDelta === "stable_upgrade") &&
+    evaluation.finalInstallFit >= 350
+  ) {
+    return "useful_now";
+  }
+  if (
+    currentNeed === "later" &&
+    evaluation.finalInstallFit >= 500
+  ) {
+    return "setup";
+  }
+  return currentNeed;
+}
+
+function evaluateRunnerPersistentInstall(
+  params: EvaluateRunnerHandDevelopmentParams,
+  context: CardContext,
+  role: RunnerHandDevelopmentRole,
+  currentNeed: RunnerHandDevelopmentCurrentNeed,
+): RunnerPersistentInstallEvaluation | undefined {
+  const action = context.legalAction;
+  if (!action || action.type !== "install_card") return undefined;
+  if (!isPersistentRunnerCard(context.card)) return undefined;
+
+  const profile = persistentFunctionalProfileForCard(
+    context.card,
+    context.signals.text,
+  );
+  const installedProfiles = (params.input.playerView.own.rig ?? [])
+    .filter((card) => card.known !== false)
+    .map((card) =>
+      persistentFunctionalProfileForCard(
+        card,
+        signalsForCard(card, []).text,
+      ),
+    );
+  const existingFunctionalCoverage = sortedUnique(
+    installedProfiles.flatMap((installed) => installed.functionalCoverage),
+  );
+  const newFunctionalCoverage = sortedUnique(
+    profile.functionalCoverage.filter(
+      (coverage) =>
+        !persistentCoverageAlreadyPresent(coverage, existingFunctionalCoverage),
+    ),
+  );
+  const installedSameDefinitionCount = context.card.definitionId
+    ? (params.input.playerView.own.rig ?? []).filter(
+        (installed) => installed.definitionId === context.card.definitionId,
+      ).length
+    : 0;
+  const installedSameFunctionalGroupCount = installedProfiles.filter(
+    (installed) => persistentProfilesOverlap(profile, installed),
+  ).length;
+  const stackabilityClass = stackabilityClassForPersistentInstall(
+    params,
+    profile,
+    installedProfiles,
+    installedSameDefinitionCount,
+    installedSameFunctionalGroupCount,
+  );
+  const capabilityDelta = capabilityDeltaForPersistentInstall({
+    params,
+    profile,
+    installedProfiles,
+    existingFunctionalCoverage,
+    newFunctionalCoverage,
+    stackabilityClass,
+    installedSameDefinitionCount,
+    installedSameFunctionalGroupCount,
+    currentNeed,
+  });
+  const duplicateRole = duplicateRoleForPersistentInstall({
+    params,
+    profile,
+    capabilityDelta,
+    installedSameDefinitionCount,
+    installedSameFunctionalGroupCount,
+    currentNeed,
+  });
+  const installCost = Math.max(0, context.installOrPlayCost ?? actionCreditCost(action) ?? 0);
+  const creditsAfterInstall = params.input.playerView.own.credits - installCost;
+  const handAfterInstall = Math.max(
+    0,
+    params.input.playerView.own.gripOrHq.length - 1,
+  );
+  const memoryCost = context.memoryCost;
+  const memoryAfterInstall =
+    context.memoryAvailable !== undefined && memoryCost !== undefined
+      ? context.memoryAvailable - memoryCost
+      : undefined;
+  const marginalUtilityScore = marginalUtilityScoreForPersistentInstall({
+    params,
+    profile,
+    capabilityDelta,
+    duplicateRole,
+    installedSameFunctionalGroupCount,
+    currentNeed,
+  });
+  const opportunityPenalty = opportunityPenaltyForPersistentInstall({
+    profile,
+    capabilityDelta,
+    duplicateRole,
+    installCost,
+    newFunctionalCoverage,
+  });
+  const reservePenalty = reservePenaltyForPersistentInstall({
+    params,
+    profile,
+    installCost,
+    creditsAfterInstall,
+  });
+  const handBufferPenalty = handBufferPenaltyForPersistentInstall({
+    params,
+    profile,
+    handAfterInstall,
+    duplicateRole,
+  });
+  const muPressurePenalty = muPressurePenaltyForPersistentInstall({
+    card: context.card,
+    ...(memoryAfterInstall !== undefined ? { memoryAfterInstall } : {}),
+  });
+  const displacementPenalty =
+    action.payload?.runnerProgramTrashBeforeInstall === true ? -1200 : 0;
+  const finalInstallFit =
+    marginalUtilityScore +
+    opportunityPenalty +
+    reservePenalty +
+    handBufferPenalty +
+    muPressurePenalty +
+    displacementPenalty;
+
+  return {
+    schemaVersion: RUNNER_PERSISTENT_INSTALL_EVALUATION_SCHEMA_VERSION,
+    actionId: action.actionId,
+    ...(context.card.definitionId ? { cardId: context.card.definitionId } : {}),
+    ...(context.card.title ? { title: context.card.title } : {}),
+    ...(context.card.type ? { cardType: context.card.type } : {}),
+    installCost,
+    creditsAfterInstall,
+    handAfterInstall,
+    ...(memoryCost !== undefined ? { memoryCost } : {}),
+    ...(memoryAfterInstall !== undefined ? { memoryAfterInstall } : {}),
+    installedSameDefinitionCount,
+    installedSameFunctionalGroupCount,
+    existingFunctionalCoverage,
+    newFunctionalCoverage,
+    capabilityDelta,
+    stackabilityClass,
+    duplicateRole,
+    marginalUtilityScore,
+    opportunityPenalty,
+    reservePenalty,
+    handBufferPenalty,
+    muPressurePenalty,
+    displacementPenalty,
+    finalInstallFit,
+    evidence: persistentInstallEvidence({
+      profile,
+      capabilityDelta,
+      stackabilityClass,
+      duplicateRole,
+      installedSameDefinitionCount,
+      installedSameFunctionalGroupCount,
+      newFunctionalCoverage,
+      installCost,
+      creditsAfterInstall,
+      handAfterInstall,
+      ...(memoryAfterInstall !== undefined ? { memoryAfterInstall } : {}),
+      marginalUtilityScore,
+      opportunityPenalty,
+      reservePenalty,
+      handBufferPenalty,
+      muPressurePenalty,
+      displacementPenalty,
+      finalInstallFit,
+      role,
+    }),
+  };
+}
+
 function strategicFitForCard(
   intent: RunnerStrategicIntentProfile | undefined,
   availability: RunnerHandDevelopmentAvailability,
   role: RunnerHandDevelopmentRole,
   currentNeed: RunnerHandDevelopmentCurrentNeed,
+  persistentInstallEvaluation?: RunnerPersistentInstallEvaluation,
 ): RunnerHandDevelopmentStrategicFit {
+  if (
+    persistentInstallEvaluation &&
+    persistentInstallEvaluation.finalInstallFit <= -650
+  ) {
+    return "weak";
+  }
   if (availability === "missing_credits" || availability === "missing_mu") {
     return currentNeed === "acute" || currentNeed === "useful_now"
       ? "blocked"
@@ -397,7 +693,20 @@ function deferReasonForCard(
   availability: RunnerHandDevelopmentAvailability,
   role: RunnerHandDevelopmentRole,
   currentNeed: RunnerHandDevelopmentCurrentNeed,
+  persistentInstallEvaluation?: RunnerPersistentInstallEvaluation,
 ): RunnerHandDevelopmentDeferReason {
+  if (
+    persistentInstallEvaluation?.duplicateRole === "redundant_duplicate"
+  ) {
+    return "duplicate";
+  }
+  if (
+    persistentInstallEvaluation &&
+    persistentInstallEvaluation.reservePenalty <= -900 &&
+    persistentInstallEvaluation.finalInstallFit <= 0
+  ) {
+    return "preserve_credit_floor";
+  }
   if (role === "duplicate_or_low_value") return "duplicate";
   if (availability === "missing_credits") return "missing_credits";
   if (availability === "missing_mu") return "missing_mu";
@@ -411,12 +720,18 @@ function priorityForCard(params: {
   developmentRole: RunnerHandDevelopmentRole;
   strategicFit: RunnerHandDevelopmentStrategicFit;
   currentNeed: RunnerHandDevelopmentCurrentNeed;
+  persistentInstallEvaluation?: RunnerPersistentInstallEvaluation;
 }): number {
+  const installFitPriority =
+    params.persistentInstallEvaluation !== undefined
+      ? Math.round(params.persistentInstallEvaluation.finalInstallFit / 3)
+      : 0;
   return clampPriority(
     rolePriority(params.developmentRole) +
       availabilityPriority(params.availability) +
       fitPriority(params.strategicFit) +
-      needPriority(params.currentNeed),
+      needPriority(params.currentNeed) +
+      installFitPriority,
   );
 }
 
@@ -427,7 +742,9 @@ function redactedEvidenceForCard(params: {
   strategicFit: RunnerHandDevelopmentStrategicFit;
   currentNeed: RunnerHandDevelopmentCurrentNeed;
   fundingNeed?: RunnerHandDevelopmentFundingNeed;
+  persistentInstallEvaluation?: RunnerPersistentInstallEvaluation;
 }): string[] {
+  const persistent = params.persistentInstallEvaluation;
   return [
     "source:own_runner_hand",
     `card_type:${params.context.card.type ?? "unknown"}`,
@@ -450,7 +767,529 @@ function redactedEvidenceForCard(params: {
           `funding_reason:${params.fundingNeed.reason}`,
         ]
       : []),
+    ...(persistent
+      ? [
+          "persistent_install_evaluation:true",
+          `stackability_class:${persistent.stackabilityClass}`,
+          `capability_delta:${persistent.capabilityDelta}`,
+          `duplicate_role:${persistent.duplicateRole}`,
+          `installed_same_definition_count:${persistent.installedSameDefinitionCount}`,
+          `installed_same_functional_group_count:${persistent.installedSameFunctionalGroupCount}`,
+          `marginal_utility_score:${persistent.marginalUtilityScore}`,
+          `opportunity_penalty:${persistent.opportunityPenalty}`,
+          `reserve_penalty:${persistent.reservePenalty}`,
+          `hand_buffer_penalty:${persistent.handBufferPenalty}`,
+          `mu_pressure_penalty:${persistent.muPressurePenalty}`,
+          `displacement_penalty:${persistent.displacementPenalty}`,
+          `final_install_fit:${persistent.finalInstallFit}`,
+          ...persistent.evidence.slice(0, 12),
+        ]
+      : []),
   ];
+}
+
+function isPersistentRunnerCard(card: VisibleCard): boolean {
+  return (
+    card.type === "program" ||
+    card.type === "hardware" ||
+    card.type === "resource"
+  );
+}
+
+function persistentFunctionalProfileForCard(
+  card: VisibleCard,
+  text: string,
+): PersistentFunctionalProfile {
+  const breakerCoverage = breakerCoverageForPersistentCard(card, text);
+  const riskyBreaker =
+    breakerCoverage.length > 0 &&
+    /blink|random|roll|self[- ]?damage|suffer .*damage|take .*damage|do .*damage/.test(text);
+  const damagePrevention =
+    /prevent .*damage|damage prevention|avoid .*damage|damage_prevention/.test(text);
+  const handSizeSupport =
+    /hand size|max hand|maximum hand|hand limit|grip size|hand_size/.test(text);
+  const memorySupport = looksLikeMemorySupport(card, text);
+  const bankTool = looksLikeBankTool(text);
+  const accessSupport = looksLikeAccessPayoff(text);
+  const searchSupport = looksLikeDrawOrSearch(text);
+  const absoluteNonStackable =
+    /\bbase link\b|base_link|link strength|gain .*link|\+\d+\s+link/.test(text) &&
+    !/counter|temporary|recurring|stored/.test(text);
+  const functionalCoverage = sortedUnique([
+    ...breakerCoverage.map((coverage) => `breaker:${coverage}`),
+    ...(memorySupport ? ["memory"] : []),
+    ...(damagePrevention ? ["damage_prevention"] : []),
+    ...(handSizeSupport ? ["hand_size"] : []),
+    ...(bankTool ? ["bank_tool"] : []),
+    ...(accessSupport ? ["access_support"] : []),
+    ...(searchSupport ? ["search_support"] : []),
+    ...(absoluteNonStackable ? ["absolute_link"] : []),
+  ]);
+  const primaryGroups = functionalCoverage.length > 0
+    ? functionalCoverage
+    : [`type:${card.type ?? "unknown"}`];
+  return {
+    functionalCoverage,
+    primaryGroups,
+    breakerCoverage,
+    riskyBreaker,
+    damagePrevention,
+    handSizeSupport,
+    memorySupport,
+    bankTool,
+    accessSupport,
+    searchSupport,
+    absoluteNonStackable,
+  };
+}
+
+function breakerCoverageForPersistentCard(
+  card: VisibleCard,
+  text: string,
+): BreakerCoverageKind[] {
+  if (!looksLikeBreaker(card, text)) return [];
+  const coverage = new Set<BreakerCoverageKind>();
+  if (/fracter|wall|barrier/.test(text)) coverage.add("wall");
+  if (/decoder|code gate|codegate|code_gate/.test(text)) coverage.add("code_gate");
+  if (/killer|sentry/.test(text)) coverage.add("sentry");
+  if (/\bap\b|anti-personnel/.test(text)) coverage.add("ap");
+  if (/\btrace\b|traces/.test(text)) coverage.add("trace");
+  if (/break (?:any|an?|\d+|one)?\s*ice subroutine|breaks? .*ice subroutine/.test(text)) {
+    coverage.add(coverage.size > 0 ? "subtype_limited" : "universal");
+  }
+  if (coverage.size === 0) coverage.add("special");
+  return [...coverage].sort();
+}
+
+function persistentCoverageAlreadyPresent(
+  coverage: string,
+  existingFunctionalCoverage: readonly string[],
+): boolean {
+  if (!coverage.startsWith("breaker:")) {
+    return existingFunctionalCoverage.includes(coverage);
+  }
+  if (existingFunctionalCoverage.includes(coverage)) return true;
+  const coverageKind = coverage.slice("breaker:".length);
+  return coverageKind !== "universal" &&
+    existingFunctionalCoverage.includes("breaker:universal");
+}
+
+function persistentProfilesOverlap(
+  candidate: PersistentFunctionalProfile,
+  installed: PersistentFunctionalProfile,
+): boolean {
+  if (
+    candidate.breakerCoverage.length > 0 &&
+    installed.breakerCoverage.length > 0 &&
+    breakerCoverageOverlaps(candidate.breakerCoverage, installed.breakerCoverage)
+  ) {
+    return true;
+  }
+  return candidate.primaryGroups.some((group) =>
+    installed.primaryGroups.includes(group),
+  );
+}
+
+function breakerCoverageOverlaps(
+  left: readonly BreakerCoverageKind[],
+  right: readonly BreakerCoverageKind[],
+): boolean {
+  if (left.includes("universal") || right.includes("universal")) return true;
+  return left.some((coverage) => right.includes(coverage));
+}
+
+function stackabilityClassForPersistentInstall(
+  params: EvaluateRunnerHandDevelopmentParams,
+  profile: PersistentFunctionalProfile,
+  installedProfiles: readonly PersistentFunctionalProfile[],
+  installedSameDefinitionCount: number,
+  installedSameFunctionalGroupCount: number,
+): RunnerPersistentInstallStackabilityClass {
+  if (profile.absoluteNonStackable) return "absolute_non_stackable";
+  if (persistentInstallReducesRisk(profile, installedProfiles)) {
+    return "risk_mitigation";
+  }
+  if (profile.memorySupport || profile.damagePrevention || profile.handSizeSupport) {
+    return "cumulative_capacity";
+  }
+  if (profile.bankTool) return "action_bank_parallel";
+  if (profile.accessSupport || profile.searchSupport) return "synergy_support";
+  if (profile.breakerCoverage.length > 0) {
+    return installedSameDefinitionCount > 0 || installedSameFunctionalGroupCount > 0
+      ? "backup_redundancy"
+      : "replacement_upgrade";
+  }
+  if (
+    installedSameFunctionalGroupCount > 0 &&
+    cumulativeNeedLevel(params, profile) !== "low"
+  ) {
+    return "cumulative_capacity";
+  }
+  return "unknown";
+}
+
+function capabilityDeltaForPersistentInstall(params: {
+  params: EvaluateRunnerHandDevelopmentParams;
+  profile: PersistentFunctionalProfile;
+  installedProfiles: readonly PersistentFunctionalProfile[];
+  existingFunctionalCoverage: readonly string[];
+  newFunctionalCoverage: readonly string[];
+  stackabilityClass: RunnerPersistentInstallStackabilityClass;
+  installedSameDefinitionCount: number;
+  installedSameFunctionalGroupCount: number;
+  currentNeed: RunnerHandDevelopmentCurrentNeed;
+}): RunnerPersistentInstallCapabilityDelta {
+  if (
+    params.profile.absoluteNonStackable &&
+    params.installedSameFunctionalGroupCount > 0
+  ) {
+    return "none";
+  }
+  if (
+    persistentInstallReducesRisk(params.profile, params.installedProfiles)
+  ) {
+    return "risk_reduction";
+  }
+  if (params.newFunctionalCoverage.length > 0) {
+    if (
+      params.profile.memorySupport ||
+      params.profile.damagePrevention ||
+      params.profile.handSizeSupport
+    ) {
+      return "cumulative_capacity";
+    }
+    return "new_coverage";
+  }
+  if (
+    params.stackabilityClass === "cumulative_capacity" &&
+    cumulativeNeedLevel(params.params, params.profile) !== "low"
+  ) {
+    return "cumulative_capacity";
+  }
+  if (
+    params.stackabilityClass === "action_bank_parallel" &&
+    params.currentNeed !== "none"
+  ) {
+    return "synergy_support";
+  }
+  if (
+    params.installedSameDefinitionCount > 0 ||
+    params.installedSameFunctionalGroupCount > 0
+  ) {
+    return "backup_only";
+  }
+  if (params.profile.functionalCoverage.length > 0) return "new_coverage";
+  return "none";
+}
+
+function duplicateRoleForPersistentInstall(params: {
+  params: EvaluateRunnerHandDevelopmentParams;
+  profile: PersistentFunctionalProfile;
+  capabilityDelta: RunnerPersistentInstallCapabilityDelta;
+  installedSameDefinitionCount: number;
+  installedSameFunctionalGroupCount: number;
+  currentNeed: RunnerHandDevelopmentCurrentNeed;
+}): RunnerPersistentInstallDuplicateRole {
+  if (
+    params.installedSameDefinitionCount === 0 &&
+    params.installedSameFunctionalGroupCount === 0
+  ) {
+    return "none";
+  }
+  if (
+    params.capabilityDelta === "risk_reduction" ||
+    params.capabilityDelta === "stable_upgrade" ||
+    params.capabilityDelta === "new_coverage" ||
+    params.capabilityDelta === "synergy_support"
+  ) {
+    return "useful_backup";
+  }
+  if (
+    params.capabilityDelta === "cumulative_capacity" &&
+    cumulativeNeedLevel(params.params, params.profile) !== "low"
+  ) {
+    return "useful_backup";
+  }
+  if (
+    params.capabilityDelta === "backup_only" &&
+    params.currentNeed === "acute"
+  ) {
+    return "emergency_redundancy";
+  }
+  return "redundant_duplicate";
+}
+
+function persistentInstallReducesRisk(
+  profile: PersistentFunctionalProfile,
+  installedProfiles: readonly PersistentFunctionalProfile[],
+): boolean {
+  return (
+    profile.breakerCoverage.length > 0 &&
+    !profile.riskyBreaker &&
+    installedProfiles.some(
+      (installed) =>
+        installed.riskyBreaker &&
+        breakerCoverageOverlaps(profile.breakerCoverage, installed.breakerCoverage),
+    )
+  );
+}
+
+function marginalUtilityScoreForPersistentInstall(params: {
+  params: EvaluateRunnerHandDevelopmentParams;
+  profile: PersistentFunctionalProfile;
+  capabilityDelta: RunnerPersistentInstallCapabilityDelta;
+  duplicateRole: RunnerPersistentInstallDuplicateRole;
+  installedSameFunctionalGroupCount: number;
+  currentNeed: RunnerHandDevelopmentCurrentNeed;
+}): number {
+  switch (params.capabilityDelta) {
+    case "new_coverage":
+      return params.profile.breakerCoverage.length > 0 &&
+        runnerNeedsCoverageFromHand(params.params.deckCapabilities)
+        ? 1250
+        : 950;
+    case "stable_upgrade":
+    case "risk_reduction":
+      return 900;
+    case "cost_upgrade":
+      return 560;
+    case "cumulative_capacity":
+      return Math.round(
+        cumulativeNeedBaseScore(params.params, params.profile) *
+          diminishingReturnFactor(params.installedSameFunctionalGroupCount),
+      );
+    case "synergy_support":
+      return params.profile.bankTool ? 260 : 420;
+    case "backup_only":
+      return params.duplicateRole === "emergency_redundancy" ? 320 : 160;
+    case "none":
+      return params.duplicateRole === "redundant_duplicate" ? -900 : 80;
+  }
+}
+
+function cumulativeNeedBaseScore(
+  params: EvaluateRunnerHandDevelopmentParams,
+  profile: PersistentFunctionalProfile,
+): number {
+  switch (cumulativeNeedLevel(params, profile)) {
+    case "high":
+      return 760;
+    case "medium":
+      return 420;
+    case "low":
+      return 170;
+  }
+}
+
+function cumulativeNeedLevel(
+  params: EvaluateRunnerHandDevelopmentParams,
+  profile: PersistentFunctionalProfile,
+): "high" | "medium" | "low" {
+  if (profile.memorySupport) {
+    const memory = params.deckCapabilities?.runner?.memoryProfile;
+    if (memory?.missingMemoryPressure || (memory?.memoryAvailable ?? 99) <= 0) {
+      return "high";
+    }
+    if (runnerUsefulProgramsInHandForPersistent(params.input) > 0) return "medium";
+  }
+  if (profile.damagePrevention || profile.handSizeSupport) {
+    if (
+      runnerHasRiskyInstalledBreaker(params.input) ||
+      visibleRunnerThreat(params.input)
+    ) {
+      return "high";
+    }
+    if (profile.handSizeSupport && params.input.playerView.own.gripOrHq.length <= 3) {
+      return "medium";
+    }
+  }
+  if (profile.bankTool) {
+    if (params.input.playerView.own.credits <= 2) return "high";
+    if (params.input.playerView.own.credits <= 5) return "medium";
+  }
+  if (
+    profile.accessSupport &&
+    (params.strategicIntent?.pressureVectors.length ?? 0) > 0
+  ) {
+    return "medium";
+  }
+  return "low";
+}
+
+function diminishingReturnFactor(installedSameFunctionalGroupCount: number): number {
+  if (installedSameFunctionalGroupCount <= 0) return 1;
+  if (installedSameFunctionalGroupCount === 1) return 0.6;
+  if (installedSameFunctionalGroupCount === 2) return 0.3;
+  return 0.15;
+}
+
+function opportunityPenaltyForPersistentInstall(params: {
+  profile: PersistentFunctionalProfile;
+  capabilityDelta: RunnerPersistentInstallCapabilityDelta;
+  duplicateRole: RunnerPersistentInstallDuplicateRole;
+  installCost: number;
+  newFunctionalCoverage: readonly string[];
+}): number {
+  let penalty = 0;
+  if (params.duplicateRole === "redundant_duplicate") penalty -= 480;
+  if (params.duplicateRole === "useful_backup") penalty -= 80;
+  if (
+    params.profile.riskyBreaker &&
+    params.capabilityDelta === "backup_only"
+  ) {
+    penalty -= 260;
+  }
+  if (
+    params.installCost > 0 &&
+    params.newFunctionalCoverage.length === 0 &&
+    (params.capabilityDelta === "backup_only" ||
+      params.capabilityDelta === "none")
+  ) {
+    penalty -= 180;
+  }
+  return penalty;
+}
+
+function reservePenaltyForPersistentInstall(params: {
+  params: EvaluateRunnerHandDevelopmentParams;
+  profile: PersistentFunctionalProfile;
+  installCost: number;
+  creditsAfterInstall: number;
+}): number {
+  if (params.installCost <= 0) return 0;
+  const riskyContext = runnerHasRiskyInstalledBreaker(params.params.input);
+  const minimumCreditFloor = riskyContext ? 3 : 2;
+  const visibleRemoteScoreThreat = runnerVisibleRemoteScoreThreat(
+    params.params.input,
+  );
+  const desiredCreditReserve = visibleRemoteScoreThreat
+    ? 6
+    : riskyContext
+      ? 5
+      : 4;
+  if (params.creditsAfterInstall < minimumCreditFloor) return -900;
+  if (visibleRemoteScoreThreat && params.creditsAfterInstall < 6) return -1300;
+  if (params.creditsAfterInstall < desiredCreditReserve) return -420;
+  return 0;
+}
+
+function handBufferPenaltyForPersistentInstall(params: {
+  params: EvaluateRunnerHandDevelopmentParams;
+  profile: PersistentFunctionalProfile;
+  handAfterInstall: number;
+  duplicateRole: RunnerPersistentInstallDuplicateRole;
+}): number {
+  if (params.profile.damagePrevention || params.profile.handSizeSupport) return 0;
+  const riskyContext =
+    runnerHasRiskyInstalledBreaker(params.params.input) ||
+    (params.profile.riskyBreaker && params.duplicateRole !== "none");
+  if (!riskyContext) return 0;
+  if (params.handAfterInstall <= 0) return -1000;
+  if (params.handAfterInstall <= 2) return -780;
+  if (params.handAfterInstall <= 3) return -520;
+  return 0;
+}
+
+function muPressurePenaltyForPersistentInstall(params: {
+  memoryAfterInstall?: number;
+  card: VisibleCard;
+}): number {
+  if (params.memoryAfterInstall === undefined) return 0;
+  if (params.memoryAfterInstall < 0) return -820;
+  if (params.card.type === "program" && params.memoryAfterInstall === 0) {
+    return -320;
+  }
+  return 0;
+}
+
+function persistentInstallEvidence(params: {
+  profile: PersistentFunctionalProfile;
+  capabilityDelta: RunnerPersistentInstallCapabilityDelta;
+  stackabilityClass: RunnerPersistentInstallStackabilityClass;
+  duplicateRole: RunnerPersistentInstallDuplicateRole;
+  installedSameDefinitionCount: number;
+  installedSameFunctionalGroupCount: number;
+  newFunctionalCoverage: readonly string[];
+  installCost: number;
+  creditsAfterInstall: number;
+  handAfterInstall: number;
+  memoryAfterInstall?: number;
+  marginalUtilityScore: number;
+  opportunityPenalty: number;
+  reservePenalty: number;
+  handBufferPenalty: number;
+  muPressurePenalty: number;
+  displacementPenalty: number;
+  finalInstallFit: number;
+  role: RunnerHandDevelopmentRole;
+}): string[] {
+  return [
+    `persistent_install_role:${params.role}`,
+    `persistent_functional_coverage:${params.profile.functionalCoverage.join("|") || "none"}`,
+    `new_functional_coverage:${params.newFunctionalCoverage.join("|") || "none"}`,
+    `stackability_class:${params.stackabilityClass}`,
+    `capability_delta:${params.capabilityDelta}`,
+    `duplicate_role:${params.duplicateRole}`,
+    `install_cost:${params.installCost}`,
+    `credits_after_install:${params.creditsAfterInstall}`,
+    `hand_after_install:${params.handAfterInstall}`,
+    ...(params.memoryAfterInstall !== undefined
+      ? [`memory_after_install:${params.memoryAfterInstall}`]
+      : []),
+    `marginal_utility_score:${params.marginalUtilityScore}`,
+    `opportunity_penalty:${params.opportunityPenalty}`,
+    `reserve_penalty:${params.reservePenalty}`,
+    `hand_buffer_penalty:${params.handBufferPenalty}`,
+    `mu_pressure_penalty:${params.muPressurePenalty}`,
+    `displacement_penalty:${params.displacementPenalty}`,
+    `final_install_fit:${params.finalInstallFit}`,
+    ...(params.duplicateRole === "redundant_duplicate"
+      ? ["why_duplicate_install_deferred:low_marginal_utility"]
+      : []),
+    ...(params.duplicateRole !== "none" &&
+    params.duplicateRole !== "redundant_duplicate"
+      ? [`why_duplicate_install_allowed:${params.duplicateRole}`]
+      : []),
+    ...(params.handBufferPenalty < 0
+      ? ["duplicate_install_reduces_damage_buffer"]
+      : []),
+    ...(params.profile.damagePrevention || params.profile.handSizeSupport
+      ? ["why_support_over_duplicate_breaker:damage_or_hand_buffer"]
+      : []),
+    ...(params.capabilityDelta === "cumulative_capacity"
+      ? ["why_cumulative_copy_still_useful:bounded_diminishing_returns"]
+      : []),
+  ];
+}
+
+function runnerHasRiskyInstalledBreaker(input: AiDecisionInput): boolean {
+  return (input.playerView.own.rig ?? []).some((card) =>
+    persistentFunctionalProfileForCard(card, signalsForCard(card, []).text)
+      .riskyBreaker,
+  );
+}
+
+function runnerVisibleRemoteScoreThreat(input: AiDecisionInput): boolean {
+  return input.playerView.servers.some(
+    (server) =>
+      server.id.startsWith("remote_") &&
+      server.root.some(
+        (card) =>
+          card.known &&
+          (card.type === "agenda" ||
+            card.advancementRequirement !== undefined ||
+            (card.advancementCounters ?? 0) > 0),
+      ),
+  );
+}
+
+function runnerUsefulProgramsInHandForPersistent(input: AiDecisionInput): number {
+  return input.playerView.own.gripOrHq.filter(
+    (card) =>
+      card.known !== false &&
+      card.type === "program" &&
+      (visibleOrRuntimeNumber(card, "memoryCost") ?? 0) > 0,
+  ).length;
 }
 
 function actionMatchesCard(action: LegalAction, card: VisibleCard): boolean {
@@ -588,7 +1427,7 @@ function looksLikeRunEvent(card: VisibleCard, text: string): boolean {
 }
 
 function looksRepeatUseful(text: string): boolean {
-  return /counter|temporary|virus|recurring|multiaccess|memory/.test(text);
+  return /counter|temporary|virus|recurring|multiaccess|memory|broker|bank|stored credits|prevent .*damage|damage prevention|hand size/.test(text);
 }
 
 function looksPotentiallyPlayable(card: VisibleCard, text: string): boolean {

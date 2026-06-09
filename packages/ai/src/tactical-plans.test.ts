@@ -13,7 +13,10 @@ import {
 } from "./tactical-plans";
 import { buildDeckCapabilityProfile } from "./deck-capabilities";
 import type { ActionSemanticCandidate } from "./action-semantic-candidate";
-import type { RunnerHandDevelopmentEvaluation } from "./runner-hand-development";
+import type {
+  RunnerHandDevelopmentEvaluation,
+  RunnerPersistentInstallEvaluation,
+} from "./runner-hand-development";
 import type {
   RunnerEconomyPosture,
   RunnerRunTargetEvaluation,
@@ -1372,6 +1375,45 @@ describe("tactical plan model", () => {
     expect(handPlan?.evidence).toContain("hand_development_role:access_payoff");
   });
 
+  it("does not plan a redundant persistent duplicate as hand development", () => {
+    const installDuplicate = legalAction(
+      "install-second-risky-breaker",
+      "runner",
+      "install_card",
+      {},
+      { source: "second-risky-breaker" },
+    );
+    const input = aiInput("runner", [installDuplicate]);
+    const handDevelopmentEvaluations: RunnerHandDevelopmentEvaluation[] = [
+      runnerHandDevelopmentEvaluation({
+        cardInstanceId: "second-risky-breaker",
+        developmentRole: "breaker_or_rig_piece",
+        strategicFit: "strong",
+        currentNeed: "useful_now",
+        priority: 950,
+        legalActionId: installDuplicate.actionId,
+        persistentInstallEvaluation: persistentInstallEvaluation({
+          actionId: installDuplicate.actionId,
+          capabilityDelta: "backup_only",
+          duplicateRole: "redundant_duplicate",
+          stackabilityClass: "backup_redundancy",
+          installedSameDefinitionCount: 1,
+          installedSameFunctionalGroupCount: 1,
+          finalInstallFit: -1800,
+        }),
+      }),
+    ];
+
+    const plans = buildTacticalPlans({
+      input,
+      runnerHandDevelopmentEvaluations: handDevelopmentEvaluations,
+    });
+
+    expect(
+      plans.some((plan) => plan.planId === "runner.develop_hand_card:second-risky-breaker"),
+    ).toBe(false);
+  });
+
   it("keeps urgent score-threat draw plausible when one overflow has discard fodder", () => {
     const run = legalAction("run-remote", "runner", "start_run", {
       serverId: "remote_1",
@@ -1876,6 +1918,38 @@ function runnerHandDevelopmentEvaluation(
     currentNeed: "useful_now",
     priority: 650,
     deferReason: "none",
+    evidence: [],
+    ...rest,
+  };
+}
+
+function persistentInstallEvaluation(
+  overrides: Partial<RunnerPersistentInstallEvaluation> & {
+    actionId: string;
+  },
+): RunnerPersistentInstallEvaluation {
+  const { actionId, ...rest } = overrides;
+  return {
+    schemaVersion: "runner-persistent-install-evaluation-v1",
+    actionId,
+    cardType: "program",
+    installCost: 0,
+    creditsAfterInstall: 4,
+    handAfterInstall: 3,
+    installedSameDefinitionCount: 0,
+    installedSameFunctionalGroupCount: 0,
+    existingFunctionalCoverage: [],
+    newFunctionalCoverage: [],
+    capabilityDelta: "none",
+    stackabilityClass: "unknown",
+    duplicateRole: "none",
+    marginalUtilityScore: 0,
+    opportunityPenalty: 0,
+    reservePenalty: 0,
+    handBufferPenalty: 0,
+    muPressurePenalty: 0,
+    displacementPenalty: 0,
+    finalInstallFit: 0,
     evidence: [],
     ...rest,
   };

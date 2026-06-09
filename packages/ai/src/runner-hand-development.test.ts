@@ -204,6 +204,196 @@ describe("RunnerHandDevelopmentEvaluation", () => {
     expect(evaluation.priority).toBeLessThan(200);
   });
 
+  it("keeps first risky universal breaker install valuable when coverage is missing", () => {
+    const blink = visibleCard("blink-1", {
+      definitionId: "test-risky-universal-breaker",
+      title: "Blink",
+      type: "program",
+      subtypes: ["icebreaker"],
+      installCost: 2,
+      memoryCost: 1,
+      rulesText:
+        "Icebreaker. Break any ice subroutine. Whenever you use this breaker, suffer 2 net damage.",
+    });
+    const input = runnerInput({
+      credits: 6,
+      hand: [blink],
+      memoryUsed: 1,
+      memoryLimit: 4,
+      legalActions: [installAction("install-blink", blink, 2)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      "blink-1",
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "breaker_or_rig_piece",
+      availability: "legal_now",
+      deferReason: "none",
+      persistentInstallEvaluation: {
+        capabilityDelta: "new_coverage",
+        duplicateRole: "none",
+        stackabilityClass: "replacement_upgrade",
+      },
+    });
+    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeGreaterThan(0);
+  });
+
+  it("devalues a second risky universal breaker when it adds no capability and reduces buffer", () => {
+    const secondBlink = visibleCard("blink-2", {
+      definitionId: "test-risky-universal-breaker",
+      title: "Blink",
+      type: "program",
+      subtypes: ["icebreaker"],
+      installCost: 2,
+      memoryCost: 1,
+      rulesText:
+        "Icebreaker. Break any ice subroutine. Whenever you use this breaker, suffer 2 net damage.",
+    });
+    const installedBlink = visibleCard("blink-installed", {
+      definitionId: "test-risky-universal-breaker",
+      title: "Blink",
+      type: "program",
+      subtypes: ["icebreaker"],
+      memoryCost: 1,
+      rulesText:
+        "Icebreaker. Break any ice subroutine. Whenever you use this breaker, suffer 2 net damage.",
+    });
+    const input = runnerInput({
+      credits: 6,
+      hand: [secondBlink],
+      rig: [installedBlink],
+      memoryUsed: 1,
+      memoryLimit: 4,
+      legalActions: [installAction("install-second-blink", secondBlink, 2)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      "blink-2",
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "duplicate_or_low_value",
+      strategicFit: "weak",
+      deferReason: "duplicate",
+      persistentInstallEvaluation: {
+        capabilityDelta: "backup_only",
+        duplicateRole: "redundant_duplicate",
+        installedSameDefinitionCount: 1,
+      },
+    });
+    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeLessThan(0);
+    expect(evaluation.persistentInstallEvaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "why_duplicate_install_deferred:low_marginal_utility",
+        "duplicate_install_reduces_damage_buffer",
+      ]),
+    );
+  });
+
+  it("keeps cumulative damage prevention useful under risky breaker pressure", () => {
+    const prevention = visibleCard("prevention-2", {
+      definitionId: "test-damage-prevention",
+      title: "Net Shield",
+      type: "resource",
+      installCost: 0,
+      rulesText: "Prevent 2 net damage.",
+    });
+    const installedPrevention = visibleCard("prevention-installed", {
+      definitionId: "test-damage-prevention",
+      title: "Net Shield",
+      type: "resource",
+      rulesText: "Prevent 2 net damage.",
+    });
+    const installedBlink = visibleCard("blink-installed", {
+      definitionId: "test-risky-universal-breaker",
+      title: "Blink",
+      type: "program",
+      subtypes: ["icebreaker"],
+      rulesText:
+        "Icebreaker. Break any ice subroutine. Whenever you use this breaker, suffer 2 net damage.",
+    });
+    const input = runnerInput({
+      credits: 4,
+      hand: [prevention],
+      rig: [installedBlink, installedPrevention],
+      legalActions: [installAction("install-prevention", prevention, 0)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      "prevention-2",
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "defense_support",
+      currentNeed: "useful_now",
+      deferReason: "none",
+      persistentInstallEvaluation: {
+        capabilityDelta: "cumulative_capacity",
+        duplicateRole: "useful_backup",
+        stackabilityClass: "cumulative_capacity",
+      },
+    });
+    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeGreaterThan(0);
+    expect(evaluation.persistentInstallEvaluation?.evidence).toEqual(
+      expect.arrayContaining([
+        "why_cumulative_copy_still_useful:bounded_diminishing_returns",
+        "why_support_over_duplicate_breaker:damage_or_hand_buffer",
+      ]),
+    );
+  });
+
+  it("values a stable breaker alternative over already installed risky coverage", () => {
+    const stableWallBreaker = visibleCard("stable-wall-breaker", {
+      definitionId: "test-stable-wall-breaker",
+      title: "Stable Wall Breaker",
+      type: "program",
+      subtypes: ["icebreaker", "fracter"],
+      installCost: 1,
+      memoryCost: 1,
+      rulesText: "Icebreaker. Break wall subroutines.",
+    });
+    const installedBlink = visibleCard("blink-installed", {
+      definitionId: "test-risky-universal-breaker",
+      title: "Blink",
+      type: "program",
+      subtypes: ["icebreaker"],
+      rulesText:
+        "Icebreaker. Break any ice subroutine. Whenever you use this breaker, suffer 2 net damage.",
+    });
+    const input = runnerInput({
+      credits: 6,
+      hand: [
+        stableWallBreaker,
+        visibleCard("buffer-1", { type: "event" }),
+        visibleCard("buffer-2", { type: "event" }),
+      ],
+      rig: [installedBlink],
+      memoryUsed: 1,
+      memoryLimit: 4,
+      legalActions: [installAction("install-stable-wall", stableWallBreaker, 1)],
+    });
+
+    const evaluation = findByInstance(
+      evaluateRunnerHandDevelopment({ input }),
+      "stable-wall-breaker",
+    );
+
+    expect(evaluation).toMatchObject({
+      developmentRole: "breaker_or_rig_piece",
+      persistentInstallEvaluation: {
+        capabilityDelta: "risk_reduction",
+        duplicateRole: "useful_backup",
+        stackabilityClass: "risk_mitigation",
+      },
+    });
+    expect(evaluation.persistentInstallEvaluation?.finalInstallFit).toBeGreaterThan(0);
+  });
+
   it("marks useful but currently unavailable run events as timing-blocked", () => {
     const runEvent = visibleCard("run-event-1", {
       definitionId: "test-run-event",

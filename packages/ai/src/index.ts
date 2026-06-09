@@ -267,6 +267,7 @@ export {
 } from "./runner-run-target-evaluation";
 export {
   RUNNER_HAND_DEVELOPMENT_EVALUATION_SCHEMA_VERSION,
+  RUNNER_PERSISTENT_INSTALL_EVALUATION_SCHEMA_VERSION,
   evaluateRunnerHandDevelopment,
   redactedRunnerHandDevelopmentFacts,
 } from "./runner-hand-development";
@@ -328,6 +329,10 @@ export type {
   RunnerHandDevelopmentFundingNeed,
   RunnerHandDevelopmentRole,
   RunnerHandDevelopmentStrategicFit,
+  RunnerPersistentInstallCapabilityDelta,
+  RunnerPersistentInstallDuplicateRole,
+  RunnerPersistentInstallEvaluation,
+  RunnerPersistentInstallStackabilityClass,
 } from "./runner-hand-development";
 export type {
   BuildRunnerTacticalGoalsParams,
@@ -7198,7 +7203,10 @@ function semanticRuntimeRunnerScoreComponents(
     );
     const muPressureMemorySupport =
       runnerMuPressureInstallScoreComponent(input, action);
+    const persistentInstallFit =
+      runnerPersistentInstallFitScoreComponent(input, action);
     if (muPressureMemorySupport) components.push(muPressureMemorySupport);
+    if (persistentInstallFit) components.push(persistentInstallFit);
     if (roles.some((role) => role.startsWith("breaker_"))) {
       components.push({
         key: "runner_install_breaker",
@@ -8562,6 +8570,74 @@ function runnerHandFundingTarget(
   return candidates[0];
 }
 
+function runnerPersistentInstallFitScoreComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  const evaluation = runnerPersistentInstallEvaluationForAction(input, action);
+  if (!evaluation) return undefined;
+  const scoreValue = evaluation.finalInstallFit < 0
+    ? evaluation.finalInstallFit
+    : Math.min(250, Math.round(evaluation.finalInstallFit / 4));
+  return {
+    key: "runner_persistent_install_fit",
+    label: "Install-Grenznutzen",
+    value: scoreValue,
+    reason: sortedUnique([
+      `stackability:${evaluation.stackabilityClass}`,
+      `delta:${evaluation.capabilityDelta}`,
+      `duplicate:${evaluation.duplicateRole}`,
+      `fit:${evaluation.finalInstallFit}`,
+    ]).join("|"),
+  };
+}
+
+function runnerPersistentInstallLegacyScoreDelta(
+  evaluation: ReturnType<typeof runnerPersistentInstallEvaluationForAction>,
+): number {
+  if (!evaluation) return 0;
+  return evaluation.finalInstallFit < 0
+    ? evaluation.finalInstallFit
+    : Math.min(180, Math.round(evaluation.finalInstallFit / 5));
+}
+
+function runnerPersistentInstallEvidenceForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): string[] {
+  const evaluation = runnerPersistentInstallEvaluationForAction(input, action);
+  if (!evaluation) return [];
+  return [
+    "persistentInstallEvaluation:true",
+    `persistentInstallStackability:${evaluation.stackabilityClass}`,
+    `persistentInstallCapabilityDelta:${evaluation.capabilityDelta}`,
+    `persistentInstallDuplicateRole:${evaluation.duplicateRole}`,
+    `persistentInstallFinalFit:${evaluation.finalInstallFit}`,
+    ...evaluation.evidence.slice(0, 16),
+  ];
+}
+
+function runnerPersistentInstallEvaluationForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+) {
+  if (
+    input.side !== "runner" ||
+    action.side !== "runner" ||
+    action.type !== "install_card"
+  ) {
+    return undefined;
+  }
+  const deckCapabilities = deckCapabilitiesForInput(input);
+  const strategicIntent = runnerStrategicIntentForInput(input, deckCapabilities);
+  return evaluateRunnerHandDevelopment({
+    input,
+    deckCapabilities,
+    strategicIntent,
+  }).find((evaluation) => evaluation.legalActionId === action.actionId)
+    ?.persistentInstallEvaluation;
+}
+
 function visibleCardPlayOrInstallCostForAi(card: VisibleCard): number {
   const definition = card.definitionId
     ? DEMO_CARDS_BY_ID[card.definitionId]
@@ -9493,6 +9569,8 @@ function semanticRuntimeRunnerEvidence(
   const blinkRiskEvidence = runnerBlinkRiskEvidenceForAction(input, action);
   const loanLiabilityEvidence =
     runnerLoanLiabilityAssessment(input, action)?.evidence ?? [];
+  const persistentInstallEvidence =
+    runnerPersistentInstallEvidenceForAction(input, action);
   if (sacrificeAssessment?.memoryRequired) {
     return [
       `program_sacrifice_penalty:${runnerProgramInstallDisplacementPenalty(sacrificeAssessment)}`,
@@ -9503,6 +9581,7 @@ function semanticRuntimeRunnerEvidence(
       ...selfDamageSurvivalEvidence,
       ...blinkRiskEvidence,
       ...loanLiabilityEvidence,
+      ...persistentInstallEvidence,
     ];
   }
   if (
@@ -9511,7 +9590,8 @@ function semanticRuntimeRunnerEvidence(
     noRunEconomyCommitmentEvidence.length > 0 ||
     selfDamageSurvivalEvidence.length > 0 ||
     blinkRiskEvidence.length > 0 ||
-    loanLiabilityEvidence.length > 0
+    loanLiabilityEvidence.length > 0 ||
+    persistentInstallEvidence.length > 0
   )
     return [
       ...actionMuPressureEvidence,
@@ -9520,6 +9600,7 @@ function semanticRuntimeRunnerEvidence(
       ...selfDamageSurvivalEvidence,
       ...blinkRiskEvidence,
       ...loanLiabilityEvidence,
+      ...persistentInstallEvidence,
     ];
   if (
     action.type !== "trash_accessed_card" &&
@@ -14091,10 +14172,13 @@ function scoreRunnerAction(
           input,
           action,
         );
+        const persistentInstallEvaluation =
+          runnerPersistentInstallEvaluationForAction(input, action);
         score =
           scoreRunnerInstall(roles, features, profile) +
           muPressureBonus.value -
-          sacrificePenalty;
+          sacrificePenalty +
+          runnerPersistentInstallLegacyScoreDelta(persistentInstallEvaluation);
         if (
           sacrificeAssessment?.memoryRequired &&
           !sacrificeAssessment.canFreeRequiredMemory
@@ -14117,6 +14201,12 @@ function scoreRunnerAction(
           "own_card_role_known",
           ...publicRoleEvidence(roles),
           ...muPressureBonus.evidence,
+          ...(persistentInstallEvaluation
+            ? [
+                "persistent_install_evaluation:true",
+                ...persistentInstallEvaluation.evidence.slice(0, 16),
+              ]
+            : []),
           ...(sacrificeAssessment?.memoryRequired
             ? [
                 `program_sacrifice_penalty:${sacrificePenalty}`,
