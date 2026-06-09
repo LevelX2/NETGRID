@@ -554,8 +554,6 @@ import {
 import {
   ARASAKA_OWNS_YOU_FLATLINE_REPLACEMENT_EVENT_ID,
   ARTIFICIAL_SECURITY_DIRECTORS_OVERADVANCE_AGENDA_ID,
-  CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID,
-  EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID,
   FAIT_ACCOMPLI_COUNTER_PROGRAM_ID,
   FALSIFIED_TRANSACTIONS_EXPERT_COUNTER_OPERATION_ID,
   GENETICS_VISIONARY_ACQUISITION_OVERADVANCE_AGENDA_ID,
@@ -565,15 +563,11 @@ import {
   SILVER_LINING_RECOVERY_PROTOCOL_ECONOMY_OPERATION_ID,
   SYSTEMATIC_LAYOFFS_ADVANCEMENT_OPERATION_ID,
   TEAM_RESTRUCTURING_COUNTER_OPERATION_ID,
-  VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID,
-  VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID,
 } from "../../mechanics/agenda-operation-effects";
 import {
   COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID,
   DISINFECTANT_VIRUS_COUNTER_ASSET_ID,
   KRUMZ_TRACE_ASSET_CARD_ID,
-  SETUP_ACCESS_AMBUSH_ASSET_CARD_ID,
-  TRAP_ACCESS_AMBUSH_ASSET_CARD_ID,
 } from "../../mechanics/asset-node-effects";
 import {
   ABLATIVE_COUNTER_HARDWARE_CARD_ID,
@@ -635,7 +629,6 @@ import {
   BLINK_ID,
   BODYWEIGHT_DATA_CRECHE_ID,
   BUTCHER_BOY_ID,
-  CHIMERA_ID,
   COCKROACH_ID,
   CODE_VIRAL_CACHE_ID,
   DANSHIS_SECOND_ID,
@@ -674,11 +667,7 @@ import {
   TRACE_AWARE_RUN_EVENT_CARD_ID,
 } from "../../mechanics/run-access";
 import {
-  CRYBABY_ACCESS_COST_UPGRADE_ID,
-  DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID,
-  DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID,
   PARIS_CITY_GRID_TRACE_TAG_UPGRADE_ID,
-  TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID,
 } from "../../mechanics/server-upgrades";
 import {
   RUN_TAX_UPGRADE_CARD_IDS,
@@ -869,27 +858,32 @@ export function createRunFlowRuntimeHosts(
   ): boolean {
     const definition = definitionFor(state, cardId);
     if (definition.type === "agenda") return true;
+    const advancementCounters = Math.max(
+      0,
+      Math.floor(state.cardInstances[cardId]?.advancementCounters ?? 0),
+    );
     if (
       state.ambushHarness?.enabled &&
       (!state.ambushHarness.triggerDefinitionId ||
         state.ambushHarness.triggerDefinitionId === definition.id)
     )
       return true;
-    if (
-      definition.id === SETUP_ACCESS_AMBUSH_ASSET_CARD_ID ||
-      definition.id === TRAP_ACCESS_AMBUSH_ASSET_CARD_ID ||
-      definition.id === DEDICATED_RESPONSE_TEAM_ACCESS_DAMAGE_UPGRADE_ID ||
-      definition.id === DIETER_ESSLIN_ACCESS_DAMAGE_UPGRADE_ID ||
-      definition.id === TURBEAU_DELACROIX_ACCESS_DAMAGE_UPGRADE_ID ||
-      definition.id === CORPRUNNERS_SHATTERED_REMAINS_ACCESS_DAMAGE_ASSET_ID ||
-      definition.id === EXPERIMENTAL_AI_ACCESS_DAMAGE_ASSET_ID ||
-      definition.id === VACANT_SOULKILLER_ACCESS_DAMAGE_ASSET_ID ||
-      definition.id === VIRUS_TEST_SITE_ACCESS_DAMAGE_ASSET_ID ||
-      definition.id === BIZARRE_ENCRYPTION_SCHEME_ID ||
-      definition.id === CHIMERA_ID
-    ) {
-      return true;
+    const implementation = cardImplementationForDefinitionId(definition.id);
+    if (implementation?.accessEffects?.length) {
+      return implementation.accessEffects.some((effect) => {
+        if (!effect.sourceZones.includes("archives")) return false;
+        if (effect.ignoreIfAccessedFrom?.includes("archives")) return false;
+        if (effect.condition?.kind === "runner_is_tagged" && state.runner.tags <= 0)
+          return false;
+        if (
+          effect.condition?.kind === "source_has_advancement_counters" &&
+          advancementCounters < effect.condition.minimum
+        )
+          return false;
+        return true;
+      });
     }
+    if (definition.id === BIZARRE_ENCRYPTION_SCHEME_ID) return true;
     return (definition.mechanics ?? []).some(
       (mechanic) =>
         mechanic === "access_ambush" ||

@@ -667,13 +667,15 @@ type FocusedCard = {
 
 type AccessReveal = {
   eventId: string;
+  kind: "access" | "archives_reveal";
   actorSide: Side;
   viewerSide: Side;
   serverLabel: string;
   serverTitleLabel: string;
   serverLocationPhrase: string;
   description: string;
-  card: DisplayVisibleCard;
+  card?: DisplayVisibleCard;
+  revealedCards?: DisplayVisibleCard[];
   actions: LegalAction[];
   trashStatus: string;
   followupStatus?: string;
@@ -1382,7 +1384,7 @@ function addNumeric(target: VisibleCard, key: keyof Pick<VisibleCard, "cost" | "
   target[key] = fallback;
 }
 
-function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, archivesRevealCount: number | null, events: PublicGameEvent[] = []): AccessReveal | null {
+function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, events: PublicGameEvent[] = []): AccessReveal | null {
   if (!event || event.publicPayload.actionType !== "access_card") return null;
   const cardId = payloadString(event.publicPayload, "cardDefinitionId");
   const title = payloadString(event.publicPayload, "title");
@@ -1396,12 +1398,13 @@ function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, details
   const highlighterStatus = accessHighlighterStatus(event.publicPayload);
   return {
     eventId: event.eventId,
+    kind: "access",
     actorSide,
     viewerSide,
     serverLabel,
     serverTitleLabel: accessServerTitleLabel(serverLabel),
     serverLocationPhrase: accessServerLocationPhrase(serverLabel),
-    description: accessRevealDescription(actorSide, viewerSide, serverLabel, archivesRevealCount),
+    description: accessRevealDescription(actorSide, viewerSide, serverLabel),
     card,
     actions,
     trashStatus: pendingAmbushStatus ?? accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel),
@@ -1409,7 +1412,7 @@ function accessRevealFromLatestEvent(event: PublicGameEvent | undefined, details
   };
 }
 
-function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, archivesRevealCount: number | null, events: PublicGameEvent[], accessEvent: PublicGameEvent | null, eventId?: string): AccessReveal | null {
+function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string, CatalogCardDetail>, legalActions: LegalAction[], viewerSide: Side, events: PublicGameEvent[], accessEvent: PublicGameEvent | null, eventId?: string): AccessReveal | null {
   const accessedCard = view.run?.accessedCard;
   if (!accessedCard?.known || !accessedCard.title) return null;
   const actorSide: Side = "runner";
@@ -1422,16 +1425,49 @@ function accessRevealFromCurrentRun(view: PlayerView, detailsById: Record<string
   const accessFollowupStatus = highlighterStatus ?? followupStatus;
   return {
     eventId: eventId ?? accessEvent?.eventId ?? `current-access:${view.stateVersion}:${accessedCard.instanceId}`,
+    kind: "access",
     actorSide,
     viewerSide,
     serverLabel,
     serverTitleLabel: accessServerTitleLabel(serverLabel),
     serverLocationPhrase: accessServerLocationPhrase(serverLabel),
-    description: accessRevealDescription(actorSide, viewerSide, serverLabel, archivesRevealCount),
+    description: accessRevealDescription(actorSide, viewerSide, serverLabel),
     card,
     actions,
     trashStatus: pendingAmbushStatus ?? accessRevealStatusLabel(card, actions, actorSide, viewerSide, serverLabel),
     ...(accessFollowupStatus ? { followupStatus: accessFollowupStatus } : {})
+  };
+}
+
+function archivesRevealFromLatestEvent(event: PublicGameEvent | undefined, detailsById: Record<string, CatalogCardDetail>, viewerSide: Side): AccessReveal | null {
+  if (!event || !isArchivesBreachRevealEvent(event)) return null;
+  const actorSide = payloadSide(event.publicPayload, "actor") ?? "runner";
+  const count = payloadPositiveInteger(event.publicPayload, "archivesRevealCount") ?? 0;
+  const definitionIds = payloadStringList(event.publicPayload, "archivesRevealDefinitionIds").length > 0
+    ? payloadStringList(event.publicPayload, "archivesRevealDefinitionIds")
+    : payloadStringList(event.publicPayload, "publicRevealDefinitionIds");
+  if (definitionIds.length === 0) return null;
+  const titles = payloadPipeStringList(event.publicPayload, "archivesRevealTitles").length > 0
+    ? payloadPipeStringList(event.publicPayload, "archivesRevealTitles")
+    : payloadPipeStringList(event.publicPayload, "publicRevealTitles");
+  const cards = definitionIds.map((definitionId, index) => {
+    const detail = detailsById[definitionId] ?? null;
+    const title = detail?.title ?? titles[index] ?? definitionId;
+    return detail ? visibleCardFromCatalogDetail(detail) : visibleCardFromPublicEvent(event, definitionId, title);
+  });
+  const serverLabel = "Archive";
+  return {
+    eventId: event.eventId,
+    kind: "archives_reveal",
+    actorSide,
+    viewerSide,
+    serverLabel,
+    serverTitleLabel: accessServerTitleLabel(serverLabel),
+    serverLocationPhrase: accessServerLocationPhrase(serverLabel),
+    description: archivesRevealDescription(actorSide, viewerSide, count || cards.length),
+    revealedCards: cards,
+    actions: [],
+    trashStatus: cards.length === 1 ? "Diese Karte liegt jetzt offen im Archiv." : "Diese Karten liegen jetzt offen im Archiv."
   };
 }
 
@@ -1502,6 +1538,15 @@ function payloadStringList(payload: Record<string, unknown>, key: string): strin
   );
 }
 
+function payloadPipeStringList(payload: Record<string, unknown>, key: string): string[] {
+  return (
+    payloadString(payload, key)
+      ?.split("|")
+      .map((item) => item.trim())
+      .filter(Boolean) ?? []
+  );
+}
+
 function payloadSide(payload: Record<string, unknown>, key: string): Side | null {
   const value = payloadString(payload, key);
   return value === "corp" || value === "runner" ? value : null;
@@ -1534,30 +1579,35 @@ function accessHighlighterStatus(payload: Record<string, unknown>): string | nul
   return `Zusätzlicher R&D-Zugriff ${accessIndex + 1} von ${Math.max(accessIndex + 1, effectiveAccessCount)}: Die Korp hat ${highlighterCounterCount} Highlighter-Counter.`;
 }
 
-function accessRevealDescription(actorSide: Side, viewerSide: Side, serverLabel: string, archivesRevealCount: number | null): string {
-  if (serverLabel === "Archive" && archivesRevealCount) {
-    const subject = actorSide === viewerSide ? "Du hast" : `${accessActorSubject(actorSide)} hat`;
-    if (archivesRevealCount === 1) return `${subject} eine verdeckte Karte im Archiv aufgedeckt und darauf zugegriffen.`;
-    const currentAccess = actorSide === viewerSide ? "greifst jetzt auf eine Archivkarte zu" : `${accessActorSubject(actorSide)} greift jetzt auf eine Archivkarte zu`;
-    return `${subject} ${archivesRevealCount} verdeckte Karten im Archiv aufgedeckt; ${currentAccess}.`;
-  }
+function accessRevealDescription(actorSide: Side, viewerSide: Side, serverLabel: string): string {
   const location = accessServerLocationPhrase(serverLabel);
   if (actorSide === viewerSide) return `Du hast auf eine Karte ${location} zugegriffen.`;
   return `${accessActorSubject(actorSide)} hat auf eine Karte ${location} zugegriffen.`;
 }
 
-function latestArchivesRevealCount(events: PublicGameEvent[], accessEvent: PublicGameEvent | null): number | null {
-  const stopIndex = accessEvent ? events.findIndex((event) => event.eventId === accessEvent.eventId) : events.length;
-  const startIndex = stopIndex >= 0 ? stopIndex - 1 : events.length - 1;
-  for (let index = startIndex; index >= 0; index -= 1) {
-    const payload = events[index]?.publicPayload;
-    if (!payload) continue;
-    if (payload.actionType === "start_run") {
-      const serverLabel = serverDisplayLabel(payloadString(payload, "serverLabel") ?? payloadString(payload, "serverId") ?? "");
-      return serverLabel === "Archive" ? payloadPositiveInteger(payload, "archivesRevealCount") : null;
-    }
+function archivesRevealDescription(actorSide: Side, viewerSide: Side, count: number): string {
+  const subject = actorSide === viewerSide ? "Du hast" : `${accessActorSubject(actorSide)} hat`;
+  const object = count === 1 ? "eine verdeckte Karte" : `${count} verdeckte Karten`;
+  return `${subject} ${object} im Archiv aufgedeckt.`;
+}
+
+function retainedArchivesRevealEvent(events: PublicGameEvent[], dismissedEventIds: string[]): PublicGameEvent | null {
+  for (let index = events.length - 1; index >= 0; index -= 1) {
+    const event = events[index];
+    if (!event) continue;
+    if (isArchivesBreachRevealEvent(event))
+      return dismissedEventIds.includes(event.eventId) ? null : event;
+    if (event.publicPayload.actionType === "start_run") return null;
   }
   return null;
+}
+
+function isArchivesBreachRevealEvent(event: PublicGameEvent): boolean {
+  const payload = event.publicPayload;
+  if (payload.actionType !== "start_run") return false;
+  if (payload.hiddenZoneAction !== "archives_breach_reveal") return false;
+  const serverLabel = serverDisplayLabel(payloadString(payload, "serverLabel") ?? payloadString(payload, "serverId") ?? "");
+  return serverLabel === "Archive" && Boolean(payloadPositiveInteger(payload, "archivesRevealCount"));
 }
 
 function accessActorSubject(side: Side): string {
@@ -2305,7 +2355,7 @@ export default function Page() {
   const [rightRailCollapsed, setRightRailCollapsed] = useState(false);
   const [undoPanelOpen, setUndoPanelOpen] = useState(false);
   const [focusedCard, setFocusedCard] = useState<FocusedCard | null>(null);
-  const [dismissedAccessEventId, setDismissedAccessEventId] = useState<string | null>(null);
+  const [dismissedAccessEventIds, setDismissedAccessEventIds] = useState<string[]>([]);
   const [dismissedExposeReviewEventId, setDismissedExposeReviewEventId] = useState<string | null>(null);
   const [diagnosticsOpen, setDiagnosticsOpen] = useState(false);
   const [matchDetailsOpen, setMatchDetailsOpen] = useState(false);
@@ -3211,12 +3261,14 @@ export default function Page() {
     };
   };
   const latestAccessRevealEvent = payload ? latestRetainableAccessRevealEvent(payload.eventTail) : null;
-  const accessRevealEvent = payload ? retainedAccessRevealEvent(payload.eventTail, dismissedAccessEventId) : null;
-  const archivesRevealCount = payload ? latestArchivesRevealCount(payload.eventTail, latestAccessRevealEvent) : null;
-  const currentAccessReveal = payload ? accessRevealFromCurrentRun(payload.playerView, catalogDetailsById, payload.legalActions, payload.side, archivesRevealCount, payload.eventTail, latestAccessRevealEvent) : null;
-  const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side, archivesRevealCount, payload.eventTail) : null;
-  const accessReveal = currentAccessReveal ?? retainedEventAccessReveal;
-  const showAccessReveal = Boolean(accessReveal && dismissedAccessEventId !== accessReveal.eventId);
+  const lastDismissedAccessEventId = dismissedAccessEventIds.at(-1) ?? null;
+  const accessRevealEvent = payload ? retainedAccessRevealEvent(payload.eventTail, lastDismissedAccessEventId) : null;
+  const archivesRevealEvent = payload ? retainedArchivesRevealEvent(payload.eventTail, dismissedAccessEventIds) : null;
+  const archivesReveal = payload ? archivesRevealFromLatestEvent(archivesRevealEvent ?? undefined, catalogDetailsById, payload.side) : null;
+  const currentAccessReveal = payload ? accessRevealFromCurrentRun(payload.playerView, catalogDetailsById, payload.legalActions, payload.side, payload.eventTail, latestAccessRevealEvent) : null;
+  const retainedEventAccessReveal = payload ? accessRevealFromLatestEvent(accessRevealEvent ?? undefined, catalogDetailsById, payload.legalActions, payload.side, payload.eventTail) : null;
+  const accessReveal = archivesReveal ?? currentAccessReveal ?? retainedEventAccessReveal;
+  const showAccessReveal = Boolean(accessReveal && !dismissedAccessEventIds.includes(accessReveal.eventId));
   const exposeReviewEvent = payload ? retainedExposeReviewEvent(payload.eventTail, dismissedExposeReviewEventId) : null;
   const exposeReview = payload ? exposeReviewFromLatestEvent(exposeReviewEvent ?? undefined, catalogDetailsById, payload.side) : null;
   const viewedApproachIceId = approachIceExposeViewingIceId(payload?.legalActions ?? []);
@@ -6671,7 +6723,13 @@ export default function Page() {
           displayMode={cardDisplayMode}
           disabled={Boolean(payload.winner) || connection !== "online"}
           onAction={submitAction}
-          onDismiss={() => setDismissedAccessEventId(accessReveal.eventId)}
+          onDismiss={() =>
+            setDismissedAccessEventIds((eventIds) =>
+              eventIds.includes(accessReveal.eventId)
+                ? eventIds
+                : [...eventIds, accessReveal.eventId].slice(-30),
+            )
+          }
         />
       ) : null}
       {activeMatchIsGame && showExposeReview && exposeReview ? (
@@ -7066,6 +7124,11 @@ function AccessRevealModal({
     onAction(action);
     onDismiss();
   };
+  const isArchivesReveal = reveal.kind === "archives_reveal";
+  const title = isArchivesReveal
+    ? "Archivkarten aufgedeckt"
+    : `Zugriff auf ${reveal.serverTitleLabel}`;
+  const eyebrow = isArchivesReveal ? "Archiv" : "Zugriff";
 
   return (
     <div className="accessRevealOverlay" role="dialog" aria-modal="true" aria-labelledby="access-reveal-title">
@@ -7073,18 +7136,33 @@ function AccessRevealModal({
       <section className="accessRevealPanel">
         <div className="accessRevealHeader">
           <div>
-            <p className="eyebrow">Zugriff</p>
-            <h2 id="access-reveal-title">Zugriff auf {reveal.serverTitleLabel}</h2>
+            <p className="eyebrow">{eyebrow}</p>
+            <h2 id="access-reveal-title">{title}</h2>
             <p>{reveal.description}</p>
           </div>
           <button className="button iconOnly" onClick={onDismiss} aria-label="Fenster schließen" title="Schließen">
             <X size={16} />
           </button>
         </div>
-        <div className="accessRevealBody">
-          <div className="accessRevealCard">
-            <CardView card={reveal.card} displayMode={displayMode} preview />
+        {reveal.revealedCards?.length ? (
+          <div className="exposeReviewCards" data-testid="archives-reveal-cards">
+            {reveal.revealedCards.map((card, index) => (
+              <div className="exposeReviewCard" key={`${reveal.eventId}-${card.definitionId ?? card.instanceId}-${index}`}>
+                <CardView card={card} displayMode={displayMode} preview />
+                <div className="exposeReviewCardText">
+                  <strong>{card.title}</strong>
+                  <span>Jetzt offen im Archiv</span>
+                </div>
+              </div>
+            ))}
           </div>
+        ) : null}
+        <div className="accessRevealBody">
+          {reveal.card ? (
+            <div className="accessRevealCard">
+              <CardView card={reveal.card} displayMode={displayMode} preview />
+            </div>
+          ) : null}
           <div className="accessRevealDecision">
             {reveal.followupStatus ? <p className="accessRevealStatus">{reveal.followupStatus}</p> : null}
             <p className="accessRevealStatus">{reveal.trashStatus}</p>

@@ -7,6 +7,7 @@ import {
 } from "../../index";
 import {
   apply,
+  installRunnerProgramForTest,
   keepOnlyCorpArchivesCards,
   MECHANIC_SMOKE_GAMES,
   moveCorpCardToArchives,
@@ -83,6 +84,11 @@ describe("V1.1.2 Full Archives Access", () => {
       hiddenZoneBarrier: true,
       hiddenZoneAction: "archives_breach_reveal",
       archivesRevealCount: 2,
+      archivesRevealDefinitionIds: "simple_economy_asset,simple_agenda",
+      archivesRevealTitles: "Simple Economy Asset|Simple Agenda",
+      archivesRevealAgendaDefinitionIds: "simple_agenda",
+      publicRevealDefinitionIds: "simple_economy_asset,simple_agenda",
+      publicRevealTitles: "Simple Economy Asset|Simple Agenda",
       archivesAutoAccessedCount: 2,
     });
     expect(JSON.stringify(getPlayerView(state, "runner"))).toContain(
@@ -165,19 +171,88 @@ describe("V1.1.2 Full Archives Access", () => {
     expect(replay.actualFinalStateHash).toBe(hashState(state));
   });
 
-  it("does not offer the basic trash ability for a card accessed from Archives", () => {
+  it("auto-accesses Archives assets whose access effects are ignored there", () => {
     let state = toRunnerTurn(MECHANIC_SMOKE_GAMES.assetNodeEffects("v112-archives-no-trash"));
     state.runner.credits = 10;
     const setupId = moveCorpCardToArchives(state, "onr_v1_340_setup", false);
     keepOnlyCorpArchivesCards(state, [setupId]);
 
     state = apply(state, "runner", (action) => action.type === "start_run" && action.payload?.serverId === "archives");
-    state = apply(state, "runner", (action) => action.type === "access_card");
 
     const actions = getLegalActions(state, "runner");
     expect(actions.some((action) => action.type === "trash_accessed_card")).toBe(false);
-    expect(actions.some((action) => action.type === "decline_trash")).toBe(true);
+    expect(actions.some((action) => action.type === "access_card")).toBe(false);
+    expect(state.run).toBeUndefined();
     expect(state.corp.archives).toEqual([setupId]);
     expect(state.cardInstances[setupId]?.faceup).toBe(true);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "start_run",
+      archivesRevealDefinitionIds: "onr_v1_340_setup",
+      archivesAutoAccessedCount: 1,
+    });
+  });
+
+  it("auto-accesses Experimental AI in Archives when no installed program can be trashed", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.agendaScoring("v112-archives-experimental-ai-no-target"),
+    );
+    const experimentalAiId = moveCorpCardToArchives(
+      state,
+      "onr_v1_323_experimental-ai",
+      false,
+    );
+    state.cardInstances[experimentalAiId] = {
+      ...state.cardInstances[experimentalAiId]!,
+      advancementCounters: 2,
+    };
+    keepOnlyCorpArchivesCards(state, [experimentalAiId]);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "archives",
+    );
+
+    expect(state.run).toBeUndefined();
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "start_run",
+      hiddenZoneAction: "archives_breach_reveal",
+      archivesRevealDefinitionIds: "onr_v1_323_experimental-ai",
+      archivesAutoAccessedCount: 1,
+    });
+  });
+
+  it("auto-accesses Experimental AI in Archives even when an installed program exists", () => {
+    let state = toRunnerTurn(
+      MECHANIC_SMOKE_GAMES.agendaScoring("v112-archives-experimental-ai-target"),
+    );
+    const programId = installRunnerProgramForTest(state, "simple_decoder");
+    const experimentalAiId = moveCorpCardToArchives(
+      state,
+      "onr_v1_323_experimental-ai",
+      false,
+    );
+    state.cardInstances[experimentalAiId] = {
+      ...state.cardInstances[experimentalAiId]!,
+      advancementCounters: 1,
+    };
+    keepOnlyCorpArchivesCards(state, [experimentalAiId]);
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "archives",
+    );
+
+    expect(state.run).toBeUndefined();
+    expect(state.runner.heap).not.toContain(programId);
+    expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
+      actionType: "start_run",
+      hiddenZoneAction: "archives_breach_reveal",
+      archivesRevealDefinitionIds: "onr_v1_323_experimental-ai",
+      archivesAutoAccessedCount: 1,
+    });
   });
 });

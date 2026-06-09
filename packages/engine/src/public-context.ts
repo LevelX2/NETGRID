@@ -967,6 +967,16 @@ export function publicContextForAction(
         legalAction.payload.returnedCardDefinitionIds;
     if (typeof legalAction.payload.archivesRevealCount === "number")
       context.archivesRevealCount = legalAction.payload.archivesRevealCount;
+    if (typeof legalAction.payload.archivesRevealDefinitionIds === "string")
+      context.archivesRevealDefinitionIds =
+        legalAction.payload.archivesRevealDefinitionIds;
+    if (typeof legalAction.payload.archivesRevealTitles === "string")
+      context.archivesRevealTitles = legalAction.payload.archivesRevealTitles;
+    if (
+      typeof legalAction.payload.archivesRevealAgendaDefinitionIds === "string"
+    )
+      context.archivesRevealAgendaDefinitionIds =
+        legalAction.payload.archivesRevealAgendaDefinitionIds;
     if (typeof legalAction.payload.revealedCount === "number")
       context.revealedCount = legalAction.payload.revealedCount;
     if (typeof legalAction.payload.revealedAgendaDefinitionIds === "string")

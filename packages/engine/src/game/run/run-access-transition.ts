@@ -645,6 +645,12 @@ function revealArchivesAtBreachStart(
     (cardId) => !host.cards.cardInstanceFor(cardId).faceup,
   );
   if (revealedIds.length === 0) return;
+  const revealedDefinitions = revealedIds.map((cardId) =>
+    host.cards.definitionFor(cardId),
+  );
+  const revealedAgendaDefinitions = revealedDefinitions.filter(
+    (definition) => definition.type === "agenda",
+  );
   for (const cardId of revealedIds) {
     const instance = host.cards.cardInstanceFor(cardId);
     host.state.cardInstances[cardId] = { ...instance, faceup: true, rezzed: true };
@@ -655,6 +661,21 @@ function revealArchivesAtBreachStart(
       hiddenZoneBarrier: true,
       hiddenZoneAction: "archives_breach_reveal",
       archivesRevealCount: revealedIds.length,
+      archivesRevealDefinitionIds: revealedDefinitions
+        .map((definition) => definition.id)
+        .join(","),
+      archivesRevealTitles: revealedDefinitions
+        .map((definition) => definition.title)
+        .join("|"),
+      archivesRevealAgendaDefinitionIds: revealedAgendaDefinitions
+        .map((definition) => definition.id)
+        .join(","),
+      publicRevealDefinitionIds: revealedDefinitions
+        .map((definition) => definition.id)
+        .join(","),
+      publicRevealTitles: revealedDefinitions
+        .map((definition) => definition.title)
+        .join("|"),
     };
   }
 }
