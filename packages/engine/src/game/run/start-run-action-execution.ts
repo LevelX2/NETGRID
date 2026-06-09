@@ -69,6 +69,36 @@ export function executeStartRunAction(
     throw new Error("Es ist keine Pirate-Broadcast-Sequenz offen.");
   }
   host.run.validateRovingSubmarineRunGate(serverId);
+  let wilsonRunSourceCardId: CardInstanceId | undefined;
+  if (legalAction.payload?.wilsonRunOnlyAction === true) {
+    const explicitWilsonSourceCardId = String(
+      legalAction.payload?.wilsonRunSourceCardId ??
+        legalAction.payload?.cardId ??
+        "",
+    ) as CardInstanceId;
+    if (explicitWilsonSourceCardId) {
+      const activeWilsonSourceIds = host.run.activeWilsonSourceIds();
+      if (!activeWilsonSourceIds.includes(explicitWilsonSourceCardId))
+        throw new Error("Wilson ist nicht installiert.");
+      const used = flags.wilsonUsedSourceIdsThisTurn ?? [];
+      if (used.includes(explicitWilsonSourceCardId))
+        throw new Error("Wilson wurde diesen Zug bereits genutzt.");
+      flags.wilsonUsedSourceIdsThisTurn = [
+        ...used,
+        explicitWilsonSourceCardId,
+      ].sort();
+      host.state.runner.clicks += 1;
+      wilsonRunSourceCardId = explicitWilsonSourceCardId;
+    } else {
+      const remaining = Math.max(
+        0,
+        Math.floor(flags.wilsonRunOnlyActionsRemaining ?? 0),
+      );
+      if (remaining <= 0)
+        throw new Error("Es ist keine Wilson-Run-Aktion verfuegbar.");
+      flags.wilsonRunOnlyActionsRemaining = remaining - 1;
+    }
+  }
   if (legalAction.payload?.bonusRunNoClick === true) {
     if (legalAction.payload?.pirateBroadcastRun !== true) {
       flags.allNighterBonusRunPending = false;
@@ -77,16 +107,6 @@ export function executeStartRunAction(
   } else {
     host.payment.spendRunnerClick();
   }
-  if (legalAction.payload?.wilsonRunOnlyAction === true) {
-    const flags = host.turn.ensureRunnerTurnFlags();
-    const remaining = Math.max(
-      0,
-      Math.floor(flags.wilsonRunOnlyActionsRemaining ?? 0),
-    );
-    if (remaining <= 0)
-      throw new Error("Es ist keine Wilson-Run-Aktion verfuegbar.");
-    flags.wilsonRunOnlyActionsRemaining = remaining - 1;
-  }
   const startRunOptions =
     legalAction.payload?.pirateBroadcastRun === true &&
     flags.pirateBroadcastPending
@@ -94,7 +114,8 @@ export function executeStartRunAction(
       : undefined;
   host.run.startRun(serverId, legalAction, startRunOptions);
   if (legalAction.payload?.wilsonRunOnlyAction === true && host.state.run) {
-    const sourceCardId = host.run.activeWilsonSourceIds()[0];
+    const sourceCardId =
+      wilsonRunSourceCardId ?? host.run.activeWilsonSourceIds()[0];
     host.state.run.wilsonRunSpendingCap = {
       sourceCardInstanceId: sourceCardId ?? ("" as CardInstanceId),
       limit: 3,
@@ -102,6 +123,7 @@ export function executeStartRunAction(
     };
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
+      ...(sourceCardId ? { wilsonRunSourceCardId: sourceCardId } : {}),
       runSpendingCap: 3,
       runSpendingCapSpent: 0,
       wilsonRunSpendingCapActive: true,

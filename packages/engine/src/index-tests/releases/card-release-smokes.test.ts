@@ -2405,31 +2405,25 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
       (action) => action.type === "install_card" && action.payload?.cardId === wilsonId,
     );
     expect(state.runner.clicks).toBe(0);
+    const actionsAfterInstall = getLegalActions(state, "runner");
     expect(
-      getLegalActions(state, "runner").some(
-        (action) => action.payload?.runnerAbility === "wilson_gain_run_action",
-      ),
-    ).toBe(true);
-    state = apply(
-      state,
-      "runner",
-      (action) => action.payload?.runnerAbility === "wilson_gain_run_action",
-    );
-    expect(state.runner.clicks).toBe(1);
-    expect(state.runnerTurnFlags?.wilsonRunOnlyActionsRemaining).toBe(1);
-    expect(
-      getLegalActions(state, "runner").some(
+      actionsAfterInstall.some(
         (action) =>
-          action.type === "start_run" &&
-          action.payload?.wilsonRunOnlyAction === true,
-      ),
-    ).toBe(true);
-    state.runner.clicks = 1;
-    expect(
-      getLegalActions(state, "runner").some(
-        (action) => action.type === "gain_credit",
+          action.type === "trigger_ability" &&
+          action.payload?.runnerAbility === "wilson_gain_run_action",
       ),
     ).toBe(false);
+    expect(actionsAfterInstall.some((action) => action.type === "end_turn")).toBe(
+      true,
+    );
+    expect(
+      actionsAfterInstall.some(
+        (action) =>
+          action.type === "start_run" &&
+          action.payload?.wilsonRunOnlyAction === true &&
+          action.payload?.serverId === "rd",
+      ),
+    ).toBe(true);
     state = apply(
       state,
       "runner",
@@ -2438,6 +2432,11 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
         action.payload?.wilsonRunOnlyAction === true &&
         action.payload?.serverId === "rd",
     );
+    expect(state.runner.clicks).toBe(0);
+    expect(state.runnerTurnFlags?.wilsonUsedSourceIdsThisTurn).toContain(
+      wilsonId,
+    );
+    expect(state.runnerTurnFlags?.wilsonRunOnlyActionsRemaining ?? 0).toBe(0);
     expect(state.run?.wilsonRunSpendingCap).toMatchObject({
       limit: 3,
       spent: 0,
@@ -2476,31 +2475,91 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     }
 
     expect(state.runner.clicks).toBe(0);
+    const actionsAfterNormalClicks = getLegalActions(state, "runner");
     expect(
-      getLegalActions(state, "runner").some(
-        (action) => action.payload?.runnerAbility === "wilson_gain_run_action",
+      actionsAfterNormalClicks.some(
+        (action) =>
+          action.type === "trigger_ability" &&
+          action.payload?.runnerAbility === "wilson_gain_run_action",
       ),
-    ).toBe(true);
-
-    state = apply(
-      state,
-      "runner",
-      (action) => action.payload?.runnerAbility === "wilson_gain_run_action",
-    );
-    expect(state.runner.clicks).toBe(1);
-    expect(state.runnerTurnFlags?.wilsonRunOnlyActionsRemaining).toBe(1);
-    const wilsonActions = getLegalActions(state, "runner");
-    expect(wilsonActions.some((action) => action.type === "gain_credit")).toBe(
+    ).toBe(false);
+    expect(
+      actionsAfterNormalClicks.some((action) => action.type === "gain_credit"),
+    ).toBe(
       false,
     );
     expect(
-      wilsonActions.some(
+      actionsAfterNormalClicks.some((action) => action.type === "end_turn"),
+    ).toBe(
+      true,
+    );
+    expect(
+      actionsAfterNormalClicks.some(
         (action) =>
           action.type === "start_run" &&
           action.payload?.wilsonRunOnlyAction === true &&
           action.payload?.serverId === "hq",
       ),
     ).toBe(true);
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" &&
+        action.payload?.wilsonRunOnlyAction === true &&
+        action.payload?.serverId === "hq",
+    );
+    expect(state.runner.clicks).toBe(0);
+    expect(state.run?.wilsonRunSpendingCap).toMatchObject({
+      limit: 3,
+      spent: 0,
+    });
+  });
+
+  it("starts Wilson's chosen run immediately without spending a normal Runner action", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "p361-wilson-immediate-run",
+        baseline: CURRENT_RULES_BASELINE,
+        runnerDeck: {
+          id: "p361_wilson_immediate_runner",
+          name: "P3.61 Wilson Immediate Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_187_wilson-weeflerunner-apprentice", quantity: 1 },
+            { id: "simple_economy_event", quantity: 10 },
+            { id: "simple_agenda", quantity: 6 },
+          ],
+        },
+        corpDeck: MECHANIC_SMOKE_DECKS.traceTags.corp,
+        agendaPointsToWin: 7,
+      }),
+    );
+    state.runner.credits = 10;
+    const wilsonId = installRunnerResourceForTest(
+      state,
+      "onr_v1_187_wilson-weeflerunner-apprentice",
+    );
+    state.runner.clicks = 4;
+
+    state = apply(
+      state,
+      "runner",
+      (action) =>
+        action.type === "start_run" &&
+        action.payload?.wilsonRunOnlyAction === true &&
+        action.payload?.serverId === "hq",
+    );
+
+    expect(state.runner.clicks).toBe(4);
+    expect(state.runnerTurnFlags?.wilsonUsedSourceIdsThisTurn).toContain(
+      wilsonId,
+    );
+    expect(state.run?.wilsonRunSpendingCap).toMatchObject({
+      limit: 3,
+      spent: 0,
+    });
   });
 
   it("resolves P3.60 Karl de Veres successful-run credits and Nevinyrral start-turn actions from CardImplementation", () => {

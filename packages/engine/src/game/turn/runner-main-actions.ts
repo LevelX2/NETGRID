@@ -269,6 +269,12 @@ export function buildRunnerMainActions(
   const actions: LegalAction[] = [];
   const flags = ensureRunnerTurnFlags(state);
   const hasClicks = state.runner.clicks > 0;
+  const unusedWilsonSourceIds = activeWilsonSourceIds(
+    runDurationPaymentHost(state),
+  ).filter(
+    (sourceCardId) =>
+      !(flags.wilsonUsedSourceIdsThisTurn ?? []).includes(sourceCardId),
+  );
   const pirateBroadcastPending = flags.pirateBroadcastPending;
   const pirateBroadcastNextServerId =
     pirateBroadcastPending?.pendingServerIds[0];
@@ -299,29 +305,7 @@ export function buildRunnerMainActions(
   const bonusRunPending =
     flags.allNighterBonusRunPending === true ||
     pirateBroadcastNextServerId !== undefined;
-  for (const sourceCardId of activeWilsonSourceIds(runDurationPaymentHost(state))) {
-    const used = flags.wilsonUsedSourceIdsThisTurn ?? [];
-    if (!used.includes(sourceCardId)) {
-      actions.push(
-        action(
-          state,
-          "runner",
-          "trigger_ability",
-          "Wilson: Run-Aktion erhalten",
-          sourceCardId,
-          [],
-          {
-            cardId: sourceCardId,
-            runnerAbility: "wilson_gain_run_action",
-            sourceDefinitionId: definitionFor(state, sourceCardId).id,
-            gainActionsAmount: 1,
-            runSpendingCap: 3,
-          },
-        ),
-      );
-    }
-  }
-  if (!hasClicks && !bonusRunPending) {
+  if (!hasClicks && !bonusRunPending && unusedWilsonSourceIds.length === 0) {
     pushCardImplementationEndOfRunnerTurnActions(
       cardImplementationRuntimeDeps,
       state,
@@ -1171,6 +1155,35 @@ export function buildRunnerMainActions(
         ),
       );
     }
+    for (const sourceCardId of unusedWilsonSourceIds) {
+      if (
+        !rovingRunBlocked &&
+        (runStartTaxCredits === 0 ||
+          availableRunnerRunStartCredits(runDurationPaymentHost(state)) >=
+            runStartTaxCredits)
+      ) {
+        actions.push(
+          action(
+            state,
+            "runner",
+            "start_run",
+            `Wilson-Run auf ${server.label}`,
+            sourceCardId,
+            runCosts,
+            {
+              ...runPayload,
+              cardId: sourceCardId,
+              runnerAbility: "wilson_gain_run_action",
+              sourceDefinitionId: definitionFor(state, sourceCardId).id,
+              gainActionsAmount: 1,
+              wilsonRunOnlyAction: true,
+              wilsonRunSourceCardId: sourceCardId,
+              runSpendingCap: 3,
+            },
+          ),
+        );
+      }
+    }
     if (
       bonusRunPending &&
       (!pirateBroadcastNextServerId || pirateBroadcastNextServerId === server.id) &&
@@ -1237,22 +1250,6 @@ export function buildRunnerMainActions(
     actions,
   );
   actions.push(buildRunnerEndTurnAction(state));
-  const wilsonRestrictedActions = Math.max(
-    0,
-    Math.floor(flags.wilsonRunOnlyActionsRemaining ?? 0),
-  );
-  if (wilsonRestrictedActions > 0 && state.runner.clicks <= wilsonRestrictedActions) {
-    return filterActionsForRestrictedExtraActions(
-      state,
-      "runner",
-      actions.filter(
-      (candidate) =>
-        candidate.type === "end_turn" ||
-        (candidate.type === "start_run" &&
-          candidate.payload?.wilsonRunOnlyAction === true),
-      ),
-    );
-  }
   return filterActionsForRestrictedExtraActions(state, "runner", actions);
 }
 

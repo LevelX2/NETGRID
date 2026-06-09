@@ -29,8 +29,12 @@ describe("Runner Wilson run action utilization", () => {
     }
   });
 
-  it("uses Wilson before an already selected safe run", () => {
-    const wilson = wilsonTriggerAction();
+  it("uses Wilson's direct run action before an already selected safe run", () => {
+    const wilson = wilsonRunAction(
+      "runner.wilson.start_run.rd",
+      "rd",
+      "Wilson-Run auf R&D",
+    );
     const runRd = runAction("runner.start_run.rd", "rd");
     const input = runnerInput({
       credits: 5,
@@ -45,7 +49,7 @@ describe("Runner Wilson run action utilization", () => {
 
     expect(decision.actionId).toBe(wilson.actionId);
     expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
-    expect(debugText).toContain("wilson_run_action_preferred");
+    expect(debugText).toContain("wilson_run_only_action_preferred");
     expect(debugText).toContain("wilson_target_server:rd");
     expect(debugText).toContain("wilson_cap_limit:3");
     expect(debugText).not.toMatch(
@@ -54,7 +58,11 @@ describe("Runner Wilson run action utilization", () => {
   });
 
   it("uses Wilson instead of ending after normal Runner actions are spent", () => {
-    const wilson = wilsonTriggerAction();
+    const wilson = wilsonRunAction(
+      "runner.wilson.start_run.hq",
+      "hq",
+      "Wilson-Run auf HQ",
+    );
     const endTurn = endTurnAction();
     const input = runnerInput({
       credits: 5,
@@ -73,10 +81,11 @@ describe("Runner Wilson run action utilization", () => {
 
   it("prefers the Wilson-only run action for the same planned target", () => {
     const normalRun = runAction("runner.start_run.rd", "rd", "Run auf R&D");
-    const wilsonRun = runAction("runner.wilson.start_run.rd", "rd", "Wilson-Run auf R&D", {
-      wilsonRunOnlyAction: true,
-      runSpendingCap: 3,
-    });
+    const wilsonRun = wilsonRunAction(
+      "runner.wilson.start_run.rd",
+      "rd",
+      "Wilson-Run auf R&D",
+    );
     const input = runnerInput({
       credits: 5,
       servers: [server("rd")],
@@ -95,8 +104,34 @@ describe("Runner Wilson run action utilization", () => {
     expect(debugText).not.toMatch(/cardInstances|privatePayload|FullState|decklist|hidden-card/i);
   });
 
+  it("uses the Wilson-only run instead of ending while Wilson remains optional", () => {
+    const wilsonRun = wilsonRunAction(
+      "runner.wilson.start_run.hq",
+      "hq",
+      "Wilson-Run auf HQ",
+    );
+    const endTurn = endTurnAction();
+    const input = runnerInput({
+      credits: 5,
+      servers: [server("hq")],
+      legalActions: [wilsonRun, endTurn],
+    });
+    input.playerView.own.clicks = 1;
+
+    const decision = chooseRunnerAction(input, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(decision.actionId).toBe(wilsonRun.actionId);
+    expect(input.legalActions.some((action) => action.actionId === decision.actionId)).toBe(true);
+  });
+
   it("skips Wilson when visible breaker spending would exceed the cap", () => {
-    const wilson = wilsonTriggerAction();
+    const wilson = wilsonRunAction(
+      "runner.wilson.start_run.rd",
+      "rd",
+      "Wilson-Run auf R&D",
+    );
     const runRd = runAction("runner.start_run.rd", "rd");
     const input = runnerInput({
       credits: 8,
@@ -182,25 +217,6 @@ function runnerInput(params: {
   };
 }
 
-function wilsonTriggerAction(): LegalAction {
-  return legalAction(
-    "runner.trigger_ability.wilson.gain_run_action",
-    "trigger_ability",
-    "Wilson: Run-Aktion erhalten",
-    {
-      source: "wilson-1",
-      costs: [],
-      payload: {
-        cardId: "wilson-1",
-        runnerAbility: "wilson_gain_run_action",
-        sourceDefinitionId: WILSON_DEFINITION_ID,
-        gainActionsAmount: 1,
-        runSpendingCap: 3,
-      },
-    },
-  );
-}
-
 function runAction(
   actionId: string,
   serverId: string,
@@ -209,6 +225,26 @@ function runAction(
 ): LegalAction {
   return legalAction(actionId, "start_run", label, {
     payload: { serverId, ...payload },
+  });
+}
+
+function wilsonRunAction(
+  actionId: string,
+  serverId: string,
+  label: string,
+): LegalAction {
+  return legalAction(actionId, "start_run", label, {
+    source: "wilson-1",
+    payload: {
+      serverId,
+      cardId: "wilson-1",
+      runnerAbility: "wilson_gain_run_action",
+      sourceDefinitionId: WILSON_DEFINITION_ID,
+      gainActionsAmount: 1,
+      wilsonRunOnlyAction: true,
+      wilsonRunSourceCardId: "wilson-1",
+      runSpendingCap: 3,
+    },
   });
 }
 

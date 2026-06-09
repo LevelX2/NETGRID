@@ -192,6 +192,37 @@ describe("start-run-action-execution", () => {
     });
   });
 
+  it("starts a direct Wilson run by gaining and spending its extra action", () => {
+    const gameState = state();
+    const calls: string[] = [];
+    gameState.runner.clicks = 0;
+    gameState.runnerTurnFlags!.wilsonRunOnlyActionsRemaining = 0;
+    const legalAction = action({
+      serverId: "hq",
+      cardId: "wilson_1",
+      wilsonRunOnlyAction: true,
+      wilsonRunSourceCardId: "wilson_1",
+    });
+
+    handleStartRunActionExecution(hostFor(gameState, calls), legalAction);
+
+    expect(gameState.runner.clicks).toBe(0);
+    expect(gameState.runnerTurnFlags?.wilsonUsedSourceIdsThisTurn).toEqual([
+      "wilson_1",
+    ]);
+    expect(gameState.run?.wilsonRunSpendingCap).toEqual({
+      sourceCardInstanceId: "wilson_1",
+      limit: 3,
+      spent: 0,
+    });
+    expect(calls).toEqual([
+      "validate:hq",
+      "spend_click",
+      "start:hq:start_run",
+      "pay_tax:0",
+    ]);
+  });
+
   it("preserves Wilson exhaustion and run-start-tax delegation", () => {
     const gameState = state();
     const calls: string[] = [];
