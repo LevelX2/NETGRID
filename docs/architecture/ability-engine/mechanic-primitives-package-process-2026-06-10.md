@@ -333,6 +333,11 @@ Checks:
 - Rot nach Baseline-Abzug: `corepack pnpm -r --if-present --no-bail test`
   - 5 Pakete grün: `shared`, `catalog`, `decks`, `ai`, `server`.
   - 2 Pakete rot wie auf `main`: `engine`, `web`.
+- Nach Merge von `main` in `codex/mechanic-primitives` erneut geprüft:
+  - Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+  - Rot nach Baseline-Abzug: `corepack pnpm -r --if-present --no-bail test`
+  - 5 Pakete grün: `shared`, `catalog`, `decks`, `ai` mit 1035 Tests, `server`.
+  - 2 Pakete rot wie zuvor und wie auf `main`: `engine`, `web`.
 
 Klassifikation:
 
