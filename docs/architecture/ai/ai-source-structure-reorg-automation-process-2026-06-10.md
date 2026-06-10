@@ -2,13 +2,19 @@
 
 ## Status
 
-`active`
+`complete`
 
 Arbeitsbranch: `codex/ai-source-structure-reorg`
 
 Arbeits-Worktree: `C:\Projekte\NETGRID_AI_SOURCE_STRUCTURE_REORG`
 
 Hauptworkspace: `C:\Projekte\NETGRID`
+
+## Finaler Stand
+
+STRUCT-0 bis STRUCT-7 sind umgesetzt. `packages/ai/src/index.ts` bleibt öffentliche Fassade, während Runtime-Orchestrierung, Action-Semantik-Bausteine, Run-/Risk-Projektionen, Runner-Economy-Posture, TacticalPlan-Typen/Memory, Legacy-Planer und Simulation-Basistypen enger getrennt sind.
+
+Abschlussbericht: `docs/reviews/ai/ai-source-structure-reorg-final-report-2026-06-10.md`
 
 ## Quelle/Vorgabe
 
