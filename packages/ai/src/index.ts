@@ -151,6 +151,10 @@ import type {
   SimulationWorld,
 } from "./simulation/simulation-types";
 import {
+  createSimulationRng,
+  type SimulationRng,
+} from "./simulation/simulation-rng";
+import {
   chooseCorpLegacyBaselineAction,
   chooseRunnerLegacyBaselineAction,
 } from "./legacy/legacy-baseline";
@@ -12124,27 +12128,6 @@ function validateSimulationDeckSupport(config: AiSimulationConfig): string[] {
     }
   }
   return sortedUnique(errors);
-}
-
-type SimulationRng = {
-  readonly seed: string;
-  counter: number;
-  nextInt: (maxExclusive: number) => number;
-};
-
-function createSimulationRng(seed: string): SimulationRng {
-  const rng: SimulationRng = {
-    seed,
-    counter: 0,
-    nextInt: (maxExclusive: number): number => {
-      if (maxExclusive <= 1) return 0;
-      rng.counter += 1;
-      const numeric = Number.parseInt(fnv1a(`${seed}:${rng.counter}`), 16);
-      if (!Number.isFinite(numeric)) return 0;
-      return Math.abs(numeric) % maxExclusive;
-    },
-  };
-  return rng;
 }
 
 // Legacy baseline decision assembly for fallback and reference decisions.
