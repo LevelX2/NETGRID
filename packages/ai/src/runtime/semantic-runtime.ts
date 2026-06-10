@@ -20,40 +20,20 @@ import type {
 } from "../tactical-plans";
 import { semanticRuntimeForcedLegacy } from "../legacy/legacy-runtime-fallback";
 import type { AiDecisionRuntimeOptions } from "./choose-ai-action";
+import type {
+  SemanticRuntimeChoice,
+  SemanticRuntimeCoverageSelectionDebug,
+  SemanticRuntimeRunOnlyActionAdjustment,
+  TacticalPlanMappedChoiceResult,
+} from "./semantic-runtime-types";
 
-export type SemanticRuntimeExclusion = {
-  key: string;
-  label: string;
-  reason: string;
-};
-
-export type SemanticRuntimeChoice = {
-  action: LegalAction;
-  scopeId: string;
-  exclusion?: SemanticRuntimeExclusion;
-  score: number;
-  reasonCode: string;
-  explanation: string;
-  evidence: string[];
-  confidence?: number;
-};
-
-export type TacticalPlanMappedChoiceResult = {
-  choice?: SemanticRuntimeChoice;
-  overrideChoice?: SemanticRuntimeChoice;
-  overriddenMappedChoice?: SemanticRuntimeChoice;
-  scoreGap?: number;
-};
-
-export type SemanticRuntimeCoverageSelectionDebug = {
-  evidence: string[];
-};
-
-export type SemanticRuntimeRunOnlyActionAdjustment = {
-  choice: SemanticRuntimeChoice;
-  rankedChoices: SemanticRuntimeChoice[];
-  memoryAction?: LegalAction;
-};
+export type {
+  SemanticRuntimeChoice,
+  SemanticRuntimeCoverageSelectionDebug,
+  SemanticRuntimeExclusion,
+  SemanticRuntimeRunOnlyActionAdjustment,
+  TacticalPlanMappedChoiceResult,
+} from "./semantic-runtime-types";
 
 export type SemanticRuntimeDependencies = {
   semanticRuntimeChoices: (input: AiDecisionInput) => SemanticRuntimeChoice[];

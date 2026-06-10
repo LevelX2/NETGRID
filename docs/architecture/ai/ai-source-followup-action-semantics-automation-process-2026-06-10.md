@@ -2,7 +2,7 @@
 
 ## Status
 
-`process_prepared`
+`ai_struct_8_complete`
 
 Arbeitsbranch: `codex/ai-source-followup-action-semantics`
 
@@ -285,6 +285,38 @@ Commit: nur falls FINAL-GREEN Fixes oder Reportänderungen erzeugt.
 - Fast-Forward-Merge nach `main` bevorzugt; wenn nicht möglich, Ursache prüfen und nicht blind Merge-Commit erzeugen.
 - Nach Merge im Hauptworkspace `@netgrid/ai test`, `@netgrid/ai typecheck`, `git diff --check` und `git status --short` ausführen.
 - Arbeits-Worktree erst nach erfolgreichem Merge entfernen.
+
+## Paketprotokoll
+
+### AI-FUP-0 abgeschlossen
+
+Commit: `21deb542 docs(ai): document action semantics follow-up preflight`
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/ai test` grün.
+- `corepack pnpm --filter @netgrid/ai typecheck` grün.
+- `git diff --check` grün.
+
+### AI-STRUCT-8 abgeschlossen
+
+Umsetzung:
+
+- Gemeinsame Semantic-Runtime-Typen nach `packages/ai/src/runtime/semantic-runtime-types.ts` extrahiert.
+- Plan-Mapping- und Semantic-Choice-Ranking nach `packages/ai/src/runtime/semantic-choice-ranking.ts` extrahiert.
+- `packages/ai/src/index.ts` behält die Runtime-Verdrahtung, verliert aber den extrahierten Ranking-/Mapping-Block.
+- `packages/ai/src/runtime/semantic-runtime.ts` re-exportiert die Runtime-Typen kompatibel aus der neuen Typdatei.
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/ai test` grün, 51 Testdateien, 1027 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck` grün.
+- `git diff --check` grün.
+
+Scope-Kontrolle:
+
+- Keine Änderung an Engine, LegalAction-Erzeugung, `applyAction`, Replay, StateHash oder Randomness.
+- Legacy-Mode, No-Candidate-Fallback und Public-Export-Kompatibilität bleiben über bestehende Verdrahtung erhalten.
 
 ## Controller-Prompt-Kern
 
