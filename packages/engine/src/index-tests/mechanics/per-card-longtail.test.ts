@@ -1241,6 +1241,13 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
     );
     expect(state.pendingChoice?.side).toBe("corp");
     expect(state.pendingChoice?.visibility).toBe("public");
+    expect(state.pendingChoice?.prompt).toBe(
+      "Forged Activation Orders: ICE 1 in R&D rezzen oder trashen",
+    );
+    expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
+      "ICE 1 in R&D rezzen",
+      "ICE 1 in R&D trashen",
+    ]);
     expect(state.eventLog.at(-1)?.publicPayload).toMatchObject({
       actionType: "resolve_choice",
       choiceKind: "select_cards",
@@ -1322,6 +1329,12 @@ describe("V1.9.22 Per-card Longtail WIP", () => {
       (option) => option.value === trashTargetId,
     );
     trashState = applyChoice(trashState, "runner", trashTargetOption?.id ?? "");
+    expect(trashState.pendingChoice?.prompt).toBe(
+      "Forged Activation Orders: ICE 1 in HQ rezzen oder trashen",
+    );
+    expect(
+      trashState.pendingChoice?.options.map((option) => option.label),
+    ).toEqual(["ICE 1 in HQ trashen"]);
     expect(
       trashState.pendingChoice?.options.map((option) => option.id),
     ).toEqual(["trash_ice"]);

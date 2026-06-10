@@ -483,11 +483,12 @@ export function createHiddenZoneNonSearchRuntime(
     const serverLabel = publicServerLabelForCard(state, selectedId) ?? "Server";
     const icePositionLabel =
       publicIcePositionLabelForCard(state, selectedId) ?? serverLabel;
+    const choiceTargetLabel = icePositionLabel || "ICE";
     state.pendingChoice = {
       choiceId: `v1922_forged_activation_orders_corp_${state.stateVersion + 1}`,
       side: "corp",
       source: `v1922.forged_activation_orders_corp:${selectedId}:${state.stateVersion + 1}`,
-      prompt: "ICE rezzen oder trashen",
+      prompt: `Forged Activation Orders: ${choiceTargetLabel} rezzen oder trashen`,
       kind: "select_option",
       options: [
         ...(!mustInstance(state.cardInstances, selectedId).rezzed &&
@@ -495,16 +496,16 @@ export function createHiddenZoneNonSearchRuntime(
           ? [
               {
                 id: "rez_ice",
-                label: "ICE rezzen",
-                publicLabel: "ICE gerezzt",
+                label: `${choiceTargetLabel} rezzen`,
+                publicLabel: `${choiceTargetLabel} gerezzt`,
                 value: "rez_ice",
               },
             ]
           : []),
         {
           id: "trash_ice",
-          label: "ICE trashen",
-          publicLabel: "ICE getrasht",
+          label: `${choiceTargetLabel} trashen`,
+          publicLabel: `${choiceTargetLabel} getrasht`,
           value: "trash_ice",
         },
       ],

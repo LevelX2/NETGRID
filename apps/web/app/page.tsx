@@ -2142,6 +2142,15 @@ function turnActionHeaderLabel(view: PlayerView, side: Side, activeAiSide?: Side
   return `Zug: ${currentTurnNumberForView(view)}  ${actorLabel} Aktionen`;
 }
 
+function sideStatusLineForView(view: PlayerView, side: Side): string {
+  if (view.pendingChoice?.side === side) return "Entscheidet";
+  const turnSide = turnSideForView(view);
+  if (turnSide !== side) return "Wartet";
+  const choiceOwner = view.pendingChoice?.side;
+  if (choiceOwner && choiceOwner !== side) return `Am Zug · ${sideLabel(choiceOwner)} entscheidet`;
+  return "Am Zug";
+}
+
 function currentTurnNumberForView(view: PlayerView): number {
   let activeSide: Side = "corp";
   let activeTurnNumber = 1;
@@ -11018,7 +11027,7 @@ function LegalActionsPanel({
       <section className={`section setupPanel ${highlighted ? "cueHighlight" : ""}`} data-testid="generic-choice-panel">
         <h2>
           <Check size={16} />
-          Entscheidung
+          {sideLabel(genericChoice.side)}-Entscheidung
         </h2>
         <p className="meta">{genericChoice.prompt}</p>
         <div className="actions setupActions">
@@ -15416,7 +15425,7 @@ function OpponentPanel({
         {side === "runner" ? <Stat value={view.opponent.coreDamage ?? 0} icon={<CoreDamageIcon size={14} />} helpText="Core Damage ist dauerhafter Schaden am Runner. Er senkt die maximale Handkartenzahl und entsteht durch Effekte, die ausdrücklich Core Damage verursachen." /> : null}
       </div>
       <IdentityCounterStrip displays={view.opponent.identity.counterDisplays} side={side} />
-      <p className="meta statusLine">{isTurn ? "Am Zug" : "Wartet"}</p>
+      <p className="meta statusLine">{sideStatusLineForView(view, side)}</p>
     </section>
   );
 }
@@ -15457,7 +15466,7 @@ function PlayerPanel({
         {view.side === "runner" ? <Stat value={view.own.coreDamage ?? 0} icon={<CoreDamageIcon size={14} />} helpText="Core Damage ist dauerhafter Schaden am Runner. Er senkt die maximale Handkartenzahl und entsteht durch Effekte, die ausdrücklich Core Damage verursachen." /> : null}
       </div>
       <IdentityCounterStrip displays={view.own.identity.counterDisplays} side={view.side} />
-      <p className="meta statusLine">{isTurn ? "Am Zug" : "Wartet"}</p>
+      <p className="meta statusLine">{sideStatusLineForView(view, view.side)}</p>
     </section>
   );
 }

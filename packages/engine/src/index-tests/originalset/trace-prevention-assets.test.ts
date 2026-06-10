@@ -696,9 +696,16 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       (option) => option.value === rdIce,
     );
     state = applyChoice(state, "runner", rdOption?.id ?? "");
+    expect(state.pendingChoice?.prompt).toBe(
+      "Forged Activation Orders: ICE 1 in Research and Development rezzen oder trashen",
+    );
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
       "rez_ice",
       "trash_ice",
+    ]);
+    expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
+      "ICE 1 in Research and Development rezzen",
+      "ICE 1 in Research and Development trashen",
     ]);
     const drifted = structuredClone(state);
     removeEverywhere(drifted, rdIce);
