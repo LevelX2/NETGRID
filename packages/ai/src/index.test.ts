@@ -7182,6 +7182,46 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     expect(decision.debug.planKind).toBe("score_now");
   });
 
+  it("downranks passive economy when a safe scoreline is available", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-passive-scoreline-downrank",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 3);
+      },
+    );
+    const score = input.legalActions.find(
+      (action) => action.type === "score_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(score).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!score || !gain)
+      throw new Error("Missing passive scoreline fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const scopedInput = { ...input, legalActions: [score, gain] };
+    const decision = chooseCorpAction(scopedInput, {
+      persistTacticalPlanMemory: false,
+    });
+    const gainAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === gain.actionId,
+    );
+    const passivePenalty = gainAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "corp_passive_scoreline_available",
+    );
+
+    expect(decision.actionId).toBe(score.actionId);
+    expect(passivePenalty?.value).toBeLessThan(0);
+    expect(passivePenalty?.reason).toBe("economy");
+    expect(JSON.stringify(decision)).not.toMatch(/cardInstances|privatePayload/);
+  });
+
   it("keeps legal advance-to-score over economy in a safe remote", () => {
     const input = corpActionPhaseInput(
       "ai-corp-score-terminal-advance",
