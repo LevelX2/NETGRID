@@ -11,6 +11,9 @@ import {
 } from "../packages/ai/src/index";
 
 type PairId = "a" | "b" | "c" | "d";
+type TraceMiningResult = ReturnType<typeof runAiSelfplayTraceMining>;
+type TraceMiningSummary = TraceMiningResult["summaries"][number];
+type TraceMiningActionEntry = TraceMiningSummary["actionSequence"][number];
 
 type TracePairFile = {
   pair: {
@@ -65,6 +68,11 @@ const matrix = pairs.map(({ pair }) => {
       deckHash: corp.metadata.deckHash,
     },
     aggregate: result.aggregate,
+    diagnostics: {
+      unsafeScoreChosenByReason: unsafeScoreChosenReasonsForSummaries(
+        result.summaries,
+      ),
+    },
     summaries: result.summaries.map((summary) => ({
       seed: summary.seed,
       winner: summary.winner,
@@ -107,6 +115,11 @@ const output = {
     maxFindings,
   },
   aggregate: combineAggregates(matrix.map((entry) => entry.aggregate)),
+  diagnostics: {
+    unsafeScoreChosenByReason: mergeCounts(
+      matrix.map((entry) => entry.diagnostics.unsafeScoreChosenByReason),
+    ),
+  },
   matrix,
 };
 
@@ -214,7 +227,7 @@ function git(args: string[]): string {
 }
 
 function combineAggregates(
-  aggregates: Array<ReturnType<typeof runAiSelfplayTraceMining>["aggregate"]>,
+  aggregates: Array<TraceMiningResult["aggregate"]>,
 ) {
   const games = sum(aggregates, (entry) => entry.games);
   const decisions = sum(aggregates, (entry) => entry.decisions);
@@ -251,8 +264,58 @@ function combineAggregates(
   };
 }
 
+function unsafeScoreChosenReasonsForSummaries(
+  summaries: readonly TraceMiningSummary[],
+): Record<string, number> {
+  const reasons: Record<string, number> = {};
+  for (const summary of summaries) {
+    for (const entry of summary.actionSequence) {
+      if (!unsafeScoreChosenEntry(entry)) continue;
+      for (const reason of unsafeScoreChosenReasons(entry)) {
+        reasons[reason] = (reasons[reason] ?? 0) + 1;
+      }
+    }
+  }
+  return reasons;
+}
+
+function unsafeScoreChosenEntry(entry: TraceMiningActionEntry): boolean {
+  return (
+    entry.side === "corp" &&
+    entry.actionType === "score_agenda" &&
+    entry.corpScoreTerminalWindow === true &&
+    entry.corpScoreTerminalWindowRunnerAccessThreatHigh === true &&
+    entry.corpScoreTerminalWindowProtectedRemoteReady !== true
+  );
+}
+
+function unsafeScoreChosenReasons(entry: TraceMiningActionEntry): string[] {
+  const reasons: string[] = [];
+  if (entry.corpScoreTerminalWindowProtectedRemoteReady !== true) {
+    reasons.push("unsafe_score_unprotected_remote");
+    reasons.push("unsafe_score_missing_protected_remote_signal");
+  }
+  if (entry.corpScoreTerminalWindowRunnerAccessThreatHigh === true) {
+    reasons.push("unsafe_score_runner_access_threat_high");
+  }
+  if (entry.corpScoreConversionFixGateBlockedByCredits === true) {
+    reasons.push("unsafe_score_insufficient_rez_reserve");
+  }
+  if (entry.corpScoreConversionFixGateBlockedByCheapContest === true) {
+    reasons.push("unsafe_score_cheap_contest_available");
+  }
+  if (entry.corpScoreConversionFixGateBlockedByHqThreat === true) {
+    reasons.push("unsafe_score_hq_or_rnd_threat");
+  }
+  return reasons.length > 0 ? sortedUnique(reasons) : ["unsafe_score_unknown_higher_priority"];
+}
+
 function sum<T>(entries: readonly T[], value: (entry: T) => number): number {
   return entries.reduce((total, entry) => total + value(entry), 0);
+}
+
+function sortedUnique(values: string[]): string[] {
+  return [...new Set(values)].sort();
 }
 
 function mergeCounts<T extends string>(

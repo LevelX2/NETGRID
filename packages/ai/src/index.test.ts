@@ -7268,6 +7268,73 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     );
   });
 
+  it("suppresses score now doctrine when score is unsafe", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-semantic-doctrine-scoreline-unsafe",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 8;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 3);
+        moveCorpCardToHq(state, "simple_barrier_ice");
+      },
+    );
+    const score = input.legalActions.find(
+      (action) => action.type === "score_agenda",
+    );
+    const protect = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1",
+    );
+    expect(score).toBeDefined();
+    expect(protect).toBeDefined();
+    if (!score || !protect)
+      throw new Error("Missing unsafe scoreline fixture actions");
+
+    const doctrine = corpDoctrineForTest(
+      "semantic-scoreline-unsafe",
+      ["rush"],
+      { score_now: 24 },
+    );
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction(
+      { ...input, ownDeckDoctrine: doctrine, legalActions: [score, protect] },
+      { persistTacticalPlanMemory: false },
+    );
+    const scoreAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === score.actionId,
+    );
+    const doctrineWeight = scoreAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "deck_doctrine_runtime_weight",
+    );
+    const suppressed = scoreAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "deck_doctrine_runtime_weight_suppressed",
+    );
+    const safetyGate = scoreAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "corp_scoreline_safety_gate_blocks_doctrine",
+    );
+
+    expect(input.legalActions.map((action) => action.actionId)).toContain(
+      score.actionId,
+    );
+    expect(doctrineWeight).toBeUndefined();
+    expect(String(suppressed?.reason)).toContain(
+      "corp_scoreline_safety_gate_blocks_doctrine:true",
+    );
+    expect(String(suppressed?.reason)).toContain(
+      "score_now_doctrine_suppressed:true",
+    );
+    expect(safetyGate?.value).toBeLessThan(0);
+    expect(String(safetyGate?.reason)).toMatch(
+      /unsafe_score_(runner_access_threat_high|unprotected_remote|cheap_contest_available)/,
+    );
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
   it("keeps legal advance-to-score over economy in a safe remote", () => {
     const input = corpActionPhaseInput(
       "ai-corp-score-terminal-advance",

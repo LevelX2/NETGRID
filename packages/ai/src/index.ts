@@ -9121,6 +9121,86 @@ function semanticRuntimeCorpDoctrineWeight(
   return semanticRuntimeDoctrinePlanWeightComponent(input, planKey);
 }
 
+function semanticRuntimeCorpScoreNowDoctrineWeight(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  const doctrineWeight = semanticRuntimeCorpDoctrineWeight(input, "score_now");
+  if (!doctrineWeight || doctrineWeight.value <= 0) return doctrineWeight;
+  const gate = semanticRuntimeCorpScoreNowSafetyGate(input, action);
+  if (gate.allowed) return doctrineWeight;
+  return {
+    key: "deck_doctrine_runtime_weight_suppressed",
+    label: "DeckDoctrine-Runtime-Gewicht unterdrückt",
+    value: 0,
+    reason: [
+      "corp_scoreline_safety_gate_blocks_doctrine:true",
+      "score_now_doctrine_suppressed:true",
+      ...gate.evidence,
+    ].join("|"),
+  };
+}
+
+function semanticRuntimeCorpScoreNowSafetyGate(
+  input: AiDecisionInput,
+  action: LegalAction,
+): { allowed: boolean; evidence: string[] } {
+  if (
+    input.side !== "corp" ||
+    action.side !== "corp" ||
+    action.type !== "score_agenda"
+  ) {
+    return {
+      allowed: false,
+      evidence: ["unsafe_score_unknown_higher_priority"],
+    };
+  }
+  const terminal = assessCorpScoreTerminalWindow(input);
+  const scoreLegal = terminal.scoreActionIds.includes(action.actionId);
+  const reasons = semanticRuntimeCorpUnsafeScoreReasons(terminal, scoreLegal);
+  return {
+    allowed: reasons.length === 0,
+    evidence:
+      reasons.length === 0
+        ? [
+            "corp_scoreline_safety_gate_passed:true",
+            `protected_remote_ready:${terminal.protectedRemoteIds.length > 0}`,
+            `runner_access_threat_high:${terminal.runnerAccessThreatHigh}`,
+          ]
+        : reasons,
+  };
+}
+
+function semanticRuntimeCorpUnsafeScoreReasons(
+  terminal: ReturnType<typeof assessCorpScoreTerminalWindow>,
+  scoreLegal: boolean,
+): string[] {
+  const reasons: string[] = [];
+  if (!terminal.terminalWindow || !scoreLegal) {
+    reasons.push("unsafe_score_unknown_higher_priority");
+  }
+  if (terminal.blockedByCredits) {
+    reasons.push("unsafe_score_insufficient_rez_reserve");
+  }
+  if (terminal.blockedByCheapContest) {
+    reasons.push("unsafe_score_cheap_contest_available");
+  }
+  if (terminal.blockedByRunnerContest) {
+    reasons.push("unsafe_score_runner_access_threat_high");
+  }
+  if (terminal.blockedByHqThreat) {
+    reasons.push("unsafe_score_hq_or_rnd_threat");
+  }
+  if (
+    terminal.runnerAccessThreatHigh &&
+    terminal.protectedRemoteIds.length === 0
+  ) {
+    reasons.push("unsafe_score_unprotected_remote");
+    reasons.push("unsafe_score_missing_protected_remote_signal");
+  }
+  return sortedUnique(reasons);
+}
+
 function semanticRuntimeDoctrinePlanWeightComponent(
   input: AiDecisionInput,
   planKey: string,
@@ -9165,11 +9245,20 @@ function semanticRuntimeCorpScoreComponents(
       value: 1200,
       reason: "score_agenda",
     });
-    const doctrineWeight = semanticRuntimeCorpDoctrineWeight(
+    const doctrineWeight = semanticRuntimeCorpScoreNowDoctrineWeight(
       input,
-      "score_now",
+      action,
     );
     if (doctrineWeight) components.push(doctrineWeight);
+    const safetyGate = semanticRuntimeCorpScoreNowSafetyGate(input, action);
+    if (!safetyGate.allowed) {
+      components.push({
+        key: "corp_scoreline_safety_gate_blocks_doctrine",
+        label: "Scoreline-Safety",
+        value: -900,
+        reason: safetyGate.evidence.join("|"),
+      });
+    }
   }
   if (action.type === "advance_card") {
     components.push({
