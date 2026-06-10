@@ -92,7 +92,15 @@ export type AiSelfplayTraceMiningResult = {
     illegalActions: number;
     replayFailures: number;
     actionLimitReached: number;
+    allRedactionSafe: boolean;
     redactionSafe: boolean;
+    averageGameLength: number;
+    corpAgendaScores: number;
+    runnerAgendaSteals: number;
+    corpFlatlines: number;
+    scoreWindowMissed: number;
+    unsafeScoreChosen: number;
+    passiveActionWithScoreLineAvailable: number;
   };
 };
 

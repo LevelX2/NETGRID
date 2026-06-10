@@ -262,6 +262,16 @@ describe("benchmark report formatting", () => {
     expect(result.aggregate.games).toBe(1);
     expect(result.aggregate.decisions).toBeGreaterThan(0);
     expect(result.aggregate.redactionSafe).toBe(true);
+    expect(result.aggregate.allRedactionSafe).toBe(true);
+    expect(result.aggregate.averageGameLength).toBeGreaterThan(0);
+    expect(result.aggregate.corpAgendaScores).toBeGreaterThanOrEqual(0);
+    expect(result.aggregate.runnerAgendaSteals).toBeGreaterThanOrEqual(0);
+    expect(result.aggregate.corpFlatlines).toBeGreaterThanOrEqual(0);
+    expect(result.aggregate.scoreWindowMissed).toBeGreaterThanOrEqual(0);
+    expect(result.aggregate.unsafeScoreChosen).toBeGreaterThanOrEqual(0);
+    expect(
+      result.aggregate.passiveActionWithScoreLineAvailable,
+    ).toBeGreaterThanOrEqual(0);
     expect(
       result.findings.some((finding) =>
         finding.detectorIds.includes("action_limit_reached"),
@@ -270,6 +280,11 @@ describe("benchmark report formatting", () => {
     expect(report).toContain("# AI Selfplay Trace Mining Report");
     expect(report).toContain("## Top Findings");
     expect(report).toContain("Gate: diagnostic_only");
+    expect(report).toContain("| allRedactionSafe | 1 |");
+    expect(report).toContain("| averageGameLength |");
+    expect(report).toContain("| scoreWindowMissed |");
+    expect(report).toContain("| unsafeScoreChosen |");
+    expect(report).toContain("| passiveActionWithScoreLineAvailable |");
     expect(JSON.stringify({ result, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
     );

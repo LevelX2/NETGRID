@@ -2527,6 +2527,7 @@ export type AiSimulationConfig = {
 export type AiSimulationSummary = {
   seed: string;
   winner: Exclude<GameState["winner"], null> | "action_limit_reached";
+  gameEndReason?: GameState["gameEndReason"];
   actions: number;
   turns: number;
   finalAgendaPoints: { runner: number; corp: number };
@@ -10619,6 +10620,7 @@ export function simulateAiGame(
   return {
     seed,
     winner: state.winner ?? "action_limit_reached",
+    ...(state.gameEndReason ? { gameEndReason: state.gameEndReason } : {}),
     actions: actionSequence.length,
     turns: state.eventLog.filter((event) => event.type === "end_turn").length,
     finalAgendaPoints: {
@@ -11282,6 +11284,11 @@ export function runAiSelfplayTraceMining(
     config.detectorIds && config.detectorIds.length > 0
       ? sortedUniqueSelfplayDetectors(config.detectorIds)
       : DEFAULT_SELFPLAY_TRACE_MINING_DETECTORS;
+  const progression = summarizeMatchProgressionMetrics(summaries);
+  const allRedactionSafe = isSelfplayTraceRedactionSafe({
+    findings,
+    topFindings,
+  });
   const aggregate = {
     games: summaries.length,
     decisions: summaries.reduce((sum, summary) => sum + summary.actions, 0),
@@ -11296,10 +11303,19 @@ export function runAiSelfplayTraceMining(
     actionLimitReached: summaries.filter(
       (summary) => summary.winner === "action_limit_reached",
     ).length,
-    redactionSafe: isSelfplayTraceRedactionSafe({
-      findings,
-      topFindings,
-    }),
+    allRedactionSafe,
+    redactionSafe: allRedactionSafe,
+    averageGameLength: progression.averageActions,
+    corpAgendaScores: progression.corpScores,
+    runnerAgendaSteals: progression.runnerSteals,
+    corpFlatlines: summaries.filter(
+      (summary) =>
+        summary.winner === "corp" && summary.gameEndReason === "flatline",
+    ).length,
+    scoreWindowMissed: progression.missedScoreWindows,
+    unsafeScoreChosen: countUnsafeScoreChosen(summaries),
+    passiveActionWithScoreLineAvailable:
+      countPassiveActionWithScoreLineAvailable(summaries),
   };
   return {
     version: "ai-selfplay-trace-mining-v1",
@@ -11326,6 +11342,55 @@ export function runAiSelfplayTraceMining(
     topFindings,
     aggregate,
   };
+}
+
+function countUnsafeScoreChosen(summaries: AiSimulationSummary[]): number {
+  return summaries.reduce(
+    (sum, summary) =>
+      sum +
+      summary.actionSequence.filter(
+        (entry) =>
+          entry.side === "corp" &&
+          entry.actionType === "score_agenda" &&
+          entry.corpScoreTerminalWindow === true &&
+          entry.corpScoreTerminalWindowRunnerAccessThreatHigh === true &&
+          entry.corpScoreTerminalWindowProtectedRemoteReady !== true,
+      ).length,
+    0,
+  );
+}
+
+function countPassiveActionWithScoreLineAvailable(
+  summaries: AiSimulationSummary[],
+): number {
+  return summaries.reduce(
+    (sum, summary) =>
+      sum +
+      summary.actionSequence.filter(
+        (entry) =>
+          entry.side === "corp" &&
+          entry.corpScoreTerminalWindow === true &&
+          entry.corpScoreTerminalSkipped === true &&
+          isPassiveCorpScoreLineSkip(entry),
+      ).length,
+    0,
+  );
+}
+
+function isPassiveCorpScoreLineSkip(
+  entry: AiSimulationSummary["actionSequence"][number],
+): boolean {
+  return (
+    entry.corpScoreTerminalSkippedForEconomy === true ||
+    entry.corpScoreTerminalSkippedForDraw === true ||
+    entry.corpScoreTerminalSkippedForProtection === true ||
+    entry.corpScoreTerminalSkippedForInstallIce === true ||
+    entry.corpScoreTerminalSkippedForInstallAssetOrUpgrade === true ||
+    entry.corpScoreTerminalSkippedForHqProtection === true ||
+    entry.corpScoreTerminalSkippedForRndProtection === true ||
+    entry.corpScoreTerminalSkippedForRemotePortfolio === true ||
+    entry.corpScoreTerminalSkippedForUnknownHigherPriority === true
+  );
 }
 
 function runMatchProgressionBenchmarkSlot(
