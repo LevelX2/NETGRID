@@ -297,3 +297,10 @@ Grün:
 Bekannter unabhängiger Check-Befund:
 
 - Die vollständige `src/card-implementations/coverage.test.ts` läuft bis auf den bestehenden Proteus-Manifest-Drift `manifestAiSupportDrift: 154` grün. Dieser Drift betrifft die `ai_supported`-Manifestparität aller Proteus-Karten und ist nicht durch den Helper-Refaktor verursacht.
+- Der vollständige Engine-Testlauf `corepack pnpm --filter @netgrid/engine test` ist am Branch-HEAD rot mit 8 Failures in 5 Dateien. Ein Diagnose-Worktree auf dem Merge-Base-Commit `2d0b2577538aa408bb6cc94324d8660ec71c60ed` zeigt dieselben roten Dateien und dieselbe Failure-Verteilung:
+  - `src/card-implementations/coverage.test.ts`: Proteus `manifestAiSupportDrift: 154`
+  - `src/game/view/player-view-projection.test.ts`: mixed remote root order / breach queue `undefined`
+  - `src/index-tests/originalset/agenda-scorearea-recurring.test.ts`: Corolla Speed Chip restricted Killer credit Erwartung
+  - `src/index-tests/originalset/hidden-access-run-regressions.test.ts`: 3 Missing-Legal-Action-Fälle für Virus Test Site, Setup!, TRAP!
+  - `src/index-tests/releases/mechanic-package-smokes-v16-v199.test.ts`: 2 Missing-Legal-Action-Fälle für Bizarre Encryption Scheme und Chimera
+- Diese roten Finaltests sind damit als vorhandener Baseline-Restpunkt klassifiziert. Die paketbezogenen Typechecks, Descriptor-Tests, Coverage-Untertests und Trace-Regressionen für diesen Refaktor sind grün.
