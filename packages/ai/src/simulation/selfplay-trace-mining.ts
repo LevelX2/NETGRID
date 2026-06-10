@@ -92,7 +92,15 @@ export type AiSelfplayTraceMiningResult = {
     illegalActions: number;
     replayFailures: number;
     actionLimitReached: number;
+    allRedactionSafe: boolean;
     redactionSafe: boolean;
+    averageGameLength: number;
+    corpAgendaScores: number;
+    runnerAgendaSteals: number;
+    corpFlatlines: number;
+    scoreWindowMissed: number;
+    unsafeScoreChosen: number;
+    passiveActionWithScoreLineAvailable: number;
   };
 };
 
@@ -518,7 +526,7 @@ function selfplayEntryDetectorFindings(
   }
   if (
     enabled.has("semantic_override_suspicious") &&
-    text.includes("semantic_runtime_actual_differs_from_legacy_debug")
+    selfplaySemanticOverrideSuspicious(entry, text)
   ) {
     findings.push(
       selfplayEntryFinding(
@@ -785,7 +793,8 @@ function selfplayPlanActionMismatch(
     entry.actionType !== "trash_accessed_card" &&
     entry.actionType !== "steal_agenda" &&
     !text.includes("funding_need:true") &&
-    !text.includes("reserve")
+    !text.includes("reserve") &&
+    !selfplayPlanMismatchHasKnownExplanation(text)
   )
     return true;
   if (
@@ -804,6 +813,48 @@ function selfplayPlanActionMismatch(
   )
     return true;
   return false;
+}
+
+function selfplaySemanticOverrideSuspicious(
+  entry: AiSimulationSummary["actionSequence"][number],
+  text: string,
+): boolean {
+  if (!text.includes("semantic_runtime_actual_differs_from_legacy_debug"))
+    return false;
+  if (selfplayPlanMismatchHasKnownExplanation(text)) return false;
+  if (selfplayReactiveSemanticOverride(entry.actionType)) return false;
+  return true;
+}
+
+function selfplayPlanMismatchHasKnownExplanation(text: string): boolean {
+  return (
+    text.includes("tactical_plan_mapping_overridden:true") ||
+    text.includes("selected_by_plan_mapping") ||
+    text.includes("runner_recent_same_server_runs") ||
+    text.includes("runner_repeated_low_value_central_run") ||
+    text.includes("runner_pressure_ready_false_positive:true") ||
+    text.includes("runner_phase_exit_blocked_by_cost:true") ||
+    text.includes("runner_phase_exit_blocked_by_target_value:true") ||
+    text.includes("self_damage_guard") ||
+    text.includes("program_sacrifice_penalty") ||
+    text.includes("runner_loan_liability")
+  );
+}
+
+function selfplayReactiveSemanticOverride(
+  actionType: AiSimulationSummary["actionSequence"][number]["actionType"],
+): boolean {
+  return (
+    actionType === "resolve_choice" ||
+    actionType === "access_card" ||
+    actionType === "steal_agenda" ||
+    actionType === "trash_accessed_card" ||
+    actionType === "decline_trash" ||
+    actionType === "break_subroutine" ||
+    actionType === "pump_breaker" ||
+    actionType === "continue_run" ||
+    actionType === "jack_out"
+  );
 }
 
 function selfplayEntryText(

@@ -3001,6 +3001,12 @@ describe("V1.2.3 Mechanic Unlock Card Release 1", () => {
     expect(correct.pendingChoice?.source).toContain("p3_58.social_engineering_guess");
     correct = applyChoice(correct, "corp", "guess_3");
     expect(correct.runner.credits).toBe(1);
+    expect(correct.pendingChoice).toBeUndefined();
+    expect(correct.activeSide).toBe("runner");
+    expect(
+      getLegalActions(correct, "runner").some((action) => action.type === "end_turn"),
+    ).toBe(true);
+    expect(getLegalActions(correct, "corp")).toHaveLength(0);
     expect(correct.eventLog.at(-1)?.publicPayload).toMatchObject({
       sourceDefinitionId: "onr_v1_111_social-engineering",
       hiddenZoneBarrier: true,

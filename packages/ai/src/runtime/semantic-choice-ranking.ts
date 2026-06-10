@@ -1,4 +1,8 @@
-import type { AiDecisionInput, LegalAction } from "@netgrid/shared";
+import type {
+  AiDecisionInput,
+  LegalAction,
+  PublicGameEvent,
+} from "@netgrid/shared";
 import type { ActionSemanticCandidate } from "../action-semantic-candidate";
 import {
   mapPlanStepToLegalActions,
@@ -34,6 +38,7 @@ export function bestSemanticRuntimeChoiceForTacticalPlanOverride(
 }
 
 export function tacticalPlanMappedChoice(
+  input: AiDecisionInput,
   choices: readonly SemanticRuntimeChoice[],
   mapping: PlanStepMappingResult | undefined,
   overrideChoice: SemanticRuntimeChoice | undefined,
@@ -72,6 +77,12 @@ export function tacticalPlanMappedChoice(
       mappedChoice.score <= 0 && overrideChoice.score > 0;
     if (
       mappedNonPositiveAgainstPositive ||
+      tacticalPlanRepeatedRunMappingShouldYield(
+        input,
+        mappedChoice,
+        overrideChoice,
+        scoreGap,
+      ) ||
       scoreGap > PLAN_MAPPED_CHOICE_MAX_SCORE_GAP
     ) {
       return {
@@ -82,6 +93,20 @@ export function tacticalPlanMappedChoice(
     }
   }
   return { choice: mappedChoice };
+}
+
+function tacticalPlanRepeatedRunMappingShouldYield(
+  input: AiDecisionInput,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+): boolean {
+  if (scoreGap <= 0) return false;
+  if (mappedChoice.action.type !== "start_run") return false;
+  if (overrideChoice.action.type === "start_run") return false;
+  const serverId = semanticRuntimeServerId(mappedChoice.action);
+  if (!serverId) return false;
+  return semanticRuntimeRecentRunnerStartRunsOnServer(input, serverId) > 0;
 }
 
 export function tacticalPlanMappingOverrideEvidence(
@@ -200,6 +225,81 @@ function tacticalPlanRuntimeWithoutSelectedMapping(
 function semanticRuntimeServerId(action: LegalAction): string | undefined {
   const serverId = action.payload?.serverId;
   return typeof serverId === "string" ? serverId : undefined;
+}
+
+function semanticRuntimeRecentRunnerStartRunsOnServer(
+  input: AiDecisionInput,
+  serverId: string,
+): number {
+  let count = 0;
+  const history = mergedAiPublicHistory(input);
+  let seenRunnerActions = 0;
+  for (let index = history.length - 1; index >= 0; index -= 1) {
+    const event = history[index]!;
+    const actionType =
+      typeof event.publicPayload.actionType === "string"
+        ? event.publicPayload.actionType
+        : event.type;
+    if (input.playerView.stateVersion - aiEventVersion(event) > 18) break;
+    if (semanticRuntimeRunnerRunProgressEvent(actionType)) break;
+    const actor =
+      typeof event.publicPayload.actor === "string"
+        ? event.publicPayload.actor
+        : undefined;
+    if (actor !== "runner" || actionType !== "start_run") continue;
+    seenRunnerActions += 1;
+    const target = aiServerIdFromEvent(event);
+    if (target === serverId) count += 1;
+    if (seenRunnerActions >= 8) break;
+  }
+  return count;
+}
+
+function mergedAiPublicHistory(input: AiDecisionInput): PublicGameEvent[] {
+  const byId = new Map<string, PublicGameEvent>();
+  for (const event of [...input.playerView.publicEvents, ...input.eventTail]) {
+    byId.set(event.eventId, event);
+  }
+  return [...byId.values()].sort(
+    (left, right) => aiEventVersion(left) - aiEventVersion(right),
+  );
+}
+
+function semanticRuntimeRunnerRunProgressEvent(actionType: string): boolean {
+  return (
+    actionType === "steal_agenda" ||
+    actionType === "score_agenda" ||
+    actionType === "trash_accessed_card" ||
+    actionType === "advance_card" ||
+    actionType === "install_card"
+  );
+}
+
+function aiServerIdFromEvent(event: PublicGameEvent): string | undefined {
+  const payload = event.publicPayload;
+  if (typeof payload.serverId === "string") return payload.serverId;
+  if (typeof payload.server === "string") return payload.server;
+  if (typeof payload.targetServerId === "string") return payload.targetServerId;
+  if (typeof payload.attackedServerId === "string")
+    return payload.attackedServerId;
+  const label =
+    typeof payload.serverLabel === "string"
+      ? payload.serverLabel
+      : typeof payload.serverName === "string"
+        ? payload.serverName
+        : undefined;
+  if (!label) return undefined;
+  const normalized = label.toLowerCase();
+  if (normalized === "r&d" || normalized === "rd") return "rd";
+  if (normalized === "hq" || normalized === "headquarters") return "hq";
+  if (normalized === "archives" || normalized === "archive") return "archives";
+  return undefined;
+}
+
+function aiEventVersion(event: PublicGameEvent): number {
+  return typeof event.stateVersionAfter === "number"
+    ? event.stateVersionAfter
+    : 0;
 }
 
 function roundScore(value: number): number {

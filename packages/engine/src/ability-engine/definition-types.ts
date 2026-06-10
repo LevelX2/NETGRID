@@ -385,17 +385,21 @@ export type CardSuccessfulRunFollowupImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "hidden_resource_successful_hq_run_corp_lose_credits";
+      kind: "successful_run_before_access_effect";
       timing: "immediately_after_successful_run_before_access";
-      amount: number;
-      cost: { kind: "tap_source" };
+      server: "hq";
+      source: "installed_hidden_runner_resource";
+      cost: { kind: "reveal_and_tap_source" };
+      effect: { kind: "corp_lose_credits"; amount: number };
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "hidden_resource_successful_remote_run_trash_fort";
+      kind: "successful_run_before_access_effect";
       timing: "immediately_after_successful_run_before_access";
-      include: "root_and_ice";
-      cost: { kind: "tap_source" };
+      server: "remote";
+      source: "installed_hidden_runner_resource";
+      cost: { kind: "reveal_and_tap_source" };
+      effect: { kind: "trash_remote_fort"; include: "root_and_ice" };
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
@@ -824,7 +828,12 @@ export type CardScoredAgendaImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "ice_transmutation_rezzed_ice_modifier";
+      kind: "select_rezzed_ice_mark_modifier";
+      target: "rezzed_installed_ice";
+      counterType: Extract<CounterType, "mark">;
+      counterAmount: 1;
+      strengthBonusPerCounter: 1;
+      duplicateEachPrintedSubroutinePerCounter: true;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
@@ -839,9 +848,17 @@ export type CardScoredAgendaImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "data_fort_reclamation";
-      temporaryCredits: 10;
-      maxHqCards: 4;
+      kind: "score_install_hq_cards_into_new_remote_then_rez";
+      sourceZone: "hq";
+      targetServer: "new_remote";
+      allowedCards: "corp_installable";
+      maxCards: number;
+      temporaryCredits: {
+        amount: number;
+        usableFor: "rez_installed_cards_from_sequence";
+        returnUnused: true;
+      };
+      optionalRez: true;
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 

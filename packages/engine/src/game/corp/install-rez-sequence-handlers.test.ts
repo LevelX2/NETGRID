@@ -18,6 +18,21 @@ import {
   type CorpInstallRezSequenceHandlerHost,
 } from "./install-rez-sequence-handlers";
 
+const DATA_FORT_SEQUENCE = {
+  kind: "score_install_hq_cards_into_new_remote_then_rez",
+  sourceZone: "hq",
+  targetServer: "new_remote",
+  allowedCards: "corp_installable",
+  maxCards: 4,
+  temporaryCredits: {
+    amount: 10,
+    usableFor: "rez_installed_cards_from_sequence",
+    returnUnused: true,
+  },
+  optionalRez: true,
+  visibility: "hidden_info_barrier",
+} as const;
+
 function definition(
   id: string,
   type: CardDefinition["type"],
@@ -87,13 +102,14 @@ type MakeHostInput = {
   playerAction?: PlayerAction;
   definitions?: Record<string, CardDefinition>;
   scoredKinds?: Record<string, string>;
+  scoredAgendas?: Record<string, unknown>;
   rezRootCalls?: CardInstanceId[];
 };
 
 function makeHost(input: MakeHostInput = {}): CorpInstallRezSequenceHandlerHost {
   const definitions: Record<string, CardDefinition> = {
     data_fort_agenda: definition(
-      "data_fort_reclamation",
+      "score_install_hq_cards_into_new_remote_then_rez",
       "agenda",
       "Data Fort Reclamation",
     ),
@@ -129,6 +145,14 @@ function makeHost(input: MakeHostInput = {}): CorpInstallRezSequenceHandlerHost 
     ]),
   );
   const legalAction = { side: "corp", payload: {} } as LegalAction;
+  const scoredAgendas: Record<string, unknown> = {
+    data_fort_agenda: DATA_FORT_SEQUENCE,
+    priority_agenda: {
+      kind: "score_rez_installed_ice_at_no_cost",
+      visibility: "hidden_info_barrier",
+    },
+    ...input.scoredAgendas,
+  };
   const state = {
     stateVersion: 7,
     pendingChoice: input.pendingChoice,
@@ -154,7 +178,13 @@ function makeHost(input: MakeHostInput = {}): CorpInstallRezSequenceHandlerHost 
         if (!found) throw new Error(`missing instance ${cardId}`);
         return found;
       },
-      scoredAgendaKind: (cardId) => input.scoredKinds?.[cardId],
+      scoredAgendaKind: (cardId) =>
+        input.scoredKinds?.[cardId] ??
+        (scoredAgendas[cardId] as { kind?: string } | undefined)?.kind,
+      scoredAgendaForCard: (cardId) =>
+        scoredAgendas[cardId] as ReturnType<
+          CorpInstallRezSequenceHandlerHost["cards"]["scoredAgendaForCard"]
+        >,
       isCorpInstallableCardType: (cardDefinition) =>
         cardDefinition.type === "ice" ||
         cardDefinition.type === "asset" ||
@@ -274,7 +304,9 @@ describe("corp install rez sequence handlers", () => {
     const host = makeHost({
       hq: ["asset_1", "ice_1", "upgrade_1"] as CardInstanceId[],
       scoreArea: ["data_fort_agenda"] as CardInstanceId[],
-      scoredKinds: { data_fort_agenda: "data_fort_reclamation" },
+      scoredKinds: {
+        data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
+      },
       pendingChoice: selectCardsChoice(
         "v1922.data_fort_reclamation:data_fort_agenda:8",
         ["asset_1", "ice_1", "upgrade_1"] as CardInstanceId[],
@@ -310,7 +342,9 @@ describe("corp install rez sequence handlers", () => {
     const overLimitHost = makeHost({
       hq: ["asset_1", "ice_1", "upgrade_1"] as CardInstanceId[],
       scoreArea: ["data_fort_agenda"] as CardInstanceId[],
-      scoredKinds: { data_fort_agenda: "data_fort_reclamation" },
+      scoredKinds: {
+        data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
+      },
       pendingChoice: selectCardsChoice(
         "v1922.data_fort_reclamation:data_fort_agenda:8",
         ["asset_1", "ice_1", "upgrade_1", "extra_1", "extra_2"] as CardInstanceId[],
@@ -332,7 +366,9 @@ describe("corp install rez sequence handlers", () => {
       hq: ["asset_1"] as CardInstanceId[],
       rd: ["ice_1"] as CardInstanceId[],
       scoreArea: ["data_fort_agenda"] as CardInstanceId[],
-      scoredKinds: { data_fort_agenda: "data_fort_reclamation" },
+      scoredKinds: {
+        data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
+      },
       pendingChoice: selectCardsChoice(
         "v1922.data_fort_reclamation:data_fort_agenda:8",
         ["ice_1"] as CardInstanceId[],
@@ -357,9 +393,11 @@ describe("corp install rez sequence handlers", () => {
       hq: [],
       scoreArea: ["data_fort_agenda"] as CardInstanceId[],
       servers: [server],
-      scoredKinds: { data_fort_agenda: "data_fort_reclamation" },
+      scoredKinds: {
+        data_fort_agenda: "score_install_hq_cards_into_new_remote_then_rez",
+      },
       pendingChoice: selectCardsChoice(
-        "v1922.data_fort_reclamation_rez:data_fort_agenda:remote_1:5:8",
+        "v1922.data_fort_reclamation_rez:data_fort_agenda:remote_1:10:8",
         ["ice_1", "asset_1"] as CardInstanceId[],
       ),
       playerAction: playerAction(["card_ice_1", "card_asset_1"]),
@@ -370,7 +408,7 @@ describe("corp install rez sequence handlers", () => {
 
     expect(result.handled).toBe(true);
     expect(result.rezzedCardIds).toEqual(["ice_1", "asset_1"]);
-    expect(host.state.corp.credits).toBe(1);
+    expect(host.state.corp.credits).toBe(5);
     expect(rezRootCalls).toEqual(["asset_1"]);
     expect(host.legalAction.payload).toMatchObject({
       hiddenZoneAction: "v1922_data_fort_reclamation_rez_sequence",
@@ -379,10 +417,10 @@ describe("corp install rez sequence handlers", () => {
       rezzedIceCount: 1,
       rezzedRootCount: 1,
       temporaryCreditsProvided: 10,
-      temporaryCreditsSpent: 5,
-      temporaryCreditsRemaining: 0,
-      corpCreditsSpent: 4,
-      corpCreditsAfter: 1,
+      temporaryCreditsSpent: 9,
+      temporaryCreditsRemaining: 1,
+      corpCreditsSpent: 0,
+      corpCreditsAfter: 5,
     });
   });
 

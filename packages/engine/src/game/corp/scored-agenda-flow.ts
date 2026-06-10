@@ -80,7 +80,7 @@ export type ScoredAgendaFlowHost = {
     drawCorpCard: () => void;
   };
   choices: {
-    startDataFortReclamation: (cardId: CardInstanceId) => void;
+  startDataFortReclamation: (cardId: CardInstanceId) => void;
     startPriorityRequisition: (cardId: CardInstanceId) => void;
     startCorporateDownsizing: (
       cardId: CardInstanceId,
@@ -363,11 +363,16 @@ function startScoreTimeChoices(
 ): void {
   const legalAction = host.legalAction;
   if (!legalAction) return;
-  if (scoredAgenda?.kind === "data_fort_reclamation") {
+  if (scoredAgenda?.kind === "score_install_hq_cards_into_new_remote_then_rez") {
     host.choices.startDataFortReclamation(cardId);
   }
-  if (scoredAgenda?.kind === "ice_transmutation_rezzed_ice_modifier") {
-    startIceTransmutationChoice(host, cardId, legalAction);
+  if (scoredAgenda?.kind === "select_rezzed_ice_mark_modifier") {
+    startScoredRezzedIceMarkModifierChoice(
+      host,
+      cardId,
+      legalAction,
+      scoredAgenda,
+    );
   }
   if (scoredAgenda?.kind === "score_rez_installed_ice_at_no_cost") {
     host.choices.startPriorityRequisition(cardId);
@@ -733,11 +738,23 @@ function iceTransmutationTargetIds(host: ScoredAgendaFlowHost): CardInstanceId[]
     .sort();
 }
 
-function startIceTransmutationChoice(
+function startScoredRezzedIceMarkModifierChoice(
   host: ScoredAgendaFlowHost,
   agendaId: CardInstanceId,
   legalAction: LegalAction,
+  scoredAgenda: Extract<
+    CardScoredAgendaImplementation,
+    { kind: "select_rezzed_ice_mark_modifier" }
+  >,
 ): void {
+  if (
+    scoredAgenda.target !== "rezzed_installed_ice" ||
+    scoredAgenda.counterType !== "mark" ||
+    scoredAgenda.counterAmount !== 1 ||
+    scoredAgenda.strengthBonusPerCounter !== 1 ||
+    scoredAgenda.duplicateEachPrintedSubroutinePerCounter !== true
+  )
+    throw new Error("Der Scored-ICE-Mark-Modifier-Vertrag ist ungueltig.");
   const targets = iceTransmutationTargetIds(host);
   if (targets.length === 0) {
     legalAction.payload = {
@@ -787,7 +804,7 @@ function resolveIceTransmutationChoice(host: ScoredAgendaFlowHost): void {
     !host.state.corp.scoreArea.includes(agendaId as CardInstanceId) ||
     host.cards.scoredAgendaForDefinition(
       host.cards.definitionFor(agendaId as CardInstanceId),
-    )?.kind !== "ice_transmutation_rezzed_ice_modifier"
+    )?.kind !== "select_rezzed_ice_mark_modifier"
   )
     throw new Error("Ice Transmutation ist nicht gescored.");
   const selectedIds = selectedChoiceCardIds(choice, playerAction);
@@ -797,18 +814,35 @@ function resolveIceTransmutationChoice(host: ScoredAgendaFlowHost): void {
   if (!targetIceId) throw new Error("Ice-Transmutation-Ziel fehlt.");
   if (!iceTransmutationTargetIds(host).includes(targetIceId))
     throw new Error("Ice Transmutation darf nur rezzed ICE wählen.");
-  host.counters.addCardCounter(targetIceId, "mark", 1);
+  const scoredAgenda = host.cards.scoredAgendaForDefinition(
+    host.cards.definitionFor(agendaId as CardInstanceId),
+  );
+  if (
+    scoredAgenda?.kind !== "select_rezzed_ice_mark_modifier" ||
+    scoredAgenda.target !== "rezzed_installed_ice" ||
+    scoredAgenda.counterType !== "mark" ||
+    scoredAgenda.counterAmount !== 1 ||
+    scoredAgenda.strengthBonusPerCounter !== 1 ||
+    scoredAgenda.duplicateEachPrintedSubroutinePerCounter !== true
+  )
+    throw new Error("Der Scored-ICE-Mark-Modifier-Vertrag passt nicht.");
+  host.counters.addCardCounter(
+    targetIceId,
+    scoredAgenda.counterType,
+    scoredAgenda.counterAmount,
+  );
   delete host.state.pendingChoice;
+  const markCount = host.counters.cardCounter(targetIceId, scoredAgenda.counterType);
   legalAction.payload = {
     ...(legalAction.payload ?? {}),
     agendaAbility: "v1920_ice_transmutation",
     sourceAgendaId: agendaId,
     targetIceId,
     targetIceDefinitionId: host.cards.definitionFor(targetIceId).id,
-    strengthBonus: host.counters.cardCounter(targetIceId, "mark"),
+    strengthBonus: markCount * scoredAgenda.strengthBonusPerCounter,
     duplicatedSubroutineCount:
       (host.cards.definitionFor(targetIceId).subroutines?.length ?? 0) *
-      host.counters.cardCounter(targetIceId, "mark"),
+      markCount,
   };
 }
 

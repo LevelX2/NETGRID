@@ -5,9 +5,17 @@ import type { CardImplementationDefinition } from "../../../types";
 export const dataFortReclamationImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_197_data-fort-reclamation",
   scoredAgenda: {
-    kind: "data_fort_reclamation",
-    temporaryCredits: 10,
-    maxHqCards: 4,
+    kind: "score_install_hq_cards_into_new_remote_then_rez",
+    sourceZone: "hq",
+    targetServer: "new_remote",
+    allowedCards: "corp_installable",
+    maxCards: 4,
+    temporaryCredits: {
+      amount: 10,
+      usableFor: "rez_installed_cards_from_sequence",
+      returnUnused: true,
+    },
+    optionalRez: true,
     visibility: "hidden_info_barrier",
   },
 };

@@ -657,6 +657,7 @@ function resolveSocialEngineeringChoice(
       );
       delete host.state.socialEngineeringSecret;
       delete host.state.pendingChoice;
+      host.state.activeSide = "runner";
       const payload = {
         sourceDefinitionId: host.constants.runAccessPressureEventCardId,
         socialEngineeringGuessCorrect: true,
@@ -721,6 +722,7 @@ function startSocialEngineeringTargetChoice(
   if (slots.length === 0) {
     delete host.state.socialEngineeringSecret;
     delete host.state.pendingChoice;
+    host.state.activeSide = "runner";
     host.legalAction.payload = {
       ...(host.legalAction.payload ?? {}),
       sourceDefinitionId: host.constants.runAccessPressureEventCardId,

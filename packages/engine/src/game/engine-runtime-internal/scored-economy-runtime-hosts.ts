@@ -761,6 +761,8 @@ export function createScoredEconomyRuntimeHosts(deps: RuntimeDeps, runtime: Reco
         mustInstance: (cardId) => mustInstance(state.cardInstances, cardId),
         scoredAgendaKind: (cardId) =>
           scoredAgendaKindForDefinition(definitionFor(state, cardId)),
+        scoredAgendaForCard: (cardId) =>
+          scoredAgendaImplementationForDefinition(definitionFor(state, cardId)),
         isCorpInstallableCardType: (definition) =>
           isCorpInstallableCardType(definition),
         canInstallCorpRootCardInServer: (definition, server) =>

@@ -14167,40 +14167,40 @@
             "scope": "corp",
             "resource": "credits",
             "amount": 10,
-            "source": "implementation.scoredAgenda.data_fort_reclamation"
+            "source": "implementation.scoredAgenda.score_install_hq_cards_into_new_remote_then_rez"
           },
           {
             "confidence": "high",
             "kind": "install",
             "timing": "when_scored",
             "scope": "remote",
-            "source": "implementation.scoredAgenda.data_fort_reclamation.install"
+            "source": "implementation.scoredAgenda.score_install_hq_cards_into_new_remote_then_rez.install"
           },
           {
             "confidence": "high",
             "kind": "remote_build",
             "timing": "when_scored",
             "scope": "remote",
-            "source": "implementation.scoredAgenda.data_fort_reclamation"
+            "source": "implementation.scoredAgenda.score_install_hq_cards_into_new_remote_then_rez"
           },
           {
             "confidence": "high",
             "kind": "rez",
             "timing": "when_scored",
             "scope": "remote",
-            "source": "implementation.scoredAgenda.data_fort_reclamation.rez"
+            "source": "implementation.scoredAgenda.score_install_hq_cards_into_new_remote_then_rez.rez"
           }
         ],
         "conditions": [
           {
             "confidence": "high",
             "kind": "requires_hq_agenda",
-            "source": "implementation.scoredAgenda.data_fort_reclamation"
+            "source": "implementation.scoredAgenda.score_install_hq_cards_into_new_remote_then_rez"
           },
           {
             "confidence": "high",
             "kind": "requires_score_window",
-            "source": "implementation.scoredAgenda.data_fort_reclamation"
+            "source": "implementation.scoredAgenda.score_install_hq_cards_into_new_remote_then_rez"
           },
           {
             "confidence": "high",
@@ -15025,7 +15025,7 @@
             "timing": "when_scored",
             "scope": "ice",
             "resource": "subroutines",
-            "source": "implementation.scoredAgenda.ice_transmutation_rezzed_ice_modifier"
+            "source": "implementation.scoredAgenda.select_rezzed_ice_mark_modifier"
           },
           {
             "confidence": "high",
@@ -15034,14 +15034,14 @@
             "scope": "ice",
             "resource": "strength",
             "amount": 1,
-            "source": "implementation.scoredAgenda.ice_transmutation_rezzed_ice_modifier"
+            "source": "implementation.scoredAgenda.select_rezzed_ice_mark_modifier"
           }
         ],
         "conditions": [
           {
             "confidence": "high",
             "kind": "requires_rezzed_ice",
-            "source": "implementation.scoredAgenda.ice_transmutation_rezzed_ice_modifier"
+            "source": "implementation.scoredAgenda.select_rezzed_ice_mark_modifier"
           },
           {
             "confidence": "high",

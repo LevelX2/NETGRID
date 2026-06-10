@@ -1014,40 +1014,53 @@ function deriveFromImplementation(card, implementationText, hint) {
     );
   }
 
-  if (/kind:\s*"data_fort_reclamation"/.test(implementationText)) {
+  if (
+    /kind:\s*"score_install_hq_cards_into_new_remote_then_rez"/.test(
+      implementationText,
+    )
+  ) {
+    const temporaryCreditAmount =
+      propertyNumber(implementationText, "temporaryCredits") ??
+      propertyNumber(implementationText, "amount");
     addEffect(facts, {
       kind: "economy",
       timing: "when_scored",
       scope: "corp",
       resource: "credits",
-      amount: propertyNumber(implementationText, "temporaryCredits"),
-      source: "implementation.scoredAgenda.data_fort_reclamation",
+      amount: temporaryCreditAmount,
+      source:
+        "implementation.scoredAgenda.score_install_hq_cards_into_new_remote_then_rez",
     });
     addEffect(facts, {
       kind: "remote_build",
       timing: "when_scored",
       scope: "remote",
-      source: "implementation.scoredAgenda.data_fort_reclamation",
+      source:
+        "implementation.scoredAgenda.score_install_hq_cards_into_new_remote_then_rez",
     });
     addEffect(facts, {
       kind: "install",
       timing: "when_scored",
       scope: "remote",
-      source: "implementation.scoredAgenda.data_fort_reclamation.install",
+      source:
+        "implementation.scoredAgenda.score_install_hq_cards_into_new_remote_then_rez.install",
     });
     addEffect(facts, {
       kind: "rez",
       timing: "when_scored",
       scope: "remote",
-      source: "implementation.scoredAgenda.data_fort_reclamation.rez",
+      source:
+        "implementation.scoredAgenda.score_install_hq_cards_into_new_remote_then_rez.rez",
     });
     addCondition(facts, {
       kind: "requires_hq_agenda",
-      source: "implementation.scoredAgenda.data_fort_reclamation",
+      source:
+        "implementation.scoredAgenda.score_install_hq_cards_into_new_remote_then_rez",
     });
     addCondition(facts, {
       kind: "requires_score_window",
-      source: "implementation.scoredAgenda.data_fort_reclamation",
+      source:
+        "implementation.scoredAgenda.score_install_hq_cards_into_new_remote_then_rez",
     });
     facts.derivationNotes.push(
       "Data Fort Reclamation temporary credits and HQ card choices are board/legal-action context; generated facts do not include hidden HQ card identities.",
@@ -1148,15 +1161,14 @@ function deriveFromImplementation(card, implementationText, hint) {
   }
 
   if (
-    /kind:\s*"ice_transmutation_rezzed_ice_modifier"/.test(implementationText)
+    /kind:\s*"select_rezzed_ice_mark_modifier"/.test(implementationText)
   ) {
     addEffect(facts, {
       kind: "global_modifier",
       timing: "when_scored",
       scope: "ice",
       resource: "subroutines",
-      source:
-        "implementation.scoredAgenda.ice_transmutation_rezzed_ice_modifier",
+      source: "implementation.scoredAgenda.select_rezzed_ice_mark_modifier",
     });
     addEffect(facts, {
       kind: "remote_protection",
@@ -1164,13 +1176,11 @@ function deriveFromImplementation(card, implementationText, hint) {
       scope: "ice",
       resource: "strength",
       amount: 1,
-      source:
-        "implementation.scoredAgenda.ice_transmutation_rezzed_ice_modifier",
+      source: "implementation.scoredAgenda.select_rezzed_ice_mark_modifier",
     });
     addCondition(facts, {
       kind: "requires_rezzed_ice",
-      source:
-        "implementation.scoredAgenda.ice_transmutation_rezzed_ice_modifier",
+      source: "implementation.scoredAgenda.select_rezzed_ice_mark_modifier",
     });
   }
 

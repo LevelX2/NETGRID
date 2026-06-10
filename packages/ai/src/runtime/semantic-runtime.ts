@@ -36,7 +36,10 @@ export type {
 } from "./semantic-runtime-types";
 
 export type SemanticRuntimeDependencies = {
-  semanticRuntimeChoices: (input: AiDecisionInput) => SemanticRuntimeChoice[];
+  semanticRuntimeChoices: (
+    input: AiDecisionInput,
+    actionSemanticCandidates?: readonly ActionSemanticCandidate[],
+  ) => SemanticRuntimeChoice[];
   semanticRuntimeChoiceIsReactive: (choice: SemanticRuntimeChoice) => boolean;
   buildActionSemanticCandidates: (input: {
     legalActions: readonly LegalAction[];
@@ -88,6 +91,7 @@ export type SemanticRuntimeDependencies = {
     planRuntime: TacticalPlanRuntimeResult,
   ) => SemanticRuntimeChoice | undefined;
   tacticalPlanMappedChoice: (
+    input: AiDecisionInput,
     choices: readonly SemanticRuntimeChoice[],
     selectedMapping: TacticalPlanRuntimeResult["selectedMapping"],
     bestPlanOverrideChoice: SemanticRuntimeChoice | undefined,
@@ -159,12 +163,15 @@ export function chooseSemanticRuntimeAction(
       ],
     };
   }
-  const choices = dependencies.semanticRuntimeChoices(input);
   const actionSemanticCandidates = dependencies.buildActionSemanticCandidates({
     legalActions: input.legalActions,
     observerSide: input.side,
     stateVersion: input.playerView.stateVersion,
   });
+  const choices = dependencies.semanticRuntimeChoices(
+    input,
+    actionSemanticCandidates,
+  );
   const reactiveChoice =
     choices.find(
       (candidate) =>
@@ -247,6 +254,7 @@ export function chooseSemanticRuntimeAction(
       planRuntime,
     );
   const mappedChoice = dependencies.tacticalPlanMappedChoice(
+    input,
     choices,
     planRuntime.selectedMapping,
     bestPlanOverrideChoice,
