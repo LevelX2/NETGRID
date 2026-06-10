@@ -1212,6 +1212,8 @@ describe("tactical plan model", () => {
         schemaVersion: "runner-run-target-evaluation-v1",
         targetServerId: "remote_2",
         targetKind: "remote",
+        accessServerId: "remote_2",
+        accessTargetKind: "remote",
         actionId: remoteRun.actionId,
         accessPayoff: "trash_affordable",
         knownAccessState: "known_payoff",

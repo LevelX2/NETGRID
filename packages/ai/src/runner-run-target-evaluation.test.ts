@@ -23,6 +23,9 @@ const WILSON_DEFINITION_ID = "onr_v1_187_wilson-weeflerunner-apprentice";
 const ALL_HANDS_DEFINITION_ID = "onr_proteus_101_all-hands";
 const RUSH_HOUR_DEFINITION_ID = "onr_proteus_122_rush-hour";
 const ALL_NIGHTER_DEFINITION_ID = "onr_v1_076_all-nighter";
+const SHREDDER_UPLINK_PROTOCOL_DEFINITION_ID =
+  "onr_v1_062_shredder-uplink-protocol";
+const KRASH_DEFINITION_ID = "onr_v1_039_krash";
 
 describe("Runner RunTargetEvaluation + EconomyPosture", () => {
   it("recommends an unknown reachable R&D run", () => {
@@ -532,6 +535,67 @@ describe("Runner RunTargetEvaluation + EconomyPosture", () => {
       recommendation: "find_breaker_first",
     });
     expect(evaluation.evidence).toContain("installed_run_payoff:hq:multiaccess");
+  });
+
+  it("evaluates Shredder as an Archives path with HQ access payoff", () => {
+    const input = aiInput({
+      credits: 4,
+      servers: [
+        server("archives", { ice: [wallOfStaticIce("archives-wall")] }),
+        server("hq"),
+      ],
+      legalActions: [shredderAbilityAction()],
+      rig: [
+        visibleCard("shredder-installed", {
+          definitionId: SHREDDER_UPLINK_PROTOCOL_DEFINITION_ID,
+          title: "Shredder Uplink Protocol",
+          type: "program",
+        }),
+        visibleCard("krash-installed", {
+          definitionId: KRASH_DEFINITION_ID,
+          title: "Krash",
+          type: "program",
+          subtypes: ["icebreaker"],
+        }),
+      ],
+    });
+
+    const [evaluation] = evaluateRunnerRunTargets({
+      input,
+      beliefState: beliefWithKnownHq(["simple_agenda"], {
+        handCount: 1,
+        unknownRestCount: 0,
+      }),
+    });
+    if (!evaluation) throw new Error("Expected Shredder evaluation");
+
+    expect(evaluation).toMatchObject({
+      targetServerId: "archives",
+      targetKind: "archives",
+      accessServerId: "hq",
+      accessTargetKind: "hq",
+      accessPayoff: "agenda",
+      knownAccessState: "known_payoff",
+      pathPassability: "blocked_unpayable",
+      pathCost: 6,
+      recommendation: "gain_credits_first",
+      runActionProjection: {
+        sourceKind: "program_ability",
+        sourceCardId: SHREDDER_UPLINK_PROTOCOL_DEFINITION_ID,
+        targetServerId: "archives",
+        accessServerId: "hq",
+      },
+    });
+    expect(evaluation.evidence).toEqual(
+      expect.arrayContaining([
+        "access_server:hq",
+        "access_target_kind:hq",
+        "central_memory_payoff:agenda",
+      ]),
+    );
+    expect(evaluation.runActionProjection.evidence).toEqual(
+      expect.arrayContaining(["run_action_projection_access_server:hq"]),
+    );
   });
 
   it("suppresses HQ when every HQ card is known and has no current access payoff", () => {
@@ -1543,6 +1607,22 @@ function runEventAction(
   };
 }
 
+function shredderAbilityAction(actionId = "shredder-archives-hq"): LegalAction {
+  return {
+    actionId,
+    side: "runner",
+    type: "activated_card_ability",
+    label: "Shredder Uplink Protocol: Run auf Archive",
+    source: "shredder-installed",
+    timingPoint: "runner_action.main",
+    costs: [{ clicks: 1 }],
+    targetRequirements: [],
+    visibility: "public",
+    expiresAtStateVersion: 2,
+    payload: { cardId: "shredder-installed" },
+  };
+}
+
 function gainCreditAction(actionId: string): LegalAction {
   return {
     actionId,
@@ -1613,6 +1693,29 @@ function expensiveBarrierIce(instanceId: string): VisibleCard {
       iceDefinitionId: "simple_barrier_ice",
       effectiveStrength: 6,
       subroutines: [{ id: "expensive_barrier_ice_etr", type: "end_the_run" }],
+    },
+  });
+}
+
+function wallOfStaticIce(instanceId: string): VisibleCard {
+  return visibleCard(instanceId, {
+    definitionId: "onr_v1_279_wall-of-static",
+    title: "Wall of Static",
+    type: "ice",
+    subtypes: ["wall"],
+    known: true,
+    rezzed: true,
+    strength: 2,
+    effectiveRunQuote: {
+      iceInstanceId: instanceId,
+      iceDefinitionId: "onr_v1_279_wall-of-static",
+      effectiveStrength: 2,
+      subroutines: [
+        {
+          id: `${instanceId}_etr`,
+          type: "end_the_run",
+        },
+      ],
     },
   });
 }

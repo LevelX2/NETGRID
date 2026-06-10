@@ -4879,11 +4879,13 @@ function semanticRuntimeActionExclusion(
   const multiRunEventExclusion =
     semanticRuntimeRunnerMultiRunEventExclusion(input, action);
   if (multiRunEventExclusion) return multiRunEventExclusion;
-  const serverId = semanticRuntimeServerId(action);
-  const runTargetEvaluation =
-    serverId !== undefined
-      ? semanticRuntimeRunnerRunTargetEvaluation(input, action, serverId)
-      : undefined;
+  const runTargetEvaluation = semanticRuntimeRunnerRunTargetEvaluationForAction(
+    input,
+    action,
+  );
+  const serverId =
+    runTargetEvaluation?.targetServerId ?? semanticRuntimeServerId(action);
+  const accessServerId = runTargetEvaluation?.accessServerId ?? serverId;
   if (input.side !== "runner" || !serverId || !runTargetEvaluation)
     return undefined;
   const blinkRunExclusion = semanticRuntimeRunnerBlinkRunExclusion(
@@ -4892,12 +4894,12 @@ function semanticRuntimeActionExclusion(
   );
   if (blinkRunExclusion) return blinkRunExclusion;
   const knownCentralPayoffExclusion =
-    semanticRuntimeKnownCentralPayoffExclusion(input, serverId);
+    semanticRuntimeKnownCentralPayoffExclusion(input, accessServerId);
   if (knownCentralPayoffExclusion) return knownCentralPayoffExclusion;
   const server = input.playerView.servers.find(
     (entry) => entry.id === serverId,
   );
-  if (serverId === "archives") {
+  if (serverId === "archives" && accessServerId === "archives") {
     const archivesExclusion = semanticRuntimeRunnerArchivesExclusion(
       input,
       server,
@@ -8045,16 +8047,46 @@ function semanticRuntimeRunnerRunTargetEvaluation(
   return runnerMultiRunTargetEvaluation(input, action, targetServerId);
 }
 
+function semanticRuntimeRunnerRunTargetEvaluationForAction(
+  input: AiDecisionInput,
+  action: LegalAction,
+): RunnerRunTargetEvaluation | undefined {
+  if (input.side !== "runner" || action.side !== "runner") return undefined;
+  const targetServerId = semanticRuntimeServerId(action);
+  if (targetServerId) {
+    return semanticRuntimeRunnerRunTargetEvaluation(
+      input,
+      action,
+      targetServerId,
+    );
+  }
+  const scopedInput: AiDecisionInput = {
+    ...input,
+    legalActions: [action],
+    playerView: {
+      ...input.playerView,
+      legalActions: [action],
+    },
+  };
+  const deckCapabilities = deckCapabilitiesForInput(input);
+  const strategicIntent = runnerStrategicIntentForInput(
+    input,
+    deckCapabilities,
+  );
+  return evaluateRunnerRunTargets({
+    input: scopedInput,
+    deckCapabilities,
+    strategicIntent,
+  })[0];
+}
+
 function semanticRuntimeRunnerRunTargetGuidanceComponent(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
-  const targetServerId = semanticRuntimeServerId(action);
-  if (!targetServerId) return undefined;
-  const evaluation = semanticRuntimeRunnerRunTargetEvaluation(
+  const evaluation = semanticRuntimeRunnerRunTargetEvaluationForAction(
     input,
     action,
-    targetServerId,
   );
   if (!evaluation) return undefined;
   const value = semanticRuntimeRunTargetGuidanceValue(evaluation);
@@ -8065,6 +8097,7 @@ function semanticRuntimeRunnerRunTargetGuidanceComponent(
     value,
     reason: [
       `target:${evaluation.targetServerId}`,
+      `access:${evaluation.accessServerId}`,
       `recommendation:${evaluation.recommendation}`,
       `payoff:${evaluation.accessPayoff}`,
       `known_access:${evaluation.knownAccessState}`,
@@ -8599,11 +8632,9 @@ function semanticRuntimeRunnerArchivesComponents(
   action: LegalAction,
   server: AiDecisionInput["playerView"]["servers"][number] | undefined,
 ): AiDecisionScoreComponent[] {
-  if (action.payload?.serverId !== "archives") return [];
-  const targetServerId = semanticRuntimeServerId(action);
   if (
-    !targetServerId ||
-    !semanticRuntimeRunnerRunTargetEvaluation(input, action, targetServerId)
+    semanticRuntimeRunnerRunTargetEvaluationForAction(input, action)
+      ?.accessServerId !== "archives"
   )
     return [];
   const root = server?.root ?? [];
