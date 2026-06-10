@@ -120,6 +120,7 @@ import {
   chooseAiActionFromSides,
   type AiDecisionRuntimeOptions,
 } from "./runtime/choose-ai-action";
+import { chooseSemanticRuntimeAction as chooseSemanticRuntimeActionFromRuntime } from "./runtime/semantic-runtime";
 import {
   DEFAULT_SELFPLAY_TRACE_MINING_DETECTORS,
   countSelfplayFindingsByDetector,
@@ -3416,217 +3417,32 @@ function chooseSemanticRuntimeAction(
   legacyDecision: AiDecision,
   options: AiDecisionRuntimeOptions,
 ): AiDecision {
-  if (semanticRuntimeForcedLegacy()) {
-    return {
-      ...legacyDecision,
-      evidence: [
-        ...(legacyDecision.evidence ?? []),
-        "semantic_runtime_force_legacy",
-      ],
-    };
-  }
-  const choices = semanticRuntimeChoices(input);
-  const actionSemanticCandidates = buildActionSemanticCandidates({
-    legalActions: input.legalActions,
-    observerSide: input.side,
-    stateVersion: input.playerView.stateVersion,
+  return chooseSemanticRuntimeActionFromRuntime(input, legacyDecision, options, {
+    semanticRuntimeChoices,
+    semanticRuntimeChoiceIsReactive,
+    buildActionSemanticCandidates,
+    getTacticalPlanMemorySnapshot,
+    deckCapabilitiesForInput,
+    runnerStrategicIntentForInput,
+    evaluateRunnerHandDevelopment,
+    buildRunnerEconomyPosture,
+    evaluateRunnerRunTargets,
+    buildRunnerTacticalGoals,
+    evaluateTacticalPlans,
+    bestSemanticRuntimeChoice,
+    bestSemanticRuntimeChoiceForTacticalPlanOverride,
+    tacticalPlanMappedChoice,
+    runnerSelfDamageImmediateWinSemanticChoice,
+    semanticRuntimeChoiceWithEvidence,
+    tacticalPlanMappingOverrideEvidence,
+    tacticalPlanRuntimeAlignedToChoice,
+    runnerRunOnlyActionAdjustedSemanticChoice,
+    semanticRuntimeCoverageSelectionDebug,
+    selectedChoicesForDecision,
+    rememberTacticalPlanRuntime,
+    scrubEvidence,
+    semanticRuntimeDecisionDebug,
   });
-  const reactiveChoice =
-    choices.find(
-      (candidate) =>
-        !candidate.exclusion &&
-        candidate.score > 0 &&
-        semanticRuntimeChoiceIsReactive(candidate),
-    ) ??
-    choices.find(
-      (candidate) =>
-        !candidate.exclusion && semanticRuntimeChoiceIsReactive(candidate),
-    );
-  const previousPlan = getTacticalPlanMemorySnapshot(input);
-  const deckCapabilities = deckCapabilitiesForInput(input);
-  const runnerStrategicIntent =
-    input.side === "runner"
-      ? runnerStrategicIntentForInput(input, deckCapabilities)
-      : undefined;
-  const runnerHandDevelopmentEvaluations = runnerStrategicIntent
-    ? evaluateRunnerHandDevelopment({
-        input,
-        strategicIntent: runnerStrategicIntent,
-        deckCapabilities,
-        actionCandidates: actionSemanticCandidates,
-      })
-    : undefined;
-  const runnerEconomyPosture = runnerStrategicIntent
-    ? buildRunnerEconomyPosture({
-        input,
-        strategicIntent: runnerStrategicIntent,
-        deckCapabilities,
-        ...(runnerHandDevelopmentEvaluations
-          ? { handDevelopmentEvaluations: runnerHandDevelopmentEvaluations }
-          : {}),
-      })
-    : undefined;
-  const runnerRunTargetEvaluations = runnerStrategicIntent
-    ? evaluateRunnerRunTargets({
-        input,
-        strategicIntent: runnerStrategicIntent,
-        deckCapabilities,
-        actionCandidates: actionSemanticCandidates,
-        ...(runnerHandDevelopmentEvaluations
-          ? { handDevelopmentEvaluations: runnerHandDevelopmentEvaluations }
-          : {}),
-      })
-    : undefined;
-  const runnerTacticalGoals = runnerStrategicIntent
-    ? buildRunnerTacticalGoals({
-        input,
-        strategicIntent: runnerStrategicIntent,
-        ...(runnerRunTargetEvaluations
-          ? { runTargetEvaluations: runnerRunTargetEvaluations }
-          : {}),
-        ...(runnerEconomyPosture
-          ? { economyPosture: runnerEconomyPosture }
-          : {}),
-        deckCapabilities,
-      })
-    : undefined;
-  const planRuntime = reactiveChoice
-    ? emptyTacticalPlanRuntimeResult()
-    : evaluateTacticalPlans({
-        input,
-        ...(previousPlan ? { previousPlan } : {}),
-        deckCapabilities,
-        ...(runnerStrategicIntent ? { runnerStrategicIntent } : {}),
-        ...(runnerRunTargetEvaluations ? { runnerRunTargetEvaluations } : {}),
-        ...(runnerEconomyPosture ? { runnerEconomyPosture } : {}),
-        ...(runnerHandDevelopmentEvaluations
-          ? { runnerHandDevelopmentEvaluations }
-          : {}),
-        ...(runnerTacticalGoals ? { runnerTacticalGoals } : {}),
-        candidates: actionSemanticCandidates,
-      });
-  const bestChoice = bestSemanticRuntimeChoice(choices);
-  const bestPlanOverrideChoice =
-    bestSemanticRuntimeChoiceForTacticalPlanOverride(choices, planRuntime);
-  const mappedChoice = tacticalPlanMappedChoice(
-    choices,
-    planRuntime.selectedMapping,
-    bestPlanOverrideChoice,
-  );
-  const planMappingOverridden = Boolean(
-    !reactiveChoice &&
-    mappedChoice.overriddenMappedChoice &&
-    mappedChoice.overrideChoice,
-  );
-  const selfDamageImmediateWinChoice =
-    runnerSelfDamageImmediateWinSemanticChoice(input, choices);
-  const initialChoice =
-    reactiveChoice ??
-    selfDamageImmediateWinChoice ??
-    mappedChoice.choice ??
-    (planMappingOverridden && mappedChoice.overrideChoice
-      ? semanticRuntimeChoiceWithEvidence(mappedChoice.overrideChoice, {
-          evidence: tacticalPlanMappingOverrideEvidence(mappedChoice),
-        })
-      : bestChoice);
-  if (!initialChoice) {
-    return {
-      ...legacyDecision,
-      evidence: [
-        ...(legacyDecision.evidence ?? []),
-        "semantic_runtime_no_non_excluded_legal_action",
-      ],
-    };
-  }
-  const effectivePlanRuntime = planMappingOverridden
-    ? tacticalPlanRuntimeAlignedToChoice(
-        planRuntime,
-        mappedChoice.overrideChoice,
-        actionSemanticCandidates,
-        input,
-      )
-    : planRuntime;
-  const runOnlyActionAdjusted = runnerRunOnlyActionAdjustedSemanticChoice(
-    input,
-    choices,
-    initialChoice,
-  );
-  const choice = runOnlyActionAdjusted.choice;
-  const coverageSelectionDebug = semanticRuntimeCoverageSelectionDebug(
-    input,
-    choice.action,
-    effectivePlanRuntime,
-  );
-  const legacyActionType = input.legalActions.find(
-    (action) => action.actionId === legacyDecision.actionId,
-  )?.type;
-  const selectedChoices = selectedChoicesForDecision(input, choice.action);
-  const persistTacticalPlanMemory = options.persistTacticalPlanMemory !== false;
-  const updatedPlanMemory = persistTacticalPlanMemory
-    ? rememberTacticalPlanRuntime(
-        input,
-        effectivePlanRuntime,
-        runOnlyActionAdjusted.memoryAction ?? choice.action,
-      )
-    : undefined;
-  return {
-    actionId: choice.action.actionId,
-    ...(selectedChoices ? { selectedChoices } : {}),
-    reasonCode: choice.reasonCode,
-    explanation: choice.explanation,
-    consideredActionIds: [],
-    fallbackUsed: false,
-    ...(choice.confidence !== undefined
-      ? { confidence: choice.confidence }
-      : {}),
-    evidence: scrubEvidence([
-      ...choice.evidence,
-      ...(coverageSelectionDebug?.evidence ?? []),
-      `semantic_runtime_default:true`,
-      `semantic_runtime_scope:${choice.scopeId}`,
-      ...(effectivePlanRuntime.selectedPlan
-        ? [
-            `tactical_plan:${effectivePlanRuntime.selectedPlan.planId}`,
-            `tactical_plan_type:${effectivePlanRuntime.selectedPlan.type}`,
-          ]
-        : []),
-      ...(effectivePlanRuntime.selectedStep
-        ? [`tactical_step:${effectivePlanRuntime.selectedStep.kind}`]
-        : []),
-      ...(updatedPlanMemory
-        ? [
-            `tactical_plan_memory_status:${updatedPlanMemory.status}`,
-            `tactical_plan_progression:${updatedPlanMemory.planProgressionReason}`,
-          ]
-        : []),
-      ...(!persistTacticalPlanMemory && effectivePlanRuntime.selectedPlan
-        ? ["tactical_plan_memory_preview_only:true"]
-        : []),
-      `legacy_reference_reason:${legacyDecision.reasonCode}`,
-      ...(legacyActionType
-        ? [`legacy_reference_action_type:${legacyActionType}`]
-        : []),
-    ]),
-    decisionDebug: semanticRuntimeDecisionDebug(
-      input,
-      choice,
-      runOnlyActionAdjusted.rankedChoices,
-      legacyDecision,
-      legacyActionType,
-      effectivePlanRuntime,
-    ),
-    timeoutUsed: Boolean(legacyDecision.timeoutUsed),
-    profileId: input.profileId,
-    difficulty: input.difficulty,
-    reason: choice.reasonCode,
-  };
-}
-
-function emptyTacticalPlanRuntimeResult(): TacticalPlanRuntimeResult {
-  return {
-    planAlternatives: [],
-    blockedPlans: [],
-  };
 }
 
 function bestSemanticRuntimeChoice(
@@ -4011,10 +3827,6 @@ function semanticRuntimeActionTypeIsReactive(
     type === "jack_out" ||
     false
   );
-}
-
-function semanticRuntimeForcedLegacy(): boolean {
-  return process.env.NETGRID_SEMANTIC_AI_RUNTIME === "legacy";
 }
 
 function semanticRuntimeChoices(
