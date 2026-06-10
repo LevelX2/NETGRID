@@ -1,6 +1,6 @@
 # CardImplementation Follow-up Blocks Process 2026-06-10
 
-Status: Aktiv
+Status: Finale Verify vor Integration abgeschlossen
 Arbeitsbranch: `codex/cardimplementation-followup-blocks`
 Worktree: `C:\Projekte\NETGRID_CARDIMPL_FOLLOWUP_BLOCKS`
 
@@ -404,3 +404,25 @@ Checks:
 - Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/hidden-zone-identity.test.ts -t "Corporate Downsizing"`
 - Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/per-card-longtail.test.ts -t "Security Purge"`
 - Grün: `git diff --check`
+
+### F8 Verify vor Integration
+
+Grün:
+
+- `corepack pnpm --filter @netgrid/engine typecheck`
+- `corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/definition-descriptors.test.ts src/game/hidden-zone/search-choice-builders.test.ts src/game/hidden-zone/search-choice-handlers.test.ts src/game/hidden-zone/search-choice-resolvers.test.ts src/game/corp/scored-agenda-abilities.test.ts src/game/corp/scored-agenda-flow.test.ts src/game/corp/install-rez-sequence-handlers.test.ts src/game/hidden-zone/corp-zone-choice-handlers.test.ts src/game/abilities/run-fort-trigger-execution.test.ts`
+- `git diff --check`
+
+Voller Engine-Test:
+
+- Befehl: `corepack pnpm --filter @netgrid/engine test`
+- Status: rot mit der bekannten Baseline-Verteilung aus dem vorherigen Prozess.
+- Ergebnis: 5 Testdateien rot, 8 Tests rot, 152 Testdateien grün, 1441 Tests grün.
+
+Bekannte Baseline-Failures:
+
+- `src/card-implementations/coverage.test.ts`: Proteus `manifestAiSupportDrift: 154`
+- `src/game/view/player-view-projection.test.ts`: mixed remote root order / breach queue `undefined`
+- `src/index-tests/originalset/agenda-scorearea-recurring.test.ts`: Corolla Speed Chip restricted Killer credit Erwartung
+- `src/index-tests/originalset/hidden-access-run-regressions.test.ts`: 3 Missing-Legal-Action-Fälle für Virus Test Site, Setup!, TRAP!
+- `src/index-tests/releases/mechanic-package-smokes-v16-v199.test.ts`: 2 Missing-Legal-Action-Fälle für Bizarre Encryption Scheme und Chimera
