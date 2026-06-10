@@ -544,7 +544,7 @@ describe("formatChronicleEvent", () => {
       "runner"
     );
 
-    expect(item.title).toBe("Die Korp hat 2 Agenden aus HQ durch Corporate Negotiating Center vorgezeigt.");
+    expect(item.title).toBe("Die Korp hat 2 Agenden aus HQ durch Corporate Negotiating Center vorgezeigt und 2 Credits erhalten.");
     expect(item.description).toBe("Gezeigt: Simple Agenda, Hostile Takeover. Timing: Start-of-turn.");
     expect(item.category).toBe("agenda");
     expect(item.visibility).toBe("public");
