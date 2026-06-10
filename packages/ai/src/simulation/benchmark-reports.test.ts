@@ -1,15 +1,19 @@
 import { describe, expect, it } from "vitest";
 import {
   evaluateDoctrineQualityGate,
+  formatAiSelfplayTraceMiningReport,
   formatDoctrineQualityBenchmarkReport,
   formatMatchProgressionBenchmarkReport,
   formatMatchProgressionBenchmarkSuiteReport,
 } from "./benchmark-reports";
 import {
+  detectAiSelfplaySuspiciousDecisions,
   listMatchProgressionBenchmarkDeckSlots,
+  runAiSelfplayTraceMining,
   runDoctrineQualityBenchmark,
   runMatchProgressionBenchmark,
   runMatchProgressionBenchmarkSuite,
+  type AiSimulationSummary,
 } from "../index";
 
 describe("benchmark report formatting", () => {
@@ -177,4 +181,142 @@ describe("benchmark report formatting", () => {
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState/i,
     );
   }, 45_000);
+
+  it("detects suspicious selfplay decisions from redaction-safe synthetic traces", () => {
+    const summary: AiSimulationSummary = {
+      seed: "selfplay-detector-synthetic",
+      winner: "action_limit_reached",
+      actions: 4,
+      turns: 2,
+      finalAgendaPoints: { runner: 0, corp: 0 },
+      finalStateHash: "fnv1a:selfplay",
+      eventLogLength: 4,
+      replayOk: true,
+      replayErrors: [],
+      actionSequence: [
+        selfplayAction("runner", 1, "start_run", {
+          selectedActionId: "run-remote-a",
+          targetServerId: "remote_1",
+          planKind: "runner.contest_remote",
+          evidence: ["known_no_current_payoff"],
+        }),
+        selfplayAction("runner", 2, "gain_credit", {
+          selectedActionId: "gain-credit",
+          reasonCode: "runner.plan.recover_economy",
+        }),
+        selfplayAction("runner", 3, "start_run", {
+          selectedActionId: "run-remote-b",
+          targetServerId: "remote_1",
+          planKind: "runner.contest_remote",
+          evidence: ["known_no_current_payoff"],
+          runnerRunPenalizedAsKnownNoAccess: true,
+          runnerRepeatRunOnKnownUnpayableRemotePath: true,
+        }),
+        selfplayAction("runner", 4, "trigger_ability", {
+          selectedActionId: "bank-load",
+          reasonCode: "runner.bank.load",
+          evidence: [
+            "bankOverDesiredTarget:true",
+            "bankConcreteFundingNeed:false",
+          ],
+        }),
+      ],
+      errors: [],
+      cardPoolVersion: "0.99.0",
+      metrics: selfplayMetricsFixture(),
+    };
+
+    const findings = detectAiSelfplaySuspiciousDecisions([summary], {
+      detectorIds: [
+        "repeated_no_progress_run",
+        "repeated_known_no_payoff_remote",
+        "bank_over_target_without_funding_need",
+      ],
+    });
+    const detectorIds = findings.flatMap((finding) => finding.detectorIds);
+
+    expect(detectorIds).toContain("repeated_no_progress_run");
+    expect(detectorIds).toContain("repeated_known_no_payoff_remote");
+    expect(detectorIds).toContain("bank_over_target_without_funding_need");
+    expect(findings.every((finding) => finding.relevantDebugFacts.length > 0))
+      .toBe(true);
+    expect(JSON.stringify(findings)).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
+    );
+  });
+
+  it("runs and formats a small selfplay trace-mining smoke", () => {
+    const result = runAiSelfplayTraceMining({
+      seeds: ["ai-v143-tuning-001"],
+      runnerDeckId: "demo_runner_008",
+      corpDeckId: "demo_corp_008",
+      maxActions: 8,
+      maxFindings: 5,
+    });
+    const report = formatAiSelfplayTraceMiningReport(result);
+
+    expect(result.version).toBe("ai-selfplay-trace-mining-v1");
+    expect(result.diagnosticOnly).toBe(true);
+    expect(result.noTraining).toBe(true);
+    expect(result.noAutofix).toBe(true);
+    expect(result.aggregate.games).toBe(1);
+    expect(result.aggregate.decisions).toBeGreaterThan(0);
+    expect(result.aggregate.redactionSafe).toBe(true);
+    expect(
+      result.findings.some((finding) =>
+        finding.detectorIds.includes("action_limit_reached"),
+      ),
+    ).toBe(true);
+    expect(report).toContain("# AI Selfplay Trace Mining Report");
+    expect(report).toContain("## Top Findings");
+    expect(report).toContain("Gate: diagnostic_only");
+    expect(JSON.stringify({ result, report })).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
+    );
+  }, 30_000);
 });
+
+function selfplayAction(
+  side: AiSimulationSummary["actionSequence"][number]["side"],
+  stateVersionBefore: number,
+  actionType: AiSimulationSummary["actionSequence"][number]["actionType"],
+  overrides: Partial<AiSimulationSummary["actionSequence"][number]> = {},
+): AiSimulationSummary["actionSequence"][number] {
+  return {
+    ...overrides,
+    side,
+    stateVersionBefore,
+    actionType,
+    reasonCode: overrides.reasonCode ?? `${side}.synthetic`,
+    explanation: overrides.explanation ?? "Synthetic selfplay action.",
+    confidence: overrides.confidence ?? 0.5,
+    evidence: overrides.evidence ?? [],
+    fallbackUsed: overrides.fallbackUsed ?? false,
+    timeoutUsed: overrides.timeoutUsed ?? false,
+    qualityTags: overrides.qualityTags ?? [],
+    stateHashAfter: overrides.stateHashAfter ?? `fnv1a:${stateVersionBefore}`,
+  };
+}
+
+function selfplayMetricsFixture(): AiSimulationSummary["metrics"] {
+  return {
+    illegalActions: 0,
+    fallbackRate: 0,
+    timeoutRate: 0,
+    reasonCodeCoverage: [],
+    actionTypeCoverage: [],
+    roleCoverage: [],
+    progressScore: 0,
+    holdout: false,
+    doctrine: {
+      nakedAgendaInstalls: 0,
+      agendaFloodExposure: 0,
+      scoreWindowMissed: 0,
+      remoteOverbuild: 0,
+      economyStall: 0,
+      repeatedLowValueCentralRun: 0,
+      rigStall: 0,
+      assetTrashNeglect: 0,
+    },
+  };
+}

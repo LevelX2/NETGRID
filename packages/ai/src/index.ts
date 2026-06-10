@@ -121,6 +121,17 @@ import {
   type AiDecisionRuntimeOptions,
 } from "./runtime/choose-ai-action";
 import {
+  DEFAULT_SELFPLAY_TRACE_MINING_DETECTORS,
+  countSelfplayFindingsByDetector,
+  countSelfplayFindingsBySeverity,
+  detectAiSelfplaySuspiciousDecisions,
+  isSelfplayTraceRedactionSafe,
+  safeSelfplayFacts,
+  sortedUniqueSelfplayDetectors,
+  type AiSelfplayTraceMiningConfig,
+  type AiSelfplayTraceMiningResult,
+} from "./simulation/selfplay-trace-mining";
+import {
   chooseCorpLegacyBaselineAction,
   chooseRunnerLegacyBaselineAction,
 } from "./legacy/legacy-baseline";
@@ -154,6 +165,7 @@ import {
   type Side,
   type VisibleCard,
   type VisibleEffectiveIceRunQuote,
+  sanitizeAiDecisionDebug,
 } from "@netgrid/shared";
 export {
   beliefDebugSummary,
@@ -162,10 +174,20 @@ export {
 } from "./belief-state";
 export {
   evaluateDoctrineQualityGate,
+  formatAiSelfplayTraceMiningReport,
   formatDoctrineQualityBenchmarkReport,
   formatMatchProgressionBenchmarkReport,
   formatMatchProgressionBenchmarkSuiteReport,
 } from "./simulation/benchmark-reports";
+export { detectAiSelfplaySuspiciousDecisions } from "./simulation/selfplay-trace-mining";
+export type {
+  AiSelfplaySuspicionSeverity,
+  AiSelfplaySuspiciousDecision,
+  AiSelfplayTraceMiningConfig,
+  AiSelfplayTraceMiningDetectorId,
+  AiSelfplayTraceMiningDetectorOptions,
+  AiSelfplayTraceMiningResult,
+} from "./simulation/selfplay-trace-mining";
 export type {
   BeliefEntry,
   BeliefEventClassification,
@@ -2515,14 +2537,17 @@ export type AiSimulationSummary = {
   actionSequence: Array<{
     side: Side;
     stateVersionBefore: number;
+    selectedActionId?: string;
     actionType: LegalAction["type"];
     eventType?: string;
     timingPoint?: string;
     turnNumber?: number;
+    planKind?: string;
     reasonCode: string;
     explanation: string;
     confidence: number;
     evidence: string[];
+    debugFacts?: string[];
     fallbackUsed: boolean;
     timeoutUsed: boolean;
     targetServerId?: string;
@@ -10253,6 +10278,29 @@ export function assertAiInputIsSideSafe(input: AiDecisionInput): boolean {
   return true;
 }
 
+function selfplayTraceFactsForDecision(
+  decision: AiDecision,
+): { planKind?: string; debugFacts?: string[] } {
+  const safeDebug = sanitizeAiDecisionDebug(decision.decisionDebug);
+  if (!safeDebug) return {};
+  const debugFacts = safeSelfplayFacts([
+    ...(safeDebug.planKind ? [`planKind:${safeDebug.planKind}`] : []),
+    ...(safeDebug.selectedActionType
+      ? [`selectedActionType:${safeDebug.selectedActionType}`]
+      : []),
+    ...(safeDebug.visibleReasons ?? []),
+    ...(safeDebug.warnings ?? []),
+    ...(safeDebug.evidence ?? []),
+    ...(safeDebug.detailSections?.flatMap((section) =>
+      section.items.slice(0, 4).map((item) => `${section.id}:${item}`),
+    ) ?? []),
+  ]);
+  return {
+    ...(safeDebug.planKind ? { planKind: safeDebug.planKind } : {}),
+    ...(debugFacts.length > 0 ? { debugFacts } : {}),
+  };
+}
+
 export function simulateAiGame(
   config: AiSimulationConfig = {},
 ): AiSimulationSummary {
@@ -10506,11 +10554,13 @@ export function simulateAiGame(
     actionSequence.push({
       side,
       stateVersionBefore: result.event.stateVersionBefore,
+      selectedActionId: action.actionId,
       actionType: action.type,
       eventType: result.event.type,
       timingPoint: action.timingPoint,
       turnNumber:
         state.eventLog.filter((event) => event.type === "end_turn").length + 1,
+      ...selfplayTraceFactsForDecision(decision),
       reasonCode: decision.reasonCode,
       explanation: decision.explanation,
       confidence: decision.confidence ?? 0,
@@ -11170,6 +11220,111 @@ export function runMatchProgressionBenchmarkSuite(
     comparisonProfiles,
     seeds,
     slots,
+  };
+}
+
+export function runAiSelfplayTraceMining(
+  config: AiSelfplayTraceMiningConfig = {},
+): AiSelfplayTraceMiningResult {
+  const seeds =
+    config.seeds && config.seeds.length > 0
+      ? config.seeds
+      : SOAK_SEEDS_143.tuningSeeds.slice(0, 5);
+  const maxActions = config.maxActions ?? 100;
+  const runnerControllerMode =
+    config.runnerControllerMode ?? "current_candidate";
+  const corpControllerMode = config.corpControllerMode ?? "current_candidate";
+  const summaries = seeds.map((seed) =>
+    simulateAiGame({
+      seed,
+      maxActions,
+      ...(config.agendaPointsToWin !== undefined
+        ? { agendaPointsToWin: config.agendaPointsToWin }
+        : {}),
+      ...(config.runnerDifficulty
+        ? { runnerDifficulty: config.runnerDifficulty }
+        : {}),
+      ...(config.corpDifficulty ? { corpDifficulty: config.corpDifficulty } : {}),
+      ...(config.runnerProfileId
+        ? { runnerProfileId: config.runnerProfileId }
+        : {}),
+      ...(config.corpProfileId ? { corpProfileId: config.corpProfileId } : {}),
+      ...(config.runnerDeck
+        ? { runnerDeck: config.runnerDeck }
+        : {
+            runnerDeckId:
+              config.runnerDeckId ?? SOAK_SEEDS_143.league.runnerDeckId,
+          }),
+      ...(config.corpDeck
+        ? { corpDeck: config.corpDeck }
+        : { corpDeckId: config.corpDeckId ?? SOAK_SEEDS_143.league.corpDeckId }),
+      ...(config.runnerDeckMetadata
+        ? { runnerDeckMetadata: config.runnerDeckMetadata }
+        : {}),
+      ...(config.corpDeckMetadata
+        ? { corpDeckMetadata: config.corpDeckMetadata }
+        : {}),
+      runnerControllerMode,
+      corpControllerMode,
+      ...(config.simulationRngSeed
+        ? { simulationRngSeed: `${config.simulationRngSeed}:${seed}` }
+        : {}),
+      ...(config.beliefWorld ? { beliefWorld: config.beliefWorld } : {}),
+    }),
+  );
+  const findings = detectAiSelfplaySuspiciousDecisions(summaries, {
+    ...(config.detectorIds ? { detectorIds: config.detectorIds } : {}),
+    longGameActionThreshold:
+      config.longGameActionThreshold ?? Math.max(20, Math.floor(maxActions * 0.75)),
+  });
+  const topFindings = findings.slice(0, config.maxFindings ?? 20);
+  const enabledDetectors =
+    config.detectorIds && config.detectorIds.length > 0
+      ? sortedUniqueSelfplayDetectors(config.detectorIds)
+      : DEFAULT_SELFPLAY_TRACE_MINING_DETECTORS;
+  const aggregate = {
+    games: summaries.length,
+    decisions: summaries.reduce((sum, summary) => sum + summary.actions, 0),
+    findings: findings.length,
+    findingsBySeverity: countSelfplayFindingsBySeverity(findings),
+    findingsByDetector: countSelfplayFindingsByDetector(findings),
+    illegalActions: summaries.reduce(
+      (sum, summary) => sum + summary.metrics.illegalActions,
+      0,
+    ),
+    replayFailures: summaries.filter((summary) => !summary.replayOk).length,
+    actionLimitReached: summaries.filter(
+      (summary) => summary.winner === "action_limit_reached",
+    ).length,
+    redactionSafe: isSelfplayTraceRedactionSafe({
+      findings,
+      topFindings,
+    }),
+  };
+  return {
+    version: "ai-selfplay-trace-mining-v1",
+    diagnosticOnly: true,
+    noTraining: true,
+    noAutofix: true,
+    config: {
+      seeds,
+      maxActions,
+      runnerDeckId:
+        config.runnerDeck?.id ??
+        config.runnerDeckId ??
+        SOAK_SEEDS_143.league.runnerDeckId,
+      corpDeckId:
+        config.corpDeck?.id ??
+        config.corpDeckId ??
+        SOAK_SEEDS_143.league.corpDeckId,
+      runnerControllerMode,
+      corpControllerMode,
+      enabledDetectors,
+    },
+    summaries,
+    findings,
+    topFindings,
+    aggregate,
   };
 }
 

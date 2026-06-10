@@ -6,6 +6,7 @@ import type {
   AiMatchProgressionBenchmarkResult,
   AiMatchProgressionBenchmarkSuiteResult,
 } from "../index";
+import type { AiSelfplayTraceMiningResult } from "./selfplay-trace-mining";
 
 // Simulation-only report helpers. Live AI decisions must not depend on these
 // aggregate benchmark outputs as an action source.
@@ -171,6 +172,74 @@ export function formatDoctrineQualityBenchmarkReport(
     gate.accepted
       ? "Der Kandidat verletzt keine harte Safety- oder Doctrine-Schwelle. Einzelne Warnungen bleiben Review-Material, bevor Gewichte angepasst werden."
       : "Der Kandidat verletzt mindestens eine harte Schwelle. Gewichtungs- oder Planänderungen sollten vor weiterer Ausweitung geprüft werden.",
+  ].join("\n");
+}
+
+export function formatAiSelfplayTraceMiningReport(
+  result: AiSelfplayTraceMiningResult,
+): string {
+  const severityRows = Object.entries(result.aggregate.findingsBySeverity).map(
+    ([severity, count]) => `| ${severity} | ${count} |`,
+  );
+  const detectorRows = Object.entries(result.aggregate.findingsByDetector)
+    .filter(([, count]) => count > 0)
+    .map(([detector, count]) => `| ${detector} | ${count} |`);
+  const topFindingRows =
+    result.topFindings.length > 0
+      ? result.topFindings.map(
+          (finding) =>
+            `| ${finding.severity} | ${finding.seed} | ${finding.stateVersion} | ${finding.side} | ${finding.selectedActionType} | ${finding.detectorIds.join(", ")} | ${escapeMarkdownTableCell(finding.shortReason)} | ${escapeMarkdownTableCell(finding.relevantDebugFacts.slice(0, 4).join("; "))} |`,
+        )
+      : ["| none | none | 0 | unknown | none | none | Keine Funde. |  |"];
+  return [
+    "# AI Selfplay Trace Mining Report",
+    "",
+    `Version: ${result.version}`,
+    `Gate: diagnostic_only`,
+    `No training: ${result.noTraining ? "yes" : "no"}`,
+    `No autofix: ${result.noAutofix ? "yes" : "no"}`,
+    `Seeds: ${result.config.seeds.join(", ")}`,
+    `Max actions: ${result.config.maxActions}`,
+    `Runner deck: ${result.config.runnerDeckId}`,
+    `Corp deck: ${result.config.corpDeckId}`,
+    `Runner mode: ${result.config.runnerControllerMode}`,
+    `Corp mode: ${result.config.corpControllerMode}`,
+    "",
+    "## Aggregate",
+    "",
+    "| Metric | Value |",
+    "| --- | ---: |",
+    `| games | ${result.aggregate.games} |`,
+    `| decisions | ${result.aggregate.decisions} |`,
+    `| findings | ${result.aggregate.findings} |`,
+    `| illegalActions | ${result.aggregate.illegalActions} |`,
+    `| replayFailures | ${result.aggregate.replayFailures} |`,
+    `| actionLimitReached | ${result.aggregate.actionLimitReached} |`,
+    `| redactionSafe | ${result.aggregate.redactionSafe ? 1 : 0} |`,
+    "",
+    "## Findings By Severity",
+    "",
+    "| Severity | Count |",
+    "| --- | ---: |",
+    ...severityRows,
+    "",
+    "## Findings By Detector",
+    "",
+    "| Detector | Count |",
+    "| --- | ---: |",
+    ...(detectorRows.length > 0 ? detectorRows : ["| none | 0 |"]),
+    "",
+    "## Top Findings",
+    "",
+    "| Severity | Seed | State | Side | Action | Detectors | Reason | Facts |",
+    "| --- | --- | ---: | --- | --- | --- | --- | --- |",
+    ...topFindingRows,
+    "",
+    "## Interpretation",
+    "",
+    result.aggregate.findings === 0
+      ? "Keine verdächtigen Entscheidungen im geprüften Selfplay-Fenster. Das ist kein Spielstärke-Beweis, sondern nur ein grünes Diagnosefenster."
+      : "Die Funde sind Review-Hinweise. Echte Fehler sollten als generische KI-Fix-Klasse formuliert und danach mit denselben Seeds erneut geprüft werden.",
   ].join("\n");
 }
 
@@ -2058,6 +2127,10 @@ function suiteMetricHeader(): string {
     "| Slot | Type | Use | Profile | Runner | Corp | Illegal | Replay Failures | Timeout Rate | Action Limit Rate | Avg Turns | Corp Scores | Score Available | Score Taken | Missed Score | Score Take Rate | Runner Steals | Advanced Steals | Adv Steal Remote | Adv Steal Central | Final Advances | Unsafe Final | Protected Final | Protect Before | Score/Steal per Match | Remote Build | Remote Advances | Remote Trash | Successful Remote Access | Remote Access Trashable | Affordable Relevant Trash Opp | Relevant Trash Taken | Relevant Trash Take Rate | Skipped Relevant Trash | Remote Runs vs Advanced | Skipped Advanced Remote | Central While Remote Threat | Runner Draw | Draw Share | Draw+Discard | Duplicate Installs | Low-Value Dup | Junkyard Dup | Economy Taken | Rig Installs | Remote Trash Opp | Remote Trash Taken | Hand Use Rate | Runner Avg Credits | Runner End Credits | End Below Reserve | Turns Below Reserve | Runs Below Reserve | Contest Blocked Credits | Spend Below Reserve | Known Unaffordable Runs | Avg Missing Path Credits | Low-Value Unaffordable Runs | Unique Advanced Threats | Contestable Threats | Threats Contested | Threat Contest Rate | Skipped Contestable Threats | Central Instead Contestable | Central Justified | Central Burned Reserve | Remote Contest Credit Block | Remote Contest Post-Run Block | Remote Runs Insufficient Reserve | Repeated Central Same Threat | Successful Central | Successful Remote | Run-window Rez |",
     "| --- | --- | --- | --- | --- | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |",
   ].join("\n");
+}
+
+function escapeMarkdownTableCell(value: string): string {
+  return value.replace(/\|/g, "\\|").replace(/\r?\n/g, " ");
 }
 
 function formatSuiteMetricRow(row: readonly (string | number)[]): string {
