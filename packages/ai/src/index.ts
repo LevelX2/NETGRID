@@ -10359,7 +10359,10 @@ export function simulateAiGame(
     actionSequence.push({
       side,
       stateVersionBefore: result.event.stateVersionBefore,
-      selectedActionId: action.actionId,
+      selectedActionId: simulationSafeSelectedActionId(
+        action,
+        targetServerId,
+      ),
       actionType: action.type,
       eventType: result.event.type,
       timingPoint: action.timingPoint,
@@ -10439,6 +10442,13 @@ export function simulateAiGame(
     cardPoolVersion: CURRENT_RULES_BASELINE.engineSchemaVersion,
     metrics: metricsFor(actionSequence, errors, replay.ok, isHoldoutSeed(seed)),
   };
+}
+
+function simulationSafeSelectedActionId(
+  action: LegalAction,
+  targetServerId?: string,
+): string {
+  return [action.side, action.type, targetServerId].filter(Boolean).join(".");
 }
 
 export function simulateAiSoak(

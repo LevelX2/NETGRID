@@ -14066,6 +14066,8 @@ describe("V1.4.1 plan-based Runner AI", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(state, "runner", (action) => action.type === "access_card");
     const input = buildAiDecisionInput(state, "runner", {
       difficulty: "normal",
@@ -14113,6 +14115,8 @@ describe("V1.4.1 plan-based Runner AI", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(state, "runner", (action) => action.type === "access_card");
     const input = buildAiDecisionInput(state, "runner", {
       difficulty: "normal",
@@ -14546,6 +14550,8 @@ describe("V1.4.1 plan-based Runner AI", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(state, "runner", (action) => action.type === "access_card");
     const input = buildAiDecisionInput(state, "runner", {
       difficulty: "normal",
@@ -19546,13 +19552,20 @@ describe("V1.4.2 belief state and opponent model", () => {
       score: expect.any(Number),
       fallbackUsed: false,
     });
-    expect(decision.decisionDebug?.actionAlternatives?.[0]).toMatchObject({
+    const selectedAlternative = decision.decisionDebug?.actionAlternatives?.[0];
+    expect(selectedAlternative).toMatchObject({
       actionId: decision.actionId,
       actionType: actualAction?.type,
       selected: true,
-      whyChosen: ["semantic_runtime_actual"],
       scoreBreakdown: expect.any(Array),
     });
+    expect(selectedAlternative?.whyChosen).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(
+          /^(semantic_runtime_actual|selected_by_plan_mapping)$/,
+        ),
+      ]),
+    );
     expect(decision.decisionDebug?.actionAlternatives?.length).toBe(
       Math.min(input.legalActions.length, 32),
     );

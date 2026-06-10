@@ -273,7 +273,7 @@
         {
           "type": "condition",
           "kind": "requires_scored_agenda",
-          "source": "implementation.cardType.agenda.activated"
+          "source": "implementation.scoredAgenda"
         },
         {
           "type": "effect",
@@ -347,7 +347,7 @@
           "generated": {
             "type": "condition",
             "kind": "requires_scored_agenda",
-            "source": "implementation.cardType.agenda.activated"
+            "source": "implementation.scoredAgenda"
           },
           "active": {
             "type": "condition",

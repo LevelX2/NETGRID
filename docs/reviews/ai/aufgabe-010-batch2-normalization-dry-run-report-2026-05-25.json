@@ -618,7 +618,8 @@
                 "kind": "topdeck_info",
                 "timing": "during_run",
                 "scope": "runner",
-                "resource": "cards"
+                "resource": "cards",
+                "amount": 5
               }
             ],
             "conditions": [
