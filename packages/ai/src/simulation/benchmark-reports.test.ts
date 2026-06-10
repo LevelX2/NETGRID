@@ -245,6 +245,71 @@ describe("benchmark report formatting", () => {
     );
   });
 
+  it("categorizes recovery loop findings without suppressing the detector", () => {
+    const summary: AiSimulationSummary = {
+      seed: "selfplay-recovery-loop-categories",
+      winner: "action_limit_reached",
+      actions: 4,
+      turns: 2,
+      finalAgendaPoints: { runner: 0, corp: 0 },
+      finalStateHash: "fnv1a:selfplay-recovery-categories",
+      eventLogLength: 4,
+      replayOk: true,
+      replayErrors: [],
+      actionSequence: [
+        selfplayAction("runner", 1, "activated_card_ability", {
+          selectedActionId: "junkyard-low-1",
+          reasonCode: "runner.recovery.low_value",
+          evidence: ["junkyard recovery without payoff"],
+        }),
+        selfplayAction("runner", 2, "activated_card_ability", {
+          selectedActionId: "junkyard-low-2",
+          reasonCode: "runner.recovery.low_value",
+          evidence: ["junkyard recovery without payoff"],
+        }),
+        selfplayAction("runner", 3, "activated_card_ability", {
+          selectedActionId: "junkyard-funded-1",
+          reasonCode: "runner.recovery.funding",
+          evidence: [
+            "junkyard recovery",
+            "fundingNeedReducesRecoveryLoopPenalty:true",
+          ],
+        }),
+        selfplayAction("runner", 4, "activated_card_ability", {
+          selectedActionId: "junkyard-funded-2",
+          reasonCode: "runner.recovery.funding",
+          evidence: [
+            "junkyard recovery",
+            "fundingNeedReducesRecoveryLoopPenalty:true",
+          ],
+        }),
+      ],
+      errors: [],
+      cardPoolVersion: "0.99.0",
+      metrics: selfplayMetricsFixture(),
+    };
+
+    const findings = detectAiSelfplaySuspiciousDecisions([summary], {
+      detectorIds: ["recovery_low_value_loop"],
+    });
+    const lowValue = findings.find(
+      (finding) => finding.selectedActionId === "junkyard-low-2",
+    );
+
+    expect(findings.flatMap((finding) => finding.detectorIds)).toEqual([
+      "recovery_low_value_loop",
+    ]);
+    expect(lowValue?.relevantDebugFacts).toContain(
+      "recovery_loop_category:low_value_repeat_no_funding_need",
+    );
+    expect(
+      findings.some((finding) => finding.selectedActionId === "junkyard-funded-2"),
+    ).toBe(false);
+    expect(JSON.stringify(findings)).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
+    );
+  });
+
   it("keeps explained semantic overrides out of suspicious selfplay findings", () => {
     const summary: AiSimulationSummary = {
       seed: "selfplay-detector-explained-overrides",

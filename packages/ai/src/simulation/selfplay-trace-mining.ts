@@ -405,16 +405,26 @@ function selfplayEntryDetectorFindings(
     /recover|recovery|junkyard|heap/.test(text) &&
     repeatedReasonWithoutProgress(summary.actionSequence, actionIndex, entry)
   ) {
-    findings.push(
-      selfplayEntryFinding(
-        summary,
-        summaryIndex,
-        actionIndex,
-        "recovery_low_value_loop",
-        "medium",
-        "Runner repeated a recovery-like action without visible progress.",
-      ),
-    );
+    const recoveryContext = recoveryLowValueLoopContext(entry, text);
+    if (
+      recoveryContext.category === "funding_need_recovery" ||
+      recoveryContext.category === "coverage_recovery" ||
+      recoveryContext.category === "search_or_draw_recovery"
+    ) {
+      // Funding and capability recovery are not low-value recovery loops.
+    } else {
+      findings.push(
+        selfplayEntryFinding(
+          summary,
+          summaryIndex,
+          actionIndex,
+          "recovery_low_value_loop",
+          "medium",
+          `Runner repeated a recovery-like action without visible progress (${recoveryContext.category}).`,
+          recoveryContext.facts,
+        ),
+      );
+    }
   }
   if (
     enabled.has("bank_over_target_without_funding_need") &&
@@ -729,6 +739,50 @@ function selfplayEntryIsMeaningfulProgress(
     entry.corpScoreTerminalAdvanceTaken === true ||
     entry.protectBeforeAdvance === true
   );
+}
+
+function recoveryLowValueLoopContext(
+  entry: AiSimulationSummary["actionSequence"][number],
+  text: string,
+): { category: string; facts: string[] } {
+  const coverageRecovery =
+    entry.runnerRecoveryTakenForBreakerCoverage === true ||
+    text.includes("supportsactivecapabilityneed:true") ||
+    text.includes("coverageanswerrole:recovery_answer");
+  const fundingNeed =
+    text.includes("fundingneedreducesrecoverylooppenalty:true") ||
+    text.includes("runner_economy_funding_need:true") ||
+    text.includes("credit_base_funding_need:true") ||
+    text.includes("runner_credit_base_recommendation:fund_useful_hand_card") ||
+    entry.runnerEconomyTakenToReachRunReserve === true ||
+    entry.runnerEconomyChoicePlausible === true;
+  const searchOrDrawNeed =
+    entry.runnerSearchTakenForBreakerCoverage === true ||
+    text.includes("supportsdraworsearchneed:true") ||
+    text.includes("coverageanswerrole:program_search") ||
+    text.includes("coverageanswerrole:draw_for_answer");
+  const pressureSkipped =
+    entry.runnerSearchRecoveryChosenOverPressure === true ||
+    entry.runnerEconomyChosenWhilePressureReady === true;
+  const category = coverageRecovery
+    ? "coverage_recovery"
+    : fundingNeed
+      ? "funding_need_recovery"
+      : searchOrDrawNeed
+        ? "search_or_draw_recovery"
+        : pressureSkipped
+          ? "recovery_over_pressure"
+          : "low_value_repeat_no_funding_need";
+  return {
+    category,
+    facts: [
+      `recovery_loop_category:${category}`,
+      `recovery_loop_funding_need:${fundingNeed}`,
+      `recovery_loop_coverage_need:${coverageRecovery}`,
+      `recovery_loop_search_or_draw_need:${searchOrDrawNeed}`,
+      `recovery_loop_pressure_skipped:${pressureSkipped}`,
+    ],
+  };
 }
 
 function repeatedReasonWithoutProgress(

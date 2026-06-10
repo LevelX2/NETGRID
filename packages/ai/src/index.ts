@@ -6878,6 +6878,11 @@ function semanticRuntimeRunnerScoreComponents(
   }
   const blinkRecoveryComponent = runnerBlinkRecoveryScoreComponent(input, action);
   if (blinkRecoveryComponent) components.push(blinkRecoveryComponent);
+  const lowValueRecoveryRepeatComponent =
+    runnerLowValueRecoveryRepeatScoreComponent(input, action);
+  if (lowValueRecoveryRepeatComponent) {
+    components.push(lowValueRecoveryRepeatComponent);
+  }
   const multiRunEventComponent = runnerMultiRunEventScoreComponent(input, action);
   if (multiRunEventComponent) components.push(multiRunEventComponent);
   components.push(
@@ -8201,6 +8206,134 @@ function runnerBlinkRecoveryScoreComponent(
   }
 
   return undefined;
+}
+
+function runnerLowValueRecoveryRepeatScoreComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (input.side !== "runner" || action.side !== "runner") return undefined;
+  if (!runnerActionLooksLikeRecovery(input, action)) return undefined;
+  const recentRepeats = semanticRuntimeRecentRunnerRecoveryActions(input, action);
+  if (recentRepeats <= 0) return undefined;
+  const fundingNeed = runnerRecoveryFundingNeedContext(input);
+  if (fundingNeed.active) return undefined;
+  const penalty = Math.min(520, 180 + recentRepeats * 140);
+  return {
+    key: "runner_low_value_recovery_repeat",
+    label: "Recovery-Wiederholung",
+    value: -penalty,
+    reason: [
+      `recent_recovery:${recentRepeats}`,
+      "funding_need:false",
+      `funding_context:${fundingNeed.reason}`,
+      `source:${sourceDefinitionIdForAction(input, action) || action.type}`,
+    ].join("|"),
+  };
+}
+
+function runnerActionLooksLikeRecovery(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (action.type !== "trigger_ability" && action.type !== "activated_card_ability")
+    return false;
+  const source = findVisibleCard(input, action.source);
+  const roles = rolesForAction(input, action);
+  const text = [
+    action.label,
+    source?.title,
+    source?.definitionId,
+    source?.rulesText,
+    ...roles,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLocaleLowerCase("en-US");
+  return /recovery|trash_recovery|junkyard|heap|trash|bbs/.test(text);
+}
+
+function runnerRecoveryFundingNeedContext(input: AiDecisionInput): {
+  active: boolean;
+  reason: string;
+} {
+  if (runnerHandFundingTarget(input)) {
+    return { active: true, reason: "hand_funding_target" };
+  }
+  if (runnerBankHasConcreteFundingNeed(input)) {
+    return { active: true, reason: "concrete_bank_funding_need" };
+  }
+  if (input.playerView.own.credits <= 2 && runnerHasKnownUnaffordableLegalRun(input)) {
+    return { active: true, reason: "known_unaffordable_run" };
+  }
+  if (input.playerView.own.credits <= 1) {
+    return { active: true, reason: "emergency_low_credits" };
+  }
+  return { active: false, reason: "none" };
+}
+
+function semanticRuntimeRecentRunnerRecoveryActions(
+  input: AiDecisionInput,
+  action: LegalAction,
+): number {
+  const currentSource = sourceDefinitionIdForAction(input, action);
+  const history = mergedAiPublicHistory(input);
+  let count = 0;
+  let seenRunnerActions = 0;
+  for (let index = history.length - 1; index >= 0; index -= 1) {
+    const event = history[index]!;
+    if (input.playerView.stateVersion - aiEventVersion(event) > 18) break;
+    const actionType =
+      typeof event.publicPayload.actionType === "string"
+        ? event.publicPayload.actionType
+        : event.type;
+    if (semanticRuntimeRunnerRecoveryProgressEvent(actionType)) break;
+    const actor =
+      typeof event.publicPayload.actor === "string"
+        ? event.publicPayload.actor
+        : undefined;
+    if (actor !== "runner") continue;
+    seenRunnerActions += 1;
+    if (semanticRuntimePublicEventLooksLikeRecovery(event, currentSource)) {
+      count += 1;
+    }
+    if (seenRunnerActions >= 8) break;
+  }
+  return count;
+}
+
+function semanticRuntimeRunnerRecoveryProgressEvent(actionType: string): boolean {
+  return (
+    actionType === "steal_agenda" ||
+    actionType === "score_agenda" ||
+    actionType === "trash_accessed_card" ||
+    actionType === "install_card" ||
+    actionType === "start_run"
+  );
+}
+
+function semanticRuntimePublicEventLooksLikeRecovery(
+  event: PublicGameEvent,
+  currentSource: string,
+): boolean {
+  const payload = event.publicPayload;
+  const source = [
+    payload.sourceDefinitionId,
+    payload.sourceCardDefinitionId,
+    payload.cardDefinitionId,
+    payload.definitionId,
+  ].find((value): value is string => typeof value === "string");
+  if (source && currentSource && source === currentSource) return true;
+  const text = Object.values(payload)
+    .filter(
+      (value): value is string | number | boolean =>
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean",
+    )
+    .join(" ")
+    .toLocaleLowerCase("en-US");
+  return /recovery|trash_recovery|junkyard|heap|trash|bbs/.test(text);
 }
 
 function runnerHandFundingTarget(

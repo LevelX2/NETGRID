@@ -13773,6 +13773,158 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("penalizes repeated runner low-value recovery without funding need", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-low-value-recovery-repeat",
+      (state) => {
+        state.runner.credits = 6;
+        moveRunnerResourceToRig(state, "onr_v1_165_junkyard-bbs");
+        const heapCard = findCard(state, "simple_economy_event");
+        removeEverywhere(state, heapCard);
+        state.runner.heap.unshift(heapCard);
+        state.cardInstances[heapCard] = {
+          ...state.cardInstances[heapCard]!,
+          zone: { side: "runner", zone: "heap" },
+          faceup: true,
+        };
+      },
+      {
+        runnerDeck: {
+          id: "ai_low_value_recovery_runner",
+          name: "AI Low Value Recovery Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_165_junkyard-bbs", quantity: 1 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const recovery = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_165_junkyard-bbs",
+    );
+    const draw = input.legalActions.find((action) => action.type === "draw_card");
+    expect(recovery).toBeDefined();
+    expect(draw).toBeDefined();
+    if (!recovery || !draw)
+      throw new Error("Missing low-value recovery fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseRunnerAction(
+      {
+        ...input,
+        eventTail: [
+          ...input.eventTail,
+          syntheticPlanActionEvent(
+            "runner-prior-low-value-recovery",
+            input.playerView.stateVersion + 1,
+            "runner",
+            "activated_card_ability",
+            undefined,
+            {
+              label: "Junkyard BBS recovery",
+              sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+            },
+          ),
+        ],
+        legalActions: [recovery, draw],
+      },
+      { persistTacticalPlanMemory: false },
+    );
+    const recoveryAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === recovery.actionId,
+      );
+    const recoveryPenalty = recoveryAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "runner_low_value_recovery_repeat",
+    );
+
+    expect(recoveryPenalty?.value).toBeLessThan(0);
+    expect(recoveryPenalty?.reason).toContain("funding_need:false");
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
+  it("keeps repeated runner recovery when a real funding need remains", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-funded-recovery-repeat",
+      (state) => {
+        state.runner.credits = 1;
+        moveRunnerResourceToRig(state, "onr_v1_165_junkyard-bbs");
+        const heapCard = findCard(state, "simple_economy_event");
+        removeEverywhere(state, heapCard);
+        state.runner.heap.unshift(heapCard);
+        state.cardInstances[heapCard] = {
+          ...state.cardInstances[heapCard]!,
+          zone: { side: "runner", zone: "heap" },
+          faceup: true,
+        };
+      },
+      {
+        runnerDeck: {
+          id: "ai_funded_recovery_runner",
+          name: "AI Funded Recovery Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_165_junkyard-bbs", quantity: 1 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const recovery = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_165_junkyard-bbs",
+    );
+    const draw = input.legalActions.find((action) => action.type === "draw_card");
+    expect(recovery).toBeDefined();
+    expect(draw).toBeDefined();
+    if (!recovery || !draw)
+      throw new Error("Missing funded recovery fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseRunnerAction(
+      {
+        ...input,
+        eventTail: [
+          ...input.eventTail,
+          syntheticPlanActionEvent(
+            "runner-prior-funded-recovery",
+            input.playerView.stateVersion + 1,
+            "runner",
+            "activated_card_ability",
+            undefined,
+            {
+              label: "Junkyard BBS recovery",
+              sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+            },
+          ),
+        ],
+        legalActions: [recovery, draw],
+      },
+      { persistTacticalPlanMemory: false },
+    );
+    const recoveryAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === recovery.actionId,
+      );
+
+    expect(
+      recoveryAlternative?.scoreBreakdown?.some(
+        (component) => component.key === "runner_low_value_recovery_repeat",
+      ),
+    ).toBe(false);
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
   it("surfaces action semantic candidate evidence in semantic runtime choices", () => {
     const input = runnerActionPhaseInput(
       "ai-runner-action-semantic-runtime-bridge",
