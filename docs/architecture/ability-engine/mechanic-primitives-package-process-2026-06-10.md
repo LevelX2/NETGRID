@@ -203,7 +203,7 @@ Done-Gate:
 - bekannte Baseline-Rotstände sind von neuen Regressionen getrennt dokumentiert;
 - Arbeitsbranch ist sauber und lokal in `main` integriert.
 
-Commit: `docs(engine): record mechanic primitive verification`
+Commit: `test(ai): update mechanic primitive verification reports`
 
 ## Verifikationsregeln
 
@@ -307,3 +307,34 @@ Checks:
 - Grün: `corepack pnpm --filter @netgrid/engine typecheck`
 - Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/install-rez-sequence-handlers.test.ts src/game/corp/scored-agenda-flow.test.ts src/index-tests/mechanics/per-card-longtail.test.ts -t "Data Fort Reclamation|corp install rez sequence handlers|scored agenda flow"`
 - Grün mit Zeilenendungswarnung: `git diff --check`
+
+### P4 Ergebnis
+
+Umgesetzt:
+
+- Volltestblock ausgeführt und die roten Tests nach Ursache getrennt.
+- Durch P1 bis P3 verursachte AI-Gate-Drift in deterministischen Reports behoben.
+- `docs/reviews/ai/ai-derived-basic-facts-gate-2026-05-25.json` neu erzeugt.
+- `docs/reviews/ai/ai-hint-compiled-index-pilot-report-2026-05-25.json` neu erzeugt.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm --filter @netgrid/ai exec vitest run src/derived-basic-facts-gate.test.ts`
+- Grün: `corepack pnpm --filter @netgrid/ai test`
+- Rot mit bekannter Baseline: `corepack pnpm --filter @netgrid/engine test`
+  - 5 Dateien / 8 Tests rot.
+  - Gegenprobe auf `main` zeigt dieselben 5 Dateien / 8 Tests.
+  - Betroffen: Proteus-Manifest-`ai_supported`-Drift, Remote-Breach-Queue-Projection, Corolla Speed Chip Restricted-Credit-Erwartung, Hidden-Access-Run-Regressions, Bizarre Encryption Scheme und Chimera.
+- Rot mit bekannter Baseline: `corepack pnpm --filter @netgrid/web test`
+  - 1 Datei / 6 Tests rot.
+  - Gegenprobe auf `main` zeigt dieselbe Datei / dieselben 6 Tests.
+  - Betroffen: Catalog-AI-Filter, Proteus-AI-Baseline, Inspector-Signale und Runner-AI-Hint-Erwartungen.
+- Rot nach Baseline-Abzug: `corepack pnpm -r --if-present --no-bail test`
+  - 5 Pakete grün: `shared`, `catalog`, `decks`, `ai`, `server`.
+  - 2 Pakete rot wie auf `main`: `engine`, `web`.
+
+Klassifikation:
+
+- Die zunächst roten AI-Tests waren durch die neuen generischen Vertrags-`kind`s verursacht und wurden durch Report-Regeneration behoben.
+- Die verbleibenden roten Engine- und Web-Tests sind auf `main` identisch reproduzierbar und werden deshalb nicht durch P1 bis P3 verursacht.
