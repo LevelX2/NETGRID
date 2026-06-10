@@ -2,7 +2,7 @@
 
 ## Status
 
-`ai_struct_8_complete`
+`ai_struct_9_complete`
 
 Arbeitsbranch: `codex/ai-source-followup-action-semantics`
 
@@ -317,6 +317,26 @@ Scope-Kontrolle:
 
 - Keine Änderung an Engine, LegalAction-Erzeugung, `applyAction`, Replay, StateHash oder Randomness.
 - Legacy-Mode, No-Candidate-Fallback und Public-Export-Kompatibilität bleiben über bestehende Verdrahtung erhalten.
+
+### AI-STRUCT-9 abgeschlossen
+
+Umsetzung:
+
+- V1.4.3-Benchmark-/Exploit-Fixture-Verträge aus `packages/ai/src/index.test.ts` nach `packages/ai/src/simulation/v143-fixtures.test.ts` verschoben.
+- Reine Simulation-Harness- und Doctrine-Quality-Metriktests nach `packages/ai/src/simulation/simulation-harness.test.ts` verschoben.
+- `index.test.ts` bleibt für die stärker mit lokalen Engine-Harness-Helfern verflochtenen Smoke- und Integrationsfälle zuständig.
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts src/simulation/v143-fixtures.test.ts src/simulation/simulation-harness.test.ts` grün, 473 Tests.
+- `corepack pnpm --filter @netgrid/ai test` grün, 53 Testdateien, 1027 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck` grün.
+- `git diff --check` grün.
+
+Scope-Kontrolle:
+
+- Keine Assertions gelöscht oder gelockert; die verschobenen Tests laufen unverändert in fokussierten Dateien.
+- Keine Runtime-, Engine- oder LegalAction-Vertragsänderung.
 
 ## Controller-Prompt-Kern
 
