@@ -576,6 +576,51 @@ describe("buildActionSemanticCandidates", () => {
     expect(explicit.projectionIssues).not.toContain("ability_unresolved");
   });
 
+  it("prefers sourceCardInstanceId over the legacy sourceCardId binding alias", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("activated_card_ability", 0, {
+          source: "preferred-instance",
+          payload: { sourceDefinitionId: "preferred-card" },
+        }),
+      ],
+      sideSafeAbilityBindings: [
+        {
+          actionId: "ai036-0-activated_card_ability",
+          sourceCardId: "legacy-wrong-instance",
+          sourceCardInstanceId: "preferred-instance",
+          sourceDefinitionId: "preferred-card",
+          abilityId: "ability.preferred",
+          method: "single_legal_ability_inferred",
+          evidence: ["R1 preferred sourceCardInstanceId binding"],
+        },
+      ],
+      cardSemanticProfilesByDefinitionId: {
+        "preferred-card": {
+          cardId: "preferred-card",
+          tacticSignals: ["card.context.preferred"],
+          abilitySemantics: [
+            {
+              abilityId: "ability.preferred",
+              tacticSignals: ["economy.preferred"],
+            },
+          ],
+        },
+      },
+    });
+
+    if (!candidate) throw new Error("Expected one preferred binding candidate");
+    expect(candidate.sourceCardId).toBe("preferred-instance");
+    expect(candidate.sourceCardInstanceId).toBe("preferred-instance");
+    expect(candidate.sourceDefinitionId).toBe("preferred-card");
+    expect(candidate.abilityId).toBe("ability.preferred");
+    expect(candidate.cardContextSignals).toEqual(["card.context.preferred"]);
+    expect(candidate.actionTacticSignals).toEqual(["economy.preferred"]);
+    expect(candidate.evidence).toContain(
+      "R1 preferred sourceCardInstanceId binding",
+    );
+  });
+
   it("does not join card semantics from source instance ids without a side-safe definition id", () => {
     const [candidate] = buildActionSemanticCandidates({
       legalActions: [
@@ -601,6 +646,8 @@ describe("buildActionSemanticCandidates", () => {
     expect(candidate.cardContextSignals).toEqual([]);
     expect(candidate.actionTacticSignals).toEqual([]);
     expect(candidate.projectionIssues).toContain("card_semantics_unavailable");
+    expect(JSON.stringify(candidate)).not.toContain("must.not.join");
+    expect(JSON.stringify(candidate)).not.toContain("hidden.signal");
     expect(candidate.evidence.join(" ")).not.toContain(
       "card semantic profile joined",
     );

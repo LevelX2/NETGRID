@@ -1,4 +1,8 @@
-import type { LegalAction } from "@netgrid/shared";
+import type {
+  CardDefinitionId,
+  CardInstanceId,
+  LegalAction,
+} from "@netgrid/shared";
 import { applyCardSemanticJoin } from "./actions/action-card-semantic-join";
 import { applyCostAndTimingProfiles } from "./actions/action-cost-timing";
 import { applyCardActionSourceBinding } from "./actions/action-source-binding";
@@ -222,9 +226,14 @@ export type ActionSemanticCandidate = {
   };
   stateVersion?: number;
   sourceKind: ActionSemanticSourceKind;
-  sourceCardId?: string;
-  sourceCardInstanceId?: string;
-  sourceDefinitionId?: string;
+  /**
+   * Legacy-compatible alias for the action source card. New semantic joins must
+   * use sourceDefinitionId for card profiles and sourceCardInstanceId for
+   * instance identity.
+   */
+  sourceCardId?: CardInstanceId | CardDefinitionId;
+  sourceCardInstanceId?: CardInstanceId;
+  sourceDefinitionId?: CardDefinitionId;
   abilityId?: string;
   abilityBindingMethod: ActionAbilityBindingMethod;
   semanticActionType: string;
@@ -258,10 +267,14 @@ export type BuildActionSemanticCandidatesParams = {
     Record<string, readonly LegalTargetSummary[]>
   >;
   cardSemanticProfilesByDefinitionId?: Readonly<
-    Record<string, ActionCardSemanticProfile>
+    Record<CardDefinitionId, ActionCardSemanticProfile>
   >;
+  /**
+   * Deprecated compatibility alias for older callers. It is interpreted as a
+   * definition-id keyed map and must not be populated from hidden instance ids.
+   */
   cardSemanticProfilesByCardId?: Readonly<
-    Record<string, ActionCardSemanticProfile>
+    Record<CardDefinitionId, ActionCardSemanticProfile>
   >;
 };
 
@@ -272,8 +285,12 @@ export type BuildNeutralActionSemanticCandidateOptions = {
 
 export type SideSafeActionAbilityBinding = {
   actionId: string;
-  sourceCardId: string;
-  sourceDefinitionId?: string;
+  sourceCardInstanceId?: CardInstanceId;
+  /**
+   * Legacy-compatible alias for sourceCardInstanceId.
+   */
+  sourceCardId: CardInstanceId;
+  sourceDefinitionId?: CardDefinitionId;
   abilityId: string;
   method: "single_legal_ability_inferred";
   evidence: string[];
@@ -291,7 +308,7 @@ export type ActionCardAbilitySemanticProfile = {
 };
 
 export type ActionCardSemanticProfile = {
-  cardId: string;
+  cardId: CardDefinitionId;
   tacticSignals: readonly string[];
   strategySupport?: readonly StrategySupportPair[];
   conditions?: readonly SemanticCondition[];

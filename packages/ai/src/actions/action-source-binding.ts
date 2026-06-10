@@ -111,7 +111,8 @@ function abilityBindingForAction(
   const matchingBindings = sideSafeAbilityBindings.filter(
     (binding) =>
       binding.actionId === action.actionId &&
-      binding.sourceCardId === sourceCardInstanceId,
+      (binding.sourceCardInstanceId ?? binding.sourceCardId) ===
+        sourceCardInstanceId,
   );
   if (matchingBindings.length !== 1) return undefined;
   const [binding] = matchingBindings;
