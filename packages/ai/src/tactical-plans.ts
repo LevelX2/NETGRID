@@ -586,6 +586,10 @@ function candidateMatchesStep(
       return false;
     }
   }
+  if (isRunPlanStep(step)) {
+    return runPlanStepMatchesAction(step, candidate, action) &&
+      candidateTargetMatchesPlan(plan, candidate, action);
+  }
   if (candidateSemanticsMatchStep(step, candidate)) {
     return candidateTargetMatchesPlan(plan, candidate, action) &&
       bankStepMatchesCandidate(step, candidate, action);
@@ -628,6 +632,37 @@ function legalActionReferencesCard(action: LegalAction, cardId: string): boolean
     payload.sourceCardId === cardId ||
     payload.targetCardId === cardId ||
     payload.selectedCardId === cardId
+  );
+}
+
+function isRunPlanStep(step: PlanStep): boolean {
+  return step.kind === "run_target" || step.kind === "probe_central";
+}
+
+function runPlanStepMatchesAction(
+  step: PlanStep,
+  candidate: ActionSemanticCandidate,
+  action: LegalAction,
+): boolean {
+  if (!actionTypeMatchesStep(step, candidate.actionType)) return false;
+  if (action.type === "start_run") return true;
+  if (!actionServerId(action)) return false;
+  return actionCandidateCanStartRun(candidate, action);
+}
+
+function actionCandidateCanStartRun(
+  candidate: ActionSemanticCandidate,
+  action: LegalAction,
+): boolean {
+  const text = [
+    candidateSemanticText(candidate),
+    action.type,
+    action.label,
+    JSON.stringify(action.payload ?? {}),
+  ].join(" ").toLowerCase();
+  if (text.includes("path blocked")) return false;
+  return /start_run|make_run|make a run|bonus_run|followup_run|run_event|run_action|extra_run|run_bypass|bypass_first_ice|server_specific_|future_run_effect|run_pressure/.test(
+    text,
   );
 }
 
@@ -1278,7 +1313,12 @@ function actionTypeMatchesStep(step: PlanStep, actionType: string): boolean {
       return actionType === "trigger_ability" || actionType === "activated_card_ability";
     case "run_target":
     case "probe_central":
-      return actionType === "start_run";
+      return (
+        actionType === "start_run" ||
+        actionType === "play_event" ||
+        actionType === "trigger_ability" ||
+        actionType === "activated_card_ability"
+      );
     case "rez_outer_ice":
       return actionType === "rez_ice";
     case "advance_score_card":

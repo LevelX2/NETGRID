@@ -5057,13 +5057,18 @@ function semanticRuntimeActionExclusion(
   const multiRunEventExclusion =
     semanticRuntimeRunnerMultiRunEventExclusion(input, action);
   if (multiRunEventExclusion) return multiRunEventExclusion;
-  if (input.side !== "runner" || action.type !== "start_run") return undefined;
+  const serverId = semanticRuntimeServerId(action);
+  const runTargetEvaluation =
+    serverId !== undefined
+      ? semanticRuntimeRunnerRunTargetEvaluation(input, action, serverId)
+      : undefined;
+  if (input.side !== "runner" || !serverId || !runTargetEvaluation)
+    return undefined;
   const blinkRunExclusion = semanticRuntimeRunnerBlinkRunExclusion(
     input,
     action,
   );
   if (blinkRunExclusion) return blinkRunExclusion;
-  const serverId = semanticRuntimeServerId(action);
   const knownCentralPayoffExclusion =
     semanticRuntimeKnownCentralPayoffExclusion(input, serverId);
   if (knownCentralPayoffExclusion) return knownCentralPayoffExclusion;
@@ -5083,6 +5088,7 @@ function semanticRuntimeActionExclusion(
       semanticRuntimeRunnerEmptyRemoteExclusion(server);
     if (emptyRemoteExclusion) return emptyRemoteExclusion;
   }
+  if (action.type !== "start_run") return undefined;
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     input.playerView.own.rig ?? [],
@@ -7129,10 +7135,10 @@ function semanticRuntimeRunnerScoreComponents(
     components.push(
       ...semanticRuntimeRepeatedRunTargetComponents(input, serverId),
     );
-    const runTargetGuidance =
-      semanticRuntimeRunnerRunTargetGuidanceComponent(input, action);
-    if (runTargetGuidance) components.push(runTargetGuidance);
   }
+  const runTargetGuidance =
+    semanticRuntimeRunnerRunTargetGuidanceComponent(input, action);
+  if (runTargetGuidance) components.push(runTargetGuidance);
   if (action.type === "trash_accessed_card") {
     components.push(
       ...semanticRuntimeRunnerAccessTrashComponents(input, action),
@@ -8130,20 +8136,13 @@ function runnerMultiRunTargetEvaluation(
   action: LegalAction,
   targetServerId: string,
 ): RunnerRunTargetEvaluation | undefined {
-  const runAction: LegalAction =
-    action.type === "start_run"
-      ? action
-      : {
-          ...action,
-          actionId: `${action.actionId}:multi_run_target_gate`,
-          type: "start_run",
-          source: "basic_action",
-          costs: [],
-          payload: {
-            ...(action.payload ?? {}),
-            serverId: targetServerId,
-          },
-        };
+  const runAction: LegalAction = {
+    ...action,
+    payload: {
+      ...(action.payload ?? {}),
+      serverId: targetServerId,
+    },
+  };
   const scopedInput: AiDecisionInput = {
     ...input,
     legalActions: [runAction],
@@ -8164,14 +8163,22 @@ function runnerMultiRunTargetEvaluation(
   })[0];
 }
 
+function semanticRuntimeRunnerRunTargetEvaluation(
+  input: AiDecisionInput,
+  action: LegalAction,
+  targetServerId: string,
+): RunnerRunTargetEvaluation | undefined {
+  if (input.side !== "runner" || action.side !== "runner") return undefined;
+  return runnerMultiRunTargetEvaluation(input, action, targetServerId);
+}
+
 function semanticRuntimeRunnerRunTargetGuidanceComponent(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
-  if (action.type !== "start_run") return undefined;
   const targetServerId = semanticRuntimeServerId(action);
   if (!targetServerId) return undefined;
-  const evaluation = runnerMultiRunTargetEvaluation(
+  const evaluation = semanticRuntimeRunnerRunTargetEvaluation(
     input,
     action,
     targetServerId,
@@ -8719,7 +8726,12 @@ function semanticRuntimeRunnerArchivesComponents(
   action: LegalAction,
   server: AiDecisionInput["playerView"]["servers"][number] | undefined,
 ): AiDecisionScoreComponent[] {
-  if (action.type !== "start_run" || action.payload?.serverId !== "archives")
+  if (action.payload?.serverId !== "archives") return [];
+  const targetServerId = semanticRuntimeServerId(action);
+  if (
+    !targetServerId ||
+    !semanticRuntimeRunnerRunTargetEvaluation(input, action, targetServerId)
+  )
     return [];
   const root = server?.root ?? [];
   const knownRoot = root.filter(
