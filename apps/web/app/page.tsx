@@ -891,7 +891,6 @@ const CATALOG_NUMERIC_LABELS: Record<string, string> = {
 };
 
 const ARCHIVES_STACK_PREVIEW_LIMIT = 18;
-const RUNNER_HEAP_PREVIEW_LIMIT = 18;
 const RUNNER_OPPONENT_GRIP_PREVIEW_LIMIT = 18;
 const CORP_OPPONENT_HQ_PREVIEW_LIMIT = 18;
 const SPECIAL_ZONE_PREVIEW_LIMIT = 14;
@@ -6441,10 +6440,10 @@ export default function Page() {
                       className="runnerHeapOverlapRow"
                       style={{
                         ...zoneCardsStyle,
-                        "--zone-stack-visible-steps": String(Math.max(0, Math.min(activeView.own.heapOrArchives.length, RUNNER_HEAP_PREVIEW_LIMIT) - 1))
+                        "--zone-stack-visible-steps": String(Math.max(0, activeView.own.heapOrArchives.length - 1))
                       } as CSSProperties}
                     >
-                      {activeView.own.heapOrArchives.slice(0, RUNNER_HEAP_PREVIEW_LIMIT).map((card) => {
+                      {activeView.own.heapOrArchives.map((card) => {
                         const displayCard = enrichCard(card);
                         return (
                           <CardView
@@ -6462,7 +6461,6 @@ export default function Page() {
                           />
                         );
                       })}
-                      {activeView.own.heapOrArchives.length > RUNNER_HEAP_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{activeView.own.heapOrArchives.length - RUNNER_HEAP_PREVIEW_LIMIT}</span> : null}
                     </div>
                   ) : (
                     <p className="archivesPileEmpty" style={zoneCardsStyle}>Keine Karten im Heap.</p>
@@ -8828,10 +8826,10 @@ function RunnerOpponentZonesStrip({
             className="runnerHeapCompactPreview runnerHeapOverlapRow"
             style={{
               ...zoneCardsStyle,
-              "--zone-stack-visible-steps": String(Math.max(0, Math.min(heapCards.length, RUNNER_HEAP_PREVIEW_LIMIT) - 1))
+              "--zone-stack-visible-steps": String(Math.max(0, heapCards.length - 1))
             } as CSSProperties}
           >
-            {heapCards.slice(0, RUNNER_HEAP_PREVIEW_LIMIT).map((card) => {
+            {heapCards.map((card) => {
               const displayCard = enrichVisibleCard(card, cardDetailsById);
               return (
                 <CardView
@@ -8849,7 +8847,6 @@ function RunnerOpponentZonesStrip({
                 />
               );
             })}
-            {heapCount > RUNNER_HEAP_PREVIEW_LIMIT ? <span className="archivesOverflowBadge">+{heapCount - RUNNER_HEAP_PREVIEW_LIMIT}</span> : null}
           </div>
         ) : (
           <p className="archivesPileEmpty">Keine Karten im Heap.</p>
