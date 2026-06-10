@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const corporateDownsizingImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_194_corporate-downsizing",
   scoredAgenda: {
-    kind: "corporate_downsizing_hq_agendas",
+    kind: "shuffle_selected_hq_agendas_into_rd_gain_credits",
     creditPerAgendaPoint: 2,
     shuffleSelectedIntoRnd: true,
     visibility: "hidden_info_barrier",

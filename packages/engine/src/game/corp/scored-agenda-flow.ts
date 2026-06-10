@@ -369,7 +369,7 @@ function startScoreTimeChoices(
   if (scoredAgenda?.kind === "ice_transmutation_rezzed_ice_modifier") {
     startIceTransmutationChoice(host, cardId, legalAction);
   }
-  if (scoredAgenda?.kind === "priority_requisition_rez_ice_at_no_cost") {
+  if (scoredAgenda?.kind === "score_rez_installed_ice_at_no_cost") {
     host.choices.startPriorityRequisition(cardId);
   }
   if (scoredAgenda?.kind === "reveal_installed_ice_subtype_for_credits") {
@@ -403,13 +403,13 @@ function startScoreTimeChoices(
       securityNetOptimizationServerId: selectedServerId,
     };
   }
-  if (scoredAgenda?.kind === "corporate_downsizing_hq_agendas") {
+  if (scoredAgenda?.kind === "shuffle_selected_hq_agendas_into_rd_gain_credits") {
     host.choices.startCorporateDownsizing(
       cardId,
       scoredAgenda.creditPerAgendaPoint,
     );
   }
-  if (scoredAgenda?.kind === "security_purge_top_rd") {
+  if (scoredAgenda?.kind === "reveal_top_rd_install_and_rez_ice_trash_rest") {
     host.choices.resolveSecurityPurge();
   }
   void definition;

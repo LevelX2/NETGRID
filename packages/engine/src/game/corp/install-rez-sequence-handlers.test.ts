@@ -425,7 +425,7 @@ describe("corp install rez sequence handlers", () => {
       scoreArea: ["priority_agenda"] as CardInstanceId[],
       servers: [server],
       scoredKinds: {
-        priority_agenda: "priority_requisition_rez_ice_at_no_cost",
+        priority_agenda: "score_rez_installed_ice_at_no_cost",
       },
     });
 
@@ -461,7 +461,7 @@ describe("corp install rez sequence handlers", () => {
       scoreArea: ["priority_agenda"] as CardInstanceId[],
       servers: [server],
       scoredKinds: {
-        priority_agenda: "priority_requisition_rez_ice_at_no_cost",
+        priority_agenda: "score_rez_installed_ice_at_no_cost",
       },
       pendingChoice: selectCardsChoice(
         "v162.priority_requisition:priority_agenda:8",

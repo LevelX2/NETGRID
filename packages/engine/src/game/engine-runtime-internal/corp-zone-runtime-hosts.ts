@@ -241,7 +241,7 @@ export function createCorpZoneRuntimeHosts(
             definitionFor(state, cardId),
           );
           return implementation?.kind ===
-            "ai_cfo_shuffle_hq_archives_into_rd_draw"
+            "shuffle_hq_archives_into_rd_then_draw"
             ? implementation.drawCount
             : 5;
         },
@@ -295,7 +295,7 @@ export function createCorpZoneRuntimeHosts(
       throw new Error("Corporate Downsizing ist nicht gescort.");
     if (
       scoredAgendaKindForDefinition(definitionFor(state, sourceCardId)) !==
-      "corporate_downsizing_hq_agendas"
+      "shuffle_selected_hq_agendas_into_rd_gain_credits"
     )
       throw new Error("Die Agenda-Aktion passt nicht zu Corporate Downsizing.");
     revealCorpRdTop(state, legalAction);

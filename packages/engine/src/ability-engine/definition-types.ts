@@ -762,7 +762,7 @@ export type CardScoredAgendaImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "ai_cfo_shuffle_hq_archives_into_rd_draw";
+      kind: "shuffle_hq_archives_into_rd_then_draw";
       drawCount: 5;
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
@@ -820,7 +820,7 @@ export type CardScoredAgendaImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "priority_requisition_rez_ice_at_no_cost";
+      kind: "score_rez_installed_ice_at_no_cost";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
@@ -828,13 +828,13 @@ export type CardScoredAgendaImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "corporate_downsizing_hq_agendas";
+      kind: "shuffle_selected_hq_agendas_into_rd_gain_credits";
       creditPerAgendaPoint: number;
       shuffleSelectedIntoRnd: true;
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "security_purge_top_rd";
+      kind: "reveal_top_rd_install_and_rez_ice_trash_rest";
       count: 3;
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }

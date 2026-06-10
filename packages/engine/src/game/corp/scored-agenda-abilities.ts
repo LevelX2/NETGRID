@@ -173,11 +173,11 @@ export function buildScoredAgendaAbilityActionsForCard(
   }
   if (
     host.cards.scoredAgendaKindForDefinition(definition) ===
-    "ai_cfo_shuffle_hq_archives_into_rd_draw"
+    "shuffle_hq_archives_into_rd_then_draw"
   ) {
     const implementation = host.cards.scoredAgendaForDefinition(definition);
     const drawCardsAmount =
-      implementation?.kind === "ai_cfo_shuffle_hq_archives_into_rd_draw"
+      implementation?.kind === "shuffle_hq_archives_into_rd_then_draw"
         ? implementation.drawCount
         : 0;
     actions.push(
@@ -483,7 +483,7 @@ function resolveAiChiefFinancialOfficerAction(
     );
   const definition = host.cards.definitionFor(sourceCardId);
   const implementation = host.cards.scoredAgendaForDefinition(definition);
-  if (implementation?.kind !== "ai_cfo_shuffle_hq_archives_into_rd_draw")
+  if (implementation?.kind !== "shuffle_hq_archives_into_rd_then_draw")
     throw new Error(
       "Die Agenda-Aktion passt nicht zur ausgewaehlten AI Chief Financial Officer Agenda.",
     );

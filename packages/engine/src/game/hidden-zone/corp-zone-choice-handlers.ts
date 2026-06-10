@@ -153,7 +153,7 @@ export function startCorporateDownsizingScoreChoice(
   if (
     !host.state.corp.scoreArea.includes(input.sourceCardId) ||
     host.cards.scoredAgendaKind(input.sourceCardId) !==
-      "corporate_downsizing_hq_agendas" ||
+      "shuffle_selected_hq_agendas_into_rd_gain_credits" ||
     !Number.isInteger(input.creditPerAgendaPoint) ||
     input.creditPerAgendaPoint < 0
   )
@@ -359,7 +359,7 @@ function resolveCorporateDownsizingScoreChoice(
     !sourceCardId ||
     !host.state.corp.scoreArea.includes(sourceCardId as CardInstanceId) ||
     host.cards.scoredAgendaKind(sourceCardId as CardInstanceId) !==
-      "corporate_downsizing_hq_agendas" ||
+      "shuffle_selected_hq_agendas_into_rd_gain_credits" ||
     !Number.isInteger(creditPerAgendaPoint) ||
     creditPerAgendaPoint < 0
   )

@@ -238,7 +238,7 @@ function resolvePriorityRequisitionChoice(
     !agendaId ||
     !host.state.corp.scoreArea.includes(agendaId as CardInstanceId) ||
     host.cards.scoredAgendaKind(agendaId as CardInstanceId) !==
-      "priority_requisition_rez_ice_at_no_cost"
+      "score_rez_installed_ice_at_no_cost"
   ) {
     throw new Error("Priority Requisition ist nicht mehr in der Korp-ScoreArea.");
   }

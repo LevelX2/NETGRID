@@ -374,3 +374,33 @@ Checks:
 
 - Kein Code geändert.
 - Blocker bewusst dokumentiert; Folgepakete dürfen nicht still neue Successful-Run-Semantik einführen.
+
+### F7 Ergebnis
+
+Umgesetzt:
+
+- `ai_cfo_shuffle_hq_archives_into_rd_draw` als Definition-`kind` durch `shuffle_hq_archives_into_rd_then_draw` ersetzt.
+- `priority_requisition_rez_ice_at_no_cost` als Definition-`kind` durch `score_rez_installed_ice_at_no_cost` ersetzt.
+- `corporate_downsizing_hq_agendas` als Definition-`kind` durch `shuffle_selected_hq_agendas_into_rd_gain_credits` ersetzt.
+- `security_purge_top_rd` als Definition-`kind` durch `reveal_top_rd_install_and_rez_ice_trash_rest` ersetzt.
+
+Nicht geändert:
+
+- Bestehende Payload-/Choice-Namen wie `ai_chief_financial_officer`, `v162_priority_requisition_free_rez`, `corporate_downsizing_hq_agendas` als `hiddenZoneAction` und `v1922_security_purge_rd_top3`.
+- `ice_transmutation_rezzed_ice_modifier`: blockiert, weil die Regel markierte ICE-Stärke und Subroutine-Duplizierung über Scored-Area-Zustand koppelt.
+- `data_fort_reclamation`: blockiert, weil die Regel mehrstufige HQ-Auswahl, neues Remote, Install-/Rez-Sequenz, temporäre Credits und Hidden-Zone-Choices koppelt.
+
+Removal Conditions:
+
+- Ice Transmutation erst generisch ersetzen, wenn ein Score-Vertrag für "select rezzed ICE -> place persistent mark counter -> strength modifier + subroutine duplication" mit Tests für Zielvalidierung, Mehrfachmarken, Replay und Encounter-Auswertung existiert.
+- Data Fort Reclamation erst generisch ersetzen, wenn ein Sequenzvertrag für "select HQ cards -> install into new remote -> optional rez with temporary credits" inklusive Choice-Source, PublicPayload, Kostenvalidierung, Remote-Cleanup und StateHash-Test existiert.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/scored-agenda-abilities.test.ts src/game/corp/scored-agenda-flow.test.ts src/game/corp/install-rez-sequence-handlers.test.ts src/game/hidden-zone/corp-zone-choice-handlers.test.ts`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/originalset/per-card-followups.test.ts -t "AI Chief Financial Officer"`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/originalset/trace-prevention-assets.test.ts -t "Priority Requisition"`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/hidden-zone-identity.test.ts -t "Corporate Downsizing"`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/per-card-longtail.test.ts -t "Security Purge"`
+- Grün: `git diff --check`

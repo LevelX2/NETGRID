@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const priorityRequisitionImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_212_priority-requisition",
   scoredAgenda: {
-    kind: "priority_requisition_rez_ice_at_no_cost",
+    kind: "score_rez_installed_ice_at_no_cost",
     visibility: "hidden_info_barrier",
   },
 };
