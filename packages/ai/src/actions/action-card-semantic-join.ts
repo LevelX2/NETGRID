@@ -8,14 +8,29 @@ import type {
 
 export function applyCardSemanticJoin(
   candidate: ActionSemanticCandidate,
-  cardSemanticProfilesByCardId:
+  cardSemanticProfilesByDefinitionId:
     | Readonly<Record<string, ActionCardSemanticProfile>>
     | undefined,
 ): ActionSemanticCandidate {
-  if (cardSemanticProfilesByCardId === undefined) return candidate;
-  if (candidate.sourceCardId === undefined) return candidate;
+  if (cardSemanticProfilesByDefinitionId === undefined) return candidate;
+  if (candidate.sourceKind !== "card") return candidate;
+  if (candidate.sourceDefinitionId === undefined) {
+    return {
+      ...candidate,
+      projectionIssues: [
+        ...new Set([
+          ...candidate.projectionIssues,
+          "card_semantics_unavailable" as const,
+        ]),
+      ],
+      evidence: [
+        ...candidate.evidence,
+        "AI041 card semantics unavailable: missing side-safe source definition",
+      ],
+    };
+  }
 
-  const profile = cardSemanticProfilesByCardId[candidate.sourceCardId];
+  const profile = cardSemanticProfilesByDefinitionId[candidate.sourceDefinitionId];
   if (profile === undefined) {
     return {
       ...candidate,

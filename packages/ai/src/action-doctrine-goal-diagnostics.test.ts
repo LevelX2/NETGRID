@@ -16,18 +16,20 @@ describe("buildDeckDoctrineV2DiagnosticReadinessReport", () => {
       legalActions: [
         legalAction("activated_card_ability", 0, {
           source: "ai044-card",
+          payload: { sourceDefinitionId: "ai044-card" },
         }),
       ],
       sideSafeAbilityBindings: [
         {
           actionId: "ai044-0-activated_card_ability",
           sourceCardId: "ai044-card",
+          sourceDefinitionId: "ai044-card",
           abilityId: "ability.ai044",
           method: "single_legal_ability_inferred",
           evidence: ["AI044 side-safe single ability"],
         },
       ],
-      cardSemanticProfilesByCardId: {
+      cardSemanticProfilesByDefinitionId: {
         "ai044-card": {
           cardId: "ai044-card",
           tacticSignals: ["card.context.economy"],
@@ -114,9 +116,10 @@ describe("buildDeckDoctrineV2DiagnosticReadinessReport", () => {
       legalActions: [
         legalAction("activated_card_ability", 1, {
           source: "ai044-ambiguous-card",
+          payload: { sourceDefinitionId: "ai044-ambiguous-card" },
         }),
       ],
-      cardSemanticProfilesByCardId: {
+      cardSemanticProfilesByDefinitionId: {
         "ai044-ambiguous-card": {
           cardId: "ai044-ambiguous-card",
           tacticSignals: ["card.context.multi"],

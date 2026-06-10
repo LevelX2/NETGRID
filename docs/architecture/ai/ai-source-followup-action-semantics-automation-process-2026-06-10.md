@@ -2,7 +2,7 @@
 
 ## Status
 
-`ai_struct_9_complete`
+`ai_sem_1_complete`
 
 Arbeitsbranch: `codex/ai-source-followup-action-semantics`
 
@@ -337,6 +337,28 @@ Scope-Kontrolle:
 
 - Keine Assertions gelöscht oder gelockert; die verschobenen Tests laufen unverändert in fokussierten Dateien.
 - Keine Runtime-, Engine- oder LegalAction-Vertragsänderung.
+
+### AI-SEM-1 abgeschlossen
+
+Umsetzung:
+
+- `ActionSemanticCandidate` trennt jetzt `sourceCardInstanceId` und `sourceDefinitionId`; `sourceCardId` bleibt als bestehendes Alias für die Instanz erhalten.
+- `applyCardActionSourceBinding` übernimmt Definition-IDs nur aus side-safe LegalAction-Payload-Feldern oder side-safe Ability-Bindings.
+- `applyCardSemanticJoin` joint CardSemanticProfiles ausschließlich über `sourceDefinitionId`; reine Instanz-IDs lösen keinen Profil-Join aus.
+- Bestehende Action-Semantik- und DeckDoctrine-Diagnose-Tests wurden auf Definition-ID-Profile umgestellt.
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/action-semantic-candidate.test.ts src/action-doctrine-goal-diagnostics.test.ts src/semantic-ai-runtime-cutover.test.ts` grün, 55 Tests.
+- `corepack pnpm --filter @netgrid/ai test` grün, 53 Testdateien, 1028 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck` grün.
+- `git diff --check` grün.
+
+Scope-Kontrolle:
+
+- Keine Hidden-Info-Auflösung aus Instanz-IDs oder Gegnerzonen.
+- BasicActions erhalten keinen CardSemanticJoin.
+- Multi-Ability-Fälle bleiben ohne eindeutige Ability-ID unresolved.
 
 ## Controller-Prompt-Kern
 

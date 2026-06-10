@@ -415,7 +415,8 @@ describe("buildActionSemanticCandidates", () => {
     const candidates = buildActionSemanticCandidates({
       legalActions: [
         legalAction("activated_card_ability", 0, {
-          source: "single-ability-card",
+          source: "single-ability-instance",
+          payload: { sourceDefinitionId: "single-ability-card" },
           targetRequirements: [
             {
               id: "target",
@@ -426,12 +427,14 @@ describe("buildActionSemanticCandidates", () => {
           ],
         }),
         legalAction("activated_card_ability", 1, {
-          source: "multi-ability-card",
+          source: "multi-ability-instance",
+          payload: { sourceCardDefinitionId: "multi-ability-card" },
         }),
         legalAction("trigger_ability", 2, {
-          source: "multi-ability-bound-card",
+          source: "multi-ability-bound-instance",
+          payload: { sourceDefinitionId: "multi-ability-bound-card" },
           abilityRef: {
-            sourceCardInstanceId: "multi-ability-bound-card",
+            sourceCardInstanceId: "multi-ability-bound-instance",
             abilityId: "ability.b",
           },
         }),
@@ -444,13 +447,14 @@ describe("buildActionSemanticCandidates", () => {
       sideSafeAbilityBindings: [
         {
           actionId: "ai036-0-activated_card_ability",
-          sourceCardId: "single-ability-card",
+          sourceCardId: "single-ability-instance",
+          sourceDefinitionId: "single-ability-card",
           abilityId: "ability.single",
           method: "single_legal_ability_inferred",
           evidence: ["AI041 test single ability binding"],
         },
       ],
-      cardSemanticProfilesByCardId: {
+      cardSemanticProfilesByDefinitionId: {
         "single-ability-card": {
           cardId: "single-ability-card",
           tacticSignals: ["card.context.economy"],
@@ -503,6 +507,8 @@ describe("buildActionSemanticCandidates", () => {
       throw new Error("Expected three AI041 candidates");
     }
 
+    expect(single.sourceCardInstanceId).toBe("single-ability-instance");
+    expect(single.sourceDefinitionId).toBe("single-ability-card");
     expect(single.cardContextSignals).toEqual(["card.context.economy"]);
     expect(single.actionTacticSignals).toEqual(["economy.burst"]);
     expect(single.strategySupport).toEqual([
@@ -512,13 +518,47 @@ describe("buildActionSemanticCandidates", () => {
       expect.objectContaining({ targetProfileId: "tp.runner_card" }),
     ]);
 
+    expect(unresolved.sourceCardInstanceId).toBe("multi-ability-instance");
+    expect(unresolved.sourceDefinitionId).toBe("multi-ability-card");
     expect(unresolved.cardContextSignals).toEqual(["card.context.multi"]);
     expect(unresolved.actionTacticSignals).toEqual([]);
     expect(unresolved.projectionIssues).toContain("ability_unresolved");
 
+    expect(explicit.sourceCardInstanceId).toBe("multi-ability-bound-instance");
+    expect(explicit.sourceDefinitionId).toBe("multi-ability-bound-card");
     expect(explicit.cardContextSignals).toEqual(["card.context.bound"]);
     expect(explicit.actionTacticSignals).toEqual(["tag.remove"]);
     expect(explicit.projectionIssues).not.toContain("ability_unresolved");
+  });
+
+  it("does not join card semantics from source instance ids without a side-safe definition id", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("activated_card_ability", 0, {
+          source: "hidden-instance-only",
+        }),
+      ],
+      cardSemanticProfilesByDefinitionId: {
+        "hidden-instance-only": {
+          cardId: "hidden-instance-only",
+          tacticSignals: ["must.not.join"],
+          abilitySemantics: [
+            { abilityId: "ability.hidden", tacticSignals: ["hidden.signal"] },
+          ],
+        },
+      },
+    });
+
+    if (!candidate) throw new Error("Expected one AI041 candidate");
+    expect(candidate.sourceCardId).toBe("hidden-instance-only");
+    expect(candidate.sourceCardInstanceId).toBe("hidden-instance-only");
+    expect(candidate.sourceDefinitionId).toBeUndefined();
+    expect(candidate.cardContextSignals).toEqual([]);
+    expect(candidate.actionTacticSignals).toEqual([]);
+    expect(candidate.projectionIssues).toContain("card_semantics_unavailable");
+    expect(candidate.evidence.join(" ")).not.toContain(
+      "card semantic profile joined",
+    );
   });
 
   it("projects Dropp break semantics as emergency prevention, not run access support", () => {
@@ -531,6 +571,7 @@ describe("buildActionSemanticCandidates", () => {
             abilityId: "dropp.break_subroutine",
           },
           payload: {
+            sourceDefinitionId: "onr_v1_019_dropp",
             iceId: "ice-1",
             subroutineIndex: 0,
           },
@@ -549,8 +590,8 @@ describe("buildActionSemanticCandidates", () => {
           subroutine: "ice-1:subroutine:0",
         },
       },
-      cardSemanticProfilesByCardId: {
-        "dropp-instance": {
+      cardSemanticProfilesByDefinitionId: {
+        "onr_v1_019_dropp": {
           cardId: "onr_v1_019_dropp",
           tacticSignals: [],
           strategySupport: [],

@@ -13,25 +13,33 @@ export function applyCardActionSourceBinding(
   action: LegalAction,
   sideSafeAbilityBindings: readonly SideSafeActionAbilityBinding[],
 ): ActionSemanticCandidate {
-  const sourceCardId = sourceCardIdForAction(action);
+  const sourceCardInstanceId = sourceCardInstanceIdForAction(action);
   const abilityBinding = abilityBindingForAction(
     action,
-    sourceCardId,
+    sourceCardInstanceId,
     sideSafeAbilityBindings,
   );
+  const sourceDefinitionId =
+    sourceDefinitionIdForAction(action) ?? abilityBinding?.sourceDefinitionId;
   const sourceKind: ActionSemanticSourceKind =
-    sourceCardId !== undefined ? "card" : candidate.sourceKind;
+    sourceCardInstanceId !== undefined ? "card" : candidate.sourceKind;
   const projectionIssues = reconcileSourceAbilityIssues(
     candidate.projectionIssues,
     action,
-    sourceCardId,
+    sourceCardInstanceId,
     abilityBinding,
   );
 
   return {
     ...candidate,
     sourceKind,
-    ...(sourceCardId !== undefined ? { sourceCardId } : {}),
+    ...(sourceCardInstanceId !== undefined
+      ? {
+          sourceCardId: sourceCardInstanceId,
+          sourceCardInstanceId,
+        }
+      : {}),
+    ...(sourceDefinitionId !== undefined ? { sourceDefinitionId } : {}),
     ...(abilityBinding?.abilityId !== undefined
       ? { abilityId: abilityBinding.abilityId }
       : {}),
@@ -40,21 +48,24 @@ export function applyCardActionSourceBinding(
     projectionIssues,
     hardGates: updateSourceAbilityGates(
       candidate.hardGates,
-      sourceCardId,
+      sourceCardInstanceId,
       abilityBinding,
       action,
     ),
     evidence: [
       ...candidate.evidence,
-      ...(sourceCardId !== undefined
-        ? [`AI038 source bound from LegalAction: ${sourceCardId}`]
+      ...(sourceCardInstanceId !== undefined
+        ? [`AI038 source instance bound from LegalAction: ${sourceCardInstanceId}`]
+        : []),
+      ...(sourceDefinitionId !== undefined
+        ? [`AI038 source definition bound from LegalAction: ${sourceDefinitionId}`]
         : []),
       ...(abilityBinding !== undefined ? abilityBinding.evidence : []),
     ],
   };
 }
 
-function sourceCardIdForAction(action: LegalAction): string | undefined {
+function sourceCardInstanceIdForAction(action: LegalAction): string | undefined {
   if (
     action.abilityRef?.sourceCardInstanceId !== undefined &&
     action.abilityRef.sourceCardInstanceId.length > 0
@@ -70,12 +81,13 @@ function sourceCardIdForAction(action: LegalAction): string | undefined {
 type ResolvedAbilityBinding = {
   abilityId: string;
   method: ActionAbilityBindingMethod;
+  sourceDefinitionId?: string;
   evidence: string[];
 };
 
 function abilityBindingForAction(
   action: LegalAction,
-  sourceCardId: string | undefined,
+  sourceCardInstanceId: string | undefined,
   sideSafeAbilityBindings: readonly SideSafeActionAbilityBinding[],
 ): ResolvedAbilityBinding | undefined {
   if (action.abilityRef?.abilityId) {
@@ -95,11 +107,11 @@ function abilityBindingForAction(
     };
   }
 
-  if (sourceCardId === undefined) return undefined;
+  if (sourceCardInstanceId === undefined) return undefined;
   const matchingBindings = sideSafeAbilityBindings.filter(
     (binding) =>
       binding.actionId === action.actionId &&
-      binding.sourceCardId === sourceCardId,
+      binding.sourceCardId === sourceCardInstanceId,
   );
   if (matchingBindings.length !== 1) return undefined;
   const [binding] = matchingBindings;
@@ -108,6 +120,9 @@ function abilityBindingForAction(
   return {
     abilityId: binding.abilityId,
     method: binding.method,
+    ...(binding.sourceDefinitionId !== undefined
+      ? { sourceDefinitionId: binding.sourceDefinitionId }
+      : {}),
     evidence: binding.evidence,
   };
 }
@@ -119,6 +134,13 @@ function stringPayload(
   const value = action.payload?.[key];
   if (typeof value !== "string" || value.length === 0) return undefined;
   return value;
+}
+
+function sourceDefinitionIdForAction(action: LegalAction): string | undefined {
+  return (
+    stringPayload(action, "sourceDefinitionId") ??
+    stringPayload(action, "sourceCardDefinitionId")
+  );
 }
 
 function reconcileSourceAbilityIssues(
@@ -158,18 +180,21 @@ function requiresAbilityBinding(action: LegalAction): boolean {
 
 function updateSourceAbilityGates(
   hardGates: ActionGateResult[],
-  sourceCardId: string | undefined,
+  sourceCardInstanceId: string | undefined,
   abilityBinding: ResolvedAbilityBinding | undefined,
   action: LegalAction,
 ): ActionGateResult[] {
   return hardGates.map((gate) => {
-    if (gate.gateId === "source_resolution" && sourceCardId !== undefined) {
+    if (
+      gate.gateId === "source_resolution" &&
+      sourceCardInstanceId !== undefined
+    ) {
       return {
         ...gate,
         status: "pass",
         severity: "info",
         reason: "Source card was bound from LegalAction/abilityRef.",
-        evidence: [sourceCardId],
+        evidence: [sourceCardInstanceId],
       };
     }
     if (gate.gateId === "ability_resolution") {
@@ -194,4 +219,3 @@ function updateSourceAbilityGates(
     return gate;
   });
 }
-

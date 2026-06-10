@@ -223,6 +223,8 @@ export type ActionSemanticCandidate = {
   stateVersion?: number;
   sourceKind: ActionSemanticSourceKind;
   sourceCardId?: string;
+  sourceCardInstanceId?: string;
+  sourceDefinitionId?: string;
   abilityId?: string;
   abilityBindingMethod: ActionAbilityBindingMethod;
   semanticActionType: string;
@@ -255,6 +257,9 @@ export type BuildActionSemanticCandidatesParams = {
   availableTargetsByActionId?: Readonly<
     Record<string, readonly LegalTargetSummary[]>
   >;
+  cardSemanticProfilesByDefinitionId?: Readonly<
+    Record<string, ActionCardSemanticProfile>
+  >;
   cardSemanticProfilesByCardId?: Readonly<
     Record<string, ActionCardSemanticProfile>
   >;
@@ -268,6 +273,7 @@ export type BuildNeutralActionSemanticCandidateOptions = {
 export type SideSafeActionAbilityBinding = {
   actionId: string;
   sourceCardId: string;
+  sourceDefinitionId?: string;
   abilityId: string;
   method: "single_legal_ability_inferred";
   evidence: string[];
@@ -314,7 +320,8 @@ export function buildActionSemanticCandidates(
       params.sideSafeAbilityBindings ?? [],
       params.selectedTargetsByActionId?.[action.actionId],
       params.availableTargetsByActionId?.[action.actionId],
-      params.cardSemanticProfilesByCardId,
+      params.cardSemanticProfilesByDefinitionId ??
+        params.cardSemanticProfilesByCardId,
     ),
   );
 }
@@ -326,7 +333,7 @@ function projectActionSemanticCandidate(
   sideSafeAbilityBindings: readonly SideSafeActionAbilityBinding[],
   selectedTargets: Readonly<Record<string, string>> | undefined,
   availableTargets: readonly LegalTargetSummary[] | undefined,
-  cardSemanticProfilesByCardId:
+  cardSemanticProfilesByDefinitionId:
     | Readonly<Record<string, ActionCardSemanticProfile>>
     | undefined,
 ): ActionSemanticCandidate {
@@ -347,7 +354,7 @@ function projectActionSemanticCandidate(
   const costTimingCandidate = applyCostAndTimingProfiles(targetCandidate, action);
   return applyCardSemanticJoin(
     costTimingCandidate,
-    cardSemanticProfilesByCardId,
+    cardSemanticProfilesByDefinitionId,
   );
 }
 
