@@ -8306,6 +8306,22 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     expect(JSON.stringify(decision.score.evidence)).not.toMatch(
       /cardInstances|privatePayload|simple_agenda/,
     );
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const semanticDecision = chooseCorpAction(scopedInput, {
+      persistTacticalPlanMemory: false,
+    });
+
+    expect(semanticDecision.actionId).toBe(remoteIceInstall.actionId);
+    expect(semanticDecision.evidence).toContain(
+      "corp_scoreline_remote_seed:agenda_in_hq",
+    );
+    expect(semanticDecision.evidence).toContain(
+      "corp_scoreline_remote_seed:build_protected_remote",
+    );
+    expect(JSON.stringify(semanticDecision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
   });
 
   it("strengthens an existing scoring remote instead of opening a planless empty remote", () => {

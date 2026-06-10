@@ -9352,6 +9352,12 @@ function semanticRuntimeCorpInstallRemoteScore(
     if (semanticRuntimeCorpRemoteHasScoreLine(server)) {
       return protectedRemote ? 650 : 950;
     }
+    if (
+      !hasRoot &&
+      semanticRuntimeCorpShouldBuildProtectedScoreRemote(input, action)
+    ) {
+      return serverId === "new_remote" ? 1050 : 900;
+    }
     let score = serverId === "new_remote" ? -1600 : -900;
     if (!hasRoot) score -= Math.min(1200, emptyRemoteCount * 350);
     if (hasStabilizingAlternative) score -= 500;
@@ -9367,6 +9373,39 @@ function semanticRuntimeCorpInstallRemoteScore(
     return hasStabilizingAlternative ? -900 : -350;
   }
   return protectedRemote ? 250 : -150;
+}
+
+function semanticRuntimeCorpShouldBuildProtectedScoreRemote(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (input.side !== "corp") return false;
+  if (action.type !== "install_card" || action.payload?.placement !== "ice")
+    return false;
+  const serverId = semanticRuntimeCorpActionServerId(input, action);
+  if (!isRemoteServerTarget(serverId)) return false;
+  if (input.playerView.own.credits < actionCreditCost(action) + 2) return false;
+  return (
+    semanticRuntimeCorpHasAgendaInHq(input) &&
+    !semanticRuntimeCorpHasProtectedRemoteCapacity(input)
+  );
+}
+
+function semanticRuntimeCorpHasAgendaInHq(input: AiDecisionInput): boolean {
+  return input.playerView.own.gripOrHq.some(
+    (card) => card.known && card.type === "agenda",
+  );
+}
+
+function semanticRuntimeCorpHasProtectedRemoteCapacity(
+  input: AiDecisionInput,
+): boolean {
+  return input.playerView.servers.some(
+    (server) =>
+      isRemoteServerTarget(server.id) &&
+      semanticRuntimeCorpRemoteIsProtected(server) &&
+      server.root.length === 0,
+  );
 }
 
 function semanticRuntimeCorpAdvanceRemoteScore(
@@ -10136,6 +10175,10 @@ function semanticRuntimeCorpEvidence(
     (server?.root.length ?? 0) === 0
   ) {
     evidence.push("corp_remote_risk:new_empty_remote");
+  }
+  if (semanticRuntimeCorpShouldBuildProtectedScoreRemote(input, action)) {
+    evidence.push("corp_scoreline_remote_seed:agenda_in_hq");
+    evidence.push("corp_scoreline_remote_seed:build_protected_remote");
   }
   if (
     semanticRuntimeCorpActionWouldCreateUnsafeRemoteScoreLine(input, action)
