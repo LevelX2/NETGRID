@@ -141,6 +141,7 @@ import {
   isSelfplayTraceRedactionSafe,
   safeSelfplayFacts,
   sortedUniqueSelfplayDetectors,
+  summarizeSelfplayActionLimitClusters,
   type AiSelfplayTraceMiningConfig,
   type AiSelfplayTraceMiningResult,
 } from "./simulation/selfplay-trace-mining";
@@ -203,6 +204,7 @@ export {
 } from "./simulation/benchmark-reports";
 export { detectAiSelfplaySuspiciousDecisions } from "./simulation/selfplay-trace-mining";
 export type {
+  AiSelfplayActionLimitClusterId,
   AiSelfplaySuspicionSeverity,
   AiSelfplaySuspiciousDecision,
   AiSelfplayTraceMiningConfig,
@@ -226,6 +228,17 @@ export {
   AI_DECISION_INPUT_TOP_LEVEL_FIELDS,
   buildAiDecisionInputDto,
 } from "./input-dto";
+export {
+  ACTION_SEMANTIC_CANDIDATE_COVERAGE_REPORT_VERSION,
+  ACTION_SEMANTIC_COVERAGE_GROUPS,
+  formatActionSemanticCandidateCoverageReport,
+  summarizeActionSemanticCandidateCoverage,
+} from "./actions/action-semantic-coverage";
+export type {
+  ActionSemanticCandidateCoverageRow,
+  ActionSemanticCandidateCoverageSummary,
+  ActionSemanticCoverageGroup,
+} from "./actions/action-semantic-coverage";
 export {
   buildAiDecisionInput,
   selectAiDecisionSideForState,
@@ -6884,6 +6897,11 @@ function semanticRuntimeRunnerScoreComponents(
   }
   const blinkRecoveryComponent = runnerBlinkRecoveryScoreComponent(input, action);
   if (blinkRecoveryComponent) components.push(blinkRecoveryComponent);
+  const lowValueRecoveryRepeatComponent =
+    runnerLowValueRecoveryRepeatScoreComponent(input, action);
+  if (lowValueRecoveryRepeatComponent) {
+    components.push(lowValueRecoveryRepeatComponent);
+  }
   const multiRunEventComponent = runnerMultiRunEventScoreComponent(input, action);
   if (multiRunEventComponent) components.push(multiRunEventComponent);
   components.push(
@@ -6958,6 +6976,7 @@ function semanticRuntimeRunnerScoreComponents(
     const serverId = semanticRuntimeServerId(action);
     const doctrineWeight = semanticRuntimeRunnerDoctrineRunWeight(
       input,
+      action,
       serverId,
     );
     if (doctrineWeight) components.push(doctrineWeight);
@@ -8240,6 +8259,136 @@ function runnerBlinkRecoveryScoreComponent(
   return undefined;
 }
 
+function runnerLowValueRecoveryRepeatScoreComponent(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  if (input.side !== "runner" || action.side !== "runner") return undefined;
+  if (!runnerActionLooksLikeRecovery(input, action)) return undefined;
+  const recentRepeats = semanticRuntimeRecentRunnerRecoveryActions(input, action);
+  if (recentRepeats <= 0) return undefined;
+  const fundingNeed = runnerRecoveryFundingNeedContext(input);
+  if (fundingNeed.active) return undefined;
+  const penalty = Math.min(520, 180 + recentRepeats * 140);
+  return {
+    key: "runner_low_value_recovery_repeat",
+    label: "Recovery-Wiederholung",
+    value: -penalty,
+    reason: [
+      `recent_recovery:${recentRepeats}`,
+      "funding_need:false",
+      `funding_context:${fundingNeed.reason}`,
+      `source:${sourceDefinitionIdForAction(input, action) || action.type}`,
+    ].join("|"),
+  };
+}
+
+function runnerActionLooksLikeRecovery(
+  input: AiDecisionInput,
+  action: LegalAction,
+): boolean {
+  if (action.type !== "trigger_ability" && action.type !== "activated_card_ability")
+    return false;
+  const source = findVisibleCard(input, action.source);
+  const roles = rolesForAction(input, action);
+  const text = [
+    action.label,
+    source?.title,
+    source?.definitionId,
+    source?.rulesText,
+    ...roles,
+  ]
+    .filter(Boolean)
+    .join(" ")
+    .toLocaleLowerCase("en-US");
+  return /recovery|trash_recovery|junkyard|heap|trash|bbs/.test(text);
+}
+
+function runnerRecoveryFundingNeedContext(input: AiDecisionInput): {
+  active: boolean;
+  reason: string;
+} {
+  if (runnerHandFundingTarget(input)) {
+    return { active: true, reason: "hand_funding_target" };
+  }
+  if (runnerBankHasConcreteFundingNeed(input)) {
+    return { active: true, reason: "concrete_bank_funding_need" };
+  }
+  if (input.playerView.own.credits <= 2 && runnerHasKnownUnaffordableLegalRun(input)) {
+    return { active: true, reason: "known_unaffordable_run" };
+  }
+  if (input.playerView.own.credits <= 1) {
+    return { active: true, reason: "emergency_low_credits" };
+  }
+  return { active: false, reason: "none" };
+}
+
+function semanticRuntimeRecentRunnerRecoveryActions(
+  input: AiDecisionInput,
+  action?: LegalAction,
+): number {
+  const currentSource = action
+    ? sourceDefinitionIdForAction(input, action)
+    : undefined;
+  const history = mergedAiPublicHistory(input);
+  let count = 0;
+  let seenRunnerActions = 0;
+  for (let index = history.length - 1; index >= 0; index -= 1) {
+    const event = history[index]!;
+    if (input.playerView.stateVersion - aiEventVersion(event) > 18) break;
+    const actionType =
+      typeof event.publicPayload.actionType === "string"
+        ? event.publicPayload.actionType
+        : event.type;
+    if (semanticRuntimeRunnerRecoveryProgressEvent(actionType)) break;
+    const actor =
+      typeof event.publicPayload.actor === "string"
+        ? event.publicPayload.actor
+        : undefined;
+    if (actor !== "runner") continue;
+    seenRunnerActions += 1;
+    if (semanticRuntimePublicEventLooksLikeRecovery(event, currentSource)) {
+      count += 1;
+    }
+    if (seenRunnerActions >= 8) break;
+  }
+  return count;
+}
+
+function semanticRuntimeRunnerRecoveryProgressEvent(actionType: string): boolean {
+  return (
+    actionType === "steal_agenda" ||
+    actionType === "score_agenda" ||
+    actionType === "trash_accessed_card" ||
+    actionType === "install_card" ||
+    actionType === "start_run"
+  );
+}
+
+function semanticRuntimePublicEventLooksLikeRecovery(
+  event: PublicGameEvent,
+  currentSource: string | undefined,
+): boolean {
+  const payload = event.publicPayload;
+  const source = [
+    payload.sourceDefinitionId,
+    payload.sourceCardDefinitionId,
+    payload.cardDefinitionId,
+    payload.definitionId,
+  ].find((value): value is string => typeof value === "string");
+  if (source && currentSource && source === currentSource) return true;
+  const text = Object.values(payload)
+    .filter(
+      (value): value is string | number | boolean =>
+        typeof value === "string" ||
+        typeof value === "number" ||
+        typeof value === "boolean",
+    )
+    .join(" ")
+    .toLocaleLowerCase("en-US");
+  return /recovery|trash_recovery|junkyard|heap|trash|bbs/.test(text);
+}
+
 function runnerHandFundingTarget(
   input: AiDecisionInput,
 ): { value: number; reason: string } | undefined {
@@ -8900,6 +9049,7 @@ function semanticRuntimeRunnerRunProgressEvent(actionType: string): boolean {
 
 function semanticRuntimeRunnerDoctrineRunWeight(
   input: AiDecisionInput,
+  action: LegalAction,
   serverId: string | undefined,
 ): AiDecisionScoreComponent | undefined {
   if (input.side !== "runner" || input.ownDeckDoctrine?.side !== "runner")
@@ -8913,24 +9063,202 @@ function semanticRuntimeRunnerDoctrineRunWeight(
           ? "contest_remote"
           : undefined;
   if (!planKey) return undefined;
-  return semanticRuntimeDoctrinePlanWeightComponent(input, planKey);
+  const consumer = semanticRuntimeDoctrineConsumerForPlan(planKey);
+  const raw = semanticRuntimeDoctrineRawWeight(input, planKey);
+  const gate = semanticRuntimeDoctrineActionGate(input, action, planKey, consumer, {
+    serverId,
+  });
+  if (raw > 0 && !gate.allowed) {
+    return semanticRuntimeDoctrineSuppressedComponent(gate.evidence);
+  }
+  return semanticRuntimeDoctrinePlanWeightComponent(input, planKey, consumer);
+}
+
+function semanticRuntimeRunnerRemoteContestDoctrineGuard(
+  input: AiDecisionInput,
+  action: LegalAction,
+  serverId: string | undefined,
+): { allowed: boolean; evidence: string[] } {
+  if (!serverId || !isRemoteServerTarget(serverId)) {
+    return {
+      allowed: false,
+      evidence: [
+        "deck_doctrine_remote_contest_suppressed:true",
+        "deck_doctrine_remote_contest_suppressed_reason:not_remote",
+      ],
+    };
+  }
+  const evaluation = semanticRuntimeRunnerRunTargetEvaluation(
+    input,
+    action,
+    serverId,
+  );
+  if (!evaluation) {
+    return {
+      allowed: false,
+      evidence: [
+        "deck_doctrine_remote_contest_suppressed:true",
+        "deck_doctrine_remote_contest_suppressed_reason:missing_evaluation",
+      ],
+    };
+  }
+  const knownNoPayoff =
+    evaluation.knownAccessState === "known_no_current_payoff" ||
+    evaluation.accessPayoff === "known_low_value";
+  const blocked =
+    evaluation.pathPassability !== "reachable" || evaluation.creditsAfterRun < 0;
+  const repeated = semanticRuntimeRecentRunnerStartRunsOnServer(
+    input,
+    serverId,
+  ) > 0;
+  const plausiblePayoff =
+    evaluation.accessPayoff === "agenda" ||
+    evaluation.accessPayoff === "score_threat" ||
+    evaluation.accessPayoff === "trash_affordable" ||
+    evaluation.accessPayoff === "fresh" ||
+    evaluation.accessPayoff === "access_bonus" ||
+    (evaluation.accessPayoff === "unknown" &&
+      evaluation.recommendation === "run_now");
+  if (knownNoPayoff || blocked || (repeated && !plausiblePayoff) || !plausiblePayoff) {
+    return {
+      allowed: false,
+      evidence: [
+        "deck_doctrine_remote_contest_suppressed:true",
+        ...(knownNoPayoff
+          ? ["runner_known_remote_no_payoff_guard:true"]
+          : []),
+        `deck_doctrine_remote_contest_suppressed_reason:${
+          knownNoPayoff
+            ? "known_no_payoff"
+            : blocked
+              ? "blocked_or_unreachable"
+              : repeated
+                ? "repeated_without_payoff"
+                : "no_plausible_payoff"
+        }`,
+        `target:${serverId}`,
+        `known_access:${evaluation.knownAccessState}`,
+        `payoff:${evaluation.accessPayoff}`,
+        `path:${evaluation.pathPassability}`,
+        `credits_after:${evaluation.creditsAfterRun}`,
+        `repeated_remote:${repeated}`,
+      ],
+    };
+  }
+  return {
+    allowed: true,
+    evidence: [
+      "deck_doctrine_remote_contest_allowed:true",
+      `target:${serverId}`,
+      `payoff:${evaluation.accessPayoff}`,
+    ],
+  };
 }
 
 function semanticRuntimeCorpDoctrineWeight(
   input: AiDecisionInput,
+  action: LegalAction,
   planKey: string,
+  consumer: SemanticRuntimeDoctrineConsumer,
 ): AiDecisionScoreComponent | undefined {
   if (input.side !== "corp" || input.ownDeckDoctrine?.side !== "corp")
     return undefined;
-  return semanticRuntimeDoctrinePlanWeightComponent(input, planKey);
+  const raw = semanticRuntimeDoctrineRawWeight(input, planKey);
+  const gate = semanticRuntimeDoctrineActionGate(input, action, planKey, consumer);
+  if (raw > 0 && !gate.allowed) {
+    return semanticRuntimeDoctrineSuppressedComponent(gate.evidence);
+  }
+  return semanticRuntimeDoctrinePlanWeightComponent(input, planKey, consumer);
 }
+
+function semanticRuntimeCorpScoreNowDoctrineWeight(
+  input: AiDecisionInput,
+  action: LegalAction,
+): AiDecisionScoreComponent | undefined {
+  return semanticRuntimeCorpDoctrineWeight(
+    input,
+    action,
+    "score_now",
+    "corp_score_now",
+  );
+}
+
+function semanticRuntimeCorpScoreNowSafetyGate(
+  input: AiDecisionInput,
+  action: LegalAction,
+): { allowed: boolean; evidence: string[] } {
+  if (
+    input.side !== "corp" ||
+    action.side !== "corp" ||
+    action.type !== "score_agenda"
+  ) {
+    return {
+      allowed: false,
+      evidence: ["unsafe_score_unknown_higher_priority"],
+    };
+  }
+  const terminal = assessCorpScoreTerminalWindow(input);
+  const scoreLegal = terminal.scoreActionIds.includes(action.actionId);
+  const reasons = semanticRuntimeCorpUnsafeScoreReasons(terminal, scoreLegal);
+  return {
+    allowed: reasons.length === 0,
+    evidence:
+      reasons.length === 0
+        ? [
+            "corp_scoreline_safety_gate_passed:true",
+            `protected_remote_ready:${terminal.protectedRemoteIds.length > 0}`,
+            `runner_access_threat_high:${terminal.runnerAccessThreatHigh}`,
+          ]
+        : reasons,
+  };
+}
+
+function semanticRuntimeCorpUnsafeScoreReasons(
+  terminal: ReturnType<typeof assessCorpScoreTerminalWindow>,
+  scoreLegal: boolean,
+): string[] {
+  const reasons: string[] = [];
+  if (!terminal.terminalWindow || !scoreLegal) {
+    reasons.push("unsafe_score_unknown_higher_priority");
+  }
+  if (terminal.blockedByCredits) {
+    reasons.push("unsafe_score_insufficient_rez_reserve");
+  }
+  if (terminal.blockedByCheapContest) {
+    reasons.push("unsafe_score_cheap_contest_available");
+  }
+  if (terminal.blockedByRunnerContest) {
+    reasons.push("unsafe_score_runner_access_threat_high");
+  }
+  if (terminal.blockedByHqThreat) {
+    reasons.push("unsafe_score_hq_or_rnd_threat");
+  }
+  if (
+    terminal.runnerAccessThreatHigh &&
+    terminal.protectedRemoteIds.length === 0
+  ) {
+    reasons.push("unsafe_score_unprotected_remote");
+    reasons.push("unsafe_score_missing_protected_remote_signal");
+  }
+  return sortedUnique(reasons);
+}
+
+type SemanticRuntimeDoctrineConsumer =
+  | "corp_score_now"
+  | "corp_score_next_turn"
+  | "corp_build_scoring_remote"
+  | "runner_pressure_rnd"
+  | "runner_pressure_hq"
+  | "runner_contest_remote";
 
 function semanticRuntimeDoctrinePlanWeightComponent(
   input: AiDecisionInput,
   planKey: string,
+  consumer: SemanticRuntimeDoctrineConsumer,
 ): AiDecisionScoreComponent | undefined {
-  const raw = input.ownDeckDoctrine?.planWeights[planKey] ?? 0;
-  const bounded = Math.max(-24, Math.min(24, raw));
+  const raw = semanticRuntimeDoctrineRawWeight(input, planKey);
+  const clamp = semanticRuntimeDoctrineClamp(consumer);
+  const bounded = Math.max(-clamp, Math.min(clamp, raw));
   const value = Math.round(bounded * 10);
   if (value === 0) return undefined;
   return {
@@ -8940,8 +9268,225 @@ function semanticRuntimeDoctrinePlanWeightComponent(
     reason: [
       `plan:${planKey}`,
       `raw:${raw}`,
+      `bounded:${bounded}`,
+      `consumer:${consumer}`,
+      `clamp:${clamp}`,
       `tags:${input.ownDeckDoctrine?.archetypeTags.slice(0, 3).join(",") ?? "neutral"}`,
     ].join("|"),
+  };
+}
+
+function semanticRuntimeDoctrineRawWeight(
+  input: AiDecisionInput,
+  planKey: string,
+): number {
+  return input.ownDeckDoctrine?.planWeights[planKey] ?? 0;
+}
+
+function semanticRuntimeDoctrineClamp(
+  consumer: SemanticRuntimeDoctrineConsumer,
+): number {
+  switch (consumer) {
+    case "corp_score_now":
+      return 24;
+    case "corp_score_next_turn":
+    case "corp_build_scoring_remote":
+      return 18;
+    case "runner_pressure_rnd":
+    case "runner_pressure_hq":
+      return 12;
+    case "runner_contest_remote":
+      return 9;
+  }
+}
+
+function semanticRuntimeDoctrineConsumerForPlan(
+  planKey: string,
+): SemanticRuntimeDoctrineConsumer {
+  switch (planKey) {
+    case "score_now":
+      return "corp_score_now";
+    case "score_next_turn":
+      return "corp_score_next_turn";
+    case "build_scoring_remote":
+      return "corp_build_scoring_remote";
+    case "pressure_rnd":
+      return "runner_pressure_rnd";
+    case "pressure_hq":
+      return "runner_pressure_hq";
+    case "contest_remote":
+      return "runner_contest_remote";
+    default:
+      throw new Error(`Unknown semantic runtime doctrine plan ${planKey}`);
+  }
+}
+
+function semanticRuntimeDoctrineActionGate(
+  input: AiDecisionInput,
+  action: LegalAction,
+  planKey: string,
+  consumer: SemanticRuntimeDoctrineConsumer,
+  context: { serverId?: string | undefined } = {},
+): { allowed: boolean; evidence: string[] } {
+  if (
+    !input.legalActions.some((legalAction) => legalAction.actionId === action.actionId)
+  ) {
+    return semanticRuntimeDoctrineGateBlocked(planKey, consumer, "illegal_action", [
+      `action:${action.actionId}`,
+    ]);
+  }
+  if (action.side !== input.side) {
+    return semanticRuntimeDoctrineGateBlocked(planKey, consumer, "side_mismatch", [
+      `input_side:${input.side}`,
+      `action_side:${action.side}`,
+    ]);
+  }
+  if (actionCreditCost(action) > input.playerView.own.credits) {
+    return semanticRuntimeDoctrineGateBlocked(planKey, consumer, "cost_blocked", [
+      `credits:${input.playerView.own.credits}`,
+      `cost:${actionCreditCost(action)}`,
+    ]);
+  }
+
+  if (
+    consumer === "runner_pressure_rnd" ||
+    consumer === "runner_pressure_hq" ||
+    consumer === "runner_contest_remote"
+  ) {
+    return semanticRuntimeRunnerDoctrineActionGate(
+      input,
+      action,
+      planKey,
+      consumer,
+      context.serverId,
+    );
+  }
+  if (consumer === "corp_score_now") {
+    const scoreGate = semanticRuntimeCorpScoreNowSafetyGate(input, action);
+    if (!scoreGate.allowed) {
+      return semanticRuntimeDoctrineGateBlocked(
+        planKey,
+        consumer,
+        "unsafe_score",
+        [
+          "corp_scoreline_safety_gate_blocks_doctrine:true",
+          "score_now_doctrine_suppressed:true",
+          ...scoreGate.evidence,
+        ],
+      );
+    }
+  }
+  return { allowed: true, evidence: [`deck_doctrine_runtime_gate_allowed:${consumer}`] };
+}
+
+function semanticRuntimeRunnerDoctrineActionGate(
+  input: AiDecisionInput,
+  action: LegalAction,
+  planKey: string,
+  consumer: SemanticRuntimeDoctrineConsumer,
+  serverId: string | undefined,
+): { allowed: boolean; evidence: string[] } {
+  if (action.type !== "start_run") {
+    return semanticRuntimeDoctrineGateBlocked(planKey, consumer, "not_run_action");
+  }
+  if (!serverId) {
+    return semanticRuntimeDoctrineGateBlocked(planKey, consumer, "missing_server");
+  }
+  const evaluation = semanticRuntimeRunnerRunTargetEvaluation(
+    input,
+    action,
+    serverId,
+  );
+  if (
+    evaluation &&
+    (evaluation.pathPassability !== "reachable" || evaluation.creditsAfterRun < 0)
+  ) {
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "cost_or_reachability_blocked",
+      [
+        `target:${serverId}`,
+        `path:${evaluation.pathPassability}`,
+        `credits_after:${evaluation.creditsAfterRun}`,
+      ],
+    );
+  }
+  if (
+    (consumer === "runner_pressure_rnd" ||
+      consumer === "runner_pressure_hq") &&
+    semanticRuntimeRecentRunnerStartRunsOnServer(input, serverId) > 0
+  ) {
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "repeated_no_progress_run",
+      [`target:${serverId}`],
+    );
+  }
+  const recoveryContext = semanticRuntimeRunnerLowValueRecoveryContext(input);
+  if (recoveryContext.active) {
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "low_value_recovery_context",
+      recoveryContext.evidence,
+    );
+  }
+  if (consumer === "runner_contest_remote") {
+    const remoteContestGate = semanticRuntimeRunnerRemoteContestDoctrineGuard(
+      input,
+      action,
+      serverId,
+    );
+    if (!remoteContestGate.allowed) return remoteContestGate;
+  }
+  return { allowed: true, evidence: [`deck_doctrine_runtime_gate_allowed:${consumer}`] };
+}
+
+function semanticRuntimeRunnerLowValueRecoveryContext(
+  input: AiDecisionInput,
+): { active: boolean; evidence: string[] } {
+  const recentRecovery = semanticRuntimeRecentRunnerRecoveryActions(input);
+  if (recentRecovery <= 1) return { active: false, evidence: [] };
+  const fundingNeed = runnerRecoveryFundingNeedContext(input);
+  if (fundingNeed.active) return { active: false, evidence: [] };
+  return {
+    active: true,
+    evidence: [
+      `recent_recovery:${recentRecovery}`,
+      "funding_need:false",
+      `funding_context:${fundingNeed.reason}`,
+    ],
+  };
+}
+
+function semanticRuntimeDoctrineGateBlocked(
+  planKey: string,
+  consumer: SemanticRuntimeDoctrineConsumer,
+  reason: string,
+  evidence: string[] = [],
+): { allowed: boolean; evidence: string[] } {
+  return {
+    allowed: false,
+    evidence: [
+      "deck_doctrine_runtime_gate_suppressed:true",
+      `plan:${planKey}`,
+      `consumer:${consumer}`,
+      `deck_doctrine_runtime_gate_reason:${reason}`,
+      ...evidence,
+    ],
+  };
+}
+
+function semanticRuntimeDoctrineSuppressedComponent(
+  evidence: readonly string[],
+): AiDecisionScoreComponent {
+  return {
+    key: "deck_doctrine_runtime_weight_suppressed",
+    label: "DeckDoctrine-Runtime-Gewicht unterdrückt",
+    value: 0,
+    reason: evidence.join("|"),
   };
 }
 
@@ -8969,11 +9514,20 @@ function semanticRuntimeCorpScoreComponents(
       value: 1200,
       reason: "score_agenda",
     });
-    const doctrineWeight = semanticRuntimeCorpDoctrineWeight(
+    const doctrineWeight = semanticRuntimeCorpScoreNowDoctrineWeight(
       input,
-      "score_now",
+      action,
     );
     if (doctrineWeight) components.push(doctrineWeight);
+    const safetyGate = semanticRuntimeCorpScoreNowSafetyGate(input, action);
+    if (!safetyGate.allowed) {
+      components.push({
+        key: "corp_scoreline_safety_gate_blocks_doctrine",
+        label: "Scoreline-Safety",
+        value: -900,
+        reason: safetyGate.evidence.join("|"),
+      });
+    }
   }
   if (action.type === "advance_card") {
     components.push({
@@ -8984,7 +9538,9 @@ function semanticRuntimeCorpScoreComponents(
     });
     const doctrineWeight = semanticRuntimeCorpDoctrineWeight(
       input,
+      action,
       "score_next_turn",
+      "corp_score_next_turn",
     );
     if (doctrineWeight) components.push(doctrineWeight);
     const remoteScore = semanticRuntimeCorpAdvanceRemoteScore(input, action);
@@ -9016,7 +9572,9 @@ function semanticRuntimeCorpScoreComponents(
       });
       const doctrineWeight = semanticRuntimeCorpDoctrineWeight(
         input,
+        action,
         "build_scoring_remote",
+        "corp_build_scoring_remote",
       );
       if (doctrineWeight) components.push(doctrineWeight);
     }
@@ -11243,6 +11801,7 @@ export function runAiSelfplayTraceMining(
     unsafeScoreChosen: countUnsafeScoreChosen(summaries),
     passiveActionWithScoreLineAvailable:
       countPassiveActionWithScoreLineAvailable(summaries),
+    actionLimitClusters: summarizeSelfplayActionLimitClusters(summaries),
   };
   return {
     version: "ai-selfplay-trace-mining-v1",

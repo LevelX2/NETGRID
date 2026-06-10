@@ -184,6 +184,11 @@ export function formatAiSelfplayTraceMiningReport(
   const detectorRows = Object.entries(result.aggregate.findingsByDetector)
     .filter(([, count]) => count > 0)
     .map(([detector, count]) => `| ${detector} | ${count} |`);
+  const actionLimitClusterRows = Object.entries(
+    result.aggregate.actionLimitClusters,
+  )
+    .filter(([, count]) => count > 0)
+    .map(([cluster, count]) => `| ${cluster} | ${count} |`);
   const topFindingRows =
     result.topFindings.length > 0
       ? result.topFindings.map(
@@ -236,6 +241,14 @@ export function formatAiSelfplayTraceMiningReport(
     "| Detector | Count |",
     "| --- | ---: |",
     ...(detectorRows.length > 0 ? detectorRows : ["| none | 0 |"]),
+    "",
+    "## Action Limit Clusters",
+    "",
+    "| Cluster | Matches |",
+    "| --- | ---: |",
+    ...(actionLimitClusterRows.length > 0
+      ? actionLimitClusterRows
+      : ["| none | 0 |"]),
     "",
     "## Top Findings",
     "",

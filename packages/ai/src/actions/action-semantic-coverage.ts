@@ -1,0 +1,318 @@
+import type {
+  ActionPrimaryProjectionStatus,
+  ActionSemanticCandidate,
+  ActionSemanticSourceKind,
+} from "../action-semantic-candidate";
+
+export const ACTION_SEMANTIC_CANDIDATE_COVERAGE_REPORT_VERSION =
+  "action-semantic-candidate-coverage-v1" as const;
+
+export const ACTION_SEMANTIC_COVERAGE_GROUPS = [
+  "basic_action",
+  "game_rule",
+  "runner_card_action",
+  "corp_card_action",
+  "choice_resolution",
+  "run_action",
+  "access_action",
+  "corp_window_action",
+  "score_action",
+  "install_action",
+  "advance_action",
+  "rez_action",
+] as const;
+
+export type ActionSemanticCoverageGroup =
+  (typeof ACTION_SEMANTIC_COVERAGE_GROUPS)[number];
+
+export type ActionSemanticTargetContextStatus =
+  | "engine_provided"
+  | "not_available"
+  | "target_context_unavailable"
+  | "missing";
+
+export type ActionSemanticCandidateCoverageRow = {
+  actionType: string;
+  semanticActionType: string;
+  primaryProjectionStatus: ActionPrimaryProjectionStatus;
+  sourceKind: ActionSemanticSourceKind;
+  hasSourceCardId: boolean;
+  hasAbilityId: boolean;
+  hasCostProfile: boolean;
+  hasTimingProfile: boolean;
+  hasTargetContext: boolean;
+  targetContextStatus: ActionSemanticTargetContextStatus;
+  usesNeutralFallback: boolean;
+  redactionSafe: boolean;
+  groups: ActionSemanticCoverageGroup[];
+};
+
+export type ActionSemanticCandidateCoverageSummary = {
+  version: typeof ACTION_SEMANTIC_CANDIDATE_COVERAGE_REPORT_VERSION;
+  totalCandidates: number;
+  redactionSafe: boolean;
+  redactionUnsafeRows: number;
+  forbiddenMarkers: string[];
+  fieldCoverage: {
+    hasSourceCardId: number;
+    hasAbilityId: number;
+    hasCostProfile: number;
+    hasTimingProfile: number;
+    hasTargetContext: number;
+    usesNeutralFallback: number;
+    redactionSafe: number;
+  };
+  actionTypes: Record<string, number>;
+  semanticActionTypes: Record<string, number>;
+  primaryProjectionStatuses: Record<string, number>;
+  sourceKinds: Record<string, number>;
+  targetContextStatuses: Record<string, number>;
+  groups: Record<ActionSemanticCoverageGroup, number>;
+  rows: ActionSemanticCandidateCoverageRow[];
+};
+
+const FORBIDDEN_REPORT_MARKERS = [
+  "cardInstances",
+  "privatePayload",
+  "sessionToken",
+  "reconnectToken",
+  "joinToken",
+  "fullGameState",
+  "AIInput",
+  "DecisionDebug",
+  "hiddenZone",
+  "hidden zone",
+  "hiddenZones",
+  "sourceCardInstanceId",
+  "CardInstance",
+] as const;
+
+export function summarizeActionSemanticCandidateCoverage(
+  candidates: readonly ActionSemanticCandidate[],
+): ActionSemanticCandidateCoverageSummary {
+  const rows = candidates.map(actionSemanticCandidateCoverageRow);
+  const summaryWithoutSafety = {
+    version: ACTION_SEMANTIC_CANDIDATE_COVERAGE_REPORT_VERSION,
+    totalCandidates: candidates.length,
+    redactionSafe: rows.every((row) => row.redactionSafe),
+    redactionUnsafeRows: rows.filter((row) => !row.redactionSafe).length,
+    forbiddenMarkers: [] as string[],
+    fieldCoverage: {
+      hasSourceCardId: countRows(rows, "hasSourceCardId"),
+      hasAbilityId: countRows(rows, "hasAbilityId"),
+      hasCostProfile: countRows(rows, "hasCostProfile"),
+      hasTimingProfile: countRows(rows, "hasTimingProfile"),
+      hasTargetContext: countRows(rows, "hasTargetContext"),
+      usesNeutralFallback: countRows(rows, "usesNeutralFallback"),
+      redactionSafe: countRows(rows, "redactionSafe"),
+    },
+    actionTypes: countBy(rows, (row) => row.actionType),
+    semanticActionTypes: countBy(rows, (row) => row.semanticActionType),
+    primaryProjectionStatuses: countBy(
+      rows,
+      (row) => row.primaryProjectionStatus,
+    ),
+    sourceKinds: countBy(rows, (row) => row.sourceKind),
+    targetContextStatuses: countBy(rows, (row) => row.targetContextStatus),
+    groups: groupCounts(rows),
+    rows,
+  };
+  const forbiddenMarkers = forbiddenMarkersIn(summaryWithoutSafety);
+  return {
+    ...summaryWithoutSafety,
+    redactionSafe:
+      summaryWithoutSafety.redactionSafe && forbiddenMarkers.length === 0,
+    redactionUnsafeRows:
+      summaryWithoutSafety.redactionUnsafeRows +
+      (forbiddenMarkers.length > 0 ? 1 : 0),
+    forbiddenMarkers,
+  };
+}
+
+export function formatActionSemanticCandidateCoverageReport(
+  summary: ActionSemanticCandidateCoverageSummary,
+): string {
+  const fieldRows = Object.entries(summary.fieldCoverage).map(
+    ([field, count]) => `| ${field} | ${count} |`,
+  );
+  const groupRows = ACTION_SEMANTIC_COVERAGE_GROUPS.map(
+    (group) => `| ${group} | ${summary.groups[group]} |`,
+  );
+  return [
+    "# Action Semantic Candidate Coverage Report",
+    "",
+    `Version: ${summary.version}`,
+    `Candidates: ${summary.totalCandidates}`,
+    `Redaction safe: ${summary.redactionSafe ? 1 : 0}`,
+    `Forbidden markers: ${summary.forbiddenMarkers.length > 0 ? summary.forbiddenMarkers.join(", ") : "none"}`,
+    "",
+    "## Field Coverage",
+    "",
+    "| Field | Count |",
+    "| --- | ---: |",
+    ...fieldRows,
+    "",
+    "## Coverage Groups",
+    "",
+    "| Group | Count |",
+    "| --- | ---: |",
+    ...groupRows,
+    "",
+    "## Projection Statuses",
+    "",
+    countMapTable(summary.primaryProjectionStatuses),
+    "",
+    "## Source Kinds",
+    "",
+    countMapTable(summary.sourceKinds),
+    "",
+    "## Target Context",
+    "",
+    countMapTable(summary.targetContextStatuses),
+  ].join("\n");
+}
+
+function actionSemanticCandidateCoverageRow(
+  candidate: ActionSemanticCandidate,
+): ActionSemanticCandidateCoverageRow {
+  const targetContextStatus: ActionSemanticTargetContextStatus =
+    candidate.targetContext?.availableTargetsStatus ?? "missing";
+  const rowWithoutSafety = {
+    actionType: candidate.actionType,
+    semanticActionType: candidate.semanticActionType,
+    primaryProjectionStatus: candidate.primaryProjectionStatus,
+    sourceKind: candidate.sourceKind,
+    hasSourceCardId: candidate.sourceCardId !== undefined,
+    hasAbilityId: candidate.abilityId !== undefined,
+    hasCostProfile: candidate.costProfile.costKnownStatus !== "unknown",
+    hasTimingProfile: candidate.timingProfile.window !== undefined,
+    hasTargetContext: candidate.targetContext !== undefined,
+    targetContextStatus,
+    usesNeutralFallback:
+      candidate.primaryProjectionStatus === "neutral_projected" ||
+      candidate.sourceKind === "unknown" ||
+      candidate.semanticActionType === "unknown",
+    groups: groupsForCandidate(candidate),
+  };
+  return {
+    ...rowWithoutSafety,
+    redactionSafe: forbiddenMarkersIn(rowWithoutSafety).length === 0,
+  };
+}
+
+function groupsForCandidate(
+  candidate: ActionSemanticCandidate,
+): ActionSemanticCoverageGroup[] {
+  const groups = new Set<ActionSemanticCoverageGroup>();
+  if (candidate.sourceKind === "basic_action") groups.add("basic_action");
+  if (candidate.sourceKind === "game_rule") groups.add("game_rule");
+  if (candidate.sourceKind === "choice" || candidate.actionType === "resolve_choice")
+    groups.add("choice_resolution");
+  if (candidate.sourceKind === "card") {
+    groups.add(
+      candidate.actorSide === "corp" ? "corp_card_action" : "runner_card_action",
+    );
+  }
+
+  if (
+    candidate.actionType === "start_run" ||
+    candidate.actionType === "continue_run" ||
+    candidate.actionType === "jack_out" ||
+    candidate.semanticActionType.startsWith("run.")
+  ) {
+    groups.add("run_action");
+  }
+  if (
+    [
+      "access_card",
+      "steal_agenda",
+      "trash_accessed_card",
+      "decline_trash",
+    ].includes(candidate.actionType) ||
+    candidate.semanticActionType.startsWith("access.")
+  ) {
+    groups.add("access_action");
+  }
+  if (
+    candidate.actorSide === "corp" &&
+    (candidate.semanticActionType.startsWith("corp_window.") ||
+      candidate.timingProfile.rezWindow === true)
+  ) {
+    groups.add("corp_window_action");
+  }
+  if (
+    candidate.actionType === "score_agenda" ||
+    candidate.semanticActionType.startsWith("score.")
+  ) {
+    groups.add("score_action");
+  }
+  if (candidate.actionType === "install_card") groups.add("install_action");
+  if (candidate.actionType === "advance_card") groups.add("advance_action");
+  if (candidate.actionType === "rez_ice" || candidate.actionType === "decline_rez")
+    groups.add("rez_action");
+
+  return [...groups].sort();
+}
+
+function countRows(
+  rows: readonly ActionSemanticCandidateCoverageRow[],
+  field: keyof Pick<
+    ActionSemanticCandidateCoverageRow,
+    | "hasSourceCardId"
+    | "hasAbilityId"
+    | "hasCostProfile"
+    | "hasTimingProfile"
+    | "hasTargetContext"
+    | "usesNeutralFallback"
+    | "redactionSafe"
+  >,
+): number {
+  return rows.filter((row) => row[field]).length;
+}
+
+function countBy<T>(
+  values: readonly T[],
+  keyFor: (value: T) => string,
+): Record<string, number> {
+  const counts: Record<string, number> = {};
+  for (const value of values) {
+    const key = keyFor(value);
+    counts[key] = (counts[key] ?? 0) + 1;
+  }
+  return sortCountMap(counts);
+}
+
+function groupCounts(
+  rows: readonly ActionSemanticCandidateCoverageRow[],
+): Record<ActionSemanticCoverageGroup, number> {
+  const counts = Object.fromEntries(
+    ACTION_SEMANTIC_COVERAGE_GROUPS.map((group) => [group, 0]),
+  ) as Record<ActionSemanticCoverageGroup, number>;
+  for (const row of rows) {
+    for (const group of row.groups) counts[group] += 1;
+  }
+  return counts;
+}
+
+function countMapTable(counts: Record<string, number>): string {
+  const rows = Object.entries(counts).map(
+    ([key, count]) => `| ${key} | ${count} |`,
+  );
+  return ["| Value | Count |", "| --- | ---: |", ...rows].join("\n");
+}
+
+function forbiddenMarkersIn(value: unknown): string[] {
+  const serialized = JSON.stringify(value);
+  return FORBIDDEN_REPORT_MARKERS.filter((marker) =>
+    serialized.includes(marker),
+  );
+}
+
+function sortCountMap(counts: Record<string, number>): Record<string, number> {
+  return Object.fromEntries(
+    Object.entries(counts).sort(
+      ([leftKey, leftCount], [rightKey, rightCount]) =>
+        rightCount - leftCount || leftKey.localeCompare(rightKey),
+    ),
+  );
+}

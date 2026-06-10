@@ -7263,6 +7263,131 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     expect(decision.actionId).toBe(score.actionId);
     expect(doctrineWeight?.value).toBe(240);
     expect(String(doctrineWeight?.reason)).toContain("plan:score_now");
+    expect(String(doctrineWeight?.reason)).toContain("bounded:24");
+    expect(String(doctrineWeight?.reason)).toContain("consumer:corp_score_now");
+    expect(String(doctrineWeight?.reason)).toContain("clamp:24");
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
+  it("clamps doctrine runtime weights by Corp score-next-turn consumer", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-semantic-doctrine-score-next-turn-clamp",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+      },
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(advance).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!advance || !gain)
+      throw new Error("Missing doctrine score-next-turn fixture actions");
+
+    const doctrine = corpDoctrineForTest(
+      "semantic-score-next-turn-clamp",
+      ["rush"],
+      { score_next_turn: 24 },
+    );
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction(
+      { ...input, ownDeckDoctrine: doctrine, legalActions: [advance, gain] },
+      { persistTacticalPlanMemory: false },
+    );
+    const advanceAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === advance.actionId,
+    );
+    const doctrineWeight = advanceAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "deck_doctrine_runtime_weight",
+    );
+
+    expect(decision.actionId).toBe(advance.actionId);
+    expect(doctrineWeight?.value).toBe(180);
+    expect(String(doctrineWeight?.reason)).toContain("plan:score_next_turn");
+    expect(String(doctrineWeight?.reason)).toContain("raw:24");
+    expect(String(doctrineWeight?.reason)).toContain("bounded:18");
+    expect(String(doctrineWeight?.reason)).toContain(
+      "consumer:corp_score_next_turn",
+    );
+    expect(String(doctrineWeight?.reason)).toContain("clamp:18");
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
+  it("suppresses score now doctrine when score is unsafe", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-semantic-doctrine-scoreline-unsafe",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 8;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 3);
+        moveCorpCardToHq(state, "simple_barrier_ice");
+      },
+    );
+    const score = input.legalActions.find(
+      (action) => action.type === "score_agenda",
+    );
+    const protect = input.legalActions.find(
+      (action) =>
+        action.type === "install_card" &&
+        action.payload?.placement === "ice" &&
+        action.payload?.serverId === "remote_1",
+    );
+    expect(score).toBeDefined();
+    expect(protect).toBeDefined();
+    if (!score || !protect)
+      throw new Error("Missing unsafe scoreline fixture actions");
+
+    const doctrine = corpDoctrineForTest(
+      "semantic-scoreline-unsafe",
+      ["rush"],
+      { score_now: 24 },
+    );
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction(
+      { ...input, ownDeckDoctrine: doctrine, legalActions: [score, protect] },
+      { persistTacticalPlanMemory: false },
+    );
+    const scoreAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === score.actionId,
+    );
+    const doctrineWeight = scoreAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "deck_doctrine_runtime_weight",
+    );
+    const suppressed = scoreAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "deck_doctrine_runtime_weight_suppressed",
+    );
+    const safetyGate = scoreAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "corp_scoreline_safety_gate_blocks_doctrine",
+    );
+
+    expect(input.legalActions.map((action) => action.actionId)).toContain(
+      score.actionId,
+    );
+    expect(doctrineWeight).toBeUndefined();
+    expect(String(suppressed?.reason)).toContain(
+      "corp_scoreline_safety_gate_blocks_doctrine:true",
+    );
+    expect(String(suppressed?.reason)).toContain(
+      "score_now_doctrine_suppressed:true",
+    );
+    expect(safetyGate?.value).toBeLessThan(0);
+    expect(String(safetyGate?.reason)).toMatch(
+      /unsafe_score_(runner_access_threat_high|unprotected_remote|cheap_contest_available)/,
+    );
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );
@@ -13773,6 +13898,158 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("penalizes repeated runner low-value recovery without funding need", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-low-value-recovery-repeat",
+      (state) => {
+        state.runner.credits = 6;
+        moveRunnerResourceToRig(state, "onr_v1_165_junkyard-bbs");
+        const heapCard = findCard(state, "simple_economy_event");
+        removeEverywhere(state, heapCard);
+        state.runner.heap.unshift(heapCard);
+        state.cardInstances[heapCard] = {
+          ...state.cardInstances[heapCard]!,
+          zone: { side: "runner", zone: "heap" },
+          faceup: true,
+        };
+      },
+      {
+        runnerDeck: {
+          id: "ai_low_value_recovery_runner",
+          name: "AI Low Value Recovery Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_165_junkyard-bbs", quantity: 1 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const recovery = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_165_junkyard-bbs",
+    );
+    const draw = input.legalActions.find((action) => action.type === "draw_card");
+    expect(recovery).toBeDefined();
+    expect(draw).toBeDefined();
+    if (!recovery || !draw)
+      throw new Error("Missing low-value recovery fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseRunnerAction(
+      {
+        ...input,
+        eventTail: [
+          ...input.eventTail,
+          syntheticPlanActionEvent(
+            "runner-prior-low-value-recovery",
+            input.playerView.stateVersion + 1,
+            "runner",
+            "activated_card_ability",
+            undefined,
+            {
+              label: "Junkyard BBS recovery",
+              sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+            },
+          ),
+        ],
+        legalActions: [recovery, draw],
+      },
+      { persistTacticalPlanMemory: false },
+    );
+    const recoveryAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === recovery.actionId,
+      );
+    const recoveryPenalty = recoveryAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "runner_low_value_recovery_repeat",
+    );
+
+    expect(recoveryPenalty?.value).toBeLessThan(0);
+    expect(recoveryPenalty?.reason).toContain("funding_need:false");
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
+  it("keeps repeated runner recovery when a real funding need remains", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-funded-recovery-repeat",
+      (state) => {
+        state.runner.credits = 1;
+        moveRunnerResourceToRig(state, "onr_v1_165_junkyard-bbs");
+        const heapCard = findCard(state, "simple_economy_event");
+        removeEverywhere(state, heapCard);
+        state.runner.heap.unshift(heapCard);
+        state.cardInstances[heapCard] = {
+          ...state.cardInstances[heapCard]!,
+          zone: { side: "runner", zone: "heap" },
+          faceup: true,
+        };
+      },
+      {
+        runnerDeck: {
+          id: "ai_funded_recovery_runner",
+          name: "AI Funded Recovery Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_165_junkyard-bbs", quantity: 1 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+      },
+    );
+    const recovery = input.legalActions.find(
+      (action) =>
+        action.type === "activated_card_ability" &&
+        sourceDefinitionFromInput(input, action) === "onr_v1_165_junkyard-bbs",
+    );
+    const draw = input.legalActions.find((action) => action.type === "draw_card");
+    expect(recovery).toBeDefined();
+    expect(draw).toBeDefined();
+    if (!recovery || !draw)
+      throw new Error("Missing funded recovery fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseRunnerAction(
+      {
+        ...input,
+        eventTail: [
+          ...input.eventTail,
+          syntheticPlanActionEvent(
+            "runner-prior-funded-recovery",
+            input.playerView.stateVersion + 1,
+            "runner",
+            "activated_card_ability",
+            undefined,
+            {
+              label: "Junkyard BBS recovery",
+              sourceDefinitionId: "onr_v1_165_junkyard-bbs",
+            },
+          ),
+        ],
+        legalActions: [recovery, draw],
+      },
+      { persistTacticalPlanMemory: false },
+    );
+    const recoveryAlternative =
+      decision.decisionDebug?.actionAlternatives?.find(
+        (alternative) => alternative.actionId === recovery.actionId,
+      );
+
+    expect(
+      recoveryAlternative?.scoreBreakdown?.some(
+        (component) => component.key === "runner_low_value_recovery_repeat",
+      ),
+    ).toBe(false);
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
   it("surfaces action semantic candidate evidence in semantic runtime choices", () => {
     const input = runnerActionPhaseInput(
       "ai-runner-action-semantic-runtime-bridge",
@@ -13842,8 +14119,13 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
 
     expect(decision.actionId).toBe(rdRun.actionId);
-    expect(doctrineWeight?.value).toBe(240);
+    expect(doctrineWeight?.value).toBe(120);
     expect(String(doctrineWeight?.reason)).toContain("plan:pressure_rnd");
+    expect(String(doctrineWeight?.reason)).toContain("bounded:12");
+    expect(String(doctrineWeight?.reason)).toContain(
+      "consumer:runner_pressure_rnd",
+    );
+    expect(String(doctrineWeight?.reason)).toContain("clamp:12");
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );
@@ -13855,7 +14137,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
       (state) => {
         state.runner.credits = 5;
         ensureRemoteServer(state, "remote_1");
-        putCorpRootInRemote(state, "simple_economy_asset", 0);
+        putCorpRootInRemote(state, "simple_agenda", 2);
       },
     );
     const remoteRun = input.legalActions.find(
@@ -13888,8 +14170,109 @@ describe("V1.4.1 plan-based Runner AI", () => {
       (component) => component.key === "deck_doctrine_runtime_weight",
     );
 
-    expect(doctrineWeight?.value).toBe(180);
+    expect(doctrineWeight?.value).toBe(90);
     expect(String(doctrineWeight?.reason)).toContain("plan:contest_remote");
+    expect(String(doctrineWeight?.reason)).toContain("bounded:9");
+    expect(String(doctrineWeight?.reason)).toContain(
+      "consumer:runner_contest_remote",
+    );
+    expect(String(doctrineWeight?.reason)).toContain("clamp:9");
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
+  it("suppresses remote contest doctrine on known no-payoff remotes", () => {
+    const input = knownRemoteRootMemoryInput(
+      "ai-runner-doctrine-known-no-payoff-remote",
+      "onr_v1_311_braindance-campaign",
+      5,
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    expect(remoteRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!remoteRun || !gain)
+      throw new Error("Missing known no-payoff doctrine fixture actions");
+
+    const doctrine = runnerDoctrineForTest(
+      "semantic-known-no-payoff-remote",
+      ["remote_contest"],
+      { contest_remote: 24 },
+    );
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseRunnerAction(
+      { ...input, ownDeckDoctrine: doctrine, legalActions: [remoteRun, gain] },
+      { persistTacticalPlanMemory: false },
+    );
+    const runAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === remoteRun.actionId,
+    );
+    const doctrineWeight = runAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "deck_doctrine_runtime_weight",
+    );
+    const suppressed = runAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "deck_doctrine_runtime_weight_suppressed",
+    );
+
+    expect(doctrineWeight).toBeUndefined();
+    expect(suppressed?.value).toBe(0);
+    expect(String(suppressed?.reason)).toContain(
+      "runner_known_remote_no_payoff_guard:true",
+    );
+    expect(String(suppressed?.reason)).toContain(
+      "deck_doctrine_remote_contest_suppressed:true",
+    );
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
+  it("keeps remote contest doctrine on plausible scoring remotes", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-doctrine-plausible-scoring-remote",
+      (state) => {
+        state.runner.credits = 6;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    expect(remoteRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!remoteRun || !gain)
+      throw new Error("Missing plausible doctrine fixture actions");
+
+    const doctrine = runnerDoctrineForTest(
+      "semantic-plausible-scoring-remote",
+      ["remote_contest"],
+      { contest_remote: 18 },
+    );
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseRunnerAction(
+      { ...input, ownDeckDoctrine: doctrine, legalActions: [remoteRun, gain] },
+      { persistTacticalPlanMemory: false },
+    );
+    const runAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === remoteRun.actionId,
+    );
+    const doctrineWeight = runAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "deck_doctrine_runtime_weight",
+    );
+
+    expect(doctrineWeight?.value).toBe(90);
+    expect(String(doctrineWeight?.reason)).toContain("plan:contest_remote");
+    expect(String(doctrineWeight?.reason)).toContain("bounded:9");
+    expect(String(doctrineWeight?.reason)).toContain(
+      "consumer:runner_contest_remote",
+    );
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );
