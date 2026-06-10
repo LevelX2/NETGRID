@@ -302,3 +302,22 @@ Checks:
 - Grün: `corepack pnpm --filter @netgrid/engine typecheck`
 - Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/definition-descriptors.test.ts src/game/hidden-zone/search-choice-builders.test.ts src/game/hidden-zone/search-choice-handlers.test.ts src/game/hidden-zone/search-choice-resolvers.test.ts src/game/hidden-zone/search-choice-move-intents.test.ts src/game/hidden-zone/topn-move-intents.test.ts src/game/card-implementation/hidden-zone-runtime-deps.test.ts`
 - Grün: `git diff --check`
+
+### F4 Ergebnis
+
+Umgesetzt:
+
+- `microtech_backup_drive_program_trash_replacement` als CardImplementation-Definition-`kind` durch `replace_installed_program_trash_with_host_on_source` ersetzt.
+- Runtime-Erkennung in `state-runtime-resolvers.ts` und `lifecycle-runtime.ts` auf den generischen Definition-`kind` umgestellt.
+
+Nicht geändert:
+
+- Microtech-spezifische LegalAction-Payloads wie `microtech_backup_drive_return_top_hosted`.
+- Existing Hosted-Recovery-Verhalten, top-hosted-card-Regel, Leave-Play-Cleanup und PublicPayloads.
+
+Checks:
+
+- Grün: keine alten `microtech_backup_drive_program_trash_replacement`-Referenzen in `packages/engine/src`.
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/abilities/run-fort-trigger-execution.test.ts src/index-tests/mechanics/per-card-longtail.test.ts -t Microtech`
+- Grün: `git diff --check`

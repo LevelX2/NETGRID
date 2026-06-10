@@ -223,7 +223,7 @@ export type CardHiddenReplacementLongtailImplementation =
 
 export type CardRunnerUtilityLongtailImplementation =
   | {
-      kind: "microtech_backup_drive_program_trash_replacement";
+      kind: "replace_installed_program_trash_with_host_on_source";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
