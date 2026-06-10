@@ -280,3 +280,30 @@ Checks:
 - Grün: keine alten `ice_transmutation_rezzed_ice_modifier`-Referenzen in `packages/engine/src` oder `scripts`.
 - Grün: `corepack pnpm --filter @netgrid/engine typecheck`
 - Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/scored-agenda-flow.test.ts src/game/corp/scored-agenda-abilities.test.ts src/index-tests/mechanics/agenda-global-random.test.ts src/game/engine-runtime-internal/card-runtime-deps-hosts.test.ts src/game/view/card-view.test.ts`
+
+### P3 Ergebnis
+
+Umgesetzt:
+
+- `CardScoredAgendaImplementation` enthält jetzt den parametrisierten Vertrag `score_install_hq_cards_into_new_remote_then_rez`.
+- `Data Fort Reclamation` nutzt diesen Vertrag mit `sourceZone: "hq"`, `targetServer: "new_remote"`, `allowedCards: "corp_installable"`, `maxCards: 4`, `temporaryCredits.amount: 10` und `optionalRez: true`.
+- `install-rez-sequence-handlers.ts` liest den generischen Vertrag beim Choice-Start und bei beiden Choice-Resolutionen erneut aus der gescorten Agenda.
+- Die Rez-Choice revalidiert nun auch den temporären Credit-Wert aus der Choice-Source gegen den Scored-Agenda-Vertrag.
+- `scripts/check-ai-derived-facts.mjs` erkennt den neuen Hidden-Zone-Install-/Rez-Sequenzvertrag.
+
+Bewusst stabil gelassen:
+
+- Choice- und Payload-Präfixe `v1922.data_fort_reclamation`, `v1922_data_fort_reclamation_hq_choice`, `v1922_data_fort_reclamation_install_sequence` und `v1922_data_fort_reclamation_rez_sequence`.
+- Die öffentlichen Payload-Zusammenfassungen bleiben count-basiert und enthalten keine verdeckten HQ-Kartenidentitäten.
+- Die Regelentscheidung `10` temporäre Credits bleibt verbindlich; ein Test mit künstlichem `:5`-Source-Wert wurde auf Vertragsrevalidierung umgestellt.
+
+Verwandte Nutzer:
+
+- `Priority Requisition`, `Hijack`, `Test Spin` und Pavit-artige Fort-Replacement-Pfade nutzen verwandte Install-/Rez- oder Hidden-Zone-Bausteine, aber nicht denselben mehrstufigen Scored-Agenda-Sequenzvertrag.
+
+Checks:
+
+- Grün: keine alten `kind: "data_fort_reclamation"`-Definitionen in `packages/engine/src` oder `scripts`.
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/install-rez-sequence-handlers.test.ts src/game/corp/scored-agenda-flow.test.ts src/index-tests/mechanics/per-card-longtail.test.ts -t "Data Fort Reclamation|corp install rez sequence handlers|scored agenda flow"`
+- Grün mit Zeilenendungswarnung: `git diff --check`

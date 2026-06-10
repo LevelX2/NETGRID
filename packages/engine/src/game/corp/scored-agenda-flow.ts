@@ -80,7 +80,7 @@ export type ScoredAgendaFlowHost = {
     drawCorpCard: () => void;
   };
   choices: {
-    startDataFortReclamation: (cardId: CardInstanceId) => void;
+  startDataFortReclamation: (cardId: CardInstanceId) => void;
     startPriorityRequisition: (cardId: CardInstanceId) => void;
     startCorporateDownsizing: (
       cardId: CardInstanceId,
@@ -363,7 +363,7 @@ function startScoreTimeChoices(
 ): void {
   const legalAction = host.legalAction;
   if (!legalAction) return;
-  if (scoredAgenda?.kind === "data_fort_reclamation") {
+  if (scoredAgenda?.kind === "score_install_hq_cards_into_new_remote_then_rez") {
     host.choices.startDataFortReclamation(cardId);
   }
   if (scoredAgenda?.kind === "select_rezzed_ice_mark_modifier") {

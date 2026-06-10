@@ -848,9 +848,17 @@ export type CardScoredAgendaImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "data_fort_reclamation";
-      temporaryCredits: 10;
-      maxHqCards: 4;
+      kind: "score_install_hq_cards_into_new_remote_then_rez";
+      sourceZone: "hq";
+      targetServer: "new_remote";
+      allowedCards: "corp_installable";
+      maxCards: number;
+      temporaryCredits: {
+        amount: number;
+        usableFor: "rez_installed_cards_from_sequence";
+        returnUnused: true;
+      };
+      optionalRez: true;
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 

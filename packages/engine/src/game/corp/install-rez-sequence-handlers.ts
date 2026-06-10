@@ -9,8 +9,13 @@ import type {
   PlayerAction,
   ServerId,
 } from "@netgrid/shared";
+import type { CardScoredAgendaImplementation } from "../../ability-engine/definition-types";
 
 type SequencePayload = Record<string, string | number | boolean>;
+type HqToNewRemoteInstallRezSequence = Extract<
+  CardScoredAgendaImplementation,
+  { kind: "score_install_hq_cards_into_new_remote_then_rez" }
+>;
 
 export type CorpInstallRezSequenceHandlerHost = {
   state: Pick<
@@ -23,6 +28,9 @@ export type CorpInstallRezSequenceHandlerHost = {
     definitionFor: (cardId: CardInstanceId) => CardDefinition;
     mustInstance: (cardId: CardInstanceId) => CardInstance;
     scoredAgendaKind: (cardId: CardInstanceId) => string | undefined;
+    scoredAgendaForCard: (
+      cardId: CardInstanceId,
+    ) => CardScoredAgendaImplementation | undefined;
     isCorpInstallableCardType: (definition: CardDefinition) => boolean;
     canInstallCorpRootCardInServer: (
       definition: CardDefinition,
@@ -46,6 +54,28 @@ export type CorpInstallRezSequenceHandlerHost = {
     resolveCorpRootRez: (cardId: CardInstanceId) => void;
   };
 };
+
+function hqToNewRemoteInstallRezSequence(
+  host: CorpInstallRezSequenceHandlerHost,
+  agendaId: CardInstanceId,
+): HqToNewRemoteInstallRezSequence {
+  const sequence = host.cards.scoredAgendaForCard(agendaId);
+  if (
+    sequence?.kind !== "score_install_hq_cards_into_new_remote_then_rez" ||
+    sequence.sourceZone !== "hq" ||
+    sequence.targetServer !== "new_remote" ||
+    sequence.allowedCards !== "corp_installable" ||
+    !Number.isInteger(sequence.maxCards) ||
+    sequence.maxCards < 0 ||
+    sequence.temporaryCredits.amount < 0 ||
+    sequence.temporaryCredits.usableFor !==
+      "rez_installed_cards_from_sequence" ||
+    sequence.temporaryCredits.returnUnused !== true ||
+    sequence.optionalRez !== true
+  )
+    throw new Error("Der Hidden-Zone-Install-/Rez-Sequenzvertrag ist ungueltig.");
+  return sequence;
+}
 
 export type CorpInstallRezSequenceHandlerResult = {
   handled: boolean;
@@ -184,6 +214,7 @@ export function startDataFortReclamationChoice(
   host: CorpInstallRezSequenceHandlerHost,
   agendaId: CardInstanceId,
 ): CorpInstallRezSequenceHandlerResult {
+  const sequence = hqToNewRemoteInstallRezSequence(host, agendaId);
   if (host.state.pendingChoice) throw new Error("Es ist bereits eine Choice offen.");
   const options = host.state.corp.hq
     .filter((cardId) =>
@@ -211,7 +242,7 @@ export function startDataFortReclamationChoice(
     kind: "select_cards",
     options,
     minSelections: 0,
-    maxSelections: Math.min(4, options.length),
+    maxSelections: Math.min(sequence.maxCards, options.length),
     stateVersion: host.state.stateVersion + 1,
     visibility: "hidden_info_barrier",
   };
@@ -220,7 +251,7 @@ export function startDataFortReclamationChoice(
     v1922CorpAgendaAbility: "data_fort_reclamation",
     dataFortReclamationChoiceOpened: true,
     dataFortReclamationCandidateCount: options.length,
-    dataFortReclamationMaxSelections: Math.min(4, options.length),
+    dataFortReclamationMaxSelections: Math.min(sequence.maxCards, options.length),
     hiddenZoneBarrier: true,
     hiddenZoneAction: "v1922_data_fort_reclamation_hq_choice",
   };
@@ -318,11 +349,18 @@ function resolveDataFortReclamationChoice(
     !agendaId ||
     !host.state.corp.scoreArea.includes(agendaId as CardInstanceId) ||
     host.cards.scoredAgendaKind(agendaId as CardInstanceId) !==
-      "data_fort_reclamation"
+      "score_install_hq_cards_into_new_remote_then_rez"
   )
     throw new Error("Data Fort Reclamation ist nicht gescored.");
+  const sequence = hqToNewRemoteInstallRezSequence(
+    host,
+    agendaId as CardInstanceId,
+  );
   const selectedIds = selectedChoiceCardIds(host, choice);
-  if (selectedIds.length > choice.maxSelections)
+  if (
+    selectedIds.length > choice.maxSelections ||
+    selectedIds.length > sequence.maxCards
+  )
     throw new Error("Data Fort Reclamation darf hoechstens vier HQ-Karten waehlen.");
   const selectedSet = new Set(selectedIds);
   if (selectedSet.size !== selectedIds.length)
@@ -371,6 +409,7 @@ function resolveDataFortReclamationChoice(
   const rezCandidates = installedIds.filter((cardId) =>
     isDataFortReclamationRezCandidate(host, cardId, server.id),
   );
+  const temporaryCreditAmount = sequence.temporaryCredits.amount;
   delete host.state.pendingChoice;
   host.legalAction.payload = {
     ...(host.legalAction.payload ?? {}),
@@ -381,10 +420,10 @@ function resolveDataFortReclamationChoice(
     installedIceCount,
     installedRootCount,
     createdServerId: server.id,
-    temporaryCreditsProvided: 10,
+    temporaryCreditsProvided: temporaryCreditAmount,
     temporaryCreditsSpent: 0,
     corpCreditsSpent: 0,
-    temporaryCreditsRemaining: 10,
+    temporaryCreditsRemaining: temporaryCreditAmount,
     dataFortReclamationRezChoiceOpened: rezCandidates.length > 0,
     dataFortReclamationRezCandidateCount: rezCandidates.length,
   };
@@ -392,7 +431,7 @@ function resolveDataFortReclamationChoice(
     host.state.pendingChoice = {
       choiceId: `choice_v1922_data_fort_reclamation_rez_${host.state.stateVersion + 1}`,
       side: "corp",
-      source: `v1922.data_fort_reclamation_rez:${agendaId}:${server.id}:10:${host.state.stateVersion + 1}`,
+      source: `v1922.data_fort_reclamation_rez:${agendaId}:${server.id}:${temporaryCreditAmount}:${host.state.stateVersion + 1}`,
       prompt: "Data Fort Reclamation: installierte Karten rezzen.",
       kind: "select_cards",
       options: rezCandidates.sort().map((cardId) => {
@@ -412,8 +451,10 @@ function resolveDataFortReclamationChoice(
     createdServerId: server.id,
     selectedCardIds: selectedIds,
     installedCardIds: installedIds,
-    temporaryCreditsGranted: 10,
-    ...(rezCandidates.length === 0 ? { temporaryCreditsReturned: 10 } : {}),
+    temporaryCreditsGranted: temporaryCreditAmount,
+    ...(rezCandidates.length === 0
+      ? { temporaryCreditsReturned: temporaryCreditAmount }
+      : {}),
     resolvedPayload: host.legalAction.payload ?? {},
   };
 }
@@ -431,14 +472,18 @@ function resolveDataFortReclamationRezChoice(
     !agendaId ||
     !host.state.corp.scoreArea.includes(agendaId as CardInstanceId) ||
     host.cards.scoredAgendaKind(agendaId as CardInstanceId) !==
-      "data_fort_reclamation"
+      "score_install_hq_cards_into_new_remote_then_rez"
   )
     throw new Error("Data Fort Reclamation ist nicht gescored.");
-  host.servers.mustServer(serverId);
-  let temporaryCreditsRemaining = Math.max(
-    0,
-    Math.floor(Number(temporaryCreditText)),
+  const sequence = hqToNewRemoteInstallRezSequence(
+    host,
+    agendaId as CardInstanceId,
   );
+  host.servers.mustServer(serverId);
+  const temporaryCreditAmount = sequence.temporaryCredits.amount;
+  if (Math.floor(Number(temporaryCreditText)) !== temporaryCreditAmount)
+    throw new Error("Die temporaeren Rez-Credits passen nicht zur Agenda.");
+  let temporaryCreditsRemaining = temporaryCreditAmount;
   const selectedIds = selectedChoiceCardIds(host, choice);
   const selectedSet = new Set(selectedIds);
   if (selectedSet.size !== selectedIds.length)
@@ -491,7 +536,7 @@ function resolveDataFortReclamationRezChoice(
     rezzedCount: rezzedIceCount + rezzedRootCount,
     rezzedIceCount,
     rezzedRootCount,
-    temporaryCreditsProvided: 10,
+    temporaryCreditsProvided: temporaryCreditAmount,
     temporaryCreditsSpent,
     temporaryCreditsRemaining,
     corpCreditsSpent,
@@ -502,7 +547,7 @@ function resolveDataFortReclamationRezChoice(
     stateChanged: true,
     deletePendingChoice: true,
     rezzedCardIds: selectedIds,
-    temporaryCreditsGranted: 10,
+    temporaryCreditsGranted: temporaryCreditAmount,
     temporaryCreditsReturned: temporaryCreditsRemaining,
     resolvedPayload: host.legalAction.payload ?? {},
   };
