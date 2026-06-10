@@ -707,6 +707,28 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       "ICE 1 in Research and Development rezzen",
       "ICE 1 in Research and Development trashen",
     ]);
+    const rezzedDrift = structuredClone(state);
+    rezzedDrift.cardInstances[rdIce] = {
+      ...rezzedDrift.cardInstances[rdIce]!,
+      rezzed: true,
+      faceup: true,
+    };
+    const rezzedDriftResult = applyAction(rezzedDrift, {
+      matchId: rezzedDrift.matchId,
+      side: "corp",
+      actionId: mustAction(
+        rezzedDrift,
+        "corp",
+        (action) => action.type === "resolve_choice",
+      ).actionId,
+      clientKnownStateVersion: rezzedDrift.stateVersion,
+      idempotencyKey: "spotcheck-forged-rezzed-target",
+      selectedChoices: {
+        choiceId: rezzedDrift.pendingChoice?.choiceId,
+        selectedOptionIds: ["trash_ice"],
+      },
+    });
+    expect(rezzedDriftResult.ok).toBe(false);
     const drifted = structuredClone(state);
     removeEverywhere(drifted, rdIce);
     const driftResult = applyAction(drifted, {
