@@ -343,3 +343,34 @@ Checks:
 - Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/assets-nodes-upgrades.test.ts src/index-tests/originalset/corp-assets-upgrades-operations.test.ts -t Rescheduler`
 - Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/assets-nodes-upgrades.test.ts src/index-tests/originalset/corp-assets-upgrades-operations.test.ts -t Cowboy`
 - Grün: `git diff --check`
+
+### F6 Ergebnis
+
+Entscheidung: kein Code-Schnitt in diesem Paket.
+
+Betroffene aktuelle Definition-`kind`s:
+
+- `hidden_resource_successful_hq_run_corp_lose_credits`
+- `hidden_resource_successful_remote_run_trash_fort`
+
+Blocker:
+
+- Beide Followups sind nicht nur "nach erfolgreichem Run" generisch. Sie hängen an Hidden-Resource-Reveal, Tap-Kosten, Run-Phase `access`, Timing `immediately_after_successful_run_before_access`, Serverklasse und anschließender Access-Fortsetzung.
+- Die Runtime-Funktionen `resolveHiddenSuccessfulRunCorpLoseCredits` und `resolveHiddenSuccessfulRunTrashRemoteFort` validieren diese Kopplung explizit und schreiben Hidden-Zone-Payloads.
+- Eine bloße Umbenennung des `kind`s würde die Kartenbenennung reduzieren, aber keinen tragfähigen generischen Vertrag schaffen.
+
+Removal Condition:
+
+- Ein neuer Definitionstyp `successful_run_before_access_effect` oder gleichwertig beschreibt mindestens:
+  - erlaubte Server (`hq`, `remote`, optional zentrale Server);
+  - Quelle und Kosten (`hidden_runner_resource_reveal_and_tap`, `tap_source`, `credit`, `none`);
+  - Effekt (`corp_lose_credits`, `trash_remote_root_and_ice`, weitere);
+  - Access-Fortsetzung oder Access-Replacement;
+  - PublicPayload-/Hidden-Zone-Payload-Felder;
+  - einmalige Nutzung pro Run.
+- Dazu braucht es Tests für LegalAction-Erzeugung, stale source, falschen Server, bereits getappte Quelle, Hidden-Info-Payload, Replay und StateHash.
+
+Checks:
+
+- Kein Code geändert.
+- Blocker bewusst dokumentiert; Folgepakete dürfen nicht still neue Successful-Run-Semantik einführen.
