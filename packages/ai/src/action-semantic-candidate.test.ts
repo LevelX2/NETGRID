@@ -576,6 +576,56 @@ describe("buildActionSemanticCandidates", () => {
     expect(explicit.projectionIssues).not.toContain("ability_unresolved");
   });
 
+  it("does not materialize TargetProfile matches without legal target evidence", () => {
+    const [candidate] = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("activated_card_ability", 0, {
+          source: "profile-only-instance",
+          payload: { sourceDefinitionId: "profile-only-card" },
+          abilityRef: {
+            sourceCardInstanceId: "profile-only-instance",
+            abilityId: "ability.profile_only",
+          },
+        }),
+      ],
+      cardSemanticProfilesByDefinitionId: {
+        "profile-only-card": {
+          cardId: "profile-only-card",
+          tacticSignals: [],
+          abilitySemantics: [
+            {
+              abilityId: "ability.profile_only",
+              tacticSignals: [],
+              targetProfileMatches: [
+                {
+                  targetProfileId: "tp.profile_only_remote",
+                  status: "matched",
+                  issues: [],
+                  evidence: [
+                    "Profile-only target classification must stay diagnostic",
+                  ],
+                },
+              ],
+            },
+          ],
+        },
+      },
+    });
+
+    if (!candidate) throw new Error("Expected profile-only target candidate");
+    const targetContextGate = candidate.hardGates.find(
+      (gate) => gate.gateId === "target_context",
+    );
+
+    expect(candidate.sourceDefinitionId).toBe("profile-only-card");
+    expect(candidate.targetContext).toBeUndefined();
+    expect(targetContextGate?.status).toBe("not_applicable");
+    expect(candidate.projectionIssues).not.toContain(
+      "target_context_unavailable",
+    );
+    expect(JSON.stringify(candidate)).not.toContain("tp.profile_only_remote");
+  });
+
   it("prefers sourceCardInstanceId over the legacy sourceCardId binding alias", () => {
     const [candidate] = buildActionSemanticCandidates({
       legalActions: [
