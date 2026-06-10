@@ -7374,6 +7374,11 @@ function semanticRuntimeRunnerScoreComponents(
   }
   if (action.type === "start_run") {
     const serverId = semanticRuntimeServerId(action);
+    const doctrineWeight = semanticRuntimeRunnerDoctrineRunWeight(
+      input,
+      serverId,
+    );
+    if (doctrineWeight) components.push(doctrineWeight);
     const server = input.playerView.servers.find(
       (entry) => entry.id === serverId,
     );
@@ -9276,6 +9281,53 @@ function semanticRuntimeRunnerRunProgressEvent(actionType: string): boolean {
   );
 }
 
+function semanticRuntimeRunnerDoctrineRunWeight(
+  input: AiDecisionInput,
+  serverId: string | undefined,
+): AiDecisionScoreComponent | undefined {
+  if (input.side !== "runner" || input.ownDeckDoctrine?.side !== "runner")
+    return undefined;
+  const planKey =
+    serverId === "rd"
+      ? "pressure_rnd"
+      : serverId === "hq"
+        ? "pressure_hq"
+        : isRemoteServerTarget(serverId)
+          ? "contest_remote"
+          : undefined;
+  if (!planKey) return undefined;
+  return semanticRuntimeDoctrinePlanWeightComponent(input, planKey);
+}
+
+function semanticRuntimeCorpDoctrineWeight(
+  input: AiDecisionInput,
+  planKey: string,
+): AiDecisionScoreComponent | undefined {
+  if (input.side !== "corp" || input.ownDeckDoctrine?.side !== "corp")
+    return undefined;
+  return semanticRuntimeDoctrinePlanWeightComponent(input, planKey);
+}
+
+function semanticRuntimeDoctrinePlanWeightComponent(
+  input: AiDecisionInput,
+  planKey: string,
+): AiDecisionScoreComponent | undefined {
+  const raw = input.ownDeckDoctrine?.planWeights[planKey] ?? 0;
+  const bounded = Math.max(-24, Math.min(24, raw));
+  const value = Math.round(bounded * 10);
+  if (value === 0) return undefined;
+  return {
+    key: "deck_doctrine_runtime_weight",
+    label: "DeckDoctrine-Runtime-Gewicht",
+    value,
+    reason: [
+      `plan:${planKey}`,
+      `raw:${raw}`,
+      `tags:${input.ownDeckDoctrine?.archetypeTags.slice(0, 3).join(",") ?? "neutral"}`,
+    ].join("|"),
+  };
+}
+
 function semanticRuntimeCorpScore(
   input: AiDecisionInput,
   action: LegalAction,
@@ -9300,6 +9352,11 @@ function semanticRuntimeCorpScoreComponents(
       value: 1200,
       reason: "score_agenda",
     });
+    const doctrineWeight = semanticRuntimeCorpDoctrineWeight(
+      input,
+      "score_now",
+    );
+    if (doctrineWeight) components.push(doctrineWeight);
   }
   if (action.type === "advance_card") {
     components.push({
@@ -9308,6 +9365,11 @@ function semanticRuntimeCorpScoreComponents(
       value: 600,
       reason: "advance_card",
     });
+    const doctrineWeight = semanticRuntimeCorpDoctrineWeight(
+      input,
+      "score_next_turn",
+    );
+    if (doctrineWeight) components.push(doctrineWeight);
     const remoteScore = semanticRuntimeCorpAdvanceRemoteScore(input, action);
     if (remoteScore !== 0) {
       components.push({
@@ -9335,6 +9397,11 @@ function semanticRuntimeCorpScoreComponents(
         value: 550,
         reason: "score_line",
       });
+      const doctrineWeight = semanticRuntimeCorpDoctrineWeight(
+        input,
+        "build_scoring_remote",
+      );
+      if (doctrineWeight) components.push(doctrineWeight);
     }
     if (
       action.payload?.placement === "ice" ||
