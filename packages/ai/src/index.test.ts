@@ -14047,6 +14047,98 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("suppresses remote contest doctrine on known no-payoff remotes", () => {
+    const input = knownRemoteRootMemoryInput(
+      "ai-runner-doctrine-known-no-payoff-remote",
+      "onr_v1_311_braindance-campaign",
+      5,
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    expect(remoteRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!remoteRun || !gain)
+      throw new Error("Missing known no-payoff doctrine fixture actions");
+
+    const doctrine = runnerDoctrineForTest(
+      "semantic-known-no-payoff-remote",
+      ["remote_contest"],
+      { contest_remote: 24 },
+    );
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseRunnerAction(
+      { ...input, ownDeckDoctrine: doctrine, legalActions: [remoteRun, gain] },
+      { persistTacticalPlanMemory: false },
+    );
+    const runAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === remoteRun.actionId,
+    );
+    const doctrineWeight = runAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "deck_doctrine_runtime_weight",
+    );
+    const suppressed = runAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "deck_doctrine_runtime_weight_suppressed",
+    );
+
+    expect(doctrineWeight).toBeUndefined();
+    expect(suppressed?.value).toBe(0);
+    expect(String(suppressed?.reason)).toContain(
+      "runner_known_remote_no_payoff_guard:true",
+    );
+    expect(String(suppressed?.reason)).toContain(
+      "deck_doctrine_remote_contest_suppressed:true",
+    );
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
+  it("keeps remote contest doctrine on plausible scoring remotes", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-doctrine-plausible-scoring-remote",
+      (state) => {
+        state.runner.credits = 6;
+        ensureRemoteServer(state, "remote_1");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+      },
+    );
+    const remoteRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "remote_1",
+    );
+    const gain = input.legalActions.find((action) => action.type === "gain_credit");
+    expect(remoteRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!remoteRun || !gain)
+      throw new Error("Missing plausible doctrine fixture actions");
+
+    const doctrine = runnerDoctrineForTest(
+      "semantic-plausible-scoring-remote",
+      ["remote_contest"],
+      { contest_remote: 18 },
+    );
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseRunnerAction(
+      { ...input, ownDeckDoctrine: doctrine, legalActions: [remoteRun, gain] },
+      { persistTacticalPlanMemory: false },
+    );
+    const runAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === remoteRun.actionId,
+    );
+    const doctrineWeight = runAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "deck_doctrine_runtime_weight",
+    );
+
+    expect(doctrineWeight?.value).toBe(180);
+    expect(String(doctrineWeight?.reason)).toContain("plan:contest_remote");
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
   it("does not phase-exit into a run when the visible path remains unaffordable", () => {
     const input = runnerActionPhaseInput(
       "ai-runner-phase-exit-false-positive-cost",

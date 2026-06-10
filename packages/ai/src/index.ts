@@ -6957,6 +6957,7 @@ function semanticRuntimeRunnerScoreComponents(
     const serverId = semanticRuntimeServerId(action);
     const doctrineWeight = semanticRuntimeRunnerDoctrineRunWeight(
       input,
+      action,
       serverId,
     );
     if (doctrineWeight) components.push(doctrineWeight);
@@ -8998,6 +8999,7 @@ function semanticRuntimeRunnerRunProgressEvent(actionType: string): boolean {
 
 function semanticRuntimeRunnerDoctrineRunWeight(
   input: AiDecisionInput,
+  action: LegalAction,
   serverId: string | undefined,
 ): AiDecisionScoreComponent | undefined {
   if (input.side !== "runner" || input.ownDeckDoctrine?.side !== "runner")
@@ -9011,7 +9013,103 @@ function semanticRuntimeRunnerDoctrineRunWeight(
           ? "contest_remote"
           : undefined;
   if (!planKey) return undefined;
+  if (planKey === "contest_remote") {
+    const guard = semanticRuntimeRunnerRemoteContestDoctrineGuard(
+      input,
+      action,
+      serverId,
+    );
+    if (!guard.allowed) {
+      return {
+        key: "deck_doctrine_runtime_weight_suppressed",
+        label: "DeckDoctrine-Runtime-Gewicht unterdrückt",
+        value: 0,
+        reason: guard.evidence.join("|"),
+      };
+    }
+  }
   return semanticRuntimeDoctrinePlanWeightComponent(input, planKey);
+}
+
+function semanticRuntimeRunnerRemoteContestDoctrineGuard(
+  input: AiDecisionInput,
+  action: LegalAction,
+  serverId: string | undefined,
+): { allowed: boolean; evidence: string[] } {
+  if (!serverId || !isRemoteServerTarget(serverId)) {
+    return {
+      allowed: false,
+      evidence: [
+        "deck_doctrine_remote_contest_suppressed:true",
+        "deck_doctrine_remote_contest_suppressed_reason:not_remote",
+      ],
+    };
+  }
+  const evaluation = semanticRuntimeRunnerRunTargetEvaluation(
+    input,
+    action,
+    serverId,
+  );
+  if (!evaluation) {
+    return {
+      allowed: false,
+      evidence: [
+        "deck_doctrine_remote_contest_suppressed:true",
+        "deck_doctrine_remote_contest_suppressed_reason:missing_evaluation",
+      ],
+    };
+  }
+  const knownNoPayoff =
+    evaluation.knownAccessState === "known_no_current_payoff" ||
+    evaluation.accessPayoff === "known_low_value";
+  const blocked =
+    evaluation.pathPassability !== "reachable" || evaluation.creditsAfterRun < 0;
+  const repeated = semanticRuntimeRecentRunnerStartRunsOnServer(
+    input,
+    serverId,
+  ) > 0;
+  const plausiblePayoff =
+    evaluation.accessPayoff === "agenda" ||
+    evaluation.accessPayoff === "score_threat" ||
+    evaluation.accessPayoff === "trash_affordable" ||
+    evaluation.accessPayoff === "fresh" ||
+    evaluation.accessPayoff === "access_bonus" ||
+    (evaluation.accessPayoff === "unknown" &&
+      evaluation.recommendation === "run_now");
+  if (knownNoPayoff || blocked || (repeated && !plausiblePayoff) || !plausiblePayoff) {
+    return {
+      allowed: false,
+      evidence: [
+        "deck_doctrine_remote_contest_suppressed:true",
+        ...(knownNoPayoff
+          ? ["runner_known_remote_no_payoff_guard:true"]
+          : []),
+        `deck_doctrine_remote_contest_suppressed_reason:${
+          knownNoPayoff
+            ? "known_no_payoff"
+            : blocked
+              ? "blocked_or_unreachable"
+              : repeated
+                ? "repeated_without_payoff"
+                : "no_plausible_payoff"
+        }`,
+        `target:${serverId}`,
+        `known_access:${evaluation.knownAccessState}`,
+        `payoff:${evaluation.accessPayoff}`,
+        `path:${evaluation.pathPassability}`,
+        `credits_after:${evaluation.creditsAfterRun}`,
+        `repeated_remote:${repeated}`,
+      ],
+    };
+  }
+  return {
+    allowed: true,
+    evidence: [
+      "deck_doctrine_remote_contest_allowed:true",
+      `target:${serverId}`,
+      `payoff:${evaluation.accessPayoff}`,
+    ],
+  };
 }
 
 function semanticRuntimeCorpDoctrineWeight(
