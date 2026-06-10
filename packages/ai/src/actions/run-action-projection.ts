@@ -100,15 +100,38 @@ export function projectInternalRunnerRunActions(
     for (const targetServerId of targetServerIds) {
       const targetKind = targetKindForServerId(targetServerId);
       if (!targetKind) continue;
+      const accessServerId = accessServerIdForRunAction(
+        action,
+        candidate,
+        hint,
+        signals,
+        targetServerId,
+      );
+      const accessKind = accessServerId
+        ? targetKindForServerId(accessServerId)
+        : undefined;
+      const accessOverride =
+        accessServerId !== undefined &&
+        accessKind !== undefined &&
+        accessServerId !== targetServerId
+          ? { serverId: accessServerId, kind: accessKind }
+          : undefined;
       projections.push({
         ...baseProjection,
         targetServerId,
         targetKind,
+        ...(accessOverride ? { accessServerId: accessOverride.serverId } : {}),
         projectionStatus: "concrete_target",
         evidence: [
           ...baseEvidence,
           `run_action_projection_target:${targetServerId}`,
           `run_action_projection_target_kind:${targetKind}`,
+          ...(accessOverride
+            ? [
+                `run_action_projection_access_server:${accessOverride.serverId}`,
+                `run_action_projection_access_target_kind:${accessOverride.kind}`,
+              ]
+            : []),
         ],
       });
     }
@@ -128,7 +151,11 @@ function dedupeRunActionProjections(
 ): InternalRunActionProjection[] {
   const byKey = new Map<string, InternalRunActionProjection>();
   for (const projection of projections) {
-    const key = `${projection.actionId}:${projection.targetServerId ?? "missing"}`;
+    const key = [
+      projection.actionId,
+      projection.targetServerId ?? "missing",
+      projection.accessServerId ?? projection.targetServerId ?? "missing",
+    ].join(":");
     const existing = byKey.get(key);
     if (!existing) {
       byKey.set(key, projection);
@@ -210,6 +237,17 @@ function runActionRelevant(action: LegalAction, signals: readonly string[]): boo
     "future_run_effect",
   ].some((needle) => text.includes(needle));
   if (explicitRunSignals) return true;
+  if (
+    text.includes("run") &&
+    (text.includes("scope:archives") ||
+      text.includes("scope:hq") ||
+      text.includes("scope:rd") ||
+      text.includes("scope:rnd") ||
+      text.includes("scope:remote") ||
+      text.includes("target:hq_via_archives"))
+  ) {
+    return true;
+  }
   return (
     action.type === "play_event" &&
     text.includes("run_pressure") &&
@@ -330,9 +368,53 @@ function targetServerIdsForRunAction(
     .map((targetId) => normalizeServerId(targetId))
     .filter((targetId): targetId is string => targetId !== undefined);
   const signalTargets = targetServerIdsFromSignals(input, signals);
-  return uniqueStrings([...targetIds, ...signalTargets]).filter(
+  let resolvedTargets = uniqueStrings([...targetIds, ...signalTargets]);
+  if (
+    targetIds.length === 0 &&
+    resolvedTargets.includes("archives") &&
+    signals.some((signal) => signal.toLowerCase().includes("hq_via_archives"))
+  ) {
+    resolvedTargets = resolvedTargets.filter((targetId) => targetId !== "hq");
+  }
+  return resolvedTargets.filter(
     (targetId) => targetKindForServerId(targetId) !== undefined,
   );
+}
+
+function accessServerIdForRunAction(
+  action: LegalAction,
+  candidate: ActionSemanticCandidate | undefined,
+  hint: AiCardHint | undefined,
+  signals: readonly string[],
+  targetServerId: string,
+): string | undefined {
+  const direct = payloadStringValues(action, [
+    "accessServerId",
+    "accessServerOverride",
+    "effectiveAccessServerId",
+    "breachServerId",
+  ])
+    .map((value) => normalizeServerId(value))
+    .find((value): value is string => value !== undefined);
+  if (direct) return direct;
+
+  const text = [
+    payloadSearchText(action),
+    signals.join(" "),
+    hint?.cardId ?? "",
+    candidate?.semanticActionType ?? "",
+  ]
+    .join(" ")
+    .toLowerCase();
+  if (
+    targetServerId === "archives" &&
+    (text.includes("target:hq_via_archives") ||
+      text.includes("access.hq_via_archives") ||
+      text.includes("hq_via_archives"))
+  ) {
+    return "hq";
+  }
+  return undefined;
 }
 
 function concretePayloadServerId(action: LegalAction): string | undefined {
@@ -369,26 +451,32 @@ function targetServerIdsFromSignals(
   input: AiDecisionInput,
   signals: readonly string[],
 ): string[] {
-  const text = signals.join(" ").toLowerCase();
+  const tokens = signals.map((signal) => signal.toLowerCase());
   const targetIds: string[] = [];
-  if (text.includes("server_specific_hq") || text.includes("scope:hq")) {
+  if (
+    signalTokensInclude(tokens, "server_specific_hq") ||
+    tokens.includes("scope:hq")
+  ) {
     targetIds.push("hq");
   }
   if (
-    text.includes("server_specific_rnd") ||
-    text.includes("server_specific_rd") ||
-    text.includes("scope:rnd") ||
-    text.includes("scope:rd")
+    signalTokensInclude(tokens, "server_specific_rnd") ||
+    signalTokensInclude(tokens, "server_specific_rd") ||
+    tokens.includes("scope:rnd") ||
+    tokens.includes("scope:rd")
   ) {
     targetIds.push("rd");
   }
   if (
-    text.includes("server_specific_archives") ||
-    text.includes("scope:archives")
+    signalTokensInclude(tokens, "server_specific_archives") ||
+    tokens.includes("scope:archives")
   ) {
     targetIds.push("archives");
   }
-  if (text.includes("server_specific_remote") || text.includes("scope:remote")) {
+  if (
+    signalTokensInclude(tokens, "server_specific_remote") ||
+    tokens.includes("scope:remote")
+  ) {
     const remoteServers = input.playerView.servers.filter((server) =>
       server.id.startsWith("remote_"),
     );
@@ -398,6 +486,15 @@ function targetServerIdsFromSignals(
     }
   }
   return uniqueStrings(targetIds);
+}
+
+function signalTokensInclude(tokens: readonly string[], value: string): boolean {
+  return tokens.some(
+    (token) =>
+      token === value ||
+      token === `target:${value}` ||
+      token === `run.${value}`,
+  );
 }
 
 function normalizeServerId(value: unknown): string | undefined {
@@ -441,6 +538,7 @@ function sourceCardIdForRunAction(
     "cardInstanceId",
     "instanceId",
     "sourceCardId",
+    "cardId",
   ])) {
     const card = visibleOwnCardById(input, id);
     if (card?.definitionId) return card.definitionId;
@@ -449,8 +547,10 @@ function sourceCardIdForRunAction(
     const card = visibleOwnCardById(input, candidate.sourceCardId);
     if (card?.definitionId) return card.definitionId;
   }
-  if (typeof action.source === "string" && AI_HINTS_BY_CARD.has(action.source)) {
-    return action.source;
+  if (typeof action.source === "string") {
+    if (AI_HINTS_BY_CARD.has(action.source)) return action.source;
+    const sourceCard = visibleOwnCardById(input, action.source);
+    if (sourceCard?.definitionId) return sourceCard.definitionId;
   }
   return undefined;
 }
@@ -532,7 +632,12 @@ function accessSignalsForHintEffect(
     if (effect.scope === "remote") return ["access.remote_multiaccess"];
     return ["access.multiaccess"];
   }
-  if (effect.kind === "access_replacement") return ["access.replacement"];
+  if (effect.kind === "access_replacement") {
+    if (target === "hq_via_archives") {
+      return ["access.replacement", "access.hq_via_archives"];
+    }
+    return ["access.replacement"];
+  }
   if (effect.kind === "hq_info") return ["access.hq_info"];
   if (effect.kind === "topdeck_info") return ["access.rnd_topdeck_info"];
   if (

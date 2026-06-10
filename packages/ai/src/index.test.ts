@@ -20298,6 +20298,108 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(hqOnlyDecision.actionId).toBe(eventHq.actionId);
   });
 
+  it("uses Shredder's Archives path and HQ access target before repeating a blocked run", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "semantic-runtime-shredder-archives-path-hq-access",
+        runnerDeck: {
+          id: "semantic_shredder_runner",
+          name: "Semantic Shredder Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "onr_v1_062_shredder-uplink-protocol", quantity: 1 },
+            { id: "onr_v1_039_krash", quantity: 1 },
+            { id: "simple_economy_event", quantity: 8 },
+            { id: "simple_run_event", quantity: 4 },
+          ],
+        },
+        corpDeck: {
+          id: "semantic_shredder_corp",
+          name: "Semantic Shredder Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "onr_v1_279_wall-of-static", quantity: 1 },
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 4;
+    state.runner.clicks = 4;
+    state.runner.memoryLimit = 6;
+    state.corp.credits = 5;
+    state.corp.archives = [];
+    moveRunnerProgramToRig(state, "onr_v1_062_shredder-uplink-protocol");
+    moveRunnerProgramToRig(state, "onr_v1_039_krash");
+    const wallId = putCorpIceOnServer(
+      state,
+      "archives",
+      "onr_v1_279_wall-of-static",
+    );
+    state.cardInstances[wallId] = {
+      ...state.cardInstances[wallId]!,
+      faceup: true,
+      rezzed: true,
+    };
+
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const shredderRun = input.legalActions.find(
+      (action) =>
+        sourceDefinitionFromInput(input, action) ===
+        "onr_v1_062_shredder-uplink-protocol",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(shredderRun).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!shredderRun || !gainCredit) {
+      throw new Error("Missing Shredder blocked Archives fixture actions");
+    }
+
+    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+    const decision = chooseRunnerAction(
+      {
+        ...input,
+        legalActions: [shredderRun, gainCredit],
+      },
+      { persistTacticalPlanMemory: false },
+    );
+    const alternatives = new Map(
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [
+        entry.actionId,
+        entry,
+      ]) ?? [],
+    );
+    const shredderAlternative = alternatives.get(shredderRun.actionId);
+    const guidance = shredderAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "runner_run_target_semantic_guidance",
+    );
+
+    expect(decision.actionId).toBe(gainCredit.actionId);
+    expect(shredderAlternative?.excluded).not.toBe(true);
+    expect(
+      shredderAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "semantic_action_excluded" &&
+          component.reason === "no_archives_cards",
+      ),
+    ).not.toBe(true);
+    expect(guidance).toMatchObject({
+      value: -2100,
+    });
+    expect(guidance?.reason).toContain("target:archives");
+    expect(guidance?.reason).toContain("access:hq");
+    expect(guidance?.reason).toContain("recommendation:gain_credits_first");
+    expect(guidance?.reason).toContain("path:blocked_unpayable");
+  });
+
   it("drops fully known non-agenda Archives below basic semantic actions", () => {
     const state = toRunnerTurn(
       createGameAfterSetup({

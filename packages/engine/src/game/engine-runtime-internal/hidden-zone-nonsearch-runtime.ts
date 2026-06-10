@@ -430,12 +430,11 @@ export function createHiddenZoneNonSearchRuntime(
   ): void {
     if (state.pendingChoice)
       throw new Error("Es ist bereits eine Choice offen.");
-    const targets = corpInstalledCardIds(state).filter(
-      (cardId) =>
-        mustInstance(state.cardInstances, cardId).zone.zone === "serverIce",
-    );
+    const targets = unrezzedInstalledIceIds(state);
     if (targets.length === 0)
-      throw new Error("Keine ICE als Ziel fuer Forged Activation Orders.");
+      throw new Error(
+        "Keine unrezzte ICE als Ziel fuer Forged Activation Orders.",
+      );
     state.pendingChoice = {
       choiceId: `v1922_forged_activation_orders_target_${state.stateVersion + 1}`,
       side: "runner",
@@ -474,20 +473,20 @@ export function createHiddenZoneNonSearchRuntime(
     const selectedId = selectedChoiceCardIds(choice, playerAction)[0];
     if (
       !selectedId ||
-      !corpInstalledCardIds(state).includes(selectedId) ||
-      mustInstance(state.cardInstances, selectedId).zone.zone !== "serverIce"
+      !unrezzedInstalledIceIds(state).includes(selectedId)
     )
       throw new Error(
-        "Das Forged-Activation-Orders-Ziel ist keine installierte ICE.",
+        "Das Forged-Activation-Orders-Ziel ist keine installierte unrezzte ICE.",
       );
     const serverLabel = publicServerLabelForCard(state, selectedId) ?? "Server";
     const icePositionLabel =
       publicIcePositionLabelForCard(state, selectedId) ?? serverLabel;
+    const choiceTargetLabel = icePositionLabel || "ICE";
     state.pendingChoice = {
       choiceId: `v1922_forged_activation_orders_corp_${state.stateVersion + 1}`,
       side: "corp",
       source: `v1922.forged_activation_orders_corp:${selectedId}:${state.stateVersion + 1}`,
-      prompt: "ICE rezzen oder trashen",
+      prompt: `Forged Activation Orders: ${choiceTargetLabel} rezzen oder trashen`,
       kind: "select_option",
       options: [
         ...(!mustInstance(state.cardInstances, selectedId).rezzed &&
@@ -495,16 +494,16 @@ export function createHiddenZoneNonSearchRuntime(
           ? [
               {
                 id: "rez_ice",
-                label: "ICE rezzen",
-                publicLabel: "ICE gerezzt",
+                label: `${choiceTargetLabel} rezzen`,
+                publicLabel: `${choiceTargetLabel} gerezzt`,
                 value: "rez_ice",
               },
             ]
           : []),
         {
           id: "trash_ice",
-          label: "ICE trashen",
-          publicLabel: "ICE getrasht",
+          label: `${choiceTargetLabel} trashen`,
+          publicLabel: `${choiceTargetLabel} getrasht`,
           value: "trash_ice",
         },
       ],
@@ -543,6 +542,10 @@ export function createHiddenZoneNonSearchRuntime(
     )
       throw new Error(
         "Das Forged-Activation-Orders-Ziel ist nicht mehr installierte ICE.",
+      );
+    if (mustInstance(state.cardInstances, targetIceId).rezzed)
+      throw new Error(
+        "Das Forged-Activation-Orders-Ziel ist nicht mehr unrezzte ICE.",
       );
     const selected = selectedChoiceIds(playerAction.selectedChoices)[0] ?? "";
     const definition = definitionFor(state, targetIceId);

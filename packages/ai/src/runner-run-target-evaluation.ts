@@ -93,6 +93,7 @@ export type RunActionProjection = {
   sourceCardId?: string;
   targetServerId?: string;
   targetKind?: RunnerRunTargetKind;
+  accessServerId?: string;
   structure: RunnerRunActionStructure;
   accessPayoffSignals: string[];
   constraintSignals: string[];
@@ -235,6 +236,8 @@ export type RunnerRunTargetEvaluation = {
   schemaVersion: typeof RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION;
   targetServerId: string;
   targetKind: RunnerRunTargetKind;
+  accessServerId: string;
+  accessTargetKind: RunnerRunTargetKind;
   actionId: string;
   accessPayoff: RunnerAccessPayoff;
   knownAccessState: RunnerKnownAccessState;
@@ -330,8 +333,14 @@ function evaluateRunnerRunTarget(
   if (!targetServerId) return undefined;
   const targetKind = targetKindForServerId(targetServerId);
   if (!targetKind) return undefined;
+  const accessServerId = projection.accessServerId ?? targetServerId;
+  const accessTargetKind = targetKindForServerId(accessServerId);
+  if (!accessTargetKind) return undefined;
   const server = params.input.playerView.servers.find(
     (candidate) => candidate.id === targetServerId,
+  );
+  const accessServer = params.input.playerView.servers.find(
+    (candidate) => candidate.id === accessServerId,
   );
   const path = assessKnownRezzedIcePath(
     server?.ice ?? [],
@@ -339,17 +348,21 @@ function evaluateRunnerRunTarget(
     params.input.playerView.own.credits,
     server?.root ?? [],
   );
-  const payoff = payoffForTarget(params, targetServerId, targetKind);
+  const payoff = payoffForTarget(params, accessServerId, accessTargetKind);
   const installedRunPayoff = installedRunPayoffForTarget(
     params.input,
-    targetKind,
+    accessTargetKind,
   );
-  const runActionPayoff = runActionPayoffForTarget(projection, targetKind);
+  const runActionPayoff = runActionPayoffForTarget(
+    projection,
+    accessTargetKind,
+  );
   const combinedRunPayoff = combineRunPayoffs(
     installedRunPayoff,
     runActionPayoff,
   );
-  const scoreThreat = targetKind === "remote" && remoteHasScoreThreat(server);
+  const scoreThreat =
+    accessTargetKind === "remote" && remoteHasScoreThreat(accessServer);
   const accessPayoff = accessPayoffWithInstalledRunPayoff({
     basePayoff: payoff.accessPayoff,
     installedRunPayoff: combinedRunPayoff,
@@ -375,7 +388,7 @@ function evaluateRunnerRunTarget(
   const multiaccessAvailable = combinedRunPayoff.multiaccessAvailable;
   const stealOrTrashAffordable = stealOrTrashAffordableFor(accessPayoff);
   const recommendation = recommendationForRunTarget({
-    targetKind,
+    targetKind: accessTargetKind,
     accessPayoff,
     knownAccessState: payoff.knownAccessState,
     pathPassability,
@@ -386,7 +399,7 @@ function evaluateRunnerRunTarget(
     ...(blinkRiskAssessment ? { blinkRiskAssessment } : {}),
   });
   const score = scoreRunTargetEvaluation({
-    targetKind,
+    targetKind: accessTargetKind,
     accessPayoff,
     knownAccessState: payoff.knownAccessState,
     pathPassability,
@@ -404,6 +417,8 @@ function evaluateRunnerRunTarget(
     schemaVersion: RUNNER_RUN_TARGET_EVALUATION_SCHEMA_VERSION,
     targetServerId,
     targetKind,
+    accessServerId,
+    accessTargetKind,
     actionId: projection.actionId,
     accessPayoff,
     knownAccessState: payoff.knownAccessState,
@@ -423,6 +438,8 @@ function evaluateRunnerRunTarget(
     evidence: [
       `target:${targetServerId}`,
       `target_kind:${targetKind}`,
+      `access_server:${accessServerId}`,
+      `access_target_kind:${accessTargetKind}`,
       `access_payoff:${accessPayoff}`,
       `known_access_state:${payoff.knownAccessState}`,
       `path_passability:${pathPassability}`,

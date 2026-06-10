@@ -696,10 +696,39 @@ describe("Originalset Spotcheck 2026-05-15 Trace/Prevention/Asset hardening", ()
       (option) => option.value === rdIce,
     );
     state = applyChoice(state, "runner", rdOption?.id ?? "");
+    expect(state.pendingChoice?.prompt).toBe(
+      "Forged Activation Orders: ICE 1 in Research and Development rezzen oder trashen",
+    );
     expect(state.pendingChoice?.options.map((option) => option.id)).toEqual([
       "rez_ice",
       "trash_ice",
     ]);
+    expect(state.pendingChoice?.options.map((option) => option.label)).toEqual([
+      "ICE 1 in Research and Development rezzen",
+      "ICE 1 in Research and Development trashen",
+    ]);
+    const rezzedDrift = structuredClone(state);
+    rezzedDrift.cardInstances[rdIce] = {
+      ...rezzedDrift.cardInstances[rdIce]!,
+      rezzed: true,
+      faceup: true,
+    };
+    const rezzedDriftResult = applyAction(rezzedDrift, {
+      matchId: rezzedDrift.matchId,
+      side: "corp",
+      actionId: mustAction(
+        rezzedDrift,
+        "corp",
+        (action) => action.type === "resolve_choice",
+      ).actionId,
+      clientKnownStateVersion: rezzedDrift.stateVersion,
+      idempotencyKey: "spotcheck-forged-rezzed-target",
+      selectedChoices: {
+        choiceId: rezzedDrift.pendingChoice?.choiceId,
+        selectedOptionIds: ["trash_ice"],
+      },
+    });
+    expect(rezzedDriftResult.ok).toBe(false);
     const drifted = structuredClone(state);
     removeEverywhere(drifted, rdIce);
     const driftResult = applyAction(drifted, {

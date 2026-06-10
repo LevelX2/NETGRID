@@ -5175,6 +5175,122 @@ describe("MVP 0.2 multiplayer service", () => {
     expect(continued.requesterPayload.playerView.stateVersion).toBeGreaterThan(declined.actorPayload.playerView.stateVersion);
   });
 
+  it("waits for Human Corp Forged Activation Orders response during Runner AI turns", async () => {
+    const storage = new InMemoryMatchStorage();
+    const service = new MultiplayerService(storage, { tokenSalt: "ai-runner-forged-response" });
+    const created = await service.createMatch({
+      mode: "human_corp_vs_runner_ai",
+      hostSide: "corp",
+      seed: "server-runner-ai-forged-response",
+      runnerDifficulty: "normal"
+    });
+    const record = await storage.load(created.matchId);
+    if (!record) throw new Error("Missing stored match");
+
+    const runnerDeck: DeckDefinition = {
+      ...DEMO_DECKS.demo_runner_001,
+      id: "server_runner_ai_forged_runner",
+      name: "Server Runner AI Forged Runner",
+      cards: [
+        { id: "onr_v1_086_forged-activation-orders", quantity: 1 },
+        ...DEMO_DECKS.demo_runner_001.cards
+      ]
+    };
+    const corpDeck: DeckDefinition = {
+      ...DEMO_DECKS.demo_corp_004,
+      id: "server_runner_ai_forged_corp",
+      name: "Server Runner AI Forged Corp",
+      cards: DEMO_DECKS.demo_corp_004.cards.some((card) => card.id === "simple_barrier_ice")
+        ? DEMO_DECKS.demo_corp_004.cards
+        : [
+            { id: "simple_barrier_ice", quantity: 1 },
+            ...DEMO_DECKS.demo_corp_004.cards
+          ]
+    };
+    let gameState = toRunnerTurnEngine(createGameAfterSetup({
+      matchId: created.matchId,
+      seed: "server-runner-ai-forged-response-engine",
+      runnerDeck,
+      corpDeck
+    }));
+    gameState.runner.credits = 5;
+    gameState.corp.credits = 0;
+    const targetIceId = putCorpIceOnServerForTest(gameState, "hq", "simple_barrier_ice");
+    moveRunnerCardToGripForTest(gameState, "onr_v1_086_forged-activation-orders");
+    gameState = applyEngineAction(
+      gameState,
+      "runner",
+      (action) =>
+        action.type === "play_event" &&
+        sourceDefinitionForServerTest(gameState, action) === "onr_v1_086_forged-activation-orders"
+    );
+    const targetOptionId = gameState.pendingChoice?.options.find((option) => option.value === targetIceId)?.id;
+    if (!targetOptionId) throw new Error("Missing Forged Activation Orders target option");
+    gameState = applyEngineChoice(gameState, "runner", [targetOptionId]);
+    expect(gameState.activeSide).toBe("runner");
+    expect(gameState.pendingChoice).toMatchObject({
+      side: "corp",
+      source: expect.stringContaining("v1922.forged_activation_orders_corp")
+    });
+    expect(getLegalActions(gameState, "runner")).toEqual([]);
+    expect(getLegalActions(gameState, "corp").map((action) => action.type)).toEqual(["resolve_choice"]);
+
+    record.gameState = gameState;
+    record.match.baseline = gameState.baseline;
+    record.eventLog = gameState.eventLog.map((event) => toEventRecordForTest(created.matchId, event));
+    record.stateSnapshots = [stateSnapshotForTest(created.matchId, gameState, record.match.matchVersion, "snap_ai_forged_response")];
+    record.actionReceipts = [];
+    record.undoSnapshots = [];
+    delete record.pendingUndo;
+    await storage.save(record);
+
+    const before = await service.bootstrap(created.matchId, "corp", created.hostSessionToken);
+    expect("error" in before).toBe(false);
+    if ("error" in before) throw new Error(before.error.message);
+    expect(before.playerView.activeSide).toBe("runner");
+    expect(before.pendingChoice).toMatchObject({
+      side: "corp",
+      source: expect.stringContaining("v1922.forged_activation_orders_corp")
+    });
+    expect(before.pendingChoice?.options.map((option) => option.id)).toEqual(["trash_ice"]);
+    expect(before.aiTurnPresentation).toEqual({ canAdvanceAi: false, pacingMode: "paced" });
+    expect(before.legalActions.map((action) => action.type)).toEqual(["resolve_choice"]);
+
+    const advanced = await service.advanceAi({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      knownStateVersion: before.playerView.stateVersion,
+      knownMatchVersion: before.matchVersion,
+      mode: "single_step"
+    });
+    expect(advanced.ok).toBe(false);
+    if (advanced.ok) throw new Error("Expected advance_ai to wait for Human Corp Forged response");
+    expect(advanced.error.code).toBe("ai_not_active");
+
+    const action = mustAction(before, (candidate) => candidate.type === "resolve_choice");
+    const resolved = await service.submitAction({
+      matchId: created.matchId,
+      side: "corp",
+      sessionToken: created.hostSessionToken,
+      actionId: action.actionId,
+      clientKnownStateVersion: before.playerView.stateVersion,
+      selectedChoices: { choiceId: before.pendingChoice?.choiceId, selectedOptionIds: ["trash_ice"] },
+      idempotencyKey: "human-corp-forged-trash"
+    });
+    expect(resolved.ok).toBe(true);
+    if (!resolved.ok) throw new Error(resolved.error.message);
+    expect(resolved.actorPayload.pendingChoice).toBeUndefined();
+    expect(resolved.actorPayload.aiTurnPresentation).toEqual({ activeAiSide: "runner", canAdvanceAi: true, pacingMode: "paced" });
+    expect(resolved.publicEvent?.publicPayload).toMatchObject({
+      actionType: "resolve_choice",
+      actor: "corp",
+      v1922RunnerEventAbility: "force_rez_or_trash_ice",
+      corpDecision: "trash_ice"
+    });
+    expect(JSON.stringify(resolved.actorPayload)).not.toContain("cardInstances");
+  });
+
   it("waits for Human Corp Mystery Box review before Runner AI installs a shown program", async () => {
     const storage = new InMemoryMatchStorage();
     const service = new MultiplayerService(storage, { tokenSalt: "ai-runner-mystery-box-review" });
