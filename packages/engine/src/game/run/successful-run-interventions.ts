@@ -9,6 +9,7 @@ import type {
   ServerId,
 } from "@netgrid/shared";
 import type {
+  CardSuccessfulRunFollowupImplementation,
   CardRunnerUtilityLongtailImplementation,
   CardUniqueDirectLongtailImplementation,
 } from "../../ability-engine/definition-types";
@@ -22,6 +23,10 @@ import {
 import type { SuccessfulRunInterventionKind } from "./run-access-transition";
 
 type ActiveRun = NonNullable<GameState["run"]>;
+type SuccessfulRunBeforeAccessEffect = Extract<
+  CardSuccessfulRunFollowupImplementation,
+  { kind: "successful_run_before_access_effect" }
+>;
 
 export type SuccessfulRunInterventionHost = {
   state: GameState;
@@ -82,6 +87,49 @@ export type SuccessfulRunInterventionHost = {
     finishSuccessfulRun: (legalAction?: LegalAction) => void;
   };
 };
+
+function hqCorpLoseCreditsBeforeAccessEffect(
+  followups: readonly CardSuccessfulRunFollowupImplementation[] | undefined,
+): Extract<
+  SuccessfulRunBeforeAccessEffect,
+  { server: "hq"; effect: { kind: "corp_lose_credits" } }
+> | undefined {
+  return followups?.find(
+    (
+      followup,
+    ): followup is Extract<
+      SuccessfulRunBeforeAccessEffect,
+      { server: "hq"; effect: { kind: "corp_lose_credits" } }
+    > =>
+      followup.kind === "successful_run_before_access_effect" &&
+      followup.server === "hq" &&
+      followup.effect.kind === "corp_lose_credits" &&
+      followup.source === "installed_hidden_runner_resource" &&
+      followup.cost.kind === "reveal_and_tap_source",
+  );
+}
+
+function remoteTrashFortBeforeAccessEffect(
+  followups: readonly CardSuccessfulRunFollowupImplementation[] | undefined,
+): Extract<
+  SuccessfulRunBeforeAccessEffect,
+  { server: "remote"; effect: { kind: "trash_remote_fort" } }
+> | undefined {
+  return followups?.find(
+    (
+      followup,
+    ): followup is Extract<
+      SuccessfulRunBeforeAccessEffect,
+      { server: "remote"; effect: { kind: "trash_remote_fort" } }
+    > =>
+      followup.kind === "successful_run_before_access_effect" &&
+      followup.server === "remote" &&
+      followup.effect.kind === "trash_remote_fort" &&
+      followup.effect.include === "root_and_ice" &&
+      followup.source === "installed_hidden_runner_resource" &&
+      followup.cost.kind === "reveal_and_tap_source",
+  );
+}
 
 export type SuccessfulRunInterventionExecutionResult = {
   handled: boolean;
@@ -200,21 +248,14 @@ export function buildSuccessfulRunFollowupActions(
         ),
       );
     }
+    const hqCreditLossFollowup =
+      hqCorpLoseCreditsBeforeAccessEffect(successfulRunFollowups);
     if (
-      successfulRunFollowups.some(
-        (followup) =>
-          followup.kind ===
-          "hidden_resource_successful_hq_run_corp_lose_credits",
-      ) &&
+      hqCreditLossFollowup &&
       run.attackedServerId === "hq" &&
       host.state.runner.rig.resources.includes(sourceCardId) &&
       host.cards.cardInstanceFor(sourceCardId).tapped !== true
     ) {
-      const followup = successfulRunFollowups.find(
-        (candidate) =>
-          candidate.kind ===
-          "hidden_resource_successful_hq_run_corp_lose_credits",
-      );
       actions.push(
         host.actions.createRunnerTriggerAction(
           `${definition.title}: Korp verliert Credits`,
@@ -224,20 +265,15 @@ export function buildSuccessfulRunFollowupActions(
             cardId: sourceCardId,
             serverId: run.attackedServerId,
             proteusHiddenSuccessfulRunFollowup: "corp_lose_credits",
-            creditLoss: followup?.kind ===
-              "hidden_resource_successful_hq_run_corp_lose_credits"
-              ? followup.amount
-              : 0,
+            creditLoss: hqCreditLossFollowup.effect.amount,
           },
         ),
       );
     }
+    const remoteTrashFortFollowup =
+      remoteTrashFortBeforeAccessEffect(successfulRunFollowups);
     if (
-      successfulRunFollowups.some(
-        (followup) =>
-          followup.kind ===
-          "hidden_resource_successful_remote_run_trash_fort",
-      ) &&
+      remoteTrashFortFollowup &&
       host.servers.mustServer(run.attackedServerId).kind === "remote" &&
       host.state.runner.rig.resources.includes(sourceCardId) &&
       host.cards.cardInstanceFor(sourceCardId).tapped !== true
@@ -400,20 +436,17 @@ function resolveHiddenSuccessfulRunCorpLoseCredits(
   if (!run.successful || run.phase !== "access" || run.attackedServerId !== "hq")
     throw new Error("Credit Subversion ist nur vor HQ-Access nach erfolgreichem Run legal.");
   const sourceDefinition = host.cards.definitionFor(sourceCardId);
-  const followup = cardImplementationForDefinitionId(sourceDefinition.id)
-    ?.successfulRunFollowups?.find(
-      (candidate) =>
-        candidate.kind === "hidden_resource_successful_hq_run_corp_lose_credits",
-    );
-  if (
-    followup?.kind !== "hidden_resource_successful_hq_run_corp_lose_credits"
-  )
+  const followup = hqCorpLoseCreditsBeforeAccessEffect(
+    cardImplementationForDefinitionId(sourceDefinition.id)
+      ?.successfulRunFollowups,
+  );
+  if (!followup)
     throw new Error("Die Hidden-Resource-Faehigkeit passt nicht zur Karte.");
   const used = run.successfulRunAbilityUsedSourceIds ?? [];
   if (used.includes(sourceCardId))
     throw new Error("Diese Successful-Run-Faehigkeit wurde bereits genutzt.");
   const revealPayload = revealAndTapHiddenResourceSource(host, sourceCardId);
-  const creditLoss = Math.min(host.state.corp.credits, followup.amount);
+  const creditLoss = Math.min(host.state.corp.credits, followup.effect.amount);
   host.state.corp.credits -= creditLoss;
   run.successfulRunAbilityUsedSourceIds = [...used, sourceCardId].sort();
   legalAction.payload = {
@@ -458,11 +491,10 @@ function resolveHiddenSuccessfulRunTrashRemoteFort(
     throw new Error("Death from Above kann nur subsidiary data forts treffen.");
   const sourceDefinition = host.cards.definitionFor(sourceCardId);
   if (
-    !cardImplementationForDefinitionId(sourceDefinition.id)
-      ?.successfulRunFollowups?.some(
-        (candidate) =>
-          candidate.kind === "hidden_resource_successful_remote_run_trash_fort",
-      )
+    !remoteTrashFortBeforeAccessEffect(
+      cardImplementationForDefinitionId(sourceDefinition.id)
+        ?.successfulRunFollowups,
+    )
   )
     throw new Error("Die Hidden-Resource-Faehigkeit passt nicht zur Karte.");
   const used = run.successfulRunAbilityUsedSourceIds ?? [];

@@ -231,3 +231,26 @@ Commit: `docs(engine): record mechanic primitive verification`
 - Neue Verträge sind durch Focus-Tests abgedeckt.
 - Volltestblock ist ausgeführt und analysiert.
 - Lokaler `main` enthält alle Paketcommits.
+
+## Paketprotokoll
+
+### P1 Ergebnis
+
+Umgesetzt:
+
+- `CardSuccessfulRunFollowupImplementation` enthält jetzt den parametrisierten Vertrag `successful_run_before_access_effect`.
+- `Credit Subversion` nutzt diesen Vertrag mit `server: "hq"` und `effect: { kind: "corp_lose_credits", amount: 3 }`.
+- `Death from Above` nutzt denselben Vertrag mit `server: "remote"` und `effect: { kind: "trash_remote_fort", include: "root_and_ice" }`.
+- `successful-run-interventions.ts` erzeugt und resolved die bestehenden LegalActions über Type-Guard-Helfer für diese Vertragsparameter.
+
+Bewusst stabil gelassen:
+
+- LegalAction-Payloads `proteusHiddenSuccessfulRunFollowup: "corp_lose_credits"` und `"trash_remote_fort"`.
+- Hidden-Zone-Actions `proteus_hidden_successful_hq_run_credit_subversion` und `proteus_hidden_successful_remote_run_trash_fort`.
+- Reveal-/Tap-Payloads, Servervalidierung, einmalige Nutzung pro Run, Access-Fortsetzung und PublicPayloads.
+
+Checks:
+
+- Grün: keine alten `hidden_resource_successful_*`-Definition-`kind`s in `packages/engine/src` oder `scripts`.
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/proteus/hidden-resource-hardening.test.ts src/game/run/successful-run-interventions.test.ts src/game/run/run-access-transition.test.ts`

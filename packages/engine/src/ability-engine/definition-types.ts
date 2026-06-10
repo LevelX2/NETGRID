@@ -385,17 +385,21 @@ export type CardSuccessfulRunFollowupImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "hidden_resource_successful_hq_run_corp_lose_credits";
+      kind: "successful_run_before_access_effect";
       timing: "immediately_after_successful_run_before_access";
-      amount: number;
-      cost: { kind: "tap_source" };
+      server: "hq";
+      source: "installed_hidden_runner_resource";
+      cost: { kind: "reveal_and_tap_source" };
+      effect: { kind: "corp_lose_credits"; amount: number };
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "hidden_resource_successful_remote_run_trash_fort";
+      kind: "successful_run_before_access_effect";
       timing: "immediately_after_successful_run_before_access";
-      include: "root_and_ice";
-      cost: { kind: "tap_source" };
+      server: "remote";
+      source: "installed_hidden_runner_resource";
+      cost: { kind: "reveal_and_tap_source" };
+      effect: { kind: "trash_remote_fort"; include: "root_and_ice" };
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     };
 
