@@ -72,6 +72,7 @@ const matrix = pairs.map(({ pair }) => {
       unsafeScoreChosenByReason: unsafeScoreChosenReasonsForSummaries(
         result.summaries,
       ),
+      actionLimitClusters: result.aggregate.actionLimitClusters,
     },
     summaries: result.summaries.map((summary) => ({
       seed: summary.seed,
@@ -118,6 +119,9 @@ const output = {
   diagnostics: {
     unsafeScoreChosenByReason: mergeCounts(
       matrix.map((entry) => entry.diagnostics.unsafeScoreChosenByReason),
+    ),
+    actionLimitClusters: mergeCounts(
+      matrix.map((entry) => entry.diagnostics.actionLimitClusters),
     ),
   },
   matrix,
@@ -260,6 +264,9 @@ function combineAggregates(
     passiveActionWithScoreLineAvailable: sum(
       aggregates,
       (entry) => entry.passiveActionWithScoreLineAvailable,
+    ),
+    actionLimitClusters: mergeCounts(
+      aggregates.map((entry) => entry.actionLimitClusters),
     ),
   };
 }

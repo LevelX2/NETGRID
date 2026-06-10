@@ -32,6 +32,14 @@ export type AiSelfplaySuspicionSeverity =
   | "medium"
   | "low";
 
+export type AiSelfplayActionLimitClusterId =
+  | "action_limit_runner_repeated_no_progress_run"
+  | "action_limit_runner_remote_contest_blocked"
+  | "action_limit_corp_scoreline_stall"
+  | "action_limit_setup_economy_loop"
+  | "action_limit_low_value_repeat"
+  | "action_limit_mixed_or_unknown";
+
 export type AiSelfplaySuspiciousDecision = {
   matchId: string;
   seed: string;
@@ -101,8 +109,19 @@ export type AiSelfplayTraceMiningResult = {
     scoreWindowMissed: number;
     unsafeScoreChosen: number;
     passiveActionWithScoreLineAvailable: number;
+    actionLimitClusters: Record<AiSelfplayActionLimitClusterId, number>;
   };
 };
+
+export const SELFPLAY_ACTION_LIMIT_CLUSTER_IDS: AiSelfplayActionLimitClusterId[] =
+  [
+    "action_limit_runner_repeated_no_progress_run",
+    "action_limit_runner_remote_contest_blocked",
+    "action_limit_corp_scoreline_stall",
+    "action_limit_setup_economy_loop",
+    "action_limit_low_value_repeat",
+    "action_limit_mixed_or_unknown",
+  ];
 
 export const DEFAULT_SELFPLAY_TRACE_MINING_DETECTORS: AiSelfplayTraceMiningDetectorId[] =
   [
@@ -185,6 +204,148 @@ export function countSelfplayFindingsByDetector(
     for (const detector of finding.detectorIds) counts[detector] += 1;
   }
   return counts;
+}
+
+export function summarizeSelfplayActionLimitClusters(
+  summaries: readonly AiSimulationSummary[],
+): Record<AiSelfplayActionLimitClusterId, number> {
+  const counts = Object.fromEntries(
+    SELFPLAY_ACTION_LIMIT_CLUSTER_IDS.map((cluster) => [cluster, 0]),
+  ) as Record<AiSelfplayActionLimitClusterId, number>;
+  for (const summary of summaries) {
+    if (summary.winner !== "action_limit_reached") continue;
+    counts[classifySelfplayActionLimitCluster(summary)] += 1;
+  }
+  return counts;
+}
+
+function classifySelfplayActionLimitCluster(
+  summary: AiSimulationSummary,
+): AiSelfplayActionLimitClusterId {
+  const window = summary.actionSequence.slice(-30);
+  const repeatedRuns = window.filter((entry, index) => {
+    if (entry.side !== "runner" || entry.actionType !== "start_run") return false;
+    const globalIndex = summary.actionSequence.length - window.length + index;
+    const previous = previousRunnerRunOnSameServer(
+      summary.actionSequence,
+      globalIndex,
+      entry,
+    );
+    return (
+      previous !== undefined &&
+      !hasMeaningfulProgressBetween(
+        summary.actionSequence,
+        previous + 1,
+        globalIndex,
+      )
+    );
+  }).length;
+  const remoteContestBlocked = window.filter(
+    (entry) =>
+      entry.runnerSkippedAdvancedRemoteContest === true ||
+      entry.runnerRemoteContestBlockedByCredits === true ||
+      entry.runnerRemoteContestBlockedByPostRunReserve === true ||
+      entry.runnerRemoteContestBlockedByBreakerCoverage === true ||
+      entry.runnerRemoteContestBlockedByKnownIceCost === true ||
+      entry.runnerCentralRunInsteadOfContestableAdvancedRemote === true,
+  ).length;
+  const corpScorelineStall = window.filter(
+    (entry) =>
+      entry.side === "corp" &&
+      (entry.corpScoreTerminalSkipped === true ||
+        ((entry.scoreActionsAvailable ?? 0) > 0 &&
+          entry.actionType !== "score_agenda")),
+  ).length;
+  const setupEconomy = window.filter(actionLimitSetupOrEconomyEntry).length;
+  const lowValueRepeat =
+    window.filter(actionLimitLowValueRepeatEntry).length +
+    countRepeatedActionReasonsWithoutProgress(window);
+
+  const scored = ([
+    {
+      cluster: "action_limit_corp_scoreline_stall",
+      score: corpScorelineStall * 3,
+    },
+    {
+      cluster: "action_limit_runner_repeated_no_progress_run",
+      score: repeatedRuns * 3,
+    },
+    {
+      cluster: "action_limit_runner_remote_contest_blocked",
+      score: remoteContestBlocked * 3,
+    },
+    {
+      cluster: "action_limit_low_value_repeat",
+      score: lowValueRepeat * 2,
+    },
+    {
+      cluster: "action_limit_setup_economy_loop",
+      score: setupEconomy,
+    },
+  ] satisfies Array<{
+    cluster: AiSelfplayActionLimitClusterId;
+    score: number;
+  }>).sort(
+    (left, right) =>
+      right.score - left.score || left.cluster.localeCompare(right.cluster),
+  );
+  const [best, second] = scored;
+  if (!best || best.score <= 0) return "action_limit_mixed_or_unknown";
+  if (second && second.score > 0 && best.score - second.score <= 2) {
+    return "action_limit_mixed_or_unknown";
+  }
+  return best.cluster;
+}
+
+function actionLimitSetupOrEconomyEntry(
+  entry: AiSimulationSummary["actionSequence"][number],
+): boolean {
+  if (
+    entry.runnerEconomyActionTaken === true ||
+    entry.runnerSearchTaken === true ||
+    entry.runnerRecoveryTaken === true ||
+    entry.runnerDrawAction === true ||
+    entry.runnerSetupContinuedAfterPressureReady === true ||
+    entry.runnerSetupLoopAfterPressureReady === true
+  ) {
+    return true;
+  }
+  const text = selfplayEntryText(entry);
+  return /economy|recover|setup|draw_for_answers|search|coverage/.test(text);
+}
+
+function actionLimitLowValueRepeatEntry(
+  entry: AiSimulationSummary["actionSequence"][number],
+): boolean {
+  if (
+    entry.runnerRepeatedLowValueCentralRun === true ||
+    entry.runnerRepeatedCentralRunWithoutFreshValue === true ||
+    entry.runnerLowValueDuplicateInstallAction === true ||
+    entry.runnerJunkyardBbsDuplicateInstall === true ||
+    entry.remoteRunSuppressedByKnownLowValueRemote === true ||
+    entry.runnerRemoteContestDeclinedAsBaitOrLowValue === true
+  ) {
+    return true;
+  }
+  const text = selfplayEntryText(entry);
+  return /known_low_value|no_current_payoff|low_value|stale/.test(text);
+}
+
+function countRepeatedActionReasonsWithoutProgress(
+  entries: readonly AiSimulationSummary["actionSequence"][number][],
+): number {
+  let repeats = 0;
+  const lastSeen = new Map<string, number>();
+  for (const [index, entry] of entries.entries()) {
+    if (selfplayEntryIsMeaningfulProgress(entry)) {
+      lastSeen.clear();
+      continue;
+    }
+    const key = `${entry.side}:${entry.actionType}:${entry.reasonCode}:${entry.targetServerId ?? "none"}`;
+    if (lastSeen.has(key)) repeats += 1;
+    lastSeen.set(key, index);
+  }
+  return repeats;
 }
 
 function collectSelfplayFindingsForSummary(

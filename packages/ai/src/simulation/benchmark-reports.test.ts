@@ -6,6 +6,7 @@ import {
   formatMatchProgressionBenchmarkReport,
   formatMatchProgressionBenchmarkSuiteReport,
 } from "./benchmark-reports";
+import { summarizeSelfplayActionLimitClusters } from "./selfplay-trace-mining";
 import {
   detectAiSelfplaySuspiciousDecisions,
   listMatchProgressionBenchmarkDeckSlots,
@@ -186,8 +187,8 @@ describe("benchmark report formatting", () => {
     const summary: AiSimulationSummary = {
       seed: "selfplay-detector-synthetic",
       winner: "action_limit_reached",
-      actions: 4,
-      turns: 2,
+      actions: 6,
+      turns: 3,
       finalAgendaPoints: { runner: 0, corp: 0 },
       finalStateHash: "fnv1a:selfplay",
       eventLogLength: 4,
@@ -396,6 +397,12 @@ describe("benchmark report formatting", () => {
       result.aggregate.passiveActionWithScoreLineAvailable,
     ).toBeGreaterThanOrEqual(0);
     expect(
+      Object.values(result.aggregate.actionLimitClusters).reduce(
+        (sum, count) => sum + count,
+        0,
+      ),
+    ).toBe(result.aggregate.actionLimitReached);
+    expect(
       result.findings.some((finding) =>
         finding.detectorIds.includes("action_limit_reached"),
       ),
@@ -408,10 +415,68 @@ describe("benchmark report formatting", () => {
     expect(report).toContain("| scoreWindowMissed |");
     expect(report).toContain("| unsafeScoreChosen |");
     expect(report).toContain("| passiveActionWithScoreLineAvailable |");
+    expect(report).toContain("## Action Limit Clusters");
     expect(JSON.stringify({ result, report })).not.toMatch(
       /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
     );
   }, 30_000);
+
+  it("clusters action-limit roots without hidden trace data", () => {
+    const summary: AiSimulationSummary = {
+      seed: "selfplay-action-limit-cluster",
+      winner: "action_limit_reached",
+      actions: 4,
+      turns: 2,
+      finalAgendaPoints: { runner: 0, corp: 0 },
+      finalStateHash: "fnv1a:selfplay-action-limit-cluster",
+      eventLogLength: 4,
+      replayOk: true,
+      replayErrors: [],
+      actionSequence: [
+        selfplayAction("runner", 1, "start_run", {
+          selectedActionId: "run-rd-1",
+          targetServerId: "rd",
+          reasonCode: "runner.plan.pressure_rnd",
+        }),
+        selfplayAction("corp", 2, "gain_credit", {
+          selectedActionId: "corp-gain",
+        }),
+        selfplayAction("runner", 3, "start_run", {
+          selectedActionId: "run-rd-2",
+          targetServerId: "rd",
+          reasonCode: "runner.plan.pressure_rnd",
+        }),
+        selfplayAction("runner", 4, "start_run", {
+          selectedActionId: "run-rd-3",
+          targetServerId: "rd",
+          reasonCode: "runner.plan.pressure_rnd",
+        }),
+        selfplayAction("runner", 5, "start_run", {
+          selectedActionId: "run-rd-4",
+          targetServerId: "rd",
+          reasonCode: "runner.plan.pressure_rnd",
+        }),
+        selfplayAction("runner", 6, "start_run", {
+          selectedActionId: "run-rd-5",
+          targetServerId: "rd",
+          reasonCode: "runner.plan.pressure_rnd",
+        }),
+      ],
+      errors: [],
+      cardPoolVersion: "0.99.0",
+      metrics: selfplayMetricsFixture(),
+    };
+
+    const clusters = summarizeSelfplayActionLimitClusters([summary]);
+
+    expect(clusters.action_limit_runner_repeated_no_progress_run).toBe(1);
+    expect(
+      Object.values(clusters).reduce((sum, count) => sum + count, 0),
+    ).toBe(1);
+    expect(JSON.stringify(clusters)).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
+    );
+  });
 });
 
 function selfplayAction(

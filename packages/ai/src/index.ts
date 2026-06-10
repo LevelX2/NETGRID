@@ -141,6 +141,7 @@ import {
   isSelfplayTraceRedactionSafe,
   safeSelfplayFacts,
   sortedUniqueSelfplayDetectors,
+  summarizeSelfplayActionLimitClusters,
   type AiSelfplayTraceMiningConfig,
   type AiSelfplayTraceMiningResult,
 } from "./simulation/selfplay-trace-mining";
@@ -199,6 +200,7 @@ export {
 } from "./simulation/benchmark-reports";
 export { detectAiSelfplaySuspiciousDecisions } from "./simulation/selfplay-trace-mining";
 export type {
+  AiSelfplayActionLimitClusterId,
   AiSelfplaySuspicionSeverity,
   AiSelfplaySuspiciousDecision,
   AiSelfplayTraceMiningConfig,
@@ -11764,6 +11766,7 @@ export function runAiSelfplayTraceMining(
     unsafeScoreChosen: countUnsafeScoreChosen(summaries),
     passiveActionWithScoreLineAvailable:
       countPassiveActionWithScoreLineAvailable(summaries),
+    actionLimitClusters: summarizeSelfplayActionLimitClusters(summaries),
   };
   return {
     version: "ai-selfplay-trace-mining-v1",
