@@ -2,6 +2,11 @@ import type { LegalAction } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
+import {
+  ACTION_SEMANTIC_COVERAGE_GROUPS,
+  formatActionSemanticCandidateCoverageReport,
+  summarizeActionSemanticCandidateCoverage,
+} from "./action-semantic-coverage";
 
 const ALL_ACTION_TYPES = [
   "mandatory_draw",
@@ -208,6 +213,88 @@ describe("Action semantic coverage", () => {
     expect(candidates[2]?.targetContext?.availableTargetsStatus).toBe(
       "engine_provided",
     );
+  });
+
+  it("summarizes candidate coverage by required fields without leaking card instance data", () => {
+    const candidates = buildActionSemanticCandidates({
+      legalActions: [
+        legalAction("gain_credit", 0, { source: "basic_action" }),
+        legalAction("resolve_choice", 1, { source: "game_rule" }),
+        legalAction("start_run", 2, {
+          source: "basic_action",
+          targetRequirements: [
+            {
+              id: "server",
+              kind: "server",
+              side: "corp",
+              visibility: "public",
+            },
+          ],
+        }),
+        legalAction("access_card", 3, { source: "game_rule" }),
+        legalAction("trigger_ability", 4, {
+          side: "runner",
+          source: "runner-hidden-instance",
+          abilityRef: {
+            sourceCardInstanceId: "runner-hidden-instance",
+            abilityId: "runner.visible.ability",
+          },
+          payload: { sourceDefinitionId: "runner-visible-definition" },
+        }),
+        legalAction("install_card", 5, {
+          side: "corp",
+          source: "corp-hidden-instance",
+          payload: { sourceDefinitionId: "corp-visible-definition" },
+        }),
+        legalAction("advance_card", 6, {
+          side: "corp",
+          source: "basic_action",
+        }),
+        legalAction("score_agenda", 7, {
+          side: "corp",
+          source: "game_rule",
+        }),
+        legalAction("rez_ice", 8, {
+          side: "corp",
+          source: "game_rule",
+          timingPoint: "run.encounter_ice",
+        }),
+      ],
+      availableTargetsByActionId: {
+        "coverage-2-start_run": [
+          {
+            targetId: "hq",
+            targetKind: "server",
+            targetSide: "corp",
+            evidence: ["coverage fixture legal server"],
+          },
+        ],
+      },
+    });
+
+    const summary = summarizeActionSemanticCandidateCoverage(candidates);
+    const report = formatActionSemanticCandidateCoverageReport(summary);
+
+    expect(summary.version).toBe("action-semantic-candidate-coverage-v1");
+    expect(summary.totalCandidates).toBe(candidates.length);
+    expect(summary.redactionSafe).toBe(true);
+    expect(summary.forbiddenMarkers).toEqual([]);
+    expect(summary.fieldCoverage).toMatchObject({
+      hasSourceCardId: 2,
+      hasAbilityId: 1,
+      hasTimingProfile: candidates.length,
+      hasTargetContext: 1,
+      redactionSafe: candidates.length,
+    });
+    for (const group of ACTION_SEMANTIC_COVERAGE_GROUPS) {
+      expect(summary.groups[group]).toBeGreaterThan(0);
+    }
+    expect(report).toContain("## Coverage Groups");
+    expect(report).not.toContain("runner-hidden-instance");
+    expect(report).not.toContain("corp-hidden-instance");
+    expect(report).not.toContain("sourceCardInstanceId");
+    expect(report).not.toContain("privatePayload");
+    expect(report).not.toContain("fullGameState");
   });
 });
 

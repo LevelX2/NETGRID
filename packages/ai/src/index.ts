@@ -223,6 +223,17 @@ export {
   buildAiDecisionInputDto,
 } from "./input-dto";
 export {
+  ACTION_SEMANTIC_CANDIDATE_COVERAGE_REPORT_VERSION,
+  ACTION_SEMANTIC_COVERAGE_GROUPS,
+  formatActionSemanticCandidateCoverageReport,
+  summarizeActionSemanticCandidateCoverage,
+} from "./actions/action-semantic-coverage";
+export type {
+  ActionSemanticCandidateCoverageRow,
+  ActionSemanticCandidateCoverageSummary,
+  ActionSemanticCoverageGroup,
+} from "./actions/action-semantic-coverage";
+export {
   buildAiDecisionInput,
   selectAiDecisionSideForState,
 } from "./runtime/ai-decision-input";
