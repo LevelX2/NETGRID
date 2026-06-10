@@ -254,3 +254,29 @@ Checks:
 - Grün: keine alten `hidden_resource_successful_*`-Definition-`kind`s in `packages/engine/src` oder `scripts`.
 - Grün: `corepack pnpm --filter @netgrid/engine typecheck`
 - Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/proteus/hidden-resource-hardening.test.ts src/game/run/successful-run-interventions.test.ts src/game/run/run-access-transition.test.ts`
+
+### P2 Ergebnis
+
+Umgesetzt:
+
+- `CardScoredAgendaImplementation` enthält jetzt den parametrisierten Vertrag `select_rezzed_ice_mark_modifier`.
+- `Ice Transmutation` nutzt diesen Vertrag mit `target: "rezzed_installed_ice"`, `counterType: "mark"`, `counterAmount: 1`, `strengthBonusPerCounter: 1` und `duplicateEachPrintedSubroutinePerCounter: true`.
+- `scored-agenda-flow.ts` validiert die Vertragsparameter vor Choice-Erzeugung und Resolution.
+- `scripts/check-ai-derived-facts.mjs` erkennt den neuen generischen Vertrag für globale ICE-Modifikatoren.
+
+Bewusst stabil gelassen:
+
+- Choice- und Payload-Präfixe `v1920_ice_transmutation` und `v1920.ice_transmutation`.
+- Counter-Typ `mark` und sichtbares Ice-Transmutation-Counter-Label.
+- Encounter-Auswertung: Mark-Counter erzeugen weiterhin Stärke-Bonus und Subroutine-Kopien.
+
+Verwandte Nutzer:
+
+- `Lisa Blight` und `Marcel DeSoleil` nutzen bereits den Run-dauernden Effekt `copy_same_fort_ice_subroutine_for_run`.
+- P2 generalisiert deshalb nicht alle Subroutine-Kopie-Effekte auf einmal, sondern trennt dauerhaften Scored-Agenda-Mark-Modifier von temporären During-Run-Kopien.
+
+Checks:
+
+- Grün: keine alten `ice_transmutation_rezzed_ice_modifier`-Referenzen in `packages/engine/src` oder `scripts`.
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/corp/scored-agenda-flow.test.ts src/game/corp/scored-agenda-abilities.test.ts src/index-tests/mechanics/agenda-global-random.test.ts src/game/engine-runtime-internal/card-runtime-deps-hosts.test.ts src/game/view/card-view.test.ts`

@@ -1148,15 +1148,14 @@ function deriveFromImplementation(card, implementationText, hint) {
   }
 
   if (
-    /kind:\s*"ice_transmutation_rezzed_ice_modifier"/.test(implementationText)
+    /kind:\s*"select_rezzed_ice_mark_modifier"/.test(implementationText)
   ) {
     addEffect(facts, {
       kind: "global_modifier",
       timing: "when_scored",
       scope: "ice",
       resource: "subroutines",
-      source:
-        "implementation.scoredAgenda.ice_transmutation_rezzed_ice_modifier",
+      source: "implementation.scoredAgenda.select_rezzed_ice_mark_modifier",
     });
     addEffect(facts, {
       kind: "remote_protection",
@@ -1164,13 +1163,11 @@ function deriveFromImplementation(card, implementationText, hint) {
       scope: "ice",
       resource: "strength",
       amount: 1,
-      source:
-        "implementation.scoredAgenda.ice_transmutation_rezzed_ice_modifier",
+      source: "implementation.scoredAgenda.select_rezzed_ice_mark_modifier",
     });
     addCondition(facts, {
       kind: "requires_rezzed_ice",
-      source:
-        "implementation.scoredAgenda.ice_transmutation_rezzed_ice_modifier",
+      source: "implementation.scoredAgenda.select_rezzed_ice_mark_modifier",
     });
   }
 

@@ -5,7 +5,12 @@ import type { CardImplementationDefinition } from "../../../types";
 export const iceTransmutationImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_204_ice-transmutation",
   scoredAgenda: {
-    kind: "ice_transmutation_rezzed_ice_modifier",
+    kind: "select_rezzed_ice_mark_modifier",
+    target: "rezzed_installed_ice",
+    counterType: "mark",
+    counterAmount: 1,
+    strengthBonusPerCounter: 1,
+    duplicateEachPrintedSubroutinePerCounter: true,
     visibility: "public",
   },
 };

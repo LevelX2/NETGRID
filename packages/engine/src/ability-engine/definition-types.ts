@@ -828,7 +828,12 @@ export type CardScoredAgendaImplementation =
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "ice_transmutation_rezzed_ice_modifier";
+      kind: "select_rezzed_ice_mark_modifier";
+      target: "rezzed_installed_ice";
+      counterType: Extract<CounterType, "mark">;
+      counterAmount: 1;
+      strengthBonusPerCounter: 1;
+      duplicateEachPrintedSubroutinePerCounter: true;
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
