@@ -246,3 +246,34 @@ Commit: keiner, außer Merge-Commit ist technisch nötig.
 - Umgesetzte Codeänderungen sind eng begrenzt und testgedeckt.
 - Nicht umgesetzte Blöcke haben konkrete Blocker und Removal Conditions.
 - Der Arbeitsbranch ist lokal in `main` integriert oder ein harter Integrationsblocker ist dokumentiert.
+
+## Paketprotokoll
+
+### F2 Ergebnis
+
+Umgesetzt:
+
+- Helper in `packages/engine/src/card-implementations/helpers.ts` für:
+  - `addHostedCredits`
+  - `takeHostedCredits`
+  - `trashSourceWhenEmpty`
+  - `takeHostedCreditsAndTrashWhenEmpty`
+  - `hostedCreditTakeTurnTrigger`
+  - `hostedCreditTakeAbility`
+  - `hostedCreditAddAbility`
+  - `restrictedHostedCreditSource`
+- Credit-Bank-, Campaign- und Coup-Karten auf die Helper migriert.
+- Standard-Restricted-Hosted-Credit-Quellen auf die Helper migriert.
+- `Krumz` verwendet nur den Add-Hosted-Credits-Helper; der eigene Trace-Bit-Vertrag bleibt bewusst unverändert.
+
+Nicht geändert:
+
+- Keine Runtime-Resolver, keine LegalAction-Payloads, keine Refresh-Reihenfolge, keine PublicEvents.
+- Keine Vereinheitlichung von Liability-/Debt- oder Trace-Bit-Sondersemantik.
+
+Checks:
+
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/card-implementations/definition-descriptors.test.ts`
+- Grün: `git diff --check`
+- Bekannter Baseline-Befund: Der breitere Satz `trace-prevention-assets`, `agenda-scorearea-recurring`, `corp-assets-upgrades-operations` bleibt wegen des bereits bekannten Corolla-Speed-Chip-Tests rot. Der Descriptor-Test bestätigt, dass die betroffenen Definitionen semantisch unverändert bleiben.

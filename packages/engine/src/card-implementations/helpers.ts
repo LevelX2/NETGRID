@@ -1,11 +1,28 @@
 import type {
+  ActivatedCardAbilityImplementation,
   CardEffectImplementation,
   CardIcebreakerAbilityImplementation,
   CardIcebreakerBreakMatcherImplementation,
+  CardLifecycleTriggeredAbilityImplementation,
   CardPrintedSubroutineImplementation,
   CardTraceSuccessEffectImplementation,
+  RestrictedHostedCreditSourceImplementation,
+  RestrictedHostedCreditUse,
   TraceEffectImplementation,
 } from "../ability-engine/definition-types";
+
+type AddHostedCreditsEffect = Extract<
+  CardEffectImplementation,
+  { kind: "add_hosted_credits" }
+>;
+type TakeHostedCreditsEffect = Extract<
+  CardEffectImplementation,
+  { kind: "take_hosted_credits" }
+>;
+type TrashSourceWhenEmptyEffect = Extract<
+  CardEffectImplementation,
+  { kind: "trash_source_when_empty" }
+>;
 
 export function basicIcebreakerAbilities(input: {
   breakCost: number;
@@ -119,5 +136,132 @@ export function traceTagEffect(
     baseTraceStrength,
     visibility: "public",
     onSuccess: traceTagSuccess(amount),
+  };
+}
+
+export function addHostedCredits(amount: number): AddHostedCreditsEffect {
+  return {
+    kind: "add_hosted_credits",
+    target: "source",
+    amount,
+    visibility: "public",
+  };
+}
+
+export function takeHostedCredits(input: {
+  amount?: number;
+  mode?: "up_to_amount_if_available" | "all";
+} = {}): TakeHostedCreditsEffect {
+  return {
+    kind: "take_hosted_credits",
+    source: "source",
+    recipient: "controller",
+    ...(input.amount !== undefined ? { amount: input.amount } : {}),
+    ...(input.mode !== undefined ? { mode: input.mode } : {}),
+    visibility: "public",
+  };
+}
+
+export function trashSourceWhenEmpty(): TrashSourceWhenEmptyEffect {
+  return {
+    kind: "trash_source_when_empty",
+    source: "source",
+    visibility: "public",
+  };
+}
+
+export function takeHostedCreditsAndTrashWhenEmpty(input: {
+  amount: number;
+}): readonly CardEffectImplementation[] {
+  return [
+    takeHostedCredits({
+      amount: input.amount,
+      mode: "up_to_amount_if_available",
+    }),
+    trashSourceWhenEmpty(),
+  ];
+}
+
+export function hostedCreditTakeTurnTrigger(input: {
+  amount: number;
+  trashWhenEmpty?: boolean;
+}): CardLifecycleTriggeredAbilityImplementation {
+  return {
+    condition: { kind: "source_has_hosted_credits" },
+    effects: input.trashWhenEmpty
+      ? takeHostedCreditsAndTrashWhenEmpty({ amount: input.amount })
+      : [
+          takeHostedCredits({
+            amount: input.amount,
+            mode: "up_to_amount_if_available",
+          }),
+        ],
+  };
+}
+
+export function hostedCreditTakeAbility(input: {
+  timing: "runner_main" | "corp_main";
+  label: string;
+  amount?: number;
+  mode?: "up_to_amount_if_available" | "all";
+  trashWhenEmpty?: boolean;
+  limit?: ActivatedCardAbilityImplementation["limit"];
+}): ActivatedCardAbilityImplementation {
+  const takeInput = {
+    ...(input.amount !== undefined ? { amount: input.amount } : {}),
+    ...(input.mode !== undefined ? { mode: input.mode } : {}),
+  };
+
+  return {
+    kind: "activated",
+    timing: input.timing,
+    costs: [{ kind: "action", amount: 1 }],
+    condition: { kind: "source_has_hosted_credits" },
+    ...(input.limit ? { limit: input.limit } : {}),
+    label: input.label,
+    effects: input.trashWhenEmpty && input.amount !== undefined
+      ? takeHostedCreditsAndTrashWhenEmpty({ amount: input.amount })
+      : [
+          takeHostedCredits(takeInput),
+        ],
+  };
+}
+
+export function hostedCreditAddAbility(input: {
+  timing: "runner_main" | "corp_main";
+  label: string;
+  amount: number;
+  limit?: ActivatedCardAbilityImplementation["limit"];
+}): ActivatedCardAbilityImplementation {
+  return {
+    kind: "activated",
+    timing: input.timing,
+    costs: [{ kind: "action", amount: 1 }],
+    ...(input.limit ? { limit: input.limit } : {}),
+    label: input.label,
+    effects: [addHostedCredits(input.amount)],
+  };
+}
+
+export function restrictedHostedCreditSource(input: {
+  capacity: number;
+  usableFor: readonly RestrictedHostedCreditUse[];
+  allowUseWhileOverwritingSource?: true;
+  requireHostedBreakerForIcebreakerUse?: true;
+}): RestrictedHostedCreditSourceImplementation {
+  return {
+    capacity: input.capacity,
+    counterType: "bit",
+    usableFor: input.usableFor,
+    refresh: {
+      timing: "start_of_runner_turn",
+      mode: "refill_to_capacity_if_used",
+    },
+    ...(input.allowUseWhileOverwritingSource
+      ? { allowUseWhileOverwritingSource: true }
+      : {}),
+    ...(input.requireHostedBreakerForIcebreakerUse
+      ? { requireHostedBreakerForIcebreakerUse: true }
+      : {}),
   };
 }
