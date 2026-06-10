@@ -2,7 +2,7 @@
 
 ## Status
 
-`ai_sem_2_complete`
+`ai_doc_1_complete`
 
 Arbeitsbranch: `codex/ai-source-followup-action-semantics`
 
@@ -379,6 +379,21 @@ Scope-Kontrolle:
 
 - Keine Runtime-Scoring-Änderung.
 - Keine LegalAction-Erzeugung, Engine-Revalidierung oder Hidden-Info-Grenze geändert.
+
+### AI-DOC-1 abgeschlossen
+
+Umsetzung:
+
+- `docs/reviews/ai/ai-source-structure-reorg-final-report-2026-06-10.md` korrigiert den historischen roten Baseline-Hinweis und verweist auf den grünen Follow-up-Stand.
+- `docs/reviews/ai/ai-source-followup-action-semantics-final-report-2026-06-10.md` neu angelegt.
+
+Verifikation:
+
+- `git diff --check` grün.
+
+Scope-Kontrolle:
+
+- Nur Dokumentation geändert.
 
 ## Controller-Prompt-Kern
 

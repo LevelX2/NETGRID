@@ -2,7 +2,7 @@
 
 ## Status
 
-`ready_for_local_main_integration`
+`followup_corrected_green`
 
 ## Ergebnis
 
@@ -16,6 +16,8 @@ Der Paketprozess STRUCT-0 bis STRUCT-7 ist umgesetzt. Die öffentliche Paketgren
 - TacticalPlan-Typen und PlanMemory: `packages/ai/src/plans/tactical-plan-types.ts`, `packages/ai/src/plans/plan-memory.ts`
 - Legacy-Planer: `packages/ai/src/legacy/runner-plans.ts`, `packages/ai/src/legacy/corp-plans.ts`
 - Simulation-Basistypen: `packages/ai/src/simulation/simulation-types.ts`
+- Semantic-Runtime-Typen und Choice-Ranking im Follow-up: `packages/ai/src/runtime/semantic-runtime-types.ts`, `packages/ai/src/runtime/semantic-choice-ranking.ts`
+- Fokussierte Simulation-Tests im Follow-up: `packages/ai/src/simulation/simulation-harness.test.ts`, `packages/ai/src/simulation/v143-fixtures.test.ts`
 
 Die alten öffentlichen Importpfade für `runner-plans.ts`, `corp-plans.ts`, `tactical-plans.ts`, `runner-run-target-evaluation.ts` und `index.ts` bleiben über Fassaden beziehungsweise Re-Exports erhalten.
 
@@ -29,24 +31,18 @@ Die alten öffentlichen Importpfade für `runner-plans.ts`, `corp-plans.ts`, `ta
 
 ## Verifikation
 
-Grün:
-
-```bash
-corepack pnpm --filter @netgrid/ai typecheck
-corepack pnpm --filter @netgrid/ai exec vitest run src/action-semantic-candidate.test.ts src/tactical-plans.test.ts src/semantic-ai-runtime-cutover.test.ts src/runner-run-target-evaluation.test.ts src/runner-hand-development.test.ts src/runner-tactical-goals.test.ts src/runner-golden-deck-debug.test.ts src/simulation/benchmark-reports.test.ts
-git diff --check
-```
-
-Der fokussierte Vitest-Lauf deckte acht Testdateien mit 159 bestandenen Tests ab.
-
-Bekannte Ausgangsabweichung:
+Grün nach STRUCT-Follow-up:
 
 ```bash
 corepack pnpm --filter @netgrid/ai test
+corepack pnpm --filter @netgrid/ai typecheck
+git diff --check
 ```
 
-Der vollständige `@netgrid/ai`-Testlauf bleibt wegen der bereits in STRUCT-0 dokumentierten sieben bestehenden Fehler in `src/index.test.ts` rot. Der Schlusslauf nach STRUCT-7 zeigte dieselbe Baseline: 50 Testdateien bestanden, 1 Testdatei fehlgeschlagen, 1018 Tests bestanden, 7 Tests fehlgeschlagen.
+Der vollständige `@netgrid/ai`-Testlauf ist nach der nachgelagerten Testbereinigung und dem Follow-up grün. Der letzte vollständige Lauf im Follow-up-Stand bestand mit 54 Testdateien und 1030 Tests.
+
+Historischer Hinweis: Die im ursprünglichen STRUCT-7-Report genannte rote `index.test.ts`-Baseline ist durch den späteren Commit `fd817c70 fix(ai): repair AI test gates` und den Follow-up-Prozess nicht mehr der aktuelle Stand.
 
 ## Offene Folgearbeit
 
-`index.test.ts` wurde bewusst nicht ausgedünnt. Die Ausdünnung bleibt sinnvoll, sobald die roten Baseline-Blöcke behoben oder durch fokussierte grüne Ersatztests abgesichert sind.
+Weitere Ausdünnung von `index.test.ts` und zusätzliche Extraktion von Debug-/Diagnosefunktionen aus `packages/ai/src/index.ts` bleiben sinnvoll, sind aber keine offenen Blocker für den aktuellen grünen Abschluss.
