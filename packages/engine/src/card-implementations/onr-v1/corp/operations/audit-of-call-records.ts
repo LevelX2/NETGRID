@@ -1,3 +1,4 @@
+import { traceTagEffect } from "../../../helpers";
 import type { CardImplementationDefinition } from "../../../types";
 
 // card name: Audit of Call Records
@@ -12,21 +13,7 @@ export const auditOfCallRecordsImplementation: CardImplementationDefinition = {
         kind: "runner_attempted_run_last_turn",
         minimumRuns: 2,
       },
-      effects: [
-        {
-          kind: "trace",
-          baseTraceStrength: 5,
-          visibility: "public",
-          onSuccess: [
-            {
-              kind: "add_tags",
-              recipient: "runner",
-              amount: 1,
-              visibility: "public",
-            },
-          ],
-        },
-      ],
+      effects: [traceTagEffect(5)],
     },
   ],
 };

@@ -1,3 +1,4 @@
+import { basicIcebreakerAbilities } from "../../../helpers";
 import type { CardImplementationDefinition } from "../../../types";
 
 // card name: Big Frackin' Gun
@@ -5,20 +6,10 @@ import type { CardImplementationDefinition } from "../../../types";
 export const proteusBigFrackinGunImplementation: CardImplementationDefinition =
   {
     cardDefinitionId: "onr_proteus_079_big-frackin-gun",
-    icebreakerAbilities: [
-      {
-        kind: "break_subroutine",
-        cost: { kind: "credit", amount: 6 },
-        matches: { kind: "ice_subtype", subtype: "sentry" },
-        count: 5,
-        visibility: "public",
-      },
-      {
-        kind: "increase_strength",
-        cost: { kind: "credit", amount: 1 },
-        amount: 1,
-        duration: "current_encounter",
-        visibility: "public",
-      },
-    ],
+    icebreakerAbilities: basicIcebreakerAbilities({
+      breakCost: 6,
+      matches: { kind: "ice_subtype", subtype: "sentry" },
+      breakCount: 5,
+      pumpCost: 1,
+    }),
   };

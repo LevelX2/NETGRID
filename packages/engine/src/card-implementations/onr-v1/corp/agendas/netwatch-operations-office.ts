@@ -1,3 +1,4 @@
+import { traceTagEffect } from "../../../helpers";
 import type { CardImplementationDefinition } from "../../../types";
 
 // card name: Netwatch Operations Office
@@ -11,21 +12,7 @@ export const netwatchOperationsOfficeImplementation: CardImplementationDefinitio
         timing: "corp_main",
         costs: [{ kind: "action", amount: 1 }],
         label: "Netwatch Operations Office: Trace 2 starten",
-        effects: [
-          {
-            kind: "trace",
-            baseTraceStrength: 2,
-            visibility: "public",
-            onSuccess: [
-              {
-                kind: "add_tags",
-                recipient: "runner",
-                amount: 1,
-                visibility: "public",
-              },
-            ],
-          },
-        ],
+        effects: [traceTagEffect(2)],
       },
     ],
   };
