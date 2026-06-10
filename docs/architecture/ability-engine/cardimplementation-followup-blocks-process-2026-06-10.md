@@ -321,3 +321,25 @@ Checks:
 - Grün: `corepack pnpm --filter @netgrid/engine typecheck`
 - Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/game/abilities/run-fort-trigger-execution.test.ts src/index-tests/mechanics/per-card-longtail.test.ts -t Microtech`
 - Grün: `git diff --check`
+
+### F5 Ergebnis
+
+Umgesetzt:
+
+- `rescheduler_hq_shuffle_draw` als CardImplementation-Definition-`kind` durch `shuffle_hq_into_rd_then_draw_same_count` ersetzt.
+- `cowboy_sysop_uninstall_corp_card_to_hq` als CardImplementation-Definition-`kind` durch `move_installed_corp_card_to_hq` ersetzt.
+- Runtime-Erkennung in Main-Action-Generierung und Cowboy-Ausführung auf die generischen Definition-`kind`s umgestellt.
+
+Nicht geändert:
+
+- Bestehende LegalAction-Payload-Werte `rescheduler_hq_shuffle_draw` und `cowboy_sysop_uninstall_corp_card_to_hq`.
+- Hidden-Zone-Actions `v1917_rescheduler_hq_shuffle_draw` und `v1951_cowboy_sysop_uninstall_to_hq`.
+- Shuffle-/Draw-Randomness, Zielvalidierung und PublicPayloads.
+
+Checks:
+
+- Grün: keine alten Rescheduler-/Cowboy-`kind`s in `packages/engine/src/card-implementations` oder `packages/engine/src/ability-engine`.
+- Grün: `corepack pnpm --filter @netgrid/engine typecheck`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/assets-nodes-upgrades.test.ts src/index-tests/originalset/corp-assets-upgrades-operations.test.ts -t Rescheduler`
+- Grün: `corepack pnpm --filter @netgrid/engine exec vitest run src/index-tests/mechanics/assets-nodes-upgrades.test.ts src/index-tests/originalset/corp-assets-upgrades-operations.test.ts -t Cowboy`
+- Grün: `git diff --check`

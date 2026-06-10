@@ -91,11 +91,11 @@ export type CardCorpUtilityImplementation =
       visibility: Extract<EventVisibilityClass, "public">;
     }
   | {
-      kind: "rescheduler_hq_shuffle_draw";
+      kind: "shuffle_hq_into_rd_then_draw_same_count";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {
-      kind: "cowboy_sysop_uninstall_corp_card_to_hq";
+      kind: "move_installed_corp_card_to_hq";
       visibility: Extract<EventVisibilityClass, "hidden_info_barrier">;
     }
   | {

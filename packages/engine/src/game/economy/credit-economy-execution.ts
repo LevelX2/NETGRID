@@ -39,7 +39,7 @@ export type CreditEconomyExecutionHost = {
     hasCorpUtilityKind: (
       state: GameState,
       cardId: CardInstanceId,
-      kind: "cowboy_sysop_uninstall_corp_card_to_hq",
+      kind: "move_installed_corp_card_to_hq",
     ) => boolean;
     uniqueDirectLongtailImplementationForCard: (
       state: GameState,
@@ -375,7 +375,7 @@ export function handleCreditEconomyExecution(
       !host.cards.hasCorpUtilityKind(
         state,
         sourceCardId,
-        "cowboy_sysop_uninstall_corp_card_to_hq",
+        "move_installed_corp_card_to_hq",
       )
     )
       throw new Error("Die Cowboy-Sysop-Faehigkeit passt nicht zur Karte.");
