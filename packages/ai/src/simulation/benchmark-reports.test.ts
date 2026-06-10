@@ -245,6 +245,64 @@ describe("benchmark report formatting", () => {
     );
   });
 
+  it("keeps explained semantic overrides out of suspicious selfplay findings", () => {
+    const summary: AiSimulationSummary = {
+      seed: "selfplay-detector-explained-overrides",
+      winner: "action_limit_reached",
+      actions: 2,
+      turns: 1,
+      finalAgendaPoints: { runner: 0, corp: 0 },
+      finalStateHash: "fnv1a:selfplay-overrides",
+      eventLogLength: 2,
+      replayOk: true,
+      replayErrors: [],
+      actionSequence: [
+        selfplayAction("runner", 1, "gain_credit", {
+          selectedActionId: "explained-gain",
+          planKind: "runner.opportunistic_central_run",
+          reasonCode: "runner.semantic.basic_economy_draw",
+          evidence: [
+            "semantic_runtime_actual_differs_from_legacy_debug",
+            "runner_recent_same_server_runs",
+            "action_semantic_candidate:economy.gain_credit",
+            "legacy_reference_action_type:start_run",
+          ],
+        }),
+        selfplayAction("runner", 2, "draw_card", {
+          selectedActionId: "unexplained-draw",
+          planKind: "runner.opportunistic_central_run",
+          reasonCode: "runner.semantic.basic_economy_draw",
+          evidence: [
+            "semantic_runtime_actual_differs_from_legacy_debug",
+            "legacy_reference_action_type:start_run",
+          ],
+        }),
+      ],
+      errors: [],
+      cardPoolVersion: "0.99.0",
+      metrics: selfplayMetricsFixture(),
+    };
+
+    const findings = detectAiSelfplaySuspiciousDecisions([summary], {
+      detectorIds: ["plan_step_action_mismatch", "semantic_override_suspicious"],
+    });
+    const explained = findings.filter(
+      (finding) => finding.selectedActionId === "explained-gain",
+    );
+    const unexplained = findings.find(
+      (finding) => finding.selectedActionId === "unexplained-draw",
+    );
+
+    expect(explained).toEqual([]);
+    expect(unexplained?.detectorIds).toEqual([
+      "plan_step_action_mismatch",
+      "semantic_override_suspicious",
+    ]);
+    expect(JSON.stringify(findings)).not.toMatch(
+      /cardInstances|privatePayload|sessionToken|reconnectToken|joinToken|fullGameState|AIInput|DecisionDebug/i,
+    );
+  });
+
   it("runs and formats a small selfplay trace-mining smoke", () => {
     const result = runAiSelfplayTraceMining({
       seeds: ["ai-v143-tuning-001"],
