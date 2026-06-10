@@ -29,274 +29,67 @@ import {
 import type { RunnerStrategicIntentProfile } from "./runner-strategic-intent";
 import { assessKnownRezzedIcePath } from "./visible-run-analysis";
 import { createAiHintsByCard } from "./ai-hints";
+import { TACTICAL_PLAN_SCHEMA_VERSION } from "./plans/tactical-plan-types";
+import { getTacticalPlanMemorySnapshot } from "./plans/plan-memory";
+import type {
+  PlanLifecycle,
+  TacticalPlanType,
+  PlanStepKind,
+  PlanMappingStatus,
+  RequiredCapabilityKind,
+  RequiredCapability,
+  PlanBlockerKind,
+  PlanBlocker,
+  PlanTarget,
+  PlanScoreBreakdown,
+  RunnerDrawOverflowSeverity,
+  RunnerDrawOverflowUrgencyOverride,
+  RunnerPressureBudget,
+  RunnerDrawOverflowAssessment,
+  PlanStep,
+  TacticalPlan,
+  TacticalPlanBuildContext,
+  PlanProgressionStatus,
+  TacticalPlanMemorySnapshot,
+  TacticalPlanSnapshot,
+  PlanStepMappingResult,
+  TacticalPlanRuntimeResult
+} from "./plans/tactical-plan-types";
 
-export const TACTICAL_PLAN_SCHEMA_VERSION = "tactical-plan-v1" as const;
 const AI_HINTS_BY_CARD = createAiHintsByCard();
 
-export type PlanLifecycle =
-  | "proposed"
-  | "active"
-  | "blocked"
-  | "progressing"
-  | "satisfied"
-  | "failed"
-  | "expired"
-  | "abandoned";
+export { TACTICAL_PLAN_SCHEMA_VERSION } from "./plans/tactical-plan-types";
+export {
+  createTacticalPlanMemorySnapshot,
+  getTacticalPlanMemorySnapshot,
+  rememberTacticalPlanRuntime,
+  resetTacticalPlanMemory,
+} from "./plans/plan-memory";
+export type {
+  PlanLifecycle,
+  TacticalPlanType,
+  PlanStepKind,
+  PlanMappingStatus,
+  RequiredCapabilityKind,
+  RequiredCapability,
+  PlanBlockerKind,
+  PlanBlocker,
+  PlanTarget,
+  PlanScoreBreakdown,
+  RunnerDrawOverflowSeverity,
+  RunnerDrawOverflowUrgencyOverride,
+  RunnerPressureBudget,
+  RunnerDrawOverflowAssessment,
+  PlanStep,
+  TacticalPlan,
+  TacticalPlanBuildContext,
+  PlanProgressionStatus,
+  TacticalPlanMemorySnapshot,
+  TacticalPlanSnapshot,
+  PlanStepMappingResult,
+  TacticalPlanRuntimeResult
+} from "./plans/tactical-plan-types";
 
-export type TacticalPlanType =
-  | "runner.obtain_breaker_coverage"
-  | "runner.contest_remote"
-  | "runner.opportunistic_central_run"
-  | "runner.develop_hand_card"
-  | "runner.build_credit_base"
-  | "runner.build_credit_bank"
-  | "runner.cash_out_credit_bank"
-  | "corp.create_score_window"
-  | "corp.build_credit_bank"
-  | "corp.rez_defense";
-
-export type PlanStepKind =
-  | "install_breaker"
-  | "resolve_missing_mu"
-  | "pivot_to_alternative"
-  | "draw_for_answer"
-  | "search_for_answer"
-  | "setup_search_engine"
-  | "gain_credits"
-  | "install_development_card"
-  | "build_remote"
-  | "protect_remote"
-  | "build_rez_reserve"
-  | "install_or_prepare_agenda"
-  | "build_bank_counter"
-  | "cash_out_bank"
-  | "run_target"
-  | "probe_central"
-  | "rez_outer_ice"
-  | "advance_score_card"
-  | "score_agenda";
-
-export type PlanMappingStatus =
-  | "unmapped"
-  | "matched"
-  | "blocked_no_legal_action"
-  | "blocked_missing_capability"
-  | "blocked_too_expensive"
-  | "blocked_timing"
-  | "defer_to_reactive_window";
-
-export type RequiredCapabilityKind =
-  | "breaker_coverage"
-  | "breaker_wall"
-  | "breaker_code_gate"
-  | "breaker_sentry"
-  | "breaker_ap"
-  | "breaker_trace"
-  | "breaker_universal"
-  | "mu"
-  | "credits"
-  | "card_draw"
-  | "card_search"
-  | "server_access"
-  | "bank_capacity"
-  | "bank_payout"
-  | "remote_protection"
-  | "agenda_score_window"
-  | "rez_reserve"
-  | "rez_window";
-
-export type RequiredCapability = {
-  capabilityId: string;
-  kind: RequiredCapabilityKind;
-  side: Side;
-  target?: PlanTarget;
-  minimumCredits?: number;
-  evidence: string[];
-};
-
-export type PlanBlockerKind =
-  | "missing_breaker_coverage"
-  | "missing_wall_coverage"
-  | "missing_code_gate_coverage"
-  | "missing_sentry_coverage"
-  | "missing_ap_coverage"
-  | "missing_trace_coverage"
-  | "coverage_not_in_deck"
-  | "search_target_not_available"
-  | "breaker_present_but_unaffordable"
-  | "breaker_present_but_mu_blocked"
-  | "missing_mu"
-  | "too_expensive"
-  | "target_unreachable"
-  | "bank_tool_not_installed"
-  | "bank_empty"
-  | "score_window_unprotected"
-  | "missing_rez_reserve"
-  | "missing_credits"
-  | "missing_legal_action"
-  | "missing_remote_protection"
-  | "timing_window_unavailable"
-  | "reactive_window";
-
-export type PlanBlocker = {
-  blockerId: string;
-  kind: PlanBlockerKind;
-  severity: "soft" | "hard";
-  target?: PlanTarget;
-  removalStepKind?: PlanStepKind;
-  evidence: string[];
-};
-
-export type PlanTarget = {
-  kind: "server" | "card" | "ice" | "capability" | "bank";
-  id: string;
-  label?: string;
-};
-
-export type PlanScoreBreakdown = {
-  key: string;
-  label: string;
-  value: number;
-  reason: string;
-};
-
-export type RunnerDrawOverflowSeverity =
-  | "none"
-  | "minor"
-  | "moderate"
-  | "high";
-
-export type RunnerDrawOverflowUrgencyOverride =
-  | "none"
-  | "find_breaker_for_score_threat"
-  | "find_survival_answer"
-  | "find_run_access_payoff"
-  | "find_economy";
-
-export type RunnerPressureBudget = {
-  canSpendActionOnPressure: boolean;
-  pressureActionBudgetThisTurn: number;
-  maxCreditLossForProbe: number;
-  allowedProbeTargets: string[];
-  nearTieProbeTargets: string[];
-  preferredProbeTarget?: string;
-  blockedReasons: string[];
-  boundedVariationApplied: boolean;
-  variationReason: string;
-  evidence: string[];
-};
-
-export type RunnerDrawOverflowAssessment = {
-  currentHandCount: number;
-  maxHandSize: number;
-  cardsToDraw: number;
-  remainingClicks: number;
-  projectedHandAfterDraw: number;
-  projectedOverflow: number;
-  severity: RunnerDrawOverflowSeverity;
-  discardFodderCount: number;
-  valuableCardsAtRisk: number;
-  usefulPlayableCardsInHand: number;
-  usefulHandCardsBlockedByCredits: number;
-  urgencyOverride: RunnerDrawOverflowUrgencyOverride;
-  penalty: number;
-  reasons: string[];
-};
-
-export type PlanStep = {
-  stepId: string;
-  kind: PlanStepKind;
-  desiredActionSemantics: string[];
-  requiredCapabilities: RequiredCapability[];
-  mappingStatus?: PlanMappingStatus;
-  actionCandidateIds: string[];
-  rationale: string[];
-};
-
-export type TacticalPlan = {
-  schemaVersion: typeof TACTICAL_PLAN_SCHEMA_VERSION;
-  planId: string;
-  side: Side;
-  type: TacticalPlanType;
-  status: PlanLifecycle;
-  priority: number;
-  horizonTurns: number;
-  target?: PlanTarget;
-  requiredCapabilities: RequiredCapability[];
-  blockers: PlanBlocker[];
-  currentStep: PlanStep;
-  nextSteps: PlanStep[];
-  evidence: string[];
-  scoreBreakdown: PlanScoreBreakdown[];
-  createdAtStateVersion: number;
-  updatedAtStateVersion: number;
-};
-
-export type TacticalPlanBuildContext = {
-  input: AiDecisionInput;
-  candidates?: readonly ActionSemanticCandidate[];
-  previousPlan?: TacticalPlanSnapshot;
-  deckCapabilities?: DeckCapabilityProfile;
-  runnerStrategicIntent?: RunnerStrategicIntentProfile;
-  runnerRunTargetEvaluations?: readonly RunnerRunTargetEvaluation[];
-  runnerEconomyPosture?: RunnerEconomyPosture;
-  runnerHandDevelopmentEvaluations?: readonly RunnerHandDevelopmentEvaluation[];
-  runnerTacticalGoals?: readonly RunnerTacticalGoal[];
-};
-
-export type PlanProgressionStatus =
-  | "active"
-  | "blocked"
-  | "progressing"
-  | "satisfied"
-  | "abandoned";
-
-export type TacticalPlanMemorySnapshot = {
-  schemaVersion: typeof TACTICAL_PLAN_SCHEMA_VERSION;
-  memoryId: string;
-  side: Side;
-  planId: string;
-  type: TacticalPlanType;
-  status: PlanProgressionStatus;
-  target?: PlanTarget;
-  selectedStepKind?: PlanStepKind;
-  selectedActionId?: string;
-  blockedBy: string[];
-  ttlDecisionsRemaining: number;
-  planProgressionReason: string;
-  whyPlanAbandoned?: string;
-  updatedAtStateVersion: number;
-};
-
-export type TacticalPlanSnapshot = TacticalPlanMemorySnapshot;
-
-export type PlanStepMappingResult = {
-  plan: TacticalPlan;
-  step: PlanStep;
-  status: PlanMappingStatus;
-  actionCandidateIds: string[];
-  legalActions: LegalAction[];
-  rationale: string[];
-};
-
-export type TacticalPlanRuntimeResult = {
-  previousPlan?: TacticalPlanMemorySnapshot;
-  deckCapabilitiesUsed?: string[];
-  runnerStrategicIntentUsed?: string[];
-  runnerRunTargetEvaluationsUsed?: string[];
-  runnerEconomyPostureUsed?: string[];
-  runnerHandDevelopmentEvaluationsUsed?: string[];
-  runnerTacticalGoalsUsed?: string[];
-  planAlternatives: TacticalPlan[];
-  blockedPlans: TacticalPlan[];
-  selectedPlan?: TacticalPlan;
-  selectedStep?: PlanStep;
-  selectedMapping?: PlanStepMappingResult;
-  planProgressionReason?: string;
-  whyPlanAbandoned?: string;
-};
-
-const tacticalPlanMemoryByKey = new Map<string, TacticalPlanMemorySnapshot>();
 const PLAN_CONTINUITY_PRIORITY_BONUS = 120;
 
 export function buildTacticalPlans(
@@ -514,59 +307,6 @@ function planCanMapToCurrentAction(plan: TacticalPlan): boolean {
     plan.status !== "failed" &&
     plan.status !== "satisfied"
   );
-}
-
-export function getTacticalPlanMemorySnapshot(
-  input: AiDecisionInput,
-): TacticalPlanMemorySnapshot | undefined {
-  if (input.playerView.winner !== null) {
-    tacticalPlanMemoryByKey.delete(tacticalPlanMemoryKey(input));
-    return undefined;
-  }
-  return tacticalPlanMemoryByKey.get(tacticalPlanMemoryKey(input));
-}
-
-export function rememberTacticalPlanRuntime(
-  input: AiDecisionInput,
-  result: TacticalPlanRuntimeResult,
-  selectedAction: LegalAction,
-): TacticalPlanMemorySnapshot | undefined {
-  if (input.playerView.winner !== null) {
-    tacticalPlanMemoryByKey.delete(tacticalPlanMemoryKey(input));
-    return undefined;
-  }
-  const selectedPlan = result.selectedPlan;
-  const selectedStep = result.selectedStep;
-  if (!selectedPlan || !selectedStep) return undefined;
-  const snapshot = createTacticalPlanMemorySnapshot({
-    input,
-    plan: selectedPlan,
-    step: selectedStep,
-    selectedAction,
-    ...(result.previousPlan ? { previousPlan: result.previousPlan } : {}),
-    ...(result.planProgressionReason
-      ? { planProgressionReason: result.planProgressionReason }
-      : {}),
-    ...(result.whyPlanAbandoned
-      ? { whyPlanAbandoned: result.whyPlanAbandoned }
-      : {}),
-  });
-  tacticalPlanMemoryByKey.set(tacticalPlanMemoryKey(input), snapshot);
-  return snapshot;
-}
-
-export function resetTacticalPlanMemory(): void {
-  tacticalPlanMemoryByKey.clear();
-}
-
-function tacticalPlanMemoryKey(input: AiDecisionInput): string {
-  return `${tacticalPlanMemoryContextId(input)}:${input.side}:${input.profileId}`;
-}
-
-function tacticalPlanMemoryContextId(input: AiDecisionInput): string {
-  const [decisionScope] = input.decisionId.split(":");
-  if (decisionScope && decisionScope.length > 0) return decisionScope;
-  return input.seed;
 }
 
 function progressTacticalPlans(
@@ -4404,62 +4144,6 @@ export function createTacticalPlan(params: {
     createdAtStateVersion: params.stateVersion,
     updatedAtStateVersion: params.stateVersion,
   };
-}
-
-export function createTacticalPlanMemorySnapshot(params: {
-  input: AiDecisionInput;
-  plan: TacticalPlan;
-  step: PlanStep;
-  selectedAction: LegalAction;
-  previousPlan?: TacticalPlanMemorySnapshot;
-  planProgressionReason?: string;
-  whyPlanAbandoned?: string;
-}): TacticalPlanMemorySnapshot {
-  const status = planMemoryStatus(params.plan, params.step);
-  const ttlDecisionsRemaining =
-    params.plan.type === "runner.opportunistic_central_run"
-      ? Math.max(0, (params.previousPlan?.ttlDecisionsRemaining ?? 1) - 1)
-      : 2;
-  return {
-    schemaVersion: TACTICAL_PLAN_SCHEMA_VERSION,
-    memoryId: tacticalPlanMemoryKey(params.input),
-    side: params.plan.side,
-    planId: params.plan.planId,
-    type: params.plan.type,
-    status,
-    ...(params.plan.target ? { target: params.plan.target } : {}),
-    selectedStepKind: params.step.kind,
-    selectedActionId: params.selectedAction.actionId,
-    blockedBy: params.plan.blockers.map((blocker) => blocker.kind),
-    ttlDecisionsRemaining,
-    planProgressionReason:
-      params.planProgressionReason ??
-      (params.previousPlan && samePlanLine(params.plan, params.previousPlan)
-        ? "continued_previous_plan"
-        : "selected_new_plan"),
-    ...(params.whyPlanAbandoned
-      ? { whyPlanAbandoned: params.whyPlanAbandoned }
-      : {}),
-    updatedAtStateVersion: params.input.playerView.stateVersion,
-  };
-}
-
-function planMemoryStatus(
-  plan: TacticalPlan,
-  step: PlanStep,
-): PlanProgressionStatus {
-  if (plan.status === "abandoned") return "abandoned";
-  if (plan.status === "blocked") return "blocked";
-  if (step.mappingStatus === "matched") {
-    if (plan.type === "runner.opportunistic_central_run") return "satisfied";
-    if (plan.type === "runner.cash_out_credit_bank") return "satisfied";
-    if (plan.type === "corp.rez_defense") return "satisfied";
-    if (plan.type === "corp.create_score_window" && step.kind === "score_agenda") {
-      return "satisfied";
-    }
-    return "progressing";
-  }
-  return "active";
 }
 
 export function rankTacticalPlans(plans: readonly TacticalPlan[]): TacticalPlan[] {
