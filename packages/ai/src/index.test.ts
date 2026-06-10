@@ -13663,6 +13663,70 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
   });
 
+  it("penalizes repeated runner pressure on the same server across no-progress setup", () => {
+    const input = runnerActionPhaseInput(
+      "ai-runner-same-server-no-progress-run",
+      (state) => {
+        state.runner.credits = 5;
+      },
+    );
+    const rdRun = input.legalActions.find(
+      (action) =>
+        action.type === "start_run" && action.payload?.serverId === "rd",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(rdRun).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!rdRun || !gain)
+      throw new Error("Missing same-server no-progress fixture actions");
+
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const scopedInput = {
+      ...input,
+      eventTail: [
+        ...input.eventTail,
+        syntheticPlanActionEvent(
+          "runner-no-progress-prior-rd-run",
+          input.playerView.stateVersion + 1,
+          "runner",
+          "start_run",
+          "rd",
+        ),
+        syntheticPlanActionEvent(
+          "runner-no-progress-corp-endturn",
+          input.playerView.stateVersion + 3,
+          "corp",
+          "end_turn",
+        ),
+        syntheticPlanActionEvent(
+          "runner-no-progress-intervening-gain",
+          input.playerView.stateVersion + 5,
+          "runner",
+          "gain_credit",
+        ),
+      ],
+      legalActions: [rdRun, gain],
+    };
+    const decision = chooseRunnerAction(scopedInput, {
+      persistTacticalPlanMemory: false,
+    });
+    const runAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === rdRun.actionId,
+    );
+    const repeatedRunPenalty = runAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "runner_recent_same_server_runs",
+    );
+
+    expect(decision.actionId).toBe(gain.actionId);
+    expect(repeatedRunPenalty?.value).toBeLessThan(0);
+    expect(String(repeatedRunPenalty?.reason)).toContain("rd");
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
   it("does not phase-exit into a run when the visible path remains unaffordable", () => {
     const input = runnerActionPhaseInput(
       "ai-runner-phase-exit-false-positive-cost",

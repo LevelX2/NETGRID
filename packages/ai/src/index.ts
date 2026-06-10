@@ -3510,6 +3510,7 @@ function chooseSemanticRuntimeAction(
   const bestPlanOverrideChoice =
     bestSemanticRuntimeChoiceForTacticalPlanOverride(choices, planRuntime);
   const mappedChoice = tacticalPlanMappedChoice(
+    input,
     choices,
     planRuntime.selectedMapping,
     bestPlanOverrideChoice,
@@ -3691,6 +3692,7 @@ function tacticalPlanBlocksSemanticChoice(
 }
 
 function tacticalPlanMappedChoice(
+  input: AiDecisionInput,
   choices: readonly SemanticRuntimeChoice[],
   mapping: PlanStepMappingResult | undefined,
   overrideChoice: SemanticRuntimeChoice | undefined,
@@ -3729,6 +3731,12 @@ function tacticalPlanMappedChoice(
       mappedChoice.score <= 0 && overrideChoice.score > 0;
     if (
       mappedNonPositiveAgainstPositive ||
+      tacticalPlanRepeatedRunMappingShouldYield(
+        input,
+        mappedChoice,
+        overrideChoice,
+        scoreGap,
+      ) ||
       scoreGap > PLAN_MAPPED_CHOICE_MAX_SCORE_GAP
     ) {
       return {
@@ -3739,6 +3747,20 @@ function tacticalPlanMappedChoice(
     }
   }
   return { choice: mappedChoice };
+}
+
+function tacticalPlanRepeatedRunMappingShouldYield(
+  input: AiDecisionInput,
+  mappedChoice: SemanticRuntimeChoice,
+  overrideChoice: SemanticRuntimeChoice,
+  scoreGap: number,
+): boolean {
+  if (scoreGap <= 0) return false;
+  if (mappedChoice.action.type !== "start_run") return false;
+  if (overrideChoice.action.type === "start_run") return false;
+  const serverId = semanticRuntimeServerId(mappedChoice.action);
+  if (!serverId) return false;
+  return semanticRuntimeRecentRunnerStartRunsOnServer(input, serverId) > 0;
 }
 
 function tacticalPlanCoverageMappingBlocksRunOverride(
@@ -9131,11 +9153,11 @@ function semanticRuntimeRepeatedRunTargetComponents(
   if (recentRuns <= 0) return [];
   const penalty =
     serverId === "hq"
-      ? Math.min(720, recentRuns * 220)
+      ? Math.min(4200, recentRuns * 2600)
       : serverId === "rd"
-        ? Math.min(360, recentRuns * 120)
+        ? Math.min(4200, recentRuns * 2600)
         : isRemoteServerTarget(serverId)
-          ? Math.min(240, recentRuns * 120)
+          ? Math.min(2400, recentRuns * 1400)
           : 0;
   if (penalty === 0) return [];
   return [
@@ -9154,27 +9176,36 @@ function semanticRuntimeRecentRunnerStartRunsOnServer(
 ): number {
   let count = 0;
   const history = mergedAiPublicHistory(input);
+  let seenRunnerActions = 0;
   for (let index = history.length - 1; index >= 0; index -= 1) {
     const event = history[index]!;
     const actionType =
       typeof event.publicPayload.actionType === "string"
         ? event.publicPayload.actionType
         : event.type;
+    if (input.playerView.stateVersion - aiEventVersion(event) > 18) break;
+    if (semanticRuntimeRunnerRunProgressEvent(actionType)) break;
     const actor =
       typeof event.publicPayload.actor === "string"
         ? event.publicPayload.actor
         : undefined;
-    if (actionType === "end_turn") break;
-    if (actor === "corp") break;
     if (actor !== "runner" || actionType !== "start_run") continue;
+    seenRunnerActions += 1;
     const target = aiServerIdFromEvent(event);
-    if (target === serverId) {
-      count += 1;
-      continue;
-    }
-    if (target) break;
+    if (target === serverId) count += 1;
+    if (seenRunnerActions >= 8) break;
   }
   return count;
+}
+
+function semanticRuntimeRunnerRunProgressEvent(actionType: string): boolean {
+  return (
+    actionType === "steal_agenda" ||
+    actionType === "score_agenda" ||
+    actionType === "trash_accessed_card" ||
+    actionType === "advance_card" ||
+    actionType === "install_card"
+  );
 }
 
 function semanticRuntimeCorpScore(
