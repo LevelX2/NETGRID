@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const reschedulerImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_336_rescheduler",
   corpUtility: {
-    kind: "rescheduler_hq_shuffle_draw",
+    kind: "shuffle_hq_into_rd_then_draw_same_count",
     visibility: "hidden_info_barrier",
   },
 };

@@ -1,3 +1,4 @@
+import { traceTagSubroutine } from "../../../helpers";
 import type { CardImplementationDefinition } from "../../../types";
 
 // card name: Jack Attack
@@ -9,18 +10,6 @@ export const jackAttackImplementation: CardImplementationDefinition = {
       kind: "run_duration_cannot_jack_out",
       text: "*For the remainder of the run, Runner cannot jack out.",
     },
-    {
-      kind: "trace",
-      baseTraceStrength: 5,
-      text: "*Trace 5-If trace is successful, give Runner a tag.",
-      onSuccess: [
-        {
-          kind: "add_tags",
-          recipient: "runner",
-          amount: 1,
-          visibility: "public",
-        },
-      ],
-    },
+    traceTagSubroutine(5),
   ],
 };

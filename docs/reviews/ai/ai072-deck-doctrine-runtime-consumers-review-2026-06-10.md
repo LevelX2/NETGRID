@@ -23,7 +23,7 @@ DeckDoctrine soll nach AI070/AI071 nicht global den Planner ersetzen, sondern nu
 
 ## A-D-Messlauf
 
-Vergleich zum Stand nach AI071:
+Vergleich zum Stand nach AI071. Die Nach-AI072-Spalte beschreibt den finalen Integrationslauf nach dem Merge von `main` in den Arbeitsbranch.
 
 | Metric | Nach AI071 | Nach AI072 |
 | --- | ---: | ---: |
@@ -34,13 +34,13 @@ Vergleich zum Stand nach AI071:
 | criticalFindings | 0 | 0 |
 | corp_never_scores_long_game | 3 | 3 |
 | actionLimitReached | 11 | 11 |
-| repeated_no_progress_run | 33 | 34 |
-| repeated_known_no_payoff_remote | 0 | 1 |
-| recovery_low_value_loop | 88 | 99 |
-| plan_step_action_mismatch | 528 | 533 |
-| semantic_override_suspicious | 436 | 423 |
+| repeated_no_progress_run | 33 | 35 |
+| repeated_known_no_payoff_remote | 0 | 0 |
+| recovery_low_value_loop | 88 | 98 |
+| plan_step_action_mismatch | 528 | 523 |
+| semantic_override_suspicious | 436 | 413 |
 | corpAgendaScores | 13 | 14 |
-| runnerAgendaSteals | 30 | 29 |
+| runnerAgendaSteals | 30 | 30 |
 | corpFlatlines | 4 | 4 |
 | scoreWindowMissed | 0 | 0 |
 | unsafeScoreChosen | 6 | 6 |
@@ -52,21 +52,21 @@ Pair-Auszug nach AI072:
 | --- | ---: | ---: | ---: | ---: | ---: | ---: |
 | A | 4 | 17 | 144 | 72 | 3 | 13 |
 | B | 6 | 50 | 169 | 102 | 4 | 2 |
-| C | 11 | 23 | 144 | 149 | 2 | 7 |
-| D | 13 | 9 | 76 | 100 | 5 | 7 |
+| C | 11 | 22 | 134 | 140 | 2 | 8 |
+| D | 14 | 9 | 76 | 99 | 5 | 7 |
 
 ## Bewertung
 
-AI072 erfüllt den gezielten Consumer-Anschluss: Doctrine wirkt sichtbar in Scoreline-, Remote-Contest- und Access-Pressure-Breakdowns, ohne Legalität, Replay oder Redaction zu verändern. Der A-D-Lauf zeigt eine kleine Spielverhaltensverschiebung: `semantic_override_suspicious` sinkt um 13 und Corp punktet einmal mehr, während `recovery_low_value_loop` um 11 und `repeated_no_progress_run` um 1 steigt.
+AI072 erfüllt den gezielten Consumer-Anschluss: Doctrine wirkt sichtbar in Scoreline-, Remote-Contest- und Access-Pressure-Breakdowns, ohne Legalität, Replay oder Redaction zu verändern. Der finale A-D-Lauf zeigt eine kleine Spielverhaltensverschiebung: `semantic_override_suspicious` sinkt um 23 und Corp punktet einmal mehr, während `recovery_low_value_loop` um 10 und `repeated_no_progress_run` um 2 steigt.
 
-Das ist für dieses Paket kein Blocker, weil die Safety-Gates grün bleiben und AI072 ausdrücklich nur einen begrenzten Runtime-Consumer anschließt. Der nächste KI-Qualitätsblock sollte Recovery-Loops und den einzelnen `repeated_known_no_payoff_remote`-Fund wieder als priorisierte Diagnose aufnehmen.
+Das ist für dieses Paket kein Blocker, weil die Safety-Gates grün bleiben und AI072 ausdrücklich nur einen begrenzten Runtime-Consumer anschließt. Der nächste KI-Qualitätsblock sollte Recovery-Loops und wiederholte No-Progress-Runs weiter als priorisierte Diagnose aufnehmen.
 
 ## Verification
 
 - `corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts -t "applies deck doctrine to semantic Runner access pressure|applies deck doctrine to semantic Runner remote contest|applies deck doctrine to semantic Corp scoreline actions"`: grün.
 - `corepack pnpm --filter @netgrid/ai typecheck`: grün.
 - `git diff --check`: grün.
-- A-D-Trace-Mining-Lauf: ausgeführt, keine illegalen Actions, keine Replay-Fehler, keine Hidden-Info-Marker, keine Critical Findings.
+- A-D-Trace-Mining-Lauf nach `main`-Integration: ausgeführt, keine illegalen Actions, keine Replay-Fehler, keine Hidden-Info-Marker, keine Critical Findings.
 
 ## Sicherheitsgrenzen
 

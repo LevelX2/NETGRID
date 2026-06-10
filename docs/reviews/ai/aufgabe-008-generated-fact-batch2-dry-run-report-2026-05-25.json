@@ -632,6 +632,7 @@
           "timing": "during_run",
           "scope": "runner",
           "resource": "cards",
+          "amount": 5,
           "confidence": "high",
           "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching"
         },
@@ -710,7 +711,8 @@
             "kind": "topdeck_info",
             "timing": "during_run",
             "scope": "runner",
-            "resource": "cards"
+            "resource": "cards",
+            "amount": 5
           }
         ],
         "conditions": [
@@ -790,6 +792,7 @@
           "timing": "during_run",
           "scope": "runner",
           "resource": "cards",
+          "amount": 5,
           "confidence": "high",
           "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching"
         },

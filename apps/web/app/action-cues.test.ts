@@ -346,6 +346,33 @@ describe("deriveOpponentActionCues", () => {
     expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
   });
 
+  it("shows Corporate Negotiating Center reveal cues with gained credits", () => {
+    const cues = deriveOpponentActionCues({
+      viewerSide: "corp",
+      playerView: view("corp"),
+      includeOwnActions: true,
+      events: [
+        event("evt_cnc", "resolve_choice", {
+          actor: "corp",
+          hiddenZoneBarrier: true,
+          hiddenZoneAction: "v1917_corporate_negotiating_center_hq_agenda_reveal",
+          sourceDefinitionId: "onr_v1_314_corporate-negotiating-center",
+          sourceTitle: "Corporate Negotiating Center",
+          publicRevealKind: "reveal",
+          publicRevealDefinitionIds: "simple_agenda,onr_v1_203_hostile-takeover",
+          publicRevealTitles: "Simple Agenda||Hostile Takeover",
+          revealedAgendaDefinitionIds: "simple_agenda,onr_v1_203_hostile-takeover",
+          revealedCount: 2,
+          gainedCredits: 2
+        })
+      ]
+    });
+
+    expect(cues).toHaveLength(1);
+    expect(cues[0]?.title).toBe("Du hast 2 Agenden aus HQ durch Corporate Negotiating Center vorgezeigt und 2 Credits erhalten.");
+    expect(cueHasHiddenLeak(cues[0]!)).toBe(false);
+  });
+
   it("keeps automatic system cues behind the local option", () => {
     const systemEvent = event("evt_auto_credit", "gain_credit", { amount: 2 });
 

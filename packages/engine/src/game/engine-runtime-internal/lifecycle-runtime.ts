@@ -142,7 +142,7 @@ function runnerProgramUsesMemory(
     (hostDefinition.type === "program" &&
       cardHasSubtype(hostDefinition, "daemon")) ||
     runnerUtilityLongtailKindForDefinition(hostDefinition.id) ===
-      "microtech_backup_drive_program_trash_replacement" ||
+      "replace_installed_program_trash_with_host_on_source" ||
     hostDefinition.id === MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID
   )
     return false;

@@ -11008,6 +11008,15 @@
         "aiSupportStatus": "ai_supported",
         "effects": [
           {
+            "amount": 5,
+            "confidence": "high",
+            "kind": "topdeck_info",
+            "resource": "cards",
+            "scope": "runner",
+            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching",
+            "timing": "during_run"
+          },
+          {
             "confidence": "high",
             "kind": "install_discount",
             "scope": "runner",
@@ -11017,14 +11026,6 @@
           {
             "confidence": "high",
             "kind": "search",
-            "scope": "runner",
-            "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching",
-            "timing": "during_run"
-          },
-          {
-            "confidence": "high",
-            "kind": "topdeck_info",
-            "resource": "cards",
             "scope": "runner",
             "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching",
             "timing": "during_run"
@@ -14674,7 +14675,7 @@
             "confidence": "high",
             "kind": "action_economy",
             "resource": "credits",
-            "scope": "corp",
+            "scope": "runner",
             "source": "implementation.effect.take_hosted_credits",
             "timing": "action"
           },
@@ -14682,7 +14683,7 @@
             "confidence": "high",
             "kind": "counter_economy",
             "resource": "credits",
-            "scope": "corp",
+            "scope": "runner",
             "source": "implementation.effect.take_hosted_credits",
             "timing": "action"
           }
@@ -15299,7 +15300,7 @@
             "confidence": "high",
             "kind": "action_economy",
             "resource": "credits",
-            "scope": "corp",
+            "scope": "runner",
             "source": "implementation.effect.take_hosted_credits",
             "timing": "action"
           },
@@ -15308,7 +15309,7 @@
             "confidence": "high",
             "kind": "counter_economy",
             "resource": "credits",
-            "scope": "corp",
+            "scope": "runner",
             "source": "implementation.effect.take_hosted_credits",
             "timing": "action"
           }
@@ -15883,7 +15884,7 @@
           {
             "confidence": "high",
             "kind": "requires_scored_agenda",
-            "source": "implementation.cardType.agenda.activated"
+            "source": "implementation.scoredAgenda"
           }
         ]
       },
@@ -17446,7 +17447,7 @@
           {
             "confidence": "high",
             "kind": "requires_scored_agenda",
-            "source": "implementation.cardType.agenda.activated"
+            "source": "implementation.scoredAgenda"
           }
         ]
       },
@@ -24290,15 +24291,6 @@
             "kind": "counter_economy",
             "resource": "credits",
             "scope": "corp",
-            "source": "implementation.effect.take_hosted_credits",
-            "timing": "action"
-          },
-          {
-            "amount": 2,
-            "confidence": "high",
-            "kind": "counter_economy",
-            "resource": "credits",
-            "scope": "corp",
             "source": "implementation.lifecycle.start_of_corp_turn.take_hosted_credits",
             "timing": "start_of_turn"
           },
@@ -24922,7 +24914,7 @@
             "kind": "zone_shuffle",
             "resource": "cards",
             "scope": "hq",
-            "source": "implementation.hidden_zone_or_rearrange_context",
+            "source": "implementation.corpUtility.move_installed_corp_card_to_hq",
             "timing": "action"
           }
         ]
@@ -25680,15 +25672,6 @@
         "planRoles": ["remote_asset_economy"],
         "aiSupportStatus": "ai_supported",
         "effects": [
-          {
-            "amount": 1,
-            "confidence": "high",
-            "kind": "counter_economy",
-            "resource": "credits",
-            "scope": "corp",
-            "source": "implementation.effect.take_hosted_credits",
-            "timing": "action"
-          },
           {
             "amount": 1,
             "confidence": "high",
@@ -26680,15 +26663,15 @@
             "kind": "draw",
             "resource": "cards",
             "scope": "corp",
-            "source": "implementation.corpUtility.rescheduler_hq_shuffle_draw",
+            "source": "implementation.corpUtility.shuffle_hq_into_rd_then_draw_same_count",
             "timing": "action"
           },
           {
             "confidence": "high",
             "kind": "zone_shuffle",
             "resource": "cards",
-            "scope": "hq",
-            "source": "implementation.hidden_zone_or_rearrange_context",
+            "scope": "rnd",
+            "source": "implementation.corpUtility.shuffle_hq_into_rd_then_draw_same_count",
             "timing": "action"
           }
         ]
@@ -27510,24 +27493,6 @@
           {
             "amount": 1,
             "confidence": "high",
-            "kind": "action_economy",
-            "resource": "credits",
-            "scope": "corp",
-            "source": "implementation.effect.take_hosted_credits",
-            "timing": "action"
-          },
-          {
-            "amount": 1,
-            "confidence": "high",
-            "kind": "counter_economy",
-            "resource": "credits",
-            "scope": "corp",
-            "source": "implementation.effect.take_hosted_credits",
-            "timing": "action"
-          },
-          {
-            "amount": 1,
-            "confidence": "high",
             "kind": "counter_economy",
             "resource": "credits",
             "scope": "corp",
@@ -27551,6 +27516,15 @@
             "scope": "corp",
             "source": "implementation.lifecycle.start_of_corp_turn.take_hosted_credits",
             "timing": "start_of_turn"
+          },
+          {
+            "amount": 3,
+            "confidence": "high",
+            "kind": "action_economy",
+            "resource": "credits",
+            "scope": "corp",
+            "source": "implementation.effect.add_hosted_credits",
+            "timing": "action"
           },
           {
             "amount": 3,

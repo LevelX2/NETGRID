@@ -674,7 +674,7 @@ export function buildCorpMainActions(
     }
     if (
       definition.id === CORP_HQ_SHUFFLE_DRAW_CARD_ID ||
-      hasCorpUtilityKind(state, assetId, "rescheduler_hq_shuffle_draw")
+      hasCorpUtilityKind(state, assetId, "shuffle_hq_into_rd_then_draw_same_count")
     ) {
       actions.push(
         action(
@@ -690,7 +690,7 @@ export function buildCorpMainActions(
     }
     if (
       definition.id === COWBOY_SYSOP_INSTALLED_CARD_ASSET_ID ||
-      hasCorpUtilityKind(state, assetId, "cowboy_sysop_uninstall_corp_card_to_hq")
+      hasCorpUtilityKind(state, assetId, "move_installed_corp_card_to_hq")
     ) {
       for (const targetCardId of corpInstalledCardIds(state).sort()) {
         const targetDefinition = definitionFor(state, targetCardId);

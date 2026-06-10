@@ -920,7 +920,7 @@ export function formatChronicleEvent(event: PublicGameEvent, side: Side, context
         visibility = "public";
         title =
           revealedCount > 0
-            ? phrase(subject, `${agendaRevealCountText(revealedCount)} aus HQ durch ${source} vorgezeigt`)
+            ? phrase(subject, `${agendaRevealCountText(revealedCount)} aus HQ durch ${source} vorgezeigt und ${creditText(gainedCredits)} erhalten`)
             : phrase(subject, `keine HQ-Agenda durch ${source} vorgezeigt`);
         description =
           revealedTitles.length > 0

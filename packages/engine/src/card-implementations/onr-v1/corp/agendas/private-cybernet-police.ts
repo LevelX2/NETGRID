@@ -1,3 +1,4 @@
+import { traceTagEffect } from "../../../helpers";
 import type { CardImplementationDefinition } from "../../../types";
 
 // card name: Private Cybernet Police
@@ -11,21 +12,7 @@ export const privateCybernetPoliceImplementation: CardImplementationDefinition =
         timing: "corp_main",
         costs: [{ kind: "action", amount: 1 }],
         label: "Private Cybernet Police: Trace 5 starten",
-        effects: [
-          {
-            kind: "trace",
-            baseTraceStrength: 5,
-            visibility: "public",
-            onSuccess: [
-              {
-                kind: "add_tags",
-                recipient: "runner",
-                amount: 1,
-                visibility: "public",
-              },
-            ],
-          },
-        ],
+        effects: [traceTagEffect(5)],
       },
     ],
   };

@@ -9043,21 +9043,13 @@ select {
 }
 
 .runnerGripHeapLayout {
-  display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr);
-  grid-template-areas:
-    "grip stack rig"
-    "heap heap heap";
+  display: flex;
+  flex-wrap: wrap;
   width: 100%;
   max-width: 100%;
   gap: 10px;
-  align-items: start;
+  align-items: flex-start;
   overflow: visible;
-}
-
-.runnerGripHeapLayout:has(.runnerHeapZone.sideZoneFrameCountOnly) {
-  grid-template-columns: auto auto auto minmax(0, 1fr);
-  grid-template-areas: "grip stack heap rig";
 }
 
 .runnerGripHeapLayout .sideZoneFrame,
@@ -9090,29 +9082,29 @@ select {
 }
 
 .runnerGripZone {
-  grid-area: grip;
+  order: 1;
   flex: 0 0 auto;
   width: fit-content;
   max-width: 100%;
 }
 
 .runnerStackZone {
-  grid-area: stack;
+  order: 2;
   flex: 0 0 auto;
   width: fit-content;
   max-width: 100%;
 }
 
 .runnerHeapZone {
-  grid-area: heap;
-  flex: 1 1 100%;
-  width: 100%;
+  order: 4;
+  flex: 0 1 auto;
+  width: fit-content;
   max-width: 100%;
 }
 
 .runnerGripHeapLayout .sideZoneFrame.runnerHeapZone {
-  flex: 1 1 100%;
-  width: 100%;
+  flex: 0 1 auto;
+  width: fit-content;
   max-width: 100%;
 }
 
@@ -9122,7 +9114,7 @@ select {
 }
 
 .runnerRigZone {
-  grid-area: rig;
+  order: 3;
   flex: 0 0 auto;
   width: fit-content;
   max-width: 100%;
@@ -9197,7 +9189,7 @@ select {
   grid-auto-rows: var(--zone-stack-card-height);
   gap: calc(8px * var(--zone-card-scale, 1)) 0;
   align-items: flex-start;
-  width: min(var(--zone-stack-width), 100%);
+  width: var(--zone-stack-width);
   max-width: 100%;
   min-height: var(--zone-stack-card-height);
   padding-right: calc(var(--zone-stack-card-width) - var(--zone-stack-card-step));
@@ -11511,23 +11503,15 @@ select,
 }
 
 .opponentRunnerBoardStrip {
-  display: grid;
-  grid-template-columns: auto auto minmax(0, 1fr);
-  grid-template-areas:
-    "grip stack rig"
-    "heap heap heap";
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px;
-  align-items: start;
+  align-items: flex-start;
   margin-bottom: 12px;
 }
 
-.opponentRunnerBoardStrip:has(.runnerOpponentHeapCompact.sideZoneFrameCountOnly) {
-  grid-template-columns: auto auto auto minmax(0, 1fr);
-  grid-template-areas: "grip stack heap rig";
-}
-
 .opponentRunnerBoardStrip .runnerRigStrip {
-  grid-area: rig;
+  order: 3;
   flex: 0 0 auto;
   width: fit-content;
   min-width: 0;
@@ -11577,14 +11561,14 @@ select,
 }
 
 .runnerOpponentGripZone {
-  grid-area: grip;
+  order: 1;
   flex: 0 1 auto;
   width: fit-content;
   min-width: 0;
 }
 
 .runnerOpponentStackZone {
-  grid-area: stack;
+  order: 2;
 }
 
 .runnerOpponentGripPreview {
@@ -11671,16 +11655,16 @@ select,
 }
 
 .runnerOpponentHeapCompact {
-  grid-area: heap;
-  flex: 1 1 100%;
-  width: 100%;
+  order: 4;
+  flex: 0 1 auto;
+  width: fit-content;
   min-width: 0;
   max-width: 100%;
 }
 
 .runnerOpponentZonesStrip .sideZoneFrame.runnerOpponentHeapCompact {
-  flex: 1 1 100%;
-  width: 100%;
+  flex: 0 1 auto;
+  width: fit-content;
   max-width: 100%;
 }
 
@@ -12421,24 +12405,6 @@ select,
     font-size: 11px;
   }
 
-  .runnerGripHeapLayout {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "grip"
-      "stack"
-      "rig"
-      "heap";
-  }
-
-  .runnerGripHeapLayout:has(.runnerHeapZone.sideZoneFrameCountOnly) {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "grip"
-      "stack"
-      "rig"
-      "heap";
-  }
-
   .runnerGripHeapLayout .sideZoneFrame,
   .runnerGripZone,
   .runnerStackZone,
@@ -12464,24 +12430,6 @@ select,
     flex-basis: 100%;
     width: 100%;
     min-width: 0;
-  }
-
-  .opponentRunnerBoardStrip {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "grip"
-      "stack"
-      "rig"
-      "heap";
-  }
-
-  .opponentRunnerBoardStrip:has(.runnerOpponentHeapCompact.sideZoneFrameCountOnly) {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-areas:
-      "grip"
-      "stack"
-      "rig"
-      "heap";
   }
 
   .runnerOpponentZonesStrip {

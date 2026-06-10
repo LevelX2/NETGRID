@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const securityPurgeImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_216_security-purge",
   scoredAgenda: {
-    kind: "security_purge_top_rd",
+    kind: "reveal_top_rd_install_and_rez_ice_trash_rest",
     count: 3,
     visibility: "hidden_info_barrier",
   },

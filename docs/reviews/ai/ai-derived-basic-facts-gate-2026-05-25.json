@@ -24,7 +24,7 @@
     "brain_damage_prevention": 2,
     "breaker": 21,
     "card_recovery": 4,
-    "counter_economy": 17,
+    "counter_economy": 14,
     "damage": 20,
     "damage_prevention": 3,
     "delayed_penalty": 2,
@@ -7639,6 +7639,7 @@
             "timing": "during_run",
             "scope": "runner",
             "resource": "cards",
+            "amount": 5,
             "source": "implementation.effect.look_top_stack_show_to_corp_then_install_matching"
           }
         ],
@@ -12053,7 +12054,7 @@
             "confidence": "high",
             "kind": "action_economy",
             "timing": "action",
-            "scope": "corp",
+            "scope": "runner",
             "resource": "credits",
             "source": "implementation.effect.take_hosted_credits"
           },
@@ -12061,7 +12062,7 @@
             "confidence": "high",
             "kind": "counter_economy",
             "timing": "action",
-            "scope": "corp",
+            "scope": "runner",
             "resource": "credits",
             "source": "implementation.effect.take_hosted_credits"
           },
@@ -12925,7 +12926,7 @@
             "confidence": "high",
             "kind": "action_economy",
             "timing": "action",
-            "scope": "corp",
+            "scope": "runner",
             "resource": "credits",
             "amount": 2,
             "source": "implementation.effect.take_hosted_credits"
@@ -12934,7 +12935,7 @@
             "confidence": "high",
             "kind": "counter_economy",
             "timing": "action",
-            "scope": "corp",
+            "scope": "runner",
             "resource": "credits",
             "amount": 2,
             "source": "implementation.effect.take_hosted_credits"
@@ -13670,7 +13671,7 @@
           {
             "confidence": "high",
             "kind": "requires_scored_agenda",
-            "source": "implementation.cardType.agenda.activated"
+            "source": "implementation.scoredAgenda"
           }
         ],
         "costProfile": {},
@@ -15557,7 +15558,7 @@
           {
             "confidence": "high",
             "kind": "requires_scored_agenda",
-            "source": "implementation.cardType.agenda.activated"
+            "source": "implementation.scoredAgenda"
           }
         ],
         "costProfile": {},
@@ -18145,7 +18146,9 @@
           }
         ],
         "costProfile": {},
-        "derivationNotes": [],
+        "derivationNotes": [
+          "Unpreventable damage is still a mechanical damage class; damage prevention and flatline resolution remain engine context."
+        ],
         "needsManualOverlayReasons": []
       },
       "manualOntologySummary": {
@@ -23657,15 +23660,6 @@
           {
             "confidence": "high",
             "kind": "counter_economy",
-            "timing": "action",
-            "scope": "corp",
-            "resource": "credits",
-            "amount": 2,
-            "source": "implementation.effect.take_hosted_credits"
-          },
-          {
-            "confidence": "high",
-            "kind": "counter_economy",
             "timing": "start_of_turn",
             "scope": "corp",
             "resource": "credits",
@@ -24410,13 +24404,13 @@
             "timing": "action",
             "scope": "hq",
             "resource": "cards",
-            "source": "implementation.hidden_zone_or_rearrange_context"
+            "source": "implementation.corpUtility.move_installed_corp_card_to_hq"
           }
         ],
         "conditions": [],
         "costProfile": {},
         "derivationNotes": [
-          "Hidden-zone rearrange/reinstall mechanics are represented as zone context only; generated facts do not expose hidden card identities or order."
+          "Installed-card-to-HQ movement is represented as zone context only; generated facts do not include hidden HQ card identities."
         ],
         "needsManualOverlayReasons": []
       },
@@ -25264,15 +25258,6 @@
       "rationale": "Hosted pool and start-turn economy are represented without current hosted-credit state.",
       "derivedFacts": {
         "effects": [
-          {
-            "confidence": "high",
-            "kind": "counter_economy",
-            "timing": "action",
-            "scope": "corp",
-            "resource": "credits",
-            "amount": 1,
-            "source": "implementation.effect.take_hosted_credits"
-          },
           {
             "confidence": "high",
             "kind": "counter_economy",
@@ -26333,21 +26318,21 @@
             "timing": "action",
             "scope": "corp",
             "resource": "cards",
-            "source": "implementation.corpUtility.rescheduler_hq_shuffle_draw"
+            "source": "implementation.corpUtility.shuffle_hq_into_rd_then_draw_same_count"
           },
           {
             "confidence": "high",
             "kind": "zone_shuffle",
             "timing": "action",
-            "scope": "hq",
+            "scope": "rnd",
             "resource": "cards",
-            "source": "implementation.hidden_zone_or_rearrange_context"
+            "source": "implementation.corpUtility.shuffle_hq_into_rd_then_draw_same_count"
           }
         ],
         "conditions": [],
         "costProfile": {},
         "derivationNotes": [
-          "Hidden-zone rearrange/reinstall mechanics are represented as zone context only; generated facts do not expose hidden card identities or order."
+          "HQ shuffle/draw is represented without hidden HQ or R&D order data."
         ],
         "needsManualOverlayReasons": []
       },
@@ -27254,17 +27239,8 @@
             "timing": "action",
             "scope": "corp",
             "resource": "credits",
-            "amount": 1,
-            "source": "implementation.effect.take_hosted_credits"
-          },
-          {
-            "confidence": "high",
-            "kind": "counter_economy",
-            "timing": "action",
-            "scope": "corp",
-            "resource": "credits",
-            "amount": 1,
-            "source": "implementation.effect.take_hosted_credits"
+            "amount": 3,
+            "source": "implementation.effect.add_hosted_credits"
           },
           {
             "confidence": "high",

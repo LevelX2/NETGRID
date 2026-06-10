@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const microtechBackupDriveImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_131_microtech-backup-drive",
   runnerUtilityLongtail: {
-    kind: "microtech_backup_drive_program_trash_replacement",
+    kind: "replace_installed_program_trash_with_host_on_source",
     visibility: "hidden_info_barrier",
   },
 };

@@ -1724,7 +1724,7 @@ function microtechBackupDriveIds(state: GameState): CardInstanceId[] {
     .filter(
       (cardId) =>
         runnerUtilityLongtailKindForCard(state, cardId) ===
-          "microtech_backup_drive_program_trash_replacement" ||
+          "replace_installed_program_trash_with_host_on_source" ||
         definitionFor(state, cardId).id === MICROTECH_BACKUP_DRIVE_HOST_RETURN_HARDWARE_ID,
     )
     .sort();

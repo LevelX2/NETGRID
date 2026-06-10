@@ -190,7 +190,7 @@ describe("scored agenda activated abilities", () => {
       activatedSourceId: "boon" as CardInstanceId,
       implementations: {
         ai_cfo: {
-          kind: "ai_cfo_shuffle_hq_archives_into_rd_draw",
+          kind: "shuffle_hq_archives_into_rd_then_draw",
           drawCount: 5,
           visibility: "hidden_info_barrier",
         },
@@ -267,7 +267,7 @@ describe("scored agenda activated abilities", () => {
       legalAction: action,
       implementations: {
         ai_cfo: {
-          kind: "ai_cfo_shuffle_hq_archives_into_rd_draw",
+          kind: "shuffle_hq_archives_into_rd_then_draw",
           drawCount: 5,
           visibility: "hidden_info_barrier",
         },

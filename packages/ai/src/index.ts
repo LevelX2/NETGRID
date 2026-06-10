@@ -120,6 +120,7 @@ import {
   chooseAiActionFromSides,
   type AiDecisionRuntimeOptions,
 } from "./runtime/choose-ai-action";
+import { chooseSemanticRuntimeAction as chooseSemanticRuntimeActionFromRuntime } from "./runtime/semantic-runtime";
 import {
   DEFAULT_SELFPLAY_TRACE_MINING_DETECTORS,
   countSelfplayFindingsByDetector,
@@ -131,6 +132,12 @@ import {
   type AiSelfplayTraceMiningConfig,
   type AiSelfplayTraceMiningResult,
 } from "./simulation/selfplay-trace-mining";
+import type {
+  SimulationBenchmarkProfile,
+  SimulationBenchmarkProfileId,
+  SimulationControllerMode,
+  SimulationWorld,
+} from "./simulation/simulation-types";
 import {
   chooseCorpLegacyBaselineAction,
   chooseRunnerLegacyBaselineAction,
@@ -2129,37 +2136,12 @@ export type AiSoakResult = {
   };
 };
 
-export type SimulationControllerMode =
-  | "random_legal_bot"
-  | "basic_corp_ai"
-  | "basic_runner_ai"
-  | "plan_corp_v1_4_0"
-  | "plan_runner_v1_4_1"
-  | "belief_ai_v1_4_2"
-  | "current_candidate";
-
-export type SimulationBenchmarkProfileId =
-  | "random_legal_bot"
-  | "basic_corp_ai"
-  | "basic_runner_ai"
-  | "plan_corp_v1_4_0"
-  | "plan_runner_v1_4_1"
-  | "belief_ai_v1_4_2"
-  | "current_candidate";
-
-export type SimulationBenchmarkProfile = {
-  benchmarkProfileId: SimulationBenchmarkProfileId;
-  runnerMode: SimulationControllerMode;
-  corpMode: SimulationControllerMode;
-};
-
-export type SimulationWorld = {
-  worldId: string;
-  sourceBeliefVersion: string;
-  seed: string;
-  hiddenAssumptions: string[];
-  redactionSafe: boolean;
-};
+export type {
+  SimulationControllerMode,
+  SimulationBenchmarkProfileId,
+  SimulationBenchmarkProfile,
+  SimulationWorld
+} from "./simulation/simulation-types";
 
 export type V143SimulationRunResult = {
   simulationId: string;
@@ -3417,218 +3399,32 @@ function chooseSemanticRuntimeAction(
   legacyDecision: AiDecision,
   options: AiDecisionRuntimeOptions,
 ): AiDecision {
-  if (semanticRuntimeForcedLegacy()) {
-    return {
-      ...legacyDecision,
-      evidence: [
-        ...(legacyDecision.evidence ?? []),
-        "semantic_runtime_force_legacy",
-      ],
-    };
-  }
-  const actionSemanticCandidates = buildActionSemanticCandidates({
-    legalActions: input.legalActions,
-    observerSide: input.side,
-    stateVersion: input.playerView.stateVersion,
+  return chooseSemanticRuntimeActionFromRuntime(input, legacyDecision, options, {
+    semanticRuntimeChoices,
+    semanticRuntimeChoiceIsReactive,
+    buildActionSemanticCandidates,
+    getTacticalPlanMemorySnapshot,
+    deckCapabilitiesForInput,
+    runnerStrategicIntentForInput,
+    evaluateRunnerHandDevelopment,
+    buildRunnerEconomyPosture,
+    evaluateRunnerRunTargets,
+    buildRunnerTacticalGoals,
+    evaluateTacticalPlans,
+    bestSemanticRuntimeChoice,
+    bestSemanticRuntimeChoiceForTacticalPlanOverride,
+    tacticalPlanMappedChoice,
+    runnerSelfDamageImmediateWinSemanticChoice,
+    semanticRuntimeChoiceWithEvidence,
+    tacticalPlanMappingOverrideEvidence,
+    tacticalPlanRuntimeAlignedToChoice,
+    runnerRunOnlyActionAdjustedSemanticChoice,
+    semanticRuntimeCoverageSelectionDebug,
+    selectedChoicesForDecision,
+    rememberTacticalPlanRuntime,
+    scrubEvidence,
+    semanticRuntimeDecisionDebug,
   });
-  const choices = semanticRuntimeChoices(input, actionSemanticCandidates);
-  const reactiveChoice =
-    choices.find(
-      (candidate) =>
-        !candidate.exclusion &&
-        candidate.score > 0 &&
-        semanticRuntimeChoiceIsReactive(candidate),
-    ) ??
-    choices.find(
-      (candidate) =>
-        !candidate.exclusion && semanticRuntimeChoiceIsReactive(candidate),
-    );
-  const previousPlan = getTacticalPlanMemorySnapshot(input);
-  const deckCapabilities = deckCapabilitiesForInput(input);
-  const runnerStrategicIntent =
-    input.side === "runner"
-      ? runnerStrategicIntentForInput(input, deckCapabilities)
-      : undefined;
-  const runnerHandDevelopmentEvaluations = runnerStrategicIntent
-    ? evaluateRunnerHandDevelopment({
-        input,
-        strategicIntent: runnerStrategicIntent,
-        deckCapabilities,
-        actionCandidates: actionSemanticCandidates,
-      })
-    : undefined;
-  const runnerEconomyPosture = runnerStrategicIntent
-    ? buildRunnerEconomyPosture({
-        input,
-        strategicIntent: runnerStrategicIntent,
-        deckCapabilities,
-        ...(runnerHandDevelopmentEvaluations
-          ? { handDevelopmentEvaluations: runnerHandDevelopmentEvaluations }
-          : {}),
-      })
-    : undefined;
-  const runnerRunTargetEvaluations = runnerStrategicIntent
-    ? evaluateRunnerRunTargets({
-        input,
-        strategicIntent: runnerStrategicIntent,
-        deckCapabilities,
-        actionCandidates: actionSemanticCandidates,
-        ...(runnerHandDevelopmentEvaluations
-          ? { handDevelopmentEvaluations: runnerHandDevelopmentEvaluations }
-          : {}),
-      })
-    : undefined;
-  const runnerTacticalGoals = runnerStrategicIntent
-    ? buildRunnerTacticalGoals({
-        input,
-        strategicIntent: runnerStrategicIntent,
-        ...(runnerRunTargetEvaluations
-          ? { runTargetEvaluations: runnerRunTargetEvaluations }
-          : {}),
-        ...(runnerEconomyPosture
-          ? { economyPosture: runnerEconomyPosture }
-          : {}),
-        deckCapabilities,
-      })
-    : undefined;
-  const planRuntime = reactiveChoice
-    ? emptyTacticalPlanRuntimeResult()
-    : evaluateTacticalPlans({
-        input,
-        ...(previousPlan ? { previousPlan } : {}),
-        deckCapabilities,
-        ...(runnerStrategicIntent ? { runnerStrategicIntent } : {}),
-        ...(runnerRunTargetEvaluations ? { runnerRunTargetEvaluations } : {}),
-        ...(runnerEconomyPosture ? { runnerEconomyPosture } : {}),
-        ...(runnerHandDevelopmentEvaluations
-          ? { runnerHandDevelopmentEvaluations }
-          : {}),
-        ...(runnerTacticalGoals ? { runnerTacticalGoals } : {}),
-        candidates: actionSemanticCandidates,
-      });
-  const bestChoice = bestSemanticRuntimeChoice(choices);
-  const bestPlanOverrideChoice =
-    bestSemanticRuntimeChoiceForTacticalPlanOverride(choices, planRuntime);
-  const mappedChoice = tacticalPlanMappedChoice(
-    input,
-    choices,
-    planRuntime.selectedMapping,
-    bestPlanOverrideChoice,
-  );
-  const planMappingOverridden = Boolean(
-    !reactiveChoice &&
-    mappedChoice.overriddenMappedChoice &&
-    mappedChoice.overrideChoice,
-  );
-  const selfDamageImmediateWinChoice =
-    runnerSelfDamageImmediateWinSemanticChoice(input, choices);
-  const initialChoice =
-    reactiveChoice ??
-    selfDamageImmediateWinChoice ??
-    mappedChoice.choice ??
-    (planMappingOverridden && mappedChoice.overrideChoice
-      ? semanticRuntimeChoiceWithEvidence(mappedChoice.overrideChoice, {
-          evidence: tacticalPlanMappingOverrideEvidence(mappedChoice),
-        })
-      : bestChoice);
-  if (!initialChoice) {
-    return {
-      ...legacyDecision,
-      evidence: [
-        ...(legacyDecision.evidence ?? []),
-        "semantic_runtime_no_non_excluded_legal_action",
-      ],
-    };
-  }
-  const effectivePlanRuntime = planMappingOverridden
-    ? tacticalPlanRuntimeAlignedToChoice(
-        planRuntime,
-        mappedChoice.overrideChoice,
-        actionSemanticCandidates,
-        input,
-      )
-    : planRuntime;
-  const runOnlyActionAdjusted = runnerRunOnlyActionAdjustedSemanticChoice(
-    input,
-    choices,
-    initialChoice,
-  );
-  const choice = runOnlyActionAdjusted.choice;
-  const coverageSelectionDebug = semanticRuntimeCoverageSelectionDebug(
-    input,
-    choice.action,
-    effectivePlanRuntime,
-  );
-  const legacyActionType = input.legalActions.find(
-    (action) => action.actionId === legacyDecision.actionId,
-  )?.type;
-  const selectedChoices = selectedChoicesForDecision(input, choice.action);
-  const persistTacticalPlanMemory = options.persistTacticalPlanMemory !== false;
-  const updatedPlanMemory = persistTacticalPlanMemory
-    ? rememberTacticalPlanRuntime(
-        input,
-        effectivePlanRuntime,
-        runOnlyActionAdjusted.memoryAction ?? choice.action,
-      )
-    : undefined;
-  return {
-    actionId: choice.action.actionId,
-    ...(selectedChoices ? { selectedChoices } : {}),
-    reasonCode: choice.reasonCode,
-    explanation: choice.explanation,
-    consideredActionIds: [],
-    fallbackUsed: false,
-    ...(choice.confidence !== undefined
-      ? { confidence: choice.confidence }
-      : {}),
-    evidence: scrubEvidence([
-      ...choice.evidence,
-      ...(coverageSelectionDebug?.evidence ?? []),
-      `semantic_runtime_default:true`,
-      `semantic_runtime_scope:${choice.scopeId}`,
-      ...(effectivePlanRuntime.selectedPlan
-        ? [
-            `tactical_plan:${effectivePlanRuntime.selectedPlan.planId}`,
-            `tactical_plan_type:${effectivePlanRuntime.selectedPlan.type}`,
-          ]
-        : []),
-      ...(effectivePlanRuntime.selectedStep
-        ? [`tactical_step:${effectivePlanRuntime.selectedStep.kind}`]
-        : []),
-      ...(updatedPlanMemory
-        ? [
-            `tactical_plan_memory_status:${updatedPlanMemory.status}`,
-            `tactical_plan_progression:${updatedPlanMemory.planProgressionReason}`,
-          ]
-        : []),
-      ...(!persistTacticalPlanMemory && effectivePlanRuntime.selectedPlan
-        ? ["tactical_plan_memory_preview_only:true"]
-        : []),
-      `legacy_reference_reason:${legacyDecision.reasonCode}`,
-      ...(legacyActionType
-        ? [`legacy_reference_action_type:${legacyActionType}`]
-        : []),
-    ]),
-    decisionDebug: semanticRuntimeDecisionDebug(
-      input,
-      choice,
-      runOnlyActionAdjusted.rankedChoices,
-      legacyDecision,
-      legacyActionType,
-      effectivePlanRuntime,
-    ),
-    timeoutUsed: Boolean(legacyDecision.timeoutUsed),
-    profileId: input.profileId,
-    difficulty: input.difficulty,
-    reason: choice.reasonCode,
-  };
-}
-
-function emptyTacticalPlanRuntimeResult(): TacticalPlanRuntimeResult {
-  return {
-    planAlternatives: [],
-    blockedPlans: [],
-  };
 }
 
 function bestSemanticRuntimeChoice(
@@ -4034,10 +3830,6 @@ function semanticRuntimeActionTypeIsReactive(
     type === "jack_out" ||
     false
   );
-}
-
-function semanticRuntimeForcedLegacy(): boolean {
-  return process.env.NETGRID_SEMANTIC_AI_RUNTIME === "legacy";
 }
 
 function semanticRuntimeChoices(
@@ -5309,13 +5101,18 @@ function semanticRuntimeActionExclusion(
   const multiRunEventExclusion =
     semanticRuntimeRunnerMultiRunEventExclusion(input, action);
   if (multiRunEventExclusion) return multiRunEventExclusion;
-  if (input.side !== "runner" || action.type !== "start_run") return undefined;
+  const serverId = semanticRuntimeServerId(action);
+  const runTargetEvaluation =
+    serverId !== undefined
+      ? semanticRuntimeRunnerRunTargetEvaluation(input, action, serverId)
+      : undefined;
+  if (input.side !== "runner" || !serverId || !runTargetEvaluation)
+    return undefined;
   const blinkRunExclusion = semanticRuntimeRunnerBlinkRunExclusion(
     input,
     action,
   );
   if (blinkRunExclusion) return blinkRunExclusion;
-  const serverId = semanticRuntimeServerId(action);
   const knownCentralPayoffExclusion =
     semanticRuntimeKnownCentralPayoffExclusion(input, serverId);
   if (knownCentralPayoffExclusion) return knownCentralPayoffExclusion;
@@ -5335,6 +5132,7 @@ function semanticRuntimeActionExclusion(
       semanticRuntimeRunnerEmptyRemoteExclusion(server);
     if (emptyRemoteExclusion) return emptyRemoteExclusion;
   }
+  if (action.type !== "start_run") return undefined;
   const assessment = assessKnownRezzedIcePath(
     server.ice,
     input.playerView.own.rig ?? [],
@@ -7432,10 +7230,10 @@ function semanticRuntimeRunnerScoreComponents(
     components.push(
       ...semanticRuntimeRepeatedRunTargetComponents(input, serverId),
     );
-    const runTargetGuidance =
-      semanticRuntimeRunnerRunTargetGuidanceComponent(input, action);
-    if (runTargetGuidance) components.push(runTargetGuidance);
   }
+  const runTargetGuidance =
+    semanticRuntimeRunnerRunTargetGuidanceComponent(input, action);
+  if (runTargetGuidance) components.push(runTargetGuidance);
   if (action.type === "trash_accessed_card") {
     components.push(
       ...semanticRuntimeRunnerAccessTrashComponents(input, action),
@@ -8433,20 +8231,13 @@ function runnerMultiRunTargetEvaluation(
   action: LegalAction,
   targetServerId: string,
 ): RunnerRunTargetEvaluation | undefined {
-  const runAction: LegalAction =
-    action.type === "start_run"
-      ? action
-      : {
-          ...action,
-          actionId: `${action.actionId}:multi_run_target_gate`,
-          type: "start_run",
-          source: "basic_action",
-          costs: [],
-          payload: {
-            ...(action.payload ?? {}),
-            serverId: targetServerId,
-          },
-        };
+  const runAction: LegalAction = {
+    ...action,
+    payload: {
+      ...(action.payload ?? {}),
+      serverId: targetServerId,
+    },
+  };
   const scopedInput: AiDecisionInput = {
     ...input,
     legalActions: [runAction],
@@ -8467,14 +8258,22 @@ function runnerMultiRunTargetEvaluation(
   })[0];
 }
 
+function semanticRuntimeRunnerRunTargetEvaluation(
+  input: AiDecisionInput,
+  action: LegalAction,
+  targetServerId: string,
+): RunnerRunTargetEvaluation | undefined {
+  if (input.side !== "runner" || action.side !== "runner") return undefined;
+  return runnerMultiRunTargetEvaluation(input, action, targetServerId);
+}
+
 function semanticRuntimeRunnerRunTargetGuidanceComponent(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
-  if (action.type !== "start_run") return undefined;
   const targetServerId = semanticRuntimeServerId(action);
   if (!targetServerId) return undefined;
-  const evaluation = runnerMultiRunTargetEvaluation(
+  const evaluation = semanticRuntimeRunnerRunTargetEvaluation(
     input,
     action,
     targetServerId,
@@ -9022,7 +8821,12 @@ function semanticRuntimeRunnerArchivesComponents(
   action: LegalAction,
   server: AiDecisionInput["playerView"]["servers"][number] | undefined,
 ): AiDecisionScoreComponent[] {
-  if (action.type !== "start_run" || action.payload?.serverId !== "archives")
+  if (action.payload?.serverId !== "archives") return [];
+  const targetServerId = semanticRuntimeServerId(action);
+  if (
+    !targetServerId ||
+    !semanticRuntimeRunnerRunTargetEvaluation(input, action, targetServerId)
+  )
     return [];
   const root = server?.root ?? [];
   const knownRoot = root.filter(
@@ -10855,7 +10659,10 @@ export function simulateAiGame(
     actionSequence.push({
       side,
       stateVersionBefore: result.event.stateVersionBefore,
-      selectedActionId: action.actionId,
+      selectedActionId: simulationSafeSelectedActionId(
+        action,
+        targetServerId,
+      ),
       actionType: action.type,
       eventType: result.event.type,
       timingPoint: action.timingPoint,
@@ -10936,6 +10743,13 @@ export function simulateAiGame(
     cardPoolVersion: CURRENT_RULES_BASELINE.engineSchemaVersion,
     metrics: metricsFor(actionSequence, errors, replay.ok, isHoldoutSeed(seed)),
   };
+}
+
+function simulationSafeSelectedActionId(
+  action: LegalAction,
+  targetServerId?: string,
+): string {
+  return [action.side, action.type, targetServerId].filter(Boolean).join(".");
 }
 
 export function simulateAiSoak(

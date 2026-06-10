@@ -24,6 +24,7 @@ import {
   emptyRunnerGripForTest,
   MECHANIC_SMOKE_DECKS,
   v105kCardReleaseGame,
+  v181CardReleaseGame,
 } from "../../engine/src/test-fixtures/mechanic-smoke-fixtures";
 import {
   AI_DECISION_INPUT_TOP_LEVEL_FIELDS,
@@ -14354,6 +14355,8 @@ describe("V1.4.1 plan-based Runner AI", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(state, "runner", (action) => action.type === "access_card");
     const input = buildAiDecisionInput(state, "runner", {
       difficulty: "normal",
@@ -14401,6 +14404,8 @@ describe("V1.4.1 plan-based Runner AI", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(state, "runner", (action) => action.type === "access_card");
     const input = buildAiDecisionInput(state, "runner", {
       difficulty: "normal",
@@ -14834,6 +14839,8 @@ describe("V1.4.1 plan-based Runner AI", () => {
       (action) =>
         action.type === "start_run" && action.payload?.serverId === "remote_1",
     );
+    state = apply(state, "corp", (action) => action.type === "decline_rez");
+    state = apply(state, "runner", (action) => action.type === "continue_run");
     state = apply(state, "runner", (action) => action.type === "access_card");
     const input = buildAiDecisionInput(state, "runner", {
       difficulty: "normal",
@@ -19834,13 +19841,20 @@ describe("V1.4.2 belief state and opponent model", () => {
       score: expect.any(Number),
       fallbackUsed: false,
     });
-    expect(decision.decisionDebug?.actionAlternatives?.[0]).toMatchObject({
+    const selectedAlternative = decision.decisionDebug?.actionAlternatives?.[0];
+    expect(selectedAlternative).toMatchObject({
       actionId: decision.actionId,
       actionType: actualAction?.type,
       selected: true,
-      whyChosen: ["semantic_runtime_actual"],
       scoreBreakdown: expect.any(Array),
     });
+    expect(selectedAlternative?.whyChosen).toEqual(
+      expect.arrayContaining([
+        expect.stringMatching(
+          /^(semantic_runtime_actual|selected_by_plan_mapping)$/,
+        ),
+      ]),
+    );
     expect(decision.decisionDebug?.actionAlternatives?.length).toBe(
       Math.min(input.legalActions.length, 32),
     );
@@ -20102,6 +20116,188 @@ describe("V1.4.2 belief state and opponent model", () => {
     expect(archivesAlternative?.rank ?? 0).toBeGreaterThan(
       rdAlternative?.rank ?? 0,
     );
+  });
+
+  it("excludes Inside Job on empty Archives while keeping real run targets available", () => {
+    let state = toRunnerTurn(
+      v181CardReleaseGame("semantic-runtime-inside-job-empty-archives"),
+    );
+    state.runner.credits = 5;
+    state.corp.archives = [];
+    moveRunnerCardToGrip(state, "onr_v1_094_inside-job");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const insideJobArchives = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.serverId === "archives" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_094_inside-job",
+    );
+    const insideJobHq = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.serverId === "hq" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_094_inside-job",
+    );
+    const insideJobRd = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.serverId === "rd" &&
+        sourceDefinitionFromInput(input, action) ===
+          "onr_v1_094_inside-job",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(insideJobArchives).toBeDefined();
+    expect(insideJobHq).toBeDefined();
+    expect(insideJobRd).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!insideJobArchives || !insideJobHq || !insideJobRd || !gainCredit) {
+      throw new Error("Missing Inside Job empty Archives fixture actions");
+    }
+
+    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+    const decision = chooseRunnerAction(
+      {
+        ...input,
+        legalActions: [
+          insideJobArchives,
+          insideJobHq,
+          insideJobRd,
+          gainCredit,
+        ],
+      },
+      { persistTacticalPlanMemory: false },
+    );
+    const alternatives = new Map(
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [
+        entry.actionId,
+        entry,
+      ]) ?? [],
+    );
+    const archivesAlternative = alternatives.get(insideJobArchives.actionId);
+    const hqAlternative = alternatives.get(insideJobHq.actionId);
+    const rdAlternative = alternatives.get(insideJobRd.actionId);
+
+    expect(decision.actionId).not.toBe(insideJobArchives.actionId);
+    expect(archivesAlternative?.excluded).toBe(true);
+    expect(archivesAlternative?.priority).toBeUndefined();
+    expect(archivesAlternative?.whyNot).toContain(
+      "semantic_excluded:archives_empty",
+    );
+    expect(
+      archivesAlternative?.scoreBreakdown?.some(
+        (component) =>
+          component.key === "semantic_action_excluded" &&
+          component.reason === "no_archives_cards",
+      ),
+    ).toBe(true);
+    expect(hqAlternative?.excluded).not.toBe(true);
+    expect(rdAlternative?.excluded).not.toBe(true);
+
+    const hqOnlyDecision = chooseRunnerAction(
+      {
+        ...input,
+        legalActions: [insideJobArchives, insideJobHq],
+      },
+      { persistTacticalPlanMemory: false },
+    );
+    expect(hqOnlyDecision.actionId).toBe(insideJobHq.actionId);
+  });
+
+  it("applies empty Archives exclusion to generic run events", () => {
+    let state = toRunnerTurn(
+      createGameAfterSetup({
+        seed: "semantic-runtime-run-event-empty-archives",
+        runnerDeck: {
+          id: "semantic_run_event_archives_runner",
+          name: "Semantic Run Event Archives Runner",
+          side: "runner",
+          identity: "runner_identity_001",
+          cards: [
+            { id: "simple_run_event", quantity: 4 },
+            { id: "simple_economy_event", quantity: 8 },
+          ],
+        },
+        corpDeck: {
+          id: "semantic_run_event_archives_corp",
+          name: "Semantic Run Event Archives Corp",
+          side: "corp",
+          identity: "corp_identity_001",
+          cards: [
+            { id: "simple_agenda", quantity: 3 },
+            { id: "simple_barrier_ice", quantity: 3 },
+            { id: "simple_economy_operation", quantity: 8 },
+          ],
+        },
+      }),
+    );
+    state.runner.credits = 5;
+    state.corp.archives = [];
+    moveRunnerCardToGrip(state, "simple_run_event");
+    const input = buildAiDecisionInput(state, "runner", {
+      difficulty: "normal",
+      profileId: "runner-ai-v1.4.2-normal",
+    });
+    const eventArchives = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.serverId === "archives" &&
+        sourceDefinitionFromInput(input, action) === "simple_run_event",
+    );
+    const eventHq = input.legalActions.find(
+      (action) =>
+        action.type === "play_event" &&
+        action.payload?.serverId === "hq" &&
+        sourceDefinitionFromInput(input, action) === "simple_run_event",
+    );
+    const gainCredit = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(eventArchives).toBeDefined();
+    expect(eventHq).toBeDefined();
+    expect(gainCredit).toBeDefined();
+    if (!eventArchives || !eventHq || !gainCredit) {
+      throw new Error("Missing generic run-event empty Archives fixture actions");
+    }
+
+    delete process.env.NETGRID_SEMANTIC_AI_RUNTIME;
+    const decision = chooseRunnerAction(
+      {
+        ...input,
+        legalActions: [eventArchives, eventHq, gainCredit],
+      },
+      { persistTacticalPlanMemory: false },
+    );
+    const alternatives = new Map(
+      decision.decisionDebug?.actionAlternatives?.map((entry) => [
+        entry.actionId,
+        entry,
+      ]) ?? [],
+    );
+    const archivesAlternative = alternatives.get(eventArchives.actionId);
+    const hqAlternative = alternatives.get(eventHq.actionId);
+
+    expect(decision.actionId).not.toBe(eventArchives.actionId);
+    expect(archivesAlternative?.excluded).toBe(true);
+    expect(archivesAlternative?.whyNot).toContain(
+      "semantic_excluded:archives_empty",
+    );
+    expect(hqAlternative?.excluded).not.toBe(true);
+
+    const hqOnlyDecision = chooseRunnerAction(
+      {
+        ...input,
+        legalActions: [eventArchives, eventHq],
+      },
+      { persistTacticalPlanMemory: false },
+    );
+    expect(hqOnlyDecision.actionId).toBe(eventHq.actionId);
   });
 
   it("drops fully known non-agenda Archives below basic semantic actions", () => {

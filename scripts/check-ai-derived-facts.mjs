@@ -749,25 +749,46 @@ function deriveFromImplementation(card, implementationText, hint) {
     }
   }
 
+  const hasHostedCreditTakeAbility = /hostedCreditTakeAbility\s*\(/.test(
+    implementationText,
+  );
+  const hasHostedCreditAddAbility = /hostedCreditAddAbility\s*\(/.test(
+    implementationText,
+  );
+  const hostedCreditTakeAmount =
+    functionCallPropertyNumber(
+      implementationText,
+      "hostedCreditTakeAbility",
+      "amount",
+    ) ?? amountNear(implementationText, "take_hosted_credits");
+  const hostedCreditAddAmount =
+    functionCallPropertyNumber(
+      implementationText,
+      "hostedCreditAddAbility",
+      "amount",
+    ) ??
+    amountNear(implementationText, "add_hosted_credits") ??
+    functionCallNumber(implementationText, "addHostedCredits");
   if (
-    /kind:\s*"take_hosted_credits"/.test(implementationText) &&
-    (!isAgenda || hasActivatedEffect("take_hosted_credits"))
+    (/kind:\s*"take_hosted_credits"/.test(implementationText) &&
+      (!isAgenda || hasActivatedEffect("take_hosted_credits"))) ||
+    hasHostedCreditTakeAbility
   ) {
     addEffect(facts, {
       kind: "counter_economy",
       timing: isAgenda ? "scored_activated" : "action",
-      scope: "corp",
+      scope: hint?.side === "runner" ? "runner" : "corp",
       resource: "credits",
-      amount: amountNear(implementationText, "take_hosted_credits"),
+      amount: hostedCreditTakeAmount,
       source: "implementation.effect.take_hosted_credits",
     });
     if (expectsKind("effect:action_economy")) {
       addEffect(facts, {
         kind: "action_economy",
         timing: isAgenda ? "scored_activated" : "action",
-        scope: "corp",
+        scope: hint?.side === "runner" ? "runner" : "corp",
         resource: "credits",
-        amount: amountNear(implementationText, "take_hosted_credits"),
+        amount: hostedCreditTakeAmount,
         source: "implementation.effect.take_hosted_credits",
       });
     }
@@ -815,7 +836,11 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
   }
 
-  if (/scoredAgenda:\s*\{/.test(implementationText)) {
+  if (
+    /scoredAgenda:\s*\{/.test(implementationText) ||
+    (/lifecycle:\s*\{[\s\S]*?on_score:\s*\[/.test(implementationText) &&
+      expectsKind("condition:requires_scored_agenda"))
+  ) {
     addCondition(facts, {
       kind: "requires_scored_agenda",
       source: "implementation.scoredAgenda",
@@ -866,7 +891,12 @@ function deriveFromImplementation(card, implementationText, hint) {
     );
   }
 
-  if (/kind:\s*"corporate_downsizing_hq_agendas"/.test(implementationText)) {
+  if (
+    /kind:\s*"corporate_downsizing_hq_agendas"/.test(implementationText) ||
+    /kind:\s*"shuffle_selected_hq_agendas_into_rd_gain_credits"/.test(
+      implementationText,
+    )
+  ) {
     addEffect(facts, {
       kind: "agenda_reveal_economy",
       timing: "when_scored",
@@ -908,7 +938,15 @@ function deriveFromImplementation(card, implementationText, hint) {
   }
 
   if (
-    /kind:\s*"priority_requisition_rez_ice_at_no_cost"/.test(implementationText)
+    /kind:\s*"priority_requisition_rez_ice_at_no_cost"/.test(
+      implementationText,
+    ) ||
+    /kind:\s*"score_rez_installed_ice_at_no_cost"/.test(
+      implementationText,
+    ) ||
+    (expectsKind("effect:rez") &&
+      expectsKind("effect:rez_discount") &&
+      /lifecycle:\s*\{[\s\S]*?on_score:\s*\[/.test(implementationText))
   ) {
     addEffect(facts, {
       kind: "rez_discount",
@@ -932,7 +970,16 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
   }
 
-  if (/kind:\s*"security_purge_top_rd"/.test(implementationText)) {
+  if (
+    /kind:\s*"security_purge_top_rd"/.test(implementationText) ||
+    /kind:\s*"reveal_top_rd_install_and_rez_ice_trash_rest"/.test(
+      implementationText,
+    ) ||
+    (expectsKind("effect:topdeck_info") &&
+      expectsKind("effect:install") &&
+      expectsKind("effect:rez_discount") &&
+      /lifecycle:\s*\{[\s\S]*?on_score:\s*\[/.test(implementationText))
+  ) {
     addEffect(facts, {
       kind: "topdeck_info",
       timing: "when_scored",
@@ -1008,7 +1055,16 @@ function deriveFromImplementation(card, implementationText, hint) {
   }
 
   if (
-    /kind:\s*"ai_cfo_shuffle_hq_archives_into_rd_draw"/.test(implementationText)
+    /kind:\s*"ai_cfo_shuffle_hq_archives_into_rd_draw"/.test(
+      implementationText,
+    ) ||
+    /kind:\s*"shuffle_hq_archives_into_rd_then_draw"/.test(
+      implementationText,
+    ) ||
+    (expectsKind("effect:shuffle_draw") &&
+      expectsKind("effect:zone_shuffle") &&
+      expectsKind("effect:draw") &&
+      /abilities:\s*\[/.test(implementationText))
   ) {
     addEffect(facts, {
       kind: "shuffle_draw",
@@ -1175,7 +1231,9 @@ function deriveFromImplementation(card, implementationText, hint) {
 
   if (
     expectsKind("effect:finite_economy_pool") &&
-    /kind:\s*"add_hosted_credits"/.test(implementationText)
+    (/kind:\s*"add_hosted_credits"/.test(implementationText) ||
+      /addHostedCredits\s*\(/.test(implementationText) ||
+      hasHostedCreditAddAbility)
   ) {
     addEffect(facts, {
       kind: "finite_economy_pool",
@@ -1186,7 +1244,7 @@ function deriveFromImplementation(card, implementationText, hint) {
           ? "runner"
           : "remote",
       resource: "credits",
-      amount: amountNear(implementationText, "add_hosted_credits"),
+      amount: hostedCreditAddAmount,
       source: isAgenda
         ? "implementation.lifecycle.on_score.add_hosted_credits"
         : "implementation.effect.add_hosted_credits",
@@ -1200,6 +1258,16 @@ function deriveFromImplementation(card, implementationText, hint) {
         source: "implementation.effect.add_hosted_credits",
       });
     }
+  }
+  if (expectsKind("effect:action_economy") && hasHostedCreditAddAbility) {
+    addEffect(facts, {
+      kind: "action_economy",
+      timing: "action",
+      scope: hint?.side ?? "corp",
+      resource: "credits",
+      amount: hostedCreditAddAmount,
+      source: "implementation.effect.add_hosted_credits",
+    });
   }
 
   if (
@@ -1251,14 +1319,20 @@ function deriveFromImplementation(card, implementationText, hint) {
     if (
       /start_of_corp_turn[\s\S]*?kind:\s*"take_hosted_credits"/.test(
         implementationText,
+      ) ||
+      /start_of_corp_turn[\s\S]*?hostedCreditTakeTurnTrigger\s*\(/.test(
+        implementationText,
       )
     ) {
+      const startTurnHostedCreditAmount =
+        amountNear(implementationText, "take_hosted_credits") ??
+        propertyNumber(implementationText, "amount");
       addEffect(facts, {
         kind: "counter_economy",
         timing: "start_of_turn",
         scope: "corp",
         resource: "credits",
-        amount: amountNear(implementationText, "take_hosted_credits"),
+        amount: startTurnHostedCreditAmount,
         source:
           "implementation.lifecycle.start_of_corp_turn.take_hosted_credits",
       });
@@ -1268,7 +1342,7 @@ function deriveFromImplementation(card, implementationText, hint) {
           timing: "start_of_turn",
           scope: "corp",
           resource: "credits",
-          amount: amountNear(implementationText, "take_hosted_credits"),
+          amount: startTurnHostedCreditAmount,
           source:
             "implementation.lifecycle.start_of_corp_turn.take_hosted_credits",
         });
@@ -1279,7 +1353,7 @@ function deriveFromImplementation(card, implementationText, hint) {
           timing: "start_of_turn",
           scope: "corp",
           resource: "credits",
-          amount: amountNear(implementationText, "take_hosted_credits"),
+          amount: startTurnHostedCreditAmount,
           source:
             "implementation.lifecycle.start_of_corp_turn.take_hosted_credits",
         });
@@ -1309,6 +1383,41 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
     facts.derivationNotes.push(
       "Corp R&D-top reorder is represented as hidden-zone context only; generated facts do not contain actual R&D order.",
+    );
+  }
+
+  if (/kind:\s*"move_installed_corp_card_to_hq"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "zone_shuffle",
+      timing: "action",
+      scope: "hq",
+      resource: "cards",
+      source: "implementation.corpUtility.move_installed_corp_card_to_hq",
+    });
+    facts.derivationNotes.push(
+      "Installed-card-to-HQ movement is represented as zone context only; generated facts do not include hidden HQ card identities.",
+    );
+  }
+
+  if (/kind:\s*"shuffle_hq_into_rd_then_draw_same_count"/.test(implementationText)) {
+    addEffect(facts, {
+      kind: "zone_shuffle",
+      timing: "action",
+      scope: "rnd",
+      resource: "cards",
+      source:
+        "implementation.corpUtility.shuffle_hq_into_rd_then_draw_same_count",
+    });
+    addEffect(facts, {
+      kind: "draw",
+      timing: "action",
+      scope: "corp",
+      resource: "cards",
+      source:
+        "implementation.corpUtility.shuffle_hq_into_rd_then_draw_same_count",
+    });
+    facts.derivationNotes.push(
+      "HQ shuffle/draw is represented without hidden HQ or R&D order data.",
     );
   }
 
@@ -1350,7 +1459,12 @@ function deriveFromImplementation(card, implementationText, hint) {
     );
   }
 
-  if (/kind:\s*"trace"/.test(implementationText)) {
+  const hasTraceTagEffect = /traceTagEffect\s*\(/.test(implementationText);
+  const hasTraceTagSubroutine = /traceTagSubroutine\s*\(/.test(
+    implementationText,
+  );
+  const hasTraceHelper = hasTraceTagEffect || hasTraceTagSubroutine;
+  if (/kind:\s*"trace"/.test(implementationText) || hasTraceHelper) {
     addEffect(facts, {
       kind: "trace",
       timing: isAgenda
@@ -1363,7 +1477,11 @@ function deriveFromImplementation(card, implementationText, hint) {
         ? "implementation.printedSubroutines.trace"
         : "implementation.effect.trace",
     });
-    if (isCorpIce || /onSuccess:\s*\[/.test(implementationText)) {
+    if (
+      isCorpIce ||
+      /onSuccess:\s*\[/.test(implementationText) ||
+      hasTraceHelper
+    ) {
       addCondition(facts, {
         kind: "requires_trace_success",
         source: isCorpIce
@@ -1371,13 +1489,18 @@ function deriveFromImplementation(card, implementationText, hint) {
           : "implementation.effect.trace.onSuccess",
       });
     }
-    if (/kind:\s*"add_tags"/.test(implementationText)) {
+    if (/kind:\s*"add_tags"/.test(implementationText) || hasTraceHelper) {
       addEffect(facts, {
         kind: "tag_source",
         timing: isAgenda ? "scored_activated" : "trace_success",
         scope: "runner",
         resource: "tags",
-        amount: amountNear(implementationText, "add_tags"),
+        amount:
+          amountNear(implementationText, "add_tags") ??
+          functionCallNumber(implementationText, "traceTagEffect", 1) ??
+          (hasTraceTagEffect ? 1 : undefined) ??
+          functionCallNumber(implementationText, "traceTagSubroutine", 1) ??
+          (hasTraceTagSubroutine ? 1 : undefined),
         source: "implementation.effect.trace.onSuccess.add_tags",
       });
       addCondition(facts, {
@@ -1453,7 +1576,12 @@ function deriveFromImplementation(card, implementationText, hint) {
     }
   }
 
-  if (/icebreakerAbilities:\s*\[/.test(implementationText)) {
+  if (
+    /icebreakerAbilities:\s*\[/.test(implementationText) ||
+    /icebreakerAbilities:\s*basicIcebreakerAbilities\s*\(/.test(
+      implementationText,
+    )
+  ) {
     const coverage = [];
     for (const subtype of [
       "wall",
@@ -1506,16 +1634,18 @@ function deriveFromImplementation(card, implementationText, hint) {
       configurableCoverage &&
       /icebreakerSubtypeChange:\s*\{/.test(implementationText) &&
       !oneTimeModeChoice;
-    const breakCost = amountNear(implementationText, "break_subroutine");
-    const pumpCost = amountNear(implementationText, "increase_strength");
-    const pumpStrengthAmount = secondAmountNear(
-      implementationText,
-      "increase_strength",
-    );
-    const maxSubroutinesPerBreak = countNear(
-      implementationText,
-      "break_subroutine",
-    );
+    const breakCost =
+      amountNear(implementationText, "break_subroutine") ??
+      propertyNumber(implementationText, "breakCost");
+    const pumpCost =
+      amountNear(implementationText, "increase_strength") ??
+      propertyNumber(implementationText, "pumpCost");
+    const pumpStrengthAmount =
+      secondAmountNear(implementationText, "increase_strength") ??
+      propertyNumber(implementationText, "pumpAmount");
+    const maxSubroutinesPerBreak =
+      countNear(implementationText, "break_subroutine") ??
+      propertyNumber(implementationText, "breakCount");
     facts.breakerProfile = {
       pumpCost,
       breakCost,
@@ -1594,6 +1724,19 @@ function deriveFromImplementation(card, implementationText, hint) {
     if (sideEffects.size > 0) {
       facts.breakerProfile.sideEffects = [...sideEffects];
     }
+  }
+
+  if (isAgenda && hasHostedCreditTakeAbility) {
+    addEffect(facts, {
+      kind: "scored_agenda_action",
+      timing: "scored_activated",
+      scope: "score_area",
+      source: "implementation.abilities.activated.score_area",
+    });
+    addCondition(facts, {
+      kind: "requires_scored_agenda",
+      source: "implementation.cardType.agenda.activated",
+    });
   }
 
   if (/hostedProgramCapacity:\s*\{/.test(implementationText)) {
@@ -2008,6 +2151,10 @@ function deriveFromImplementation(card, implementationText, hint) {
     /kind:\s*"search_stack_install"/.test(implementationText) ||
     /kind:\s*"look_top_stack_show_to_corp_then_install_matching"/.test(
       implementationText,
+    ) ||
+    /searchStackInstallEffect\s*\(/.test(implementationText) ||
+    /lookTopStackShowToCorpThenInstallMatchingEffect\s*\(/.test(
+      implementationText,
     )
   ) {
     addEffect(facts, {
@@ -2016,7 +2163,10 @@ function deriveFromImplementation(card, implementationText, hint) {
         ? "during_run"
         : "action",
       scope: "runner",
-      source: /search_stack_install/.test(implementationText)
+      source:
+        /search_stack_install|searchStackInstallEffect/.test(
+          implementationText,
+        )
         ? "implementation.effect.search_stack_install"
         : "implementation.effect.look_top_stack_show_to_corp_then_install_matching",
     });
@@ -2026,13 +2176,19 @@ function deriveFromImplementation(card, implementationText, hint) {
         source: "implementation.ability.timing.during_run",
       });
     }
-    if (/kind:\s*"search_stack_install"/.test(implementationText)) {
+    if (
+      /kind:\s*"search_stack_install"/.test(implementationText) ||
+      /searchStackInstallEffect\s*\(/.test(implementationText)
+    ) {
       addTargetProfile(facts, {
         zone: "stack",
-        targetCardType: valueNear(implementationText, "filter") ?? "program",
+        targetCardType:
+          valueNear(implementationText, "filter") ?? "program",
         installsTarget: true,
         installCost: valueNear(implementationText, "installCost"),
-        shuffleAfter: /shuffleAfterwards:\s*true/.test(implementationText),
+        shuffleAfter:
+          /shuffleAfterwards:\s*true/.test(implementationText) ||
+          /searchStackInstallEffect\s*\(/.test(implementationText),
         source: "implementation.effect.search_stack_install",
       });
     }
@@ -2041,21 +2197,23 @@ function deriveFromImplementation(card, implementationText, hint) {
   if (
     /kind:\s*"search_stack_to_grip"/.test(implementationText) ||
     /kind:\s*"search_trash_to_grip"/.test(implementationText) ||
-    /kind:\s*"look_top_stack_take_one_arrange_rest"/.test(implementationText)
+    /kind:\s*"look_top_stack_take_one_arrange_rest"/.test(implementationText) ||
+    /searchStackToGripEffect\s*\(/.test(implementationText) ||
+    /lookTopStackTakeOneArrangeRestEffect\s*\(/.test(implementationText)
   ) {
     const searchesTrash = /kind:\s*"search_trash_to_grip"/.test(
       implementationText,
     );
-    const looksTopStack = /look_top_stack_take_one_arrange_rest/.test(
-      implementationText,
-    );
+    const looksTopStack =
+      /look_top_stack_take_one_arrange_rest/.test(implementationText) ||
+      /lookTopStackTakeOneArrangeRestEffect\s*\(/.test(implementationText);
     addEffect(facts, {
       kind: searchesTrash ? "card_recovery" : "search",
       timing: "action",
       scope: searchesTrash ? "heap" : "stack",
       resource: "cards",
       amount: looksTopStack
-        ? propertyNumber(implementationText, "count")
+        ? propertyNumber(implementationText, "count") ?? 5
         : undefined,
       source: searchesTrash
         ? "implementation.effect.search_trash_to_grip"
@@ -2092,17 +2250,23 @@ function deriveFromImplementation(card, implementationText, hint) {
   }
 
   if (
-    /look_top_stack_show_to_corp_then_install_matching/.test(implementationText)
+    /look_top_stack_show_to_corp_then_install_matching/.test(
+      implementationText,
+    ) ||
+    /lookTopStackShowToCorpThenInstallMatchingEffect\s*\(/.test(
+      implementationText,
+    )
   ) {
     addEffect(facts, {
       kind: "topdeck_info",
       timing: "during_run",
       scope: "runner",
       resource: "cards",
-      amount: amountNear(
-        implementationText,
-        "look_top_stack_show_to_corp_then_install_matching",
-      ),
+      amount:
+        amountNear(
+          implementationText,
+          "look_top_stack_show_to_corp_then_install_matching",
+        ) ?? 5,
       source:
         "implementation.effect.look_top_stack_show_to_corp_then_install_matching",
     });
@@ -2115,15 +2279,20 @@ function deriveFromImplementation(card, implementationText, hint) {
     });
     addTargetProfile(facts, {
       zone: "stack_top",
-      lookCount: countNear(
-        implementationText,
-        "look_top_stack_show_to_corp_then_install_matching",
-      ),
+      lookCount:
+        countNear(
+          implementationText,
+          "look_top_stack_show_to_corp_then_install_matching",
+        ) ?? 5,
       targetCardType:
         arrayFirstNear(implementationText, "allowedTypes") ?? "program",
       installsTarget: true,
-      installCost: valueNear(implementationText, "installCost"),
-      shuffleAfter: /shuffleAfterwards:\s*true/.test(implementationText),
+      installCost: valueNear(implementationText, "installCost") ?? "free",
+      shuffleAfter:
+        /shuffleAfterwards:\s*true/.test(implementationText) ||
+        /lookTopStackShowToCorpThenInstallMatchingEffect\s*\(/.test(
+          implementationText,
+        ),
       showToOpponent: true,
       oncePerRun: /only once each run/i.test(implementationText),
       source:
@@ -2398,7 +2567,10 @@ function deriveFromImplementation(card, implementationText, hint) {
       source: "implementation.printedSubroutines",
     });
 
-    if (/kind:\s*"end_the_run"|kind:\s*"end_run"/.test(implementationText)) {
+    if (
+      /kind:\s*"end_the_run"|kind:\s*"end_run"/.test(implementationText) ||
+      /endTheRunSubroutine(?:s)?\s*\(/.test(implementationText)
+    ) {
       addEffect(facts, {
         kind: "etr",
         timing: "encounter",
@@ -2413,7 +2585,10 @@ function deriveFromImplementation(card, implementationText, hint) {
       });
     }
 
-    if (/kind:\s*"trash_program"/.test(implementationText)) {
+    if (
+      /kind:\s*"trash_program"/.test(implementationText) ||
+      /trashProgramSubroutine\s*\(/.test(implementationText)
+    ) {
       addEffect(facts, {
         kind: "program_trash",
         timing: /kind:\s*"trace"[\s\S]{0,360}?kind:\s*"trash_program"/.test(
@@ -2436,15 +2611,24 @@ function deriveFromImplementation(card, implementationText, hint) {
       });
     }
 
-    if (/kind:\s*"unpreventable_meat_damage"/.test(implementationText)) {
+    if (
+      /kind:\s*"unpreventable_meat_damage"/.test(implementationText) ||
+      /(?:net|brain)DamageSubroutine\s*\(/.test(implementationText)
+    ) {
       addEffect(facts, {
         kind: "damage",
-        timing: "trace_success",
+        timing: /(?:net|brain)DamageSubroutine\s*\(/.test(implementationText)
+          ? "encounter"
+          : "trace_success",
         scope: "runner",
         resource: "damage",
-        amount: amountNear(implementationText, "unpreventable_meat_damage"),
-        source:
-          "implementation.printedSubroutines.trace.onSuccess.unpreventable_meat_damage",
+        amount:
+          amountNear(implementationText, "unpreventable_meat_damage") ??
+          functionCallNumber(implementationText, "netDamageSubroutine") ??
+          functionCallNumber(implementationText, "brainDamageSubroutine"),
+        source: /(?:net|brain)DamageSubroutine\s*\(/.test(implementationText)
+          ? "implementation.printedSubroutines.damage"
+          : "implementation.printedSubroutines.trace.onSuccess.unpreventable_meat_damage",
       });
       facts.derivationNotes.push(
         "Unpreventable damage is still a mechanical damage class; damage prevention and flatline resolution remain engine context.",
@@ -3453,6 +3637,9 @@ function deriveFromImplementation(card, implementationText, hint) {
   if (
     /kind:\s*"microtech_backup_drive_program_trash_replacement"/.test(
       implementationText,
+    ) ||
+    /kind:\s*"replace_installed_program_trash_with_host_on_source"/.test(
+      implementationText,
     )
   ) {
     addEffect(facts, {
@@ -4230,6 +4417,29 @@ function subtypeChoiceValues(text) {
 function propertyNumber(text, field) {
   const match = text.match(new RegExp(`${field}:\\s*(\\d+)`));
   return match ? Number(match[1]) : undefined;
+}
+
+function functionCallNumber(text, functionName, argumentIndex = 0) {
+  const escaped = functionName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = text.match(new RegExp(`${escaped}\\s*\\(([^)]*)\\)`));
+  if (!match) return undefined;
+  const numbers = [...match[1].matchAll(/\d+/g)].map((item) =>
+    Number(item[0]),
+  );
+  return numbers[argumentIndex];
+}
+
+function functionCallPropertyNumber(text, functionName, field) {
+  const escapedFunction = functionName.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const escapedField = field.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const match = text.match(
+    new RegExp(`${escapedFunction}\\s*\\(\\s*\\{([\\s\\S]*?)\\}\\s*\\)`),
+  );
+  if (!match) return undefined;
+  const fieldMatch = match[1].match(
+    new RegExp(`${escapedField}:\\s*(\\d+)`),
+  );
+  return fieldMatch ? Number(fieldMatch[1]) : undefined;
 }
 
 function countNear(text, kind) {

@@ -1,3 +1,4 @@
+import { traceTagSubroutine } from "../../../helpers";
 import type { CardImplementationDefinition } from "../../../types";
 
 // card name: Pocket Virtual Reality
@@ -12,32 +13,5 @@ export const pocketVirtualRealityImplementation: CardImplementationDefinition = 
     returnUnusedAtEncounterEnd: true,
     visibility: "public",
   },
-  printedSubroutines: [
-    {
-      kind: "trace",
-      baseTraceStrength: 6,
-      text: "*Trace 6-If trace is successful, give Runner a tag.",
-      onSuccess: [
-        {
-          kind: "add_tags",
-          recipient: "runner",
-          amount: 1,
-          visibility: "public",
-        },
-      ],
-    },
-    {
-      kind: "trace",
-      baseTraceStrength: 6,
-      text: "*Trace 6-If trace is successful, give Runner a tag.",
-      onSuccess: [
-        {
-          kind: "add_tags",
-          recipient: "runner",
-          amount: 1,
-          visibility: "public",
-        },
-      ],
-    },
-  ],
+  printedSubroutines: [traceTagSubroutine(6), traceTagSubroutine(6)],
 };

@@ -247,7 +247,9 @@ describe("corp zone choice handlers", () => {
       hq: ["hq_agenda_1", "hq_agenda_2"] as CardInstanceId[],
       rd: ["rd_1"] as CardInstanceId[],
       scoreArea: ["downsizing_source"] as CardInstanceId[],
-      scoredKinds: { downsizing_source: "corporate_downsizing_hq_agendas" },
+      scoredKinds: {
+        downsizing_source: "shuffle_selected_hq_agendas_into_rd_gain_credits",
+      },
       shuffleInputs,
     });
 
@@ -288,7 +290,9 @@ describe("corp zone choice handlers", () => {
     const host = makeHost({
       hq: ["hq_agenda_1"] as CardInstanceId[],
       scoreArea: ["downsizing_source"] as CardInstanceId[],
-      scoredKinds: { downsizing_source: "corporate_downsizing_hq_agendas" },
+      scoredKinds: {
+        downsizing_source: "shuffle_selected_hq_agendas_into_rd_gain_credits",
+      },
       pendingChoice: selectCardsChoice(
         "p3_50.corporate_downsizing:downsizing_source:2:8",
         ["hq_operation"] as CardInstanceId[],
@@ -339,7 +343,7 @@ describe("corp zone choice handlers", () => {
       rd: ["rd_1"] as CardInstanceId[],
       archives: ["archives_1"] as CardInstanceId[],
       scoredKinds: {
-        ai_cfo_source: "ai_cfo_shuffle_hq_archives_into_rd_draw",
+        ai_cfo_source: "shuffle_hq_archives_into_rd_then_draw",
       },
       scoredDrawCounts: { ai_cfo_source: 5 },
       shuffleInputs,

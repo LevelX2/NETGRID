@@ -5,7 +5,7 @@ import type { CardImplementationDefinition } from "../../../types";
 export const cowboySysopImplementation: CardImplementationDefinition = {
   cardDefinitionId: "onr_v1_316_cowboy-sysop",
   corpUtility: {
-    kind: "cowboy_sysop_uninstall_corp_card_to_hq",
+    kind: "move_installed_corp_card_to_hq",
     visibility: "hidden_info_barrier",
   },
 };

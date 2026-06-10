@@ -1,4 +1,8 @@
 import type { CardImplementationDefinition } from "../../../types";
+import {
+  addHostedCredits,
+  restrictedHostedCreditSource,
+} from "../../../helpers";
 
 // card name: Cortical Cybermodem
 // text: Provides +2 MU and +2 hand size. Put [2] from the bank on Cortical Cybermodem when it is installed. Use these bits only to pay for using icebreakers during runs. If you use any of these bits, replace them from the bank at the start of your next turn. Only one deck can be in play at a time. Trash any older decks.
@@ -27,22 +31,10 @@ export const proteusCorticalCybermodemImplementation: CardImplementationDefiniti
       },
     ],
     lifecycle: {
-      on_install: [
-        {
-          kind: "add_hosted_credits",
-          target: "source",
-          amount: 2,
-          visibility: "public",
-        },
-      ],
+      on_install: [addHostedCredits(2)],
     },
-    restrictedHostedCreditSource: {
+    restrictedHostedCreditSource: restrictedHostedCreditSource({
       capacity: 2,
-      counterType: "bit",
       usableFor: ["using_icebreaker_during_run"],
-      refresh: {
-        timing: "start_of_runner_turn",
-        mode: "refill_to_capacity_if_used",
-      },
-    },
+    }),
   };
