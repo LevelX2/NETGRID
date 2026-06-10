@@ -2,7 +2,7 @@
 
 ## Status
 
-`ai_doc_1_complete`
+`complete`
 
 Arbeitsbranch: `codex/ai-source-followup-action-semantics`
 
@@ -394,6 +394,23 @@ Verifikation:
 Scope-Kontrolle:
 
 - Nur Dokumentation geändert.
+
+### FINAL-GREEN abgeschlossen
+
+Umsetzung:
+
+- Arbeitsbranch mit weitergelaufenem `main` abgeglichen.
+- Konflikt in `packages/ai/src/index.ts` gelöst, indem die neue `main`-Heuristik für wiederholte Run-Mappings in `packages/ai/src/runtime/semantic-choice-ranking.ts` übernommen wurde.
+- Arbeitsbranch lokal per Fast-Forward nach `main` integriert.
+
+Verifikation:
+
+- Im Arbeits-Worktree nach `main`-Abgleich: `corepack pnpm --filter @netgrid/ai test` grün, 54 Testdateien, 1038 Tests.
+- Im Arbeits-Worktree nach `main`-Abgleich: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+- Im Arbeits-Worktree nach `main`-Abgleich: `git diff --check --cached` und `git diff --check` grün.
+- Im Hauptworkspace nach Fast-Forward-Merge: `corepack pnpm --filter @netgrid/ai test` grün, 54 Testdateien, 1038 Tests.
+- Im Hauptworkspace nach Fast-Forward-Merge: `corepack pnpm --filter @netgrid/ai typecheck` grün.
+- Im Hauptworkspace nach Fast-Forward-Merge: `git diff --check` grün.
 
 ## Controller-Prompt-Kern
 

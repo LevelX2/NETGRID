@@ -2,7 +2,7 @@
 
 ## Status
 
-`ready_for_final_green`
+`complete`
 
 ## Ergebnis
 
@@ -34,7 +34,7 @@ corepack pnpm --filter @netgrid/ai typecheck
 git diff --check
 ```
 
-Der letzte vollständige `@netgrid/ai`-Testlauf bestand mit 54 Testdateien und 1030 Tests.
+Der vollständige `@netgrid/ai`-Testlauf vor dem `main`-Abgleich bestand mit 54 Testdateien und 1030 Tests. Nach dem Abgleich mit dem weitergelaufenen `main` und der lokalen Integration bestand der vollständige `@netgrid/ai`-Testlauf mit 54 Testdateien und 1038 Tests.
 
 Zusätzlich grün:
 
@@ -52,7 +52,7 @@ corepack pnpm --filter @netgrid/ai exec vitest run src/index.test.ts src/simulat
 - `c31e6a9c fix(ai): resolve action card semantics by definition id`
 - `9a5e6fca test(ai): cover action semantic projection contracts`
 
-## Restpunkte
+## Abschluss
 
-- FINAL-GREEN muss noch den vollständigen Schlusslauf wiederholen, lokal nach `main` integrieren, `main` verifizieren und den Arbeits-Worktree entfernen.
+- FINAL-GREEN wurde lokal abgeschlossen: Arbeitsbranch nach `main` abgeglichen, lokal nach `main` integriert und im Hauptworkspace verifiziert.
 - Weitere spätere Strukturarbeit kann Debug-/Diagnosefunktionen aus `packages/ai/src/index.ts` auslagern; das ist kein Blocker für diesen Abschluss.
