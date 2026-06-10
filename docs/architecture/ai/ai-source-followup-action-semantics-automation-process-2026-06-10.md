@@ -2,7 +2,7 @@
 
 ## Status
 
-`ai_sem_1_complete`
+`ai_sem_2_complete`
 
 Arbeitsbranch: `codex/ai-source-followup-action-semantics`
 
@@ -359,6 +359,26 @@ Scope-Kontrolle:
 - Keine Hidden-Info-Auflösung aus Instanz-IDs oder Gegnerzonen.
 - BasicActions erhalten keinen CardSemanticJoin.
 - Multi-Ability-Fälle bleiben ohne eindeutige Ability-ID unresolved.
+
+### AI-SEM-2 abgeschlossen
+
+Umsetzung:
+
+- Neue Coverage-Matrix in `packages/ai/src/actions/action-semantic-coverage.test.ts`.
+- Alle bekannten `LegalAction`-Typen werden auf Candidate-Identität, `legalActionRef`, HardGates, Visibility, Timing, Cost, ProjectionStatus und Evidence geprüft.
+- Zentrale BasicActions werden separat gegen source-/ability-freie Projektion abgesichert.
+
+Verifikation:
+
+- `corepack pnpm --filter @netgrid/ai exec vitest run src/actions/action-semantic-coverage.test.ts src/action-semantic-candidate.test.ts src/semantic-ai-runtime-cutover.test.ts` grün, 48 Tests.
+- `corepack pnpm --filter @netgrid/ai test` grün, 54 Testdateien, 1030 Tests.
+- `corepack pnpm --filter @netgrid/ai typecheck` grün.
+- `git diff --check` grün.
+
+Scope-Kontrolle:
+
+- Keine Runtime-Scoring-Änderung.
+- Keine LegalAction-Erzeugung, Engine-Revalidierung oder Hidden-Info-Grenze geändert.
 
 ## Controller-Prompt-Kern
 
