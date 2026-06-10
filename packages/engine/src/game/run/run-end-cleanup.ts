@@ -331,17 +331,38 @@ export function handleRunEndCleanup(
   host.credits.gainRunner(bonus);
   host.credits.gainCorp(corpBonus.amount);
   if (run && corpBonus.amount > 0 && legalAction) {
+    const sourceDefinition = corpBonus.sourceCardId
+      ? host.cards.definitionFor(corpBonus.sourceCardId)
+      : undefined;
+    const sourceDefinitionId =
+      sourceDefinition?.id ?? TOKYO_CHIBA_INFIGHTING_FALLBACK_SOURCE;
+    const serverLabel = host.servers.publicServerLabel(run.attackedServerId);
     legalAction.payload = {
       ...(legalAction.payload ?? {}),
       tokyoChibaInfightingBonus: true,
-      sourceDefinitionId: corpBonus.sourceCardId
-        ? host.cards.definitionFor(corpBonus.sourceCardId).id
-        : TOKYO_CHIBA_INFIGHTING_FALLBACK_SOURCE,
+      sourceDefinitionId,
       serverId: run.attackedServerId,
       corpCreditsGained: corpBonus.amount,
       corpCreditsAfter: host.state.corp.credits,
       ...(corpBonus.sourceCardId ? { sourceCardId: corpBonus.sourceCardId } : {}),
     };
+    legalAction.resolvedEffects = [
+      ...(legalAction.resolvedEffects ?? []),
+      {
+        effectId: `${run.runId}.${
+          corpBonus.sourceCardId ?? "tokyo-chiba-infighting"
+        }.unsuccessful_run.gain_credits`,
+        kind: "gain_credits",
+        visibility: "public",
+        side: "corp",
+        amount: corpBonus.amount,
+        reason: "unsuccessful_run",
+        sourceDefinitionId,
+        sourceTitle: sourceDefinition?.title ?? "Tokyo-Chiba Infighting",
+        serverId: run.attackedServerId,
+        ...(serverLabel ? { serverLabel } : {}),
+      },
+    ];
   }
   let postRunBridge: PostRunBridgeResult = { handled: false };
   if (allNighterBonusRunOnFinish && !host.state.winner) {

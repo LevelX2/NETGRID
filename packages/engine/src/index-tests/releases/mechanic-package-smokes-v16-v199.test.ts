@@ -2665,6 +2665,21 @@ describe("V1.6.3 Mechanikpaket C", () => {
     );
     expect(tokyoState.run).toBeUndefined();
     expect(tokyoState.corp.credits).toBe(creditsBeforeContinue + 2);
+    expect(tokyoState.eventLog.at(-1)?.publicPayload.resolvedEffects).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          kind: "gain_credits",
+          visibility: "public",
+          side: "corp",
+          amount: 2,
+          reason: "unsuccessful_run",
+          sourceDefinitionId: "onr_v1_371_tokyo-chiba-infighting",
+          sourceTitle: "Tokyo-Chiba Infighting",
+          serverId: "remote_1",
+          serverLabel: "Remote 1",
+        }),
+      ]),
+    );
   });
 });
 

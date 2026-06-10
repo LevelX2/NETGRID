@@ -851,6 +851,19 @@ describe("run end cleanup", () => {
       corpCreditsAfter: 7,
       sourceCardId: "tokyo",
     });
+    expect(fixture.legalAction.resolvedEffects).toContainEqual(
+      expect.objectContaining({
+        kind: "gain_credits",
+        visibility: "public",
+        side: "corp",
+        amount: 3,
+        reason: "unsuccessful_run",
+        sourceDefinitionId: "tokyo_def",
+        sourceTitle: "tokyo_def",
+        serverId: "remote_1",
+        serverLabel: "Remote 1",
+      }),
+    );
   });
 
   it("clears encounter temporary trace credits with the existing payload fields", () => {
