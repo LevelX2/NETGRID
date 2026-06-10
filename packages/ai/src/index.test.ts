@@ -7263,6 +7263,64 @@ describe("Legacy fallback V1.4.0 plan-based Corp AI", () => {
     expect(decision.actionId).toBe(score.actionId);
     expect(doctrineWeight?.value).toBe(240);
     expect(String(doctrineWeight?.reason)).toContain("plan:score_now");
+    expect(String(doctrineWeight?.reason)).toContain("bounded:24");
+    expect(String(doctrineWeight?.reason)).toContain("consumer:corp_score_now");
+    expect(String(doctrineWeight?.reason)).toContain("clamp:24");
+    expect(JSON.stringify(decision)).not.toMatch(
+      /cardInstances|privatePayload/,
+    );
+  });
+
+  it("clamps doctrine runtime weights by Corp score-next-turn consumer", () => {
+    const input = corpActionPhaseInput(
+      "ai-corp-semantic-doctrine-score-next-turn-clamp",
+      (state) => {
+        state.corp.credits = 8;
+        state.runner.credits = 0;
+        ensureRemoteServer(state, "remote_1");
+        putCorpIceOnServer(state, "remote_1", "simple_barrier_ice");
+        putCorpRootInRemote(state, "simple_agenda", 2);
+      },
+    );
+    const advance = input.legalActions.find(
+      (action) =>
+        action.type === "advance_card" &&
+        sourceDefinitionFromInput(input, action) === "simple_agenda",
+    );
+    const gain = input.legalActions.find(
+      (action) => action.type === "gain_credit",
+    );
+    expect(advance).toBeDefined();
+    expect(gain).toBeDefined();
+    if (!advance || !gain)
+      throw new Error("Missing doctrine score-next-turn fixture actions");
+
+    const doctrine = corpDoctrineForTest(
+      "semantic-score-next-turn-clamp",
+      ["rush"],
+      { score_next_turn: 24 },
+    );
+    process.env.NETGRID_SEMANTIC_AI_RUNTIME = "semantic";
+    const decision = chooseCorpAction(
+      { ...input, ownDeckDoctrine: doctrine, legalActions: [advance, gain] },
+      { persistTacticalPlanMemory: false },
+    );
+    const advanceAlternative = decision.decisionDebug?.actionAlternatives?.find(
+      (alternative) => alternative.actionId === advance.actionId,
+    );
+    const doctrineWeight = advanceAlternative?.scoreBreakdown?.find(
+      (component) => component.key === "deck_doctrine_runtime_weight",
+    );
+
+    expect(decision.actionId).toBe(advance.actionId);
+    expect(doctrineWeight?.value).toBe(180);
+    expect(String(doctrineWeight?.reason)).toContain("plan:score_next_turn");
+    expect(String(doctrineWeight?.reason)).toContain("raw:24");
+    expect(String(doctrineWeight?.reason)).toContain("bounded:18");
+    expect(String(doctrineWeight?.reason)).toContain(
+      "consumer:corp_score_next_turn",
+    );
+    expect(String(doctrineWeight?.reason)).toContain("clamp:18");
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );
@@ -14061,8 +14119,13 @@ describe("V1.4.1 plan-based Runner AI", () => {
     );
 
     expect(decision.actionId).toBe(rdRun.actionId);
-    expect(doctrineWeight?.value).toBe(240);
+    expect(doctrineWeight?.value).toBe(120);
     expect(String(doctrineWeight?.reason)).toContain("plan:pressure_rnd");
+    expect(String(doctrineWeight?.reason)).toContain("bounded:12");
+    expect(String(doctrineWeight?.reason)).toContain(
+      "consumer:runner_pressure_rnd",
+    );
+    expect(String(doctrineWeight?.reason)).toContain("clamp:12");
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );
@@ -14074,7 +14137,7 @@ describe("V1.4.1 plan-based Runner AI", () => {
       (state) => {
         state.runner.credits = 5;
         ensureRemoteServer(state, "remote_1");
-        putCorpRootInRemote(state, "simple_economy_asset", 0);
+        putCorpRootInRemote(state, "simple_agenda", 2);
       },
     );
     const remoteRun = input.legalActions.find(
@@ -14107,8 +14170,13 @@ describe("V1.4.1 plan-based Runner AI", () => {
       (component) => component.key === "deck_doctrine_runtime_weight",
     );
 
-    expect(doctrineWeight?.value).toBe(180);
+    expect(doctrineWeight?.value).toBe(90);
     expect(String(doctrineWeight?.reason)).toContain("plan:contest_remote");
+    expect(String(doctrineWeight?.reason)).toContain("bounded:9");
+    expect(String(doctrineWeight?.reason)).toContain(
+      "consumer:runner_contest_remote",
+    );
+    expect(String(doctrineWeight?.reason)).toContain("clamp:9");
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );
@@ -14199,8 +14267,12 @@ describe("V1.4.1 plan-based Runner AI", () => {
       (component) => component.key === "deck_doctrine_runtime_weight",
     );
 
-    expect(doctrineWeight?.value).toBe(180);
+    expect(doctrineWeight?.value).toBe(90);
     expect(String(doctrineWeight?.reason)).toContain("plan:contest_remote");
+    expect(String(doctrineWeight?.reason)).toContain("bounded:9");
+    expect(String(doctrineWeight?.reason)).toContain(
+      "consumer:runner_contest_remote",
+    );
     expect(JSON.stringify(decision)).not.toMatch(
       /cardInstances|privatePayload/,
     );

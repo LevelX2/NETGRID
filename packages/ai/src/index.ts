@@ -8286,9 +8286,11 @@ function runnerRecoveryFundingNeedContext(input: AiDecisionInput): {
 
 function semanticRuntimeRecentRunnerRecoveryActions(
   input: AiDecisionInput,
-  action: LegalAction,
+  action?: LegalAction,
 ): number {
-  const currentSource = sourceDefinitionIdForAction(input, action);
+  const currentSource = action
+    ? sourceDefinitionIdForAction(input, action)
+    : undefined;
   const history = mergedAiPublicHistory(input);
   let count = 0;
   let seenRunnerActions = 0;
@@ -8326,7 +8328,7 @@ function semanticRuntimeRunnerRecoveryProgressEvent(actionType: string): boolean
 
 function semanticRuntimePublicEventLooksLikeRecovery(
   event: PublicGameEvent,
-  currentSource: string,
+  currentSource: string | undefined,
 ): boolean {
   const payload = event.publicPayload;
   const source = [
@@ -9024,22 +9026,15 @@ function semanticRuntimeRunnerDoctrineRunWeight(
           ? "contest_remote"
           : undefined;
   if (!planKey) return undefined;
-  if (planKey === "contest_remote") {
-    const guard = semanticRuntimeRunnerRemoteContestDoctrineGuard(
-      input,
-      action,
-      serverId,
-    );
-    if (!guard.allowed) {
-      return {
-        key: "deck_doctrine_runtime_weight_suppressed",
-        label: "DeckDoctrine-Runtime-Gewicht unterdrückt",
-        value: 0,
-        reason: guard.evidence.join("|"),
-      };
-    }
+  const consumer = semanticRuntimeDoctrineConsumerForPlan(planKey);
+  const raw = semanticRuntimeDoctrineRawWeight(input, planKey);
+  const gate = semanticRuntimeDoctrineActionGate(input, action, planKey, consumer, {
+    serverId,
+  });
+  if (raw > 0 && !gate.allowed) {
+    return semanticRuntimeDoctrineSuppressedComponent(gate.evidence);
   }
-  return semanticRuntimeDoctrinePlanWeightComponent(input, planKey);
+  return semanticRuntimeDoctrinePlanWeightComponent(input, planKey, consumer);
 }
 
 function semanticRuntimeRunnerRemoteContestDoctrineGuard(
@@ -9125,31 +9120,30 @@ function semanticRuntimeRunnerRemoteContestDoctrineGuard(
 
 function semanticRuntimeCorpDoctrineWeight(
   input: AiDecisionInput,
+  action: LegalAction,
   planKey: string,
+  consumer: SemanticRuntimeDoctrineConsumer,
 ): AiDecisionScoreComponent | undefined {
   if (input.side !== "corp" || input.ownDeckDoctrine?.side !== "corp")
     return undefined;
-  return semanticRuntimeDoctrinePlanWeightComponent(input, planKey);
+  const raw = semanticRuntimeDoctrineRawWeight(input, planKey);
+  const gate = semanticRuntimeDoctrineActionGate(input, action, planKey, consumer);
+  if (raw > 0 && !gate.allowed) {
+    return semanticRuntimeDoctrineSuppressedComponent(gate.evidence);
+  }
+  return semanticRuntimeDoctrinePlanWeightComponent(input, planKey, consumer);
 }
 
 function semanticRuntimeCorpScoreNowDoctrineWeight(
   input: AiDecisionInput,
   action: LegalAction,
 ): AiDecisionScoreComponent | undefined {
-  const doctrineWeight = semanticRuntimeCorpDoctrineWeight(input, "score_now");
-  if (!doctrineWeight || doctrineWeight.value <= 0) return doctrineWeight;
-  const gate = semanticRuntimeCorpScoreNowSafetyGate(input, action);
-  if (gate.allowed) return doctrineWeight;
-  return {
-    key: "deck_doctrine_runtime_weight_suppressed",
-    label: "DeckDoctrine-Runtime-Gewicht unterdrückt",
-    value: 0,
-    reason: [
-      "corp_scoreline_safety_gate_blocks_doctrine:true",
-      "score_now_doctrine_suppressed:true",
-      ...gate.evidence,
-    ].join("|"),
-  };
+  return semanticRuntimeCorpDoctrineWeight(
+    input,
+    action,
+    "score_now",
+    "corp_score_now",
+  );
 }
 
 function semanticRuntimeCorpScoreNowSafetyGate(
@@ -9212,12 +9206,22 @@ function semanticRuntimeCorpUnsafeScoreReasons(
   return sortedUnique(reasons);
 }
 
+type SemanticRuntimeDoctrineConsumer =
+  | "corp_score_now"
+  | "corp_score_next_turn"
+  | "corp_build_scoring_remote"
+  | "runner_pressure_rnd"
+  | "runner_pressure_hq"
+  | "runner_contest_remote";
+
 function semanticRuntimeDoctrinePlanWeightComponent(
   input: AiDecisionInput,
   planKey: string,
+  consumer: SemanticRuntimeDoctrineConsumer,
 ): AiDecisionScoreComponent | undefined {
-  const raw = input.ownDeckDoctrine?.planWeights[planKey] ?? 0;
-  const bounded = Math.max(-24, Math.min(24, raw));
+  const raw = semanticRuntimeDoctrineRawWeight(input, planKey);
+  const clamp = semanticRuntimeDoctrineClamp(consumer);
+  const bounded = Math.max(-clamp, Math.min(clamp, raw));
   const value = Math.round(bounded * 10);
   if (value === 0) return undefined;
   return {
@@ -9227,8 +9231,225 @@ function semanticRuntimeDoctrinePlanWeightComponent(
     reason: [
       `plan:${planKey}`,
       `raw:${raw}`,
+      `bounded:${bounded}`,
+      `consumer:${consumer}`,
+      `clamp:${clamp}`,
       `tags:${input.ownDeckDoctrine?.archetypeTags.slice(0, 3).join(",") ?? "neutral"}`,
     ].join("|"),
+  };
+}
+
+function semanticRuntimeDoctrineRawWeight(
+  input: AiDecisionInput,
+  planKey: string,
+): number {
+  return input.ownDeckDoctrine?.planWeights[planKey] ?? 0;
+}
+
+function semanticRuntimeDoctrineClamp(
+  consumer: SemanticRuntimeDoctrineConsumer,
+): number {
+  switch (consumer) {
+    case "corp_score_now":
+      return 24;
+    case "corp_score_next_turn":
+    case "corp_build_scoring_remote":
+      return 18;
+    case "runner_pressure_rnd":
+    case "runner_pressure_hq":
+      return 12;
+    case "runner_contest_remote":
+      return 9;
+  }
+}
+
+function semanticRuntimeDoctrineConsumerForPlan(
+  planKey: string,
+): SemanticRuntimeDoctrineConsumer {
+  switch (planKey) {
+    case "score_now":
+      return "corp_score_now";
+    case "score_next_turn":
+      return "corp_score_next_turn";
+    case "build_scoring_remote":
+      return "corp_build_scoring_remote";
+    case "pressure_rnd":
+      return "runner_pressure_rnd";
+    case "pressure_hq":
+      return "runner_pressure_hq";
+    case "contest_remote":
+      return "runner_contest_remote";
+    default:
+      throw new Error(`Unknown semantic runtime doctrine plan ${planKey}`);
+  }
+}
+
+function semanticRuntimeDoctrineActionGate(
+  input: AiDecisionInput,
+  action: LegalAction,
+  planKey: string,
+  consumer: SemanticRuntimeDoctrineConsumer,
+  context: { serverId?: string | undefined } = {},
+): { allowed: boolean; evidence: string[] } {
+  if (
+    !input.legalActions.some((legalAction) => legalAction.actionId === action.actionId)
+  ) {
+    return semanticRuntimeDoctrineGateBlocked(planKey, consumer, "illegal_action", [
+      `action:${action.actionId}`,
+    ]);
+  }
+  if (action.side !== input.side) {
+    return semanticRuntimeDoctrineGateBlocked(planKey, consumer, "side_mismatch", [
+      `input_side:${input.side}`,
+      `action_side:${action.side}`,
+    ]);
+  }
+  if (actionCreditCost(action) > input.playerView.own.credits) {
+    return semanticRuntimeDoctrineGateBlocked(planKey, consumer, "cost_blocked", [
+      `credits:${input.playerView.own.credits}`,
+      `cost:${actionCreditCost(action)}`,
+    ]);
+  }
+
+  if (
+    consumer === "runner_pressure_rnd" ||
+    consumer === "runner_pressure_hq" ||
+    consumer === "runner_contest_remote"
+  ) {
+    return semanticRuntimeRunnerDoctrineActionGate(
+      input,
+      action,
+      planKey,
+      consumer,
+      context.serverId,
+    );
+  }
+  if (consumer === "corp_score_now") {
+    const scoreGate = semanticRuntimeCorpScoreNowSafetyGate(input, action);
+    if (!scoreGate.allowed) {
+      return semanticRuntimeDoctrineGateBlocked(
+        planKey,
+        consumer,
+        "unsafe_score",
+        [
+          "corp_scoreline_safety_gate_blocks_doctrine:true",
+          "score_now_doctrine_suppressed:true",
+          ...scoreGate.evidence,
+        ],
+      );
+    }
+  }
+  return { allowed: true, evidence: [`deck_doctrine_runtime_gate_allowed:${consumer}`] };
+}
+
+function semanticRuntimeRunnerDoctrineActionGate(
+  input: AiDecisionInput,
+  action: LegalAction,
+  planKey: string,
+  consumer: SemanticRuntimeDoctrineConsumer,
+  serverId: string | undefined,
+): { allowed: boolean; evidence: string[] } {
+  if (action.type !== "start_run") {
+    return semanticRuntimeDoctrineGateBlocked(planKey, consumer, "not_run_action");
+  }
+  if (!serverId) {
+    return semanticRuntimeDoctrineGateBlocked(planKey, consumer, "missing_server");
+  }
+  const evaluation = semanticRuntimeRunnerRunTargetEvaluation(
+    input,
+    action,
+    serverId,
+  );
+  if (
+    evaluation &&
+    (evaluation.pathPassability !== "reachable" || evaluation.creditsAfterRun < 0)
+  ) {
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "cost_or_reachability_blocked",
+      [
+        `target:${serverId}`,
+        `path:${evaluation.pathPassability}`,
+        `credits_after:${evaluation.creditsAfterRun}`,
+      ],
+    );
+  }
+  if (
+    (consumer === "runner_pressure_rnd" ||
+      consumer === "runner_pressure_hq") &&
+    semanticRuntimeRecentRunnerStartRunsOnServer(input, serverId) > 0
+  ) {
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "repeated_no_progress_run",
+      [`target:${serverId}`],
+    );
+  }
+  const recoveryContext = semanticRuntimeRunnerLowValueRecoveryContext(input);
+  if (recoveryContext.active) {
+    return semanticRuntimeDoctrineGateBlocked(
+      planKey,
+      consumer,
+      "low_value_recovery_context",
+      recoveryContext.evidence,
+    );
+  }
+  if (consumer === "runner_contest_remote") {
+    const remoteContestGate = semanticRuntimeRunnerRemoteContestDoctrineGuard(
+      input,
+      action,
+      serverId,
+    );
+    if (!remoteContestGate.allowed) return remoteContestGate;
+  }
+  return { allowed: true, evidence: [`deck_doctrine_runtime_gate_allowed:${consumer}`] };
+}
+
+function semanticRuntimeRunnerLowValueRecoveryContext(
+  input: AiDecisionInput,
+): { active: boolean; evidence: string[] } {
+  const recentRecovery = semanticRuntimeRecentRunnerRecoveryActions(input);
+  if (recentRecovery <= 1) return { active: false, evidence: [] };
+  const fundingNeed = runnerRecoveryFundingNeedContext(input);
+  if (fundingNeed.active) return { active: false, evidence: [] };
+  return {
+    active: true,
+    evidence: [
+      `recent_recovery:${recentRecovery}`,
+      "funding_need:false",
+      `funding_context:${fundingNeed.reason}`,
+    ],
+  };
+}
+
+function semanticRuntimeDoctrineGateBlocked(
+  planKey: string,
+  consumer: SemanticRuntimeDoctrineConsumer,
+  reason: string,
+  evidence: string[] = [],
+): { allowed: boolean; evidence: string[] } {
+  return {
+    allowed: false,
+    evidence: [
+      "deck_doctrine_runtime_gate_suppressed:true",
+      `plan:${planKey}`,
+      `consumer:${consumer}`,
+      `deck_doctrine_runtime_gate_reason:${reason}`,
+      ...evidence,
+    ],
+  };
+}
+
+function semanticRuntimeDoctrineSuppressedComponent(
+  evidence: readonly string[],
+): AiDecisionScoreComponent {
+  return {
+    key: "deck_doctrine_runtime_weight_suppressed",
+    label: "DeckDoctrine-Runtime-Gewicht unterdrückt",
+    value: 0,
+    reason: evidence.join("|"),
   };
 }
 
@@ -9280,7 +9501,9 @@ function semanticRuntimeCorpScoreComponents(
     });
     const doctrineWeight = semanticRuntimeCorpDoctrineWeight(
       input,
+      action,
       "score_next_turn",
+      "corp_score_next_turn",
     );
     if (doctrineWeight) components.push(doctrineWeight);
     const remoteScore = semanticRuntimeCorpAdvanceRemoteScore(input, action);
@@ -9312,7 +9535,9 @@ function semanticRuntimeCorpScoreComponents(
       });
       const doctrineWeight = semanticRuntimeCorpDoctrineWeight(
         input,
+        action,
         "build_scoring_remote",
+        "corp_build_scoring_remote",
       );
       if (doctrineWeight) components.push(doctrineWeight);
     }
