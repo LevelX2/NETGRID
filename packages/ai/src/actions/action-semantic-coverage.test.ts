@@ -1,4 +1,9 @@
-import type { LegalAction } from "@netgrid/shared";
+import {
+  applyAction,
+  createGameAfterSetup,
+  getLegalActions,
+} from "@netgrid/engine";
+import type { GameState, LegalAction, Side } from "@netgrid/shared";
 import { describe, expect, it } from "vitest";
 
 import { buildActionSemanticCandidates } from "../action-semantic-candidate";
@@ -209,6 +214,70 @@ describe("Action semantic coverage", () => {
       "engine_provided",
     );
   });
+
+  it("projects real Engine LegalActions without leaking hidden payload values", () => {
+    const realActions = collectRealEngineLegalActions();
+    const realTypes = new Set(realActions.map((action) => action.type));
+    expect([...realTypes]).toEqual(
+      expect.arrayContaining([
+        "mandatory_draw",
+        "gain_credit",
+        "draw_card",
+        "install_card",
+        "play_operation",
+        "end_turn",
+        "resolve_choice",
+        "play_event",
+        "start_run",
+        "access_card",
+      ]),
+    );
+
+    const candidates = buildActionSemanticCandidates({
+      legalActions: realActions,
+      observerSide: "system",
+      stateVersion: 209,
+    });
+
+    expect(candidates).toHaveLength(realActions.length);
+    for (const [index, candidate] of candidates.entries()) {
+      const action = realActions[index];
+      if (!action) throw new Error(`Missing real Engine action ${index}`);
+
+      expect(candidate.actionId).toBe(action.actionId);
+      expect(candidate.legalActionRef.actionId).toBe(action.actionId);
+      expect(candidate.legalActionRef.actionType).toBe(action.type);
+      expect(candidate.legalActionRef.originalPayloadKeys).toEqual(
+        Object.keys(action.payload ?? {}).sort(),
+      );
+      expect(candidate.timingProfile.window).toBe(action.timingPoint);
+      expect(candidate.costProfile.costKnownStatus).toMatch(
+        /^(known|not_applicable|unknown)$/,
+      );
+      expect(candidate.hardGates).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            gateId: "engine_legal_action",
+            status: "pass",
+          }),
+          expect.objectContaining({
+            gateId: "hidden_info",
+            status: "pass",
+          }),
+        ]),
+      );
+
+      if (action.source === "basic_action" || action.source === "game_rule") {
+        expect(candidate.sourceCardId).toBeUndefined();
+        expect(candidate.sourceCardInstanceId).toBeUndefined();
+        expect(candidate.sourceDefinitionId).toBeUndefined();
+      }
+
+      expect(JSON.stringify(candidate)).not.toMatch(
+        /privatePayload|cardInstances|fullGameState|secretRunnerHandIds|secretGripIds/i,
+      );
+    }
+  });
 });
 
 function legalAction(
@@ -269,4 +338,79 @@ function costFor(index: number): LegalAction["costs"] {
   if (index % 3 === 0) return [{ clicks: 1 }];
   if (index % 3 === 1) return [{ credits: 2 }];
   return [];
+}
+
+function collectRealEngineLegalActions(): LegalAction[] {
+  let state = createGameAfterSetup({
+    seed: "r2-real-engine-legal-action-coverage",
+  });
+  const actions: LegalAction[] = [];
+  collectActiveActions(state, actions);
+
+  state = applyRealAction(state, "corp", (action) => action.type === "mandatory_draw");
+  collectActiveActions(state, actions);
+
+  state = applyRealAction(state, "corp", (action) => action.type === "end_turn");
+  collectActiveActions(state, actions);
+
+  if (state.pendingChoice?.source === "discard_phase") {
+    const selectedOptionId = state.pendingChoice.options[0]?.id;
+    if (!selectedOptionId) throw new Error("Missing discard choice option");
+    state = applyRealAction(
+      state,
+      "corp",
+      (action) => action.type === "resolve_choice",
+      {
+        choiceId: state.pendingChoice.choiceId,
+        selectedOptionIds: [String(selectedOptionId)],
+      },
+    );
+  }
+  collectActiveActions(state, actions);
+
+  state = applyRealAction(
+    state,
+    "runner",
+    (action) =>
+      action.type === "start_run" &&
+      (action.payload?.serverId === "hq" || action.label.toLowerCase().includes("hq")),
+  );
+  collectActiveActions(state, actions);
+
+  return actions;
+}
+
+function collectActiveActions(state: GameState, target: LegalAction[]): void {
+  target.push(...getLegalActions(state, state.activeSide));
+}
+
+function applyRealAction(
+  state: GameState,
+  side: Side,
+  predicate: (action: LegalAction) => boolean,
+  selectedChoices?: {
+    choiceId: string;
+    selectedOptionIds: string[];
+  },
+): GameState {
+  const action = getLegalActions(state, side).find(predicate);
+  if (!action) {
+    throw new Error(
+      `Missing real action. Legal: ${getLegalActions(state, side)
+        .map((candidate) => `${candidate.type}:${candidate.label}`)
+        .join(", ")}`,
+    );
+  }
+  const result = applyAction(state, {
+    matchId: state.matchId,
+    side,
+    actionId: action.actionId,
+    clientKnownStateVersion: state.stateVersion,
+    ...(selectedChoices ? { selectedChoices } : {}),
+    idempotencyKey: `r2-${side}-${state.stateVersion}-${action.actionId}`,
+  });
+  if (!result.ok) {
+    throw new Error(`${result.error.code}: ${result.error.message}`);
+  }
+  return result.state;
 }
